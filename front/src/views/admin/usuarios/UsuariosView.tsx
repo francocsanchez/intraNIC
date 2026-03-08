@@ -1,0 +1,237 @@
+import { changeStatusUsuario, getUsuarios } from "@/api/usuarioAPI";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+
+function capitalize(value: string) {
+  return value
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+export default function UsuariosView() {
+  const queryClient = useQueryClient();
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["usuarios", "listar"],
+    queryFn: getUsuarios,
+  });
+
+  const { mutate: changeStatus } = useMutation({
+    mutationFn: (id: string) => changeStatusUsuario(id),
+
+    onError: (error: any) => {
+      toast.error(error.message || "Error al cambiar el estado del usuario");
+    },
+
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Estado del usuario actualizado");
+      queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
+    },
+  });
+  const usuarios = data ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="w-full px-4 py-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          Cargando usuarios...
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full px-4 py-6">
+        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">
+          Error al cargar los usuarios
+        </div>
+      </div>
+    );
+  }
+
+  const totalUsuarios = usuarios.length;
+  const activos = usuarios.filter((u: any) => u.enable).length;
+
+  const companyStats = usuarios.reduce(
+    (acc: Record<string, number>, u: any) => {
+      u.company.forEach((company: string) => {
+        acc[company] = (acc[company] || 0) + 1;
+      });
+      return acc;
+    },
+    {},
+  );
+
+  return (
+    <div className="w-full px-4 py-6 space-y-6">
+      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Administración
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            Usuarios
+          </h1>
+        </div>
+
+        <Link
+          to="/admin/usuarios/crear"
+          className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+        >
+          Crear usuario
+        </Link>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Total usuarios
+          </p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
+            {totalUsuarios}
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Activos
+          </p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
+            {activos}
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            Compañías
+          </p>
+
+          <div
+            className="mt-3 grid divide-x divide-gray-200"
+            style={{
+              gridTemplateColumns: `repeat(${Math.max(
+                Object.keys(companyStats).length,
+                1,
+              )}, minmax(0, 1fr))`,
+            }}
+          >
+            {Object.entries(companyStats).map(([company, total]) => (
+              <div key={company} className="px-3 first:pl-0 last:pr-0">
+                <p className="text-xs text-gray-500 uppercase">{company}</p>
+                <p className="text-lg font-semibold text-gray-900">{total}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 px-6 py-4">
+          <h2 className="text-base font-semibold tracking-tight text-gray-900">
+            Lista de usuarios
+          </h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+              <tr>
+                <th className="px-6 py-3 text-left">Usuario</th>
+                <th className="px-6 py-3 text-left">Rol</th>
+                <th className="px-6 py-3 text-left">Empresa</th>
+                <th className="px-6 py-3 text-left">NIC</th>
+                <th className="px-6 py-3 text-left">LIESS</th>
+                <th className="px-6 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100">
+              {usuarios.map((u: any) => (
+                <tr key={u.email} className="hover:bg-gray-50">
+                  <td className="px-6 py-3">
+                    <div className="font-medium text-gray-900">
+                      {capitalize(u.lastName)}, {capitalize(u.name)}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {u.email}
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      {u.role.map((r: string) => (
+                        <span
+                          key={r}
+                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+                        >
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      {u.company.map((c: string) => (
+                        <span
+                          key={c}
+                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-3 text-gray-700">{u.numberSaleNic}</td>
+
+                  <td className="px-6 py-3 text-gray-700">
+                    {u.numberSaleLiess}
+                  </td>
+
+                  <td className="px-6 py-3">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => changeStatus(u._id)}
+                        className={[
+                          "inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
+                          u.enable
+                            ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                            : "border border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
+                        ].join(" ")}
+                      >
+                        {u.enable ? "Deshabilitar" : "Habilitar"}
+                      </button>
+                      <Link
+                        to={`/admin/usuarios/${u._id}/editar`}
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                      >
+                        Editar
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {usuarios.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-6 py-10 text-center text-sm text-gray-500"
+                  >
+                    No hay usuarios para mostrar.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
