@@ -129,10 +129,21 @@ export const usuarioSchema = z.object({
   numberSaleLiess: z.number(),
   role: z.array(z.string()),
   company: z.array(z.string()),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-  __v: z.number(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export const usuariosResponseSchema = z.array(usuarioSchema);
 export type Usuario = z.infer<typeof usuarioSchema>;
+
+//**************************** */  
+// USUARIOS SCHEMA TOKEN
+//**************************** */ 
+
+export const userSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  lastName: z.string(),
+  role: z.array(z.string()),
+  enable: z.boolean(),
+});

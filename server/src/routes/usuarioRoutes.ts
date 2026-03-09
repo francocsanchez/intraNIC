@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UsuarioController } from "../controllers/UsuarioController";
+import { authenticate } from "../middleware/authenticate";
 
 const router = Router();
 
@@ -19,13 +20,6 @@ router.get("/", UsuarioController.listUsuarios);
  */
 router.post("/", UsuarioController.createUsuario);
 
-/**
- *
- * @route GET /
- * @desc Obtener usuario by ID.
- *
- */
-router.get("/:idUsuario", UsuarioController.getUsuarioByID);
 
 /**
  *
@@ -42,5 +36,29 @@ router.put("/:idUsuario", UsuarioController.updateUsuarioById);
  *
  */
 router.patch("/:idUsuario/change-status", UsuarioController.changeStatusUsuario);
+
+/**
+ *
+ * @route POST /
+ * @desc Login usuario.
+ *
+ */
+router.post("/login", UsuarioController.login);
+
+/**
+ *
+ * @route POST /
+ * @desc Login usuario.
+ *
+ */
+router.get("/me", authenticate,UsuarioController.getMe);
+
+/**
+ *
+ * @route GET /
+ * @desc Obtener usuario by ID.
+ *
+ */
+router.get("/:idUsuario", UsuarioController.getUsuarioByID);
 
 export default router;
