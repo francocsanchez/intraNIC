@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function MenuAdminNavbar() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { user, isLoading, isAuthenticated, refetch } = useAuth();
@@ -24,7 +26,7 @@ export default function MenuAdminNavbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("AUTH_TOKEN");
-    refetch();
+
     navigate("/login", { replace: true });
   };
   return (

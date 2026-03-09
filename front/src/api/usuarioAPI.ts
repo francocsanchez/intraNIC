@@ -1,7 +1,8 @@
 import api from "@/libs/axios";
 import { isAxiosError } from "axios";
-import { userSchema, usuarioSchema, usuariosResponseSchema, type Usuario } from "../types";
+import { usuarioSchema, usuariosResponseSchema, type Usuario } from "../types";
 import type { UsuarioFormData } from "@/views/admin/usuarios/CrearUsuarioView";
+import UpdatePasswordForm from "@/views/auth/MiPerfilView";
 
 export async function getUsuarios() {
   try {
@@ -103,4 +104,32 @@ export async function getMe() {
   }
 
   return result.data;
+}
+
+type UpdatePasswordForm = {
+  newPassword: string;
+};
+
+export async function updateMyPassword(formData: UpdatePasswordForm) {
+  try {
+    const { data } = await api.patch(`/usuarios/change-password`, formData);
+
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
+}
+
+export async function resetPasswordUserByID(idUsuario: Usuario["_id"]) {
+  try {
+    const { data } = await api.patch(`/usuarios/reset-password/${idUsuario}`);
+
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
 }

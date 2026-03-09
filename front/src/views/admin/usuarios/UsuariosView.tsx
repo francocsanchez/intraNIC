@@ -1,5 +1,12 @@
-import { changeStatusUsuario, getUsuarios } from "@/api/usuarioAPI";
+import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import {
+  changeStatusUsuario,
+  getUsuarios,
+  resetPasswordUserByID,
+} from "@/api/usuarioAPI";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RotateCcw } from "lucide-react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -13,23 +20,54 @@ function capitalize(value: string) {
 
 export default function UsuariosView() {
   const queryClient = useQueryClient();
+
   const { data, isError, isLoading } = useQuery({
     queryKey: ["usuarios", "listar"],
     queryFn: getUsuarios,
   });
 
+  const { data: vendedoresData } = useQuery({
+    queryKey: ["vendedores", "listar"],
+    queryFn: getVendedoresNic,
+  });
+
+  const vendedoresMap = useMemo(() => {
+  const vendedores = vendedoresData?.data ?? [];
+
+  return vendedores.reduce((acc: Record<number, string>, vendedor) => {
+    const codigo = Number(vendedor.codigo ?? 0);
+    const nombre = vendedor.vendedor ?? "";
+
+    if (codigo) {
+      acc[codigo] = nombre;
+    }
+
+    return acc;
+  }, {});
+}, [vendedoresData]);
+
   const { mutate: changeStatus } = useMutation({
     mutationFn: (id: string) => changeStatusUsuario(id),
-
     onError: (error: any) => {
       toast.error(error.message || "Error al cambiar el estado del usuario");
     },
-
     onSuccess: (response: any) => {
       toast.success(response.message || "Estado del usuario actualizado");
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
     },
   });
+
+  const { mutate: resetPasswordUser } = useMutation({
+    mutationFn: (id: string) => resetPasswordUserByID(id),
+    onError: (error: any) => {
+      toast.error(error.message || "Error al resetear la contraseña");
+    },
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Contraseña reseteada correctamente");
+      queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
+    },
+  });
+
   const usuarios = data ?? [];
 
   if (isLoading) {
@@ -62,7 +100,7 @@ export default function UsuariosView() {
       });
       return acc;
     },
-    {},
+    {}
   );
 
   return (
@@ -114,7 +152,7 @@ export default function UsuariosView() {
             style={{
               gridTemplateColumns: `repeat(${Math.max(
                 Object.keys(companyStats).length,
-                1,
+                1
               )}, minmax(0, 1fr))`,
             }}
           >
@@ -186,10 +224,16 @@ export default function UsuariosView() {
                     </div>
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">{u.numberSaleNic}</td>
+                  <td className="px-6 py-3 text-gray-700">
+                    {u.numberSaleNic
+                      ? vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic
+                      : "-"}
+                  </td>
 
                   <td className="px-6 py-3 text-gray-700">
-                    {u.numberSaleLiess}
+                    {u.numberSaleLiess
+                      ? vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess
+                      : "-"}
                   </td>
 
                   <td className="px-6 py-3">
@@ -206,9 +250,18 @@ export default function UsuariosView() {
                       >
                         {u.enable ? "Deshabilitar" : "Habilitar"}
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => resetPasswordUser(u._id)}
+                        className="inline-flex items-center gap-1 justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                      >
+                        <RotateCcw size={14} strokeWidth={1.8} />
+                        Reset password
+                      </button>
+
                       <Link
                         to={`/admin/usuarios/${u._id}/editar`}
-                        type="button"
                         className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                       >
                         Editar
@@ -221,7 +274,7 @@ export default function UsuariosView() {
               {usuarios.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-6 py-10 text-center text-sm text-gray-500"
                   >
                     No hay usuarios para mostrar.

@@ -47,8 +47,8 @@ router.post("/login", UsuarioController.login);
 
 /**
  *
- * @route POST /
- * @desc Login usuario.
+ * @route GET /
+ * @desc Obtener usuario.
  *
  */
 router.get("/me", authenticate,UsuarioController.getMe);
@@ -60,5 +60,21 @@ router.get("/me", authenticate,UsuarioController.getMe);
  *
  */
 router.get("/:idUsuario", UsuarioController.getUsuarioByID);
+
+/**
+ *
+ * @route PATCH /
+ * @desc Resetear password.
+ *
+ */
+router.patch("/reset-password/:idUsuario",UsuarioController.resetPassword);
+
+/**
+ *
+ * @route PATCH /
+ * @desc Actualizar password.
+ *
+ */
+router.patch("/change-password",authenticate,UsuarioController.updateMyPassword);
 
 export default router;

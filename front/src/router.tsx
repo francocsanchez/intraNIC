@@ -40,26 +40,30 @@ export default function Router() {
             />
 
             <Route path="/mi-perfil" element={<MiPerfilView />} />
+
+            <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
+            <Route
+              path="/admin/configuracion"
+              element={<ConfiguracionView />}
+            />
+            <Route
+              path="/admin/configuracion/convencional/editar"
+              element={<EditConfiguracionConvView />}
+            />
+            <Route
+              path="/admin/configuracion/usados/editar"
+              element={<EditConfiguracionUsadoView />}
+            />
+            <Route path="/admin/usuarios" element={<UsuariosView />} />
+            <Route
+              path="/admin/usuarios/crear"
+              element={<CrearUsuarioView />}
+            />
+            <Route
+              path="/admin/usuarios/:idUsuario/editar"
+              element={<EditUsuarioView />}
+            />
           </Route>
-
-          <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
-          <Route path="/admin/configuracion" element={<ConfiguracionView />} />
-          <Route
-            path="/admin/configuracion/convencional/editar"
-            element={<EditConfiguracionConvView />}
-          />
-          <Route
-            path="/admin/configuracion/usados/editar"
-            element={<EditConfiguracionUsadoView />}
-          />
-          <Route path="/admin/usuarios" element={<UsuariosView />} />
-          <Route path="/admin/usuarios/crear" element={<CrearUsuarioView />} />
-          <Route
-            path="/admin/usuarios/:idUsuario/editar"
-            element={<EditUsuarioView />}
-          />
-
-          
 
           <Route path="*" element={<NotFoundView />} />
         </Route>

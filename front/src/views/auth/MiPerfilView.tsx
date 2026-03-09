@@ -1,7 +1,18 @@
+import { updateMyPassword } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building2, CircleUserRound, Hash, KeyRound, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+type UpdatePasswordForm = {
+  newPassword: string;
+  confirmPassword: string;
+};
 
 export default function MiPerfilView() {
+  const navigate = useNavigate();
   const { user, isLoading, isError } = useAuth();
 
   if (isLoading) {
@@ -30,6 +41,27 @@ export default function MiPerfilView() {
   }
 
   const fullName = `${user.name ?? ""} ${user.lastName ?? ""}`.trim();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<UpdatePasswordForm>();
+
+  const newPassword = watch("newPassword");
+
+  const mutation = useMutation({
+    mutationFn: updateMyPassword,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      localStorage.removeItem("AUTH_TOKEN");
+      navigate("/login", { replace: true });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Error al iniciar sesión");
+    },
+  });
 
   return (
     <div className="w-full px-4 py-6 space-y-6">
@@ -93,7 +125,7 @@ export default function MiPerfilView() {
                   Nombre completo
                 </p>
               </div>
-              <p className="mt-3 text-sm font-medium text-gray-900">
+              <p className="mt-3 text-sm font-medium text-gray-900 ">
                 {fullName || "No informado"}
               </p>
             </div>
@@ -140,7 +172,7 @@ export default function MiPerfilView() {
           <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="border-b border-gray-200 px-6 py-4">
               <h2 className="text-base font-semibold tracking-tight text-gray-900">
-                Compañías
+                Unidad de negocio
               </h2>
             </div>
 
@@ -164,7 +196,11 @@ export default function MiPerfilView() {
           <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center gap-2">
-                <KeyRound size={16} strokeWidth={1.5} className="text-gray-700" />
+                <KeyRound
+                  size={16}
+                  strokeWidth={1.5}
+                  className="text-gray-700"
+                />
                 <h2 className="text-base font-semibold tracking-tight text-gray-900">
                   Cambiar contraseña
                 </h2>
@@ -174,7 +210,12 @@ export default function MiPerfilView() {
               </p>
             </div>
 
-            <form className="space-y-5 p-6">
+            <form
+              className="space-y-5 p-6"
+              onSubmit={handleSubmit(({ confirmPassword, ...formData }) =>
+                mutation.mutate(formData),
+              )}
+            >
               <div className="space-y-2">
                 <label
                   htmlFor="newPassword"
@@ -186,8 +227,20 @@ export default function MiPerfilView() {
                   id="newPassword"
                   type="password"
                   placeholder="••••••••"
+                  {...register("newPassword", {
+                    required: "La contraseña es obligatoria",
+                    minLength: {
+                      value: 8,
+                      message: "La contraseña debe tener al menos 8 caracteres",
+                    },
+                  })}
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
                 />
+                {errors.newPassword && (
+                  <p className="text-xs text-red-500">
+                    {errors.newPassword.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -201,8 +254,18 @@ export default function MiPerfilView() {
                   id="confirmPassword"
                   type="password"
                   placeholder="••••••••"
+                  {...register("confirmPassword", {
+                    required: "Debes confirmar la contraseña",
+                    validate: (value) =>
+                      value === newPassword || "Las contraseñas no coinciden",
+                  })}
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
                 />
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
 
               <button

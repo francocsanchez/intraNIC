@@ -219,7 +219,7 @@ export class UsuarioController {
       const token = generateJWT({ sub: String(user._id) });
 
       return res.status(200).json({
-        token
+        token,
       });
     } catch (error) {
       logError("UsuarioController.login");
@@ -231,7 +231,68 @@ export class UsuarioController {
     }
   };
 
-  static getMe = async (req: Request, res: Response): Promise<void> => {
-  res.json(req.user);
-};
+  static getMe = async (req: Request, res: Response) => {
+    res.json(req.user);
+  };
+
+  static updateMyPassword = async (req: Request, res: Response) => {
+    try {
+      const { _id } = req.user;
+      const { newPassword } = req.body;
+
+      const usuario = await User.findById(_id);
+
+      if (!usuario) {
+        return res.status(404).json({
+          data: null,
+          message: "Usuario no encontrado",
+        });
+      }
+
+      usuario.password = await hashPassword(newPassword);
+      await usuario.save();
+
+      return res.status(200).json({
+        data: null,
+        message: "Contraseña actualizada correctamente",
+      });
+    } catch (error) {
+      logError("UsuarioController.updateMyPassword");
+      console.error(error);
+      return res.status(500).json({
+        data: null,
+        message: "Error del servidor",
+      });
+    }
+  };
+
+  static resetPassword = async (req: Request, res: Response) => {
+    try {
+      const { idUsuario } = req.params;
+
+      const usuario = await User.findById(idUsuario);
+
+      if (!usuario) {
+        return res.status(404).json({
+          data: null,
+          message: "Usuario no encontrado",
+        });
+      }
+
+      usuario.password = await hashPassword(`${usuario.name}123`);
+      await usuario.save();
+
+      return res.status(200).json({
+        data: null,
+        message: `Contraseña actualizada correctamente - ${usuario.name}123`,
+      });
+    } catch (error) {
+      logError("UsuarioController.resetPassword");
+      console.error(error);
+      return res.status(500).json({
+        data: null,
+        message: "Error del servidor",
+      });
+    }
+  };
 }
