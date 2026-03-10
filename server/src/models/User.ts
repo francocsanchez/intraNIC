@@ -14,6 +14,7 @@ export const userCompany = {
   CONVENCIONAL: "convencional",
   LIESS: "liess",
   USADOS: "usados",
+  TPA: "planAhorro",
 } as const;
 
 export type userCompany = (typeof userCompany)[keyof typeof userCompany];

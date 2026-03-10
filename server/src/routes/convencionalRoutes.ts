@@ -1,18 +1,17 @@
 import { Router } from "express";
 import { ConvencionalController } from "../controllers/ConvencionalController";
+import { authenticate } from "../middleware/authenticate";
+import { authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
-
+router.use(authenticate);
 /**
  *
  * @route GET /
  * @desc Listar stock disponible.
  *
  */
-router.get(
-  "/stock-disponible",
-  ConvencionalController.stockDisponible,
-);
+router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente","vendedor"),ConvencionalController.stockDisponible);
 
 /**
  *
@@ -22,6 +21,7 @@ router.get(
  */
 router.get(
   "/stock-guardado",
+  authorizeRoles("admin","gerente"),
   ConvencionalController.stockGuardado,
 );
 
@@ -33,6 +33,7 @@ router.get(
  */
 router.get(
   "/stock-reservado",
+  authorizeRoles("admin", "supervisor", "gerente"),
   ConvencionalController.stockReservado,
 );
 
@@ -64,9 +65,6 @@ router.get(
  * @desc Lista de espera.
  *
  */
-router.get(
-  "/lista-de-espera",
-  ConvencionalController.listaDeEspera,
-);
+router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
 
 export default router;

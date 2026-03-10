@@ -10,7 +10,8 @@ export class UsuarioController {
       const usuarios = await User.find({}, { password: 0 })
         .sort({
           enable: -1,
-          name: 1,
+          lastName: 1,
+          name:1
         })
         .lean();
 
