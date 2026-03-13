@@ -83,9 +83,7 @@ ORDER BY
     auto.au_nombre
 `;
 
-export const reservasSucursalesConvencionalQuery = (
-  vendedoresReservas: string[],
-) => `
+export const reservasSucursalesConvencionalQuery = (vendedoresReservas: string[]) => `
 SELECT
   ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS sucursal,
   COUNT(*) AS cantidad
@@ -226,4 +224,43 @@ WHERE
 ORDER BY
 v.ven_nombre ,
 ope.ope_codigo
+`;
+
+export const misOperacionesQuery = (mes: number, ano: number, numberSaleNic: number) => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_stoauto as "interno",
+	ope.ope_fecfac as "fechaFactura",
+	ope.ope_fecha as "fecha",
+	cli.cli_nombre as "clienteNombre",
+	ope.ope_fecent as "fechaEntrega",
+	ope.ope_fecasig as "fechaAsignacion",
+	auto.au_nombre AS "version",
+	famiauto.fam_nombre AS "modelo",
+	vende.ven_nombre as "vendedor",
+	color.col_nombre AS "color"
+FROM
+	opera ope
+INNER JOIN cliente cli ON
+	ope.ope_cliente = cli.cli_codigo
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN stoauto ON
+	stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN movnped ON
+	movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN color ON
+	movnped.mnp_col1 = color.col_codigo
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND MONTH(ope.ope_fecasig) = ${mes}
+	AND YEAR(ope.ope_fecasig) = ${ano}
+	AND ope.ope_vende = ${numberSaleNic}
+ORDER BY
+	cli.cli_nombre
 `;

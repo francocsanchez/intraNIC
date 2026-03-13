@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BookMarked, CalendarClock, CircleUserRound, Cog, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, CircleUserRound, Cog, Handshake, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
@@ -102,6 +102,18 @@ export default function MenuAdminNavbar({negocio}:NavBarProps) {
               >
                 <Wrench size={16} strokeWidth={1.25} />
                 Mi cuenta
+              </Link>
+            )}
+          </MenuItem>
+
+          <MenuItem>
+            {({ focus }) => (
+              <Link
+                to={`/mis-operaciones/${negocio}`}
+                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+              >
+                <Handshake size={16} strokeWidth={1.25} />
+                Mis Operaciones
               </Link>
             )}
           </MenuItem>

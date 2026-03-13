@@ -12,10 +12,12 @@ import {
   reservasConvencionalQuery,
   stockConvencionalQuery,
   listaDeEsperaConvencionalQuery,
+  misOperacionesQuery,
 } from "./querys/convencional.query";
 
 import { buildResumen, StockRow } from "../utils/reportUnidadesConvencional";
 import { buildResumenListaDeEspera, ListaEsperaRow } from "../utils/reportOperacionesConvencional";
+import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisOperacionesConvencional";
 
 export class ConvencionalController {
   static stockDisponible = async (_req: Request, res: Response) => {
@@ -132,10 +134,9 @@ export class ConvencionalController {
         type: QueryTypes.SELECT,
       });
 
-       const resumen = buildResumenListaDeEspera(data);
+      const resumen = buildResumenListaDeEspera(data);
 
       return res.status(200).json({ data, resumen });
-
     } catch (error) {
       logError("ConvencionalController.misReservas");
       console.error(error);
@@ -143,7 +144,7 @@ export class ConvencionalController {
     }
   };
 
-  static listaDeEspera = async (_req: Request, res: Response) => {
+  static listaDeEspera = async (req: Request, res: Response) => {
     try {
       const query = listaDeEsperaConvencionalQuery();
 
@@ -156,6 +157,26 @@ export class ConvencionalController {
       return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("ConvencionalController.listaDeEspera");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static misOperaciones = async (req: Request, res: Response) => {
+    const { mes, ano } = req.params;
+
+    try {
+      const query = misOperacionesQuery(Number(mes), Number(ano), Number(req.user.numberSaleNic));
+
+      const data = await sequelizeNIC.query<MisOperacionRow>(query, {
+        type: QueryTypes.SELECT,
+      });
+
+      const resumen = buildResumenMisOperaciones(data);
+
+      return res.status(200).json({ data, resumen });
+    } catch (error) {
+      logError("ConvencionalController.misOperaciones");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

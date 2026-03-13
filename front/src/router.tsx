@@ -23,6 +23,7 @@ import LiessLayout from "./layouts/LiessLayout";
 import StockDisponibleLiess from "./views/liess/StockDisponibleLiess";
 import MisReservas from "./views/auth/MisReservas";
 import MiListaDeEsperaView from "./views/auth/MiListaDeEsperaView";
+import MisOperacionesView from "./views/auth/MisOperacionesView";
 
 export default function Router() {
   return (
@@ -42,6 +43,7 @@ export default function Router() {
               <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
               <Route path="/mis-reservas/convencional" element={<MisReservas />} />
               <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
+              <Route path="/mis-operaciones/convencional" element={<MisOperacionesView />} />
 
               <Route path="/stock/disponible/convencional" element={<StockDisponibleConvencional />} />
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>

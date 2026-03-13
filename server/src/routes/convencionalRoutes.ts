@@ -61,4 +61,6 @@ router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
  */
 router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 
+router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
+
 export default router;

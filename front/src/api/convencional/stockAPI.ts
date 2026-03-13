@@ -1,5 +1,11 @@
 import api from "@/libs/axios";
-import { misListaDeEsperaResponseSchema, misReservasResponseSchema, ReservasResponseSchema, stockDisponibleConvencionalSchema } from "@/types/index";
+import {
+  misListaDeEsperaResponseSchema,
+  misOperacionesSchema,
+  misReservasResponseSchema,
+  ReservasResponseSchema,
+  stockDisponibleConvencionalSchema,
+} from "@/types/index";
 import { isAxiosError } from "axios";
 
 export async function getStockDisponibleConvencional() {
@@ -75,7 +81,7 @@ export async function misReservas() {
   try {
     const { data } = await api(`/dms/convencional/mis-reservas`);
 
-     const parsed = misReservasResponseSchema.safeParse(data);
+    const parsed = misReservasResponseSchema.safeParse(data);
 
     if (!parsed.success) {
       console.error(parsed.error.issues);
@@ -94,7 +100,26 @@ export async function miListaDeEspera() {
   try {
     const { data } = await api(`/dms/convencional/mi-lista-de-espera`);
 
-     const parsed = misListaDeEsperaResponseSchema.safeParse(data);
+    const parsed = misListaDeEsperaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
+}
+
+export async function misOperaciones(mes: number, anio: number) {
+  try {
+    const { data } = await api(`/dms/convencional/mis-operaciones/${mes}/${anio}`);
+
+    const parsed = misOperacionesSchema.safeParse(data);
 
     if (!parsed.success) {
       console.error(parsed.error.issues);

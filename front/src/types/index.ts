@@ -213,8 +213,8 @@ export const miListaDeEsperaSchema = z.object({
   clienteNombre: z.string(),
   version: z.string(),
   modelo: z.string(),
-  color1: z.string(),
-  color2: z.string().nullable(),
+  color1: z.string().nullable().optional(),
+  color2: z.string().nullable().optional(),
 });
 
 export const misListaDeEsperaResponseSchema = z.object({
@@ -226,3 +226,34 @@ export const misListaDeEsperaResponseSchema = z.object({
 });
 
 export type MiListaDeEsperaResponse = z.infer<typeof misListaDeEsperaResponseSchema>;
+
+//**************************** */  
+// MIS OPERACIONES
+//**************************** */ 
+
+export const misOperacionesItemSchema = z.object({
+  opera: z.number(),
+  interno: z.number(),
+  fechaFactura: z.string().nullable(),
+  fecha: z.string().nullable(),
+  clienteNombre: z.string(),
+  fechaEntrega: z.string().nullable(),
+  fechaAsignacion: z.string().nullable(),
+  version: z.string(),
+  modelo: z.string(),
+  vendedor: z.string(),
+  color: z.string(),
+});
+
+export const misOperacionesResumenSchema = z.object({
+  total: z.number(),
+  porDia: z.record(z.string(), z.number()),
+  porModelo: z.record(z.string(), z.number()),
+});
+
+export const misOperacionesSchema = z.object({
+  data: z.array(misOperacionesItemSchema),
+  resumen: misOperacionesResumenSchema,
+});
+
+export type MisOperacionesResponse = z.infer<typeof misOperacionesSchema>;
