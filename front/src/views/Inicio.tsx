@@ -60,7 +60,7 @@ export default function Inicio() {
 
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Convencional</h2>
 
-              <p className="text-sm text-gray-500 mt-1">Gestión de stock convencional</p>
+              <p className="text-sm text-gray-500 mt-1">Gestión de vehículos nuevos</p>
             </Link>
           ) : (
             <div className={disabledCard}>
@@ -70,7 +70,7 @@ export default function Inicio() {
 
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Convencional</h2>
 
-              <p className="text-sm text-gray-500 mt-1">Gestión de stock convencional</p>
+              <p className="text-sm text-gray-500 mt-1">Gestión de vehículos nuevos</p>
             </div>
           )}
 
@@ -94,6 +94,7 @@ export default function Inicio() {
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Usados</h2>
 
               <p className="text-sm text-gray-500 mt-1">Gestión de vehículos usados</p>
+              <p>Proximamente....</p>
             </div>
           )}
 

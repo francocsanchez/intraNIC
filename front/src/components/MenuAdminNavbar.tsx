@@ -1,11 +1,15 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { CircleUserRound, Cog, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, CircleUserRound, Cog, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
 
-export default function MenuAdminNavbar() {
+type NavBarProps = {
+  negocio: string;
+};
+
+export default function MenuAdminNavbar({negocio}:NavBarProps) {
   const navigate = useNavigate();
 
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -37,7 +41,7 @@ export default function MenuAdminNavbar() {
             <MenuItem>
               {({ focus }) => (
                 <Link
-                  to={"/admin/usuarios"}
+                  to={`/admin/usuarios`}
                   className={` px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                 >
                   <Users size={16} strokeWidth={1.25} />
@@ -93,11 +97,35 @@ export default function MenuAdminNavbar() {
           <MenuItem>
             {({ focus }) => (
               <Link
-                to={`/mi-perfil`}
+                to={`/mi-perfil/${negocio}`}
                 className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
               >
                 <Wrench size={16} strokeWidth={1.25} />
                 Mi cuenta
+              </Link>
+            )}
+          </MenuItem>
+
+          <MenuItem>
+            {({ focus }) => (
+              <Link
+                to={`/mis-reservas/${negocio}`}
+                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+              >
+                <BookMarked size={16} strokeWidth={1.25} />
+                Mis reservas
+              </Link>
+            )}
+          </MenuItem>
+
+          <MenuItem>
+            {({ focus }) => (
+              <Link
+                to={`/mi-lista-espera/${negocio}`}
+                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+              >
+                <CalendarClock size={16} strokeWidth={1.25} />
+                Mis Lista de espera
               </Link>
             )}
           </MenuItem>

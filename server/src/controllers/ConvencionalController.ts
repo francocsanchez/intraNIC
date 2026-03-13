@@ -23,18 +23,12 @@ export class ConvencionalController {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res
-          .status(404)
-          .json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresDisponibleConvencional =
-        config.vendedoresDisponibleConvencional ?? [];
+      const vendedoresDisponibleConvencional = config.vendedoresDisponibleConvencional ?? [];
 
-      const data = await sequelizeNIC.query<StockRow>(
-        stockConvencionalQuery(vendedoresDisponibleConvencional),
-        { type: QueryTypes.SELECT },
-      );
+      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(vendedoresDisponibleConvencional), { type: QueryTypes.SELECT });
 
       const resumen = buildResumen(data);
 
@@ -51,18 +45,12 @@ export class ConvencionalController {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res
-          .status(404)
-          .json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresStockGuardadoConvencional =
-        config.vendedoresStockGuardadoConvencional ?? [];
+      const vendedoresStockGuardadoConvencional = config.vendedoresStockGuardadoConvencional ?? [];
 
-      const data = await sequelizeNIC.query<StockRow>(
-        stockConvencionalQuery(vendedoresStockGuardadoConvencional),
-        { type: QueryTypes.SELECT },
-      );
+      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(vendedoresStockGuardadoConvencional), { type: QueryTypes.SELECT });
 
       const resumen = buildResumen(data);
 
@@ -79,18 +67,12 @@ export class ConvencionalController {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res
-          .status(404)
-          .json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresReservasConvencional =
-        config.vendedoresReservasConvencional ?? [];
+      const vendedoresReservasConvencional = config.vendedoresReservasConvencional ?? [];
 
-      const data = await sequelizeNIC.query<StockRow>(
-        reservasConvencionalQuery(vendedoresReservasConvencional),
-        { type: QueryTypes.SELECT },
-      );
+      const data = await sequelizeNIC.query<StockRow>(reservasConvencionalQuery(vendedoresReservasConvencional), { type: QueryTypes.SELECT });
 
       const resumenPorSucursal: Record<string, number> = {};
       const tablasPorSucursal: Record<string, StockRow[]> = {};
@@ -126,14 +108,16 @@ export class ConvencionalController {
 
   static misReservas = async (req: Request, res: Response) => {
     try {
-      const { numeroVendedor } = req.params;
+      const { numberSaleNic } = req.user;
 
-      const query = misReservasConvencionalQuery(Number(numeroVendedor));
+      const query = misReservasConvencionalQuery(Number(numberSaleNic));
       const data = await sequelizeNIC.query<any>(query, {
         type: QueryTypes.SELECT,
       });
 
-      return res.status(200).json({ data });
+      const resumen = buildResumenListaDeEspera(data);
+
+      return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("ConvencionalController.misReservas");
       console.error(error);
@@ -143,14 +127,15 @@ export class ConvencionalController {
 
   static miListaDeEspera = async (req: Request, res: Response) => {
     try {
-      const { numeroVendedor } = req.params;
-
-      const query = miListaDeEsperaConvencionalQuery(Number(numeroVendedor));
+      const query = miListaDeEsperaConvencionalQuery(Number(req.user.numberSaleNic));
       const data = await sequelizeNIC.query<any>(query, {
         type: QueryTypes.SELECT,
       });
 
-      return res.status(200).json({ data });
+       const resumen = buildResumenListaDeEspera(data);
+
+      return res.status(200).json({ data, resumen });
+
     } catch (error) {
       logError("ConvencionalController.misReservas");
       console.error(error);
@@ -159,21 +144,20 @@ export class ConvencionalController {
   };
 
   static listaDeEspera = async (_req: Request, res: Response) => {
-  try {
-    const query = listaDeEsperaConvencionalQuery();
+    try {
+      const query = listaDeEsperaConvencionalQuery();
 
-    const data = await sequelizeNIC.query<ListaEsperaRow>(query, {
-      type: QueryTypes.SELECT,
-    });
+      const data = await sequelizeNIC.query<ListaEsperaRow>(query, {
+        type: QueryTypes.SELECT,
+      });
 
-    const resumen = buildResumenListaDeEspera(data);
+      const resumen = buildResumenListaDeEspera(data);
 
-    return res.status(200).json({ data, resumen });
-  } catch (error) {
-    logError("ConvencionalController.listaDeEspera");
-    console.error(error);
-    return res.status(500).json({ message: "Error del servidor SIAC" });
-  }
-};
-
+      return res.status(200).json({ data, resumen });
+    } catch (error) {
+      logError("ConvencionalController.listaDeEspera");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
 }

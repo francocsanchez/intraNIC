@@ -12,9 +12,9 @@ export interface IConfiguration extends Document {
   vendedoresStockGuardadoUsados: string[];
 
   sistemaActivoLIESS: boolean;
-  vendedoresDisponibleLIES: string[];
-  vendedoresStockGuardadoLIES: string[];
-  vendedoresReservasLIES: string[];
+  vendedoresDisponibleLIESS: string[];
+  vendedoresStockGuardadoLIESS: string[];
+  vendedoresReservasLIESS: string[];
 }
 
 const configSchema: Schema = new Schema(
@@ -30,9 +30,9 @@ const configSchema: Schema = new Schema(
     vendedoresStockGuardadoUsados: { type: [String] },
 
     sistemaActivoLIESS: { type: Boolean, default: true },
-    vendedoresDisponibleLIES: { type: [String] },
-    vendedoresStockGuardadoLIES: { type: [String] },
-    vendedoresReservasLIES: { type: [String] },
+    vendedoresDisponibleLIESS: { type: [String] },
+    vendedoresStockGuardadoLIESS: { type: [String] },
+    vendedoresReservasLIESS: { type: [String] },
   },
   { timestamps: true },
 );

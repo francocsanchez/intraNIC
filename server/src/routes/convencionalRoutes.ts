@@ -11,7 +11,7 @@ router.use(authenticate);
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente","vendedor"),ConvencionalController.stockDisponible);
+router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente", "vendedor"), ConvencionalController.stockDisponible);
 
 /**
  *
@@ -19,11 +19,7 @@ router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente",
  * @desc Listar stock guardado.
  *
  */
-router.get(
-  "/stock-guardado",
-  authorizeRoles("admin","gerente"),
-  ConvencionalController.stockGuardado,
-);
+router.get("/stock-guardado", authorizeRoles("admin", "gerente"), ConvencionalController.stockGuardado);
 
 /**
  *
@@ -31,11 +27,7 @@ router.get(
  * @desc Listar stock reservado.
  *
  */
-router.get(
-  "/stock-reservado",
-  authorizeRoles("admin", "supervisor", "gerente"),
-  ConvencionalController.stockReservado,
-);
+router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.stockReservado);
 
 /**
  *
@@ -43,10 +35,7 @@ router.get(
  * @desc Mis reservas.
  *
  */
-router.get(
-  "/stock-reservado/:numeroVendedor",
-  ConvencionalController.misReservas,
-);
+router.get("/stock-reservado/:numeroVendedor", ConvencionalController.misReservas);
 
 /**
  *
@@ -54,10 +43,7 @@ router.get(
  * @desc Mi lista de espera.
  *
  */
-router.get(
-  "/lista-de-espera/:numeroVendedor",
-  ConvencionalController.miListaDeEspera,
-);
+router.get("/mi-lista-de-espera", authenticate, ConvencionalController.miListaDeEspera);
 
 /**
  *
@@ -66,5 +52,13 @@ router.get(
  *
  */
 router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
+
+/**
+ *
+ * @route GET /
+ * @desc Mi lista de espera.
+ *
+ */
+router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 
 export default router;

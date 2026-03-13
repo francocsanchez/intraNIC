@@ -42,7 +42,7 @@ export default function NavBar({ negocio }: NavBarProps) {
         </nav>
 
         {/* Menu administracion / perfil */}
-        <MenuAdminNavbar />
+        <MenuAdminNavbar negocio={negocio}/>
       </div>
     </header>
   );

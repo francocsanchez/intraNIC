@@ -19,6 +19,10 @@ import NoAutorizadoView from "./views/NoAutorizadoView";
 import RoleProtectedRoute from "./layouts/RoleProtectedRoute";
 import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
 import NICLayout from "./layouts/NICLayout";
+import LiessLayout from "./layouts/LiessLayout";
+import StockDisponibleLiess from "./views/liess/StockDisponibleLiess";
+import MisReservas from "./views/auth/MisReservas";
+import MiListaDeEsperaView from "./views/auth/MiListaDeEsperaView";
 
 export default function Router() {
   return (
@@ -31,9 +35,14 @@ export default function Router() {
           <Route path="/" element={<Inicio />} />
           <Route path="/no-autorizado" element={<NoAutorizadoView />} />
 
+          <Route element={<CompanyProtectedRoute allowedCompany={["liess", "convencional", "usados"]} />}></Route>
+
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
             <Route element={<NICLayout />}>
-              <Route path="/mi-perfil" element={<MiPerfilView />} />
+              <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
+              <Route path="/mis-reservas/convencional" element={<MisReservas />} />
+              <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
+
               <Route path="/stock/disponible/convencional" element={<StockDisponibleConvencional />} />
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
                 <Route path="/stock/reservado/convencional" element={<StockReservasConvencional />} />
@@ -51,6 +60,15 @@ export default function Router() {
                 <Route path="/admin/usuarios/crear" element={<CrearUsuarioView />} />
                 <Route path="/admin/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
               </Route>
+            </Route>
+          </Route>
+
+          <Route element={<CompanyProtectedRoute allowedCompany={["liess"]} />}>
+            <Route element={<LiessLayout />}>
+              <Route path="/mi-perfil/liess" element={<MiPerfilView />} />
+              <Route path="/stock/disponible/liess" element={<StockDisponibleLiess />} />
+
+              
             </Route>
           </Route>
 

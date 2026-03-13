@@ -1,8 +1,5 @@
 import api from "@/libs/axios";
-import {
-  ReservasResponseSchema,
-  stockDisponibleConvencionalSchema,
-} from "@/types/index";
+import { misListaDeEsperaResponseSchema, misReservasResponseSchema, ReservasResponseSchema, stockDisponibleConvencionalSchema } from "@/types/index";
 import { isAxiosError } from "axios";
 
 export async function getStockDisponibleConvencional() {
@@ -20,16 +17,11 @@ export async function getStockDisponibleConvencional() {
   } catch (error) {
     if (isAxiosError(error)) {
       throw new Error(
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al obtener el stock disponible convencional",
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener el stock disponible convencional",
       );
     }
 
-    throw new Error(
-      "Error inesperado al obtener el stock disponible convencional",
-    );
+    throw new Error("Error inesperado al obtener el stock disponible convencional");
   }
 }
 
@@ -48,16 +40,11 @@ export async function getStockGuardadoConvencional() {
   } catch (error) {
     if (isAxiosError(error)) {
       throw new Error(
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al obtener el stock guardado convencional",
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener el stock guardado convencional",
       );
     }
 
-    throw new Error(
-      "Error inesperado al obtener el stock guardado convencional",
-    );
+    throw new Error("Error inesperado al obtener el stock guardado convencional");
   }
 }
 
@@ -76,15 +63,48 @@ export async function getStockReservaConvencional() {
   } catch (error) {
     if (isAxiosError(error)) {
       throw new Error(
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al obtener el stock reservado convencional",
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener el stock reservado convencional",
       );
     }
 
-    throw new Error(
-      "Error inesperado al obtener el stock reservado convencional",
-    );
+    throw new Error("Error inesperado al obtener el stock reservado convencional");
+  }
+}
+
+export async function misReservas() {
+  try {
+    const { data } = await api(`/dms/convencional/mis-reservas`);
+
+     const parsed = misReservasResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
+}
+
+export async function miListaDeEspera() {
+  try {
+    const { data } = await api(`/dms/convencional/mi-lista-de-espera`);
+
+     const parsed = misListaDeEsperaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
   }
 }

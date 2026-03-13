@@ -92,9 +92,6 @@ export default function StockReservasConvencional() {
     );
   }, [sucursalesFiltradas]);
 
-  const formatDate = (value: string) =>
-    new Intl.DateTimeFormat("es-AR").format(new Date(value));
-
   const diasReserva = (fecha: string) => {
     const start = new Date(fecha).getTime();
     const now = Date.now();

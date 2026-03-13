@@ -6,12 +6,7 @@ import { Sequelize } from "sequelize";
 dotenv.config();
 const separator = colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-const createMssqlConnection = (
-  database: string,
-  username: string,
-  password: string,
-  host: string,
-) => {
+const createMssqlConnection = (database: string, username: string, password: string, host: string) => {
   return new Sequelize(database, username, password, {
     host,
     dialect: "mssql",
@@ -57,9 +52,7 @@ export const authenticateSQL = async (sequelize: Sequelize, name: string) => {
     console.log("\n" + colors.bgRed.white.bold(" ERROR SQL SERVER "));
     console.log(separator);
     console.log(`${colors.yellow("📡 DB:")} ${colors.white(name)}`);
-    console.log(
-      `${colors.yellow("📊 Estado:")} ${colors.red("Error de conexión")}`,
-    );
+    console.log(`${colors.yellow("📊 Estado:")} ${colors.red("Error de conexión")}`);
     console.log(separator);
     console.error(colors.gray(error));
   }
@@ -70,19 +63,13 @@ export const connectMongo = async () => {
     const connection = await mongoose.connect(process.env.DATABASE_MONGO!);
     console.log("\n" + colors.bgGreen.white.bold(" 🍃 MONGODB "));
     console.log(separator);
-    console.log(
-      `${colors.yellow("🌐 Host:")} ${colors.white(
-        `${connection.connection.host}:${connection.connection.port}`,
-      )}`,
-    );
+    console.log(`${colors.yellow("🌐 Host:")} ${colors.white(`${connection.connection.host}:${connection.connection.port}`)}`);
     console.log(`${colors.yellow("📊 Estado:")} ${colors.green("Conectado")}`);
     console.log(separator);
   } catch (error) {
     console.log("\n" + colors.bgRed.white.bold(" ERROR MONGODB "));
     console.log(separator);
-    console.log(
-      `${colors.yellow("📊 Estado:")} ${colors.red("Error de conexión")}`,
-    );
+    console.log(`${colors.yellow("📊 Estado:")} ${colors.red("Error de conexión")}`);
     console.log(separator);
     console.error(colors.gray(error));
     process.exit(1);
@@ -91,6 +78,6 @@ export const connectMongo = async () => {
 
 export const connectDatabases = async () => {
   await authenticateSQL(sequelizeNIC, "NIPPON CAR");
-  //await authenticateSQL(sequelizeLIESS, "LIESS")
+  await authenticateSQL(sequelizeLIESS, "LIESS");
   await connectMongo();
 };

@@ -170,14 +170,11 @@ SELECT
 	auto.au_nombre AS "version",
 	color1.col_nombre as "color1",
 	color2.col_nombre as "color2",
-	famiauto.fam_nombre AS "modelo",
-    v.ven_nombre AS "vendedor"
+	famiauto.fam_nombre AS "modelo"
 FROM
 	opera ope
 INNER JOIN cliente cli ON
 	ope.ope_cliente = cli.cli_codigo
-INNER JOIN vendedor v ON
-	ope.ope_vende  = v.ven_codigo 
 INNER JOIN auto ON
 	auto.au_codigo = ope.ope_auto
 	AND auto.au_marca = ope.ope_marca

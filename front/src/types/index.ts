@@ -101,9 +101,9 @@ export const configuracionSchema = z.object({
   vendedoresStockGuardadoUsados: z.array(z.string()),
 
   sistemaActivoLIESS: z.boolean(),
-  vendedoresDisponibleLIES: z.array(z.string()),
-  vendedoresStockGuardadoLIES: z.array(z.string()),
-  vendedoresReservasLIES: z.array(z.string()),
+  vendedoresDisponibleLIESS: z.array(z.string()),
+  vendedoresStockGuardadoLIESS: z.array(z.string()),
+  vendedoresReservasLIESS: z.array(z.string()),
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -147,3 +147,82 @@ export const userSchema = z.object({
   role: z.array(z.string()),
   enable: z.boolean(),
 });
+
+//**************************** */  
+// STOCK DISPONIBE - GUARDADO 
+//**************************** */ 
+export const stockDisponibleLiesslItemSchema = z.object({
+  interno: z.number(),
+  estado:z.number(),
+  marca: z.string(),
+  version: z.string(),
+  chasis: z.string().nullable(),
+  color:z.string().nullable(),
+  reservaVendedor:z.string(),
+  tipo: z.string(),
+});
+
+export const stockDisponibleLiessResumenSchema = z.object({
+  total: z.number(),
+  totalNuevos: z.number(),
+  totalUsados: z.number(),
+  porMarca: z.record(z.string(), z.number()),
+  porTipo: z.record(z.string(), z.number()),
+  porReserva: z.record(z.string(), z.number()),
+  marcas: z.array(z.string()),
+  tablasPorMarca: z.record(z.string(), z.array(stockDisponibleLiesslItemSchema)),
+});
+
+export const stockDisponibleLiessSchema = z.object({
+  data: z.array(stockDisponibleLiesslItemSchema),
+  resumen: stockDisponibleLiessResumenSchema,
+});
+
+//**************************** */  
+// MIS RESERVAS 
+//**************************** */ 
+export const misReservaSchema = z.object({
+  interno: z.number(),
+  vendedorReserva: z.string(),
+  version: z.string(),
+  modelo: z.string(),
+  color: z.string(),
+  ubicacion: z.string(),
+  chasis: z.string(),
+  sucursal: z.string(),
+  fechaReserva: z.string(),
+  fechaRecepcion: z.string(),
+});
+
+export const misReservasResponseSchema = z.object({
+  data: z.array(misReservaSchema),
+  resumen: z.object({
+    total: z.number(),
+    porModelo: z.record(z.string(),z.number()),
+  }),
+});
+
+export type MisReservasResponse = z.infer<typeof misReservasResponseSchema>;
+
+//**************************** */  
+// MI LISTA DE ESPERA 
+//**************************** */ 
+export const miListaDeEsperaSchema = z.object({
+  opera: z.number(),
+  fecha: z.string(),
+  clienteNombre: z.string(),
+  version: z.string(),
+  modelo: z.string(),
+  color1: z.string(),
+  color2: z.string().nullable(),
+});
+
+export const misListaDeEsperaResponseSchema = z.object({
+  data: z.array(miListaDeEsperaSchema),
+  resumen: z.object({
+    total: z.number(),
+    porModelo: z.record(z.string(),z.number()),
+  }),
+});
+
+export type MiListaDeEsperaResponse = z.infer<typeof misListaDeEsperaResponseSchema>;
