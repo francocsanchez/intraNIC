@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { CircleUserRound, Cog, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
+import { CircleUserRound, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";

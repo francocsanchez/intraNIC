@@ -1,6 +1,6 @@
 import { updateMyPassword } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Building2, CircleUserRound, Hash, KeyRound, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
