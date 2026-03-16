@@ -40,7 +40,7 @@ services:
     container_name: intranic_frontend
     restart: always
     ports:
-      - "5173:5173"
+      - "5173:4173"
     networks:
       - intranic_network
 
