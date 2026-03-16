@@ -16,7 +16,7 @@ import { corsOptions } from "./config/cors";
 connectDatabases();
 const app = express();
 app.use(cors(corsOptions));
-app.options("*",cors(corsOptions));
+app.options("/{*any}", cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
