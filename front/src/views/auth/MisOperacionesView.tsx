@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } from "recharts";
+import { textToColor } from "@/helpers/colores";
 
 const MESES = [
   { label: "ENERO", value: 1 },
@@ -47,7 +48,7 @@ export default function MisOperacionesView() {
   const ANIOS = Array.from({ length: 5 }, (_, i) => anioActual - i);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["misVentas", mes, anio],
+    queryKey: ["misVentas", mes, anio, user?._id],
     queryFn: () => misOperaciones(mes, anio),
     refetchOnWindowFocus: true,
     refetchInterval: 10000,
@@ -96,7 +97,7 @@ export default function MisOperacionesView() {
   return (
     <div className="w-full px-4 py-6 space-y-6">
       {/* HEADER */}
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-gray-900">{nombreUsuario}</h1>
@@ -148,10 +149,10 @@ export default function MisOperacionesView() {
       {/* GRAFICOS */}
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* BARRAS */}
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Ventas por día</h2>
 
-          <div className="mt-6 h-72">
+          <div className="mt-6 h-72 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ventasPorDia}>
                 <XAxis dataKey="fechaCorta" axisLine={false} tickLine={false} />
@@ -168,10 +169,10 @@ export default function MisOperacionesView() {
         </article>
 
         {/* TORTA */}
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Distribución por modelo</h2>
 
-          <div className="mt-6 h-72 relative">
+          <div className="mt-6 h-72 min-w-0 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={distribucionPorModelo} dataKey="total" nameKey="modelo" innerRadius={60} outerRadius={95} paddingAngle={3}>
@@ -229,6 +230,7 @@ export default function MisOperacionesView() {
                 <th className="px-6 py-3 text-left">Interno</th>
                 <th className="px-6 py-3 text-left">Modelo</th>
                 <th className="px-6 py-3 text-left">Versión</th>
+                <th className="px-6 py-3 text-left">Color</th>
                 <th className="px-6 py-3 text-center">Fac</th>
                 <th className="px-6 py-3 text-center">Entregado</th>
               </tr>
@@ -243,7 +245,11 @@ export default function MisOperacionesView() {
                   <td className="px-6 py-3">{item.interno}</td>
                   <td className="px-6 py-3">{item.modelo}</td>
                   <td className="px-6 py-3">{item.version}</td>
-
+                  <td className="px-4 py-4">
+                    <div className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(item.color)} `}>
+                      {item.color}
+                    </div>
+                  </td>
                   <td className="px-6 py-3">
                     <div className="flex justify-center">
                       {item.fechaFactura ? (

@@ -166,7 +166,7 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
       })}
     >
       <option value="vendedor">Vendedor</option>
-      <option value="stock">Stock</option>
+      <option value="gerente">Gerente</option>
       <option value="supervisor">Supervisor</option>
       <option value="admin">Admin</option>
     </select>

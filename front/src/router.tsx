@@ -69,8 +69,6 @@ export default function Router() {
             <Route element={<LiessLayout />}>
               <Route path="/mi-perfil/liess" element={<MiPerfilView />} />
               <Route path="/stock/disponible/liess" element={<StockDisponibleLiess />} />
-
-              
             </Route>
           </Route>
 

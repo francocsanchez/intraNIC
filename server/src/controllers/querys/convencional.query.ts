@@ -258,6 +258,7 @@ INNER JOIN famiauto ON
 	auto.au_familia = famiauto.fam_codigo
 WHERE
 	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
 	AND MONTH(ope.ope_fecasig) = ${mes}
 	AND YEAR(ope.ope_fecasig) = ${ano}
 	AND ope.ope_vende = ${numberSaleNic}

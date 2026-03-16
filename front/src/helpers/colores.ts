@@ -14,6 +14,7 @@ export const tablaColores: Record<string, string> = {
   "Gris Plata Metaliza": "bg-slate-100 text-slate-600",
   "Gris Plata": "bg-slate-100 text-slate-600",
   "GRIS PLA": "bg-slate-100 text-slate-600",
+  "Plata Metalizado Bi": "bg-slate-100 text-slate-600",
 
   // GRIS OSCURO
   GRIS: "bg-slate-200 text-slate-700",

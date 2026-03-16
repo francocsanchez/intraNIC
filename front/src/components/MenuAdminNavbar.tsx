@@ -9,7 +9,7 @@ type NavBarProps = {
   negocio: string;
 };
 
-export default function MenuAdminNavbar({negocio}:NavBarProps) {
+export default function MenuAdminNavbar({ negocio }: NavBarProps) {
   const navigate = useNavigate();
 
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -26,11 +26,10 @@ export default function MenuAdminNavbar({negocio}:NavBarProps) {
   };
 
   const { allowed: buttonsAdmin } = useRoleGuard(["admin"]);
-  const { allowed: buttonsConfig } = useRoleGuard(["admin", "gerente"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
       {/* Administración */}
-      {buttonsConfig && (
+      {buttonsAdmin && (
         <Menu as="div" className="relative">
           <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
             <MonitorCog size={16} strokeWidth={1.25} />

@@ -242,7 +242,7 @@ export const misOperacionesItemSchema = z.object({
   version: z.string(),
   modelo: z.string(),
   vendedor: z.string(),
-  color: z.string(),
+  color: z.string()
 });
 
 export const misOperacionesResumenSchema = z.object({
