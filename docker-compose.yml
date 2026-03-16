@@ -9,8 +9,9 @@ services:
     restart: always
     ports:
       - "4002:4002"
-    env_file:
-      - ./server/.env.docker
+    environment:
+      DATABASE_MONGO: ${DATABASE_MONGO}
+      PORT: 4002
     networks:
       - intranic_network
 
