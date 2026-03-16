@@ -40,9 +40,14 @@ export default function LoginUser() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-8 gap-10">
           <img
             src="/logoNic.png"
+            alt="IntraNIC"
+            className="h-12 w-auto object-contain"
+          />
+           <img
+            src="/logoLIESS.png"
             alt="IntraNIC"
             className="h-12 w-auto object-contain"
           />

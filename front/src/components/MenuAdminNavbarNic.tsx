@@ -9,7 +9,7 @@ type NavBarProps = {
   negocio: string;
 };
 
-export default function MenuAdminNavbar({ negocio }: NavBarProps) {
+export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
   const navigate = useNavigate();
 
   const { user, isLoading, isAuthenticated } = useAuth();

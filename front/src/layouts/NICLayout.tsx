@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
-import NavBar from "./NavBar";
+import NavBarNic from "./NavBarNic";
 
 export default function NICLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Navbar */}
-      <NavBar negocio={`convencional`} />
+      <NavBarNic negocio={`convencional`} />
 
       {/* Main */}
       <main className="flex-1">
@@ -22,5 +22,5 @@ export default function NICLayout() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

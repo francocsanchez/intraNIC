@@ -1,4 +1,4 @@
-import MenuAdminNavbar from "@/components/MenuAdminNavbar";
+import MenuAdminNavbarLiess from "@/components/MenuAdminNavbarLiess";
 import { Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -17,14 +17,18 @@ export default function NavBarLiess({ negocio }: NavBarProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to={`/stock/disponible/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+          <Link to={`/stock/disponible/${negocio}/nuevos`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
             <Package size={16} strokeWidth={1.5} />
-            Disponible
+            Nuevos
+          </Link>
+          <Link to={`/stock/disponible/${negocio}/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Package size={16} strokeWidth={1.5} />
+            Usados
           </Link>
         </nav>
 
         {/* Menu administracion / perfil */}
-        <MenuAdminNavbar negocio={`liess`} />
+        <MenuAdminNavbarLiess negocio={`liess`} />
       </div>
     </header>
   );

@@ -7,16 +7,18 @@ export type StockLiessRow = {
   chasis: string | null;
   color: string | null;
   reservaVendedor: string;
-  tipo: "NUEVO" | "USADO";
+  tipo: "nuevo" | "usado";
+  fechaRecepcion: string;
 };
 
-export const stockLiessQuery = () => `
+export const stockLiessQuery = (tipo: number) => `
 SELECT
       stoauto.sa_codigo AS "interno",
       stoauto.sa_estado AS "estado",
       marca.mar_nombre AS "marca",
       auto.au_nombre AS "version",
       movnped.mnp_chasis AS "chasis",
+      movnped.mnp_fecrec AS "fechaRecepcion",
       COALESCE(anexnvo.an_color, anexusa.aus_color) AS "color",
       stoauto.sa_reserva AS "reservaVendedor",
       CASE
@@ -38,14 +40,15 @@ SELECT
     LEFT JOIN anexusa ON
       stoauto.sa_codigo = anexusa.aus_codigo
       AND stoauto.sa_tipo = anexusa.aus_tipo
-    WHERE
-      stoauto.sa_opera = 0
-      AND stoauto.sa_reserva IN ('NQN', 'SIMPA')
-      AND (
+WHERE
+	stoauto.sa_opera = 0
+	AND stoauto.sa_tipo = ${tipo}
+	AND stoauto.sa_reserva IN ('NQN', 'SIMPA')
+	AND (
         stoauto.sa_estado = 10
-        OR stoauto.sa_estado = 25
+		OR stoauto.sa_estado = 25
       )
-    ORDER BY
-      marca.mar_nombre,
-      auto.au_nombre
+ORDER BY
+	marca.mar_nombre,
+	auto.au_nombre
 `;

@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import NavBarConvencional from "./NavBar";
+import NavBarConvencional from "./NavBarNic";
 
 export default function UserLayoutConvencional() {
   return (

@@ -9,17 +9,18 @@ import { stockLiessQuery, StockLiessRow } from "./querys/liess.query";
 import { buildResumenLiess } from "../utils/reportUnidadesLiess";
 
 export class LieesController {
-   static stockDisponible = async (_req: Request, res: Response) => {
+  static stockDisponible = async (req: Request, res: Response) => {
+    const { tipo } = req.params;
+    let tipoFiltro = tipo === "nuevos" ? 5 : 10;
+    
     try {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res
-          .status(404)
-          .json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const data = await sequelizeLIESS.query<StockLiessRow>(stockLiessQuery(), {
+      const data = await sequelizeLIESS.query<StockLiessRow>(stockLiessQuery(Number(tipoFiltro)), {
         type: QueryTypes.SELECT,
       });
 

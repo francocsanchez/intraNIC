@@ -2,10 +2,10 @@ import api from "@/libs/axios";
 import { stockDisponibleLiessSchema } from "@/types/index";
 import { isAxiosError } from "axios";
 
-export async function getStockDisponibleLiess() {
+export async function getStockDisponibleLiess(tipoSeleccionado: string) {
   try {
-    const { data } = await api.get("/dms/liess/stock-disponible");
-
+    const { data } = await api.get(`/dms/liess/stock-disponible/${tipoSeleccionado}`);
+   
     const parsed = stockDisponibleLiessSchema.safeParse(data);
 
     if (!parsed.success) {

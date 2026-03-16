@@ -1,4 +1,4 @@
-import NavBar from './NavBar'
+import NavBar from './NavBarNic'
 import { Outlet } from 'react-router-dom'
 
 export default function UsadoLayout() {

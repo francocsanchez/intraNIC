@@ -1,4 +1,4 @@
-import MenuAdminNavbar from "@/components/MenuAdminNavbar";
+import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
 import { Archive, BookMarked, Package } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,7 +7,7 @@ type NavBarProps = {
   negocio: string;
 };
 
-export default function NavBar({ negocio }: NavBarProps) {
+export default function NavBarNic({ negocio }: NavBarProps) {
   const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente"]);
   const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor"]);
 
@@ -42,7 +42,7 @@ export default function NavBar({ negocio }: NavBarProps) {
         </nav>
 
         {/* Menu administracion / perfil */}
-        <MenuAdminNavbar negocio={negocio}/>
+        <MenuAdminNavbarNic negocio={negocio}/>
       </div>
     </header>
   );

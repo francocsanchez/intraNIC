@@ -1,16 +1,21 @@
 import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { getStockDisponibleLiess } from "@/api/liess/stockAPI";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
 
 type MarcaFiltro = string;
+type TipoLiess = "usados" | "nuevos";
 
 export default function StockDisponibleLiess() {
+  const { tipo } = useParams<{ tipo: TipoLiess }>();
+  const tipoSeleccionado: TipoLiess = tipo === "usados" ? "usados" : "nuevos";
+
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["stockDisponible", "liess"],
-    queryFn: getStockDisponibleLiess,
+    queryKey: ["stockDisponible", "liess", tipoSeleccionado],
+    queryFn: () => getStockDisponibleLiess(tipoSeleccionado),
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
@@ -22,10 +27,7 @@ export default function StockDisponibleLiess() {
     const porMarca = resumen?.porMarca ?? {};
 
     return Object.entries(porMarca)
-      .map(([marca, total]) => ({
-        marca,
-        total,
-      }))
+      .map(([marca, total]) => ({ marca, total }))
       .sort((a, b) => b.total - a.total || a.marca.localeCompare(b.marca));
   }, [resumen]);
 
@@ -39,17 +41,12 @@ export default function StockDisponibleLiess() {
   }, [resumen]);
 
   const marcasVisibles = useMemo(() => {
-    if (marcaActiva === "TODOS") {
-      return Object.keys(tablasPorMarca);
-    }
-
+    if (marcaActiva === "TODOS") return Object.keys(tablasPorMarca);
     return tablasPorMarca[marcaActiva] ? [marcaActiva] : [];
   }, [marcaActiva, tablasPorMarca]);
 
   const totalVisible = useMemo(() => {
-    return marcasVisibles.reduce((acc, marca) => {
-      return acc + (tablasPorMarca[marca]?.length ?? 0);
-    }, 0);
+    return marcasVisibles.reduce((acc, marca) => acc + (tablasPorMarca[marca]?.length ?? 0), 0);
   }, [marcasVisibles, tablasPorMarca]);
 
   if (isLoading) {
@@ -74,19 +71,6 @@ export default function StockDisponibleLiess() {
             <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-200" />
           ))}
         </div>
-
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-200 px-6 py-4">
-              <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
-            </div>
-            <div className="p-6 space-y-4">
-              {Array.from({ length: 5 }).map((_, j) => (
-                <div key={j} className="h-10 animate-pulse rounded bg-gray-100" />
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
     );
   }
@@ -107,9 +91,10 @@ export default function StockDisponibleLiess() {
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Liess</p>
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Disponible Liess</h1>
+        <p className="mt-2 text-sm text-gray-500 capitalize">Tipo seleccionado: {tipoSeleccionado}</p>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.8fr_0.9fr]">
+      <section className="grid grid-cols-1 gap-2 xl:grid-cols-[2.8fr_0.9fr]">
         <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cantidad por marca</p>
 
@@ -139,7 +124,7 @@ export default function StockDisponibleLiess() {
       <section
         className="grid gap-3"
         style={{
-          gridTemplateColumns: `repeat(${Math.min(Math.max(filtrosDisponibles.length, 2), 8)}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${Math.min(Math.max(filtrosDisponibles.length, 2), 9)}, minmax(0, 1fr))`,
         }}
       >
         {filtrosDisponibles.map((filtro) => {
@@ -198,27 +183,18 @@ export default function StockDisponibleLiess() {
                       ].join(" ")}
                     >
                       <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-
                       <td className="px-4 py-2 text-gray-700">
                         <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
                       </td>
-
                       <td className="min-w-[280px] px-4 py-2 text-gray-900">{item.version}</td>
-
                       <td className="px-4 py-2 text-center text-gray-700">
                         {item.color ? (
-                          <span
-                            className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}
-                          >
+                          <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
                             {item.color}
                           </span>
-                        ) : (
-                          "-"
-                        )}
+                        ) : "-"}
                       </td>
-
                       <td className="px-4 py-2 text-gray-700">{item.chasis ?? "-"}</td>
-
                       <td className="px-4 py-2 text-gray-700">{item.reservaVendedor}</td>
                     </tr>
                   ))}

@@ -47,12 +47,16 @@ export const tablaColores: Record<string, string> = {
   BLACK: "bg-gray-200 text-gray-700",
   NEGRO: "bg-gray-200 text-gray-700",
   Negro: "bg-gray-200 text-gray-700",
+  NEG: "bg-gray-200 text-gray-700",
 
   // NARANJA
   NARANJA: "bg-orange-50 text-orange-600 ring-1 ring-orange-200",
 
   // BRONCE
   BRONCE: "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
+
+  // VERDE
+  VERDE: "bg-green-50 text-green-600 ring-1 ring-green-200",
 };
 
 export function textToColor(color: string | null | undefined): string | null {

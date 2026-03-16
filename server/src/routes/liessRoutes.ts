@@ -9,6 +9,6 @@ const router = Router();
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", LieesController.stockDisponible);
+router.get("/stock-disponible/:tipo", LieesController.stockDisponible);
 
 export default router;

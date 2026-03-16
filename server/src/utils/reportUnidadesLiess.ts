@@ -6,7 +6,8 @@ export type StockLiessRow = {
   chasis: string | null;
   color: string | null;
   reservaVendedor: string;
-  tipo: "NUEVO" | "USADO";
+  tipo: "nuevo" | "usado";
+  fechaRecepcion: string;
 };
 
 const normalizeText = (value: string) => (value || "").trim().toUpperCase().replace(/\s+/g, " ");
