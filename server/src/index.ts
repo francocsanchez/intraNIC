@@ -3,7 +3,7 @@ import server from "./server";
 
 const port = process.env.PORT || 4002;
 
-server.listen(port, () => {
+server.listen(Number(port), "0.0.0.0", () => {
   console.log("\n" + "🚀 SERVIDOR INICIADO".bgGreen.white);
   console.log(colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
   console.log(`${colors.yellow("📡 API:")} ${colors.white("REST API running")}`);

@@ -1,48 +1,45 @@
 version: "3.9"
 
 services:
-  backend:
+  intranic-backend:
+    container_name: intranic-backend
     build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: intranic_backend
-    restart: always
+      context: ./server
+      dockerfile: Dockerfile
     ports:
       - "4002:4002"
+    restart: unless-stopped
     environment:
-      PORT: ${PORT}
-      NODE_ENV: ${NODE_ENV}
+      PORT: 4002
+      NODE_ENV: production
       DATABASE_MONGO: ${DATABASE_MONGO}
-      DATABASE_MONGO2: ${DATABASE_MONGO2}
+
       PORT_NIC: ${PORT_NIC}
       DBUSER_NIC: ${DBUSER_NIC}
       DBPASS_NIC: ${DBPASS_NIC}
       DBHOST_NIC: ${DBHOST_NIC}
       DBPORT_NIC: ${DBPORT_NIC}
       DATABASE_NIC: ${DATABASE_NIC}
+
       PORT_LIESS: ${PORT_LIESS}
       DBUSER_LIESS: ${DBUSER_LIESS}
       DBPASS_LIESS: ${DBPASS_LIESS}
       DBHOST_LIESS: ${DBHOST_LIESS}
       DBPORT_LIESS: ${DBPORT_LIESS}
       DATABASE_LIESS: ${DATABASE_LIESS}
+
       FRONTEND_URL_NIC: ${FRONTEND_URL_NIC}
       JWT_SECRET: ${JWT_SECRET}
-    networks:
-      - intranic_network
 
-  frontend:
+  intranic-frontend:
+    container_name: intranic-frontend
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./front
+      dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL}
-    container_name: intranic_frontend
-    restart: always
+        VITE_API_URL: http://192.168.100.31:4002
     ports:
-      - "5173:4173"
-    networks:
-      - intranic_network
-
-networks:
-  intranic_network:
+      - "8080:80"
+    restart: unless-stopped
+    depends_on:
+      - intranic-backend
