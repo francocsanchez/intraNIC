@@ -10,8 +10,24 @@ services:
     ports:
       - "4002:4002"
     environment:
+      PORT: ${PORT}
+      NODE_ENV: ${NODE_ENV}
       DATABASE_MONGO: ${DATABASE_MONGO}
-      PORT: 4002
+      DATABASE_MONGO2: ${DATABASE_MONGO2}
+      PORT_NIC: ${PORT_NIC}
+      DBUSER_NIC: ${DBUSER_NIC}
+      DBPASS_NIC: ${DBPASS_NIC}
+      DBHOST_NIC: ${DBHOST_NIC}
+      DBPORT_NIC: ${DBPORT_NIC}
+      DATABASE_NIC: ${DATABASE_NIC}
+      PORT_LIESS: ${PORT_LIESS}
+      DBUSER_LIESS: ${DBUSER_LIESS}
+      DBPASS_LIESS: ${DBPASS_LIESS}
+      DBHOST_LIESS: ${DBHOST_LIESS}
+      DBPORT_LIESS: ${DBPORT_LIESS}
+      DATABASE_LIESS: ${DATABASE_LIESS}
+      FRONTEND_URL_NIC: ${FRONTEND_URL_NIC}
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - intranic_network
 
