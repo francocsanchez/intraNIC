@@ -3,9 +3,7 @@ version: "3.9"
 services:
   intranic-backend:
     container_name: intranic-backend
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: ghcr.io/francocsanchez/intranic-backend:latest
     ports:
       - "4002:4002"
     restart: unless-stopped
@@ -33,11 +31,7 @@ services:
 
   intranic-frontend:
     container_name: intranic-frontend
-    build:
-      context: ./front
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: http://192.168.100.31:4002
+    image: ghcr.io/francocsanchez/intranic-frontend:latest
     ports:
       - "8080:80"
     restart: unless-stopped
