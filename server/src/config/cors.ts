@@ -3,7 +3,9 @@ import colors from "colors";
 import { logError } from "../utils/logError";
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL_NIC
+  process.env.FRONTEND_URL_NIC,
+  "http://192.168.100.31:5173",
+  "http://localhost:5173",
 ].filter(Boolean) as string[];
 
 export const corsOptions: CorsOptions = {
