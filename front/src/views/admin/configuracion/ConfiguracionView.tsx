@@ -30,22 +30,15 @@ export default function ConfiguracionView() {
   }
 
   if (configError || vendedoresError) {
-    return (
-      <div className="px-4 py-6 text-red-600">
-        Error al cargar la configuración
-      </div>
-    );
+    return <div className="px-4 py-6 text-red-600">Error al cargar la configuración</div>;
   }
 
-  const vendedoresMap = new Map(
-    vendedores.map((v: any) => [String(v.codigo), v.vendedor]),
-  );
+  const vendedoresMap = new Map(vendedores.map((v: any) => [String(v.codigo), v.vendedor]));
 
-  const mapCodigos = (codigos: string[]) =>
-    codigos.map((c) => vendedoresMap.get(String(c)) ?? `Código ${c}`);
+  const mapCodigos = (codigos: string[]) => codigos.map((c) => vendedoresMap.get(String(c)) ?? `Código ${c}`);
 
   if (!config) return null;
-  
+
   const sistemas = [
     {
       title: "Convencional",
@@ -66,54 +59,41 @@ export default function ConfiguracionView() {
   return (
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-          Administración
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          Configuración
-        </h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Configuración</h1>
       </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {sistemas.map((sistema) => (
-          <div
-            key={sistema.title}
-            className="rounded-2xl border border-gray-200 bg-white shadow-sm"
-          >
+          <div key={sistema.title} className="rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-base font-semibold text-gray-900">
-                  {sistema.title}
-                </h2>
+                <h2 className="text-base font-semibold text-gray-900">{sistema.title}</h2>
 
                 <span
                   className={[
                     "rounded-full px-3 py-1 text-xs font-semibold",
-                    sistema.activo
-                      ? "border border-green-200 bg-green-50 text-green-700"
-                      : "border border-red-200 bg-red-50 text-red-700",
+                    sistema.activo ? "border border-green-200 bg-green-50 text-green-700" : "border border-red-200 bg-red-50 text-red-700",
                   ].join(" ")}
                 >
                   {sistema.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
 
-              <Link to={`${sistema.title}/editar`} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50">
+              <Link
+                to={`${sistema.title}/editar`}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+              >
                 Editar
               </Link>
             </div>
 
             <div className="space-y-5 p-6">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">
-                  Vendedores Reservas
-                </div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Reservas</div>
                 <div className="flex flex-wrap gap-2">
                   {sistema.reservas.map((v) => (
-                    <span
-                      key={v}
-                      className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
-                    >
+                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
                       {v}
                     </span>
                   ))}
@@ -121,15 +101,10 @@ export default function ConfiguracionView() {
               </div>
 
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">
-                  Vendedores Disponible
-                </div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Disponible</div>
                 <div className="flex flex-wrap gap-2">
                   {sistema.disponibles.map((v) => (
-                    <span
-                      key={v}
-                      className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
-                    >
+                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
                       {v}
                     </span>
                   ))}
@@ -137,15 +112,10 @@ export default function ConfiguracionView() {
               </div>
 
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">
-                  Vendedores Stock Guardado
-                </div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Stock Guardado</div>
                 <div className="flex flex-wrap gap-2">
                   {sistema.stockGuardado.map((v) => (
-                    <span
-                      key={v}
-                      className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
-                    >
+                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
                       {v}
                     </span>
                   ))}

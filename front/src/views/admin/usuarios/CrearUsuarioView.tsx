@@ -49,13 +49,9 @@ export default function CreateUsuarioView() {
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Administración
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
 
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Crear usuario
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Crear usuario</h1>
         </div>
 
         <Link
@@ -72,13 +68,8 @@ export default function CreateUsuarioView() {
         onSubmit={handleSubmit((formData) => mutation.mutate(formData))}
       >
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
-            Datos del usuario
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Completá la información principal, roles, compañías y vendedor
-            asociado.
-          </p>
+          <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
+          <p className="mt-1 text-sm text-gray-500">Completá la información principal, roles, compañías y vendedor asociado.</p>
         </div>
 
         <div className="p-6">
@@ -86,9 +77,7 @@ export default function CreateUsuarioView() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500">
-            Los campos obligatorios deben completarse antes de guardar.
-          </div>
+          <div className="text-sm text-gray-500">Los campos obligatorios deben completarse antes de guardar.</div>
 
           <input
             type="submit"

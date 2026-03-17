@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, useParams } from "react-router-dom";
 import { getUsuarioById } from "@/api/usuarioAPI";
@@ -14,10 +13,7 @@ function LoadingState() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <article
-            key={i}
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-          >
+          <article key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
             <div className="mt-3 h-6 w-32 animate-pulse rounded bg-gray-100" />
           </article>

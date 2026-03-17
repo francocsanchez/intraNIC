@@ -1,9 +1,5 @@
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
-import {
-  changeStatusUsuario,
-  getUsuarios,
-  resetPasswordUserByID,
-} from "@/api/usuarioAPI";
+import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/usuarioAPI";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
@@ -32,19 +28,19 @@ export default function UsuariosView() {
   });
 
   const vendedoresMap = useMemo(() => {
-  const vendedores = vendedoresData?.data ?? [];
+    const vendedores = vendedoresData?.data ?? [];
 
-  return vendedores.reduce((acc: Record<number, string>, vendedor) => {
-    const codigo = Number(vendedor.codigo ?? 0);
-    const nombre = vendedor.vendedor ?? "";
+    return vendedores.reduce((acc: Record<number, string>, vendedor) => {
+      const codigo = Number(vendedor.codigo ?? 0);
+      const nombre = vendedor.vendedor ?? "";
 
-    if (codigo) {
-      acc[codigo] = nombre;
-    }
+      if (codigo) {
+        acc[codigo] = nombre;
+      }
 
-    return acc;
-  }, {});
-}, [vendedoresData]);
+      return acc;
+    }, {});
+  }, [vendedoresData]);
 
   const { mutate: changeStatus } = useMutation({
     mutationFn: (id: string) => changeStatusUsuario(id),
@@ -73,9 +69,7 @@ export default function UsuariosView() {
   if (isLoading) {
     return (
       <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          Cargando usuarios...
-        </div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando usuarios...</div>
       </div>
     );
   }
@@ -83,9 +77,7 @@ export default function UsuariosView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">
-          Error al cargar los usuarios
-        </div>
+        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">Error al cargar los usuarios</div>
       </div>
     );
   }
@@ -93,26 +85,19 @@ export default function UsuariosView() {
   const totalUsuarios = usuarios.length;
   const activos = usuarios.filter((u: any) => u.enable).length;
 
-  const companyStats = usuarios.reduce(
-    (acc: Record<string, number>, u: any) => {
-      u.company.forEach((company: string) => {
-        acc[company] = (acc[company] || 0) + 1;
-      });
-      return acc;
-    },
-    {}
-  );
+  const companyStats = usuarios.reduce((acc: Record<string, number>, u: any) => {
+    u.company.forEach((company: string) => {
+      acc[company] = (acc[company] || 0) + 1;
+    });
+    return acc;
+  }, {});
 
   return (
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Administración
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Usuarios
-          </h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Usuarios</h1>
         </div>
 
         <Link
@@ -125,35 +110,22 @@ export default function UsuariosView() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Total usuarios
-          </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            {totalUsuarios}
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total usuarios</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalUsuarios}</p>
         </article>
 
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Activos
-          </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            {activos}
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activos</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{activos}</p>
         </article>
 
         <article className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Compañías
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Compañías</p>
 
           <div
             className="mt-3 grid divide-x divide-gray-200"
             style={{
-              gridTemplateColumns: `repeat(${Math.max(
-                Object.keys(companyStats).length,
-                1
-              )}, minmax(0, 1fr))`,
+              gridTemplateColumns: `repeat(${Math.max(Object.keys(companyStats).length, 1)}, minmax(0, 1fr))`,
             }}
           >
             {Object.entries(companyStats).map(([company, total]) => (
@@ -168,9 +140,7 @@ export default function UsuariosView() {
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
-            Lista de usuarios
-          </h2>
+          <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de usuarios</h2>
         </div>
 
         <div className="overflow-x-auto">
@@ -193,18 +163,13 @@ export default function UsuariosView() {
                     <div className="font-medium text-gray-900">
                       {capitalize(u.lastName)}, {capitalize(u.name)}
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {u.email}
-                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">{u.email}</div>
                   </td>
 
                   <td className="px-6 py-3">
                     <div className="flex flex-wrap gap-2">
                       {u.role.map((r: string) => (
-                        <span
-                          key={r}
-                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-                        >
+                        <span key={r} className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
                           {r}
                         </span>
                       ))}
@@ -214,27 +179,16 @@ export default function UsuariosView() {
                   <td className="px-6 py-3">
                     <div className="flex flex-wrap gap-2">
                       {u.company.map((c: string) => (
-                        <span
-                          key={c}
-                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-                        >
+                        <span key={c} className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
                           {c}
                         </span>
                       ))}
                     </div>
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">
-                    {u.numberSaleNic
-                      ? vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic
-                      : "-"}
-                  </td>
+                  <td className="px-6 py-3 text-gray-700">{u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}</td>
 
-                  <td className="px-6 py-3 text-gray-700">
-                    {u.numberSaleLiess
-                      ? vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess
-                      : "-"}
-                  </td>
+                  <td className="px-6 py-3 text-gray-700">{u.numberSaleLiess ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess) : "-"}</td>
 
                   <td className="px-6 py-3">
                     <div className="flex justify-end gap-2">
@@ -273,10 +227,7 @@ export default function UsuariosView() {
 
               {usuarios.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-10 text-center text-sm text-gray-500"
-                  >
+                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay usuarios para mostrar.
                   </td>
                 </tr>

@@ -1,7 +1,4 @@
-import {
-  getConfiguracion,
-  updateConfiguracionConvencional,
-} from "@/api/configuracionAPI";
+import { getConfiguracion, updateConfiguracionConvencional } from "@/api/configuracionAPI";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import CheckListVendedores from "@/components/configuracion/CheckListVendedores";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -63,15 +60,9 @@ export default function EditConfiguracionConvView() {
 
     reset({
       sistemaActivoConvencional: activo,
-      vendedoresReservasConvencional: (
-        config.vendedoresReservasConvencional ?? []
-      ).map(String),
-      vendedoresDisponibleConvencional: (
-        config.vendedoresDisponibleConvencional ?? []
-      ).map(String),
-      vendedoresStockGuardadoConvencional: (
-        config.vendedoresStockGuardadoConvencional ?? []
-      ).map(String),
+      vendedoresReservasConvencional: (config.vendedoresReservasConvencional ?? []).map(String),
+      vendedoresDisponibleConvencional: (config.vendedoresDisponibleConvencional ?? []).map(String),
+      vendedoresStockGuardadoConvencional: (config.vendedoresStockGuardadoConvencional ?? []).map(String),
     });
   }, [config, reset]);
 
@@ -101,10 +92,7 @@ export default function EditConfiguracionConvView() {
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-            >
+            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
               <div className="mt-3 h-8 w-16 animate-pulse rounded bg-gray-100" />
             </div>
@@ -119,17 +107,11 @@ export default function EditConfiguracionConvView() {
             <div className="h-16 animate-pulse rounded-xl bg-gray-100" />
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-                >
+                <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
                   <div className="mt-4 space-y-2">
                     {Array.from({ length: 5 }).map((_, j) => (
-                      <div
-                        key={j}
-                        className="h-9 animate-pulse rounded-lg bg-gray-100"
-                      />
+                      <div key={j} className="h-9 animate-pulse rounded-lg bg-gray-100" />
                     ))}
                   </div>
                 </div>
@@ -145,12 +127,8 @@ export default function EditConfiguracionConvView() {
     return (
       <div className="w-full px-4 py-6">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
-            Error al cargar la configuración
-          </h1>
-          <p className="mt-2 text-sm text-red-600">
-            No fue posible cargar la configuración.
-          </p>
+          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar la configuración</h1>
+          <p className="mt-2 text-sm text-red-600">No fue posible cargar la configuración.</p>
         </section>
       </div>
     );
@@ -160,13 +138,9 @@ export default function EditConfiguracionConvView() {
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Administración
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-              Editar configuración
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Editar configuración</h1>
             <span className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
               Convencional
             </span>
@@ -183,47 +157,27 @@ export default function EditConfiguracionConvView() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Sistema
-          </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            Convencional
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sistema</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">Convencional</p>
         </article>
 
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Estado actual
-          </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            {enabled ? "Activo" : "Inactivo"}
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Estado actual</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{enabled ? "Activo" : "Inactivo"}</p>
         </article>
       </section>
 
-      <form
-        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
-        noValidate
-        onSubmit={handleSubmit(handleForm)}
-      >
+      <form className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" noValidate onSubmit={handleSubmit(handleForm)}>
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
-            Configuración
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Seleccioná vendedores habilitados por módulo.
-          </p>
+          <h2 className="text-base font-semibold tracking-tight text-gray-900">Configuración</h2>
+          <p className="mt-1 text-sm text-gray-500">Seleccioná vendedores habilitados por módulo.</p>
         </div>
 
         <div className="space-y-6 p-6">
           <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                Estado del sistema
-              </div>
-              <div className="mt-1 text-sm text-gray-500">
-                Activo habilita el acceso a esta unidad de negocio.
-              </div>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Estado del sistema</div>
+              <div className="mt-1 text-sm text-gray-500">Activo habilita el acceso a esta unidad de negocio.</div>
             </div>
 
             <label className="inline-flex items-center gap-3">
@@ -247,11 +201,7 @@ export default function EditConfiguracionConvView() {
                 />
               </Switch>
 
-              <input
-                type="hidden"
-                value={enabled ? "true" : "false"}
-                {...register("sistemaActivoConvencional")}
-              />
+              <input type="hidden" value={enabled ? "true" : "false"} {...register("sistemaActivoConvencional")} />
             </label>
           </div>
 
@@ -286,9 +236,7 @@ export default function EditConfiguracionConvView() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500">
-            Guardá los cambios para actualizar la configuración.
-          </div>
+          <div className="text-sm text-gray-500">Guardá los cambios para actualizar la configuración.</div>
 
           <input
             type="submit"

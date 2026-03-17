@@ -49,6 +49,13 @@ export default function StockDisponibleLiess() {
     return marcasVisibles.reduce((acc, marca) => acc + (tablasPorMarca[marca]?.length ?? 0), 0);
   }, [marcasVisibles, tablasPorMarca]);
 
+  const diasEnStock = (fecha: string) => {
+    const start = new Date(fecha).getTime();
+    const now = Date.now();
+    const diff = now - start;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  };
+
   if (isLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
@@ -170,6 +177,7 @@ export default function StockDisponibleLiess() {
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Chasis</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Dias</th>
                   </tr>
                 </thead>
 
@@ -189,13 +197,18 @@ export default function StockDisponibleLiess() {
                       <td className="min-w-[280px] px-4 py-2 text-gray-900">{item.version}</td>
                       <td className="px-4 py-2 text-center text-gray-700">
                         {item.color ? (
-                          <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
+                          <span
+                            className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}
+                          >
                             {item.color}
                           </span>
-                        ) : "-"}
+                        ) : (
+                          "-"
+                        )}
                       </td>
                       <td className="px-4 py-2 text-gray-700">{item.chasis ?? "-"}</td>
                       <td className="px-4 py-2 text-gray-700">{item.reservaVendedor}</td>
+                      <td className="px-4 py-2 text-gray-700">{diasEnStock(item.fechaRecepcion)}</td>
                     </tr>
                   ))}
 
