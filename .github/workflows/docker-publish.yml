@@ -77,6 +77,6 @@ jobs:
           file: ./front/Dockerfile
           push: true
           build-args: |
-            VITE_API_URL=http://192.168.100.31:4002
+            VITE_API_URL=http://192.168.100.31:4002/api
           tags: ${{ steps.meta_frontend.outputs.tags }}
           labels: ${{ steps.meta_frontend.outputs.labels }}
