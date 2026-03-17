@@ -4,7 +4,6 @@ import express from "express";
 import { connectDatabases } from "./config/database";
 import cors from "cors";
 
-// Rutas de proyectos
 import configRoutes from "./routes/configRoutes";
 import convencionalRoutes from "./routes/convencionalRoutes";
 import dmsRoutes from "./routes/dmsRoutes";
@@ -17,8 +16,6 @@ connectDatabases();
 const app = express();
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
