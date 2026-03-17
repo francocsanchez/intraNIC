@@ -2,6 +2,7 @@ import { CorsOptions } from "cors";
 
 const allowedOrigins = [
   process.env.FRONTEND_URL_NIC,
+  process.env.FRONTEND_URL_PUBLIC,
 ].filter(Boolean);
 
 export const corsOptions: CorsOptions = {
