@@ -1,7 +1,17 @@
 import { CorsOptions } from "cors";
 
+const allowedOrigins = [process.env.FRONTEND_URL_NIC, "http://192.168.100.31:8080", "http://nipponcarsrl.ddns.net:2245"];
+
 export const corsOptions: CorsOptions = {
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
