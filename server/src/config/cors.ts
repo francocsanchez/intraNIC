@@ -1,5 +1,7 @@
 import { CorsOptions } from "cors";
 
+console.log("CORS VERSION TEST 12345");
+
 export const corsOptions: CorsOptions = {
   origin: true,
   credentials: true,
