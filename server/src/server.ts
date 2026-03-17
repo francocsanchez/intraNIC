@@ -9,6 +9,7 @@ import convencionalRoutes from "./routes/convencionalRoutes";
 import dmsRoutes from "./routes/dmsRoutes";
 import usuarioRoutes from "./routes/usuarioRoutes";
 import liessRoutes from "./routes/liessRoutes";
+import healthRoutes from "./routes/healthRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -24,6 +25,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/health", healthRoutes);
 app.use("/api/config", configRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/dms/convencional", convencionalRoutes);
