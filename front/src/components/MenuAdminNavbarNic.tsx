@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BookMarked, CalendarClock, CircleUserRound, Cog, Handshake, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, CircleUserRound, Cog, FileChartPie, Handshake, MonitorCog, PowerOff, Users, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
@@ -26,6 +26,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
   };
 
   const { allowed: buttonsAdmin } = useRoleGuard(["admin"]);
+  const { allowed: buttonsGerente } = useRoleGuard(["admin", "gerente"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
       {/* Administración */}
@@ -60,17 +61,6 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                 </Link>
               )}
             </MenuItem>
-          </MenuItems>
-        </Menu>
-      )}
-      {buttonsAdmin && (
-        <Menu as="div" className="relative">
-          <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
-            <MonitorCog size={16} strokeWidth={1.25} />
-            SIAC
-          </MenuButton>
-
-          <MenuItems anchor="bottom end" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
             <MenuItem>
               {({ focus }) => (
                 <Link
@@ -78,6 +68,28 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                   className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                 >
                   Vendedores
+                </Link>
+              )}
+            </MenuItem>
+          </MenuItems>
+        </Menu>
+      )}
+      {buttonsGerente && (
+        <Menu as="div" className="relative">
+          <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+            <MonitorCog size={16} strokeWidth={1.25} />
+            Gestion
+          </MenuButton>
+
+          <MenuItems anchor="bottom end" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={"/asignaciones"}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <FileChartPie size={16} strokeWidth={1.5} />
+                  Asignaciones
                 </Link>
               )}
             </MenuItem>

@@ -37,3 +37,39 @@ v.ven_estado = 1
 ORDER BY
 	v.ven_nombre
 `;
+
+export const getAsignacionRecepcion = (mes: string, anio: string) => `
+SELECT
+	stoauto.sa_codigo AS interno,
+	stoauto.sa_nrofab AS nrofab,
+	auto.au_nombre AS version,
+	movnped.mnp_chasis AS chasis,
+	movnped.mnp_fecrec AS fechaProblableRecep,
+	li.li_fecha AS fechaRecepcionRemito,
+	color.col_nombre as color,
+	stoauto.sa_opera as opera,
+	DATEDIFF(DAY, movnped.mnp_fecrec, li.li_fecha) AS diferenciaDias
+FROM
+	stoauto
+INNER JOIN movnped
+    ON stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto
+    ON stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+INNER JOIN famiauto
+    ON auto.au_familia = famiauto.fam_codigo
+INNER JOIN color
+    ON movnped.mnp_col1 = color.col_codigo
+LEFT JOIN anexnvo an
+    ON an.an_stoauto = stoauto.sa_codigo
+LEFT JOIN libivac li
+    ON li.li_nroope = an.an_nrooper
+WHERE
+	stoauto.sa_nrofab LIKE 'NIC%'
+	AND movnped.mnp_fecbaj IS NULL
+	AND SUBSTRING(stoauto.sa_nrofab, 5, 2) = '${anio}'
+	AND SUBSTRING(stoauto.sa_nrofab, 7, 2) = '${mes}'
+ORDER BY
+	auto.au_nombre,
+	li.li_fecha
+`;

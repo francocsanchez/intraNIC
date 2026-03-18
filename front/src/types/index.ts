@@ -255,3 +255,42 @@ export const misOperacionesSchema = z.object({
 });
 
 export type MisOperacionesResponse = z.infer<typeof misOperacionesSchema>;
+
+//**************************** */
+// ASIGNACIONES
+//**************************** */
+
+export const asignacionRecepcionItemSchema = z.object({
+  interno: z.number(),
+  nrofab: z.string(),
+  version: z.string(),
+  chasis: z.string().nullable(),
+  fechaProblableRecep: z.string().nullable(),
+  fechaRecepcionRemito: z.string().nullable(),
+  color: z.string(),
+  opera:z.number(),
+  diferenciaDias: z.number().nullable(),
+});
+
+export const resumenAsignacionRecepcionSchema = z.object({
+  total: z.number(),
+  recibidos: z.number(),
+  pendientes: z.number(),
+  porDiaRecepcion: z.array(
+    z.object({
+      fecha: z.string(),
+      cantidad: z.number(),
+    })
+  ),
+  estadoRecepcion: z.array(
+    z.object({
+      name: z.string(),
+      value: z.number(),
+    })
+  ),
+});
+
+export const getAsignacionRecepcionResponseSchema = z.object({
+  data: z.array(asignacionRecepcionItemSchema),
+  resumen: resumenAsignacionRecepcionSchema,
+});

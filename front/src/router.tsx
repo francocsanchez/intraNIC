@@ -33,6 +33,7 @@ import StockReservasConvencional from "./views/convencional/StockReservasConvenc
 
 import StockDisponibleLiess from "./views/liess/StockDisponibleLiess";
 import AdminLayout from "./layouts/AdminLayout";
+import AsignacionesView from "./views/admin/siac/AsignacionesView";
 
 export default function Router() {
   return (
@@ -66,6 +67,7 @@ export default function Router() {
               </Route>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
+                <Route path="/asignaciones" element={<AsignacionesView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
