@@ -130,6 +130,7 @@ SELECT
 	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
 	sucursal.suc_nombre AS "sucursal",
 	reserva.res_fecregistro AS "fechaReserva",
+	reserva.res_nombrecliente as "clienteReserva",
 	DATEADD(DAY, 5, movnped.mnp_fecrec) AS "fechaRecepcion"
 FROM
 	stoauto

@@ -2,6 +2,8 @@ import { misReservas } from "@/api/convencional/stockAPI";
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
 import { useQuery } from "@tanstack/react-query";
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment, useState } from "react";
 
 const getDiasReservada = (fecha: string) => {
   const start = new Date(fecha).getTime();
@@ -11,6 +13,8 @@ const getDiasReservada = (fecha: string) => {
 };
 
 export default function MisReservas() {
+  const [reservaSeleccionada, setReservaSeleccionada] = useState<any>(null);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["mis", "reservas"],
     queryFn: misReservas,
@@ -94,6 +98,7 @@ export default function MisReservas() {
                     <th className="px-4 py-3">Color</th>
                     <th className="px-4 py-3">Ubicación</th>
                     <th className="px-4 py-3">Chasis</th>
+                    <th className="px-4 py-3">Cliente</th>
                     <th className="px-4 py-3 text-center">Días</th>
                   </tr>
                 </thead>
@@ -113,6 +118,15 @@ export default function MisReservas() {
                       </td>
                       <td className="px-4 py-4">{reserva.ubicacion}</td>
                       <td className="px-4 py-4">{reserva.chasis}</td>
+                      <td className="px-4 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setReservaSeleccionada(reserva)}
+                          className="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-700"
+                        >
+                          Ver
+                        </button>
+                      </td>
                       <td className="px-4 py-4 text-center">{getDiasReservada(reserva.fechaReserva)}</td>
                     </tr>
                   ))}
@@ -122,6 +136,21 @@ export default function MisReservas() {
           )}
         </section>
       </div>
+
+  <Transition appear show={!!reservaSeleccionada} as={Fragment}>
+  <Dialog as="div" className="relative z-50" onClose={() => setReservaSeleccionada(null)}>
+    <div className="fixed inset-0 bg-black/40" />
+    <div className="fixed inset-0 flex items-center justify-center p-4">
+      <Dialog.Panel className="bg-white p-6 rounded-xl max-w-md w-full">
+        <Dialog.Title className="font-semibold">Cliente</Dialog.Title>
+        <p className="mt-4">{reservaSeleccionada?.clienteReserva || "Sin cliente"}</p>
+        <button onClick={() => setReservaSeleccionada(null)} className="mt-4 bg-gray-900 text-white px-4 py-2 rounded">
+          Cerrar
+        </button>
+      </Dialog.Panel>
+    </div>
+  </Dialog>
+</Transition>
     </div>
   );
 }

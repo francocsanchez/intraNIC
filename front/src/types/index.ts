@@ -190,6 +190,7 @@ export const misReservaSchema = z.object({
   sucursal: z.string(),
   fechaReserva: z.string(),
   fechaRecepcion: z.string(),
+  clienteReserva:z.string()
 });
 
 export const misReservasResponseSchema = z.object({
