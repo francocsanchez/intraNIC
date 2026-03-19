@@ -1,13 +1,8 @@
-import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
 import { Archive, BookMarked, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
-type NavBarProps = {
-  negocio: string;
-};
-
-export default function NavBarNic({ negocio }: NavBarProps) {
+export default function NavBarUsados() {
   const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente"]);
   const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor"]);
 
@@ -21,28 +16,26 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to={`/stock/disponible/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+          <Link to={`/stock/disponible/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
             <Package size={16} strokeWidth={1.5} />
             Disponible
           </Link>
 
           {buttonGuardado && (
-            <Link to={`/stock/guardado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Link to={`/stock/guardado/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <Archive size={16} strokeWidth={1.5} />
               Guardado
             </Link>
           )}
 
           {buttonReservas && (
-            <Link to={`/stock/reservado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Link to={`/stock/reservado/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <BookMarked size={16} strokeWidth={1.5} />
               Reservas
             </Link>
           )}
         </nav>
 
-        {/* Menu administracion / perfil */}
-        <MenuAdminNavbarNic negocio={negocio}/>
       </div>
     </header>
   );

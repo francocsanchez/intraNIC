@@ -268,7 +268,7 @@ export const asignacionRecepcionItemSchema = z.object({
   fechaProblableRecep: z.string().nullable(),
   fechaRecepcionRemito: z.string().nullable(),
   color: z.string(),
-  opera:z.number(),
+  opera: z.number(),
   diferenciaDias: z.number().nullable(),
 });
 
@@ -280,13 +280,13 @@ export const resumenAsignacionRecepcionSchema = z.object({
     z.object({
       fecha: z.string(),
       cantidad: z.number(),
-    })
+    }),
   ),
   estadoRecepcion: z.array(
     z.object({
       name: z.string(),
       value: z.number(),
-    })
+    }),
   ),
 });
 
@@ -294,3 +294,62 @@ export const getAsignacionRecepcionResponseSchema = z.object({
   data: z.array(asignacionRecepcionItemSchema),
   resumen: resumenAsignacionRecepcionSchema,
 });
+
+//**************************** */
+// STOCK DISPONIBLE USADOS
+//**************************** */
+
+export const unidadRowSchema = z.object({
+  interno: z.number(),
+  version: z.string(),
+  marca: z.string(),
+  observaciones: z.string().nullable(),
+  color: z.string().nullable(),
+  anio: z.number(),
+  precioVenta: z.number(),
+  fechaRecepcion: z.string().nullable(),
+  kilometros: z.number(),
+});
+
+export const resumenPorMarcaSchema = z.object({
+  total: z.number(),
+  porMarca: z.record(z.string(), z.number()),
+});
+
+export const stockUsadosResponseSchema = z.object({
+  data: z.array(unidadRowSchema),
+  resumen: resumenPorMarcaSchema,
+});
+
+//**************************** */
+// STOCK RESERVADO USADOS
+//**************************** */
+
+export const ReservaUsadosSchema = z.object({
+  interno: z.number(),
+  version: z.string(),
+  modelo: z.string(),
+  marca: z.string(),
+  observaciones: z.string(),
+  color: z.string(),
+  anio: z.number(),
+  precioVenta: z.number(),
+  fechaRecepcion: z.string(),
+  kilometros: z.number(),
+  vendedorReserva: z.string(),
+  sucursal: z.string(),
+});
+
+export const ReservasUsadosDataSchema = z.record(z.string(), z.array(ReservaUsadosSchema));
+
+export const ReservasUsadosResumenSchema = z.object({
+  data: ReservasUsadosDataSchema,
+  resumen: z.object({
+    total: z.number(),
+    sucursales: z.record(z.string(), z.number()),
+  }),
+});
+
+export type ReservaUsados = z.infer<typeof ReservaUsadosSchema>;
+export type ReservasUsadosData = z.infer<typeof ReservasUsadosDataSchema>;
+export type ReservasUsadosResumen = z.infer<typeof ReservasUsadosResumenSchema>;
