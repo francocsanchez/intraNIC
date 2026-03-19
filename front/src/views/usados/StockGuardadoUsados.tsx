@@ -2,7 +2,7 @@ import { useMemo, useState, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
 import { Dialog, Transition } from "@headlessui/react";
-import { getStockDisponibleUsados } from "@/api/usados/stockAPI";
+import {  getStockGuardadoUsados} from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
 
@@ -12,7 +12,7 @@ export default function StockGuardadoUsados() {
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stockGuardado", "usados"],
-    queryFn: getStockDisponibleUsados,
+    queryFn: getStockGuardadoUsados,
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
