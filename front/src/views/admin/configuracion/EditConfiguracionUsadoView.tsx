@@ -74,7 +74,7 @@ export default function EditConfiguracionUsadoView() {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["configuracion"] });
       toast.success(response.message);
-      navigate("/admin/configuracion");
+      navigate("/configuracion");
     },
   });
 
@@ -148,7 +148,7 @@ export default function EditConfiguracionUsadoView() {
         </div>
 
         <Link
-          to="/admin/configuracion"
+          to="/configuracion"
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Volver

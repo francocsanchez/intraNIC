@@ -55,7 +55,10 @@ export default function Router() {
               <Route path="/usuarios" element={<UsuariosView />} />
               <Route path="/usuarios/crear" element={<CrearUsuarioView />} />
               <Route path="/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
+              
               <Route path="/configuracion" element={<ConfiguracionView />} />
+              <Route path="/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
+              <Route path="/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
             </Route>
           </Route>
 
@@ -63,9 +66,6 @@ export default function Router() {
             <Route element={<NICLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
-                <Route path="/admin/configuracion" element={<ConfiguracionView />} />
-                <Route path="/admin/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
-                <Route path="/admin/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
