@@ -42,8 +42,10 @@ export async function createUsuario(formData: UsuarioFormData) {
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error);
+      throw new Error(error.response.data.error || error.response.data.message || "Error al crear el usuario");
     }
+
+    throw new Error("Error inesperado al crear el usuario");
   }
 }
 
@@ -53,10 +55,7 @@ export async function getUsuarioById(idUsuario: Usuario["_id"]) {
 
     const response = usuarioSchema.safeParse(data.data);
     if (!response.success) {
-      console.error(
-        "Error en la validación de getUsuarioById:",
-        response.error,
-      );
+      console.error("Error en la validación de getUsuarioById:", response.error);
       throw new Error("La estructura de los datos es inválida");
     }
 
@@ -77,10 +76,7 @@ type UsuarioAPIType = {
   usuarioId: Usuario["_id"];
 };
 
-export async function updateUsuarioById({
-  formData,
-  usuarioId,
-}: UsuarioAPIType) {
+export async function updateUsuarioById({ formData, usuarioId }: UsuarioAPIType) {
   try {
     const { data } = await api.put(`/usuarios/${usuarioId}`, formData);
 
@@ -133,4 +129,3 @@ export async function resetPasswordUserByID(idUsuario: Usuario["_id"]) {
     }
   }
 }
-

@@ -101,7 +101,7 @@ export default function UsuariosView() {
         </div>
 
         <Link
-          to="/admin/usuarios/crear"
+          to="/usuarios/crear"
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Crear usuario
@@ -215,7 +215,7 @@ export default function UsuariosView() {
                       </button>
 
                       <Link
-                        to={`/admin/usuarios/${u._id}/editar`}
+                        to={`/usuarios/${u._id}/editar`}
                         className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                       >
                         Editar

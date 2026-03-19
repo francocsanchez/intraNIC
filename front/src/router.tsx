@@ -52,9 +52,10 @@ export default function Router() {
 
           <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
             <Route element={<AdminLayout />}>
-              <Route path="/admin/usuarios" element={<UsuariosView />} />
-              <Route path="/admin/usuarios/crear" element={<CrearUsuarioView />} />
-              <Route path="/admin/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
+              <Route path="/usuarios" element={<UsuariosView />} />
+              <Route path="/usuarios/crear" element={<CrearUsuarioView />} />
+              <Route path="/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
+              <Route path="/configuracion" element={<ConfiguracionView />} />
             </Route>
           </Route>
 

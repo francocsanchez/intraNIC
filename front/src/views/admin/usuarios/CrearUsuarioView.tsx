@@ -38,10 +38,11 @@ export default function CreateUsuarioView() {
 
   const mutation = useMutation({
     mutationFn: createUsuario,
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      toast.error(error.message)},
     onSuccess: (response: { message: string }) => {
       toast.success(response.message);
-      navigate("/admin/usuarios");
+      navigate("/usuarios");
     },
   });
 
@@ -55,7 +56,7 @@ export default function CreateUsuarioView() {
         </div>
 
         <Link
-          to="/admin/usuarios"
+          to="/usuarios"
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Volver

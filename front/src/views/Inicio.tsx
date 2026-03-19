@@ -125,7 +125,7 @@ export default function Inicio() {
 
           {/* Liess */}
           {hasAdmin ? (
-            <Link to="/stock/disponible/liess/nuevos" className={`${baseCard} hover:shadow-md transition group`}>
+            <Link to="/configuracion" className={`${baseCard} hover:shadow-md transition group`}>
               <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
                 <Cog size={26} strokeWidth={1.5} className="text-gray-900" />
               </div>

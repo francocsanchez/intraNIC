@@ -58,7 +58,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
       queryClient.invalidateQueries({ queryKey: ["usuario", usuarioId] });
       toast.success(response.message);
-      navigate("/admin/usuarios");
+      navigate("/usuarios");
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -79,7 +79,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         </div>
 
         <Link
-          to="/admin/usuarios"
+          to="/usuarios"
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Volver
