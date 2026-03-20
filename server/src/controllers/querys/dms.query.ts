@@ -48,22 +48,36 @@ SELECT
 	li.li_fecha AS fechaRecepcionRemito,
 	color.col_nombre as color,
 	stoauto.sa_opera as opera,
+	sucursal.suc_nombre as sucursal,
 	DATEDIFF(DAY, movnped.mnp_fecrec, li.li_fecha) AS diferenciaDias
 FROM
 	stoauto
 INNER JOIN movnped
-    ON stoauto.sa_codigo = movnped.mnp_stoauto
+    ON
+	stoauto.sa_codigo = movnped.mnp_stoauto
 INNER JOIN auto
-    ON stoauto.sa_auto = auto.au_codigo
+    ON
+	stoauto.sa_auto = auto.au_codigo
 	AND stoauto.sa_marca = auto.au_marca
 INNER JOIN famiauto
-    ON auto.au_familia = famiauto.fam_codigo
+    ON
+	auto.au_familia = famiauto.fam_codigo
 INNER JOIN color
-    ON movnped.mnp_col1 = color.col_codigo
+    ON
+	movnped.mnp_col1 = color.col_codigo
+LEFT JOIN opera
+    ON
+	stoauto.sa_opera = opera.ope_codigo
+	AND stoauto.sa_tipo = opera.ope_tipo
+LEFT JOIN sucursal
+    ON
+	opera.ope_sucur = sucursal.suc_codigo
 LEFT JOIN anexnvo an
-    ON an.an_stoauto = stoauto.sa_codigo
+    ON
+	an.an_stoauto = stoauto.sa_codigo
 LEFT JOIN libivac li
-    ON li.li_nroope = an.an_nrooper
+    ON
+	li.li_nroope = an.an_nrooper
 WHERE
 	stoauto.sa_nrofab LIKE 'NIC%'
 	AND movnped.mnp_fecbaj IS NULL

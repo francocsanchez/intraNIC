@@ -271,6 +271,7 @@ export const asignacionRecepcionItemSchema = z.object({
   color: z.string(),
   opera: z.number(),
   diferenciaDias: z.number().nullable(),
+  sucursal:z.string().nullable()
 });
 
 export const resumenAsignacionRecepcionSchema = z.object({

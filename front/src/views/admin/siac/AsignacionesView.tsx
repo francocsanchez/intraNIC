@@ -369,8 +369,8 @@ export default function AsignacionesView() {
                 <th className="px-6 py-3 text-left">Chasis</th>
                 <th className="px-6 py-3 text-left">Color</th>
                 <th className="px-6 py-3 text-left">F. probable</th>
-                <th className="px-6 py-3 text-left">F. remito</th>
                 <th className="px-6 py-3 text-center">Opera</th>
+                <th className="px-6 py-3 text-center">Sucursal</th>
                 <th className="px-6 py-3 text-center">Estado</th>
               </tr>
             </thead>
@@ -396,9 +396,11 @@ export default function AsignacionesView() {
                       </div>
                     </td>
                     <td className="px-6 py-3">{formatFullDate(item.fechaProblableRecep)}</td>
-                    <td className="px-6 py-3">{formatFullDate(item.fechaRecepcionRemito)}</td>
                     <td className="px-6 py-3 text-center">
                       {item.opera == 0 ? "-" : item.opera}
+                    </td>
+                    <td className="px-6 py-3 text-center">
+                      {item.opera == 0 ? "-" : item.sucursal}
                     </td>
                     <td className="px-6 py-3">
                       <div className="flex justify-center">
