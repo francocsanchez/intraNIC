@@ -77,8 +77,7 @@ export default function AsignacionesView() {
       const anioFormatted = anio.toString().slice(-2);
       return getAsignaciones(mesFormatted, anioFormatted);
     },
-    refetchOnWindowFocus: true,
-    refetchInterval: 10000,
+    refetchOnWindowFocus: true
   });
 
   const registros = data?.data ?? [];
