@@ -65,7 +65,6 @@ export async function getVendedoresActivosNic() {
 export async function getAsignaciones(mes:string, anio:string) {
   try {
     const { data } = await api.get(`/dms/asignaciones/${mes}/${anio}`);
-    console.log(data)
 
    const parsed = getAsignacionRecepcionResponseSchema.safeParse(data);
 

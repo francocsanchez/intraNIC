@@ -145,14 +145,6 @@ function buildBarFromLiess(
     .slice(0, 10);
 }
 
-function ChartEmptyState({ text }: { text: string }) {
-  return (
-    <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-500">
-      {text}
-    </div>
-  );
-}
-
 function PieCard({
   title,
   data,
@@ -163,22 +155,22 @@ function PieCard({
   total: number;
 }) {
   return (
-    <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold tracking-tight text-gray-900">
-        {title}
-      </h2>
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <h3 className="text-sm font-semibold tracking-tight text-gray-900">{title}</h3>
 
-      <div className="relative mt-4 h-52 w-full min-w-0">
+      <div className="mt-4 w-full min-w-0">
         {data.length ? (
-          <>
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="relative h-[260px] w-full min-w-0">
+            <ResponsiveContainer width="100%" height={260} minWidth={0}>
               <PieChart>
                 <Pie
                   data={data}
                   dataKey="value"
                   nameKey="name"
-                  innerRadius={32}
-                  outerRadius={54}
+                  cx="50%"
+                  cy="44%"
+                  innerRadius={58}
+                  outerRadius={92}
                   paddingAngle={3}
                 >
                   {data.map((entry, index) => (
@@ -194,30 +186,27 @@ function PieCard({
 
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">{total}</p>
-                <p className="text-[10px] uppercase tracking-wider text-gray-500">
+                <p className="text-3xl font-bold leading-none text-gray-900">{total}</p>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-gray-500">
                   Total
                 </p>
               </div>
             </div>
-          </>
+          </div>
         ) : (
-          <ChartEmptyState text="Sin datos disponibles." />
+          <div className="flex h-[260px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-500">
+            Sin datos disponibles.
+          </div>
         )}
       </div>
 
       {!!data.length && (
-        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2">
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
           {data.map((item, index) => (
-            <div
-              key={item.name}
-              className="flex items-center gap-2 text-[11px] text-gray-700"
-            >
+            <div key={item.name} className="flex items-center gap-2 text-xs text-gray-700">
               <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{
-                  backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
-                }}
+                className="h-3 w-3 rounded-full"
+                style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
               />
               <span>
                 {item.name}: {item.value}
@@ -238,12 +227,12 @@ function BarCard({
   data: BarDatum[];
 }) {
   return (
-    <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <article className="w-full rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
       <h2 className="text-sm font-semibold tracking-tight text-gray-900">
         {title}
       </h2>
 
-      <div className="mt-4 h-64 w-full min-w-0">
+      <div className="mt-4 w-full h-[280px]">
         {data.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -256,7 +245,7 @@ function BarCard({
               <YAxis
                 type="category"
                 dataKey="name"
-                width={88}
+                width={100}
                 tick={{ fontSize: 10 }}
               />
               <Tooltip formatter={(value) => [Number(value ?? 0), "Cantidad"]} />
@@ -270,7 +259,9 @@ function BarCard({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <ChartEmptyState text="Sin datos disponibles." />
+          <div className="flex h-full w-full items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-500">
+            Sin datos disponibles.
+          </div>
         )}
       </div>
     </article>
@@ -385,90 +376,92 @@ export default function ConsolidadoView() {
   ];
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          Consolidado de stock
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Resumen general de stock con análisis por estado, modelo y marca.
+    <div className="w-full space-y-6 px-4 py-6 min-w-0">
+  <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+      Consolidado de stock
+    </h1>
+    <p className="mt-1 text-sm text-gray-500">
+      Resumen general de stock con análisis por estado, modelo y marca.
+    </p>
+  </section>
+
+  <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6 min-w-0">
+    {cards.map((card) => (
+      <article
+        key={card.label}
+        className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          {card.label}
         </p>
-      </section>
+        <p className={`mt-3 text-3xl font-bold ${card.accent}`}>
+          {card.value}
+        </p>
+      </article>
+    ))}
+  </section>
 
-      <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-        {cards.map((card) => (
-          <article
-            key={card.label}
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-              {card.label}
-            </p>
-            <p className={`mt-3 text-3xl font-bold ${card.accent}`}>{card.value}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
-            Gráficos por estado
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <PieCard
-            title="Convencional"
-            data={dataset.pieConvencional}
-            total={dataset.totalConvencional}
-          />
-          <PieCard
-            title="V. especiales"
-            data={dataset.pieVEspeciales}
-            total={dataset.totalVEspeciales}
-          />
-          <PieCard
-            title="Plan de ahorro"
-            data={dataset.piePlanAhorro}
-            total={dataset.totalPlanAhorro}
-          />
-          <PieCard
-            title="Usados"
-            data={dataset.pieUsados}
-            total={dataset.totalUsados}
-          />
-          <PieCard
-            title="Liess"
-            data={dataset.pieLiess}
-            total={dataset.totalLiess}
-          />
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
-            Gráficos comparativos
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <BarCard
-            title="Convencional (por modelo)"
-            data={dataset.barConvencional}
-          />
-          <BarCard
-            title="V. especiales (por modelo)"
-            data={dataset.barVEspeciales}
-          />
-          <BarCard
-            title="Plan de ahorro (por modelo)"
-            data={dataset.barPlanAhorro}
-          />
-          <BarCard title="Usados (por marca)" data={dataset.barUsados} />
-          <BarCard title="Liess (por marca)" data={dataset.barLiess} />
-        </div>
-      </section>
+  <section className="space-y-4 min-w-0">
+    <div>
+      <h2 className="text-base font-semibold tracking-tight text-gray-900">
+        Gráficos por estado
+      </h2>
     </div>
+
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5 min-w-0">
+      <PieCard
+        title="Convencional"
+        data={dataset.pieConvencional}
+        total={dataset.totalConvencional}
+      />
+      <PieCard
+        title="V. especiales"
+        data={dataset.pieVEspeciales}
+        total={dataset.totalVEspeciales}
+      />
+      <PieCard
+        title="Plan de ahorro"
+        data={dataset.piePlanAhorro}
+        total={dataset.totalPlanAhorro}
+      />
+      <PieCard
+        title="Usados"
+        data={dataset.pieUsados}
+        total={dataset.totalUsados}
+      />
+      <PieCard
+        title="Liess"
+        data={dataset.pieLiess}
+        total={dataset.totalLiess}
+      />
+    </div>
+  </section>
+
+  <section className="space-y-4 min-w-0">
+    <div>
+      <h2 className="text-base font-semibold tracking-tight text-gray-900">
+        Gráficos comparativos
+      </h2>
+    </div>
+
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 min-w-0">
+      <BarCard
+        title="Convencional (por modelo)"
+        data={dataset.barConvencional}
+      />
+      <BarCard
+        title="V. especiales (por modelo)"
+        data={dataset.barVEspeciales}
+      />
+      <BarCard
+        title="Plan de ahorro (por modelo)"
+        data={dataset.barPlanAhorro}
+      />
+      <BarCard title="Usados (por marca)" data={dataset.barUsados} />
+      <BarCard title="Liess (por marca)" data={dataset.barLiess} />
+    </div>
+  </section>
+</div>
   );
 }
