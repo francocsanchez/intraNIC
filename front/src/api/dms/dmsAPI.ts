@@ -1,6 +1,7 @@
 import api from "@/libs/axios";
 import {
   getAsignacionRecepcionResponseSchema,
+  resumenGeneralSchema,
   vendedoresResponseSchema
 } from "@/types/index";
 import { isAxiosError } from "axios";
@@ -68,6 +69,36 @@ export async function getAsignaciones(mes:string, anio:string) {
 
    const parsed = getAsignacionRecepcionResponseSchema.safeParse(data);
 
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al obtener el los vendedores",
+      );
+    }
+
+    throw new Error(
+      "Error inesperado al obtener el los vendedores",
+    );
+  }
+}
+
+
+export async function getStockConsolidado() {
+  try {
+    const { data } = await api.get(`/dms/consolidado/stock`);
+    
+    const parsed = resumenGeneralSchema.safeParse(data);
+    
     if (!parsed.success) {
       console.error(parsed.error.issues);
       throw new Error("La respuesta del endpoint no tiene el formato esperado");

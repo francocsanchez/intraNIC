@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BookMarked, CalendarClock, CircleUserRound, FileChartPie, Handshake, MonitorCog, PowerOff, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, Handshake, MonitorCog, PowerOff, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
@@ -45,6 +45,17 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                 >
                   <FileChartPie size={16} strokeWidth={1.5} />
                   Asignaciones
+                </Link>
+              )}
+            </MenuItem>
+                  <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={"/consolidado"}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <ChartBarBig size={16} strokeWidth={1.5} />
+                  Stock consolidado
                 </Link>
               )}
             </MenuItem>

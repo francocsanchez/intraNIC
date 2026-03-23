@@ -355,3 +355,51 @@ export const ReservasUsadosResumenSchema = z.object({
 export type ReservaUsados = z.infer<typeof ReservaUsadosSchema>;
 export type ReservasUsadosData = z.infer<typeof ReservasUsadosDataSchema>;
 export type ReservasUsadosResumen = z.infer<typeof ReservasUsadosResumenSchema>;
+
+//**************************** */
+// CONSOLIDADO
+//**************************** */
+
+const resumenPorEstadoSchema = z.record(z.string(), z.number());
+
+const resumenAgrupadoItemSchema = z.object({
+  nombre: z.string(),
+  total: z.number(),
+  porEstado: resumenPorEstadoSchema,
+});
+
+const resumenStockConsolidadoSchema = z.object({
+  total: z.number(),
+  totalUsados: z.number(),
+  totalNuevos: z.number(),
+  usadosPorMarca: z.record(z.string(), resumenAgrupadoItemSchema),
+  nuevosPorTipoOrder: z.object({
+    convencional: z.record(z.string(), resumenAgrupadoItemSchema),
+    "v. especiales": z.record(z.string(), resumenAgrupadoItemSchema),
+    "plan de ahorro": z.record(z.string(), resumenAgrupadoItemSchema),
+  }),
+});
+
+const resumenLiessMarcaItemSchema = z.object({
+  marca: z.string(),
+  total: z.number(),
+  nuevo: z.number(),
+  usado: z.number(),
+});
+
+const resumenLiessMarcaSchema = z.object({
+  total: z.number(),
+  marcas: z.record(z.string(), resumenLiessMarcaItemSchema),
+});
+
+export const resumenGeneralSchema = z.object({
+  resumen: z.object({
+    totales: z.object({
+      nic: z.number(),
+      liess: z.number(),
+      general: z.number(),
+    }),
+    nic: resumenStockConsolidadoSchema,
+    liess: resumenLiessMarcaSchema,
+  }),
+});

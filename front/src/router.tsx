@@ -38,6 +38,7 @@ import StockDisponibleUsados from "./views/usados/StockDisponibleUsados";
 import NICUsadosLayout from "./layouts/NICUsadosLayout";
 import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
+import ConsolidadoView from "./views/admin/siac/ConsolidadoView";
 
 export default function Router() {
   return (
@@ -55,7 +56,7 @@ export default function Router() {
               <Route path="/usuarios" element={<UsuariosView />} />
               <Route path="/usuarios/crear" element={<CrearUsuarioView />} />
               <Route path="/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
-              
+
               <Route path="/configuracion" element={<ConfiguracionView />} />
               <Route path="/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
               <Route path="/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
@@ -71,6 +72,7 @@ export default function Router() {
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
+                <Route path="/consolidado" element={<ConsolidadoView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
