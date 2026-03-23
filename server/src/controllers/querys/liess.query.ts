@@ -52,3 +52,34 @@ ORDER BY
 	marca.mar_nombre,
 	auto.au_nombre
 `;
+
+export const getStockConsolidadoLiess = () => `
+SELECT
+	stoauto.sa_codigo as "interno",
+	marca.mar_nombre as "marca",
+	stoauto.sa_nrofab as "order",
+	stoauto.sa_estado,
+	CASE 
+		WHEN stoauto.sa_estado = 5 THEN 'Fis. Disp'
+		WHEN stoauto.sa_estado = 10 THEN 'Fis. Disp. Res. s/B'
+		WHEN stoauto.sa_estado = 15 THEN 'Fis. Res. c/B'
+		WHEN stoauto.sa_estado = 20 THEN 'No Fis. Disp.'
+		WHEN stoauto.sa_estado = 25 THEN 'No Fis. Disp. Res. s/B'
+		WHEN stoauto.sa_estado = 30 THEN 'No Fis. Res. c/B'
+		ELSE 'anulado'
+	END as "estado",
+	CASE 
+		WHEN stoauto.sa_tipo = 5 THEN 'nuevo'
+		WHEN stoauto.sa_tipo = 10 THEN 'usado'
+		ELSE 'otro'
+	END as "tipoStock"
+FROM
+	stoauto
+INNER JOIN auto ON
+	stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+INNER JOIN marca ON
+	marca.mar_codigo = auto.au_marca
+WHERE
+	stoauto.sa_estado NOT IN (40, 35)
+`
