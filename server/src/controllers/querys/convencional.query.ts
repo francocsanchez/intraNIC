@@ -30,6 +30,7 @@ export const stockConvencionalQuery = (vendedoresDisponible: string[]) => `
         movnped.mnp_col1 = color.col_codigo
     WHERE
         reserva.res_anulada = 0
+		AND stoauto.sa_tipo = 5
         AND reserva.res_vendedor IN (${vendedoresDisponible})
     ORDER BY
         famiauto.fam_nombre,
