@@ -182,6 +182,7 @@ export default function StockIngresoUsados() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Km</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Precio venta</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ultimo dueño</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Observaciones</th>
               </tr>
             </thead>
@@ -204,6 +205,7 @@ export default function StockIngresoUsados() {
                   <td className="px-4 py-2 text-gray-700">{item.anio}</td>
                   <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.km ?? 0)}</td>
                   <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta)}</td>
+                  <td className="px-4 py-2 text-gray-700 uppercase">{item.ultimoDueno}</td>
                   <td className="px-4 py-2 text-center">
                     {item.observaciones ? (
                       <button
