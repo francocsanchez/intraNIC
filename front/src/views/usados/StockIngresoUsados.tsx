@@ -107,7 +107,7 @@ export default function StockIngresoUsados() {
     <div className="w-full space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usados</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Guardadas Usados</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Ingreso Usados</h1>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
