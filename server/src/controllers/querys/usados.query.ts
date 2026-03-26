@@ -71,6 +71,37 @@ ORDER BY
 	auto.au_nombre
 `;
 
+export const stockUsadoIngreso = () => `
+SELECT
+	stoauto.sa_codigo as "interno",
+	marca.mar_nombre as "marca",
+	auto.au_nombre as "version",
+	anexusa.aus_dueno as "ultimoDueno",
+	anexusa.aus_color as "color",
+	anexusa.aus_anio as "anio",
+	anexusa.aus_km as km
+FROM
+	stoauto
+INNER JOIN anexusa ON
+	stoauto.sa_codigo = anexusa.aus_codigo
+INNER JOIN auto ON
+	stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+	AND stoauto.sa_bienuso = 0
+INNER JOIN marca ON
+	marca.mar_codigo = auto.au_marca
+LEFT JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	stoauto.sa_estado = 20
+	AND stoauto.sa_tipo = 10
+ORDER BY
+	marca.mar_nombre,
+	auto.au_nombre
+`;
+
+/** FUNCIONES A TESTEAR */
+
 export const reservasSucursalesUsadoQuery = (vendedoresReservas: string[]) => `
 SELECT
   ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS sucursal,

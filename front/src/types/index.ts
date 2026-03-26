@@ -403,3 +403,31 @@ export const resumenGeneralSchema = z.object({
     liess: resumenLiessMarcaSchema,
   }),
 });
+
+//**************************** */
+// STOCK INGRESO USADOS
+//**************************** */
+
+export const stockIngresoUsadosItemSchema = z.object({
+  interno: z.number(),
+  marca: z.string(),
+  version: z.string(),
+  ultimoDueno: z.string().nullable(),
+  color: z.string().nullable(),
+  anio: z.number(),
+  km: z.number(),
+});
+
+export const stockIngresoUsadosResumenSchema = z.object({
+  total: z.number(),
+  porMarca: z.record(z.string(), z.number()),
+});
+
+export const stockIngresoUsadosSchema = z.object({
+  data: z.array(stockIngresoUsadosItemSchema),
+  resumen: stockIngresoUsadosResumenSchema,
+});
+
+export type StockIngresoUsadosItem = z.infer<typeof stockIngresoUsadosItemSchema>;
+export type StockIngresoUsadosResumen = z.infer<typeof stockIngresoUsadosResumenSchema>;
+export type StockIngresoUsadosResponse = z.infer<typeof stockIngresoUsadosSchema>;

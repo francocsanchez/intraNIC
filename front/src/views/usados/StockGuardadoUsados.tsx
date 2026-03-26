@@ -186,7 +186,6 @@ export default function StockGuardadoUsados() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelo</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
@@ -204,7 +203,6 @@ export default function StockGuardadoUsados() {
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{item.modelo}</td>
                   <td className="min-w-[240px] px-4 py-2 text-center">
                     <div className="font-medium text-gray-900">{item.version}</div>
                   </td>

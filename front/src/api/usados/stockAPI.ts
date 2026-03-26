@@ -1,5 +1,5 @@
 import api from "@/libs/axios";
-import { stockUsadosResponseSchema,ReservasUsadosResumenSchema, type ReservasUsadosResumen } from "@/types/index";
+import { stockUsadosResponseSchema,ReservasUsadosResumenSchema, type ReservasUsadosResumen, stockIngresoUsadosSchema } from "@/types/index";
 import { isAxiosError } from "axios";
 
 export async function getStockDisponibleUsados() {
@@ -71,5 +71,28 @@ export async function getStockReservaUsados(): Promise<ReservasUsadosResumen> {
     }
 
     throw new Error("Error inesperado al obtener el stock reservado convencional");
+  }
+}
+
+export async function getStockIngresoUsado() {
+  try {
+    const { data } = await api.get("/dms/usados/stock-ingreso");
+
+    const parsed = stockIngresoUsadosSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener el stock disponible usados",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener el stock disponible usados");
   }
 }

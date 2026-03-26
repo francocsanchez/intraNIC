@@ -39,6 +39,7 @@ import NICUsadosLayout from "./layouts/NICUsadosLayout";
 import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
 import ConsolidadoView from "./views/admin/siac/ConsolidadoView";
+import StockIngresoUsados from "./views/usados/StockIngresoUsados";
 
 export default function Router() {
   return (
@@ -101,6 +102,7 @@ export default function Router() {
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
                 <Route path="/stock/reservado/usados" element={<StockReservasUsados />} />
+                <Route path="/stock/ingresos/usados" element={<StockIngresoUsados />} />
               </Route>
             </Route>
           </Route>

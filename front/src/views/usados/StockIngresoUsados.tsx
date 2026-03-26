@@ -1,40 +1,24 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Mantenimiento from "@/components/Mantenimiento";
-import { useAuth } from "@/hooks/useAuthe";
-import { getConfiguracion } from "@/api/configuracionAPI";
 import { textToColor } from "@/helpers/colores";
-import { getStockDisponibleUsados } from "@/api/usados/stockAPI";
+import { Dialog, Transition } from "@headlessui/react";
+import { getStockIngresoUsado } from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
 
-export default function StockDisponibleUsados() {
+export default function StockIngresoUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
-  const { user } = useAuth();
-
-  const {
-    data: configResponse,
-    isError: configError,
-    isLoading: configLoading,
-  } = useQuery({
-    queryKey: ["configuracion"],
-    queryFn: getConfiguracion,
-    refetchOnWindowFocus: true,
-    refetchInterval: 1000,
-  });
+  const [itemSeleccionado, setItemSeleccionado] = useState<any>(null);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["stockDisponible", "usados"],
-    queryFn: getStockDisponibleUsados,
+    queryKey: ["strockIngreso", "usados"],
+    queryFn: getStockIngresoUsado,
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
 
   const items = data?.data ?? [];
   const resumen = data?.resumen;
-
-  const roles = user?.role ?? [];
-  const isPrivileged = roles.includes("admin") || roles.includes("gerente");
 
   const marcasDisponibles = useMemo(() => {
     const marcas = Array.from(new Set(items.map((item: any) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
@@ -61,7 +45,6 @@ export default function StockDisponibleUsados() {
       .sort((a, b) => a.marca.localeCompare(b.marca));
   }, [resumen]);
 
-
   const formatCurrency = (value?: number) => {
     if (!value) return "-";
 
@@ -72,14 +55,7 @@ export default function StockDisponibleUsados() {
     }).format(value);
   };
 
-  const diasEnStock = (fecha: string) => {
-    const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
-  };
-
-  if (isLoading || configLoading) {
+  if (isLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -116,7 +92,7 @@ export default function StockDisponibleUsados() {
     );
   }
 
-  if (isError || configError) {
+  if (isError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
@@ -127,15 +103,11 @@ export default function StockDisponibleUsados() {
     );
   }
 
-  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
-    return <Mantenimiento />;
-  }
-
   return (
     <div className="w-full space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usados</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Disponible Usados</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Guardadas Usados</h1>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
@@ -211,8 +183,8 @@ export default function StockDisponibleUsados() {
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Km</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepción</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Precio venta</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Observaciones</th>
               </tr>
             </thead>
 
@@ -232,9 +204,20 @@ export default function StockDisponibleUsados() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-gray-700">{item.anio}</td>
-                  <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td>
-                  <td className="px-4 py-2 text-gray-700">{diasEnStock(item.fechaRecepcion)}</td>
+                  <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.km ?? 0)}</td>
                   <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta)}</td>
+                  <td className="px-4 py-2 text-center">
+                    {item.observaciones ? (
+                      <button
+                        onClick={() => setItemSeleccionado(item)}
+                        className="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-700"
+                      >
+                        Ver
+                      </button>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                 </tr>
               ))}
 
@@ -254,6 +237,21 @@ export default function StockDisponibleUsados() {
           {marcaActiva !== "TODOS" ? ` de ${marcaActiva}` : ""}.
         </div>
       </section>
+
+      <Transition appear show={!!itemSeleccionado} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setItemSeleccionado(null)}>
+          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="bg-white p-6 rounded-xl max-w-md w-full">
+              <Dialog.Title className="font-semibold">Observaciones</Dialog.Title>
+              <p className="mt-4">{itemSeleccionado?.observaciones || "Sin observaciones"}</p>
+              <button onClick={() => setItemSeleccionado(null)} className="mt-4 bg-gray-900 text-white px-4 py-2 rounded">
+                Cerrar
+              </button>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

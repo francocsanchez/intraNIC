@@ -7,6 +7,9 @@ export const tablaColores: Record<string, string> = {
   "Rojo Mica Metalizad": "bg-red-50 text-red-600",
   "Body Rojo Techo Neg": "bg-red-50 text-red-600",
   "Rojo Bitono": "bg-red-50 text-red-600",
+  "RED MICA M": "bg-red-50 text-red-600",
+  "RED METALL": "bg-red-50 text-red-600",
+  "Rojo Mica": "bg-red-50 text-red-600",
 
   // PLATA / GRIS CLARO
   "Plata Metalizado": "bg-slate-100 text-slate-600",
@@ -16,12 +19,16 @@ export const tablaColores: Record<string, string> = {
   "GRIS PLA": "bg-slate-100 text-slate-600",
   "GRIS PLATA": "bg-slate-100 text-slate-600",
   "Plata Metalizado Bi": "bg-slate-100 text-slate-600",
+  "SILVER MET": "bg-slate-100 text-slate-600",
+  "PLATEADO": "bg-slate-100 text-slate-600",
+  "SILVER MIC": "bg-slate-100 text-slate-600",
 
   // GRIS OSCURO
   GRIS: "bg-slate-200 text-slate-700",
   "Gris Oscuro": "bg-slate-200 text-slate-700",
   "Gris Oscuro Metaliz": "bg-slate-200 text-slate-700",
   "GRIS OSCUR": "bg-slate-200 text-slate-700",
+  "GRIS OSC": "bg-slate-200 text-slate-700",
 
   // AZULES
   "Gris Azulado": "bg-blue-50 text-blue-600",
@@ -30,6 +37,8 @@ export const tablaColores: Record<string, string> = {
   CELESTE: "bg-blue-50 text-blue-600",
   AZUL: "bg-blue-50 text-blue-600",
   "AZUL CLA": "bg-blue-50 text-blue-600",
+  "DARK BLUE": "bg-blue-50 text-blue-600",
+  "AZUL ELECT": "bg-blue-50 text-blue-600",
 
   // BLANCOS
   BLANCO: "bg-gray-50 text-gray-600 ring-1 ring-gray-200",

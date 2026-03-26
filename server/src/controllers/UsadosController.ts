@@ -15,7 +15,8 @@ import {
   misReservasUsadoQuery,
   stockUsadoQuery,
   misOperacionesQuery,
-  reservasUsadoQuery
+  reservasUsadoQuery,
+  stockUsadoIngreso
 } from "./querys/usados.query";
 import { buildReportePorMarca, UnidadRow } from "../utils/reportUnidadesPorMarca";
 
@@ -178,6 +179,21 @@ export class UsadosController {
       return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("UsadosController.misOperaciones");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+    static stockIngreso = async (_req: Request, res: Response) => {
+     try {
+     
+      const data = await sequelizeNIC.query<UnidadRow>(stockUsadoIngreso(), { type: QueryTypes.SELECT });
+
+      const resumen = buildReportePorMarca(data);
+
+      return res.status(200).json({ data,resumen });
+    } catch (error) {
+      logError("UsadosController.stockIngreso");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }
