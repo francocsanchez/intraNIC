@@ -2,7 +2,7 @@ import { useMemo, useState, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
 import { Dialog, Transition } from "@headlessui/react";
-import {  getStockGuardadoUsados} from "@/api/usados/stockAPI";
+import { getStockGuardadoUsados } from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
 
@@ -116,27 +116,24 @@ export default function StockGuardadoUsados() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usados</p>
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Guardadas Usados</h1>
       </section>
-
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
         <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cantidad por marcas</p>
 
-          <div className="mt-5 overflow-x-auto">
-            <div className="flex gap-3 min-w-max">
-              {resumenMarcas.map((item) => (
-                <div key={item.marca} className="min-w-[120px] rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center">
-                  <p className="text-xs text-gray-500 truncate">{item.marca}</p>
-                  <p className="mt-1 text-xl font-semibold tracking-tight text-gray-900">{item.total}</p>
-                </div>
-              ))}
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            {resumenMarcas.map((item) => (
+              <div key={item.marca} className="rounded-lg bg-gray-50 px-2 py-2 text-center">
+                <p className="text-[10px] text-gray-500 truncate">{item.marca}</p>
+                <p className="text-sm font-semibold text-gray-900">{item.total}</p>
+              </div>
+            ))}
 
-              {!resumenMarcas.length && (
-                <div className="min-w-[120px] rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center">
-                  <p className="text-xs text-gray-500">Sin marcas</p>
-                  <p className="mt-1 text-xl font-semibold tracking-tight text-gray-900">0</p>
-                </div>
-              )}
-            </div>
+            {!resumenMarcas.length && (
+              <div className="rounded-lg bg-gray-50 px-2 py-2 text-center col-span-full">
+                <p className="text-xs text-gray-500">Sin marcas</p>
+                <p className="text-sm font-semibold text-gray-900">0</p>
+              </div>
+            )}
           </div>
         </article>
 
