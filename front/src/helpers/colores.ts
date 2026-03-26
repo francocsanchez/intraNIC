@@ -8,8 +8,9 @@ export const tablaColores: Record<string, string> = {
   "Body Rojo Techo Neg": "bg-red-50 text-red-600",
   "Rojo Bitono": "bg-red-50 text-red-600",
   "RED MICA M": "bg-red-50 text-red-600",
-  "RED METALL": "bg-red-50 text-red-600",
   "Rojo Mica": "bg-red-50 text-red-600",
+  "Rojo Mica ": "bg-red-50 text-red-600",
+  "RED METALL": "bg-red-50 text-red-600",
 
   // PLATA / GRIS CLARO
   "Plata Metalizado": "bg-slate-100 text-slate-600",
@@ -22,6 +23,7 @@ export const tablaColores: Record<string, string> = {
   "SILVER MET": "bg-slate-100 text-slate-600",
   "PLATEADO": "bg-slate-100 text-slate-600",
   "SILVER MIC": "bg-slate-100 text-slate-600",
+  "Plata Meta": "bg-slate-100 text-slate-600",
 
   // GRIS OSCURO
   GRIS: "bg-slate-200 text-slate-700",
@@ -29,6 +31,12 @@ export const tablaColores: Record<string, string> = {
   "Gris Oscuro Metaliz": "bg-slate-200 text-slate-700",
   "GRIS OSCUR": "bg-slate-200 text-slate-700",
   "GRIS OSC": "bg-slate-200 text-slate-700",
+  "Gris Oscur": "bg-slate-200 text-slate-700",
+  "GRAY METAL": "bg-slate-200 text-slate-700",
+
+  // BORDO
+  BORDO: "bg-rose-200 text-rose-700",
+  "VINOTINTO": "bg-rose-200 text-rose-700",
 
   // AZULES
   "Gris Azulado": "bg-blue-50 text-blue-600",
@@ -38,22 +46,11 @@ export const tablaColores: Record<string, string> = {
   AZUL: "bg-blue-50 text-blue-600",
   "AZUL CLA": "bg-blue-50 text-blue-600",
   "DARK BLUE": "bg-blue-50 text-blue-600",
+  "GRIS AZULA": "bg-blue-50 text-blue-600",
   "AZUL ELECT": "bg-blue-50 text-blue-600",
-
-  // BLANCOS
-  BLANCO: "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Super Blanco": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "SUPER BLANCO": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Perlado": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Perlado Bi-t": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco perlado con ": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Perlado con ": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Perlado con": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Perlado Tech": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Body Blanco Perlado": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  Blanco: "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "BLANCO PER": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
-  "Blanco Per": "bg-gray-50 text-gray-600 ring-1 ring-gray-200",
+  "BLUE": "bg-blue-50 text-blue-600",
+  "Gris Azula": "bg-blue-50 text-blue-600",
+  "Azul Metal": "bg-blue-50 text-blue-600",
 
   // NEGROS
   "Negro Mica": "bg-gray-200 text-gray-700",
@@ -67,6 +64,7 @@ export const tablaColores: Record<string, string> = {
 
   // BRONCE
   BRONCE: "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
+  "SILKY GOLD": "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
 
   // VERDE
   VERDE: "bg-green-50 text-green-600 ring-1 ring-green-200",
