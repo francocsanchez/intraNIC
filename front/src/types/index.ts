@@ -9,7 +9,7 @@ export const stockDisponibleConvencionalItemSchema = z.object({
   version: z.string(),
   modelo: z.string(),
   color: z.string(),
-  ubicacion: z.string(),
+  ubicacion: z.string().nullable(),
   chasis: z.string(),
   fechaRecepcion: z.string().datetime(),
 });

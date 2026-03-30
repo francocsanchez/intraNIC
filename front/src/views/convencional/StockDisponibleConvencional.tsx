@@ -241,7 +241,8 @@ export default function StockDisponibleConvencional() {
                       {item.color}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>
+                  {item.ubicacion ? ( <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>) : (<td className="px-4 py-2 text-gray-700">EN PRODUCCIÓN</td>)}
+                 
 
                   <td className="px-4 py-2 text-gray-700">{formatDate(item.fechaRecepcion)}</td>
                   <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
