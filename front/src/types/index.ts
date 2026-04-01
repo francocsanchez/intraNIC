@@ -185,7 +185,7 @@ export const misReservaSchema = z.object({
   version: z.string(),
   modelo: z.string(),
   color: z.string(),
-  ubicacion: z.string(),
+  ubicacion: z.string().nullable(),
   chasis: z.string(),
   sucursal: z.string(),
   fechaReserva: z.string(),

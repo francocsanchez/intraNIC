@@ -116,7 +116,7 @@ export default function MisReservas() {
                           {reserva.color}
                         </div>
                       </td>
-                      <td className="px-4 py-4">{reserva.ubicacion}</td>
+                      <td className="px-4 py-4">{reserva.ubicacion ?? "EN PRODUCCION"}</td>
                       <td className="px-4 py-4">{reserva.chasis}</td>
                       <td className="px-4 py-4">
                         <button
