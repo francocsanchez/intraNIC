@@ -38,7 +38,7 @@ export const ReservaSchema = z.object({
   version: z.string(),
   modelo: z.string(),
   color: z.string(),
-  ubicacion: z.string(),
+  ubicacion: z.string().nullable(),
   chasis: z.string(),
   sucursal: z.string(),
   fechaReserva: z.string(),
@@ -190,7 +190,7 @@ export const misReservaSchema = z.object({
   sucursal: z.string(),
   fechaReserva: z.string(),
   fechaRecepcion: z.string(),
-  clienteReserva:z.string()
+  clienteReserva: z.string(),
 });
 
 export const misReservasResponseSchema = z.object({
@@ -271,7 +271,7 @@ export const asignacionRecepcionItemSchema = z.object({
   color: z.string(),
   opera: z.number(),
   diferenciaDias: z.number().nullable(),
-  sucursal:z.string().nullable()
+  sucursal: z.string().nullable(),
 });
 
 export const resumenAsignacionRecepcionSchema = z.object({

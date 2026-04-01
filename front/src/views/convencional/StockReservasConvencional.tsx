@@ -2,27 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getStockReservaConvencional } from "@/api/convencional/stockAPI";
 import { textToColor } from "@/helpers/colores";
-
-type Reserva = {
-  interno: number;
-  vendedorReserva: string;
-  version: string;
-  modelo: string;
-  color: string;
-  ubicacion: string;
-  chasis: string;
-  sucursal: string;
-  fechaReserva: string;
-  fechaRecepcion: string;
-};
-
-type ReservasResponse = {
-  data: Record<string, Reserva[]>;
-  resumen: {
-    total: number;
-    sucursales: Record<string, number>;
-  };
-};
+import type { ReservasResponse } from "@/types/index";
 
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
@@ -92,7 +72,7 @@ export default function StockReservasConvencional() {
           <div
             className="mt-5 grid divide-x divide-gray-200"
             style={{
-              gridTemplateColumns: `repeat(${Math.max(Object.keys(data?.resumen.sucursales ?? {}).length, 1)}, minmax(0,1fr))`,
+              gridTemplateColumns: `repeat(${Math.max(Object.keys(data?.resumen?.sucursales ?? {}).length, 1)}, minmax(0,1fr))`,
             }}
           >
             {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => (
@@ -177,7 +157,7 @@ export default function StockReservasConvencional() {
                       </span>
                     </td>
 
-                    <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>
+                      {item.ubicacion ? ( <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>) : (<td className="px-4 py-2 text-gray-700">EN PRODUCCIÓN</td>)}
 
                     <td className="px-4 py-2 text-gray-700">{item.chasis}</td>
 
