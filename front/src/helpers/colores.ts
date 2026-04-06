@@ -51,6 +51,8 @@ export const tablaColores: Record<string, string> = {
   "BLUE": "bg-blue-50 text-blue-600",
   "Gris Azula": "bg-blue-50 text-blue-600",
   "Azul Metal": "bg-blue-50 text-blue-600",
+  "AZUL METAL": "bg-blue-50 text-blue-600",
+  "Azul Oscur": "bg-blue-50 text-blue-600",
 
   // NEGROS
   "Negro Mica": "bg-gray-200 text-gray-700",
