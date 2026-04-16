@@ -169,6 +169,8 @@ WHERE
 	AND ope.ope_fecfac IS NULL
 	AND ope.ope_stoauto IS NOT NULL
 	AND stoauto.sa_nrofab LIKE 'NIC%'
+	AND cli.cli_codigo <> 5722
+	AND vende.ven_codigo NOT IN (74, 265)
 ORDER BY
 	cli.cli_nombre
 `
