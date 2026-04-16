@@ -36,4 +36,12 @@ router.get("/asignaciones/:mes/:anio", DmsController.getAsignacion);
  */
 router.get("/consolidado/stock", DmsController.getStockConsolidado);
 
+/**
+ *
+ * @route GET /
+ * @desc Listar asignacion por mes y anio.
+ *
+ */
+router.get("/reventas/facturas", DmsController.getFactuasReventas);
+
 export default router;

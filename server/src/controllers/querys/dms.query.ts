@@ -130,3 +130,45 @@ WHERE
 ORDER BY
 	famiauto.fam_nombre
 `
+
+export const getFacturaReventasNic = () => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_stoauto as "interno",
+	ope.ope_fecha as "fecha",
+	cli.cli_nombre as "clienteNombre",
+	ope.ope_fecent as "fechaEntrega",
+	DATEDIFF(DAY, ope.ope_fecent, GETDATE()) as "diasDesdeEntrega",
+	DATEDIFF(DAY, ope.ope_fecasig, GETDATE()) as "diasDesdeAsignado",
+	ope.ope_fecasig as "fechaAsignacion",
+	auto.au_nombre AS "version",
+	famiauto.fam_nombre AS "modelo",
+	vende.ven_nombre as "vendedor",
+	movnped.mnp_chasis as "chasis"
+FROM
+	opera ope
+INNER JOIN cliente cli ON
+	ope.ope_cliente = cli.cli_codigo
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN stoauto ON
+	stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN movnped ON
+	movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN color ON
+	movnped.mnp_col1 = color.col_codigo
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND ope.ope_fecent IS NOT NULL
+	AND ope.ope_fecfac IS NULL
+	AND ope.ope_stoauto IS NOT NULL
+	AND stoauto.sa_nrofab LIKE 'NIC%'
+ORDER BY
+	cli.cli_nombre
+`

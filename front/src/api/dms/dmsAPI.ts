@@ -120,3 +120,25 @@ export async function getStockConsolidado() {
     );
   }
 }
+
+export async function getPendienteReventas() {
+  try {
+    const { data } = await api.get(`/dms/reventas/facturas`);
+
+    return data;
+
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al obtener el los vendedores",
+      );
+    }
+
+    throw new Error(
+      "Error inesperado al obtener el los vendedores",
+    );
+  }
+}

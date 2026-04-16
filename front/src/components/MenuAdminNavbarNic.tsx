@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, Handshake, MonitorCog, PowerOff, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, Handshake, MonitorCog, PowerOff, Ticket, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
@@ -28,7 +28,6 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
   const { allowed: buttonsGerente } = useRoleGuard(["admin", "gerente"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
-     
       {buttonsGerente && (
         <Menu as="div" className="relative">
           <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
@@ -48,7 +47,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                 </Link>
               )}
             </MenuItem>
-                  <MenuItem>
+            <MenuItem>
               {({ focus }) => (
                 <Link
                   to={"/consolidado"}
@@ -56,6 +55,17 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                 >
                   <ChartBarBig size={16} strokeWidth={1.5} />
                   Stock consolidado
+                </Link>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={"/reventa-pendientes"}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <Ticket size={16} strokeWidth={1.5} />
+                 Reventas pendientes
                 </Link>
               )}
             </MenuItem>

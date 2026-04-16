@@ -1,11 +1,12 @@
 import { Response, Request } from "express";
 import { sequelizeLIESS, sequelizeNIC } from "../config/database";
-import { getAsignacionRecepcion, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
+import { getAsignacionRecepcion, getFacturaReventasNic, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
 import { QueryTypes } from "sequelize";
 import { logError } from "../utils/logError";
 import { getReporteAsignacionRecepcion } from "../utils/reporteAsignacionRecepcion";
 import { buildResumenLiessMarca, buildResumenStockConsolidado } from "../utils/reportStockConsolidado";
 import { getStockConsolidadoLiess } from "./querys/liess.query";
+import { buildResumenFacturasReventas } from "../utils/reportFacturaRevetnas";
 
 export class DmsController {
   static getVendedores = async (_req: Request, res: Response) => {
@@ -87,6 +88,26 @@ export class DmsController {
       };
 
       return res.status(200).json({ resumen: resumenGeneral });
+    } catch (error) {
+      logError("ConvencionalController.getStockConsolidado");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getFactuasReventas = async (req: Request, res: Response) => {
+    try {
+      const queryNIC = getFacturaReventasNic();
+
+      const dataNIC = await sequelizeNIC.query<any>(queryNIC, {
+        type: QueryTypes.SELECT,
+      });
+ 
+      const resumenNIC = buildResumenFacturasReventas(dataNIC);
+
+      return res.status(200).json({
+        data: dataNIC, 
+        resumen: resumenNIC });
     } catch (error) {
       logError("ConvencionalController.getStockConsolidado");
       console.error(error);

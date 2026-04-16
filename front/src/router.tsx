@@ -40,6 +40,7 @@ import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
 import ConsolidadoView from "./views/admin/siac/ConsolidadoView";
 import StockIngresoUsados from "./views/usados/StockIngresoUsados";
+import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
 
 export default function Router() {
   return (
@@ -74,6 +75,7 @@ export default function Router() {
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
                 <Route path="/consolidado" element={<ConsolidadoView />} />
+                <Route path="/reventa-pendientes" element={<PendienteReventaView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
