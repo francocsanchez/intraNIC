@@ -171,6 +171,7 @@ WHERE
 	AND stoauto.sa_nrofab LIKE 'NIC%'
 	AND cli.cli_codigo NOT IN (5722, 78) 
 	AND vende.ven_codigo NOT IN (74, 265)
+	AND ope.ope_codigo NOT IN (29426, 37313, 50602)
 ORDER BY
 	cli.cli_nombre
 `
