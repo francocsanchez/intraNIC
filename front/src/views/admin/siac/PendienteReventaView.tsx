@@ -73,6 +73,15 @@ export default function PendienteReventaView() {
       .sort((a, b) => b.total - a.total || a.modelo.localeCompare(b.modelo));
   }, [items]);
 
+  const resumenDias = useMemo(
+    () => ({
+      mayorA90: items.filter((item) => item.diasDesdeEntrega >= 90).length,
+      entre60y89: items.filter((item) => item.diasDesdeEntrega >= 60 && item.diasDesdeEntrega <= 89).length,
+      menorA30: items.filter((item) => item.diasDesdeEntrega < 60).length,
+    }),
+    [items],
+  );
+
   const filtrosDisponibles = useMemo(() => {
     const existentes = new Set(items.map((item) => item.modelo));
     return FILTROS_PRIORITARIOS.filter((filtro) => filtro === "TODOS" || existentes.has(filtro));
@@ -91,13 +100,13 @@ export default function PendienteReventaView() {
           <div className="mt-3 h-4 w-72 animate-pulse rounded bg-gray-100" />
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-24 animate-pulse rounded-2xl bg-gray-100" />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_1.1fr]">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div key={index} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
+              <div className="mt-6 h-24 w-full animate-pulse rounded bg-gray-100" />
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
@@ -142,32 +151,55 @@ export default function PendienteReventaView() {
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Reventas pendientes de facturacion</h1>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelos</p>
-            <h2 className="mt-1 text-base font-semibold tracking-tight text-gray-900">Resumen por modelo</h2>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_1.1fr]">
+        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelos</p>
+              <h2 className="mt-1 text-base font-semibold tracking-tight text-gray-900">Resumen por modelo</h2>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{items.length} registros</div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{items.length} registros</div>
-        </div>
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {resumenDinamico.map((item) => (
+              <div key={item.modelo} className="rounded-lg bg-gray-50 px-2 py-2 text-center">
+                <p className="truncate text-[10px] text-gray-500">{item.modelo}</p>
+                <p className="text-sm font-semibold text-gray-900">{item.total}</p>
+              </div>
+            ))}
 
-        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-          {resumenDinamico.map((item) => (
-            <article key={item.modelo} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-              <p className="text-sm text-gray-500">{item.modelo}</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{item.total}</p>
-            </article>
-          ))}
+            {resumenDinamico.length === 0 && (
+              <div className="col-span-full rounded-lg bg-gray-50 px-2 py-2 text-center">
+                <p className="text-xs text-gray-500">Sin modelos</p>
+                <p className="text-sm font-semibold text-gray-900">0</p>
+              </div>
+            )}
+          </div>
 
-          {resumenDinamico.length === 0 && (
-            <div className="col-span-full rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-10 text-center text-sm text-gray-500">
-              No hay modelos para mostrar.
+          {resumen?.total ? <p className="mt-4 text-sm text-gray-500">Total informado por el servicio: {resumen.total}</p> : null}
+        </article>
+
+        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Antiguedad</p>
+          <div className="mt-5 grid grid-cols-1 gap-2">
+            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-red-600">Mayor a 90 dias</p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-red-700">{resumenDias.mayorA90}</p>
             </div>
-          )}
-        </div>
 
-        {resumen?.total ? <p className="mt-4 text-sm text-gray-500">Total informado por el servicio: {resumen.total}</p> : null}
+            <div className="rounded-lg border border-amber-100 bg-amber-50 px-3 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-amber-600">Entre 60 y 90</p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-amber-700">{resumenDias.entre60y89}</p>
+            </div>
+
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-600">Menor a 60 dias</p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-700">{resumenDias.menorA30}</p>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
