@@ -72,7 +72,7 @@ export default function Router() {
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
                 <Route path="/consolidado" element={<ConsolidadoView />} />

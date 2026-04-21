@@ -1,6 +1,7 @@
 import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
-import { Archive, BookMarked, Package } from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Archive, BookMarked, ChartBarBig, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type NavBarProps = {
@@ -10,6 +11,7 @@ type NavBarProps = {
 export default function NavBarNic({ negocio }: NavBarProps) {
   const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente"]);
   const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor"]);
+  const { allowed: buttonPromedios } = useRoleGuard(["admin", "gerente", "supervisor"]);
 
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
@@ -38,6 +40,29 @@ export default function NavBarNic({ negocio }: NavBarProps) {
               <BookMarked size={16} strokeWidth={1.5} />
               Reservas
             </Link>
+          )}
+
+          {buttonPromedios && (
+            <Menu as="div" className="relative">
+              <MenuButton className="inline-flex items-center gap-2 hover:text-gray-900 transition">
+                <ChartBarBig size={16} strokeWidth={1.5} />
+                Reportes
+              </MenuButton>
+
+              <MenuItems anchor="bottom start" className="mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                <MenuItem>
+                  {({ focus }) => (
+                    <Link
+                      to="/promedio-convencional"
+                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                    >
+                      <ChartBarBig size={16} strokeWidth={1.5} />
+                      Promedios de ventas
+                    </Link>
+                  )}
+                </MenuItem>
+              </MenuItems>
+            </Menu>
           )}
         </nav>
 

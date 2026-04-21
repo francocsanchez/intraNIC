@@ -68,19 +68,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
                  Reventas pendientes
                 </Link>
               )}
-            </MenuItem>
-            <MenuItem>
-              {({ focus }) => (
-                <Link
-                  to={"/promedio-convencional"}
-                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                >
-                  <Ticket size={16} strokeWidth={1.5} />
-                 Promedio Vendedores
-                </Link>
-              )}
-            </MenuItem>
-            
+            </MenuItem>    
           </MenuItems>
         </Menu>
       )}
