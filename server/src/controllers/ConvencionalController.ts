@@ -13,11 +13,13 @@ import {
   stockConvencionalQuery,
   listaDeEsperaConvencionalQuery,
   misOperacionesQuery,
+  operacionesConvencional,
 } from "./querys/convencional.query";
 
 import { buildResumen, StockRow } from "../utils/reportUnidadesConvencional";
 import { buildResumenListaDeEspera, ListaEsperaRow } from "../utils/reportOperacionesConvencional";
 import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisOperacionesConvencional";
+import { buildReportePromedioOperaciones, PromedioOperacionRow } from "../utils/reportPromedioOperacionesConvencional";
 
 export class ConvencionalController {
   static stockDisponible = async (_req: Request, res: Response) => {
@@ -177,6 +179,28 @@ export class ConvencionalController {
       return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("ConvencionalController.misOperaciones");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static promedioOperaciones = async (req: Request, res: Response) => {
+    const { mes, ano } = req.params;
+
+    try {
+      const mesNumber = Number(mes);
+      const anoNumber = Number(ano);
+      const query = operacionesConvencional(mesNumber, anoNumber);
+
+      const data = await sequelizeNIC.query<PromedioOperacionRow>(query, {
+        type: QueryTypes.SELECT,
+      });
+
+      const resumen = buildReportePromedioOperaciones(data, mesNumber, anoNumber);
+
+      return res.status(200).json({ resumen });
+    } catch (error) {
+      logError("ConvencionalController.promedioOperaciones");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

@@ -431,3 +431,58 @@ export const stockIngresoUsadosSchema = z.object({
 export type StockIngresoUsadosItem = z.infer<typeof stockIngresoUsadosItemSchema>;
 export type StockIngresoUsadosResumen = z.infer<typeof stockIngresoUsadosResumenSchema>;
 export type StockIngresoUsadosResponse = z.infer<typeof stockIngresoUsadosSchema>;
+
+//**************************** */
+// PROMEDIOS CONVENCIONAL
+//**************************** */
+
+export const promedioOperacionMesSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  mes: z.number(),
+  ano: z.number(),
+});
+
+export const promedioOperacionVendedorSchema = z.object({
+  vendedor: z.string(),
+  sucursal: z.string(),
+  meses: z.record(z.string(), z.number()),
+  totalSemestre: z.number(),
+  ventasMesActual: z.number(),
+  promedio: z.number(),
+});
+
+export const promedioOperacionSucursalSchema = z.object({
+  sucursal: z.string(),
+  vendedores: z.array(promedioOperacionVendedorSchema),
+  meses: z.record(z.string(), z.number()),
+  totalSemestre: z.number(),
+  ventasMesActual: z.number(),
+  promedio: z.number(),
+});
+
+export const promedioOperacionTablaItemSchema = z.object({
+  tipo: z.enum(["vendedor", "sucursal"]).default("vendedor"),
+  vendedor: z.string(),
+  meses: z.record(z.string(), z.number()),
+  ventasMesActual: z.number(),
+  promedio: z.number(),
+});
+
+export const promedioOperacionesConvencionalResumenSchema = z.object({
+  total: z.number(),
+  periodo: z.object({
+    mes: z.number(),
+    ano: z.number(),
+  }),
+  meses: z.array(promedioOperacionMesSchema),
+  vendedores: z.array(promedioOperacionVendedorSchema),
+  sucursales: z.array(promedioOperacionSucursalSchema),
+  tablasPorSucursal: z.record(z.string(), z.array(promedioOperacionTablaItemSchema)),
+});
+
+export const promedioOperacionesConvencionalResponseSchema = z.object({
+  resumen: promedioOperacionesConvencionalResumenSchema,
+});
+
+export type PromedioOperacionesConvencionalResponse = z.infer<typeof promedioOperacionesConvencionalResponseSchema>;

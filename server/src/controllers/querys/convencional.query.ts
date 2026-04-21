@@ -267,3 +267,33 @@ WHERE
 ORDER BY
 	cli.cli_nombre
 `;
+
+export const operacionesConvencional = (mes: number, ano: number) => `
+SELECT
+	ope.ope_codigo AS "opera",
+	ope.ope_fecasig AS "fechaAsignacion",
+	famiauto.fam_nombre AS "modelo",
+	vende.ven_nombre AS "vendedor",
+	ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS "sucursal"
+FROM
+	opera ope
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+LEFT JOIN sucursal ON
+	vende.ven_sucur = sucursal.suc_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND ope.ope_fecasig >= DATEADD(MONTH, -5, DATEFROMPARTS(${ano}, ${mes}, 1))
+	AND ope.ope_fecasig < DATEADD(MONTH, 1, DATEFROMPARTS(${ano}, ${mes}, 1))
+	AND ope.ope_vende NOT IN (74, 432,66,253)
+ORDER BY
+	sucursal.suc_nombre,
+	vende.ven_nombre,
+	ope.ope_fecasig
+`;

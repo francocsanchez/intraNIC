@@ -1,6 +1,7 @@
 import api from "@/libs/axios";
 import {
   getAsignacionRecepcionResponseSchema,
+  promedioOperacionesConvencionalResponseSchema,
   resumenGeneralSchema,
   vendedoresResponseSchema
 } from "@/types/index";
@@ -140,5 +141,31 @@ export async function getPendienteReventas() {
     throw new Error(
       "Error inesperado al obtener el los vendedores",
     );
+  }
+}
+
+export async function getPromedioOperacionesConvencional(mes: number, anio: number) {
+  try {
+    const { data } = await api.get(`/dms/convencional/promedio-operaciones/${mes}/${anio}`);
+
+    const parsed = promedioOperacionesConvencionalResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al obtener el promedio de operaciones convencional",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener el promedio de operaciones convencional");
   }
 }

@@ -62,5 +62,6 @@ router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
 router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 
 router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
+router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.promedioOperaciones);
 
 export default router;
