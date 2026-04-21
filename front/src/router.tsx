@@ -73,7 +73,7 @@ export default function Router() {
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
                 <Route path="/consolidado" element={<ConsolidadoView />} />
@@ -100,7 +100,6 @@ export default function Router() {
             <Route element={<NICUsadosLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
                 <Route path="/stock/disponible/usados" element={<StockDisponibleUsados />} />
-                <Route path="/ranking-convencional" element={<RankingConvencionalView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
