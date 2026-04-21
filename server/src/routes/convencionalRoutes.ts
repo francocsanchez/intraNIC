@@ -63,6 +63,6 @@ router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 
 router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
 router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.rankingOperaciones);
+router.get("/ranking-operaciones/:ano",authenticate , ConvencionalController.rankingOperaciones);
 
 export default router;

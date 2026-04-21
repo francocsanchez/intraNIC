@@ -23,6 +23,11 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium text-gray-600">
+          <Link to="/ranking-convencional" className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Trophy size={16} strokeWidth={1.5} />
+            Ranking de ventas
+          </Link>
+
           <Link to={`/stock/disponible/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
             <Package size={16} strokeWidth={1.5} />
             Disponible
@@ -61,25 +66,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                     </Link>
                   )}
                 </MenuItem>
-
-                <MenuItem>
-                  {({ focus }) => (
-                    <Link
-                      to="/ranking-convencional"
-                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                    >
-                      <Trophy size={16} strokeWidth={1.5} />
-                      Ranking de ventas
-                    </Link>
-                  )}
-                </MenuItem>
               </MenuItems>
             </Menu>
           )}
         </nav>
 
         {/* Menu administracion / perfil */}
-        <MenuAdminNavbarNic negocio={negocio}/>
+        <MenuAdminNavbarNic negocio={negocio} />
       </div>
     </header>
   );

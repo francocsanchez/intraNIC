@@ -100,6 +100,7 @@ export default function Router() {
             <Route element={<NICUsadosLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
                 <Route path="/stock/disponible/usados" element={<StockDisponibleUsados />} />
+                <Route path="/ranking-convencional" element={<RankingConvencionalView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
