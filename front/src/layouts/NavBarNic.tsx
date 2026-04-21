@@ -1,7 +1,7 @@
 import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, ChartBarBig, Package } from "lucide-react";
+import { Archive, BookMarked, ChartBarBig, Package, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type NavBarProps = {
@@ -58,6 +58,18 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                     >
                       <ChartBarBig size={16} strokeWidth={1.5} />
                       Promedios de ventas
+                    </Link>
+                  )}
+                </MenuItem>
+
+                <MenuItem>
+                  {({ focus }) => (
+                    <Link
+                      to="/ranking-convencional"
+                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                    >
+                      <Trophy size={16} strokeWidth={1.5} />
+                      Ranking de ventas
                     </Link>
                   )}
                 </MenuItem>

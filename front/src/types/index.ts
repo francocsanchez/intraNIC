@@ -486,3 +486,58 @@ export const promedioOperacionesConvencionalResponseSchema = z.object({
 });
 
 export type PromedioOperacionesConvencionalResponse = z.infer<typeof promedioOperacionesConvencionalResponseSchema>;
+
+//**************************** */
+// RANKING CONVENCIONAL
+//**************************** */
+
+export const rankingBaseItemSchema = z.object({
+  nombre: z.string(),
+  total: z.number(),
+});
+
+export const rankingVendedorItemSchema = rankingBaseItemSchema.extend({
+  sucursal: z.string(),
+  promedioMensual: z.number(),
+  hilux: z.number(),
+});
+
+export const rankingMesItemSchema = z.object({
+  mes: z.number(),
+  label: z.string(),
+  total: z.number(),
+});
+
+export const rankingDestacadosSchema = z.object({
+  topVendedorDelAno: rankingVendedorItemSchema.nullable(),
+  topModeloDelAno: rankingBaseItemSchema.nullable(),
+  topSucursalDelAno: rankingBaseItemSchema.nullable(),
+  topHiluxDelAno: rankingVendedorItemSchema.nullable(),
+  mejorPromedioAnual: rankingVendedorItemSchema.nullable(),
+});
+
+export const rankingOperacionesConvencionalResumenSchema = z.object({
+  periodo: z.object({
+    ano: z.number(),
+  }),
+  totales: z.object({
+    operaciones: z.number(),
+    vendedores: z.number(),
+    modelos: z.number(),
+    sucursales: z.number(),
+    hilux: z.number(),
+  }),
+  destacados: rankingDestacadosSchema,
+  ventasPorMes: z.array(rankingMesItemSchema),
+  rankingVendedores: z.array(rankingVendedorItemSchema),
+  rankingModelos: z.array(rankingBaseItemSchema),
+  rankingSucursales: z.array(rankingBaseItemSchema),
+  rankingHilux: z.array(rankingVendedorItemSchema),
+  ventasAcumuladasPorVendedor: z.array(rankingVendedorItemSchema),
+});
+
+export const rankingOperacionesConvencionalResponseSchema = z.object({
+  resumen: rankingOperacionesConvencionalResumenSchema,
+});
+
+export type RankingOperacionesConvencionalResponse = z.infer<typeof rankingOperacionesConvencionalResponseSchema>;
