@@ -56,6 +56,16 @@ export default function StockDisponibleLiess() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
+  const getAnioUnidad = (item: any) => {
+    const tipoUnidad = String(item.tipo ?? "").toLowerCase();
+
+    if (tipoUnidad === "nuevo" || tipoSeleccionado === "nuevos") {
+      return item.anioNuevo ?? "-";
+    }
+
+    return item.anioUsado ?? "-";
+  };
+
   if (isLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
@@ -174,6 +184,7 @@ export default function StockDisponibleLiess() {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Chasis</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
@@ -195,6 +206,7 @@ export default function StockDisponibleLiess() {
                         <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
                       </td>
                       <td className="min-w-[280px] px-4 py-2 text-gray-900">{item.version}</td>
+                      <td className="px-4 py-2 text-center font-medium text-gray-700">{getAnioUnidad(item)}</td>
                       <td className="px-4 py-2 text-center text-gray-700">
                         {item.color ? (
                           <span
@@ -214,7 +226,7 @@ export default function StockDisponibleLiess() {
 
                   {rows.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                         No hay unidades para la marca seleccionada.
                       </td>
                     </tr>
