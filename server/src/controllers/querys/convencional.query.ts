@@ -291,7 +291,7 @@ WHERE
 	AND ope.ope_tipo = 5
 	AND ope.ope_fecasig >= DATEADD(MONTH, -5, DATEFROMPARTS(${ano}, ${mes}, 1))
 	AND ope.ope_fecasig < DATEADD(MONTH, 1, DATEFROMPARTS(${ano}, ${mes}, 1))
-	AND ope.ope_vende NOT IN (74, 432,66,253)
+	AND ope.ope_vende NOT IN (74, 432,66,253,24,1,168,61)
 ORDER BY
 	sucursal.suc_nombre,
 	vende.ven_nombre,
