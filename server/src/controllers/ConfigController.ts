@@ -53,6 +53,40 @@ export class ConfigController {
 
   static updateConfig = async (req: Request, res: Response) => {
     try {
+      const userCompanies = req.user?.company ?? [];
+      const bodyKeys = Object.keys(req.body ?? {});
+
+      const conventionalKeys = [
+        "sistemaActivoConvencional",
+        "vendedoresReservasConvencional",
+        "vendedoresDisponibleConvencional",
+        "vendedoresStockGuardadoConvencional",
+      ];
+
+      const usadosKeys = [
+        "sistemaActivoUsados",
+        "vendedoresReservasUsados",
+        "vendedoresDisponibleUsados",
+        "vendedoresStockGuardadoUsados",
+      ];
+
+      const touchesConvencional = bodyKeys.some((key) =>
+        conventionalKeys.includes(key),
+      );
+      const touchesUsados = bodyKeys.some((key) => usadosKeys.includes(key));
+
+      if (touchesConvencional && !userCompanies.includes("convencional")) {
+        return res.status(403).json({
+          error: "No tienes permisos para editar la configuracion de Convencional.",
+        });
+      }
+
+      if (touchesUsados && !userCompanies.includes("usados")) {
+        return res.status(403).json({
+          error: "No tienes permisos para editar la configuracion de Usados.",
+        });
+      }
+
       const config = await Configuration.findOneAndUpdate({}, req.body, {
         returnDocument: "after",
         runValidators: true,

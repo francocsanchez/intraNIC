@@ -1,5 +1,7 @@
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/usuarioAPI";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
@@ -15,7 +17,9 @@ function capitalize(value: string) {
 }
 
 export default function UsuariosView() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const canManageUsers = hasAnyRole(user, ["admin", "stock"]);
 
   const { data, isError, isLoading } = useQuery({
     queryKey: ["usuarios", "listar"],
@@ -100,12 +104,14 @@ export default function UsuariosView() {
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Usuarios</h1>
         </div>
 
-        <Link
-          to="/usuarios/crear"
-          className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
-        >
-          Crear usuario
-        </Link>
+        {canManageUsers ? (
+          <Link
+            to="/usuarios/crear"
+            className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+          >
+            Crear usuario
+          </Link>
+        ) : null}
       </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -192,34 +198,38 @@ export default function UsuariosView() {
 
                   <td className="px-6 py-3">
                     <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => changeStatus(u._id)}
-                        className={[
-                          "inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
-                          u.enable
-                            ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                            : "border border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
-                        ].join(" ")}
-                      >
-                        {u.enable ? "Deshabilitar" : "Habilitar"}
-                      </button>
+                      {canManageUsers ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => changeStatus(u._id)}
+                            className={[
+                              "inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
+                              u.enable
+                                ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                                : "border border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
+                            ].join(" ")}
+                          >
+                            {u.enable ? "Deshabilitar" : "Habilitar"}
+                          </button>
 
-                      <button
-                        type="button"
-                        onClick={() => resetPasswordUser(u._id)}
-                        className="inline-flex items-center gap-1 justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
-                      >
-                        <RotateCcw size={14} strokeWidth={1.8} />
-                        Reset password
-                      </button>
+                          <button
+                            type="button"
+                            onClick={() => resetPasswordUser(u._id)}
+                            className="inline-flex items-center gap-1 justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                          >
+                            <RotateCcw size={14} strokeWidth={1.8} />
+                            Reset password
+                          </button>
 
-                      <Link
-                        to={`/usuarios/${u._id}/editar`}
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
-                      >
-                        Editar
-                      </Link>
+                          <Link
+                            to={`/usuarios/${u._id}/editar`}
+                            className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                          >
+                            Editar
+                          </Link>
+                        </>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

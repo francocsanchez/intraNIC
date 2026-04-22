@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { getConfiguracion } from "@/api/configuracionAPI";
+import Mantenimiento from "@/components/Mantenimiento";
 import { getStockReservaUsados } from "@/api/usados/stockAPI";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { textToColor } from "@/helpers/colores";
 
 type ReservaUsado = {
@@ -29,6 +33,17 @@ type MarcaFiltro = "TODOS" | string;
 
 export default function StockReservasUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
+  const { user } = useAuth();
+
+  const {
+    data: configResponse,
+    isError: configError,
+    isLoading: configLoading,
+  } = useQuery({
+    queryKey: ["configuracion"],
+    queryFn: getConfiguracion,
+    refetchOnWindowFocus: true,
+  });
 
   const { data, isLoading, isError, error } = useQuery<ReservasUsadosResponse>({
     queryKey: ["stockReservado", "usados"],
@@ -74,10 +89,16 @@ export default function StockReservasUsados() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading) return <div className="px-4 py-6">Cargando...</div>;
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
-  if (isError) {
+  if (isLoading || configLoading) return <div className="px-4 py-6">Cargando...</div>;
+
+  if (isError || configError) {
     return <div className="px-4 py-6">{error instanceof Error ? error.message : "Error"}</div>;
+  }
+
+  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
+    return <Mantenimiento />;
   }
 
   return (

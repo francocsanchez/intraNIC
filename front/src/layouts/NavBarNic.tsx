@@ -9,8 +9,8 @@ type NavBarProps = {
 };
 
 export default function NavBarNic({ negocio }: NavBarProps) {
-  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente"]);
-  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor"]);
+  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "stock"]);
+  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
   const { allowed: buttonPromedios } = useRoleGuard(["admin", "gerente", "supervisor"]);
 
   return (

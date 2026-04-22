@@ -1,17 +1,18 @@
 import { Router } from "express";
 import { ConvencionalController } from "../controllers/ConvencionalController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
 router.use(authenticate);
+router.use(authorizeCompanies("convencional"));
 /**
  *
  * @route GET /
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente", "vendedor"), ConvencionalController.stockDisponible);
+router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), ConvencionalController.stockDisponible);
 
 /**
  *
@@ -19,7 +20,7 @@ router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente",
  * @desc Listar stock guardado.
  *
  */
-router.get("/stock-guardado", authorizeRoles("admin", "gerente"), ConvencionalController.stockGuardado);
+router.get("/stock-guardado", authorizeRoles("admin", "gerente", "stock"), ConvencionalController.stockGuardado);
 
 /**
  *
@@ -27,7 +28,7 @@ router.get("/stock-guardado", authorizeRoles("admin", "gerente"), ConvencionalCo
  * @desc Listar stock reservado.
  *
  */
-router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.stockReservado);
+router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", "stock"), ConvencionalController.stockReservado);
 
 /**
  *
@@ -63,6 +64,6 @@ router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 
 router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
 router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano",authenticate , ConvencionalController.rankingOperaciones);
+router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), ConvencionalController.rankingOperaciones);
 
 export default router;

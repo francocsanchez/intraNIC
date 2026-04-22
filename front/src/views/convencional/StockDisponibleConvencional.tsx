@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import Mantenimiento from "@/components/Mantenimiento";
 
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
@@ -35,8 +36,7 @@ export default function StockDisponibleConvencional() {
   const items = data?.data ?? [];
   const resumen = data?.resumen;
 
-  const roles = user?.role ?? [];
-  const isPrivileged = roles.includes("admin") || roles.includes("gerente");
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const resumenDinamico = useMemo(() => {
     const porModelo = items.reduce<Record<string, number>>((acc, item) => {

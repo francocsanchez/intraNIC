@@ -2,6 +2,7 @@ import Mantenimiento from "@/components/Mantenimiento";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getPendienteReventas } from "@/api/dms/dmsAPI";
 import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -59,8 +60,7 @@ export default function PendienteReventaView() {
   const items: PendienteReventaItem[] = data?.data ?? [];
   const resumen = data?.resumen;
 
-  const roles = user?.role ?? [];
-  const isPrivileged = roles.includes("admin") || roles.includes("gerente");
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const resumenDinamico = useMemo(() => {
     const porModelo = items.reduce<Record<string, number>>((acc, item) => {

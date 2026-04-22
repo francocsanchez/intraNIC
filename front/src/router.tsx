@@ -55,42 +55,73 @@ export default function Router() {
           <Route path="/" element={<Inicio />} />
           <Route path="/no-autorizado" element={<NoAutorizadoView />} />
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/usuarios" element={<UsuariosView />} />
-              <Route path="/usuarios/crear" element={<CrearUsuarioView />} />
-              <Route path="/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
-
               <Route path="/configuracion" element={<ConfiguracionView />} />
-              <Route path="/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
-              <Route path="/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/usuarios/crear" element={<CrearUsuarioView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
+                <Route path="/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
+              </Route>
+
+              <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
+                <Route path="/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/reventa-pendientes" element={<PendienteReventaView />} />
             </Route>
           </Route>
 
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
             <Route element={<NICLayout />}>
+              <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
+
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
+                <Route path="/consolidado" element={<ConsolidadoView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
-                <Route path="/consolidado" element={<ConsolidadoView />} />
-                <Route path="/reventa-pendientes" element={<PendienteReventaView />} />
-                <Route path="/promedio-convencional" element={<PromediosConvencionalView />} />
-                <Route path="/ranking-convencional" element={<RankingConvencionalView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
+                <Route path="/promedio-convencional" element={<PromediosConvencionalView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
                 <Route path="/stock/reservado/convencional" element={<StockReservasConvencional />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
-                <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
                 <Route path="/mis-reservas/convencional" element={<MisReservas />} />
                 <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
                 <Route path="/mis-operaciones/convencional" element={<MisOperacionesView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
+                <Route path="/ranking-convencional" element={<RankingConvencionalView />} />
                 <Route path="/stock/disponible/convencional" element={<StockDisponibleConvencional />} />
               </Route>
             </Route>
@@ -98,16 +129,16 @@ export default function Router() {
 
           <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
             <Route element={<NICUsadosLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path="/stock/disponible/usados" element={<StockDisponibleUsados />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
                 <Route path="/stock/guardado/usados" element={<StockGuardadoUsados />} />
+                <Route path="/stock/reservado/usados" element={<StockReservasUsados />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
-                <Route path="/stock/reservado/usados" element={<StockReservasUsados />} />
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path="/stock/ingresos/usados" element={<StockIngresoUsados />} />
               </Route>
             </Route>
@@ -116,7 +147,10 @@ export default function Router() {
           <Route element={<CompanyProtectedRoute allowedCompany={["liess"]} />}>
             <Route element={<LiessLayout />}>
               <Route path="/mi-perfil/liess" element={<MiPerfilView />} />
-              <Route path="/stock/disponible/liess/:tipo" element={<StockDisponibleLiess />} />
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
+                <Route path="/stock/disponible/liess/:tipo" element={<StockDisponibleLiess />} />
+              </Route>
             </Route>
           </Route>
         </Route>

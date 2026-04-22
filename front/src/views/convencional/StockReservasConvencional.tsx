@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getStockReservaConvencional } from "@/api/convencional/stockAPI";
+import { getConfiguracion } from "@/api/configuracionAPI";
+import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import type { ReservasResponse } from "@/types/index";
 
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
@@ -10,6 +14,17 @@ const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", 
 
 export default function StockReservasConvencional() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const { user } = useAuth();
+
+  const {
+    data: configResponse,
+    isError: configError,
+    isLoading: configLoading,
+  } = useQuery({
+    queryKey: ["configuracion"],
+    queryFn: getConfiguracion,
+    refetchOnWindowFocus: true,
+  });
 
   const { data, isLoading, isError, error } = useQuery<ReservasResponse>({
     queryKey: ["stockReservado", "convencional"],
@@ -52,10 +67,16 @@ export default function StockReservasConvencional() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading) return <div className="px-4 py-6">Cargando...</div>;
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
-  if (isError) {
+  if (isLoading || configLoading) return <div className="px-4 py-6">Cargando...</div>;
+
+  if (isError || configError) {
     return <div className="px-4 py-6">{error instanceof Error ? error.message : "Error"}</div>;
+  }
+
+  if (configResponse?.data.sistemaActivoConvencional === false && !isPrivileged) {
+    return <Mantenimiento />;
   }
 
   return (

@@ -4,6 +4,7 @@ import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, 
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
+import { hasAnyRole } from "@/helpers/access";
 
 type NavBarProps = {
   negocio: string;
@@ -25,10 +26,14 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
     navigate("/login", { replace: true });
   };
 
-  const { allowed: buttonsGerente } = useRoleGuard(["admin", "gerente"]);
+  const canViewGestion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
+  const { allowed: canViewAsignaciones } = useRoleGuard(["admin", "gerente", "stock"]);
+  const { allowed: canViewConsolidado } = useRoleGuard(["admin"]);
+  const { allowed: canViewReventas } = useRoleGuard(["admin", "gerente", "stock", "administracion"]);
+  const canViewOperativeMenu = hasAnyRole(user, ["admin", "gerente", "supervisor", "vendedor"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
-      {buttonsGerente && (
+      {canViewGestion && (
         <Menu as="div" className="relative">
           <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
             <MonitorCog size={16} strokeWidth={1.25} />
@@ -36,39 +41,45 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
           </MenuButton>
 
           <MenuItems anchor="bottom end" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-            <MenuItem>
-              {({ focus }) => (
-                <Link
-                  to={"/asignaciones"}
-                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                >
-                  <FileChartPie size={16} strokeWidth={1.5} />
-                  Asignaciones
-                </Link>
-              )}
-            </MenuItem>
-            <MenuItem>
-              {({ focus }) => (
-                <Link
-                  to={"/consolidado"}
-                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                >
-                  <ChartBarBig size={16} strokeWidth={1.5} />
-                  Stock consolidado
-                </Link>
-              )}
-            </MenuItem>
-            <MenuItem>
-              {({ focus }) => (
-                <Link
-                  to={"/reventa-pendientes"}
-                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                >
-                  <Ticket size={16} strokeWidth={1.5} />
-                 Reventas pendientes
-                </Link>
-              )}
-            </MenuItem>    
+            {canViewAsignaciones ? (
+              <MenuItem>
+                {({ focus }) => (
+                  <Link
+                    to={"/asignaciones"}
+                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                  >
+                    <FileChartPie size={16} strokeWidth={1.5} />
+                    Asignaciones
+                  </Link>
+                )}
+              </MenuItem>
+            ) : null}
+            {canViewConsolidado ? (
+              <MenuItem>
+                {({ focus }) => (
+                  <Link
+                    to={"/consolidado"}
+                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                  >
+                    <ChartBarBig size={16} strokeWidth={1.5} />
+                    Stock consolidado
+                  </Link>
+                )}
+              </MenuItem>
+            ) : null}
+            {canViewReventas ? (
+              <MenuItem>
+                {({ focus }) => (
+                  <Link
+                    to={"/reventa-pendientes"}
+                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                  >
+                    <Ticket size={16} strokeWidth={1.5} />
+                    Reventas pendientes
+                  </Link>
+                )}
+              </MenuItem>
+            ) : null}
           </MenuItems>
         </Menu>
       )}
@@ -93,41 +104,47 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
             )}
           </MenuItem>
 
-          <MenuItem>
-            {({ focus }) => (
-              <Link
-                to={`/mis-operaciones/${negocio}`}
-                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-              >
-                <Handshake size={16} strokeWidth={1.25} />
-                Mis Operaciones
-              </Link>
-            )}
-          </MenuItem>
+          {canViewOperativeMenu ? (
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={`/mis-operaciones/${negocio}`}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <Handshake size={16} strokeWidth={1.25} />
+                  Mis Operaciones
+                </Link>
+              )}
+            </MenuItem>
+          ) : null}
 
-          <MenuItem>
-            {({ focus }) => (
-              <Link
-                to={`/mis-reservas/${negocio}`}
-                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-              >
-                <BookMarked size={16} strokeWidth={1.25} />
-                Mis reservas
-              </Link>
-            )}
-          </MenuItem>
+          {canViewOperativeMenu ? (
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={`/mis-reservas/${negocio}`}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <BookMarked size={16} strokeWidth={1.25} />
+                  Mis reservas
+                </Link>
+              )}
+            </MenuItem>
+          ) : null}
 
-          <MenuItem>
-            {({ focus }) => (
-              <Link
-                to={`/mi-lista-espera/${negocio}`}
-                className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-              >
-                <CalendarClock size={16} strokeWidth={1.25} />
-                Mis Lista de espera
-              </Link>
-            )}
-          </MenuItem>
+          {canViewOperativeMenu ? (
+            <MenuItem>
+              {({ focus }) => (
+                <Link
+                  to={`/mi-lista-espera/${negocio}`}
+                  className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                >
+                  <CalendarClock size={16} strokeWidth={1.25} />
+                  Mis Lista de espera
+                </Link>
+              )}
+            </MenuItem>
+          ) : null}
 
           <MenuItem>
             {({ focus }) => (

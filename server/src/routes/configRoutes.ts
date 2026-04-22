@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { ConfigController } from "../controllers/ConfigController";
+import { authenticate } from "../middleware/authenticate";
+import { authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
+router.use(authenticate);
 
 /**
  *
@@ -17,7 +20,7 @@ router.get("/", ConfigController.listConfig);
  * @desc Crear configuracion.
  *
  */
-router.post("/", ConfigController.createConfig);
+router.post("/", authorizeRoles("admin"), ConfigController.createConfig);
 
 /**
  *
@@ -25,7 +28,7 @@ router.post("/", ConfigController.createConfig);
  * @desc Actualizar confinguracion configuracion.
  *
  */
-router.patch("/", ConfigController.updateConfig);
+router.patch("/", authorizeRoles("admin", "supervisor", "stock"), ConfigController.updateConfig);
 
 /**
  *
@@ -33,7 +36,7 @@ router.patch("/", ConfigController.updateConfig);
  * @desc Activar / Desactivar sistema Convencional.
  *
  */
-router.patch("/change-status/convencional", ConfigController.toggleSistemaConvencional);
+router.patch("/change-status/convencional", authorizeRoles("admin"), ConfigController.toggleSistemaConvencional);
 
 /**
  *
@@ -41,7 +44,7 @@ router.patch("/change-status/convencional", ConfigController.toggleSistemaConven
  * @desc Activar / Desactivar sistema Usados.
  *
  */
-router.patch("/change-status/usados", ConfigController.toggleSistemaUsados);
+router.patch("/change-status/usados", authorizeRoles("admin"), ConfigController.toggleSistemaUsados);
 
 /**
  *
@@ -49,6 +52,6 @@ router.patch("/change-status/usados", ConfigController.toggleSistemaUsados);
  * @desc Activar / Desactivar sistema LIESS.
  *
  */
-router.patch("/change-status/liess", ConfigController.toggleSistemaLIESS);
+router.patch("/change-status/liess", authorizeRoles("admin"), ConfigController.toggleSistemaLIESS);
 
 export default router;

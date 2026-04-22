@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { DmsController } from "../controllers/DmsController";
 import { authenticate } from "../middleware/authenticate";
+import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
 router.use(authenticate);
@@ -10,7 +11,7 @@ router.use(authenticate);
  * @desc Listar vendedores.
  *
  */
-router.get("/vendedores", DmsController.getVendedores);
+router.get("/vendedores", authorizeRoles("admin", "supervisor", "stock"), DmsController.getVendedores);
 
 /**
  *
@@ -18,7 +19,7 @@ router.get("/vendedores", DmsController.getVendedores);
  * @desc Listar vendedores activos.
  *
  */
-router.get("/vendedores/activos", DmsController.getVendedoresActivos);
+router.get("/vendedores/activos", authorizeRoles("admin", "supervisor", "stock"), DmsController.getVendedoresActivos);
 
 /**
  *
@@ -26,7 +27,7 @@ router.get("/vendedores/activos", DmsController.getVendedoresActivos);
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/asignaciones/:mes/:anio", DmsController.getAsignacion);
+router.get("/asignaciones/:mes/:anio", authorizeCompanies("convencional"), authorizeRoles("admin", "gerente", "stock"), DmsController.getAsignacion);
 
 /**
  *
@@ -34,7 +35,7 @@ router.get("/asignaciones/:mes/:anio", DmsController.getAsignacion);
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/consolidado/stock", DmsController.getStockConsolidado);
+router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRoles("admin"), DmsController.getStockConsolidado);
 
 /**
  *
@@ -42,6 +43,6 @@ router.get("/consolidado/stock", DmsController.getStockConsolidado);
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/reventas/facturas", DmsController.getFactuasReventas);
+router.get("/reventas/facturas", authorizeRoles("admin", "gerente", "stock", "administracion"), DmsController.getFactuasReventas);
 
 export default router;

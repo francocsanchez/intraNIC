@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { CarFront, Car, Motorbike, LogOut, Cog } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
@@ -15,12 +16,11 @@ export default function Inicio() {
   }
 
   const companies = user.company ?? [];
-  const roles = user.role ?? [];
-
   const hasNIC = companies.includes("convencional");
   const hasUSED = companies.includes("usados");
   const hasLIESS = companies.includes("liess");
-  const hasAdmin = roles.includes("admin");
+  const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const hasAdministracion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
@@ -52,7 +52,7 @@ export default function Inicio() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
           {/* Convencional */}
           {hasNIC ? (
             <Link to="/stock/disponible/convencional" className={`${baseCard} hover:shadow-md transition group`}>
@@ -122,14 +122,14 @@ export default function Inicio() {
             </div>
           )}
 
-          {/* Liess */}
-          {hasAdmin ? (
+          {/* Sistema */}
+          {hasSystem ? (
             <Link to="/configuracion" className={`${baseCard} hover:shadow-md transition group`}>
               <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
                 <Cog size={26} strokeWidth={1.5} className="text-gray-900" />
               </div>
 
-              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Sistema</h2>
 
               <p className="text-sm text-gray-500 mt-1">Config del sistema</p>
             </Link>
@@ -139,9 +139,32 @@ export default function Inicio() {
                 <Cog size={26} strokeWidth={1.5} className="text-gray-600" />
               </div>
 
-              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Sistema</h2>
 
               <p className="text-sm text-gray-500 mt-1">Config del sistema</p>
+            </div>
+          )}
+
+          {/* Administracion */}
+          {hasAdministracion ? (
+            <Link to="/reventa-pendientes" className={`${baseCard} hover:shadow-md transition group`}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
+                <Cog size={26} strokeWidth={1.5} className="text-gray-900" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Reventas pendientes</p>
+            </Link>
+          ) : (
+            <div className={disabledCard}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
+                <Cog size={26} strokeWidth={1.5} className="text-gray-600" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Reventas pendientes</p>
             </div>
           )}
         </div>

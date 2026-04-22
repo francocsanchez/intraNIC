@@ -22,6 +22,31 @@ declare global {
 
 type AuthPayload = JwtPayload & { sub?: string };
 
+const normalizeStringArray = (values: unknown): string[] => {
+  const normalizeEntry = (value: unknown) =>
+    String(value)
+      .normalize("NFKC")
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .replace(/\s+/g, "")
+      .trim()
+      .toLowerCase();
+
+  if (Array.isArray(values)) {
+    return values
+      .map((value) => normalizeEntry(value))
+      .filter(Boolean);
+  }
+
+  if (typeof values === "string") {
+    return values
+      .split(",")
+      .map((value) => normalizeEntry(value))
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
 export const authenticate = async (
   req: Request,
   res: Response,
@@ -67,11 +92,11 @@ export const authenticate = async (
       name: user.name,
       email: user.email,
       lastName: user.lastName,
-      role: user.role,
+      role: normalizeStringArray(user.role),
       enable: user.enable,
       numberSaleNic: user.numberSaleNic,
       numberSaleLiess: user.numberSaleLiess,
-      company: user.company,
+      company: normalizeStringArray(user.company),
     };
 
     next();

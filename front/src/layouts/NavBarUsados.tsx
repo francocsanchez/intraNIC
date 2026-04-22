@@ -3,8 +3,9 @@ import { Archive, BookMarked, Import, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NavBarUsados() {
-  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente"]);
-  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor"]);
+  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
+  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
+  const { allowed: buttonIngreso } = useRoleGuard(["admin", "gerente", "stock"]);
 
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
@@ -34,7 +35,7 @@ export default function NavBarUsados() {
               Reservas
             </Link>
           )}
-          {buttonReservas && (
+          {buttonIngreso && (
             <Link to={`/stock/ingresos/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <Import size={16} strokeWidth={1.5} />A ingresar
             </Link>

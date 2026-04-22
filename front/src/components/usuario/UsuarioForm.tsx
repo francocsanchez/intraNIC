@@ -168,6 +168,9 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
       <option value="vendedor">Vendedor</option>
       <option value="gerente">Gerente</option>
       <option value="supervisor">Supervisor</option>
+      <option value="stock">Stock</option>
+      <option value="reventa">Reventa</option>
+      <option value="administracion">Administracion</option>
       <option value="admin">Admin</option>
     </select>
     <FieldError message={errors.role?.message as string | undefined} />

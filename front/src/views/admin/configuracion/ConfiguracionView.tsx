@@ -1,9 +1,12 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyCompany } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 export default function ConfiguracionView() {
+  const { user } = useAuth();
   const {
     data: configResponse,
     isError: configError,
@@ -42,17 +45,21 @@ export default function ConfiguracionView() {
   const sistemas = [
     {
       title: "Convencional",
+      slug: "convencional",
       activo: config.sistemaActivoConvencional,
       reservas: mapCodigos(config.vendedoresReservasConvencional),
       disponibles: mapCodigos(config.vendedoresDisponibleConvencional),
       stockGuardado: mapCodigos(config.vendedoresStockGuardadoConvencional),
+      canEdit: hasAnyCompany(user, ["convencional"]),
     },
     {
       title: "Usados",
+      slug: "usados",
       activo: config.sistemaActivoUsados,
       reservas: mapCodigos(config.vendedoresReservasUsados),
       disponibles: mapCodigos(config.vendedoresDisponibleUsados),
       stockGuardado: mapCodigos(config.vendedoresStockGuardadoUsados),
+      canEdit: hasAnyCompany(user, ["usados"]),
     },
   ];
 
@@ -80,12 +87,18 @@ export default function ConfiguracionView() {
                 </span>
               </div>
 
-              <Link
-                to={`${sistema.title}/editar`}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                Editar
-              </Link>
+              {sistema.canEdit ? (
+                <Link
+                  to={`/configuracion/${sistema.slug}/editar`}
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Editar
+                </Link>
+              ) : (
+                <span className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-400">
+                  Sin acceso de edicion
+                </span>
+              )}
             </div>
 
             <div className="space-y-5 p-6">

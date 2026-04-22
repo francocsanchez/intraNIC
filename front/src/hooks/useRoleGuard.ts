@@ -1,13 +1,11 @@
 import { useAuth } from "./useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 
 type Role = string;
 
 export default function useRoleGuard(allowedRoles: Role[]) {
   const { user } = useAuth();
-
-  const roles = user?.role ?? [];
-
-  const hasAccess = roles.some((role) => allowedRoles.includes(role));
+  const hasAccess = hasAnyRole(user, allowedRoles);
 
   if (!hasAccess) {
     return {

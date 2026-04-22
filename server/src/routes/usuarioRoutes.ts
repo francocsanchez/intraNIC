@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { UsuarioController } from "../controllers/UsuarioController";
 import { authenticate } from "../middleware/authenticate";
+import { authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
 
@@ -10,7 +11,7 @@ const router = Router();
  * @desc Listar usuarios.
  *
  */
-router.get("/", UsuarioController.listUsuarios);
+router.get("/", authenticate, authorizeRoles("admin", "supervisor", "stock"), UsuarioController.listUsuarios);
 
 /**
  *
@@ -18,7 +19,7 @@ router.get("/", UsuarioController.listUsuarios);
  * @desc Crear usuarios.
  *
  */
-router.post("/", UsuarioController.createUsuario);
+router.post("/", authenticate, authorizeRoles("admin", "stock"), UsuarioController.createUsuario);
 
 
 /**
@@ -27,7 +28,7 @@ router.post("/", UsuarioController.createUsuario);
  * @desc Actualizar usuario by ID.
  *
  */
-router.put("/:idUsuario", UsuarioController.updateUsuarioById);
+router.put("/:idUsuario", authenticate, authorizeRoles("admin"), UsuarioController.updateUsuarioById);
 
 /**
  *
@@ -35,7 +36,7 @@ router.put("/:idUsuario", UsuarioController.updateUsuarioById);
  * @desc Activar-desactivar usuario.
  *
  */
-router.patch("/:idUsuario/change-status", UsuarioController.changeStatusUsuario);
+router.patch("/:idUsuario/change-status", authenticate, authorizeRoles("admin"), UsuarioController.changeStatusUsuario);
 
 /**
  *
@@ -59,7 +60,7 @@ router.get("/me", authenticate,UsuarioController.getMe);
  * @desc Obtener usuario by ID.
  *
  */
-router.get("/:idUsuario", UsuarioController.getUsuarioByID);
+router.get("/:idUsuario", authenticate, authorizeRoles("admin"), UsuarioController.getUsuarioByID);
 
 /**
  *
@@ -67,7 +68,7 @@ router.get("/:idUsuario", UsuarioController.getUsuarioByID);
  * @desc Resetear password.
  *
  */
-router.patch("/reset-password/:idUsuario",UsuarioController.resetPassword);
+router.patch("/reset-password/:idUsuario", authenticate, authorizeRoles("admin"), UsuarioController.resetPassword);
 
 /**
  *

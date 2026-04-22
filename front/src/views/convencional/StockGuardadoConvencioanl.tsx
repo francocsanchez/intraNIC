@@ -1,5 +1,9 @@
 import { getStockGuardadoConvencional } from "@/api/convencional/stockAPI";
+import { getConfiguracion } from "@/api/configuracionAPI";
+import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -9,6 +13,17 @@ const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", 
 
 export default function StockGuardadoConvencioanl() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const { user } = useAuth();
+
+  const {
+    data: configResponse,
+    isError: configError,
+    isLoading: configLoading,
+  } = useQuery({
+    queryKey: ["configuracion"],
+    queryFn: getConfiguracion,
+    refetchOnWindowFocus: true,
+  });
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stockGuardado", "convencional"],
@@ -52,6 +67,8 @@ export default function StockGuardadoConvencioanl() {
     return items.filter((item) => item.modelo === modeloActivo);
   }, [items, modeloActivo]);
 
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
+
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("es-AR", {
       day: "2-digit",
@@ -59,7 +76,7 @@ export default function StockGuardadoConvencioanl() {
       year: "numeric",
     }).format(new Date(value));
 
-  if (isLoading) {
+  if (isLoading || configLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -96,7 +113,7 @@ export default function StockGuardadoConvencioanl() {
     );
   }
 
-  if (isError) {
+  if (isError || configError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
@@ -105,6 +122,10 @@ export default function StockGuardadoConvencioanl() {
         </div>
       </div>
     );
+  }
+
+  if (configResponse?.data.sistemaActivoConvencional === false && !isPrivileged) {
+    return <Mantenimiento />;
   }
 
   return (

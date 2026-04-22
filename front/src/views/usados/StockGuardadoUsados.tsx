@@ -1,7 +1,11 @@
 import { useMemo, useState, Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { getConfiguracion } from "@/api/configuracionAPI";
+import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
 import { Dialog, Transition } from "@headlessui/react";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { getStockGuardadoUsados } from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
@@ -9,6 +13,17 @@ type MarcaFiltro = "TODOS" | string;
 export default function StockGuardadoUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [itemSeleccionado, setItemSeleccionado] = useState<any>(null);
+  const { user } = useAuth();
+
+  const {
+    data: configResponse,
+    isError: configError,
+    isLoading: configLoading,
+  } = useQuery({
+    queryKey: ["configuracion"],
+    queryFn: getConfiguracion,
+    refetchOnWindowFocus: true,
+  });
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stockGuardado", "usados"],
@@ -62,7 +77,9 @@ export default function StockGuardadoUsados() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading) {
+  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
+
+  if (isLoading || configLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -99,7 +116,7 @@ export default function StockGuardadoUsados() {
     );
   }
 
-  if (isError) {
+  if (isError || configError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
@@ -108,6 +125,10 @@ export default function StockGuardadoUsados() {
         </div>
       </div>
     );
+  }
+
+  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
+    return <Mantenimiento />;
   }
 
   return (
