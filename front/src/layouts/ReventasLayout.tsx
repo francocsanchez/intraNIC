@@ -15,7 +15,7 @@ export default function ReventasLayout() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link className="flex items-center gap-3 text-gray-900 font-semibold" to="/">
             <img src="/logoNic.png" alt="IntraNIC" className="h-8 w-auto object-contain" />
-            <span className="hidden sm:inline">Reventas</span>
+            <span className="hidden sm:inline">Publico</span>
           </Link>
 
           <nav className="flex items-center gap-6 text-sm font-medium text-gray-600">
@@ -50,7 +50,7 @@ export default function ReventasLayout() {
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between text-sm text-gray-500">
           <span>{new Date().getFullYear()} IntraNIC</span>
-          <span>Modulo Reventas</span>
+          <span>Modulo Publico</span>
         </div>
       </footer>
     </div>

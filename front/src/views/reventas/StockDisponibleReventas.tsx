@@ -100,7 +100,7 @@ export default function StockDisponibleReventas() {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el stock de reventas</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el stock de unidades</h2>
           <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function StockDisponibleReventas() {
           <div>
             <h2 className="text-base font-semibold tracking-tight text-gray-900">Detalle de unidades</h2>
             <p className="mt-1 text-sm text-gray-500">
-              {modeloActivo === "TODOS" ? "Listado completo de unidades de reventa" : `Listado filtrado por modelo: ${modeloActivo}`}
+              {modeloActivo === "TODOS" ? "Listado completo de unidades" : `Listado filtrado por modelo: ${modeloActivo}`}
             </p>
           </div>
 
