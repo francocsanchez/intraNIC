@@ -5,6 +5,7 @@ export interface IConfiguration extends Document {
   vendedoresReservasConvencional: string[];
   vendedoresDisponibleConvencional: string[];
   vendedoresStockGuardadoConvencional: string[];
+  vendedorReventasConvencional: string[];
 
   sistemaActivoUsados: boolean;
   vendedoresReservasUsados: string[];
@@ -23,6 +24,7 @@ const configSchema: Schema = new Schema(
     vendedoresReservasConvencional: { type: [String] },
     vendedoresDisponibleConvencional: { type: [String] },
     vendedoresStockGuardadoConvencional: { type: [String] },
+    vendedorReventasConvencional: { type: [String] },
 
     sistemaActivoUsados: { type: Boolean, default: true },
     vendedoresReservasUsados: { type: [String] },

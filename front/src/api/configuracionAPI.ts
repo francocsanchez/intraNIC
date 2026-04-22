@@ -27,6 +27,7 @@ type ConfigConvForm = {
   vendedoresReservasConvencional: string[];
   vendedoresDisponibleConvencional: string[];
   vendedoresStockGuardadoConvencional: string[];
+  vendedorReventasConvencional: string[];
 };
 
 export async function updateConfiguracionConvencional(
@@ -51,6 +52,22 @@ type ConfigUsaForm = {
 };
 
 export async function updateConfiguracionUsado(formData: ConfigUsaForm) {
+  try {
+    const { data } = await api.patch("/config/", formData);
+
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
+}
+
+type ConfigReventaForm = {
+  vendedorReventasConvencional: string[];
+};
+
+export async function updateConfiguracionReventa(formData: ConfigReventaForm) {
   try {
     const { data } = await api.patch("/config/", formData);
 

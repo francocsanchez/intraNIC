@@ -43,6 +43,6 @@ router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRo
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/reventas/facturas", authorizeRoles("admin", "gerente", "stock", "administracion"), DmsController.getFactuasReventas);
+router.get("/reventas/facturas", authorizeCompanies("reventa"), authorizeRoles("admin", "gerente", "stock", "administracion"), DmsController.getFactuasReventas);
 
 export default router;

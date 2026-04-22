@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import NICLayout from "./layouts/NICLayout";
 import LiessLayout from "./layouts/LiessLayout";
+import ReventasLayout from "./layouts/ReventasLayout";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
@@ -11,6 +12,7 @@ import ConfiguracionView from "./views/admin/configuracion/ConfiguracionView";
 import VendedoresView from "./views/admin/configuracion/VendedoresView";
 import EditConfiguracionConvView from "./views/admin/configuracion/EditConfiguracionConvView";
 import EditConfiguracionUsadoView from "./views/admin/configuracion/EditConfiguracionUsadoView";
+import EditConfiguracionReventaView from "./views/admin/configuracion/EditConfiguracionReventaView";
 
 import UsuariosView from "./views/admin/usuarios/UsuariosView";
 import EditUsuarioView from "./views/admin/usuarios/EditUsuarioView";
@@ -43,12 +45,16 @@ import StockIngresoUsados from "./views/usados/StockIngresoUsados";
 import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
 import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalView";
 import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView";
+import StockDisponibleReventas from "./views/reventas/StockDisponibleReventas";
 
 export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginUser />} />
+        <Route element={<ReventasLayout />}>
+          <Route path="/stock-publico" element={<StockDisponibleReventas />} />
+        </Route>
         <Route path="*" element={<NotFoundView />} />
 
         <Route element={<ProtectedRoute />}>
@@ -83,12 +89,18 @@ export default function Router() {
               <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
                 <Route path="/configuracion/usados/editar" element={<EditConfiguracionUsadoView />} />
               </Route>
+
+              <Route element={<CompanyProtectedRoute allowedCompany={["reventa"]} />}>
+                <Route path="/configuracion/reventa/editar" element={<EditConfiguracionReventaView />} />
+              </Route>
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion"]} />}>
-            <Route element={<AdminLayout />}>
+          <Route element={<CompanyProtectedRoute allowedCompany={["reventa"]} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion"]} />}>
+              <Route element={<AdminLayout />}>
               <Route path="/reventa-pendientes" element={<PendienteReventaView />} />
+              </Route>
             </Route>
           </Route>
 
@@ -153,6 +165,7 @@ export default function Router() {
               </Route>
             </Route>
           </Route>
+
         </Route>
       </Routes>
     </BrowserRouter>

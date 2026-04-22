@@ -95,7 +95,7 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
       </div>
     </div>
 
-    <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-5">
       <label className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100">
         <input
           type="checkbox"
@@ -141,6 +141,18 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
           className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
         />
         <span className="text-sm font-medium text-gray-800">Plan Ahorro</span>
+      </label>
+
+      <label className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100">
+        <input
+          type="checkbox"
+          value="reventa"
+          {...register("company", {
+            required: "Debe seleccionar al menos una compaÃ±Ã­a",
+          })}
+          className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+        />
+        <span className="text-sm font-medium text-gray-800">Reventa</span>
       </label>
     </div>
 

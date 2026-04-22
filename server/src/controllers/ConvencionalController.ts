@@ -15,6 +15,7 @@ import {
   misOperacionesQuery,
   operacionesConvencional,
   operacionesConvencionalRanking,
+  stockReventaQuery,
 } from "./querys/convencional.query";
 
 import { buildResumen, StockRow } from "../utils/reportUnidadesConvencional";
@@ -63,6 +64,28 @@ export class ConvencionalController {
       return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("ConvencionalController.stockGuardado");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static stockReventa = async (_req: Request, res: Response) => {
+    try {
+      const config = await Configuration.findOne().lean();
+
+      if (!config) {
+        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
+      }
+
+      const vendedorReventasConvencional = config.vendedorReventasConvencional ?? [];
+
+      const data = await sequelizeNIC.query<StockRow>(stockReventaQuery(vendedorReventasConvencional), { type: QueryTypes.SELECT });
+
+      const resumen = buildResumen(data);
+
+      return res.status(200).json({ data, resumen });
+    } catch (error) {
+      logError("ConvencionalController.stockReventa");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

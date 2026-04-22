@@ -326,3 +326,43 @@ ORDER BY
 	vende.ven_nombre,
 	ope.ope_fecasig
 `;
+
+export const stockReventaQuery = (vendedoresReventas: string[]) => `
+    SELECT
+        stoauto.sa_codigo AS "interno",
+        vendedor.ven_nombre AS "vendedorReserva",
+        auto.au_nombre AS "version",
+        famiauto.fam_nombre AS "modelo",
+        color.col_nombre AS "color",
+        CASE
+            WHEN stoauto.sa_estado IN (5, 10, 15) THEN 'STOCK CONCESIONARIO'
+            WHEN movnped.mnp_status IN ('STOCK CONCESIONARIO', 'TRANSITO TASA-CONCESIONARIO') THEN 'FURLONG'
+            ELSE movnped.mnp_status
+        END AS "ubicacion",
+        ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+        DATEADD(DAY, 5, movnped.mnp_fecrec) AS "fechaRecepcion"
+    FROM
+        reserva
+    INNER JOIN stoauto ON
+        reserva.res_stoauto = stoauto.sa_codigo
+        AND reserva.res_tipo = stoauto.sa_tipo
+    INNER JOIN movnped ON
+        movnped.mnp_stoauto = stoauto.sa_codigo
+    INNER JOIN auto ON
+        auto.au_codigo = stoauto.sa_auto
+        AND auto.au_marca = stoauto.sa_marca
+    INNER JOIN famiauto ON
+        auto.au_familia = famiauto.fam_codigo
+    INNER JOIN vendedor ON
+        reserva.res_vendedor = vendedor.ven_codigo
+    INNER JOIN color ON
+        movnped.mnp_col1 = color.col_codigo
+    WHERE
+        reserva.res_anulada = 0
+		AND stoauto.sa_tipo = 5
+        AND reserva.res_vendedor IN (${vendedoresReventas})
+    ORDER BY
+        famiauto.fam_nombre,
+        auto.au_nombre,
+        color.col_nombre
+    `;

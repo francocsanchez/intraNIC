@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
-import { CarFront, Car, Motorbike, LogOut, Cog } from "lucide-react";
+import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
+import { CarFront, Car, Motorbike, LogOut, Cog, ReceiptText } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function Inicio() {
@@ -19,8 +19,9 @@ export default function Inicio() {
   const hasNIC = companies.includes("convencional");
   const hasUSED = companies.includes("usados");
   const hasLIESS = companies.includes("liess");
+  const hasREVENTA = companies.includes("reventa");
   const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const hasAdministracion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
+  const hasAdministracion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]) && hasAnyCompany(user, ["reventa"]);
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
@@ -52,7 +53,8 @@ export default function Inicio() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {/* Convencional */}
           {hasNIC ? (
             <Link to="/stock/disponible/convencional" className={`${baseCard} hover:shadow-md transition group`}>
@@ -122,6 +124,30 @@ export default function Inicio() {
             </div>
           )}
 
+          {hasREVENTA ? (
+            <Link to="/stock-publico" className={`${baseCard} hover:shadow-md transition group`}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
+                <ReceiptText size={26} strokeWidth={1.5} className="text-gray-900" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Reventas</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Stock disponible para reventas</p>
+            </Link>
+          ) : (
+            <div className={disabledCard}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
+                <ReceiptText size={26} strokeWidth={1.5} className="text-gray-600" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Reventas</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Stock disponible para reventas</p>
+            </div>
+          )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Sistema */}
           {hasSystem ? (
             <Link to="/configuracion" className={`${baseCard} hover:shadow-md transition group`}>
@@ -167,6 +193,7 @@ export default function Inicio() {
               <p className="text-sm text-gray-500 mt-1">Reventas pendientes</p>
             </div>
           )}
+          </div>
         </div>
 
         {/* Leyenda */}

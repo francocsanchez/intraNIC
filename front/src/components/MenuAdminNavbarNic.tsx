@@ -4,7 +4,7 @@ import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, 
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import useRoleGuard from "@/hooks/useRoleGuard";
-import { hasAnyRole } from "@/helpers/access";
+import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
 
 type NavBarProps = {
   negocio: string;
@@ -29,7 +29,8 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
   const canViewGestion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
   const { allowed: canViewAsignaciones } = useRoleGuard(["admin", "gerente", "stock"]);
   const { allowed: canViewConsolidado } = useRoleGuard(["admin"]);
-  const { allowed: canViewReventas } = useRoleGuard(["admin", "gerente", "stock", "administracion"]);
+  const { allowed: canViewReventasByRole } = useRoleGuard(["admin", "gerente", "stock", "administracion"]);
+  const canViewReventas = canViewReventasByRole && hasAnyCompany(user, ["reventa"]);
   const canViewOperativeMenu = hasAnyRole(user, ["admin", "gerente", "supervisor", "vendedor"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">

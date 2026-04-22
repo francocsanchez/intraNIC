@@ -63,6 +63,10 @@ export class ConfigController {
         "vendedoresStockGuardadoConvencional",
       ];
 
+      const reventaKeys = [
+        "vendedorReventasConvencional",
+      ];
+
       const usadosKeys = [
         "sistemaActivoUsados",
         "vendedoresReservasUsados",
@@ -73,11 +77,18 @@ export class ConfigController {
       const touchesConvencional = bodyKeys.some((key) =>
         conventionalKeys.includes(key),
       );
+      const touchesReventa = bodyKeys.some((key) => reventaKeys.includes(key));
       const touchesUsados = bodyKeys.some((key) => usadosKeys.includes(key));
 
       if (touchesConvencional && !userCompanies.includes("convencional")) {
         return res.status(403).json({
           error: "No tienes permisos para editar la configuracion de Convencional.",
+        });
+      }
+
+      if (touchesReventa && !userCompanies.includes("reventa")) {
+        return res.status(403).json({
+          error: "No tienes permisos para editar la configuracion de Reventa.",
         });
       }
 

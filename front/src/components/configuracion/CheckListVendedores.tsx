@@ -10,7 +10,8 @@ type CheckListVendedoresProps = {
   name:
     | "vendedoresReservasConvencional"
     | "vendedoresDisponibleConvencional"
-    | "vendedoresStockGuardadoConvencional";
+    | "vendedoresStockGuardadoConvencional"
+    | "vendedorReventasConvencional";
   register: UseFormRegister<any>;
 };
 

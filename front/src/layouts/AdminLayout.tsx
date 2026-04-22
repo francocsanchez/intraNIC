@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
+import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { PowerOff, Shield } from "lucide-react";
 
@@ -21,7 +21,7 @@ export default function AdminLayout() {
 
   const canViewUsuarios = hasAnyRole(user, ["admin", "supervisor", "stock"]);
   const canViewConfiguracion = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewReventas = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
+  const canViewReventas = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]) && hasAnyCompany(user, ["reventa"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

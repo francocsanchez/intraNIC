@@ -47,19 +47,53 @@ export default function ConfiguracionView() {
       title: "Convencional",
       slug: "convencional",
       activo: config.sistemaActivoConvencional,
-      reservas: mapCodigos(config.vendedoresReservasConvencional),
-      disponibles: mapCodigos(config.vendedoresDisponibleConvencional),
-      stockGuardado: mapCodigos(config.vendedoresStockGuardadoConvencional),
+      bloques: [
+        {
+          label: "Vendedores Reservas",
+          values: mapCodigos(config.vendedoresReservasConvencional),
+        },
+        {
+          label: "Vendedores Disponible",
+          values: mapCodigos(config.vendedoresDisponibleConvencional),
+        },
+        {
+          label: "Vendedores Stock Guardado",
+          values: mapCodigos(config.vendedoresStockGuardadoConvencional),
+        },
+      ],
       canEdit: hasAnyCompany(user, ["convencional"]),
     },
     {
       title: "Usados",
       slug: "usados",
       activo: config.sistemaActivoUsados,
-      reservas: mapCodigos(config.vendedoresReservasUsados),
-      disponibles: mapCodigos(config.vendedoresDisponibleUsados),
-      stockGuardado: mapCodigos(config.vendedoresStockGuardadoUsados),
+      bloques: [
+        {
+          label: "Vendedores Reservas",
+          values: mapCodigos(config.vendedoresReservasUsados),
+        },
+        {
+          label: "Vendedores Disponible",
+          values: mapCodigos(config.vendedoresDisponibleUsados),
+        },
+        {
+          label: "Vendedores Stock Guardado",
+          values: mapCodigos(config.vendedoresStockGuardadoUsados),
+        },
+      ],
       canEdit: hasAnyCompany(user, ["usados"]),
+    },
+    {
+      title: "Reventas",
+      slug: "reventa",
+      activo: config.sistemaActivoConvencional,
+      bloques: [
+        {
+          label: "Vendedores Reventas",
+          values: mapCodigos(config.vendedorReventasConvencional ?? []),
+        },
+      ],
+      canEdit: hasAnyCompany(user, ["reventa"]),
     },
   ];
 
@@ -102,38 +136,22 @@ export default function ConfiguracionView() {
             </div>
 
             <div className="space-y-5 p-6">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Reservas</div>
-                <div className="flex flex-wrap gap-2">
-                  {sistema.reservas.map((v) => (
-                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                      {v}
-                    </span>
-                  ))}
+              {sistema.bloques.map((bloque) => (
+                <div key={bloque.label}>
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">{bloque.label}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {bloque.values.length > 0 ? (
+                      bloque.values.map((v) => (
+                        <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                          {v}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-400">Sin vendedores configurados</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Disponible</div>
-                <div className="flex flex-wrap gap-2">
-                  {sistema.disponibles.map((v) => (
-                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                      {v}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Vendedores Stock Guardado</div>
-                <div className="flex flex-wrap gap-2">
-                  {sistema.stockGuardado.map((v) => (
-                    <span key={v} className="rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                      {v}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         ))}

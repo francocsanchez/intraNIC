@@ -54,6 +54,29 @@ export async function getStockGuardadoConvencional() {
   }
 }
 
+export async function getStockReventaConvencional() {
+  try {
+    const { data } = await api.get("/dms/convencional/stock-reventa");
+
+    const parsed = stockDisponibleConvencionalSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener el stock de reventa convencional",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener el stock de reventa convencional");
+  }
+}
+
 export async function getStockReservaConvencional() {
   try {
     const { data } = await api.get("/dms/convencional/stock-reservado");
