@@ -110,8 +110,8 @@ export default function StockDisponibleReventas() {
   return (
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Reventas</p>
-        <h1 className=" text-2xl font-semibold tracking-tight text-gray-900">Stock Disponible Reventas</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Publico</p>
+        <h1 className=" text-2xl font-semibold tracking-tight text-gray-900">Stock Disponible Publico</h1>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_2.5fr_0.9fr]">
