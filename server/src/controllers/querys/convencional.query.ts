@@ -366,3 +366,31 @@ export const stockReventaQuery = (vendedoresReventas: string[]) => `
         auto.au_nombre,
         color.col_nombre
     `;
+
+export const infoInternoQuery = (interno: number) => `
+ SELECT
+	stoauto.sa_codigo as "interno",
+	auto.au_nombre as "version",
+	stoauto.sa_nrofab as "order",
+	ISNULL(c.cli_nombre, '-') as cliente,
+	ISNULL(v.ven_nombre, '-') as vendedor,
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis"
+FROM
+	stoauto
+LEFT JOIN opera ON
+	stoauto.sa_opera = opera.ope_codigo
+LEFT JOIN vendedor v ON
+	opera.ope_vende = v.ven_codigo
+LEFT JOIN cliente c ON
+	opera.ope_cliente = c.cli_codigo
+INNER JOIN movnped ON
+	stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto ON
+	stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+WHERE
+	stoauto.sa_tipo = 5
+	AND stoauto.sa_codigo = ${interno}
+ORDER BY
+	auto.au_nombre
+    `;

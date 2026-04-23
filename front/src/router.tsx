@@ -46,6 +46,7 @@ import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
 import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalView";
 import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView";
 import StockDisponibleReventas from "./views/reventas/StockDisponibleReventas";
+import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
 
 export default function Router() {
   return (
@@ -116,6 +117,10 @@ export default function Router() {
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path="/stock/guardado/convencional" element={<StockGuardadoConvencioanl />} />
                 <Route path="/asignaciones" element={<AsignacionesView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
+                <Route path="/pedido-unidades" element={<PedidoUnidadesView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>

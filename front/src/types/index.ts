@@ -275,6 +275,7 @@ export const asignacionRecepcionItemSchema = z.object({
   opera: z.number(),
   diferenciaDias: z.number().nullable(),
   sucursal: z.string().nullable(),
+  fuePedido: z.boolean().optional(),
 });
 
 export const resumenAsignacionRecepcionSchema = z.object({
@@ -544,3 +545,58 @@ export const rankingOperacionesConvencionalResponseSchema = z.object({
 });
 
 export type RankingOperacionesConvencionalResponse = z.infer<typeof rankingOperacionesConvencionalResponseSchema>;
+
+//**************************** */
+// PEDIDO UNIDADES
+//**************************** */
+
+export const pedidoUnidadInfoInternoSchema = z.object({
+  interno: z.number(),
+  version: z.string(),
+  order: z.string(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  chasis: z.string(),
+});
+
+export const pedidoUnidadItemSchema = pedidoUnidadInfoInternoSchema.extend({
+  PDI: z.boolean(),
+});
+
+export const pedidoUnidadSchema = z.object({
+  _id: z.string(),
+  fecha: z.string(),
+  usuario_id: z.string(),
+  usuarioNombre: z.string(),
+  items: z.array(pedidoUnidadItemSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const pedidoUnidadInfoInternoResponseSchema = z.object({
+  data: pedidoUnidadInfoInternoSchema,
+});
+
+export const pedidoUnidadListResponseSchema = z.object({
+  data: z.array(pedidoUnidadSchema),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
+export const pedidoUnidadResponseSchema = z.object({
+  data: pedidoUnidadSchema,
+  message: z.string(),
+});
+
+export const pedidoUnidadInternosEstadoResponseSchema = z.object({
+  data: z.record(z.string(), z.boolean()),
+});
+
+export type PedidoUnidadInfoInterno = z.infer<typeof pedidoUnidadInfoInternoSchema>;
+export type PedidoUnidadItem = z.infer<typeof pedidoUnidadItemSchema>;
+export type PedidoUnidad = z.infer<typeof pedidoUnidadSchema>;
+export type PedidoUnidadListResponse = z.infer<typeof pedidoUnidadListResponseSchema>;

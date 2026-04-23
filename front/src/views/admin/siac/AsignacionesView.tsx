@@ -1,7 +1,11 @@
 import Loading from "@/components/Loading";
+import { getEstadoInternosPedido } from "@/api/dms/pedidoUnidadAPI";
+import { useAuth } from "@/hooks/useAuthe";
+import { hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Clock3 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -63,6 +67,9 @@ function formatFullDate(dateString?: string | null) {
 }
 
 export default function AsignacionesView() {
+  const { user } = useAuth();
+  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
+  const canSeePedidoStatus = hasAnyRole(user, ["admin", "gerente", "stock"]);
   const anioActual = new Date().getFullYear();
   const [anio, setAnio] = useState<number>(anioActual);
   const [mes, setMes] = useState<number>(() => new Date().getMonth() + 1);
@@ -82,6 +89,13 @@ export default function AsignacionesView() {
 
   const registros = data?.data ?? [];
   const resumen = data?.resumen;
+
+  const { data: estadoPedidos = {}, isLoading: pedidosLoading } = useQuery({
+    queryKey: ["pedido-unidades-estado", registros.map((item: any) => item.interno).join("-")],
+    queryFn: () => getEstadoInternosPedido(registros.map((item: any) => Number(item.interno))),
+    enabled: registros.length > 0 && canSeePedidoStatus,
+    refetchOnWindowFocus: true,
+  });
 
   const recepcionesPorDia = useMemo(() => {
     return (resumen?.porDiaRecepcion ?? []).map((item: any) => ({
@@ -108,7 +122,7 @@ export default function AsignacionesView() {
   const totalPendientes = resumen?.pendientes ?? 0;
   const mesActivo = MESES.find((item) => item.value === mes)?.label ?? "";
 
-  if (isLoading) return <Loading />;
+  if (isLoading || pedidosLoading) return <Loading />;
 
   if (isError) {
     return (
@@ -139,6 +153,15 @@ export default function AsignacionesView() {
           </div>
 
           <div className="flex items-center gap-3 self-start">
+            {canManagePedidos ? (
+              <Link
+                to="/pedido-unidades"
+                className="rounded-lg bg-[#15aa9a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
+              >
+                Solicitar unidades
+              </Link>
+            ) : null}
+
             <label
               htmlFor="anio"
               className="text-sm font-semibold text-gray-900"
@@ -371,6 +394,7 @@ export default function AsignacionesView() {
                 <th className="px-6 py-3 text-left">F. probable</th>
                 <th className="px-6 py-3 text-center">Opera</th>
                 <th className="px-6 py-3 text-center">Sucursal</th>
+                <th className="px-6 py-3 text-center">Pedido</th>
                 <th className="px-6 py-3 text-center">Estado</th>
               </tr>
             </thead>
@@ -378,6 +402,7 @@ export default function AsignacionesView() {
             <tbody className="divide-y divide-gray-100">
               {registrosFiltrados.map((item: any, index: number) => {
                 const recibido = Boolean(item.fechaRecepcionRemito);
+                const fuePedido = Boolean(estadoPedidos[String(item.interno)]);
 
                 return (
                   <tr key={`${item.interno}-${item.nrofab}`} className="hover:bg-gray-50">
@@ -404,6 +429,19 @@ export default function AsignacionesView() {
                     </td>
                     <td className="px-6 py-3">
                       <div className="flex justify-center">
+                        {fuePedido ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                            Si
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                            No
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3">
+                      <div className="flex justify-center">
                         {recibido ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                             <Check size={14} strokeWidth={2.5} />
@@ -423,7 +461,7 @@ export default function AsignacionesView() {
 
               {!registrosFiltrados.length && (
                 <tr>
-                  <td colSpan={10} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>

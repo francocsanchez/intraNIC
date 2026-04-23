@@ -11,6 +11,7 @@ import usuarioRoutes from "./routes/usuarioRoutes";
 import liessRoutes from "./routes/liessRoutes";
 import usadosRoutes from "./routes/usadosRoutes";
 import healthRoutes from "./routes/healthRoutes";
+import pedidoUnidadRoutes from "./routes/pedidoUnidadRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -29,5 +30,6 @@ app.use("/api/dms/convencional", convencionalRoutes);
 app.use("/api/dms/usados", usadosRoutes);
 app.use("/api/dms/liess", liessRoutes);
 app.use("/api/dms", dmsRoutes);
+app.use("/api/dms/pedido-unidades", pedidoUnidadRoutes);
 
 export default app;
