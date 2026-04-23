@@ -600,3 +600,133 @@ export type PedidoUnidadInfoInterno = z.infer<typeof pedidoUnidadInfoInternoSche
 export type PedidoUnidadItem = z.infer<typeof pedidoUnidadItemSchema>;
 export type PedidoUnidad = z.infer<typeof pedidoUnidadSchema>;
 export type PedidoUnidadListResponse = z.infer<typeof pedidoUnidadListResponseSchema>;
+
+//**************************** */
+// REGISTRO ASIGNACIONES
+//**************************** */
+
+export const registroAsignacionInfoOperacionSchema = z.object({
+  operacion: z.number(),
+  interno: z.number(),
+  cliente: z.string(),
+  modelo: z.string(),
+  version: z.string(),
+  chasis: z.string(),
+  sucursal: z.string(),
+  vendedor: z.string(),
+});
+
+export const registroAsignacionSchema = z.object({
+  _id: z.string(),
+  fecha: z.string(),
+  usuario_id: z.string(),
+  usuarioNombre: z.string(),
+  operacion: z.number(),
+  interno: z.number(),
+  cliente: z.string(),
+  modelo: z.string(),
+  version: z.string(),
+  chasis: z.string(),
+  sucursal: z.string(),
+  vendedor: z.string(),
+  observaciones: z.string().optional().default(""),
+  tipo: z.enum(["Asignado", "Desasignado"]),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const registroAsignacionListResponseSchema = z.object({
+  data: z.array(registroAsignacionSchema),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
+export const registroAsignacionInfoOperacionResponseSchema = z.object({
+  data: registroAsignacionInfoOperacionSchema,
+});
+
+export const registroAsignacionResponseSchema = z.object({
+  data: registroAsignacionSchema.optional(),
+  message: z.string(),
+});
+
+export const registroAsignacionResumenResponseSchema = z.object({
+  resumenMensual: z.object({
+    periodo: z.object({
+      mes: z.number(),
+      ano: z.number(),
+    }),
+    porModelo: z.array(
+      z.object({
+        modelo: z.string(),
+        asignadas: z.number(),
+        desasignadas: z.number(),
+        neto: z.number(),
+      }),
+    ),
+    total: z.object({
+      asignadas: z.number(),
+      desasignadas: z.number(),
+      neto: z.number(),
+    }),
+    sucursales: z.array(z.string()),
+    porModeloSucursal: z.array(
+      z.object({
+        modelo: z.string(),
+        total: z.number(),
+        asignadas: z.number(),
+        desasignadas: z.number(),
+        sucursales: z.record(
+          z.string(),
+          z.object({
+            asignadas: z.number(),
+            desasignadas: z.number(),
+            neto: z.number(),
+          }),
+        ),
+      }),
+    ),
+    resumenSucursales: z.array(
+      z.object({
+        sucursal: z.string(),
+        asignadas: z.number(),
+        desasignadas: z.number(),
+        neto: z.number(),
+      }),
+    ),
+    porDia: z.array(
+      z.object({
+        dia: z.number(),
+        label: z.string(),
+        asignadas: z.number(),
+        desasignadas: z.number(),
+      }),
+    ),
+  }),
+  resumenAnual: z.object({
+    ano: z.number(),
+    porMes: z.array(
+      z.object({
+        mes: z.number(),
+        label: z.string(),
+        asignadas: z.number(),
+        desasignadas: z.number(),
+      }),
+    ),
+  }),
+});
+
+export type RegistroAsignacion = z.infer<typeof registroAsignacionSchema>;
+export type RegistroAsignacionInfoOperacion = z.infer<
+  typeof registroAsignacionInfoOperacionSchema
+>;
+export type RegistroAsignacionListResponse = z.infer<
+  typeof registroAsignacionListResponseSchema
+>;
+export type RegistroAsignacionResumenResponse = z.infer<
+  typeof registroAsignacionResumenResponseSchema
+>;

@@ -394,3 +394,38 @@ WHERE
 ORDER BY
 	auto.au_nombre
     `;
+
+export const infoOperaRegistroQuery = (operacion: number) => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_stoauto as "interno",
+	cli.cli_nombre as "clienteNombre",
+	auto.au_nombre AS "version",
+	s.suc_nombre as "sucursal",
+	famiauto.fam_nombre AS "modelo",
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+	vende.ven_nombre as "vendedor"
+FROM
+	opera ope
+INNER JOIN cliente cli ON
+	ope.ope_cliente = cli.cli_codigo
+	INNER JOIN sucursal s ON
+	ope.ope_sucur = s.suc_codigo 
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN stoauto ON
+	stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN movnped ON
+	movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND ope.ope_codigo = ${operacion}
+ORDER BY
+	cli.cli_nombre
+    `;
