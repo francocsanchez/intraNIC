@@ -416,9 +416,9 @@ INNER JOIN vendedor vende ON
 INNER JOIN auto ON
 	auto.au_codigo = ope.ope_auto
 	AND auto.au_marca = ope.ope_marca
-INNER JOIN stoauto ON
+LEFT JOIN stoauto ON
 	stoauto.sa_codigo = ope.ope_stoauto
-INNER JOIN movnped ON
+LEFT JOIN movnped ON
 	movnped.mnp_stoauto = stoauto.sa_codigo
 INNER JOIN famiauto ON
 	auto.au_familia = famiauto.fam_codigo
