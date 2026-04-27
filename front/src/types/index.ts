@@ -780,3 +780,106 @@ export type RegistroAsignacionListResponse = z.infer<
 export type RegistroAsignacionResumenResponse = z.infer<
   typeof registroAsignacionResumenResponseSchema
 >;
+
+//**************************** */
+// PREVENTAS
+//**************************** */
+
+export const catalogoSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const catalogoListResponseSchema = z.object({
+  data: z.array(catalogoSchema),
+});
+
+export const catalogoResponseSchema = z.object({
+  data: catalogoSchema,
+  message: z.string(),
+});
+
+export const preventaSchema = z.object({
+  _id: z.string(),
+  vendedor: z.number(),
+  vendedorNombre: z.string(),
+  numero_op: z.number().nullable().optional(),
+  cliente: z.string(),
+  version: catalogoSchema,
+  colores: z.array(catalogoSchema),
+  monto_reserva: z.number().nullable().optional(),
+  observaciones: z.string().optional().default(""),
+  mes_asigna: z.string(),
+  mes_asigna_label: z.string(),
+  asignado: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const preventaListResponseSchema = z.object({
+  data: z.array(preventaSchema),
+});
+
+export const preventaResponseSchema = z.object({
+  data: preventaSchema,
+  message: z.string().optional().default(""),
+});
+
+export const preventaResumenItemSchema = z.object({
+  mes_asigna: z.string(),
+  mes_asigna_label: z.string(),
+  version: z.string(),
+  color: z.string(),
+  vendedor: z.string(),
+  cantidad: z.number(),
+});
+
+export const preventaResumenResponseSchema = z.object({
+  data: z.array(preventaResumenItemSchema),
+});
+
+export const pedidoMensualSchema = z.object({
+  _id: z.string(),
+  version: catalogoSchema,
+  cantidad: z.number(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const pedidoMensualListResponseSchema = z.object({
+  data: z.array(pedidoMensualSchema),
+});
+
+export const pedidoMensualResponseSchema = z.object({
+  data: pedidoMensualSchema,
+  message: z.string(),
+});
+
+export const resumenPedidoMensualItemSchema = z.object({
+  versionId: z.string(),
+  version: z.string(),
+  pedido: z.number(),
+  preventas_pendientes: z.number(),
+  disponible: z.number(),
+});
+
+export const resumenPedidoMensualResponseSchema = z.object({
+  data: z.array(resumenPedidoMensualItemSchema),
+});
+
+export type Catalogo = z.infer<typeof catalogoSchema>;
+export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
+export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
+export type Preventa = z.infer<typeof preventaSchema>;
+export type PreventaListResponse = z.infer<typeof preventaListResponseSchema>;
+export type PreventaResponse = z.infer<typeof preventaResponseSchema>;
+export type PreventaResumenItem = z.infer<typeof preventaResumenItemSchema>;
+export type PreventaResumenResponse = z.infer<typeof preventaResumenResponseSchema>;
+export type PedidoMensual = z.infer<typeof pedidoMensualSchema>;
+export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponseSchema>;
+export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
+export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
+export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;

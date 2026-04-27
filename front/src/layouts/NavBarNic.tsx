@@ -1,7 +1,7 @@
 import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, ChartBarBig, Package, Trophy } from "lucide-react";
+import { Archive, BookMarked, ChartBarBig, ClipboardList, MonitorCog, Package, Palette, Tag, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type NavBarProps = {
@@ -12,7 +12,11 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "stock"]);
   const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
   const { allowed: buttonPromedios } = useRoleGuard(["admin", "gerente", "supervisor"]);
-  const { allowed: buttonTracking } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
+  const { allowed: buttonAsignaciones } = useRoleGuard(["admin", "gerente", "stock"]);
+  const { allowed: buttonRegistroAsignaciones } = useRoleGuard(["admin", "stock"]);
+  const { allowed: buttonPedidoMensual } = useRoleGuard(["admin", "stock"]);
+  const { allowed: buttonResumenPreventas } = useRoleGuard(["admin", "stock", "supervisor"]);
+  const { allowed: buttonSistema } = useRoleGuard(["admin", "stock"]);
 
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
@@ -24,68 +28,161 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to="/ranking-convencional" className="flex items-center gap-2 relative hover:text-gray-900 transition">
-            <Trophy size={16} strokeWidth={1.5} />
-            Ranking de ventas
-          </Link>
-
           <Link to={`/stock/disponible/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
             <Package size={16} strokeWidth={1.5} />
             Disponible
           </Link>
 
-          {buttonGuardado && (
-            <Link to={`/stock/guardado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <Archive size={16} strokeWidth={1.5} />
-              Guardado
-            </Link>
-          )}
-
-          {buttonReservas && (
+          {buttonReservas ? (
             <Link to={`/stock/reservado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <BookMarked size={16} strokeWidth={1.5} />
               Reservas
             </Link>
-          )}
+          ) : null}
 
-          {(buttonPromedios || buttonTracking) && (
+          {buttonGuardado ? (
+            <Link to={`/stock/guardado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+              <Archive size={16} strokeWidth={1.5} />
+              Guardado
+            </Link>
+          ) : null}
+
+          <Menu as="div" className="relative">
+            <MenuButton className="inline-flex items-center gap-2 hover:text-gray-900 transition">
+              <ChartBarBig size={16} strokeWidth={1.5} />
+              Reportes
+            </MenuButton>
+
+            <MenuItems anchor="bottom start" className="mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+              <MenuItem>
+                {({ focus }) => (
+                  <Link
+                    to="/ranking-convencional"
+                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                  >
+                    <Trophy size={16} strokeWidth={1.5} />
+                    Ranking de vendedores
+                  </Link>
+                )}
+              </MenuItem>
+
+              {buttonPromedios ? (
+                <MenuItem>
+                  {({ focus }) => (
+                    <Link
+                      to="/promedio-convencional"
+                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                    >
+                      <ChartBarBig size={16} strokeWidth={1.5} />
+                      Promedio de ventas
+                    </Link>
+                  )}
+                </MenuItem>
+              ) : null}
+            </MenuItems>
+          </Menu>
+
+          {(buttonAsignaciones || buttonRegistroAsignaciones || buttonPedidoMensual || buttonResumenPreventas) ? (
             <Menu as="div" className="relative">
               <MenuButton className="inline-flex items-center gap-2 hover:text-gray-900 transition">
-                <ChartBarBig size={16} strokeWidth={1.5} />
-                Reportes
+                <MonitorCog size={16} strokeWidth={1.5} />
+                Gestion
               </MenuButton>
 
-              <MenuItems anchor="bottom start" className="mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-                {buttonPromedios ? (
+              <MenuItems anchor="bottom start" className="mt-3 w-60 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                {buttonAsignaciones ? (
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/promedio-convencional"
+                        to="/asignaciones"
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
-                        <ChartBarBig size={16} strokeWidth={1.5} />
-                        Promedios de ventas
+                        <MonitorCog size={16} strokeWidth={1.5} />
+                        Asignaciones
                       </Link>
                     )}
                   </MenuItem>
                 ) : null}
 
-                {buttonTracking ? (
+                {buttonRegistroAsignaciones ? (
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/trazabilidad-operativa"
+                        to="/registro-asignaciones"
+                        className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                      >
+                        <ClipboardList size={16} strokeWidth={1.5} />
+                        Registro de asignaciones
+                      </Link>
+                    )}
+                  </MenuItem>
+                ) : null}
+
+                {buttonPedidoMensual ? (
+                  <MenuItem>
+                    {({ focus }) => (
+                      <Link
+                        to="/preventas/pedido-mensual"
+                        className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                      >
+                        <Package size={16} strokeWidth={1.5} />
+                        Pedido mensual
+                      </Link>
+                    )}
+                  </MenuItem>
+                ) : null}
+
+                {buttonResumenPreventas ? (
+                  <MenuItem>
+                    {({ focus }) => (
+                      <Link
+                        to="/preventas/resumen"
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <ChartBarBig size={16} strokeWidth={1.5} />
-                        Trazabilidad operativa
+                        Resumen de preventas
                       </Link>
                     )}
                   </MenuItem>
                 ) : null}
               </MenuItems>
             </Menu>
-          )}
+          ) : null}
+
+          {buttonSistema ? (
+            <Menu as="div" className="relative">
+              <MenuButton className="inline-flex items-center gap-2 hover:text-gray-900 transition">
+                <MonitorCog size={16} strokeWidth={1.5} />
+                Sistema
+              </MenuButton>
+
+              <MenuItems anchor="bottom start" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+                <MenuItem>
+                  {({ focus }) => (
+                    <Link
+                      to="/preventas/colores"
+                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                    >
+                      <Palette size={16} strokeWidth={1.5} />
+                      Colores
+                    </Link>
+                  )}
+                </MenuItem>
+
+                <MenuItem>
+                  {({ focus }) => (
+                    <Link
+                      to="/preventas/versiones"
+                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                    >
+                      <Tag size={16} strokeWidth={1.5} />
+                      Versiones
+                    </Link>
+                  )}
+                </MenuItem>
+              </MenuItems>
+            </Menu>
+          ) : null}
         </nav>
 
         {/* Menu administracion / perfil */}

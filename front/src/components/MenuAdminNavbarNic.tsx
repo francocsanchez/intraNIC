@@ -1,10 +1,9 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { BookMarked, CalendarClock, ChartBarBig, CircleUserRound, FileChartPie, Handshake, ListChecks, MonitorCog, PowerOff, Ticket, Wrench } from "lucide-react";
+import { BookMarked, CalendarClock, CircleUserRound, Handshake, PowerOff, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
-import useRoleGuard from "@/hooks/useRoleGuard";
-import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
+import { hasAnyRole } from "@/helpers/access";
 
 type NavBarProps = {
   negocio: string;
@@ -26,79 +25,9 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
     navigate("/login", { replace: true });
   };
 
-  const canViewGestion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]);
-  const { allowed: canViewAsignaciones } = useRoleGuard(["admin", "gerente", "stock"]);
-  const { allowed: canViewRegistroAsignaciones } = useRoleGuard(["admin", "stock"]);
-  const { allowed: canViewConsolidado } = useRoleGuard(["admin"]);
-  const { allowed: canViewReventasByRole } = useRoleGuard(["admin", "gerente", "stock", "administracion"]);
-  const canViewReventas = canViewReventasByRole && hasAnyCompany(user, ["reventa"]);
   const canViewOperativeMenu = hasAnyRole(user, ["admin", "gerente", "supervisor", "vendedor"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
-      {canViewGestion && (
-        <Menu as="div" className="relative">
-          <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition">
-            <MonitorCog size={16} strokeWidth={1.25} />
-            Gestion
-          </MenuButton>
-
-          <MenuItems anchor="bottom end" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-            {canViewAsignaciones ? (
-              <MenuItem>
-                {({ focus }) => (
-                  <Link
-                    to={"/asignaciones"}
-                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                  >
-                    <FileChartPie size={16} strokeWidth={1.5} />
-                    Asignaciones
-                  </Link>
-                )}
-              </MenuItem>
-            ) : null}
-            {canViewConsolidado ? (
-              <MenuItem>
-                {({ focus }) => (
-                  <Link
-                    to={"/consolidado"}
-                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                  >
-                    <ChartBarBig size={16} strokeWidth={1.5} />
-                    Stock consolidado
-                  </Link>
-                )}
-              </MenuItem>
-            ) : null}
-            {canViewRegistroAsignaciones ? (
-              <MenuItem>
-                {({ focus }) => (
-                  <Link
-                    to={"/registro-asignaciones"}
-                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                  >
-                    <ListChecks size={16} strokeWidth={1.5} />
-                    Registro asignaciones
-                  </Link>
-                )}
-              </MenuItem>
-            ) : null}
-            {canViewReventas ? (
-              <MenuItem>
-                {({ focus }) => (
-                  <Link
-                    to={"/reventa-pendientes"}
-                    className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                  >
-                    <Ticket size={16} strokeWidth={1.5} />
-                    Reventas pendientes
-                  </Link>
-                )}
-              </MenuItem>
-            ) : null}
-          </MenuItems>
-        </Menu>
-      )}
-
       {/* Perfil */}
       <Menu as="div" className="relative">
         <MenuButton className="inline-flex items-center gap-1 hover:text-gray-900 transition capitalize">

@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
-import { CarFront, Car, Motorbike, LogOut, Cog, ReceiptText, Gauge } from "lucide-react";
+import { CarFront, Car, Motorbike, LogOut, Cog, ReceiptText, Gauge, ClipboardList } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function Inicio() {
@@ -23,6 +23,7 @@ export default function Inicio() {
   const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
   const hasAdministracion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]) && hasAnyCompany(user, ["reventa"]);
   const hasTrackingOperativa = hasNIC && hasAnyRole(user, ["admin", "gerente", "supervisor", "stock"]);
+  const hasPreventas = hasNIC && hasAnyRole(user, ["admin", "stock", "supervisor"]);
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
@@ -146,9 +147,31 @@ export default function Inicio() {
               <p className="text-sm text-gray-500 mt-1">Stock disponible para reventas</p>
             </div>
           )}
+
+          {hasPreventas ? (
+            <Link to="/preventas" className={`${baseCard} hover:shadow-md transition group`}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
+                <ClipboardList size={26} strokeWidth={1.5} className="text-gray-900" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Preventas</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Demanda pendiente de asignacion</p>
+            </Link>
+          ) : (
+            <div className={disabledCard}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
+                <ClipboardList size={26} strokeWidth={1.5} className="text-gray-600" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Preventas</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Demanda pendiente de asignacion</p>
+            </div>
+          )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {/* Sistema */}
           {hasSystem ? (
             <Link to="/configuracion" className={`${baseCard} hover:shadow-md transition group`}>

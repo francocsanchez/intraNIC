@@ -13,6 +13,10 @@ import usadosRoutes from "./routes/usadosRoutes";
 import healthRoutes from "./routes/healthRoutes";
 import pedidoUnidadRoutes from "./routes/pedidoUnidadRoutes";
 import registroAsignacionRoutes from "./routes/registroAsignacionRoutes";
+import colorRoutes from "./routes/colorRoutes";
+import versionRoutes from "./routes/versionRoutes";
+import preventaRoutes from "./routes/preventaRoutes";
+import pedidoMensualRoutes from "./routes/pedidoMensualRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -33,5 +37,9 @@ app.use("/api/dms/liess", liessRoutes);
 app.use("/api/dms", dmsRoutes);
 app.use("/api/dms/pedido-unidades", pedidoUnidadRoutes);
 app.use("/api/dms/registro-asignaciones", registroAsignacionRoutes);
+app.use("/api/dms/colores", colorRoutes);
+app.use("/api/dms/versiones", versionRoutes);
+app.use("/api/dms/preventas", preventaRoutes);
+app.use("/api/dms/pedido-mensual", pedidoMensualRoutes);
 
 export default app;

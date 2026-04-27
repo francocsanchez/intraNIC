@@ -40,7 +40,6 @@ import StockDisponibleUsados from "./views/usados/StockDisponibleUsados";
 import NICUsadosLayout from "./layouts/NICUsadosLayout";
 import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
-import ConsolidadoView from "./views/admin/siac/ConsolidadoView";
 import StockIngresoUsados from "./views/usados/StockIngresoUsados";
 import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
 import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalView";
@@ -50,6 +49,15 @@ import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
 import RegistroAsignacionesView from "./views/admin/siac/RegistroAsignacionesView";
 import RegistroAsignacionesResumenView from "./views/admin/siac/RegistroAsignacionesResumenView";
 import TrackingOperacionesView from "./views/admin/siac/TrackingOperacionesView";
+import PreventasView from "./views/admin/siac/PreventasView";
+import PreventasAsignadasView from "./views/admin/siac/PreventasAsignadasView";
+import PreventaFormView from "./views/admin/siac/PreventaFormView";
+import PreventasResumenView from "./views/admin/siac/PreventasResumenView";
+import ColoresView from "./views/admin/siac/ColoresView";
+import ColorFormView from "./views/admin/siac/ColorFormView";
+import VersionesView from "./views/admin/siac/VersionesView";
+import VersionFormView from "./views/admin/siac/VersionFormView";
+import PedidoMensualView from "./views/admin/siac/PedidoMensualView";
 
 export default function Router() {
   return (
@@ -114,7 +122,6 @@ export default function Router() {
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
-                <Route path="/consolidado" element={<ConsolidadoView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
@@ -122,10 +129,34 @@ export default function Router() {
                 <Route path="/asignaciones" element={<AsignacionesView />} />
               </Route>
 
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
+                <Route path="/preventas" element={<PreventasView />} />
+                <Route path="/preventas/asignadas" element={<PreventasAsignadasView />} />
+                <Route path="/preventas/nueva" element={<PreventaFormView />} />
+                <Route path="/preventas/:id/editar" element={<PreventaFormView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["stock", "supervisor", "admin"]} />}>
+                <Route path="/preventas/resumen" element={<PreventasResumenView />} />
+              </Route>
+
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
                 <Route path="/pedido-unidades" element={<PedidoUnidadesView />} />
                 <Route path="/registro-asignaciones" element={<RegistroAsignacionesView />} />
                 <Route path="/registro-asignaciones/resumen" element={<RegistroAsignacionesResumenView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin"]} />}>
+                <Route path="/preventas/pedido-mensual" element={<PedidoMensualView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
+                <Route path="/preventas/colores" element={<ColoresView />} />
+                <Route path="/preventas/colores/nuevo" element={<ColorFormView />} />
+                <Route path="/preventas/colores/:id/editar" element={<ColorFormView />} />
+                <Route path="/preventas/versiones" element={<VersionesView />} />
+                <Route path="/preventas/versiones/nuevo" element={<VersionFormView />} />
+                <Route path="/preventas/versiones/:id/editar" element={<VersionFormView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
