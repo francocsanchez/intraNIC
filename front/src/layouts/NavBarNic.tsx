@@ -1,7 +1,7 @@
 import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, ChartBarBig, ClipboardList, MonitorCog, Package, Palette, Tag, Trophy } from "lucide-react";
+import { Archive, BookMarked, ChartBarBig, ClipboardList, MonitorCog, Package, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type NavBarProps = {
@@ -16,7 +16,6 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const { allowed: buttonRegistroAsignaciones } = useRoleGuard(["admin", "stock"]);
   const { allowed: buttonPedidoMensual } = useRoleGuard(["admin", "stock"]);
   const { allowed: buttonResumenPreventas } = useRoleGuard(["admin", "stock", "supervisor"]);
-  const { allowed: buttonSistema } = useRoleGuard(["admin", "stock"]);
 
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
@@ -149,40 +148,6 @@ export default function NavBarNic({ negocio }: NavBarProps) {
             </Menu>
           ) : null}
 
-          {buttonSistema ? (
-            <Menu as="div" className="relative">
-              <MenuButton className="inline-flex items-center gap-2 hover:text-gray-900 transition">
-                <MonitorCog size={16} strokeWidth={1.5} />
-                Sistema
-              </MenuButton>
-
-              <MenuItems anchor="bottom start" className="mt-3 w-52 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
-                <MenuItem>
-                  {({ focus }) => (
-                    <Link
-                      to="/preventas/colores"
-                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                    >
-                      <Palette size={16} strokeWidth={1.5} />
-                      Colores
-                    </Link>
-                  )}
-                </MenuItem>
-
-                <MenuItem>
-                  {({ focus }) => (
-                    <Link
-                      to="/preventas/versiones"
-                      className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
-                    >
-                      <Tag size={16} strokeWidth={1.5} />
-                      Versiones
-                    </Link>
-                  )}
-                </MenuItem>
-              </MenuItems>
-            </Menu>
-          ) : null}
         </nav>
 
         {/* Menu administracion / perfil */}

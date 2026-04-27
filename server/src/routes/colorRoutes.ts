@@ -7,9 +7,9 @@ const router = Router();
 
 router.use(authenticate);
 router.use(authorizeCompanies("convencional"));
-router.use(authorizeRoles("admin", "stock"));
 
-router.get("/", ColorController.list);
+router.get("/", authorizeRoles("admin", "stock", "supervisor"), ColorController.list);
+router.use(authorizeRoles("admin", "stock"));
 router.post("/", ColorController.create);
 router.put("/:id", ColorController.update);
 router.delete("/:id", ColorController.remove);
