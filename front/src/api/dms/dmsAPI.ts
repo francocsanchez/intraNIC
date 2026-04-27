@@ -4,6 +4,7 @@ import {
   promedioOperacionesConvencionalResponseSchema,
   rankingOperacionesConvencionalResponseSchema,
   resumenGeneralSchema,
+  trackingOperacionesResponseSchema,
   vendedoresResponseSchema
 } from "@/types/index";
 import { isAxiosError } from "axios";
@@ -194,5 +195,31 @@ export async function getRankingOperacionesConvencional(anio: number) {
     }
 
     throw new Error("Error inesperado al obtener el ranking de operaciones convencional");
+  }
+}
+
+export async function getTrackingOperaciones(mes: number, anio: number) {
+  try {
+    const { data } = await api.get(`/dms/convencional/tracking-operaciones/${mes}/${anio}`);
+
+    const parsed = trackingOperacionesResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al obtener la trazabilidad operativa",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener la trazabilidad operativa");
   }
 }

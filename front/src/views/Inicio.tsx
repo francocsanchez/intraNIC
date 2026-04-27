@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
-import { CarFront, Car, Motorbike, LogOut, Cog, ReceiptText } from "lucide-react";
+import { CarFront, Car, Motorbike, LogOut, Cog, ReceiptText, Gauge } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function Inicio() {
@@ -22,6 +22,7 @@ export default function Inicio() {
   const hasREVENTA = companies.includes("reventa");
   const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
   const hasAdministracion = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]) && hasAnyCompany(user, ["reventa"]);
+  const hasTrackingOperativa = hasNIC && hasAnyRole(user, ["admin", "gerente", "supervisor", "stock"]);
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
@@ -147,7 +148,7 @@ export default function Inicio() {
           )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {/* Sistema */}
           {hasSystem ? (
             <Link to="/configuracion" className={`${baseCard} hover:shadow-md transition group`}>
@@ -191,6 +192,28 @@ export default function Inicio() {
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
 
               <p className="text-sm text-gray-500 mt-1">Reventas pendientes</p>
+            </div>
+          )}
+
+          {hasTrackingOperativa ? (
+            <Link to="/trazabilidad-operativa" className={`${baseCard} hover:shadow-md transition group`}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
+                <Gauge size={26} strokeWidth={1.5} className="text-gray-900" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Trazabilidad operativa</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Seguimiento de entrega desde facturacion</p>
+            </Link>
+          ) : (
+            <div className={disabledCard}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
+                <Gauge size={26} strokeWidth={1.5} className="text-gray-600" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Trazabilidad operativa</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Seguimiento de entrega desde facturaciÃ³n</p>
             </div>
           )}
           </div>

@@ -175,3 +175,38 @@ WHERE
 ORDER BY
 	cli.cli_nombre
 `
+
+export const getControlUnidades = (mes: number, ano: number) => `
+SELECT
+	ope.ope_codigo AS "opera",
+	ope.ope_fecfac AS "fechaFactura",
+	ope.ope_fecent AS "fechaEntrega",
+	DATEDIFF(DAY, CAST(ope.ope_fecfac AS date), CAST(ope.ope_fecent AS date)) AS "diasEntrega",
+	famiauto.fam_nombre AS "modelo",
+	vende.ven_nombre AS "vendedor",
+	ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS "sucursal"
+FROM
+	opera ope
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+LEFT JOIN sucursal ON
+	vende.ven_sucur = sucursal.suc_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND ope.ope_fecfac IS NOT NULL
+	AND ope.ope_fecent IS NOT NULL
+	AND CAST(ope.ope_fecent AS date) >= CAST(ope.ope_fecfac AS date)
+	AND ope.ope_fecent >= DATEFROMPARTS(${ano}, 1, 1)
+	AND ope.ope_fecent < DATEFROMPARTS(${ano + 1}, 1, 1)
+	AND ope.ope_cliente NOT IN (25,227,418,477,774,901,1759,2623,5722,7274,10175,51451,75295)
+ORDER BY
+	sucursal.suc_nombre,
+	vende.ven_nombre,
+	ope.ope_fecent
+`

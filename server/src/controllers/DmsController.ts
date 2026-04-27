@@ -1,12 +1,13 @@
 import { Response, Request } from "express";
 import { sequelizeLIESS, sequelizeNIC } from "../config/database";
-import { getAsignacionRecepcion, getFacturaReventasNic, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
+import { getAsignacionRecepcion, getControlUnidades, getFacturaReventasNic, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
 import { QueryTypes } from "sequelize";
 import { logError } from "../utils/logError";
 import { getReporteAsignacionRecepcion } from "../utils/reporteAsignacionRecepcion";
 import { buildResumenLiessMarca, buildResumenStockConsolidado } from "../utils/reportStockConsolidado";
 import { getStockConsolidadoLiess } from "./querys/liess.query";
 import { buildResumenFacturasReventas } from "../utils/reportFacturaRevetnas";
+import { buildReporteTrackingOperaciones, TrackingOperacionRow } from "../utils/reportTrackingOperaciones";
 
 export class DmsController {
   static getVendedores = async (_req: Request, res: Response) => {
@@ -110,6 +111,28 @@ export class DmsController {
         resumen: resumenNIC });
     } catch (error) {
       logError("ConvencionalController.getStockConsolidado");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getTrackingOperaciones = async (req: Request, res: Response) => {
+    const { mes, ano, anio } = req.params;
+
+    try {
+      const mesNumber = Number(mes);
+      const anoNumber = Number(ano ?? anio);
+      const query = getControlUnidades(mesNumber, anoNumber);
+
+      const data = await sequelizeNIC.query<TrackingOperacionRow>(query, {
+        type: QueryTypes.SELECT,
+      });
+
+      const resumen = buildReporteTrackingOperaciones(data, mesNumber, anoNumber);
+
+      return res.status(200).json({ resumen });
+    } catch (error) {
+      logError("DmsController.getTrackingOperaciones");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

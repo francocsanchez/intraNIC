@@ -547,6 +547,56 @@ export const rankingOperacionesConvencionalResponseSchema = z.object({
 export type RankingOperacionesConvencionalResponse = z.infer<typeof rankingOperacionesConvencionalResponseSchema>;
 
 //**************************** */
+// TRACKING OPERACIONES
+//**************************** */
+
+export const trackingOperacionesStatusSchema = z.object({
+  key: z.enum(["bueno", "medio", "malo", "sin-datos"]),
+  label: z.string(),
+});
+
+export const trackingOperacionesResponseSchema = z.object({
+  resumen: z.object({
+    periodo: z.object({
+      mes: z.number(),
+      ano: z.number(),
+      label: z.string(),
+    }),
+    mensual: z.object({
+      promedioDias: z.number(),
+      totalOperaciones: z.number(),
+      estado: trackingOperacionesStatusSchema,
+    }),
+    porSucursal: z.array(
+      z.object({
+        sucursal: z.string(),
+        promedioDias: z.number(),
+        totalOperaciones: z.number(),
+        estado: trackingOperacionesStatusSchema,
+        graficoAnual: z.array(
+          z.object({
+            mes: z.number(),
+            label: z.string(),
+            promedioDias: z.number(),
+            totalOperaciones: z.number(),
+          }),
+        ),
+      }),
+    ),
+    graficoAnual: z.array(
+      z.object({
+        mes: z.number(),
+        label: z.string(),
+        promedioDias: z.number(),
+        totalOperaciones: z.number(),
+      }),
+    ),
+  }),
+});
+
+export type TrackingOperacionesResponse = z.infer<typeof trackingOperacionesResponseSchema>;
+
+//**************************** */
 // PEDIDO UNIDADES
 //**************************** */
 

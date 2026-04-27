@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ConvencionalController } from "../controllers/ConvencionalController";
+import { DmsController } from "../controllers/DmsController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
 
@@ -74,5 +75,6 @@ router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
 router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
 router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.promedioOperaciones);
 router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), ConvencionalController.rankingOperaciones);
+router.get("/tracking-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente", "stock"), DmsController.getTrackingOperaciones);
 
 export default router;

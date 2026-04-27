@@ -44,5 +44,6 @@ router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRo
  *
  */
 router.get("/reventas/facturas", authorizeCompanies("reventa"), authorizeRoles("admin", "gerente", "stock", "administracion"), DmsController.getFactuasReventas);
+router.get("/tracking-operaciones/:mes/:anio", authorizeCompanies("convencional"), authorizeRoles("admin", "gerente", "supervisor", "stock"), DmsController.getTrackingOperaciones);
 
 export default router;
