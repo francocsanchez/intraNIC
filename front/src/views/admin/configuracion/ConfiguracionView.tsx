@@ -1,7 +1,7 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyCompany } from "@/helpers/access";
+import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
@@ -36,11 +36,13 @@ export default function ConfiguracionView() {
     return <div className="px-4 py-6 text-red-600">Error al cargar la configuración</div>;
   }
 
-  const vendedoresMap = new Map(vendedores.map((v: any) => [String(v.codigo), v.vendedor]));
+  const vendedoresMap = new Map(vendedores.map((v) => [String(v.codigo), v.vendedor]));
 
   const mapCodigos = (codigos: string[]) => codigos.map((c) => vendedoresMap.get(String(c)) ?? `Código ${c}`);
 
   if (!config) return null;
+
+  const canManagePreventasCatalogs = hasAnyRole(user, ["admin", "stock"]) && hasAnyCompany(user, ["convencional"]);
 
   const sistemas = [
     {
@@ -62,6 +64,12 @@ export default function ConfiguracionView() {
         },
       ],
       canEdit: hasAnyCompany(user, ["convencional"]),
+      catalogos: canManagePreventasCatalogs
+        ? [
+            { label: "Colores", to: "/preventas/colores" },
+            { label: "Versiones", to: "/preventas/versiones" },
+          ]
+        : [],
     },
     {
       title: "Usados",
@@ -82,6 +90,7 @@ export default function ConfiguracionView() {
         },
       ],
       canEdit: hasAnyCompany(user, ["usados"]),
+      catalogos: [],
     },
     {
       title: "Reventas",
@@ -94,6 +103,7 @@ export default function ConfiguracionView() {
         },
       ],
       canEdit: hasAnyCompany(user, ["reventa"]),
+      catalogos: [],
     },
   ];
 
@@ -152,6 +162,23 @@ export default function ConfiguracionView() {
                   </div>
                 </div>
               ))}
+
+              {sistema.catalogos.length ? (
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-2">Catalogos preventas</div>
+                  <div className="flex flex-wrap gap-2">
+                    {sistema.catalogos.map((catalogo) => (
+                      <Link
+                        key={catalogo.to}
+                        to={catalogo.to}
+                        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                      >
+                        {catalogo.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         ))}
