@@ -10,14 +10,30 @@ import { useAuth } from "@/hooks/useAuthe";
 import type { PedidoUnidad, PedidoUnidadItem } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, List, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const MAX_UNIDADES = 8;
 const PAGE_SIZE = 10;
+const EMPTY_PEDIDOS: PedidoUnidad[] = [];
 
 type ViewMode = "carga" | "registros";
+
+type PedidoUnidadDateGroupItem = {
+  pedido: PedidoUnidad;
+  item: PedidoUnidadItem;
+};
+
+type PedidoUnidadDateGroup = {
+  fecha: string;
+  pedidos: PedidoUnidad[];
+  detalleItems: PedidoUnidadDateGroupItem[];
+  totalUnidades: number;
+  totalConPDI: number;
+  usuarios: string[];
+  latestCreatedAt: string;
+};
 
 function formatDate(dateString: string) {
   const [year, month, day] = dateString.split("-");
@@ -35,6 +51,21 @@ function formatDateTime(dateString: string) {
   });
 }
 
+function getLatestCreatedAt(pedidos: PedidoUnidad[]) {
+  return pedidos.reduce((latest, pedido) => {
+    if (!latest) return pedido.createdAt;
+
+    const latestTime = new Date(latest).getTime();
+    const pedidoTime = new Date(pedido.createdAt).getTime();
+
+    if (Number.isNaN(latestTime) || Number.isNaN(pedidoTime)) {
+      return latest;
+    }
+
+    return pedidoTime > latestTime ? pedido.createdAt : latest;
+  }, "");
+}
+
 export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
   const { user, isLoading: authLoading } = useAuth();
@@ -44,7 +75,7 @@ export default function PedidoUnidadesView() {
   const [editingPedidoId, setEditingPedidoId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("carga");
   const [page, setPage] = useState<number>(1);
-  const [expandedPedidoId, setExpandedPedidoId] = useState<string | null>(null);
+  const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
 
   const { data: pedidosResponse, isLoading, isError, error } = useQuery({
     queryKey: ["pedido-unidades", page],
@@ -52,8 +83,37 @@ export default function PedidoUnidadesView() {
     refetchOnWindowFocus: true,
   });
 
-  const pedidos = pedidosResponse?.data ?? [];
+  const pedidos = pedidosResponse?.data ?? EMPTY_PEDIDOS;
   const pagination = pedidosResponse?.pagination;
+
+  const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
+    const groups = new Map<string, PedidoUnidad[]>();
+
+    pedidos.forEach((pedido) => {
+      const pedidosDelDia = groups.get(pedido.fecha) ?? [];
+      pedidosDelDia.push(pedido);
+      groups.set(pedido.fecha, pedidosDelDia);
+    });
+
+    return Array.from(groups.entries()).map(([fechaGrupo, pedidosDelDia]) => {
+      const detalleItems = pedidosDelDia.flatMap((pedido) =>
+        pedido.items.map((item) => ({
+          pedido,
+          item,
+        })),
+      );
+
+      return {
+        fecha: fechaGrupo,
+        pedidos: pedidosDelDia,
+        detalleItems,
+        totalUnidades: detalleItems.length,
+        totalConPDI: detalleItems.filter(({ item }) => item.PDI).length,
+        usuarios: Array.from(new Set(pedidosDelDia.map((pedido) => pedido.usuarioNombre))),
+        latestCreatedAt: getLatestCreatedAt(pedidosDelDia),
+      };
+    });
+  }, [pedidos]);
 
   const addInternoMutation = useMutation({
     mutationFn: getPedidoUnidadInfoInterno,
@@ -88,7 +148,7 @@ export default function PedidoUnidadesView() {
       setInternoInput("");
       setItems([]);
       setEditingPedidoId(null);
-      setExpandedPedidoId(null);
+      setExpandedFecha(null);
       setViewMode("registros");
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades"] });
     },
@@ -426,7 +486,7 @@ export default function PedidoUnidadesView() {
                 Registros de pedidos
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Historial paginado con vista resumida y detalle expandible por pedido.
+                Historial paginado con vista resumida por fecha y detalle expandible.
               </p>
             </div>
 
@@ -440,56 +500,49 @@ export default function PedidoUnidadesView() {
               <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                 <tr>
                   <th className="px-4 py-3 text-left">Fecha</th>
+                  <th className="px-4 py-3 text-center">Registros</th>
                   <th className="px-4 py-3 text-left">Usuario</th>
                   <th className="px-4 py-3 text-center">Unidades</th>
                   <th className="px-4 py-3 text-center">Con PDI</th>
-                  <th className="px-4 py-3 text-left">Creado</th>
+                  <th className="px-4 py-3 text-left">Ultimo registro</th>
                   <th className="px-4 py-3 text-center">Detalle</th>
-                  <th className="px-4 py-3 text-center">Accion</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {pedidos.map((pedido) => {
-                  const expanded = expandedPedidoId === pedido._id;
-                  const pedidosConPDI = pedido.items.filter((item) => item.PDI).length;
+                {pedidosAgrupadosPorFecha.map((grupo) => {
+                  const expanded = expandedFecha === grupo.fecha;
+                  const registrosLabel = grupo.pedidos.length === 1 ? "registro" : "registros";
 
                   return (
-                    <Fragment key={pedido._id}>
-                      <tr key={pedido._id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-semibold text-gray-900">{formatDate(pedido.fecha)}</td>
-                        <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
-                        <td className="px-4 py-3 text-center text-gray-700">{pedido.items.length}</td>
-                        <td className="px-4 py-3 text-center text-gray-700">{pedidosConPDI}</td>
-                        <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
+                    <Fragment key={grupo.fecha}>
+                      <tr className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-semibold text-gray-900">{formatDate(grupo.fecha)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">
+                          {grupo.pedidos.length} {registrosLabel}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">{grupo.usuarios.join(", ")}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{grupo.totalUnidades}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{grupo.totalConPDI}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatDateTime(grupo.latestCreatedAt)}</td>
                         <td className="px-4 py-3 text-center">
                           <button
                             type="button"
-                            onClick={() => setExpandedPedidoId(expanded ? null : pedido._id)}
+                            onClick={() => setExpandedFecha(expanded ? null : grupo.fecha)}
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                           >
                             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                             {expanded ? "Ocultar" : "Expandir"}
                           </button>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleEditPedido(pedido)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
-                          >
-                            <Pencil size={14} strokeWidth={1.8} />
-                            Editar
-                          </button>
-                        </td>
                       </tr>
 
                       {expanded ? (
-                        <tr key={`${pedido._id}-detail`} className="bg-gray-50">
+                        <tr className="bg-gray-50">
                           <td colSpan={7} className="px-4 py-4">
                             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                               <div className="overflow-x-auto">
-                                <table className="min-w-[720px] w-full text-sm">
+                                <table className="min-w-[1120px] w-full text-sm">
                                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                                     <tr>
                                       <th className="px-4 py-3 text-left">Interno</th>
@@ -499,10 +552,13 @@ export default function PedidoUnidadesView() {
                                       <th className="px-4 py-3 text-left">Vendedor</th>
                                       <th className="px-4 py-3 text-left">Chasis</th>
                                       <th className="px-4 py-3 text-center">PDI</th>
+                                      <th className="px-4 py-3 text-left">Usuario</th>
+                                      <th className="px-4 py-3 text-left">Creado</th>
+                                      <th className="px-4 py-3 text-center">Accion</th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
-                                    {pedido.items.map((item) => (
+                                    {grupo.detalleItems.map(({ pedido, item }) => (
                                       <tr key={`${pedido._id}-${item.interno}`} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
                                         <td className="px-4 py-3 text-gray-700">{item.version}</td>
@@ -519,6 +575,18 @@ export default function PedidoUnidadesView() {
                                           >
                                             {item.PDI ? "Si" : "No"}
                                           </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
+                                        <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
+                                        <td className="px-4 py-3 text-center">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleEditPedido(pedido)}
+                                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
+                                          >
+                                            <Pencil size={14} strokeWidth={1.8} />
+                                            Editar
+                                          </button>
                                         </td>
                                       </tr>
                                     ))}
