@@ -51,8 +51,9 @@ const buildPedidoItems = async (items: PedidoUnidadPayloadItem[]) => {
 
   const unidades = await Promise.all(
     internosUnicos.map(async (interno) => {
-      const rows = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(interno), {
+      const rows = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(), {
         type: QueryTypes.SELECT,
+        replacements: { interno },
       });
 
       return rows[0] ?? null;
@@ -93,8 +94,9 @@ export class PedidoUnidadController {
     }
 
     try {
-      const data = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(interno), {
+      const data = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(), {
         type: QueryTypes.SELECT,
+        replacements: { interno },
       });
 
       const unidad = data[0];

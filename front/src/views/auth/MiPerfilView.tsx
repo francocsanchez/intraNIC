@@ -2,7 +2,7 @@ import { updateMyPassword } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation } from "@tanstack/react-query";
 import { Building2, CircleUserRound, Hash, KeyRound, Mail } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -14,6 +14,25 @@ type UpdatePasswordForm = {
 export default function MiPerfilView() {
   const navigate = useNavigate();
   const { user, isLoading, isError } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<UpdatePasswordForm>();
+
+  const newPassword = useWatch({ control, name: "newPassword" });
+  const mutation = useMutation({
+    mutationFn: updateMyPassword,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      localStorage.removeItem("AUTH_TOKEN");
+      navigate("/login", { replace: true });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Error al actualizar la contrasena");
+    },
+  });
 
   if (isLoading) {
     return (
@@ -30,7 +49,7 @@ export default function MiPerfilView() {
       <div className="w-full px-4 py-6">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el perfil</h1>
-          <p className="mt-2 text-sm text-red-600">No fue posible obtener la información del usuario.</p>
+          <p className="mt-2 text-sm text-red-600">No fue posible obtener la informacion del usuario.</p>
         </section>
       </div>
     );
@@ -38,32 +57,11 @@ export default function MiPerfilView() {
 
   const fullName = `${user.name ?? ""} ${user.lastName ?? ""}`.trim();
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<UpdatePasswordForm>();
-
-  const newPassword = watch("newPassword");
-
-  const mutation = useMutation({
-    mutationFn: updateMyPassword,
-    onSuccess: (data) => {
-      toast.success(data.message);
-      localStorage.removeItem("AUTH_TOKEN");
-      navigate("/login", { replace: true });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Error al iniciar sesión");
-    },
-  });
-
   return (
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mi perfil</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Información del usuario</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Informacion del usuario</h1>
         <p className="mt-2 text-sm text-gray-500">Resumen general de tu cuenta dentro del sistema.</p>
       </section>
 
@@ -74,7 +72,7 @@ export default function MiPerfilView() {
         </article>
 
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Compañías</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Companias</p>
           <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">{user.company?.length ?? 0}</p>
         </article>
 
@@ -88,7 +86,7 @@ export default function MiPerfilView() {
         <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 px-6 py-4">
             <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos principales</h2>
-            <p className="mt-1 text-sm text-gray-500">Información básica de tu cuenta.</p>
+            <p className="mt-1 text-sm text-gray-500">Informacion basica de tu cuenta.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
@@ -97,7 +95,7 @@ export default function MiPerfilView() {
                 <CircleUserRound size={16} strokeWidth={1.5} />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]">Nombre completo</p>
               </div>
-              <p className="mt-3 text-sm font-medium text-gray-900 ">{fullName || "No informado"}</p>
+              <p className="mt-3 text-sm font-medium text-gray-900">{fullName || "No informado"}</p>
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -111,7 +109,7 @@ export default function MiPerfilView() {
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex items-center gap-2 text-gray-500">
                 <Hash size={16} strokeWidth={1.5} />
-                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Número vendedor NIC</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Numero vendedor NIC</p>
               </div>
               <p className="mt-3 text-sm font-medium text-gray-900">{user.numberSaleNic ?? 0}</p>
             </div>
@@ -119,7 +117,7 @@ export default function MiPerfilView() {
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="flex items-center gap-2 text-gray-500">
                 <Hash size={16} strokeWidth={1.5} />
-                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Número vendedor Liess</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Numero vendedor Liess</p>
               </div>
               <p className="mt-3 text-sm font-medium text-gray-900">{user.numberSaleLiess ?? 0}</p>
             </div>
@@ -144,7 +142,7 @@ export default function MiPerfilView() {
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">Sin compañías asignadas</p>
+                <p className="text-sm text-gray-500">Sin companias asignadas</p>
               )}
             </div>
           </section>
@@ -153,54 +151,60 @@ export default function MiPerfilView() {
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center gap-2">
                 <KeyRound size={16} strokeWidth={1.5} className="text-gray-700" />
-                <h2 className="text-base font-semibold tracking-tight text-gray-900">Cambiar contraseña</h2>
+                <h2 className="text-base font-semibold tracking-tight text-gray-900">Cambiar contrasena</h2>
               </div>
-              <p className="mt-1 text-sm text-gray-500">Ingresá la nueva contraseña dos veces para confirmarla.</p>
+              <p className="mt-1 text-sm text-gray-500">Ingresa la nueva contrasena dos veces para confirmarla.</p>
             </div>
 
-            <form className="space-y-5 p-6" onSubmit={handleSubmit(({ confirmPassword, ...formData }) => mutation.mutate(formData))}>
+            <form
+              className="space-y-5 p-6"
+              onSubmit={handleSubmit((formData) =>
+                mutation.mutate({ newPassword: formData.newPassword }),
+              )}
+            >
               <div className="space-y-2">
                 <label htmlFor="newPassword" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                  Nueva contraseña
+                  Nueva contrasena
                 </label>
                 <input
                   id="newPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="********"
                   {...register("newPassword", {
-                    required: "La contraseña es obligatoria",
+                    required: "La contrasena es obligatoria",
                     minLength: {
                       value: 8,
-                      message: "La contraseña debe tener al menos 8 caracteres",
+                      message: "La contrasena debe tener al menos 8 caracteres",
                     },
                   })}
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
                 />
-                {errors.newPassword && <p className="text-xs text-red-500">{errors.newPassword.message}</p>}
+                {errors.newPassword ? <p className="text-xs text-red-500">{errors.newPassword.message}</p> : null}
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                  Confirmar nueva contraseña
+                  Confirmar nueva contrasena
                 </label>
                 <input
                   id="confirmPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="********"
                   {...register("confirmPassword", {
-                    required: "Debes confirmar la contraseña",
-                    validate: (value) => value === newPassword || "Las contraseñas no coinciden",
+                    required: "Debes confirmar la contrasena",
+                    validate: (value) => value === newPassword || "Las contrasenas no coinciden",
                   })}
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
                 />
-                {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
+                {errors.confirmPassword ? <p className="text-xs text-red-500">{errors.confirmPassword.message}</p> : null}
               </div>
 
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
+                disabled={mutation.isPending}
+                className="inline-flex w-full items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Actualizar contraseña
+                {mutation.isPending ? "Actualizando..." : "Actualizar contrasena"}
               </button>
             </form>
           </section>

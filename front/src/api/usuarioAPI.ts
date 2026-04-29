@@ -2,7 +2,19 @@ import api from "@/libs/axios";
 import { isAxiosError } from "axios";
 import { usuarioSchema, usuariosResponseSchema, type Usuario } from "../types";
 import type { UsuarioFormData } from "@/views/admin/usuarios/CrearUsuarioView";
-import UpdatePasswordForm from "@/views/auth/MiPerfilView";
+
+const getApiErrorMessage = (error: unknown, fallback: string) => {
+  if (isAxiosError(error)) {
+    return (
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message ||
+      fallback
+    );
+  }
+
+  return fallback;
+};
 
 export async function getUsuarios() {
   try {
@@ -124,8 +136,6 @@ export async function resetPasswordUserByID(idUsuario: Usuario["_id"]) {
 
     return data;
   } catch (error) {
-    if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error);
-    }
+    throw new Error(getApiErrorMessage(error, "Error al resetear la contrasena"));
   }
 }

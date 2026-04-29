@@ -1,4 +1,4 @@
-export const stockConvencionalQuery = (vendedoresDisponible: string[]) => `
+export const stockConvencionalQuery = () => `
     SELECT
         stoauto.sa_codigo AS "interno",
         vendedor.ven_nombre AS "vendedorReserva",
@@ -31,14 +31,14 @@ export const stockConvencionalQuery = (vendedoresDisponible: string[]) => `
     WHERE
         reserva.res_anulada = 0
 		AND stoauto.sa_tipo = 5
-        AND reserva.res_vendedor IN (${vendedoresDisponible})
+        AND reserva.res_vendedor IN (:vendedores)
     ORDER BY
         famiauto.fam_nombre,
         auto.au_nombre,
         color.col_nombre
     `;
 
-export const reservasConvencionalQuery = (vendedoresReservas: string[]) => `
+export const reservasConvencionalQuery = () => `
 SELECT
     stoauto.sa_codigo as "interno",
     vendedor.ven_nombre as "vendedorReserva",
@@ -76,7 +76,7 @@ LEFT JOIN sucursal ON
 WHERE
     reserva.res_anulada = 0
     AND reserva.res_tipo = 5
-    AND reserva.res_vendedor IN (${vendedoresReservas})
+    AND reserva.res_vendedor IN (:vendedores)
 ORDER BY
     sucursal.suc_nombre,
     vendedor.ven_nombre,
@@ -84,7 +84,7 @@ ORDER BY
     auto.au_nombre
 `;
 
-export const reservasSucursalesConvencionalQuery = (vendedoresReservas: string[]) => `
+export const reservasSucursalesConvencionalQuery = () => `
 SELECT
   ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS sucursal,
   COUNT(*) AS cantidad
@@ -109,14 +109,14 @@ LEFT JOIN sucursal ON
 WHERE
   reserva.res_anulada = 0
   AND reserva.res_tipo = 5
-  AND reserva.res_vendedor IN (${vendedoresReservas})
+  AND reserva.res_vendedor IN (:vendedores)
 GROUP BY
   sucursal.suc_nombre
 ORDER BY
   sucursal.suc_nombre
 `;
 
-export const misReservasConvencionalQuery = (numeroVendedor: number) => `
+export const misReservasConvencionalQuery = () => `
 SELECT
 	stoauto.sa_codigo as "interno",
 	vendedor.ven_nombre as "vendedorReserva",
@@ -154,7 +154,7 @@ INNER JOIN sucursal ON
 WHERE
 	reserva.res_anulada = 0
 	AND reserva.res_tipo = 5
-	AND reserva.res_vendedor IN (${numeroVendedor})
+	AND reserva.res_vendedor IN (:numeroVendedor)
 ORDER BY
 	sucursal.suc_nombre,
 	vendedor.ven_nombre,
@@ -162,7 +162,7 @@ ORDER BY
 	auto.au_nombre
 `;
 
-export const miListaDeEsperaConvencionalQuery = (numeroVendedor: number) => `
+export const miListaDeEsperaConvencionalQuery = () => `
 SELECT
 	ope.ope_codigo as "opera",
 	ope.ope_fecha as "fecha",
@@ -187,7 +187,7 @@ INNER JOIN famiauto ON
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND
-        ope.ope_vende = ${numeroVendedor}
+        ope.ope_vende = :numeroVendedor
 	AND
         ope.ope_stoauto = 0
 ORDER BY
@@ -228,7 +228,7 @@ v.ven_nombre ,
 ope.ope_codigo
 `;
 
-export const misOperacionesQuery = (mes: number, ano: number, numberSaleNic: number) => `
+export const misOperacionesQuery = () => `
 SELECT
 	ope.ope_codigo as "opera",
 	ope.ope_stoauto as "interno",
@@ -261,14 +261,14 @@ INNER JOIN famiauto ON
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND ope.ope_tipo = 5
-	AND MONTH(ope.ope_fecasig) = ${mes}
-	AND YEAR(ope.ope_fecasig) = ${ano}
-	AND ope.ope_vende = ${numberSaleNic}
+	AND MONTH(ope.ope_fecasig) = :mes
+	AND YEAR(ope.ope_fecasig) = :ano
+	AND ope.ope_vende = :numberSaleNic
 ORDER BY
 	cli.cli_nombre
 `;
 
-export const operacionesConvencional = (mes: number, ano: number) => `
+export const operacionesConvencional = () => `
 SELECT
 	ope.ope_codigo AS "opera",
 	ope.ope_fecasig AS "fechaAsignacion",
@@ -289,8 +289,8 @@ INNER JOIN famiauto ON
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND ope.ope_tipo = 5
-	AND ope.ope_fecasig >= DATEADD(MONTH, -5, DATEFROMPARTS(${ano}, ${mes}, 1))
-	AND ope.ope_fecasig < DATEADD(MONTH, 1, DATEFROMPARTS(${ano}, ${mes}, 1))
+	AND ope.ope_fecasig >= DATEADD(MONTH, -5, DATEFROMPARTS(:ano, :mes, 1))
+	AND ope.ope_fecasig < DATEADD(MONTH, 1, DATEFROMPARTS(:ano, :mes, 1))
 	AND ope.ope_vende NOT IN (74, 432,66,253,24,1,168,61)
 ORDER BY
 	sucursal.suc_nombre,
@@ -298,7 +298,7 @@ ORDER BY
 	ope.ope_fecasig
 `;
 
-export const operacionesConvencionalRanking = ( ano: number) => `
+export const operacionesConvencionalRanking = () => `
 SELECT
 	ope.ope_codigo AS "opera",
 	ope.ope_fecasig AS "fechaAsignacion",
@@ -319,7 +319,7 @@ INNER JOIN famiauto ON
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND ope.ope_tipo = 5
-	AND YEAR(ope.ope_fecasig) = ${ano}
+	AND YEAR(ope.ope_fecasig) = :ano
 	AND ope.ope_vende NOT IN (74, 432,66,253)
 ORDER BY
 	sucursal.suc_nombre,
@@ -327,7 +327,7 @@ ORDER BY
 	ope.ope_fecasig
 `;
 
-export const stockReventaQuery = (vendedoresReventas: string[]) => `
+export const stockReventaQuery = () => `
     SELECT
         stoauto.sa_codigo AS "interno",
         vendedor.ven_nombre AS "vendedorReserva",
@@ -360,14 +360,14 @@ export const stockReventaQuery = (vendedoresReventas: string[]) => `
     WHERE
         reserva.res_anulada = 0
 		AND stoauto.sa_tipo = 5
-        AND reserva.res_vendedor IN (${vendedoresReventas})
+        AND reserva.res_vendedor IN (:vendedores)
     ORDER BY
         famiauto.fam_nombre,
         auto.au_nombre,
         color.col_nombre
     `;
 
-export const infoInternoQuery = (interno: number) => `
+export const infoInternoQuery = () => `
  SELECT
 	stoauto.sa_codigo as "interno",
 	auto.au_nombre as "version",
@@ -390,12 +390,12 @@ INNER JOIN auto ON
 	AND stoauto.sa_marca = auto.au_marca
 WHERE
 	stoauto.sa_tipo = 5
-	AND stoauto.sa_codigo = ${interno}
+	AND stoauto.sa_codigo = :interno
 ORDER BY
 	auto.au_nombre
     `;
 
-export const infoOperaRegistroQuery = (operacion: number) => `
+export const infoOperaRegistroQuery = () => `
 SELECT
 	ope.ope_codigo as "opera",
 	ope.ope_stoauto as "interno",
@@ -425,7 +425,7 @@ INNER JOIN famiauto ON
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND ope.ope_tipo = 5
-	AND ope.ope_codigo = ${operacion}
+	AND ope.ope_codigo = :operacion
 ORDER BY
 	cli.cli_nombre
     `;

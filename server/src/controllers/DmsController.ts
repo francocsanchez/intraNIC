@@ -9,6 +9,29 @@ import { getStockConsolidadoLiess } from "./querys/liess.query";
 import { buildResumenFacturasReventas } from "../utils/reportFacturaRevetnas";
 import { buildReporteTrackingOperaciones, TrackingOperacionRow } from "../utils/reportTrackingOperaciones";
 
+const parsePositiveInt = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const parseMonth = (value: unknown) => {
+  const parsed = parsePositiveInt(value);
+  return parsed && parsed <= 12 ? parsed : null;
+};
+
+const parseTwoDigitYear = (value: unknown) => {
+  const text = String(value ?? "").trim();
+  return /^\d{2}$/.test(text) ? text : null;
+};
+
+const parseTwoDigitMonth = (value: unknown) => {
+  const text = String(value ?? "").trim();
+  if (!/^\d{2}$/.test(text)) return null;
+
+  const month = Number(text);
+  return month >= 1 && month <= 12 ? text : null;
+};
+
 export class DmsController {
   static getVendedores = async (_req: Request, res: Response) => {
     try {
@@ -44,12 +67,19 @@ export class DmsController {
 
   static getAsignacion = async (req: Request, res: Response) => {
     const { mes, anio } = req.params;
+    const mesParam = parseTwoDigitMonth(mes);
+    const anioParam = parseTwoDigitYear(anio);
+
+    if (!mesParam || !anioParam) {
+      return res.status(400).json({ message: "Periodo no valido" });
+    }
 
     try {
-      const query = getAsignacionRecepcion(String(mes), String(anio));
+      const query = getAsignacionRecepcion();
 
       const data = await sequelizeNIC.query<any>(query, {
         type: QueryTypes.SELECT,
+        replacements: { mes: mesParam, anio: anioParam },
       });
 
       const resumen = getReporteAsignacionRecepcion(data);
@@ -118,14 +148,19 @@ export class DmsController {
 
   static getTrackingOperaciones = async (req: Request, res: Response) => {
     const { mes, ano, anio } = req.params;
+    const mesNumber = parseMonth(mes);
+    const anoNumber = parsePositiveInt(ano ?? anio);
+
+    if (!mesNumber || !anoNumber) {
+      return res.status(400).json({ message: "Periodo no valido" });
+    }
 
     try {
-      const mesNumber = Number(mes);
-      const anoNumber = Number(ano ?? anio);
-      const query = getControlUnidades(mesNumber, anoNumber);
+      const query = getControlUnidades();
 
       const data = await sequelizeNIC.query<TrackingOperacionRow>(query, {
         type: QueryTypes.SELECT,
+        replacements: { ano: anoNumber, anoSiguiente: anoNumber + 1 },
       });
 
       const resumen = buildReporteTrackingOperaciones(data, mesNumber, anoNumber);

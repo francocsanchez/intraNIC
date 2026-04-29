@@ -11,7 +11,7 @@ export class UsuarioController {
         .sort({
           enable: -1,
           lastName: 1,
-          name:1
+          name: 1,
         })
         .lean();
 
@@ -197,7 +197,7 @@ export class UsuarioController {
       if (!user) {
         return res.status(401).json({
           data: null,
-          message: "Credenciales inválidas",
+          message: "Credenciales invalidas",
         });
       }
 
@@ -213,7 +213,7 @@ export class UsuarioController {
       if (!ok) {
         return res.status(401).json({
           data: null,
-          message: "Credenciales inválidas",
+          message: "Credenciales invalidas",
         });
       }
 
@@ -241,6 +241,13 @@ export class UsuarioController {
       const { _id } = req.user;
       const { newPassword } = req.body;
 
+      if (typeof newPassword !== "string" || newPassword.length < 8) {
+        return res.status(400).json({
+          data: null,
+          message: "La contrasena debe tener al menos 8 caracteres",
+        });
+      }
+
       const usuario = await User.findById(_id);
 
       if (!usuario) {
@@ -255,7 +262,7 @@ export class UsuarioController {
 
       return res.status(200).json({
         data: null,
-        message: "Contraseña actualizada correctamente",
+        message: "Contrasena actualizada correctamente",
       });
     } catch (error) {
       logError("UsuarioController.updateMyPassword");
@@ -285,7 +292,7 @@ export class UsuarioController {
 
       return res.status(200).json({
         data: null,
-        message: `Contraseña actualizada correctamente - ${usuario.name}123`,
+        message: `Contrasena actualizada correctamente - ${usuario.name}123`,
       });
     } catch (error) {
       logError("UsuarioController.resetPassword");

@@ -12,10 +12,10 @@ export async function authenticateUser(formData: UserLoginForm) {
       throw new Error(
         error.response?.data?.error ||
           error.response?.data?.message ||
-          "Error al iniciar sesión"
+          "Error al iniciar sesion",
       );
     }
 
-    throw new Error("Error al iniciar sesión");
+    throw new Error("Error al iniciar sesion");
   }
 }

@@ -43,9 +43,10 @@ const isValidTipo = (value: unknown): value is RegistroAsignacionTipo =>
 
 const getOperacionInfo = async (operacion: number) => {
   const rows = await sequelizeNIC.query<InfoOperacionRow>(
-    infoOperaRegistroQuery(operacion),
+    infoOperaRegistroQuery(),
     {
       type: QueryTypes.SELECT,
+      replacements: { operacion },
     },
   );
 

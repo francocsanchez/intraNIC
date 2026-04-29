@@ -30,8 +30,8 @@ export default function LoginUser() {
       toast.success("Bienvenido");
       navigate("/");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Error al iniciar sesión");
+    onError: (error: Error) => {
+      toast.error(error.message || "Error al iniciar sesion");
     },
   });
 
@@ -49,9 +49,9 @@ export default function LoginUser() {
           <div className="px-6 py-5 border-b border-gray-200">
             <div className="flex items-center gap-2 text-gray-900">
               <LogIn size={18} strokeWidth={1.5} />
-              <h1 className="text-lg font-semibold tracking-tight">Iniciar sesión</h1>
+              <h1 className="text-lg font-semibold tracking-tight">Iniciar sesion</h1>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Accedé al sistema con tu cuenta.</p>
+            <p className="text-sm text-gray-500 mt-1">Accede al sistema con tu cuenta.</p>
           </div>
 
           <form className="p-6 space-y-5" onSubmit={handleSubmit(handleLogin)} noValidate>
@@ -69,30 +69,30 @@ export default function LoginUser() {
                   required: "El email es obligatorio",
                   pattern: {
                     value: /\S+@\S+\.\S+/,
-                    message: "Email no válido",
+                    message: "Email no valido",
                   },
                 })}
               />
 
-              {errors.email && <p className="text-xs font-medium text-red-600">{errors.email.message}</p>}
+              {errors.email ? <p className="text-xs font-medium text-red-600">{errors.email.message}</p> : null}
             </div>
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                Contraseña
+                Contrasena
               </label>
 
               <input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="********"
                 className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
                 {...register("password", {
-                  required: "La contraseña es obligatoria",
+                  required: "La contrasena es obligatoria",
                 })}
               />
 
-              {errors.password && <p className="text-xs font-medium text-red-600">{errors.password.message}</p>}
+              {errors.password ? <p className="text-xs font-medium text-red-600">{errors.password.message}</p> : null}
             </div>
 
             <button

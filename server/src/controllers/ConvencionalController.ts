@@ -24,6 +24,24 @@ import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisO
 import { buildReportePromedioOperaciones, PromedioOperacionRow } from "../utils/reportPromedioOperacionesConvencional";
 import { buildReporteRankingOperaciones, RankingOperacionRow } from "../utils/reportRankingOperacionesConvencional";
 
+const normalizeNumericList = (values: unknown): number[] => {
+  if (!Array.isArray(values)) return [];
+
+  return values
+    .map((value) => Number(value))
+    .filter((value) => Number.isInteger(value) && value > 0);
+};
+
+const parsePositiveInt = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const parseMonth = (value: unknown) => {
+  const parsed = parsePositiveInt(value);
+  return parsed && parsed <= 12 ? parsed : null;
+};
+
 export class ConvencionalController {
   static stockDisponible = async (_req: Request, res: Response) => {
     try {
@@ -33,9 +51,16 @@ export class ConvencionalController {
         return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresDisponibleConvencional = config.vendedoresDisponibleConvencional ?? [];
+      const vendedoresDisponibleConvencional = normalizeNumericList(config.vendedoresDisponibleConvencional);
 
-      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(vendedoresDisponibleConvencional), { type: QueryTypes.SELECT });
+      if (!vendedoresDisponibleConvencional.length) {
+        return res.status(200).json({ data: [], resumen: buildResumen([]) });
+      }
+
+      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { vendedores: vendedoresDisponibleConvencional },
+      });
 
       const resumen = buildResumen(data);
 
@@ -55,9 +80,16 @@ export class ConvencionalController {
         return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresStockGuardadoConvencional = config.vendedoresStockGuardadoConvencional ?? [];
+      const vendedoresStockGuardadoConvencional = normalizeNumericList(config.vendedoresStockGuardadoConvencional);
 
-      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(vendedoresStockGuardadoConvencional), { type: QueryTypes.SELECT });
+      if (!vendedoresStockGuardadoConvencional.length) {
+        return res.status(200).json({ data: [], resumen: buildResumen([]) });
+      }
+
+      const data = await sequelizeNIC.query<StockRow>(stockConvencionalQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { vendedores: vendedoresStockGuardadoConvencional },
+      });
 
       const resumen = buildResumen(data);
 
@@ -77,9 +109,16 @@ export class ConvencionalController {
         return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
       }
 
-      const vendedorReventasConvencional = config.vendedorReventasConvencional ?? [];
+      const vendedorReventasConvencional = normalizeNumericList(config.vendedorReventasConvencional);
 
-      const data = await sequelizeNIC.query<StockRow>(stockReventaQuery(vendedorReventasConvencional), { type: QueryTypes.SELECT });
+      if (!vendedorReventasConvencional.length) {
+        return res.status(200).json({ data: [], resumen: buildResumen([]) });
+      }
+
+      const data = await sequelizeNIC.query<StockRow>(stockReventaQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { vendedores: vendedorReventasConvencional },
+      });
 
       const resumen = buildResumen(data);
 
@@ -99,9 +138,22 @@ export class ConvencionalController {
         return res.status(404).json({ message: "No existe configuración inicial" });
       }
 
-      const vendedoresReservasConvencional = config.vendedoresReservasConvencional ?? [];
+      const vendedoresReservasConvencional = normalizeNumericList(config.vendedoresReservasConvencional);
 
-      const data = await sequelizeNIC.query<StockRow>(reservasConvencionalQuery(vendedoresReservasConvencional), { type: QueryTypes.SELECT });
+      if (!vendedoresReservasConvencional.length) {
+        return res.status(200).json({
+          data: {},
+          resumen: {
+            total: 0,
+            sucursales: {},
+          },
+        });
+      }
+
+      const data = await sequelizeNIC.query<StockRow>(reservasConvencionalQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { vendedores: vendedoresReservasConvencional },
+      });
 
       const resumenPorSucursal: Record<string, number> = {};
       const tablasPorSucursal: Record<string, StockRow[]> = {};
@@ -138,10 +190,16 @@ export class ConvencionalController {
   static misReservas = async (req: Request, res: Response) => {
     try {
       const { numberSaleNic } = req.user;
+      const numeroVendedor = parsePositiveInt(numberSaleNic);
 
-      const query = misReservasConvencionalQuery(Number(numberSaleNic));
+      if (!numeroVendedor) {
+        return res.status(400).json({ message: "Numero de vendedor no valido" });
+      }
+
+      const query = misReservasConvencionalQuery();
       const data = await sequelizeNIC.query<any>(query, {
         type: QueryTypes.SELECT,
+        replacements: { numeroVendedor },
       });
 
       const resumen = buildResumenListaDeEspera(data);
@@ -156,9 +214,16 @@ export class ConvencionalController {
 
   static miListaDeEspera = async (req: Request, res: Response) => {
     try {
-      const query = miListaDeEsperaConvencionalQuery(Number(req.user.numberSaleNic));
+      const numeroVendedor = parsePositiveInt(req.user.numberSaleNic);
+
+      if (!numeroVendedor) {
+        return res.status(400).json({ message: "Numero de vendedor no valido" });
+      }
+
+      const query = miListaDeEsperaConvencionalQuery();
       const data = await sequelizeNIC.query<any>(query, {
         type: QueryTypes.SELECT,
+        replacements: { numeroVendedor },
       });
 
       const resumen = buildResumenListaDeEspera(data);
@@ -191,12 +256,25 @@ export class ConvencionalController {
 
   static misOperaciones = async (req: Request, res: Response) => {
     const { mes, ano } = req.params;
+    const mesNumber = parseMonth(mes);
+    const anoNumber = parsePositiveInt(ano);
+
+    if (!mesNumber || !anoNumber) {
+      return res.status(400).json({ message: "Periodo no valido" });
+    }
+
+    const numberSaleNic = parsePositiveInt(req.user.numberSaleNic);
+
+    if (!numberSaleNic) {
+      return res.status(400).json({ message: "Numero de vendedor no valido" });
+    }
 
     try {
-      const query = misOperacionesQuery(Number(mes), Number(ano), Number(req.user.numberSaleNic));
+      const query = misOperacionesQuery();
 
       const data = await sequelizeNIC.query<MisOperacionRow>(query, {
         type: QueryTypes.SELECT,
+        replacements: { mes: mesNumber, ano: anoNumber, numberSaleNic },
       });
 
       const resumen = buildResumenMisOperaciones(data);
@@ -211,14 +289,19 @@ export class ConvencionalController {
 
   static promedioOperaciones = async (req: Request, res: Response) => {
     const { mes, ano } = req.params;
+    const mesNumber = parseMonth(mes);
+    const anoNumber = parsePositiveInt(ano);
+
+    if (!mesNumber || !anoNumber) {
+      return res.status(400).json({ message: "Periodo no valido" });
+    }
 
     try {
-      const mesNumber = Number(mes);
-      const anoNumber = Number(ano);
-      const query = operacionesConvencional(mesNumber, anoNumber);
+      const query = operacionesConvencional();
 
       const data = await sequelizeNIC.query<PromedioOperacionRow>(query, {
         type: QueryTypes.SELECT,
+        replacements: { mes: mesNumber, ano: anoNumber },
       });
 
       const resumen = buildReportePromedioOperaciones(data, mesNumber, anoNumber);
@@ -233,13 +316,18 @@ export class ConvencionalController {
 
    static rankingOperaciones = async (req: Request, res: Response) => {
     const { ano } = req.params;
+    const anoNumber = parsePositiveInt(ano);
+
+    if (!anoNumber) {
+      return res.status(400).json({ message: "Periodo no valido" });
+    }
 
     try {
-      const anoNumber = Number(ano);
-      const query = operacionesConvencionalRanking(anoNumber);
+      const query = operacionesConvencionalRanking();
 
       const data = await sequelizeNIC.query<RankingOperacionRow>(query, {
         type: QueryTypes.SELECT,
+        replacements: { ano: anoNumber },
       });
 
       const resumen = buildReporteRankingOperaciones(data, anoNumber);
