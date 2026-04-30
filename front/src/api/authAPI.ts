@@ -19,3 +19,20 @@ export async function authenticateUser(formData: UserLoginForm) {
     throw new Error("Error al iniciar sesion");
   }
 }
+
+export async function forgotPassword(email: string) {
+  try {
+    const { data } = await api.post("/usuarios/forgot-password", { email });
+    return data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Error al recuperar la contrasena",
+      );
+    }
+
+    throw new Error("Error al recuperar la contrasena");
+  }
+}

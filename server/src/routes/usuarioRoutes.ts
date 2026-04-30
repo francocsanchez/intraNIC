@@ -48,6 +48,14 @@ router.post("/login", UsuarioController.login);
 
 /**
  *
+ * @route POST /
+ * @desc Recuperar password por email.
+ *
+ */
+router.post("/forgot-password", UsuarioController.forgotPassword);
+
+/**
+ *
  * @route GET /
  * @desc Obtener usuario.
  *
@@ -68,7 +76,7 @@ router.get("/:idUsuario", authenticate, authorizeRoles("admin"), UsuarioControll
  * @desc Resetear password.
  *
  */
-router.patch("/reset-password/:idUsuario", authenticate, authorizeRoles("admin"), UsuarioController.resetPassword);
+router.patch("/reset-password/:idUsuario", authenticate, authorizeRoles("admin", "stock"), UsuarioController.resetPassword);
 
 /**
  *

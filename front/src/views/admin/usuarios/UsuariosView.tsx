@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyRole } from "@/helpers/access";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ export default function UsuariosView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const canManageUsers = hasAnyRole(user, ["admin", "stock"]);
+  const [resettingUserId, setResettingUserId] = useState<string | null>(null);
 
   const { data, isError, isLoading } = useQuery({
     queryKey: ["usuarios", "listar"],
@@ -59,12 +60,18 @@ export default function UsuariosView() {
 
   const { mutate: resetPasswordUser } = useMutation({
     mutationFn: (id: string) => resetPasswordUserByID(id),
+    onMutate: (id: string) => {
+      setResettingUserId(id);
+    },
     onError: (error: any) => {
-      toast.error(error.message || "Error al resetear la contraseña");
+      toast.error(error.message || "Error al enviar la nueva contrasena");
     },
     onSuccess: (response: any) => {
-      toast.success(response.message || "Contraseña reseteada correctamente");
+      toast.success(response.message || "Nueva contrasena enviada correctamente");
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
+    },
+    onSettled: () => {
+      setResettingUserId(null);
     },
   });
 
@@ -216,10 +223,11 @@ export default function UsuariosView() {
                           <button
                             type="button"
                             onClick={() => resetPasswordUser(u._id)}
+                            disabled={resettingUserId === u._id}
                             className="inline-flex items-center gap-1 justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
                           >
                             <RotateCcw size={14} strokeWidth={1.8} />
-                            Reset password
+                            {resettingUserId === u._id ? "Enviando..." : "Enviar nueva pass"}
                           </button>
 
                           <Link

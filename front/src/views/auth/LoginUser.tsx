@@ -1,6 +1,6 @@
-import { authenticateUser } from "@/api/authAPI";
+import { authenticateUser, forgotPassword } from "@/api/authAPI";
 import { useMutation } from "@tanstack/react-query";
-import { LogIn } from "lucide-react";
+import { KeyRound, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ export default function LoginUser() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<UserLoginForm>({
     defaultValues: {
@@ -35,7 +36,28 @@ export default function LoginUser() {
     },
   });
 
+  const { mutate: recoverPassword, isPending: isRecoveringPassword } = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Te enviamos una nueva contrasena por email");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Error al recuperar la contrasena");
+    },
+  });
+
   const handleLogin = (formData: UserLoginForm) => mutate(formData);
+
+  const handleRecoverPassword = () => {
+    const email = getValues("email").trim();
+
+    if (!email) {
+      toast.error("Ingresa tu email para recuperar la contrasena");
+      return;
+    }
+
+    recoverPassword(email);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -97,11 +119,21 @@ export default function LoginUser() {
 
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || isRecoveringPassword}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-900 transition disabled:cursor-not-allowed disabled:opacity-60"
             >
               <LogIn size={16} strokeWidth={1.5} />
               {isPending ? "Ingresando..." : "Ingresar"}
+            </button>
+
+            <button
+              type="button"
+              disabled={isPending || isRecoveringPassword}
+              onClick={handleRecoverPassword}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <KeyRound size={16} strokeWidth={1.5} />
+              {isRecoveringPassword ? "Enviando nueva contrasena..." : "Recuperar contrasena"}
             </button>
           </form>
         </div>

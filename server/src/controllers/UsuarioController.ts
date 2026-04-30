@@ -3,6 +3,28 @@ import { logError } from "../utils/logError";
 import User from "../models/User";
 import { checkPassword, hashPassword } from "../utils/hassPassword";
 import { generateJWT } from "../utils/jwt";
+import { sendPasswordResetEmail } from "../utils/mail";
+import { generateTemporaryPassword } from "../utils/password";
+
+const resetAndSendPassword = async (usuario: any) => {
+  const temporaryPassword = generateTemporaryPassword();
+  const previousPassword = usuario.password;
+
+  usuario.password = await hashPassword(temporaryPassword);
+  await usuario.save();
+
+  try {
+    await sendPasswordResetEmail({
+      to: usuario.email,
+      name: usuario.name,
+      temporaryPassword,
+    });
+  } catch (error) {
+    usuario.password = previousPassword;
+    await usuario.save();
+    throw error;
+  }
+};
 
 export class UsuarioController {
   static listUsuarios = async (_req: Request, res: Response) => {
@@ -287,15 +309,58 @@ export class UsuarioController {
         });
       }
 
-      usuario.password = await hashPassword(`${usuario.name}123`);
-      await usuario.save();
+      await resetAndSendPassword(usuario);
 
       return res.status(200).json({
         data: null,
-        message: `Contrasena actualizada correctamente - ${usuario.name}123`,
+        message: `Nueva contrasena enviada a ${usuario.email}`,
       });
     } catch (error) {
       logError("UsuarioController.resetPassword");
+      console.error(error);
+      return res.status(500).json({
+        data: null,
+        message: "Error del servidor",
+      });
+    }
+  };
+
+  static forgotPassword = async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body as { email?: string };
+
+      if (!email) {
+        return res.status(400).json({
+          data: null,
+          message: "El email es obligatorio",
+        });
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+      const usuario = await User.findOne({ email: normalizedEmail });
+
+      if (!usuario) {
+        return res.status(404).json({
+          data: null,
+          message: "Usuario no encontrado",
+        });
+      }
+
+      if (!usuario.enable) {
+        return res.status(403).json({
+          data: null,
+          message: "Usuario deshabilitado",
+        });
+      }
+
+      await resetAndSendPassword(usuario);
+
+      return res.status(200).json({
+        data: null,
+        message: "Te enviamos una nueva contrasena por email",
+      });
+    } catch (error) {
+      logError("UsuarioController.forgotPassword");
       console.error(error);
       return res.status(500).json({
         data: null,

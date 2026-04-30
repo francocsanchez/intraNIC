@@ -28,6 +28,15 @@ services:
 
       FRONTEND_URL_NIC: ${FRONTEND_URL_NIC}
       JWT_SECRET: ${JWT_SECRET}
+
+      MAIL_APP_NAME: ${MAIL_APP_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:4002/api/health"]
       interval: 30s
