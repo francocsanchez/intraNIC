@@ -636,6 +636,7 @@ export const pedidoUnidadListResponseSchema = z.object({
     page: z.number(),
     limit: z.number(),
     total: z.number(),
+    totalRecords: z.number(),
     totalPages: z.number(),
   }),
 });

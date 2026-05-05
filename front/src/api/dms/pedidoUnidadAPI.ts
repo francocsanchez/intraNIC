@@ -47,7 +47,7 @@ export async function getPedidoUnidadInfoInterno(interno: number): Promise<Pedid
   }
 }
 
-export async function getPedidosUnidades(page = 1, limit = 10): Promise<PedidoUnidadListResponse> {
+export async function getPedidosUnidades(page = 1, limit = 20): Promise<PedidoUnidadListResponse> {
   try {
     const { data } = await api.get("/dms/pedido-unidades", {
       params: { page, limit },

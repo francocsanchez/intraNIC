@@ -400,17 +400,29 @@ export class PedidoUnidadController {
   static list = async (req: Request, res: Response) => {
     try {
       const page = Math.max(Number(req.query.page) || 1, 1);
-      const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+      const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);
       const skip = (page - 1) * limit;
 
-      const [data, total] = await Promise.all([
-        PedidoUnidad.find()
-          .sort({ fecha: -1, createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
+      const [fechasAgrupadas, totalPorFechaResult, totalRecords] = await Promise.all([
+        PedidoUnidad.aggregate<{ _id: string }>([
+          { $group: { _id: "$fecha" } },
+          { $sort: { _id: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+        ]),
+        PedidoUnidad.aggregate<{ total: number }>([
+          { $group: { _id: "$fecha" } },
+          { $count: "total" },
+        ]),
         PedidoUnidad.countDocuments(),
       ]);
+      const fechasPagina = fechasAgrupadas.map((item) => item._id);
+      const data = fechasPagina.length
+        ? await PedidoUnidad.find({ fecha: { $in: fechasPagina } })
+            .sort({ fecha: -1, createdAt: -1 })
+            .lean()
+        : [];
+      const total = totalPorFechaResult[0]?.total ?? 0;
 
       return res.status(200).json({
         data: data.map(normalizePedidoUnidad),
@@ -418,6 +430,7 @@ export class PedidoUnidadController {
           page,
           limit,
           total,
+          totalRecords,
           totalPages: Math.max(Math.ceil(total / limit), 1),
         },
       });

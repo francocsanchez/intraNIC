@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const MAX_UNIDADES = 8;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 const EMPTY_PEDIDOS: PedidoUnidad[] = [];
 const EMPTY_PREVIAS: PedidoUnidadPrevia[] = [];
 const PRIORIDAD_OPTIONS: PedidoUnidadPrioridad[] = ["normal", "media", "urgente"];
@@ -362,7 +362,7 @@ export default function PedidoUnidadesView() {
     savePedidoMutation.mutate();
   };
 
-  const totalRecords = pagination?.total ?? 0;
+  const totalRecords = pagination?.totalRecords ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
 
   return (
