@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NICLayout from "./layouts/NICLayout";
 import LiessLayout from "./layouts/LiessLayout";
 import ReventasLayout from "./layouts/ReventasLayout";
+import AdminModuleLayout from "./layouts/AdminModuleLayout";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
@@ -25,6 +26,7 @@ import MiListaDeEsperaView from "./views/auth/MiListaDeEsperaView";
 import LoginUser from "./views/auth/LoginUser";
 
 import Inicio from "./views/Inicio";
+import AdministracionHubView from "./views/admin/AdministracionHubView";
 
 import NotFoundView from "./views/NotFoundView";
 import NoAutorizadoView from "./views/NoAutorizadoView";
@@ -46,6 +48,7 @@ import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalV
 import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView";
 import StockDisponibleReventas from "./views/reventas/StockDisponibleReventas";
 import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
+import PedidoUnidadesPreviasView from "./views/admin/siac/PedidoUnidadesPreviasView";
 import RegistroAsignacionesView from "./views/admin/siac/RegistroAsignacionesView";
 import RegistroAsignacionesResumenView from "./views/admin/siac/RegistroAsignacionesResumenView";
 import TrackingOperacionesView from "./views/admin/siac/TrackingOperacionesView";
@@ -76,6 +79,11 @@ export default function Router() {
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/usuarios" element={<UsuariosView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
+            <Route element={<AdminLayout />}>
               <Route path="/configuracion" element={<ConfiguracionView />} />
             </Route>
           </Route>
@@ -92,7 +100,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente"]} />}>
             <Route element={<AdminLayout />}>
               <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
                 <Route path="/configuracion/convencional/editar" element={<EditConfiguracionConvView />} />
@@ -108,17 +116,35 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["reventa"]} />}>
-            <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion"]} />}>
-              <Route element={<AdminLayout />}>
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path="/administracion" element={<AdministracionHubView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion", "supervisor", "vendedor"]} />}>
+            <Route element={<AdminModuleLayout />}>
               <Route path="/reventa-pendientes" element={<PendienteReventaView />} />
-              </Route>
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path="/pedido-unidades/lista-previa" element={<PedidoUnidadesPreviasView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path="/trazabilidad-operativa" element={<TrackingOperacionesView />} />
             </Route>
           </Route>
 
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
             <Route element={<NICLayout />}>
-              <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
+                <Route path="/mi-perfil/convencional" element={<MiPerfilView />} />
+              </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
@@ -129,24 +155,30 @@ export default function Router() {
                 <Route path="/asignaciones" element={<AsignacionesView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock", "administracion"]} />}>
                 <Route path="/preventas" element={<PreventasView />} />
+                <Route path="/preventas/resumen" element={<PreventasResumenView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
                 <Route path="/preventas/asignadas" element={<PreventasAsignadasView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
                 <Route path="/preventas/nueva" element={<PreventaFormView />} />
                 <Route path="/preventas/:id/editar" element={<PreventaFormView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["stock", "supervisor", "admin"]} />}>
-                <Route path="/preventas/resumen" element={<PreventasResumenView />} />
-              </Route>
-
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
                 <Route path="/pedido-unidades" element={<PedidoUnidadesView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path="/registro-asignaciones" element={<RegistroAsignacionesView />} />
                 <Route path="/registro-asignaciones/resumen" element={<RegistroAsignacionesResumenView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin", "gerente"]} />}>
                 <Route path="/preventas/pedido-mensual" element={<PedidoMensualView />} />
               </Route>
 
@@ -159,26 +191,25 @@ export default function Router() {
                 <Route path="/preventas/versiones/:id/editar" element={<VersionFormView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
                 <Route path="/promedio-convencional" element={<PromediosConvencionalView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
-                <Route path="/trazabilidad-operativa" element={<TrackingOperacionesView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
                 <Route path="/stock/reservado/convencional" element={<StockReservasConvencional />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
                 <Route path="/mis-reservas/convencional" element={<MisReservas />} />
                 <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
                 <Route path="/mis-operaciones/convencional" element={<MisOperacionesView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
                 <Route path="/ranking-convencional" element={<RankingConvencionalView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path="/stock/disponible/convencional" element={<StockDisponibleConvencional />} />
               </Route>
             </Route>
@@ -216,3 +247,4 @@ export default function Router() {
     </BrowserRouter>
   );
 }
+

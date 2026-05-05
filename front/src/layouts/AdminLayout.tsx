@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
+import { hasAnyRole } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { PowerOff, Shield } from "lucide-react";
 
@@ -20,8 +20,7 @@ export default function AdminLayout() {
   };
 
   const canViewUsuarios = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewConfiguracion = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewReventas = hasAnyRole(user, ["admin", "gerente", "stock", "administracion"]) && hasAnyCompany(user, ["reventa"]);
+  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -49,11 +48,6 @@ export default function AdminLayout() {
               </Link>
             ) : null}
 
-            {canViewReventas ? (
-              <Link to="/reventa-pendientes" className="hover:text-gray-900 transition">
-                Reventas
-              </Link>
-            ) : null}
           </div>
 
           <div className="flex items-center gap-6 text-sm text-gray-600">

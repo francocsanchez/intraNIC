@@ -5,6 +5,8 @@ import { authenticate } from "../middleware/authenticate";
 import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
 
 const router = Router();
+const convencionalRoles = ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"];
+
 /**
  *
  * @route GET /
@@ -46,7 +48,11 @@ router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", 
  * @desc Mis reservas.
  *
  */
-router.get("/stock-reservado/:numeroVendedor", ConvencionalController.misReservas);
+router.get(
+  "/stock-reservado/:numeroVendedor",
+  authorizeRoles(...convencionalRoles),
+  ConvencionalController.misReservas,
+);
 
 /**
  *
@@ -54,7 +60,7 @@ router.get("/stock-reservado/:numeroVendedor", ConvencionalController.misReserva
  * @desc Mi lista de espera.
  *
  */
-router.get("/mi-lista-de-espera", authenticate, ConvencionalController.miListaDeEspera);
+router.get("/mi-lista-de-espera", authorizeRoles(...convencionalRoles), ConvencionalController.miListaDeEspera);
 
 /**
  *
@@ -70,11 +76,11 @@ router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
  * @desc Mi lista de espera.
  *
  */
-router.get("/mis-reservas", authenticate, ConvencionalController.misReservas);
+router.get("/mis-reservas", authorizeRoles(...convencionalRoles), ConvencionalController.misReservas);
 
-router.get("/mis-operaciones/:mes/:ano", authenticate, ConvencionalController.misOperaciones);
-router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), ConvencionalController.rankingOperaciones);
-router.get("/tracking-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente", "stock"), DmsController.getTrackingOperaciones);
+router.get("/mis-operaciones/:mes/:ano", authorizeRoles(...convencionalRoles), ConvencionalController.misOperaciones);
+router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "stock", "gerente", "vendedor"), ConvencionalController.promedioOperaciones);
+router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "stock", "gerente", "vendedor"), ConvencionalController.rankingOperaciones);
+router.get("/tracking-operaciones/:mes/:ano", authorizeRoles("admin", "supervisor", "gerente", "stock", "administracion"), DmsController.getTrackingOperaciones);
 
 export default router;

@@ -11,7 +11,7 @@ router.use(authenticate);
  * @desc Listar vendedores.
  *
  */
-router.get("/vendedores", authorizeRoles("admin", "supervisor", "stock"), DmsController.getVendedores);
+router.get("/vendedores", authorizeRoles("admin", "stock", "supervisor"), DmsController.getVendedores);
 
 /**
  *
@@ -19,7 +19,7 @@ router.get("/vendedores", authorizeRoles("admin", "supervisor", "stock"), DmsCon
  * @desc Listar vendedores activos.
  *
  */
-router.get("/vendedores/activos", authorizeRoles("admin", "supervisor", "stock"), DmsController.getVendedoresActivos);
+router.get("/vendedores/activos", authorizeRoles("admin", "stock", "gerente", "supervisor"), DmsController.getVendedoresActivos);
 
 /**
  *
@@ -43,7 +43,7 @@ router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRo
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/reventas/facturas", authorizeCompanies("reventa"), authorizeRoles("admin", "gerente", "stock", "administracion"), DmsController.getFactuasReventas);
-router.get("/tracking-operaciones/:mes/:anio", authorizeCompanies("convencional"), authorizeRoles("admin", "gerente", "supervisor", "stock"), DmsController.getTrackingOperaciones);
+router.get("/reventas/facturas", authorizeRoles("admin", "stock", "gerente", "supervisor", "vendedor", "administracion"), DmsController.getFactuasReventas);
+router.get("/tracking-operaciones/:mes/:anio", authorizeRoles("admin", "stock", "gerente", "supervisor", "vendedor", "administracion"), DmsController.getTrackingOperaciones);
 
 export default router;

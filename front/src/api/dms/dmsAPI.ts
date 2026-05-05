@@ -200,7 +200,7 @@ export async function getRankingOperacionesConvencional(anio: number) {
 
 export async function getTrackingOperaciones(mes: number, anio: number) {
   try {
-    const { data } = await api.get(`/dms/convencional/tracking-operaciones/${mes}/${anio}`);
+    const { data } = await api.get(`/dms/tracking-operaciones/${mes}/${anio}`);
 
     const parsed = trackingOperacionesResponseSchema.safeParse(data);
 

@@ -42,7 +42,11 @@ export default function ConfiguracionView() {
 
   if (!config) return null;
 
+  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const canEditConfiguracion = hasAnyRole(user, ["admin", "stock"]);
   const canManagePreventasCatalogs = hasAnyRole(user, ["admin", "stock"]) && hasAnyCompany(user, ["convencional"]);
+
+  if (!canViewConfiguracion) return null;
 
   const sistemas = [
     {
@@ -63,7 +67,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedoresStockGuardadoConvencional),
         },
       ],
-      canEdit: hasAnyCompany(user, ["convencional"]),
+      canView: hasAnyCompany(user, ["convencional"]),
+      canEdit: canEditConfiguracion && hasAnyCompany(user, ["convencional"]),
       catalogos: canManagePreventasCatalogs
         ? [
             { label: "Colores", to: "/preventas/colores" },
@@ -89,7 +94,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedoresStockGuardadoUsados),
         },
       ],
-      canEdit: hasAnyCompany(user, ["usados"]),
+      canView: hasAnyCompany(user, ["usados"]),
+      canEdit: canEditConfiguracion && hasAnyCompany(user, ["usados"]),
       catalogos: [],
     },
     {
@@ -102,7 +108,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedorReventasConvencional ?? []),
         },
       ],
-      canEdit: hasAnyCompany(user, ["reventa"]),
+      canView: hasAnyCompany(user, ["reventa"]),
+      canEdit: canEditConfiguracion && hasAnyCompany(user, ["reventa"]),
       catalogos: [],
     },
   ];
@@ -115,7 +122,7 @@ export default function ConfiguracionView() {
       </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {sistemas.map((sistema) => (
+        {sistemas.filter((sistema) => sistema.canView).map((sistema) => (
           <div key={sistema.title} className="rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
               <div className="flex items-center gap-3">

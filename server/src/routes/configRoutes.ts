@@ -28,7 +28,7 @@ router.post("/", authorizeRoles("admin"), ConfigController.createConfig);
  * @desc Actualizar confinguracion configuracion.
  *
  */
-router.patch("/", authorizeRoles("admin", "supervisor", "stock"), ConfigController.updateConfig);
+router.patch("/", authorizeRoles("admin", "stock", "gerente"), ConfigController.updateConfig);
 
 /**
  *

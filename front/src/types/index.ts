@@ -602,15 +602,18 @@ export type TrackingOperacionesResponse = z.infer<typeof trackingOperacionesResp
 
 export const pedidoUnidadInfoInternoSchema = z.object({
   interno: z.number(),
-  version: z.string(),
-  order: z.string(),
-  cliente: z.string(),
-  vendedor: z.string(),
-  chasis: z.string(),
+  version: z.string().default("-"),
+  order: z.string().default("-"),
+  cliente: z.string().default("-"),
+  vendedor: z.string().default("-"),
+  chasis: z.string().nullable().default(null),
+  modelo: z.string().default("-"),
 });
 
 export const pedidoUnidadItemSchema = pedidoUnidadInfoInternoSchema.extend({
+  prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
   PDI: z.boolean(),
+  listaPreviaCreatedAt: z.string().nullable().optional(),
 });
 
 export const pedidoUnidadSchema = z.object({
@@ -646,10 +649,36 @@ export const pedidoUnidadInternosEstadoResponseSchema = z.object({
   data: z.record(z.string(), z.boolean()),
 });
 
+export const pedidoUnidadPreviaSchema = z.object({
+  _id: z.string(),
+  interno: z.number(),
+  clienteNombre: z.string(),
+  vendedorNombre: z.string(),
+  chasis: z.string().nullable(),
+  version: z.string(),
+  modelo: z.string(),
+  prioridad: z.enum(["normal", "media", "urgente"]),
+  usuario_id: z.string(),
+  usuario: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const pedidoUnidadPreviaListResponseSchema = z.object({
+  data: z.array(pedidoUnidadPreviaSchema),
+});
+
+export const pedidoUnidadPreviaResponseSchema = z.object({
+  data: pedidoUnidadPreviaSchema.optional(),
+  message: z.string(),
+});
+
 export type PedidoUnidadInfoInterno = z.infer<typeof pedidoUnidadInfoInternoSchema>;
 export type PedidoUnidadItem = z.infer<typeof pedidoUnidadItemSchema>;
 export type PedidoUnidad = z.infer<typeof pedidoUnidadSchema>;
 export type PedidoUnidadListResponse = z.infer<typeof pedidoUnidadListResponseSchema>;
+export type PedidoUnidadPrioridad = PedidoUnidadItem["prioridad"];
+export type PedidoUnidadPrevia = z.infer<typeof pedidoUnidadPreviaSchema>;
 
 //**************************** */
 // REGISTRO ASIGNACIONES

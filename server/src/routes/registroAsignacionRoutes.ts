@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authenticate);
 router.use(authorizeCompanies("convencional"));
-router.use(authorizeRoles("admin", "stock"));
+router.use(authorizeRoles("admin", "stock", "gerente"));
 
 router.get("/operacion/:operacion", RegistroAsignacionController.getInfoOperacion);
 router.get("/resumen", RegistroAsignacionController.summary);

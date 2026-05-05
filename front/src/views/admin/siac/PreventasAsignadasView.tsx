@@ -1,6 +1,8 @@
 import Loading from "@/components/Loading";
 import { getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
+import { hasAnyRole } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { History, Undo2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,6 +10,7 @@ import { toast } from "sonner";
 
 export default function PreventasAsignadasView() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["preventas", "asignadas"],
@@ -38,6 +41,7 @@ export default function PreventasAsignadasView() {
   }
 
   const preventas = data?.data ?? [];
+  const canManagePreventas = hasAnyRole(user, ["admin", "stock"]);
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -86,14 +90,18 @@ export default function PreventasAsignadasView() {
                   <td className="px-4 py-3 text-gray-700">{preventa.vendedorNombre}</td>
                   <td className="px-4 py-3 text-gray-700">{formatCurrency(preventa.monto_reserva)}</td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => mutation.mutate({ id: preventa._id, asignado: false })}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#bde2dc] bg-[#eef9f7] px-3 py-2 text-xs font-semibold text-[#146b61] transition hover:bg-[#e0f5f1]"
-                    >
-                      <Undo2 size={14} />
-                      Volver a pendiente
-                    </button>
+                    {canManagePreventas ? (
+                      <button
+                        type="button"
+                        onClick={() => mutation.mutate({ id: preventa._id, asignado: false })}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#bde2dc] bg-[#eef9f7] px-3 py-2 text-xs font-semibold text-[#146b61] transition hover:bg-[#e0f5f1]"
+                      >
+                        <Undo2 size={14} />
+                        Volver a pendiente
+                      </button>
+                    ) : (
+                      <span className="text-xs font-semibold text-gray-400">Solo lectura</span>
+                    )}
                   </td>
                 </tr>
               ))}

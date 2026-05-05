@@ -3,9 +3,13 @@ import {
   pedidoUnidadInternosEstadoResponseSchema,
   pedidoUnidadInfoInternoResponseSchema,
   pedidoUnidadListResponseSchema,
+  pedidoUnidadPreviaListResponseSchema,
+  pedidoUnidadPreviaResponseSchema,
   pedidoUnidadResponseSchema,
   type PedidoUnidadInfoInterno,
   type PedidoUnidadListResponse,
+  type PedidoUnidadPrevia,
+  type PedidoUnidadPrioridad,
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
@@ -14,6 +18,8 @@ type PedidoUnidadPayload = {
   items: Array<{
     interno: number;
     PDI: boolean;
+    prioridad: PedidoUnidadPrioridad;
+    listaPreviaCreatedAt?: string | null;
   }>;
 };
 
@@ -104,5 +110,69 @@ export async function updatePedidoUnidad(id: string, payload: PedidoUnidadPayloa
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al actualizar el pedido de unidades"));
+  }
+}
+
+export async function getPedidoUnidadesPrevias(): Promise<PedidoUnidadPrevia[]> {
+  try {
+    const { data } = await api.get("/dms/pedido-unidades/previas");
+    const parsed = pedidoUnidadPreviaListResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener la lista previa"));
+  }
+}
+
+export async function createPedidoUnidadPrevia(interno: number) {
+  try {
+    const { data } = await api.post("/dms/pedido-unidades/previas", { interno });
+    const parsed = pedidoUnidadPreviaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al agregar la unidad a la lista previa"));
+  }
+}
+
+export async function updatePedidoUnidadPreviaPrioridad(id: string, prioridad: PedidoUnidadPrioridad) {
+  try {
+    const { data } = await api.patch(`/dms/pedido-unidades/previas/${id}/prioridad`, { prioridad });
+    const parsed = pedidoUnidadPreviaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al actualizar la prioridad"));
+  }
+}
+
+export async function deletePedidoUnidadPrevia(id: string) {
+  try {
+    const { data } = await api.delete(`/dms/pedido-unidades/previas/${id}`);
+    const parsed = pedidoUnidadPreviaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al eliminar el registro previo"));
   }
 }

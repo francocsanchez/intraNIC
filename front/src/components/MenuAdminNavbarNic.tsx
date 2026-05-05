@@ -25,7 +25,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
     navigate("/login", { replace: true });
   };
 
-  const canViewOperativeMenu = hasAnyRole(user, ["admin", "gerente", "supervisor", "vendedor"]);
+  const canViewOperativeMenu = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
       {/* Perfil */}

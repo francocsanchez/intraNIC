@@ -8,10 +8,10 @@ const router = Router();
 router.use(authenticate);
 router.use(authorizeCompanies("convencional"));
 
-router.get("/", authorizeRoles("stock", "admin"), PedidoMensualController.list);
-router.get("/:id", authorizeRoles("stock", "admin"), PedidoMensualController.getById);
-router.post("/", authorizeRoles("stock", "admin"), PedidoMensualController.create);
-router.put("/:id", authorizeRoles("stock", "admin"), PedidoMensualController.update);
-router.delete("/:id", authorizeRoles("stock", "admin"), PedidoMensualController.remove);
+router.get("/", authorizeRoles("stock", "admin", "gerente"), PedidoMensualController.list);
+router.get("/:id", authorizeRoles("stock", "admin", "gerente"), PedidoMensualController.getById);
+router.post("/", authorizeRoles("stock", "admin", "gerente"), PedidoMensualController.create);
+router.put("/:id", authorizeRoles("stock", "admin", "gerente"), PedidoMensualController.update);
+router.delete("/:id", authorizeRoles("stock", "admin", "gerente"), PedidoMensualController.remove);
 
 export default router;
