@@ -641,6 +641,34 @@ export const pedidoUnidadListResponseSchema = z.object({
   }),
 });
 
+export const pedidoUnidadRegistroSchema = z.object({
+  pedidoId: z.string(),
+  fecha: z.string(),
+  usuario_id: z.string(),
+  usuarioNombre: z.string(),
+  createdAt: z.string(),
+  interno: z.number(),
+  version: z.string().default("-"),
+  order: z.string().default("-"),
+  cliente: z.string().default("-"),
+  vendedor: z.string().default("-"),
+  chasis: z.string().nullable().default(null),
+  modelo: z.string().default("-"),
+  prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
+  PDI: z.boolean(),
+  listaPreviaCreatedAt: z.string().nullable().optional(),
+});
+
+export const pedidoUnidadRegistroListResponseSchema = z.object({
+  data: z.array(pedidoUnidadRegistroSchema),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
 export const pedidoUnidadResponseSchema = z.object({
   data: pedidoUnidadSchema,
   message: z.string(),
@@ -678,6 +706,8 @@ export type PedidoUnidadInfoInterno = z.infer<typeof pedidoUnidadInfoInternoSche
 export type PedidoUnidadItem = z.infer<typeof pedidoUnidadItemSchema>;
 export type PedidoUnidad = z.infer<typeof pedidoUnidadSchema>;
 export type PedidoUnidadListResponse = z.infer<typeof pedidoUnidadListResponseSchema>;
+export type PedidoUnidadRegistro = z.infer<typeof pedidoUnidadRegistroSchema>;
+export type PedidoUnidadRegistroListResponse = z.infer<typeof pedidoUnidadRegistroListResponseSchema>;
 export type PedidoUnidadPrioridad = PedidoUnidadItem["prioridad"];
 export type PedidoUnidadPrevia = z.infer<typeof pedidoUnidadPreviaSchema>;
 

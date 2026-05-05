@@ -57,6 +57,7 @@ Estado: pantalla cerrada y validada dentro del modulo Administracion. No modific
 
 - `Lista previa / Ver pantalla` -  `admin`, `stock`, `administracion`, `gerente` - Permite ingresar a `/pedido-unidades/lista-previa` y consultar la pantalla. - `frontend + ruta + backend`
 - `Lista previa / Ir a Pedido de Unidades` - `admin`, `stock` - Link superior hacia `/pedido-unidades`. Solo estos roles deben ver el boton. - `frontend + ruta`
+- `Lista previa / Ver registros de pedidos` - `admin`, `stock`, `administracion`, `gerente` - Link superior hacia `/pedido-unidades?view=registros` para consultar cuando se pidio cada unidad en modo solo lectura si no corresponde carga. - `frontend + ruta`
 - `Lista previa / Campo Interno` - `admin`, `stock`, `administracion` - Campo numerico para ingresar el interno que se quiere cargar. - `frontend`
 - `Lista previa / Agregar` - `admin`, `stock`, `administracion` - Boton que agrega el interno cargado en el campo Interno. Tambien se ejecuta al presionar Enter dentro del campo. - `frontend + backend`
 - `Lista previa / Ver unidades cargadas` - `admin`, `stock`, `administracion`, `gerente` - Permite ver la tabla de unidades cargadas con interno, cliente, vendedor, chasis, version, modelo, prioridad, usuario y fecha. - `frontend + backend`
@@ -251,7 +252,7 @@ Nota: las pantallas `/preventas`, `/preventas/resumen`, `/preventas/asignadas`, 
 - `Asignaciones / Ver error de carga` - `convencional` - `pendiente` - Muestra error cuando no se pueden cargar asignaciones. - `frontend`
 
 ### Convencional - Pedido de Unidades {usuarios que contengan alguno de los siguientes roles `stock`, `admin`}
-- `Pedido de Unidades / Ver pantalla` - `convencional` - `pendiente` - Permite ingresar a `/pedido-unidades`. - `frontend + ruta + backend`
+- `Pedido de Unidades / Ver pantalla` - `admin`, `stock`, `administracion`, `gerente` - Permite ingresar a `/pedido-unidades`. Los roles `administracion` y `gerente` solo pueden consultar el modo `Registros`. - `frontend + ruta + backend`
 - `Pedido de Unidades / Ir a lista previa` - `convencional` - `pendiente` - Link hacia `/pedido-unidades/lista-previa`. - `frontend + ruta`
 - `Pedido de Unidades / Volver a asignaciones` - `convencional` - `pendiente` - Link hacia `/asignaciones`. - `frontend + ruta`
 - `Pedido de Unidades / Ver registros de pedidos` - `convencional` - `pendiente` - Boton superior que cambia a vista de registros. - `frontend + backend`

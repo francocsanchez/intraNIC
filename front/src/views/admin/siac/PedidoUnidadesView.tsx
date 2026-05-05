@@ -3,21 +3,21 @@ import {
   createPedidoUnidad,
   getPedidoUnidadInfoInterno,
   getPedidoUnidadesPrevias,
-  getPedidosUnidades,
+  getPedidosUnidadesRegistro,
   updatePedidoUnidad,
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad } from "@/types/index";
+import type { PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, List, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import { Fragment, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { CalendarDays, ClipboardList, List, Plus, Save, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const MAX_UNIDADES = 8;
 const PAGE_SIZE = 20;
-const EMPTY_PEDIDOS: PedidoUnidad[] = [];
+const EMPTY_REGISTROS: PedidoUnidadRegistro[] = [];
 const EMPTY_PREVIAS: PedidoUnidadPrevia[] = [];
 const PRIORIDAD_OPTIONS: PedidoUnidadPrioridad[] = ["normal", "media", "urgente"];
 const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
@@ -27,21 +27,6 @@ const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
 };
 
 type ViewMode = "carga" | "registros";
-
-type PedidoUnidadDateGroupItem = {
-  pedido: PedidoUnidad;
-  item: PedidoUnidadItem;
-};
-
-type PedidoUnidadDateGroup = {
-  fecha: string;
-  pedidos: PedidoUnidad[];
-  detalleItems: PedidoUnidadDateGroupItem[];
-  totalUnidades: number;
-  totalConPDI: number;
-  usuarios: string[];
-  latestCreatedAt: string;
-};
 
 const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
   normal: "bg-gray-100 text-gray-700",
@@ -63,21 +48,6 @@ function formatDateTime(dateString: string) {
     dateStyle: "short",
     timeStyle: "short",
   });
-}
-
-function getLatestCreatedAt(pedidos: PedidoUnidad[]) {
-  return pedidos.reduce((latest, pedido) => {
-    if (!latest) return pedido.createdAt;
-
-    const latestTime = new Date(latest).getTime();
-    const pedidoTime = new Date(pedido.createdAt).getTime();
-
-    if (Number.isNaN(latestTime) || Number.isNaN(pedidoTime)) {
-      return latest;
-    }
-
-    return pedidoTime > latestTime ? pedido.createdAt : latest;
-  }, "");
 }
 
 function comparePrioridad(a: PedidoUnidadPrioridad, b: PedidoUnidadPrioridad) {
@@ -116,18 +86,20 @@ function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
 export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
   const { user, isLoading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [fecha, setFecha] = useState<string>("");
   const [internoInput, setInternoInput] = useState<string>("");
   const [items, setItems] = useState<PedidoUnidadItem[]>([]);
   const [editingPedidoId, setEditingPedidoId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("carga");
   const [page, setPage] = useState<number>(1);
-  const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
+  const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
+  const [registroInterno, setRegistroInterno] = useState<string>("");
   const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
 
-  const { data: pedidosResponse, isLoading, isError, error } = useQuery({
-    queryKey: ["pedido-unidades", page],
-    queryFn: () => getPedidosUnidades(page, PAGE_SIZE),
+  const { data: registrosResponse, isLoading, isError, error } = useQuery({
+    queryKey: ["pedido-unidades-registros", page, registroInterno],
+    queryFn: () => getPedidosUnidadesRegistro(page, PAGE_SIZE, registroInterno),
     refetchOnWindowFocus: true,
   });
 
@@ -137,11 +109,36 @@ export default function PedidoUnidadesView() {
     refetchOnWindowFocus: true,
   });
 
-  const pedidos = pedidosResponse?.data ?? EMPTY_PEDIDOS;
-  const pagination = pedidosResponse?.pagination;
+  const registros = registrosResponse?.data ?? EMPTY_REGISTROS;
+  const pagination = registrosResponse?.pagination;
   const canManagePriority = hasAnyRole(user, ["admin", "stock"]);
+  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
+  const canOpenAsignaciones = hasAnyRole(user, ["admin", "stock", "gerente"]);
+  const canAccess = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
   const previasOrdenadas = useMemo(() => [...previasData].sort(comparePrevia), [previasData]);
   const itemsOrdenados = useMemo(() => [...items].sort(comparePedidoItem), [items]);
+
+  useEffect(() => {
+    const requestedView = searchParams.get("view");
+
+    if (!canManagePedidos) {
+      setViewMode("registros");
+      return;
+    }
+
+    if (requestedView === "registros") {
+      setViewMode("registros");
+      return;
+    }
+
+    if (requestedView === "carga") {
+      setViewMode("carga");
+    }
+  }, [canManagePedidos, searchParams]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [registroInterno]);
 
   const removeInternosFromPreviasCache = (internos: number[]) => {
     if (!internos.length) return;
@@ -151,36 +148,10 @@ export default function PedidoUnidadesView() {
     );
   };
 
-  const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
-    const groups = new Map<string, PedidoUnidad[]>();
-
-    pedidos.forEach((pedido) => {
-      const pedidosDelDia = groups.get(pedido.fecha) ?? [];
-      pedidosDelDia.push(pedido);
-      groups.set(pedido.fecha, pedidosDelDia);
-    });
-
-    return Array.from(groups.entries()).map(([fechaGrupo, pedidosDelDia]) => {
-      const detalleItems = pedidosDelDia
-        .flatMap((pedido) =>
-          pedido.items.map((item) => ({
-            pedido,
-            item,
-          })),
-        )
-        .sort((a, b) => comparePedidoItem(a.item, b.item));
-
-      return {
-        fecha: fechaGrupo,
-        pedidos: pedidosDelDia,
-        detalleItems,
-        totalUnidades: detalleItems.length,
-        totalConPDI: detalleItems.filter(({ item }) => item.PDI).length,
-        usuarios: Array.from(new Set(pedidosDelDia.map((pedido) => pedido.usuarioNombre))),
-        latestCreatedAt: getLatestCreatedAt(pedidosDelDia),
-      };
-    });
-  }, [pedidos]);
+  const handleBuscarRegistro = () => {
+    setRegistroInterno(registroInternoInput.trim());
+    setPage(1);
+  };
 
   const addInternoMutation = useMutation({
     mutationFn: getPedidoUnidadInfoInterno,
@@ -219,9 +190,8 @@ export default function PedidoUnidadesView() {
       setInternoInput("");
       setItems([]);
       setEditingPedidoId(null);
-      setExpandedFecha(null);
       setViewMode("registros");
-      queryClient.invalidateQueries({ queryKey: ["pedido-unidades"] });
+      queryClient.invalidateQueries({ queryKey: ["pedido-unidades-registros"] });
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades-previas"] });
     },
     onError: (mutationError: Error) => {
@@ -244,7 +214,6 @@ export default function PedidoUnidadesView() {
     );
   }
 
-  const canAccess = hasAnyRole(user, ["admin", "stock"]);
   if (!canAccess) {
     return null;
   }
@@ -332,15 +301,6 @@ export default function PedidoUnidadesView() {
     setSelectedPrevias([]);
   };
 
-  const handleEditPedido = (pedido: PedidoUnidad) => {
-    setEditingPedidoId(pedido._id);
-    setFecha(pedido.fecha);
-    setItems(pedido.items);
-    setInternoInput("");
-    setViewMode("carga");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleCancelEdit = () => {
     setEditingPedidoId(null);
     setFecha("");
@@ -362,7 +322,7 @@ export default function PedidoUnidadesView() {
     savePedidoMutation.mutate();
   };
 
-  const totalRecords = pagination?.totalRecords ?? 0;
+  const totalRecords = pagination?.total ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
 
   return (
@@ -387,13 +347,15 @@ export default function PedidoUnidadesView() {
               Lista previa
             </Link>
 
-            <Link
-              to="/asignaciones"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
-            >
-              <CalendarDays size={16} strokeWidth={1.75} />
-              Volver a asignaciones
-            </Link>
+            {canOpenAsignaciones && (
+              <Link
+                to="/asignaciones"
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+              >
+                <CalendarDays size={16} strokeWidth={1.75} />
+                Volver a asignaciones
+              </Link>
+            )}
 
             <button
               type="button"
@@ -408,16 +370,18 @@ export default function PedidoUnidadesView() {
       </section>
 
       <section className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => setViewMode("carga")}
-          className={[
-            "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-            viewMode === "carga" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
-          ].join(" ")}
-        >
-          Nueva carga
-        </button>
+        {canManagePedidos && (
+          <button
+            type="button"
+            onClick={() => setViewMode("carga")}
+            className={[
+              "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+              viewMode === "carga" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+            ].join(" ")}
+          >
+            Nueva carga
+          </button>
+        )}
 
         <button
           type="button"
@@ -431,7 +395,7 @@ export default function PedidoUnidadesView() {
         </button>
       </section>
 
-      {viewMode === "carga" ? (
+      {viewMode === "carga" && canManagePedidos ? (
         <section>
           <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -510,7 +474,7 @@ export default function PedidoUnidadesView() {
               </div>
 
               <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
-                <table className="min-w-[1020px] w-full text-sm">
+                <table className="min-w-[1160px] w-full text-sm">
                   <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                     <tr>
                       <th className="px-4 py-3 text-center">Sel.</th>
@@ -519,6 +483,7 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Vendedor</th>
                       <th className="px-4 py-3 text-left">Version</th>
                       <th className="px-4 py-3 text-left">Modelo</th>
+                      <th className="px-4 py-3 text-left">Chasis</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
                       <th className="px-4 py-3 text-left">Cargado</th>
                     </tr>
@@ -544,6 +509,7 @@ export default function PedidoUnidadesView() {
                           <td className="px-4 py-3">{previa.vendedorNombre}</td>
                           <td className="px-4 py-3">{previa.version}</td>
                           <td className="px-4 py-3">{previa.modelo}</td>
+                          <td className="px-4 py-3">{previa.chasis ?? "-"}</td>
                           <td className="px-4 py-3">
                             <span
                               className={[
@@ -561,7 +527,7 @@ export default function PedidoUnidadesView() {
 
                     {!previasData.length ? (
                       <tr>
-                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500">
                           Todavia no hay unidades en la lista previa.
                         </td>
                       </tr>
@@ -699,145 +665,105 @@ export default function PedidoUnidadesView() {
           <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-base font-semibold tracking-tight text-gray-900">
-                Registros de pedidos
+                Registro de unidades pedidas
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Historial paginado con vista resumida por fecha y detalle expandible.
+                Consulta cada unidad consolidada, la fecha del pedido y el momento exacto en que se registro.
               </p>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
-              {totalRecords} registros
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <label className="flex min-w-[240px] flex-col gap-2 text-sm font-medium text-gray-700">
+                Buscar por interno
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={registroInternoInput}
+                  onChange={(event) => setRegistroInternoInput(event.target.value.replace(/\D/g, ""))}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleBuscarRegistro();
+                    }
+                  }}
+                  placeholder="Ej: 65799"
+                  className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={handleBuscarRegistro}
+                className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
+              >
+                Buscar
+              </button>
+
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                {totalRecords} unidades
+              </div>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-[920px] w-full text-sm">
+            <table className="min-w-[1320px] w-full text-sm">
               <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                 <tr>
-                  <th className="px-4 py-3 text-left">Fecha</th>
-                  <th className="px-4 py-3 text-center">Registros</th>
+                  <th className="px-4 py-3 text-left">Interno</th>
+                  <th className="px-4 py-3 text-left">Fecha pedido</th>
+                  <th className="px-4 py-3 text-left">Consolidado</th>
                   <th className="px-4 py-3 text-left">Usuario</th>
-                  <th className="px-4 py-3 text-center">Unidades</th>
-                  <th className="px-4 py-3 text-center">Con PDI</th>
-                  <th className="px-4 py-3 text-left">Ultimo registro</th>
-                  <th className="px-4 py-3 text-center">Detalle</th>
+                  <th className="px-4 py-3 text-left">Cliente</th>
+                  <th className="px-4 py-3 text-left">Vendedor</th>
+                  <th className="px-4 py-3 text-left">Modelo</th>
+                  <th className="px-4 py-3 text-left">Version</th>
+                  <th className="px-4 py-3 text-left">Chasis</th>
+                  <th className="px-4 py-3 text-left">Prioridad</th>
+                  <th className="px-4 py-3 text-center">PDI</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {pedidosAgrupadosPorFecha.map((grupo) => {
-                  const expanded = expandedFecha === grupo.fecha;
-                  const registrosLabel = grupo.pedidos.length === 1 ? "registro" : "registros";
+                {registros.map((registro) => (
+                  <tr key={`${registro.pedidoId}-${registro.interno}`} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-semibold text-gray-900">{registro.interno}</td>
+                    <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
+                    <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.version}</td>
+                    <td className="px-4 py-3 text-gray-700">{registro.chasis ?? "-"}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={[
+                          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                          prioridadBadgeClass[registro.prioridad],
+                        ].join(" ")}
+                      >
+                        {registro.prioridad}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span
+                        className={[
+                          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                          registro.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
+                        ].join(" ")}
+                      >
+                        {registro.PDI ? "Si" : "No"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
 
-                  return (
-                    <Fragment key={grupo.fecha}>
-                      <tr className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-semibold text-gray-900">{formatDate(grupo.fecha)}</td>
-                        <td className="px-4 py-3 text-center text-gray-700">
-                          {grupo.pedidos.length} {registrosLabel}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700">{grupo.usuarios.join(", ")}</td>
-                        <td className="px-4 py-3 text-center text-gray-700">{grupo.totalUnidades}</td>
-                        <td className="px-4 py-3 text-center text-gray-700">{grupo.totalConPDI}</td>
-                        <td className="px-4 py-3 text-gray-700">{formatDateTime(grupo.latestCreatedAt)}</td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedFecha(expanded ? null : grupo.fecha)}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-                          >
-                            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                            {expanded ? "Ocultar" : "Expandir"}
-                          </button>
-                        </td>
-                      </tr>
-
-                      {expanded ? (
-                        <tr className="bg-gray-50">
-                          <td colSpan={7} className="px-4 py-4">
-                            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                              <div className="overflow-x-auto">
-                                <table className="min-w-[1240px] w-full text-sm">
-                                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
-                                    <tr>
-                                      <th className="px-4 py-3 text-left">Interno</th>
-                                      <th className="px-4 py-3 text-left">Version</th>
-                                      <th className="px-4 py-3 text-left">Order</th>
-                                      <th className="px-4 py-3 text-left">Modelo</th>
-                                      <th className="px-4 py-3 text-left">Cliente</th>
-                                      <th className="px-4 py-3 text-left">Vendedor</th>
-                                      <th className="px-4 py-3 text-left">Chasis</th>
-                                      <th className="px-4 py-3 text-left">Prioridad</th>
-                                      <th className="px-4 py-3 text-left">Lista previa</th>
-                                      <th className="px-4 py-3 text-center">PDI</th>
-                                      <th className="px-4 py-3 text-left">Usuario</th>
-                                      <th className="px-4 py-3 text-left">Creado</th>
-                                      <th className="px-4 py-3 text-center">Accion</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-gray-100">
-                                    {grupo.detalleItems.map(({ pedido, item }) => (
-                                      <tr key={`${pedido._id}-${item.interno}`} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.version}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.order}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
-                                        <td className="px-4 py-3">
-                                          <span
-                                            className={[
-                                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                              prioridadBadgeClass[item.prioridad],
-                                            ].join(" ")}
-                                          >
-                                            {item.prioridad}
-                                          </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-700">
-                                          {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                          <span
-                                            className={[
-                                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                              item.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
-                                            ].join(" ")}
-                                          >
-                                            {item.PDI ? "Si" : "No"}
-                                          </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
-                                        <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
-                                        <td className="px-4 py-3 text-center">
-                                          <button
-                                            type="button"
-                                            onClick={() => handleEditPedido(pedido)}
-                                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
-                                          >
-                                            <Pencil size={14} strokeWidth={1.8} />
-                                            Editar
-                                          </button>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : null}
-                    </Fragment>
-                  );
-                })}
-
-                {!pedidos.length ? (
+                {!registros.length ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                      Todavia no hay pedidos de unidades registrados.
+                    <td colSpan={11} className="px-6 py-12 text-center text-sm text-gray-500">
+                      {registroInterno
+                        ? "No se encontraron unidades para ese interno."
+                        : "Todavia no hay unidades pedidas registradas."}
                     </td>
                   </tr>
                 ) : null}

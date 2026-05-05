@@ -94,6 +94,8 @@ const normalizePedidoUnidad = (pedido: any) => ({
 const isValidFecha = (value: unknown) =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const getInternosYaPedidosSet = async (internos: number[], excludePedidoId?: string) => {
   if (!internos.length) return new Set<number>();
 
@@ -438,6 +440,80 @@ export class PedidoUnidadController {
       logError("PedidoUnidadController.list");
       console.error(error);
       return res.status(500).json({ message: "Error al listar pedidos de unidades" });
+    }
+  };
+
+  static listRegistros = async (req: Request, res: Response) => {
+    try {
+      const page = Math.max(Number(req.query.page) || 1, 1);
+      const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+      const skip = (page - 1) * limit;
+      const interno = typeof req.query.interno === "string" ? req.query.interno.trim() : "";
+
+      const pipeline: any[] = [
+        { $unwind: "$items" },
+      ];
+
+      if (interno) {
+        pipeline.push(
+          { $addFields: { internoBusqueda: { $toString: "$items.interno" } } },
+          { $match: { internoBusqueda: { $regex: escapeRegex(interno), $options: "i" } } },
+        );
+      }
+
+      pipeline.push(
+        { $sort: { fecha: -1, createdAt: -1, "items.interno": 1 } },
+        {
+          $facet: {
+            data: [
+              { $skip: skip },
+              { $limit: limit },
+              {
+                $project: {
+                  _id: 0,
+                  pedidoId: "$_id",
+                  fecha: 1,
+                  usuario_id: 1,
+                  usuarioNombre: 1,
+                  createdAt: 1,
+                  interno: "$items.interno",
+                  version: "$items.version",
+                  order: "$items.order",
+                  cliente: "$items.cliente",
+                  vendedor: "$items.vendedor",
+                  chasis: "$items.chasis",
+                  modelo: "$items.modelo",
+                  prioridad: "$items.prioridad",
+                  PDI: "$items.PDI",
+                  listaPreviaCreatedAt: "$items.listaPreviaCreatedAt",
+                },
+              },
+            ],
+            total: [{ $count: "count" }],
+          },
+        },
+      );
+
+      const [result] = await PedidoUnidad.aggregate<{
+        data: Array<Record<string, unknown>>;
+        total: Array<{ count: number }>;
+      }>(pipeline);
+      const data = result?.data ?? [];
+      const total = result?.total?.[0]?.count ?? 0;
+
+      return res.status(200).json({
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.max(Math.ceil(total / limit), 1),
+        },
+      });
+    } catch (error) {
+      logError("PedidoUnidadController.listRegistros");
+      console.error(error);
+      return res.status(500).json({ message: "Error al listar unidades pedidas" });
     }
   };
 

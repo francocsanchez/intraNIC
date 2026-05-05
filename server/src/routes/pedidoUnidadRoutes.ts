@@ -7,6 +7,7 @@ const router = Router();
 const listaPreviaRoles = ["stock", "admin", "administracion", "gerente"];
 const crearPreviaRoles = ["stock", "admin", "administracion"];
 const pedidoRoles = ["stock", "admin"];
+const lecturaPedidoRoles = ["stock", "admin", "administracion", "gerente"];
 const estadoInternosRoles = ["stock", "admin", "gerente"];
 const prioridadRoles = ["stock", "admin", "administracion", "gerente"];
 
@@ -20,8 +21,9 @@ router.post("/previas", authorizeRoles(...crearPreviaRoles), PedidoUnidadControl
 router.patch("/previas/:id/prioridad", authorizeRoles(...prioridadRoles), PedidoUnidadController.updatePrioridadPrevia);
 router.delete("/previas/:id", authorizeRoles(...listaPreviaRoles), PedidoUnidadController.deletePrevia);
 
-router.get("/", authorizeRoles(...pedidoRoles), PedidoUnidadController.list);
-router.get("/:id", authorizeRoles(...pedidoRoles), PedidoUnidadController.getById);
+router.get("/registros", authorizeRoles(...lecturaPedidoRoles), PedidoUnidadController.listRegistros);
+router.get("/", authorizeRoles(...lecturaPedidoRoles), PedidoUnidadController.list);
+router.get("/:id", authorizeRoles(...lecturaPedidoRoles), PedidoUnidadController.getById);
 router.post("/", authorizeRoles(...pedidoRoles), PedidoUnidadController.create);
 router.put("/:id", authorizeRoles(...pedidoRoles), PedidoUnidadController.update);
 

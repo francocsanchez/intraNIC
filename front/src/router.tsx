@@ -169,7 +169,7 @@ export default function Router() {
                 <Route path="/preventas/:id/editar" element={<PreventaFormView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
                 <Route path="/pedido-unidades" element={<PedidoUnidadesView />} />
               </Route>
 

@@ -3,6 +3,7 @@ import {
   pedidoUnidadInternosEstadoResponseSchema,
   pedidoUnidadInfoInternoResponseSchema,
   pedidoUnidadListResponseSchema,
+  pedidoUnidadRegistroListResponseSchema,
   pedidoUnidadPreviaListResponseSchema,
   pedidoUnidadPreviaResponseSchema,
   pedidoUnidadResponseSchema,
@@ -10,6 +11,7 @@ import {
   type PedidoUnidadListResponse,
   type PedidoUnidadPrevia,
   type PedidoUnidadPrioridad,
+  type PedidoUnidadRegistroListResponse,
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
@@ -62,6 +64,28 @@ export async function getPedidosUnidades(page = 1, limit = 20): Promise<PedidoUn
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener los pedidos de unidades"));
+  }
+}
+
+export async function getPedidosUnidadesRegistro(
+  page = 1,
+  limit = 20,
+  interno = "",
+): Promise<PedidoUnidadRegistroListResponse> {
+  try {
+    const { data } = await api.get("/dms/pedido-unidades/registros", {
+      params: { page, limit, interno: interno.trim() || undefined },
+    });
+    const parsed = pedidoUnidadRegistroListResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el registro de unidades pedidas"));
   }
 }
 
