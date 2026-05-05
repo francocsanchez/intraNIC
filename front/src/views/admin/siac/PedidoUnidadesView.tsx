@@ -2,12 +2,13 @@ import Loading from "@/components/Loading";
 import {
   createPedidoUnidad,
   getPedidoUnidadInfoInterno,
+  getPedidoUnidadesPrevias,
   getPedidosUnidades,
   updatePedidoUnidad,
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import type { PedidoUnidad, PedidoUnidadItem } from "@/types/index";
+import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, List, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
@@ -17,6 +18,13 @@ import { toast } from "sonner";
 const MAX_UNIDADES = 8;
 const PAGE_SIZE = 10;
 const EMPTY_PEDIDOS: PedidoUnidad[] = [];
+const EMPTY_PREVIAS: PedidoUnidadPrevia[] = [];
+const PRIORIDAD_OPTIONS: PedidoUnidadPrioridad[] = ["normal", "media", "urgente"];
+const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
+  urgente: 0,
+  media: 1,
+  normal: 2,
+};
 
 type ViewMode = "carga" | "registros";
 
@@ -33,6 +41,12 @@ type PedidoUnidadDateGroup = {
   totalConPDI: number;
   usuarios: string[];
   latestCreatedAt: string;
+};
+
+const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
+  normal: "bg-gray-100 text-gray-700",
+  media: "bg-yellow-100 text-yellow-800",
+  urgente: "bg-red-100 text-red-700",
 };
 
 function formatDate(dateString: string) {
@@ -66,6 +80,39 @@ function getLatestCreatedAt(pedidos: PedidoUnidad[]) {
   }, "");
 }
 
+function comparePrioridad(a: PedidoUnidadPrioridad, b: PedidoUnidadPrioridad) {
+  return PRIORIDAD_ORDER[a] - PRIORIDAD_ORDER[b];
+}
+
+function comparePedidoItem(a: PedidoUnidadItem, b: PedidoUnidadItem) {
+  const priorityDiff = comparePrioridad(a.prioridad, b.prioridad);
+  if (priorityDiff !== 0) return priorityDiff;
+
+  return a.interno - b.interno;
+}
+
+function comparePrevia(a: PedidoUnidadPrevia, b: PedidoUnidadPrevia) {
+  const priorityDiff = comparePrioridad(a.prioridad, b.prioridad);
+  if (priorityDiff !== 0) return priorityDiff;
+
+  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+}
+
+function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
+  return {
+    interno: item.interno,
+    version: item.version,
+    order: "-",
+    cliente: item.clienteNombre,
+    vendedor: item.vendedorNombre,
+    chasis: item.chasis,
+    modelo: item.modelo,
+    prioridad: item.prioridad,
+    PDI: false,
+    listaPreviaCreatedAt: item.createdAt,
+  };
+}
+
 export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
   const { user, isLoading: authLoading } = useAuth();
@@ -76,6 +123,7 @@ export default function PedidoUnidadesView() {
   const [viewMode, setViewMode] = useState<ViewMode>("carga");
   const [page, setPage] = useState<number>(1);
   const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
+  const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
 
   const { data: pedidosResponse, isLoading, isError, error } = useQuery({
     queryKey: ["pedido-unidades", page],
@@ -83,8 +131,25 @@ export default function PedidoUnidadesView() {
     refetchOnWindowFocus: true,
   });
 
+  const { data: previasData = EMPTY_PREVIAS, isLoading: isLoadingPrevias } = useQuery({
+    queryKey: ["pedido-unidades-previas"],
+    queryFn: getPedidoUnidadesPrevias,
+    refetchOnWindowFocus: true,
+  });
+
   const pedidos = pedidosResponse?.data ?? EMPTY_PEDIDOS;
   const pagination = pedidosResponse?.pagination;
+  const canManagePriority = hasAnyRole(user, ["admin", "stock"]);
+  const previasOrdenadas = useMemo(() => [...previasData].sort(comparePrevia), [previasData]);
+  const itemsOrdenados = useMemo(() => [...items].sort(comparePedidoItem), [items]);
+
+  const removeInternosFromPreviasCache = (internos: number[]) => {
+    if (!internos.length) return;
+
+    queryClient.setQueryData<PedidoUnidadPrevia[]>(["pedido-unidades-previas"], (current) =>
+      current?.filter((item) => !internos.includes(item.interno)) ?? current,
+    );
+  };
 
   const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
     const groups = new Map<string, PedidoUnidad[]>();
@@ -96,12 +161,14 @@ export default function PedidoUnidadesView() {
     });
 
     return Array.from(groups.entries()).map(([fechaGrupo, pedidosDelDia]) => {
-      const detalleItems = pedidosDelDia.flatMap((pedido) =>
-        pedido.items.map((item) => ({
-          pedido,
-          item,
-        })),
-      );
+      const detalleItems = pedidosDelDia
+        .flatMap((pedido) =>
+          pedido.items.map((item) => ({
+            pedido,
+            item,
+          })),
+        )
+        .sort((a, b) => comparePedidoItem(a.item, b.item));
 
       return {
         fecha: fechaGrupo,
@@ -118,7 +185,9 @@ export default function PedidoUnidadesView() {
   const addInternoMutation = useMutation({
     mutationFn: getPedidoUnidadInfoInterno,
     onSuccess: (data) => {
-      setItems((current) => [...current, { ...data, PDI: false }]);
+      setItems((current) => [...current, { ...data, prioridad: "normal", PDI: false }]);
+      removeInternosFromPreviasCache([data.interno]);
+      setSelectedPrevias((current) => current.filter((interno) => interno !== data.interno));
       setInternoInput("");
     },
     onError: (mutationError: Error) => {
@@ -133,6 +202,8 @@ export default function PedidoUnidadesView() {
         items: items.map((item) => ({
           interno: item.interno,
           PDI: item.PDI,
+          prioridad: item.prioridad,
+          listaPreviaCreatedAt: item.listaPreviaCreatedAt ?? null,
         })),
       };
 
@@ -151,13 +222,14 @@ export default function PedidoUnidadesView() {
       setExpandedFecha(null);
       setViewMode("registros");
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades"] });
+      queryClient.invalidateQueries({ queryKey: ["pedido-unidades-previas"] });
     },
     onError: (mutationError: Error) => {
       toast.error(mutationError.message || "No se pudo guardar el pedido");
     },
   });
 
-  if (authLoading || isLoading) return <Loading />;
+  if (authLoading || isLoading || isLoadingPrevias) return <Loading />;
 
   if (isError) {
     return (
@@ -216,6 +288,50 @@ export default function PedidoUnidadesView() {
     );
   };
 
+  const handleChangePrioridad = (interno: number, prioridad: PedidoUnidadPrioridad) => {
+    setItems((current) =>
+      current.map((item) => (item.interno === interno ? { ...item, prioridad } : item)),
+    );
+  };
+
+  const handleTogglePreviaSelection = (interno: number) => {
+    setSelectedPrevias((current) =>
+      current.includes(interno) ? current.filter((value) => value !== interno) : [...current, interno],
+    );
+  };
+
+  const handleAddSelectedPrevias = () => {
+    if (!fecha) {
+      toast.error("Debes seleccionar la fecha del pedido");
+      return;
+    }
+
+    const previasSeleccionadas = previasData.filter((item) => selectedPrevias.includes(item.interno));
+
+    if (!previasSeleccionadas.length) {
+      toast.error("Selecciona al menos una unidad de la lista previa");
+      return;
+    }
+
+    const repetidas = previasSeleccionadas.filter((previa) =>
+      items.some((item) => item.interno === previa.interno),
+    );
+
+    if (repetidas.length) {
+      toast.error(`Ya agregaste estos internos al pedido: ${repetidas.map((item) => item.interno).join(", ")}`);
+      return;
+    }
+
+    if (items.length + previasSeleccionadas.length > MAX_UNIDADES) {
+      toast.error("Solo puedes consolidar hasta 8 unidades por pedido");
+      return;
+    }
+
+    setItems((current) => [...current, ...previasSeleccionadas.map(mapPreviaToPedidoItem)]);
+    removeInternosFromPreviasCache(previasSeleccionadas.map((item) => item.interno));
+    setSelectedPrevias([]);
+  };
+
   const handleEditPedido = (pedido: PedidoUnidad) => {
     setEditingPedidoId(pedido._id);
     setFecha(pedido.fecha);
@@ -264,6 +380,14 @@ export default function PedidoUnidadesView() {
 
           <div className="flex flex-wrap gap-3">
             <Link
+              to="/pedido-unidades/lista-previa"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+            >
+              <ClipboardList size={16} strokeWidth={1.75} />
+              Lista previa
+            </Link>
+
+            <Link
               to="/asignaciones"
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
             >
@@ -308,7 +432,7 @@ export default function PedidoUnidadesView() {
       </section>
 
       {viewMode === "carga" ? (
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <section>
           <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
@@ -365,31 +489,149 @@ export default function PedidoUnidadesView() {
               </button>
             </div>
 
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">Seleccionar desde lista previa</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Puedes mezclar unidades previas con carga manual en el mismo pedido.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddSelectedPrevias}
+                  disabled={!selectedPrevias.length || !canAddMore}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  <Plus size={16} strokeWidth={2} />
+                  Agregar seleccionadas
+                </button>
+              </div>
+
+              <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
+                <table className="min-w-[1020px] w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                    <tr>
+                      <th className="px-4 py-3 text-center">Sel.</th>
+                      <th className="px-4 py-3 text-left">Interno</th>
+                      <th className="px-4 py-3 text-left">Cliente</th>
+                      <th className="px-4 py-3 text-left">Vendedor</th>
+                      <th className="px-4 py-3 text-left">Version</th>
+                      <th className="px-4 py-3 text-left">Modelo</th>
+                      <th className="px-4 py-3 text-left">Prioridad</th>
+                      <th className="px-4 py-3 text-left">Cargado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {previasOrdenadas.map((previa) => {
+                      const alreadyAdded = items.some((item) => item.interno === previa.interno);
+                      const checked = selectedPrevias.includes(previa.interno);
+
+                      return (
+                        <tr key={previa._id} className={alreadyAdded ? "bg-gray-50 text-gray-400" : "hover:bg-gray-50"}>
+                          <td className="px-4 py-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              disabled={alreadyAdded}
+                              onChange={() => handleTogglePreviaSelection(previa.interno)}
+                              className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a] disabled:cursor-not-allowed"
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-semibold">{previa.interno}</td>
+                          <td className="px-4 py-3">{previa.clienteNombre}</td>
+                          <td className="px-4 py-3">{previa.vendedorNombre}</td>
+                          <td className="px-4 py-3">{previa.version}</td>
+                          <td className="px-4 py-3">{previa.modelo}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={[
+                                "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                prioridadBadgeClass[previa.prioridad],
+                              ].join(" ")}
+                            >
+                              {previa.prioridad}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-700">{formatDateTime(previa.createdAt)}</td>
+                        </tr>
+                      );
+                    })}
+
+                    {!previasData.length ? (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
+                          Todavia no hay unidades en la lista previa.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
               <div className="overflow-x-auto">
-                <table className="min-w-[840px] w-full text-sm">
+                <table className="min-w-[980px] w-full text-sm">
                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                     <tr>
                       <th className="px-4 py-3 text-left">Interno</th>
                       <th className="px-4 py-3 text-left">Version</th>
                       <th className="px-4 py-3 text-left">Order</th>
+                      <th className="px-4 py-3 text-left">Modelo</th>
                       <th className="px-4 py-3 text-left">Cliente</th>
                       <th className="px-4 py-3 text-left">Vendedor</th>
                       <th className="px-4 py-3 text-left">Chasis</th>
+                      <th className="px-4 py-3 text-left">Prioridad</th>
+                      <th className="px-4 py-3 text-left">Lista previa</th>
                       <th className="px-4 py-3 text-center">PDI</th>
                       <th className="px-4 py-3 text-center">Accion</th>
                     </tr>
                   </thead>
 
                   <tbody className="divide-y divide-gray-100 bg-white">
-                    {items.map((item) => (
+                    {itemsOrdenados.map((item) => (
                       <tr key={item.interno} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-semibold text-gray-900">{item.interno}</td>
                         <td className="px-4 py-3 text-gray-700">{item.version}</td>
                         <td className="px-4 py-3 text-gray-700">{item.order}</td>
+                        <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
                         <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
                         <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.chasis}</td>
+                        <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                        <td className="px-4 py-3">
+                          {canManagePriority ? (
+                            <select
+                              value={item.prioridad}
+                              onChange={(event) =>
+                                handleChangePrioridad(item.interno, event.target.value as PedidoUnidadPrioridad)
+                              }
+                              className={[
+                                "rounded-full border-0 px-3 py-1 text-xs font-semibold outline-none",
+                                prioridadBadgeClass[item.prioridad],
+                              ].join(" ")}
+                            >
+                              {PRIORIDAD_OPTIONS.map((prioridad) => (
+                                <option key={prioridad} value={prioridad}>
+                                  {prioridad}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span
+                              className={[
+                                "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                prioridadBadgeClass[item.prioridad],
+                              ].join(" ")}
+                            >
+                              {item.prioridad}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">
+                          {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <input
                             type="checkbox"
@@ -413,7 +655,7 @@ export default function PedidoUnidadesView() {
 
                     {!items.length && (
                       <tr>
-                        <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                        <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
                           Todavia no agregaste internos al pedido.
                         </td>
                       </tr>
@@ -448,32 +690,6 @@ export default function PedidoUnidadesView() {
                   {isEditing ? <Save size={16} strokeWidth={2} /> : <ClipboardList size={16} strokeWidth={2} />}
                   {isEditing ? "Guardar cambios" : "Consolidar carga"}
                 </button>
-              </div>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">
-              Resumen de carga
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Vista rapida del pedido en preparacion.
-            </p>
-
-            <div className="mt-6 grid grid-cols-1 gap-4">
-              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Fecha</p>
-                <p className="mt-2 text-xl font-semibold text-gray-900">{fecha ? formatDate(fecha) : "-"}</p>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Unidades</p>
-                <p className="mt-2 text-xl font-semibold text-gray-900">{items.length}</p>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Con PDI</p>
-                <p className="mt-2 text-xl font-semibold text-gray-900">{items.filter((item) => item.PDI).length}</p>
               </div>
             </div>
           </article>
@@ -542,15 +758,18 @@ export default function PedidoUnidadesView() {
                           <td colSpan={7} className="px-4 py-4">
                             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                               <div className="overflow-x-auto">
-                                <table className="min-w-[1120px] w-full text-sm">
+                                <table className="min-w-[1240px] w-full text-sm">
                                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                                     <tr>
                                       <th className="px-4 py-3 text-left">Interno</th>
                                       <th className="px-4 py-3 text-left">Version</th>
                                       <th className="px-4 py-3 text-left">Order</th>
+                                      <th className="px-4 py-3 text-left">Modelo</th>
                                       <th className="px-4 py-3 text-left">Cliente</th>
                                       <th className="px-4 py-3 text-left">Vendedor</th>
                                       <th className="px-4 py-3 text-left">Chasis</th>
+                                      <th className="px-4 py-3 text-left">Prioridad</th>
+                                      <th className="px-4 py-3 text-left">Lista previa</th>
                                       <th className="px-4 py-3 text-center">PDI</th>
                                       <th className="px-4 py-3 text-left">Usuario</th>
                                       <th className="px-4 py-3 text-left">Creado</th>
@@ -563,9 +782,23 @@ export default function PedidoUnidadesView() {
                                         <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
                                         <td className="px-4 py-3 text-gray-700">{item.version}</td>
                                         <td className="px-4 py-3 text-gray-700">{item.order}</td>
+                                        <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
                                         <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
                                         <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                                        <td className="px-4 py-3 text-gray-700">{item.chasis}</td>
+                                        <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                                        <td className="px-4 py-3">
+                                          <span
+                                            className={[
+                                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                              prioridadBadgeClass[item.prioridad],
+                                            ].join(" ")}
+                                          >
+                                            {item.prioridad}
+                                          </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-700">
+                                          {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
+                                        </td>
                                         <td className="px-4 py-3 text-center">
                                           <span
                                             className={[
@@ -642,3 +875,4 @@ export default function PedidoUnidadesView() {
     </div>
   );
 }
+

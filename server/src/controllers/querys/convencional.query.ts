@@ -374,7 +374,8 @@ export const infoInternoQuery = () => `
 	stoauto.sa_nrofab as "order",
 	ISNULL(c.cli_nombre, '-') as cliente,
 	ISNULL(v.ven_nombre, '-') as vendedor,
-	ISNULL(movnped.mnp_chasis, '-') AS "chasis"
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+	ISNULL(famiauto.fam_nombre, '-') AS "modelo"
 FROM
 	stoauto
 LEFT JOIN opera ON
@@ -388,6 +389,8 @@ INNER JOIN movnped ON
 INNER JOIN auto ON
 	stoauto.sa_auto = auto.au_codigo
 	AND stoauto.sa_marca = auto.au_marca
+LEFT JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
 WHERE
 	stoauto.sa_tipo = 5
 	AND stoauto.sa_codigo = :interno

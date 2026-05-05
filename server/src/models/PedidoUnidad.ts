@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import { PEDIDO_UNIDAD_PRIORIDADES, type PedidoUnidadPrioridad } from "./PedidoUnidadPrevia";
 
 export interface IPedidoUnidadItem {
   interno: number;
@@ -6,7 +7,10 @@ export interface IPedidoUnidadItem {
   order: string;
   cliente: string;
   vendedor: string;
-  chasis: string;
+  chasis: string | null;
+  modelo: string;
+  prioridad: PedidoUnidadPrioridad;
+  listaPreviaCreatedAt?: Date | null;
   PDI: boolean;
 }
 
@@ -47,8 +51,23 @@ const pedidoUnidadItemSchema = new Schema<IPedidoUnidadItem>(
     },
     chasis: {
       type: String,
+      default: null,
+      trim: true,
+    },
+    modelo: {
+      type: String,
       required: true,
       trim: true,
+    },
+    prioridad: {
+      type: String,
+      enum: PEDIDO_UNIDAD_PRIORIDADES,
+      default: "normal",
+      required: true,
+    },
+    listaPreviaCreatedAt: {
+      type: Date,
+      default: null,
     },
     PDI: {
       type: Boolean,
