@@ -6,9 +6,9 @@ import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles
 const router = Router();
 
 router.use(authenticate);
-router.use(authorizeCompanies("convencional"));
 
-router.get("/", authorizeRoles("admin", "stock", "supervisor"), VersionController.list);
+router.get("/", VersionController.list);
+router.use(authorizeCompanies("convencional"));
 router.use(authorizeRoles("admin", "stock"));
 router.post("/", VersionController.create);
 router.put("/:id", VersionController.update);

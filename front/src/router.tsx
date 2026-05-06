@@ -143,6 +143,12 @@ export default function Router() {
             </Route>
           </Route>
 
+          <Route element={<AdminModuleLayout />}>
+            <Route path="/proformas" element={<ProformasView />} />
+            <Route path="/proformas/nueva" element={<ProformaFormView />} />
+            <Route path="/proformas/:id" element={<ProformaDetailView />} />
+          </Route>
+
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
             <Route element={<NICLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
@@ -206,9 +212,6 @@ export default function Router() {
                 <Route path="/mis-reservas/convencional" element={<MisReservas />} />
                 <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
                 <Route path="/mis-operaciones/convencional" element={<MisOperacionesView />} />
-                <Route path="/proformas" element={<ProformasView />} />
-                <Route path="/proformas/nueva" element={<ProformaFormView />} />
-                <Route path="/proformas/:id" element={<ProformaDetailView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>

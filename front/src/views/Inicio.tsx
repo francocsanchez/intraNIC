@@ -23,7 +23,7 @@ export default function Inicio() {
   const hasAdministracion =
     hasAnyRole(user, ["admin", "administracion", "stock", "gerente", "supervisor", "vendedor"]);
   const hasPreventas = hasNIC;
-  const hasProformas = hasNIC;
+  const hasProformas = true;
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
