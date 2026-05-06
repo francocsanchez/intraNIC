@@ -158,6 +158,7 @@ export const stockDisponibleLiesslItemSchema = z.object({
   color: z.string().nullable(),
   anioNuevo: z.number().nullable().optional(),
   anioUsado: z.number().nullable().optional(),
+  precioVentaUsado: z.coerce.number().nullable().optional(),
   reservaVendedor: z.string(),
   tipo: z.string(),
   fechaRecepcion: z.string(),

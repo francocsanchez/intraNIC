@@ -6,6 +6,9 @@ export type StockLiessRow = {
   version: string;
   chasis: string | null;
   color: string | null;
+  anioNuevo?: number | null;
+  anioUsado?: number | null;
+  precioVentaUsado?: number | null;
   reservaVendedor: string;
   tipo: "nuevo" | "usado";
   fechaRecepcion: string;
@@ -22,6 +25,7 @@ SELECT
 	COALESCE(anexnvo.an_color, anexusa.aus_color) AS "color",
 	anexnvo.an_anio as "anioNuevo",
 	anexusa.aus_anio as "anioUsado",
+	anexusa.aus_precio as "precioVentaUsado",
 	stoauto.sa_reserva AS "reservaVendedor",
 	CASE
 		WHEN stoauto.sa_tipo = 5 THEN 'NUEVO'

@@ -7,6 +7,23 @@ import { textToColor } from "@/helpers/colores";
 type MarcaFiltro = string;
 type TipoLiess = "usados" | "nuevos";
 
+function formatCurrency(value: number | string | null | undefined) {
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim().length
+        ? Number(value)
+        : Number.NaN;
+
+  if (Number.isNaN(numericValue)) return "-";
+
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(numericValue);
+}
+
 export default function StockDisponibleLiess() {
   const { tipo } = useParams<{ tipo: TipoLiess }>();
   const tipoSeleccionado: TipoLiess = tipo === "usados" ? "usados" : "nuevos";
@@ -65,6 +82,14 @@ export default function StockDisponibleLiess() {
 
     return item.anioUsado ?? "-";
   };
+
+  const showPrecioUsado = useMemo(() => {
+    if (tipoSeleccionado === "usados") return true;
+
+    return Object.values(tablasPorMarca).some((rows) =>
+      rows.some((item: any) => item.precioVentaUsado !== null && item.precioVentaUsado !== undefined),
+    );
+  }, [tablasPorMarca, tipoSeleccionado]);
 
   if (isLoading) {
     return (
@@ -185,6 +210,7 @@ export default function StockDisponibleLiess() {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
+                    {showPrecioUsado ? <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Precio</th> : null}
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Chasis</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
@@ -207,6 +233,7 @@ export default function StockDisponibleLiess() {
                       </td>
                       <td className="min-w-[280px] px-4 py-2 text-gray-900">{item.version}</td>
                       <td className="px-4 py-2 text-center font-medium text-gray-700">{getAnioUnidad(item)}</td>
+                      {showPrecioUsado ? <td className="px-4 py-2 text-right font-medium text-gray-700">{formatCurrency(item.precioVentaUsado)}</td> : null}
                       <td className="px-4 py-2 text-center text-gray-700">
                         {item.color ? (
                           <span
@@ -226,7 +253,7 @@ export default function StockDisponibleLiess() {
 
                   {rows.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                      <td colSpan={showPrecioUsado ? 9 : 8} className="px-6 py-10 text-center text-sm text-gray-500">
                         No hay unidades para la marca seleccionada.
                       </td>
                     </tr>

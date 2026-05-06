@@ -5,6 +5,9 @@ export type StockLiessRow = {
   version: string;
   chasis: string | null;
   color: string | null;
+  anioNuevo?: number | null;
+  anioUsado?: number | null;
+  precioVentaUsado?: number | null;
   reservaVendedor: string;
   tipo: "nuevo" | "usado";
   fechaRecepcion: string;
