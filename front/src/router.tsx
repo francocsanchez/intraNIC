@@ -61,6 +61,9 @@ import ColorFormView from "./views/admin/siac/ColorFormView";
 import VersionesView from "./views/admin/siac/VersionesView";
 import VersionFormView from "./views/admin/siac/VersionFormView";
 import PedidoMensualView from "./views/admin/siac/PedidoMensualView";
+import ProformasView from "./views/admin/siac/ProformasView";
+import ProformaFormView from "./views/admin/siac/ProformaFormView";
+import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
 
 export default function Router() {
   return (
@@ -203,6 +206,9 @@ export default function Router() {
                 <Route path="/mis-reservas/convencional" element={<MisReservas />} />
                 <Route path="/mi-lista-espera/convencional" element={<MiListaDeEsperaView />} />
                 <Route path="/mis-operaciones/convencional" element={<MisOperacionesView />} />
+                <Route path="/proformas" element={<ProformasView />} />
+                <Route path="/proformas/nueva" element={<ProformaFormView />} />
+                <Route path="/proformas/:id" element={<ProformaDetailView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>

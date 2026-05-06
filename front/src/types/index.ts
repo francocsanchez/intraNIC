@@ -142,6 +142,8 @@ export const userSchema = z.object({
   _id: z.string(),
   name: z.string(),
   lastName: z.string(),
+  email: z.string().optional(),
+  company: z.array(z.string()).optional(),
   role: z.array(z.string()),
   enable: z.boolean(),
 });
@@ -944,3 +946,62 @@ export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponse
 export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
+
+//**************************** */
+// PROFORMAS
+//**************************** */
+
+export const proformaRowSchema = z.object({
+  detalle: z.string(),
+  cantidad: z.number(),
+  iva: z.number(),
+  neto: z.number(),
+  total: z.number(),
+  totales: z.number(),
+});
+
+export const proformaUnidadSchema = z.object({
+  _id: z.string(),
+  versionId: z.string(),
+  versionNombre: z.string(),
+  cantidad: z.number(),
+  ivaUnidad: z.number(),
+  totalUnidad: z.number(),
+  descuentoUnidad: z.number(),
+  totalPatentamiento: z.number(),
+  totalFlete: z.number(),
+  rows: z.array(proformaRowSchema),
+  subtotal: z.number(),
+});
+
+export const proformaSchema = z.object({
+  _id: z.string(),
+  numeroProforma: z.number(),
+  fecha: z.string(),
+  fechaLabel: z.string(),
+  listaPrecioLabel: z.string(),
+  senores: z.string(),
+  cliente: z.string(),
+  cuit: z.string(),
+  observaciones: z.string(),
+  asesorComercial: z.string(),
+  emailAsesor: z.string(),
+  usuarioId: z.string(),
+  unidades: z.array(proformaUnidadSchema),
+  totalNeto: z.number(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const proformaListResponseSchema = z.object({
+  data: z.array(proformaSchema),
+});
+
+export const proformaResponseSchema = z.object({
+  data: proformaSchema,
+  message: z.string().optional().default(""),
+});
+
+export type Proforma = z.infer<typeof proformaSchema>;
+export type ProformaListResponse = z.infer<typeof proformaListResponseSchema>;
+export type ProformaResponse = z.infer<typeof proformaResponseSchema>;

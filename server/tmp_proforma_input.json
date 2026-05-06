@@ -1,0 +1,20 @@
+{
+  "numeroProforma": 12,
+  "fechaLabel": "06/05/2026",
+  "listaPrecioLabel": "mayo-2026",
+  "senores": "Cliente Demo",
+  "cliente": "Empresa Demo",
+  "cuit": "30-12345678-9",
+  "asesorComercial": "Perez, Juan",
+  "emailAsesor": "juan@example.com",
+  "totalNeto": 1500000,
+  "unidades": [
+    {
+      "rows": [
+        {"detalle":"HILUX 4X4 DC DX 2.4 TDI 6 MT","cantidad":1,"iva":10.5,"neto":900000,"total":994500,"totales":994500},
+        {"detalle":"Patentamiento","cantidad":1,"iva":21,"neto":100000,"total":121000,"totales":121000},
+        {"detalle":"Flete","cantidad":1,"iva":21,"neto":31859.5,"total":38506.99,"totales":38506.99}
+      ]
+    }
+  ]
+}
