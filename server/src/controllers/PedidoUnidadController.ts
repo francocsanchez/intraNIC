@@ -20,6 +20,21 @@ type InfoInternoRow = {
   modelo: string;
 };
 
+type PedidoUnidadPreviaResponseItem = {
+  _id: mongoose.Types.ObjectId | string;
+  interno: number;
+  clienteNombre: string;
+  vendedorNombre: string;
+  chasis: string | null;
+  version: string;
+  modelo: string;
+  prioridad: PedidoUnidadPrioridad;
+  usuario_id: mongoose.Types.ObjectId | string;
+  usuario: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 type PedidoUnidadPayloadItem = {
   interno: number;
   PDI?: boolean;
@@ -123,6 +138,48 @@ const removePreviasByInternos = async (internos: number[]) => {
   await PedidoUnidadPrevia.deleteMany({ interno: { $in: internos } });
 };
 
+const getInfoInternosMap = async (internos: number[]) => {
+  const internosUnicos = Array.from(new Set(internos.filter((interno) => Number.isInteger(interno) && interno > 0)));
+  if (!internosUnicos.length) {
+    return new Map<number, InfoInternoRow>();
+  }
+
+  const unidades = await Promise.all(
+    internosUnicos.map(async (interno) => {
+      const rows = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { interno },
+      });
+
+      return rows[0] ?? null;
+    }),
+  );
+
+  return new Map(
+    unidades
+      .filter((unidad): unidad is InfoInternoRow => Boolean(unidad?.interno))
+      .map((unidad) => [unidad.interno, unidad]),
+  );
+};
+
+const hydratePrevia = (
+  previa: any,
+  unidadActual?: InfoInternoRow | null,
+): PedidoUnidadPreviaResponseItem => ({
+  _id: previa._id,
+  interno: previa.interno,
+  clienteNombre: normalizeText(unidadActual?.cliente),
+  vendedorNombre: normalizeText(unidadActual?.vendedor),
+  chasis: normalizeNullableText(unidadActual?.chasis),
+  version: normalizeText(unidadActual?.version),
+  modelo: normalizeText(unidadActual?.modelo),
+  prioridad: isValidPrioridad(previa?.prioridad) ? previa.prioridad : "normal",
+  usuario_id: previa.usuario_id,
+  usuario: normalizeText(previa?.usuario),
+  createdAt: new Date(previa.createdAt),
+  updatedAt: new Date(previa.updatedAt),
+});
+
 const buildPedidoItems = async (
   items: PedidoUnidadPayloadItem[],
   options: {
@@ -160,18 +217,9 @@ const buildPedidoItems = async (
     );
   }
 
-  const unidades = await Promise.all(
-    internosUnicos.map(async (interno) => {
-      const rows = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(), {
-        type: QueryTypes.SELECT,
-        replacements: { interno },
-      });
+  const unidadesMap = await getInfoInternosMap(internosUnicos);
 
-      return rows[0] ?? null;
-    }),
-  );
-
-  const faltantes = internosUnicos.filter((interno, index) => !unidades[index]);
+  const faltantes = internosUnicos.filter((interno) => !unidadesMap.has(interno));
   if (faltantes.length) {
     throw new Error(`No se encontro informacion para los internos: ${faltantes.join(", ")}`);
   }
@@ -183,7 +231,7 @@ const buildPedidoItems = async (
 
   return items.map((item) => {
     const interno = Number(item.interno);
-    const unidad = unidades.find((row) => row?.interno === interno);
+    const unidad = unidadesMap.get(interno);
     const previa = previasByInterno.get(interno);
     const existingItem = existingByInterno.get(interno);
 
@@ -256,8 +304,13 @@ export class PedidoUnidadController {
       const previas = await PedidoUnidadPrevia.find().lean();
       const internos = previas.map((item) => item.interno);
       const internosYaPedidos = await getInternosYaPedidosSet(internos);
+      const internosDisponibles = previas
+        .filter((item) => !internosYaPedidos.has(item.interno))
+        .map((item) => item.interno);
+      const unidadesMap = await getInfoInternosMap(internosDisponibles);
       const data = previas
         .filter((item) => !internosYaPedidos.has(item.interno))
+        .map((item) => hydratePrevia(item, unidadesMap.get(item.interno)))
         .sort(comparePrevia);
 
       return res.status(200).json({ data });
@@ -290,23 +343,13 @@ export class PedidoUnidadController {
         return res.status(409).json({ error: "Ese interno ya existe en la lista previa" });
       }
 
-      const rows = await sequelizeNIC.query<InfoInternoRow>(infoInternoQuery(), {
-        type: QueryTypes.SELECT,
-        replacements: { interno },
-      });
-
-      const unidad = rows[0];
+      const unidad = (await getInfoInternosMap([interno])).get(interno);
       if (!unidad) {
         return res.status(404).json({ error: "No se encontro informacion para el interno solicitado" });
       }
 
       const previa = await PedidoUnidadPrevia.create({
         interno: unidad.interno,
-        clienteNombre: normalizeText(unidad.cliente),
-        vendedorNombre: normalizeText(unidad.vendedor),
-        chasis: normalizeNullableText(unidad.chasis),
-        version: normalizeText(unidad.version),
-        modelo: normalizeText(unidad.modelo),
         prioridad: "normal",
         usuario_id: new mongoose.Types.ObjectId(req.user._id),
         usuario: `${req.user.lastName}, ${req.user.name}`,
@@ -314,7 +357,7 @@ export class PedidoUnidadController {
 
       return res.status(201).json({
         message: "Unidad agregada a la lista previa",
-        data: previa,
+        data: hydratePrevia(previa.toObject(), unidad),
       });
     } catch (error: any) {
       logError("PedidoUnidadController.createPrevia");
@@ -352,16 +395,18 @@ export class PedidoUnidadController {
       const data = await PedidoUnidadPrevia.findByIdAndUpdate(
         req.params.id,
         { prioridad },
-        { new: true },
+        { new: true, lean: true },
       );
 
       if (!data) {
         return res.status(404).json({ error: "Registro previo no encontrado" });
       }
 
+      const unidadActual = (await getInfoInternosMap([data.interno])).get(data.interno);
+
       return res.status(200).json({
         message: "Prioridad actualizada correctamente",
-        data,
+        data: hydratePrevia(data, unidadActual),
       });
     } catch (error) {
       logError("PedidoUnidadController.updatePrioridadPrevia");

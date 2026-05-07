@@ -5,11 +5,6 @@ export type PedidoUnidadPrioridad = (typeof PEDIDO_UNIDAD_PRIORIDADES)[number];
 
 export interface IPedidoUnidadPrevia extends Document {
   interno: number;
-  clienteNombre: string;
-  vendedorNombre: string;
-  chasis: string | null;
-  version: string;
-  modelo: string;
   prioridad: PedidoUnidadPrioridad;
   usuario_id: Types.ObjectId;
   usuario: string;
@@ -24,31 +19,6 @@ const pedidoUnidadPreviaSchema = new Schema<IPedidoUnidadPrevia>(
       required: true,
       unique: true,
       index: true,
-    },
-    clienteNombre: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    vendedorNombre: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    chasis: {
-      type: String,
-      default: null,
-      trim: true,
-    },
-    version: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    modelo: {
-      type: String,
-      required: true,
-      trim: true,
     },
     prioridad: {
       type: String,
