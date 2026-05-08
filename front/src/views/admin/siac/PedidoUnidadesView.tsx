@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import {
   createPedidoUnidad,
-  getEstadoInternosPedido,
+  getEstadoInternosArribo,
   getPedidoUnidadInfoInterno,
   getPedidosUnidades,
   getPedidoUnidadesPrevias,
@@ -246,8 +246,8 @@ export default function PedidoUnidadesView() {
   );
 
   const { data: estadoPedidos = {}, isLoading: isLoadingEstadoPedidos } = useQuery({
-    queryKey: ["pedido-unidades-estado", internosEnPagina.join("-")],
-    queryFn: () => getEstadoInternosPedido(internosEnPagina),
+    queryKey: ["pedido-unidades-estado-arribo", internosEnPagina.join("-")],
+    queryFn: () => getEstadoInternosArribo(internosEnPagina),
     enabled: canManagePedidos && viewMode === "registros" && internosEnPagina.length > 0,
     refetchOnWindowFocus: true,
   });
@@ -258,8 +258,8 @@ export default function PedidoUnidadesView() {
   );
 
   const { data: estadoRegistros = {}, isLoading: isLoadingEstadoRegistros } = useQuery({
-    queryKey: ["pedido-unidades-estado-registros", internosRegistros.join("-")],
-    queryFn: () => getEstadoInternosPedido(internosRegistros),
+    queryKey: ["pedido-unidades-estado-arribo-registros", internosRegistros.join("-")],
+    queryFn: () => getEstadoInternosArribo(internosRegistros),
     enabled: !canManagePedidos && viewMode === "registros" && internosRegistros.length > 0,
     refetchOnWindowFocus: true,
   });

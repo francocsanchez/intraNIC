@@ -20,6 +20,11 @@ type InfoInternoRow = {
   modelo: string;
 };
 
+type InternoArriboRow = {
+  interno: number;
+  fechaRecepcionRemito: string | null;
+};
+
 type PedidoUnidadPreviaResponseItem = {
   _id: mongoose.Types.ObjectId | string;
   interno: number;
@@ -591,6 +596,56 @@ export class PedidoUnidadController {
       logError("PedidoUnidadController.getEstadoInternos");
       console.error(error);
       return res.status(500).json({ message: "Error al consultar el estado de internos pedidos" });
+    }
+  };
+
+  static getEstadoInternosArribo = async (req: Request, res: Response) => {
+    const internos = Array.isArray(req.body?.internos)
+      ? req.body.internos
+          .map((value: unknown) => Number(value))
+          .filter((value: number) => Number.isInteger(value) && value > 0)
+      : [];
+
+    if (!internos.length) {
+      return res.status(200).json({ data: {} });
+    }
+
+    try {
+      const internosQuery = internos.join(", ");
+      const query = `
+SELECT
+  stoauto.sa_codigo AS interno,
+  li.li_fecha AS fechaRecepcionRemito
+FROM stoauto
+INNER JOIN movnped
+  ON stoauto.sa_codigo = movnped.mnp_stoauto
+LEFT JOIN anexnvo an
+  ON an.an_stoauto = stoauto.sa_codigo
+LEFT JOIN libivac li
+  ON li.li_nroope = an.an_nrooper
+WHERE stoauto.sa_codigo IN (${internosQuery})
+`;
+
+      const rows = await sequelizeNIC.query<InternoArriboRow>(query, {
+        type: QueryTypes.SELECT,
+      });
+
+      const recibidosSet = new Set(
+        rows
+          .filter((row) => Boolean(row.fechaRecepcionRemito))
+          .map((row) => Number(row.interno)),
+      );
+
+      const data = internos.reduce((acc: Record<number, boolean>, interno) => {
+        acc[interno] = recibidosSet.has(interno);
+        return acc;
+      }, {});
+
+      return res.status(200).json({ data });
+    } catch (error) {
+      logError("PedidoUnidadController.getEstadoInternosArribo");
+      console.error(error);
+      return res.status(500).json({ message: "Error al consultar el arribo de internos" });
     }
   };
 

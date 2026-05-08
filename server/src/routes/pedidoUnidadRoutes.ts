@@ -15,6 +15,7 @@ router.use(authenticate);
 
 router.get("/unidad/:interno", authorizeRoles(...pedidoRoles), PedidoUnidadController.getInfoInterno);
 router.post("/estado-internos", authorizeRoles(...estadoInternosRoles), PedidoUnidadController.getEstadoInternos);
+router.post("/estado-internos-arribo", authorizeRoles(...estadoInternosRoles), PedidoUnidadController.getEstadoInternosArribo);
 
 router.get("/previas", authorizeRoles(...listaPreviaRoles), PedidoUnidadController.listPrevias);
 router.post("/previas", authorizeRoles(...crearPreviaRoles), PedidoUnidadController.createPrevia);

@@ -105,6 +105,22 @@ export async function getEstadoInternosPedido(internos: number[]) {
   }
 }
 
+export async function getEstadoInternosArribo(internos: number[]) {
+  try {
+    const { data } = await api.post("/dms/pedido-unidades/estado-internos-arribo", { internos });
+    const parsed = pedidoUnidadInternosEstadoResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el estado de arribo por interno"));
+  }
+}
+
 export async function createPedidoUnidad(payload: PedidoUnidadPayload) {
   try {
     const { data } = await api.post("/dms/pedido-unidades", payload);
