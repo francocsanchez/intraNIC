@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import {
   createPedidoUnidad,
+  getEstadoInternosPedido,
   getPedidoUnidadInfoInterno,
   getPedidosUnidades,
   getPedidoUnidadesPrevias,
@@ -232,6 +233,37 @@ export default function PedidoUnidadesView() {
     });
   }, [pedidos]);
 
+  const internosEnPagina = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          pedidosAgrupadosPorFecha.flatMap((grupo) =>
+            grupo.detalleItems.map(({ item }) => Number(item.interno)),
+          ),
+        ),
+      ),
+    [pedidosAgrupadosPorFecha],
+  );
+
+  const { data: estadoPedidos = {}, isLoading: isLoadingEstadoPedidos } = useQuery({
+    queryKey: ["pedido-unidades-estado", internosEnPagina.join("-")],
+    queryFn: () => getEstadoInternosPedido(internosEnPagina),
+    enabled: canManagePedidos && viewMode === "registros" && internosEnPagina.length > 0,
+    refetchOnWindowFocus: true,
+  });
+
+  const pedidosBloqueados = useMemo(
+    () =>
+      new Set(
+        pedidosAgrupadosPorFecha.flatMap((grupo) =>
+          grupo.detalleItems
+            .filter(({ item }) => Boolean(estadoPedidos[String(item.interno)]))
+            .map(({ pedido }) => pedido._id),
+        ),
+      ),
+    [estadoPedidos, pedidosAgrupadosPorFecha],
+  );
+
   const removeInternosFromPreviasCache = (internos: number[]) => {
     if (!internos.length) return;
 
@@ -333,6 +365,7 @@ export default function PedidoUnidadesView() {
     authLoading ||
     (viewMode === "carga" && canManagePedidos && isLoadingPrevias) ||
     (viewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
+    (viewMode === "registros" && canManagePedidos && isLoadingEstadoPedidos) ||
     (viewMode === "registros" && !canManagePedidos && isLoadingRegistros);
 
   const hasActiveError = canManagePedidos ? isErrorPedidos : isErrorRegistros;
@@ -897,9 +930,27 @@ export default function PedidoUnidadesView() {
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
-                                        {grupo.detalleItems.map(({ pedido, item }) => (
-                                          <tr key={`${pedido._id}-${item.interno}`} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
+                                        {grupo.detalleItems.map(({ pedido, item }) => {
+                                          const unidadArribada = Boolean(estadoPedidos[String(item.interno)]);
+                                          const pedidoBloqueado = pedidosBloqueados.has(pedido._id);
+
+                                          return (
+                                          <tr
+                                            key={`${pedido._id}-${item.interno}`}
+                                            className={[
+                                              unidadArribada
+                                                ? "bg-emerald-50 hover:bg-emerald-100"
+                                                : "hover:bg-gray-50",
+                                            ].join(" ")}
+                                          >
+                                            <td className="px-4 py-3 font-medium text-gray-900">
+                                              <div className="flex flex-col">
+                                                <span>{item.interno}</span>
+                                                {unidadArribada ? (
+                                                  <span className="text-xs font-semibold text-emerald-700">Arribada</span>
+                                                ) : null}
+                                              </div>
+                                            </td>
                                             <td className="px-4 py-3 text-gray-700">{item.version}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.order}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
@@ -932,17 +983,19 @@ export default function PedidoUnidadesView() {
                                             <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
                                             <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
                                             <td className="px-4 py-3 text-center">
-                                              <button
-                                                type="button"
-                                                onClick={() => handleEditPedido(pedido)}
-                                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
-                                              >
-                                                <Pencil size={14} strokeWidth={1.8} />
-                                                Editar
-                                              </button>
+                                              {pedidoBloqueado ? null : (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleEditPedido(pedido)}
+                                                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
+                                                >
+                                                  <Pencil size={14} strokeWidth={1.8} />
+                                                  Editar
+                                                </button>
+                                              )}
                                             </td>
                                           </tr>
-                                        ))}
+                                        )})}
                                       </tbody>
                                     </table>
                                   </div>
