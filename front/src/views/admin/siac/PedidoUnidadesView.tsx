@@ -2,21 +2,23 @@ import Loading from "@/components/Loading";
 import {
   createPedidoUnidad,
   getPedidoUnidadInfoInterno,
+  getPedidosUnidades,
   getPedidoUnidadesPrevias,
   getPedidosUnidadesRegistro,
   updatePedidoUnidad,
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import type { PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
+import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ClipboardList, List, Plus, Save, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const MAX_UNIDADES = 8;
 const PAGE_SIZE = 20;
+const EMPTY_PEDIDOS: PedidoUnidad[] = [];
 const EMPTY_REGISTROS: PedidoUnidadRegistro[] = [];
 const EMPTY_PREVIAS: PedidoUnidadPrevia[] = [];
 const PRIORIDAD_OPTIONS: PedidoUnidadPrioridad[] = ["normal", "media", "urgente"];
@@ -27,6 +29,21 @@ const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
 };
 
 type ViewMode = "carga" | "registros";
+
+type PedidoUnidadDateGroupItem = {
+  pedido: PedidoUnidad;
+  item: PedidoUnidadItem;
+};
+
+type PedidoUnidadDateGroup = {
+  fecha: string;
+  pedidos: PedidoUnidad[];
+  detalleItems: PedidoUnidadDateGroupItem[];
+  totalUnidades: number;
+  totalConPDI: number;
+  usuarios: string[];
+  latestCreatedAt: string;
+};
 
 const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
   normal: "bg-gray-100 text-gray-700",
@@ -68,6 +85,39 @@ function comparePrevia(a: PedidoUnidadPrevia, b: PedidoUnidadPrevia) {
   return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 }
 
+function getLatestCreatedAt(pedidos: PedidoUnidad[]) {
+  return pedidos.reduce((latest, pedido) => {
+    if (!latest) return pedido.createdAt;
+
+    const latestTime = new Date(latest).getTime();
+    const pedidoTime = new Date(pedido.createdAt).getTime();
+
+    if (Number.isNaN(latestTime) || Number.isNaN(pedidoTime)) {
+      return latest;
+    }
+
+    return pedidoTime > latestTime ? pedido.createdAt : latest;
+  }, "");
+}
+
+function escapeCsvCell(value: unknown) {
+  const normalized = value == null ? "" : String(value);
+  return `"${normalized.replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename: string, rows: Array<Array<string | number>>) {
+  const csv = `\uFEFF${rows.map((row) => row.map(escapeCsvCell).join(";")).join("\r\n")}`;
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
 function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
   return {
     interno: item.interno,
@@ -93,28 +143,39 @@ export default function PedidoUnidadesView() {
   const [editingPedidoId, setEditingPedidoId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("carga");
   const [page, setPage] = useState<number>(1);
+  const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
   const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
   const [registroInterno, setRegistroInterno] = useState<string>("");
   const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
+  const canManagePriority = hasAnyRole(user, ["admin", "stock"]);
+  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
+  const canOpenAsignaciones = hasAnyRole(user, ["admin", "stock", "gerente"]);
+  const canAccess = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
 
-  const { data: registrosResponse, isLoading, isError, error } = useQuery({
+  const { data: pedidosResponse, isLoading: isLoadingPedidos, isError: isErrorPedidos, error: pedidosError } = useQuery({
+    queryKey: ["pedido-unidades", page],
+    queryFn: () => getPedidosUnidades(page, PAGE_SIZE),
+    enabled: canManagePedidos && viewMode === "registros",
+    refetchOnWindowFocus: true,
+  });
+
+  const { data: registrosResponse, isLoading: isLoadingRegistros, isError: isErrorRegistros, error: registrosError } = useQuery({
     queryKey: ["pedido-unidades-registros", page, registroInterno],
     queryFn: () => getPedidosUnidadesRegistro(page, PAGE_SIZE, registroInterno),
+    enabled: !canManagePedidos && viewMode === "registros",
     refetchOnWindowFocus: true,
   });
 
   const { data: previasData = EMPTY_PREVIAS, isLoading: isLoadingPrevias } = useQuery({
     queryKey: ["pedido-unidades-previas"],
     queryFn: getPedidoUnidadesPrevias,
+    enabled: canManagePedidos,
     refetchOnWindowFocus: true,
   });
 
+  const pedidos = pedidosResponse?.data ?? EMPTY_PEDIDOS;
   const registros = registrosResponse?.data ?? EMPTY_REGISTROS;
-  const pagination = registrosResponse?.pagination;
-  const canManagePriority = hasAnyRole(user, ["admin", "stock"]);
-  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
-  const canOpenAsignaciones = hasAnyRole(user, ["admin", "stock", "gerente"]);
-  const canAccess = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
+  const pagination = canManagePedidos ? pedidosResponse?.pagination : registrosResponse?.pagination;
   const previasOrdenadas = useMemo(() => [...previasData].sort(comparePrevia), [previasData]);
   const itemsOrdenados = useMemo(() => [...items].sort(comparePedidoItem), [items]);
 
@@ -140,6 +201,37 @@ export default function PedidoUnidadesView() {
     setPage(1);
   }, [registroInterno]);
 
+  const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
+    const groups = new Map<string, PedidoUnidad[]>();
+
+    pedidos.forEach((pedido) => {
+      const pedidosDelDia = groups.get(pedido.fecha) ?? [];
+      pedidosDelDia.push(pedido);
+      groups.set(pedido.fecha, pedidosDelDia);
+    });
+
+    return Array.from(groups.entries()).map(([fechaGrupo, pedidosDelDia]) => {
+      const detalleItems = pedidosDelDia
+        .flatMap((pedido) =>
+          pedido.items.map((item) => ({
+            pedido,
+            item,
+          })),
+        )
+        .sort((a, b) => comparePedidoItem(a.item, b.item));
+
+      return {
+        fecha: fechaGrupo,
+        pedidos: pedidosDelDia,
+        detalleItems,
+        totalUnidades: detalleItems.length,
+        totalConPDI: detalleItems.filter(({ item }) => item.PDI).length,
+        usuarios: Array.from(new Set(pedidosDelDia.map((pedido) => pedido.usuarioNombre))),
+        latestCreatedAt: getLatestCreatedAt(pedidosDelDia),
+      };
+    });
+  }, [pedidos]);
+
   const removeInternosFromPreviasCache = (internos: number[]) => {
     if (!internos.length) return;
 
@@ -151,6 +243,42 @@ export default function PedidoUnidadesView() {
   const handleBuscarRegistro = () => {
     setRegistroInterno(registroInternoInput.trim());
     setPage(1);
+  };
+
+  const handleEditPedido = (pedido: PedidoUnidad) => {
+    setEditingPedidoId(pedido._id);
+    setFecha(pedido.fecha);
+    setItems(pedido.items);
+    setInternoInput("");
+    setExpandedFecha(pedido.fecha);
+    setViewMode("carga");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDownloadGrupo = (grupo: PedidoUnidadDateGroup) => {
+    const rows = [
+      ["Fecha pedido", formatDate(grupo.fecha)],
+      ["Usuarios", grupo.usuarios.join(", ")],
+      ["Total unidades", String(grupo.totalUnidades)],
+      [],
+      ["Interno", "Version", "Order", "Modelo", "Cliente", "Vendedor", "Chasis", "Prioridad", "Lista previa", "PDI", "Usuario", "Consolidado"],
+      ...grupo.detalleItems.map(({ pedido, item }) => [
+        item.interno,
+        item.version,
+        item.order,
+        item.modelo,
+        item.cliente,
+        item.vendedor,
+        item.chasis ?? "-",
+        item.prioridad,
+        item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-",
+        item.PDI ? "Si" : "No",
+        pedido.usuarioNombre,
+        formatDateTime(pedido.createdAt),
+      ]),
+    ];
+
+    downloadCsv(`pedido-unidades-${grupo.fecha}.csv`, rows);
   };
 
   const addInternoMutation = useMutation({
@@ -190,7 +318,9 @@ export default function PedidoUnidadesView() {
       setInternoInput("");
       setItems([]);
       setEditingPedidoId(null);
+      setExpandedFecha(null);
       setViewMode("registros");
+      queryClient.invalidateQueries({ queryKey: ["pedido-unidades"] });
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades-registros"] });
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades-previas"] });
     },
@@ -199,16 +329,25 @@ export default function PedidoUnidadesView() {
     },
   });
 
-  if (authLoading || isLoading || isLoadingPrevias) return <Loading />;
+  const isLoading =
+    authLoading ||
+    (viewMode === "carga" && canManagePedidos && isLoadingPrevias) ||
+    (viewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
+    (viewMode === "registros" && !canManagePedidos && isLoadingRegistros);
 
-  if (isError) {
+  const hasActiveError = canManagePedidos ? isErrorPedidos : isErrorRegistros;
+  const activeError = canManagePedidos ? pedidosError : registrosError;
+
+  if (isLoading) return <Loading />;
+
+  if (hasActiveError) {
     return (
       <div className="w-full px-4 py-6">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-gray-900">
             Error al cargar pedidos de unidades
           </h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+          <p className="mt-2 text-sm text-red-600">{activeError instanceof Error ? activeError.message : "Error desconocido"}</p>
         </section>
       </div>
     );
@@ -322,7 +461,9 @@ export default function PedidoUnidadesView() {
     savePedidoMutation.mutate();
   };
 
-  const totalRecords = pagination?.total ?? 0;
+  const totalRecords = canManagePedidos
+    ? pedidosResponse?.pagination?.totalRecords ?? 0
+    : pagination?.total ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
 
   return (
@@ -662,114 +803,280 @@ export default function PedidoUnidadesView() {
         </section>
       ) : (
         <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">
-                Registro de unidades pedidas
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Consulta cada unidad consolidada, la fecha del pedido y el momento exacto en que se registro.
-              </p>
-            </div>
+          {canManagePedidos ? (
+            <>
+              <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold tracking-tight text-gray-900">
+                    Registros de pedidos
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Historial paginado con vista resumida por fecha y detalle expandible.
+                  </p>
+                </div>
 
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <label className="flex min-w-[240px] flex-col gap-2 text-sm font-medium text-gray-700">
-                Buscar por interno
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={registroInternoInput}
-                  onChange={(event) => setRegistroInternoInput(event.target.value.replace(/\D/g, ""))}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      handleBuscarRegistro();
-                    }
-                  }}
-                  placeholder="Ej: 65799"
-                  className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={handleBuscarRegistro}
-                className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
-              >
-                Buscar
-              </button>
-
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
-                {totalRecords} unidades
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                  {pedidosResponse?.pagination?.totalRecords ?? totalRecords} registros
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-[1320px] w-full text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
-                <tr>
-                  <th className="px-4 py-3 text-left">Interno</th>
-                  <th className="px-4 py-3 text-left">Fecha pedido</th>
-                  <th className="px-4 py-3 text-left">Consolidado</th>
-                  <th className="px-4 py-3 text-left">Usuario</th>
-                  <th className="px-4 py-3 text-left">Cliente</th>
-                  <th className="px-4 py-3 text-left">Vendedor</th>
-                  <th className="px-4 py-3 text-left">Modelo</th>
-                  <th className="px-4 py-3 text-left">Version</th>
-                  <th className="px-4 py-3 text-left">Chasis</th>
-                  <th className="px-4 py-3 text-left">Prioridad</th>
-                  <th className="px-4 py-3 text-center">PDI</th>
-                </tr>
-              </thead>
+              <div className="overflow-x-auto">
+                <table className="min-w-[980px] w-full text-sm">
+                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Fecha</th>
+                      <th className="px-4 py-3 text-center">Registros</th>
+                      <th className="px-4 py-3 text-left">Usuario</th>
+                      <th className="px-4 py-3 text-center">Unidades</th>
+                      <th className="px-4 py-3 text-center">Con PDI</th>
+                      <th className="px-4 py-3 text-left">Ultimo registro</th>
+                      <th className="px-4 py-3 text-center">Detalle</th>
+                    </tr>
+                  </thead>
 
-              <tbody className="divide-y divide-gray-100">
-                {registros.map((registro) => (
-                  <tr key={`${registro.pedidoId}-${registro.interno}`} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-semibold text-gray-900">{registro.interno}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.version}</td>
-                    <td className="px-4 py-3 text-gray-700">{registro.chasis ?? "-"}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={[
-                          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                          prioridadBadgeClass[registro.prioridad],
-                        ].join(" ")}
-                      >
-                        {registro.prioridad}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={[
-                          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                          registro.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
-                        ].join(" ")}
-                      >
-                        {registro.PDI ? "Si" : "No"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                  <tbody className="divide-y divide-gray-100">
+                    {pedidosAgrupadosPorFecha.map((grupo) => {
+                      const expanded = expandedFecha === grupo.fecha;
+                      const registrosLabel = grupo.pedidos.length === 1 ? "registro" : "registros";
 
-                {!registros.length ? (
-                  <tr>
-                    <td colSpan={11} className="px-6 py-12 text-center text-sm text-gray-500">
-                      {registroInterno
-                        ? "No se encontraron unidades para ese interno."
-                        : "Todavia no hay unidades pedidas registradas."}
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
+                      return (
+                        <Fragment key={grupo.fecha}>
+                          <tr key={`resumen-${grupo.fecha}`} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 font-semibold text-gray-900">{formatDate(grupo.fecha)}</td>
+                            <td className="px-4 py-3 text-center text-gray-700">
+                              {grupo.pedidos.length} {registrosLabel}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">{grupo.usuarios.join(", ")}</td>
+                            <td className="px-4 py-3 text-center text-gray-700">{grupo.totalUnidades}</td>
+                            <td className="px-4 py-3 text-center text-gray-700">{grupo.totalConPDI}</td>
+                            <td className="px-4 py-3 text-gray-700">{formatDateTime(grupo.latestCreatedAt)}</td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedFecha(expanded ? null : grupo.fecha)}
+                                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                                >
+                                  {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                  {expanded ? "Ocultar" : "Expandir"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadGrupo(grupo)}
+                                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                                >
+                                  <Download size={14} />
+                                  Descargar
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+
+                          {expanded ? (
+                            <tr key={`detalle-${grupo.fecha}`} className="bg-gray-50">
+                              <td colSpan={7} className="px-4 py-4">
+                                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                                  <div className="overflow-x-auto">
+                                    <table className="min-w-[1240px] w-full text-sm">
+                                      <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                                        <tr>
+                                          <th className="px-4 py-3 text-left">Interno</th>
+                                          <th className="px-4 py-3 text-left">Version</th>
+                                          <th className="px-4 py-3 text-left">Order</th>
+                                          <th className="px-4 py-3 text-left">Modelo</th>
+                                          <th className="px-4 py-3 text-left">Cliente</th>
+                                          <th className="px-4 py-3 text-left">Vendedor</th>
+                                          <th className="px-4 py-3 text-left">Chasis</th>
+                                          <th className="px-4 py-3 text-left">Prioridad</th>
+                                          <th className="px-4 py-3 text-left">Lista previa</th>
+                                          <th className="px-4 py-3 text-center">PDI</th>
+                                          <th className="px-4 py-3 text-left">Usuario</th>
+                                          <th className="px-4 py-3 text-left">Consolidado</th>
+                                          <th className="px-4 py-3 text-center">Accion</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-gray-100">
+                                        {grupo.detalleItems.map(({ pedido, item }) => (
+                                          <tr key={`${pedido._id}-${item.interno}`} className="hover:bg-gray-50">
+                                            <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.version}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.order}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                                            <td className="px-4 py-3">
+                                              <span
+                                                className={[
+                                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                                  prioridadBadgeClass[item.prioridad],
+                                                ].join(" ")}
+                                              >
+                                                {item.prioridad}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700">
+                                              {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                              <span
+                                                className={[
+                                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                                  item.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
+                                                ].join(" ")}
+                                              >
+                                                {item.PDI ? "Si" : "No"}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
+                                            <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
+                                            <td className="px-4 py-3 text-center">
+                                              <button
+                                                type="button"
+                                                onClick={() => handleEditPedido(pedido)}
+                                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
+                                              >
+                                                <Pencil size={14} strokeWidth={1.8} />
+                                                Editar
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : null}
+                        </Fragment>
+                      );
+                    })}
+
+                    {!pedidos.length ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                          Todavia no hay pedidos de unidades registrados.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold tracking-tight text-gray-900">
+                    Registro de unidades pedidas
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Consulta cada unidad consolidada, la fecha del pedido y el momento exacto en que se registro.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                  <label className="flex min-w-[240px] flex-col gap-2 text-sm font-medium text-gray-700">
+                    Buscar por interno
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={registroInternoInput}
+                      onChange={(event) => setRegistroInternoInput(event.target.value.replace(/\D/g, ""))}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          handleBuscarRegistro();
+                        }
+                      }}
+                      placeholder="Ej: 65799"
+                      className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleBuscarRegistro}
+                    className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
+                  >
+                    Buscar
+                  </button>
+
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                    {totalRecords} unidades
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-[1320px] w-full text-sm">
+                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Interno</th>
+                      <th className="px-4 py-3 text-left">Fecha pedido</th>
+                      <th className="px-4 py-3 text-left">Consolidado</th>
+                      <th className="px-4 py-3 text-left">Usuario</th>
+                      <th className="px-4 py-3 text-left">Cliente</th>
+                      <th className="px-4 py-3 text-left">Vendedor</th>
+                      <th className="px-4 py-3 text-left">Modelo</th>
+                      <th className="px-4 py-3 text-left">Version</th>
+                      <th className="px-4 py-3 text-left">Chasis</th>
+                      <th className="px-4 py-3 text-left">Prioridad</th>
+                      <th className="px-4 py-3 text-center">PDI</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-gray-100">
+                    {registros.map((registro) => (
+                      <tr key={`${registro.pedidoId}-${registro.interno}`} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-semibold text-gray-900">{registro.interno}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.version}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.chasis ?? "-"}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={[
+                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                              prioridadBadgeClass[registro.prioridad],
+                            ].join(" ")}
+                          >
+                            {registro.prioridad}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={[
+                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                              registro.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
+                            ].join(" ")}
+                          >
+                            {registro.PDI ? "Si" : "No"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {!registros.length ? (
+                      <tr>
+                        <td colSpan={11} className="px-6 py-12 text-center text-sm text-gray-500">
+                          {registroInterno
+                            ? "No se encontraron unidades para ese interno."
+                            : "Todavia no hay unidades pedidas registradas."}
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
           <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-gray-500">
