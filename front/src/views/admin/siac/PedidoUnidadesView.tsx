@@ -6,13 +6,12 @@ import {
   getPedidosUnidades,
   getPedidoUnidadesPrevias,
   getPedidosUnidadesRegistro,
-  updatePedidoUnidad,
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Plus, Trash2 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -141,7 +140,6 @@ export default function PedidoUnidadesView() {
   const [fecha, setFecha] = useState<string>("");
   const [internoInput, setInternoInput] = useState<string>("");
   const [items, setItems] = useState<PedidoUnidadItem[]>([]);
-  const [editingPedidoId, setEditingPedidoId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("carga");
   const [page, setPage] = useState<number>(1);
   const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
@@ -264,18 +262,6 @@ export default function PedidoUnidadesView() {
     refetchOnWindowFocus: true,
   });
 
-  const pedidosBloqueados = useMemo(
-    () =>
-      new Set(
-        pedidosAgrupadosPorFecha.flatMap((grupo) =>
-          grupo.detalleItems
-            .filter(({ item }) => Boolean(estadoPedidos[String(item.interno)]))
-            .map(({ pedido }) => pedido._id),
-        ),
-      ),
-    [estadoPedidos, pedidosAgrupadosPorFecha],
-  );
-
   const removeInternosFromPreviasCache = (internos: number[]) => {
     if (!internos.length) return;
 
@@ -287,16 +273,6 @@ export default function PedidoUnidadesView() {
   const handleBuscarRegistro = () => {
     setRegistroInterno(registroInternoInput.trim());
     setPage(1);
-  };
-
-  const handleEditPedido = (pedido: PedidoUnidad) => {
-    setEditingPedidoId(pedido._id);
-    setFecha(pedido.fecha);
-    setItems(pedido.items);
-    setInternoInput("");
-    setExpandedFecha(pedido.fecha);
-    setViewMode("carga");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDownloadGrupo = (grupo: PedidoUnidadDateGroup) => {
@@ -340,7 +316,7 @@ export default function PedidoUnidadesView() {
 
   const savePedidoMutation = useMutation({
     mutationFn: async () => {
-      const payload = {
+      return createPedidoUnidad({
         fecha,
         items: items.map((item) => ({
           interno: item.interno,
@@ -348,20 +324,13 @@ export default function PedidoUnidadesView() {
           prioridad: item.prioridad,
           listaPreviaCreatedAt: item.listaPreviaCreatedAt ?? null,
         })),
-      };
-
-      if (editingPedidoId) {
-        return updatePedidoUnidad(editingPedidoId, payload);
-      }
-
-      return createPedidoUnidad(payload);
+      });
     },
     onSuccess: (response) => {
       toast.success(response.message);
       setFecha("");
       setInternoInput("");
       setItems([]);
-      setEditingPedidoId(null);
       setExpandedFecha(null);
       setViewMode("registros");
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades"] });
@@ -403,7 +372,6 @@ export default function PedidoUnidadesView() {
     return null;
   }
 
-  const isEditing = Boolean(editingPedidoId);
   const canAddMore = items.length < MAX_UNIDADES;
 
   const handleAddInterno = () => {
@@ -484,13 +452,6 @@ export default function PedidoUnidadesView() {
     setItems((current) => [...current, ...previasSeleccionadas.map(mapPreviaToPedidoItem)]);
     removeInternosFromPreviasCache(previasSeleccionadas.map((item) => item.interno));
     setSelectedPrevias([]);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingPedidoId(null);
-    setFecha("");
-    setInternoInput("");
-    setItems([]);
   };
 
   const handleSavePedido = () => {
@@ -587,9 +548,7 @@ export default function PedidoUnidadesView() {
           <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-base font-semibold tracking-tight text-gray-900">
-                  {isEditing ? "Editar pedido" : "Nuevo pedido"}
-                </h2>
+                <h2 className="text-base font-semibold tracking-tight text-gray-900">Nuevo pedido</h2>
                 <p className="mt-1 text-sm text-gray-500">
                   Carga internos uno por uno y consolida cuando el pedido este completo.
                 </p>
@@ -824,24 +783,14 @@ export default function PedidoUnidadesView() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {isEditing ? (
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-                  >
-                    Cancelar edicion
-                  </button>
-                ) : null}
-
                 <button
                   type="button"
                   onClick={handleSavePedido}
                   disabled={savePedidoMutation.isPending}
                   className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
-                  {isEditing ? <Save size={16} strokeWidth={2} /> : <ClipboardList size={16} strokeWidth={2} />}
-                  {isEditing ? "Guardar cambios" : "Consolidar carga"}
+                  <ClipboardList size={16} strokeWidth={2} />
+                  Consolidar carga
                 </button>
               </div>
             </div>
@@ -945,7 +894,6 @@ export default function PedidoUnidadesView() {
                                       <tbody className="divide-y divide-gray-100">
                                         {grupo.detalleItems.map(({ pedido, item }) => {
                                           const unidadArribada = Boolean(estadoPedidos[String(item.interno)]);
-                                          const pedidoBloqueado = pedidosBloqueados.has(pedido._id);
 
                                           return (
                                           <tr
@@ -995,18 +943,7 @@ export default function PedidoUnidadesView() {
                                             </td>
                                             <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
                                             <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
-                                            <td className="px-4 py-3 text-center">
-                                              {pedidoBloqueado ? null : (
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleEditPedido(pedido)}
-                                                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
-                                                >
-                                                  <Pencil size={14} strokeWidth={1.8} />
-                                                  Editar
-                                                </button>
-                                              )}
-                                            </td>
+                                            <td className="px-4 py-3 text-center" />
                                           </tr>
                                         )})}
                                       </tbody>
