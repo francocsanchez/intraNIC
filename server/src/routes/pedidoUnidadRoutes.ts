@@ -8,7 +8,7 @@ const listaPreviaRoles = ["stock", "admin", "administracion", "gerente"];
 const crearPreviaRoles = ["stock", "admin", "administracion"];
 const pedidoRoles = ["stock", "admin"];
 const lecturaPedidoRoles = ["stock", "admin", "administracion", "gerente"];
-const estadoInternosRoles = ["stock", "admin", "gerente"];
+const estadoInternosRoles = ["stock", "admin", "gerente", "administracion"];
 const prioridadRoles = ["stock", "admin", "administracion", "gerente"];
 
 router.use(authenticate);
