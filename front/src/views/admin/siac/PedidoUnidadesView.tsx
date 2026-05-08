@@ -886,9 +886,9 @@ export default function PedidoUnidadesView() {
                                           <th className="px-4 py-3 text-left">Prioridad</th>
                                           <th className="px-4 py-3 text-left">Lista previa</th>
                                           <th className="px-4 py-3 text-center">PDI</th>
+                                          <th className="px-4 py-3 text-center">Llegó</th>
                                           <th className="px-4 py-3 text-left">Usuario</th>
                                           <th className="px-4 py-3 text-left">Consolidado</th>
-                                          <th className="px-4 py-3 text-center">Accion</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
@@ -941,9 +941,18 @@ export default function PedidoUnidadesView() {
                                                 {item.PDI ? "Si" : "No"}
                                               </span>
                                             </td>
+                                            <td className="px-4 py-3 text-center">
+                                              <span
+                                                className={[
+                                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                                  unidadArribada ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
+                                                ].join(" ")}
+                                              >
+                                                {unidadArribada ? "Si" : "No"}
+                                              </span>
+                                            </td>
                                             <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
                                             <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
-                                            <td className="px-4 py-3 text-center" />
                                           </tr>
                                         )})}
                                       </tbody>
