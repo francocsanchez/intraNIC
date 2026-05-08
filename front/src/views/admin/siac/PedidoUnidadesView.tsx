@@ -252,6 +252,18 @@ export default function PedidoUnidadesView() {
     refetchOnWindowFocus: true,
   });
 
+  const internosRegistros = useMemo(
+    () => Array.from(new Set(registros.map((registro) => Number(registro.interno)))),
+    [registros],
+  );
+
+  const { data: estadoRegistros = {}, isLoading: isLoadingEstadoRegistros } = useQuery({
+    queryKey: ["pedido-unidades-estado-registros", internosRegistros.join("-")],
+    queryFn: () => getEstadoInternosPedido(internosRegistros),
+    enabled: !canManagePedidos && viewMode === "registros" && internosRegistros.length > 0,
+    refetchOnWindowFocus: true,
+  });
+
   const pedidosBloqueados = useMemo(
     () =>
       new Set(
@@ -366,6 +378,7 @@ export default function PedidoUnidadesView() {
     (viewMode === "carga" && canManagePedidos && isLoadingPrevias) ||
     (viewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
     (viewMode === "registros" && canManagePedidos && isLoadingEstadoPedidos) ||
+    (viewMode === "registros" && !canManagePedidos && isLoadingEstadoRegistros) ||
     (viewMode === "registros" && !canManagePedidos && isLoadingRegistros);
 
   const hasActiveError = canManagePedidos ? isErrorPedidos : isErrorRegistros;
@@ -1068,6 +1081,7 @@ export default function PedidoUnidadesView() {
                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                     <tr>
                       <th className="px-4 py-3 text-left">Interno</th>
+                      <th className="px-4 py-3 text-center">Llegó</th>
                       <th className="px-4 py-3 text-left">Fecha pedido</th>
                       <th className="px-4 py-3 text-left">Consolidado</th>
                       <th className="px-4 py-3 text-left">Usuario</th>
@@ -1082,9 +1096,26 @@ export default function PedidoUnidadesView() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {registros.map((registro) => (
-                      <tr key={`${registro.pedidoId}-${registro.interno}`} className="hover:bg-gray-50">
+                    {registros.map((registro) => {
+                      const unidadArribada = Boolean(estadoRegistros[String(registro.interno)]);
+
+                      return (
+                      <tr
+                        key={`${registro.pedidoId}-${registro.interno}`}
+                        className={unidadArribada ? "bg-emerald-50 hover:bg-emerald-100" : "hover:bg-gray-50"}
+                      >
                         <td className="px-4 py-3 font-semibold text-gray-900">{registro.interno}</td>
+                        <td className="px-4 py-3 text-center">
+                          {unidadArribada ? (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                              Si
+                            </span>
+                          ) : (
+                            <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                              No
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
                         <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
@@ -1114,11 +1145,11 @@ export default function PedidoUnidadesView() {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                    )})}
 
                     {!registros.length ? (
                       <tr>
-                        <td colSpan={11} className="px-6 py-12 text-center text-sm text-gray-500">
+                        <td colSpan={12} className="px-6 py-12 text-center text-sm text-gray-500">
                           {registroInterno
                             ? "No se encontraron unidades para ese interno."
                             : "Todavia no hay unidades pedidas registradas."}
