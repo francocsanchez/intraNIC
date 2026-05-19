@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { ClipboardList, Gauge, Home, PowerOff, ReceiptText, Shield } from "lucide-react";
+import { ClipboardList, FileWarning, Gauge, Home, PowerOff, ReceiptText, Shield } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -23,6 +23,7 @@ export default function AdminModuleLayout() {
   const canViewReventas = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   const canViewPedidoUnidades = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
   const canViewTrazabilidad = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
+  const canViewFacturasAnticipo = hasAnyRole(user, ["administracion"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -57,6 +58,16 @@ export default function AdminModuleLayout() {
               >
                 <ClipboardList size={15} strokeWidth={1.5} />
                 Pedido de Unidades
+              </Link>
+            )}
+
+            {canViewFacturasAnticipo && (
+              <Link
+                to="/administracion/facturas-anticipo"
+                className="inline-flex items-center gap-1 hover:text-gray-900 transition"
+              >
+                <FileWarning size={15} strokeWidth={1.5} />
+                Facturas de anticipo
               </Link>
             )}
 

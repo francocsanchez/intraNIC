@@ -716,6 +716,33 @@ export type PedidoUnidadPrioridad = PedidoUnidadItem["prioridad"];
 export type PedidoUnidadPrevia = z.infer<typeof pedidoUnidadPreviaSchema>;
 
 //**************************** */
+// FACTURAS ANTICIPO
+//**************************** */
+
+export const facturaAnticipoSchema = z.object({
+  _id: z.string(),
+  numeroOp: z.number(),
+  cliente: z.string(),
+  version: z.string(),
+  vendedor: z.string(),
+  chasis: z.string(),
+  usuarioCarga: z.string(),
+  fechaCarga: z.string(),
+  estaFacturada: z.boolean(),
+});
+
+export const facturaAnticipoListResponseSchema = z.object({
+  data: z.array(facturaAnticipoSchema),
+});
+
+export const facturaAnticipoResponseSchema = z.object({
+  data: facturaAnticipoSchema.optional(),
+  message: z.string(),
+});
+
+export type FacturaAnticipo = z.infer<typeof facturaAnticipoSchema>;
+
+//**************************** */
 // REGISTRO ASIGNACIONES
 //**************************** */
 

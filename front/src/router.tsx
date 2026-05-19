@@ -49,6 +49,7 @@ import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView"
 import StockDisponibleReventas from "./views/reventas/StockDisponibleReventas";
 import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
 import PedidoUnidadesPreviasView from "./views/admin/siac/PedidoUnidadesPreviasView";
+import FacturasAnticipoView from "./views/admin/siac/FacturasAnticipoView";
 import RegistroAsignacionesView from "./views/admin/siac/RegistroAsignacionesView";
 import RegistroAsignacionesResumenView from "./views/admin/siac/RegistroAsignacionesResumenView";
 import TrackingOperacionesView from "./views/admin/siac/TrackingOperacionesView";
@@ -134,6 +135,12 @@ export default function Router() {
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path="/pedido-unidades/lista-previa" element={<PedidoUnidadesPreviasView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["administracion"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path="/administracion/facturas-anticipo" element={<FacturasAnticipoView />} />
             </Route>
           </Route>
 

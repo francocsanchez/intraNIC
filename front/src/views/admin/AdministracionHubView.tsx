@@ -1,6 +1,6 @@
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { ClipboardList, Gauge, ReceiptText } from "lucide-react";
+import { ClipboardList, FileWarning, Gauge, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const cardClass =
@@ -16,6 +16,8 @@ export default function AdministracionHubView() {
     canViewAdminModule;
   const canViewListaPrevia =
     hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
+  const canViewFacturasAnticipo =
+    hasAnyRole(user, ["administracion"]);
   const canViewTracking =
     canViewAdminModule;
 
@@ -62,6 +64,24 @@ export default function AdministracionHubView() {
               <ClipboardList size={24} strokeWidth={1.5} />
             </div>
             <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Pedido previo de unidades</h2>
+            <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
+          </div>
+        )}
+
+        {canViewFacturasAnticipo ? (
+          <Link to="/administracion/facturas-anticipo" className={cardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
+              <FileWarning size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Facturas de anticipo</h2>
+            <p className="mt-1 text-sm text-gray-500">Carga operaciones por OP y visualiza si ya tienen factura de anticipo.</p>
+          </Link>
+        ) : (
+          <div className={disabledCardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200 text-gray-600">
+              <FileWarning size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Facturas de anticipo</h2>
             <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
           </div>
         )}

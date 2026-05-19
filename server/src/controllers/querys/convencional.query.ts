@@ -268,6 +268,56 @@ ORDER BY
 	cli.cli_nombre
 `;
 
+export const datoOpera = () => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_stoauto as "interno",
+	ope.ope_fecfac as "fechaFactura",
+	ope.ope_fecha as "fecha",
+	cli.cli_nombre as "clienteNombre",
+	ope.ope_fecent as "fechaEntrega",
+	ope.ope_fecasig as "fechaAsignacion",
+	auto.au_nombre AS "version",
+	famiauto.fam_nombre AS "modelo",
+	vende.ven_nombre as "vendedor",
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+	color.col_nombre AS "color"
+FROM
+	opera ope
+INNER JOIN cliente cli ON
+	ope.ope_cliente = cli.cli_codigo
+INNER JOIN vendedor vende ON
+	ope.ope_vende = vende.ven_codigo
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN stoauto ON
+	stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN movnped ON
+	movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN color ON
+	movnped.mnp_col1 = color.col_codigo
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_codigo = :opera
+	AND ope.ope_tipo = 5
+ORDER BY
+	cli.cli_nombre
+`;
+
+export const facturasAnticipoEstadoQuery = (numeroOps: string) => `
+SELECT DISTINCT
+	ope.ope_codigo AS "numeroOp"
+FROM
+	opera ope
+WHERE
+	ope.ope_tipo = 5
+	AND ope.ope_fecbaj IS NULL
+	AND ope.ope_fecfac IS NOT NULL
+	AND ope.ope_codigo IN (${numeroOps})
+`;
+
 export const operacionesConvencional = () => `
 SELECT
 	ope.ope_codigo AS "opera",
