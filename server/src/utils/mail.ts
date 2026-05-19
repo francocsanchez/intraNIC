@@ -18,7 +18,10 @@ const getRequiredEnv = (name: string) => {
 
 const getTransporter = () => {
   const port = Number(process.env.SMTP_PORT || 587);
-  const secure = process.env.SMTP_SECURE === "true";
+  const secureEnv = process.env.SMTP_SECURE;
+  const secure = secureEnv
+    ? secureEnv === "true"
+    : port === 465;
 
   return nodemailer.createTransport({
     host: getRequiredEnv("SMTP_HOST"),
@@ -29,6 +32,12 @@ const getTransporter = () => {
       pass: getRequiredEnv("SMTP_PASS"),
     },
   });
+};
+
+export type MailOptions = {
+  to: string;
+  subject: string;
+  html: string;
 };
 
 const buildPasswordResetTemplate = ({ name, temporaryPassword }: PasswordResetEmailData) => {
@@ -83,6 +92,14 @@ const buildPasswordResetTemplate = ({ name, temporaryPassword }: PasswordResetEm
 };
 
 export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
+  await sendMail({
+    to: data.to,
+    subject: "Nueva contrasena de acceso",
+    html: buildPasswordResetTemplate(data),
+  });
+}
+
+export async function sendMail(data: MailOptions) {
   const fromEmail = getRequiredEnv("SMTP_FROM_EMAIL");
   const fromName = process.env.SMTP_FROM_NAME || process.env.MAIL_APP_NAME || "IntraNIC";
   const transporter = getTransporter();
@@ -90,7 +107,7 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
   await transporter.sendMail({
     from: `"${fromName}" <${fromEmail}>`,
     to: data.to,
-    subject: "Nueva contrasena de acceso",
-    html: buildPasswordResetTemplate(data),
+    subject: data.subject,
+    html: data.html,
   });
 }

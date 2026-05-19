@@ -1,5 +1,6 @@
 import colors from "colors";
 import server from "./server";
+import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 
 const port = process.env.PORT || 4002;
 
@@ -10,4 +11,6 @@ server.listen(Number(port), "0.0.0.0", () => {
   console.log(`${colors.yellow("🌐 URL:")} ${colors.underline(`http://localhost:${port}`)}`);
   console.log(`${colors.yellow("⚙️  ENV:")} ${colors.green(process.env.NODE_ENV || "development")}`);
   console.log(colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━") + "\n");
+
+  startFacturasAnticipoJob();
 });
