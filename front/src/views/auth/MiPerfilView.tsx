@@ -1,7 +1,7 @@
 import { updateMyPassword } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation } from "@tanstack/react-query";
-import { Building2, CircleUserRound, Hash, KeyRound, Mail } from "lucide-react";
+import { Building2, CircleUserRound, Hash, KeyRound, Mail, Smartphone } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -104,6 +104,14 @@ export default function MiPerfilView() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]">Email</p>
               </div>
               <p className="mt-3 text-sm font-medium break-all text-gray-900">{user.email || "No informado"}</p>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-center gap-2 text-gray-500">
+                <Smartphone size={16} strokeWidth={1.5} />
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Celular</p>
+              </div>
+              <p className="mt-3 text-sm font-medium text-gray-900">{user.celular || "No informado"}</p>
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">

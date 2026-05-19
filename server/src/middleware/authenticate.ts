@@ -10,6 +10,7 @@ declare global {
         name: string;
         lastName: string;
         email: string;
+        celular?: string;
         numberSaleNic?: number;
         numberSaleLiess?: number;
         role: string[];
@@ -92,6 +93,7 @@ export const authenticate = async (
       name: user.name,
       email: user.email,
       lastName: user.lastName,
+      celular: user.celular,
       role: normalizeStringArray(user.role),
       enable: user.enable,
       numberSaleNic: user.numberSaleNic,

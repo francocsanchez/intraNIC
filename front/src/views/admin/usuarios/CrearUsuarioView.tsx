@@ -9,6 +9,7 @@ export type UsuarioFormData = {
   name: string;
   lastName: string;
   email: string;
+  celular: string;
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];
@@ -22,6 +23,7 @@ export default function CreateUsuarioView() {
     name: "",
     lastName: "",
     email: "",
+    celular: "",
     numberSaleNic: 0,
     numberSaleLiess: 0,
     role: [],

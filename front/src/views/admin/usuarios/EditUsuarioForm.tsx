@@ -10,6 +10,7 @@ type Usuario = {
   email: string;
   name: string;
   lastName: string;
+  celular?: string;
   enable: boolean;
   numberSaleNic: number;
   numberSaleLiess: number;
@@ -21,6 +22,7 @@ export type UsuarioFormData = {
   name: string;
   lastName: string;
   email: string;
+  celular: string;
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];
@@ -45,6 +47,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       name: data.name,
       lastName: data.lastName,
       email: data.email,
+      celular: data.celular ?? "",
       numberSaleNic: data.numberSaleNic,
       numberSaleLiess: data.numberSaleLiess,
       company: data.company,

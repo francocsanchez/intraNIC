@@ -28,6 +28,7 @@ export interface IUser extends Document {
   password: string;
   name: string;
   lastName: string;
+  celular?: string;
   enable: boolean;
   role: userRole[];
   company: userCompany[];
@@ -58,6 +59,11 @@ const userSchema: Schema = new Schema(
       type: String,
       required: true,
       lowercase: true,
+      trim: true,
+    },
+    celular: {
+      type: String,
+      default: "",
       trim: true,
     },
     enable: {

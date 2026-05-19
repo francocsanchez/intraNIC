@@ -122,6 +122,7 @@ export const usuarioSchema = z.object({
   email: z.string(),
   name: z.string(),
   lastName: z.string(),
+  celular: z.string().optional().default(""),
   enable: z.boolean(),
   numberSaleNic: z.number(),
   numberSaleLiess: z.number(),

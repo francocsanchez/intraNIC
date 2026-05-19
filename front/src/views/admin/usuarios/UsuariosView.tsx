@@ -163,6 +163,7 @@ export default function UsuariosView() {
                 <th className="px-6 py-3 text-left">Usuario</th>
                 <th className="px-6 py-3 text-left">Rol</th>
                 <th className="px-6 py-3 text-left">Empresa</th>
+                <th className="px-6 py-3 text-left">Celular</th>
                 <th className="px-6 py-3 text-left">NIC</th>
                 <th className="px-6 py-3 text-left">LIESS</th>
                 <th className="px-6 py-3 text-right">Acciones</th>
@@ -198,6 +199,8 @@ export default function UsuariosView() {
                       ))}
                     </div>
                   </td>
+
+                  <td className="px-6 py-3 text-gray-700">{u.celular || "-"}</td>
 
                   <td className="px-6 py-3 text-gray-700">{u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}</td>
 
@@ -245,7 +248,7 @@ export default function UsuariosView() {
 
               {usuarios.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay usuarios para mostrar.
                   </td>
                 </tr>

@@ -6,6 +6,54 @@ import { generateJWT } from "../utils/jwt";
 import { sendPasswordResetEmail } from "../utils/mail";
 import { generateTemporaryPassword } from "../utils/password";
 
+const normalizeCelular = (value: unknown) => {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.replace(/\D/g, "").trim();
+};
+
+const toWhatsappCelular = (celular: string) => {
+  if (!celular) {
+    return "";
+  }
+
+  return `549${celular}`;
+};
+
+const validateCelular = (celular: string) => {
+  if (!celular) {
+    return null;
+  }
+
+  if (!/^\d+$/.test(celular)) {
+    return "El celular solo puede contener numeros";
+  }
+
+  if (celular.startsWith("0")) {
+    return "El celular no debe incluir el 0 inicial";
+  }
+
+  if (celular.startsWith("549")) {
+    return "El celular no debe incluir el prefijo +549";
+  }
+
+  if (celular.startsWith("54")) {
+    return "El celular no debe incluir el codigo de pais 54";
+  }
+
+  if (celular.startsWith("15")) {
+    return "El celular no debe incluir el 15";
+  }
+
+  if (celular.length < 8 || celular.length > 13) {
+    return "El celular debe contener entre 8 y 13 digitos";
+  }
+
+  return null;
+};
+
 const resetAndSendPassword = async (usuario: any) => {
   const temporaryPassword = generateTemporaryPassword();
   const previousPassword = usuario.password;
@@ -61,6 +109,15 @@ export class UsuarioController {
   static createUsuario = async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
+      const celularInput = normalizeCelular(req.body?.celular);
+      const celularError = validateCelular(celularInput);
+
+      if (celularError) {
+        return res.status(400).json({
+          data: null,
+          message: celularError,
+        });
+      }
 
       const exists = await User.findOne({ email }).lean();
 
@@ -79,6 +136,7 @@ export class UsuarioController {
 
       const usuario = await User.create({
         ...req.body,
+        celular: toWhatsappCelular(celularInput),
         password: hashedPassword,
       });
 
@@ -170,12 +228,27 @@ export class UsuarioController {
         "email",
         "name",
         "lastName",
+        "celular",
         "role",
         "company",
         "numberSaleNic",
         "numberSaleLiess",
         "enable",
       ] as const;
+
+      if (Object.prototype.hasOwnProperty.call(req.body, "celular")) {
+        const celularInput = normalizeCelular(req.body.celular);
+        const celularError = validateCelular(celularInput);
+
+        if (celularError) {
+          return res.status(400).json({
+            data: null,
+            message: celularError,
+          });
+        }
+
+        req.body.celular = toWhatsappCelular(celularInput);
+      }
 
       for (const field of allowedFields) {
         if (Object.prototype.hasOwnProperty.call(req.body, field)) {

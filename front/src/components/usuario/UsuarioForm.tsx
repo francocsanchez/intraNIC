@@ -83,6 +83,39 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
       />
       <FieldError message={errors.email?.message} />
     </div>
+
+    <div className="space-y-2">
+      <label
+        htmlFor="celular"
+        className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+      >
+        Celular
+      </label>
+      <input
+        id="celular"
+        type="text"
+        inputMode="numeric"
+        placeholder="Ej: 1123456789"
+        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+        {...register("celular", {
+          setValueAs: (value) => typeof value === "string" ? value.replace(/\D/g, "") : "",
+          validate: (value) => {
+            if (!value) return true;
+            if (!/^\d+$/.test(value)) return "El celular solo puede contener numeros";
+            if (value.startsWith("0")) return "No ingreses el 0 inicial";
+            if (value.startsWith("549")) return "No ingreses el prefijo +549";
+            if (value.startsWith("54")) return "No ingreses el codigo de pais 54";
+            if (value.startsWith("15")) return "No ingreses el 15";
+            if (value.length < 8 || value.length > 13) return "Ingresa entre 8 y 13 digitos";
+            return true;
+          },
+        })}
+      />
+      <p className="text-xs text-gray-500">
+        Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.
+      </p>
+      <FieldError message={errors.celular?.message} />
+    </div>
   </section>
 
   <section className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
