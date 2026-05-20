@@ -620,7 +620,7 @@ export default function PedidoUnidadesView() {
               </div>
 
               <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
-                <table className="min-w-[1160px] w-full text-sm">
+                <table className="min-w-[1320px] w-full text-sm">
                   <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                     <tr>
                       <th className="px-4 py-3 text-center">Sel.</th>
@@ -632,6 +632,7 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Chasis</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
                       <th className="px-4 py-3 text-left">Cargado</th>
+                      <th className="px-4 py-3 text-left">Usuario</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -667,13 +668,14 @@ export default function PedidoUnidadesView() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-gray-700">{formatDateTime(previa.createdAt)}</td>
+                          <td className="px-4 py-3 text-gray-700">{previa.usuario}</td>
                         </tr>
                       );
                     })}
 
                     {!previasData.length ? (
                       <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
                           Todavia no hay unidades en la lista previa.
                         </td>
                       </tr>
@@ -873,7 +875,7 @@ export default function PedidoUnidadesView() {
                               <td colSpan={7} className="px-4 py-4">
                                 <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                                   <div className="overflow-x-auto">
-                                    <table className="min-w-[1240px] w-full text-sm">
+                                    <table className="min-w-[1360px] w-full text-sm">
                                       <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                                         <tr>
                                           <th className="px-4 py-3 text-left">Interno</th>
@@ -887,8 +889,8 @@ export default function PedidoUnidadesView() {
                                           <th className="px-4 py-3 text-left">Lista previa</th>
                                           <th className="px-4 py-3 text-center">PDI</th>
                                           <th className="px-4 py-3 text-center">Llegó</th>
-                                          <th className="px-4 py-3 text-left">Usuario</th>
                                           <th className="px-4 py-3 text-left">Consolidado</th>
+                                          <th className="px-4 py-3 text-left">Usuario</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
@@ -951,8 +953,8 @@ export default function PedidoUnidadesView() {
                                                 {unidadArribada ? "Si" : "No"}
                                               </span>
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
                                             <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
+                                            <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
                                           </tr>
                                         )})}
                                       </tbody>
@@ -1030,7 +1032,6 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-center">Llegó</th>
                       <th className="px-4 py-3 text-left">Fecha pedido</th>
                       <th className="px-4 py-3 text-left">Consolidado</th>
-                      <th className="px-4 py-3 text-left">Usuario</th>
                       <th className="px-4 py-3 text-left">Cliente</th>
                       <th className="px-4 py-3 text-left">Vendedor</th>
                       <th className="px-4 py-3 text-left">Modelo</th>
@@ -1038,6 +1039,7 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Chasis</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
                       <th className="px-4 py-3 text-center">PDI</th>
+                      <th className="px-4 py-3 text-left">Usuario</th>
                     </tr>
                   </thead>
 
@@ -1064,7 +1066,6 @@ export default function PedidoUnidadesView() {
                         </td>
                         <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
                         <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
@@ -1090,6 +1091,7 @@ export default function PedidoUnidadesView() {
                             {registro.PDI ? "Si" : "No"}
                           </span>
                         </td>
+                        <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
                       </tr>
                     )})}
 
