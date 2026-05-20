@@ -632,7 +632,7 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Chasis</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
                       <th className="px-4 py-3 text-left">Cargado</th>
-                      <th className="px-4 py-3 text-left">Usuario</th>
+                      <th className="px-4 py-3 text-left">Adm</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -886,11 +886,11 @@ export default function PedidoUnidadesView() {
                                           <th className="px-4 py-3 text-left">Vendedor</th>
                                           <th className="px-4 py-3 text-left">Chasis</th>
                                           <th className="px-4 py-3 text-left">Prioridad</th>
-                                          <th className="px-4 py-3 text-left">Lista previa</th>
+                                          <th className="px-4 py-3 text-left">F. Sol</th>
                                           <th className="px-4 py-3 text-center">PDI</th>
                                           <th className="px-4 py-3 text-center">Llegó</th>
                                           <th className="px-4 py-3 text-left">Consolidado</th>
-                                          <th className="px-4 py-3 text-left">Usuario</th>
+                                          <th className="px-4 py-3 text-left">ADM</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100">
@@ -954,7 +954,7 @@ export default function PedidoUnidadesView() {
                                               </span>
                                             </td>
                                             <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
-                                            <td className="px-4 py-3 text-gray-700">{pedido.usuarioNombre}</td>
+                                            <td className="px-4 py-3 text-gray-700">{item.listaPreviaUsuario ?? "-"}</td>
                                           </tr>
                                         )})}
                                       </tbody>
@@ -1039,7 +1039,7 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Chasis</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
                       <th className="px-4 py-3 text-center">PDI</th>
-                      <th className="px-4 py-3 text-left">Usuario</th>
+                      <th className="px-4 py-3 text-left">Usuario lista previa</th>
                     </tr>
                   </thead>
 
@@ -1091,7 +1091,7 @@ export default function PedidoUnidadesView() {
                             {registro.PDI ? "Si" : "No"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-gray-700">{registro.usuarioNombre}</td>
+                        <td className="px-4 py-3 text-gray-700">{registro.listaPreviaUsuario ?? "-"}</td>
                       </tr>
                     )})}
 

@@ -11,6 +11,7 @@ export interface IPedidoUnidadItem {
   modelo: string;
   prioridad: PedidoUnidadPrioridad;
   listaPreviaCreatedAt?: Date | null;
+  listaPreviaUsuario?: string | null;
   PDI: boolean;
 }
 
@@ -68,6 +69,11 @@ const pedidoUnidadItemSchema = new Schema<IPedidoUnidadItem>(
     listaPreviaCreatedAt: {
       type: Date,
       default: null,
+    },
+    listaPreviaUsuario: {
+      type: String,
+      default: null,
+      trim: true,
     },
     PDI: {
       type: Boolean,

@@ -618,6 +618,7 @@ export const pedidoUnidadItemSchema = pedidoUnidadInfoInternoSchema.extend({
   prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
   PDI: z.boolean(),
   listaPreviaCreatedAt: z.string().nullable().optional(),
+  listaPreviaUsuario: z.string().nullable().optional(),
 });
 
 export const pedidoUnidadSchema = z.object({
@@ -661,6 +662,7 @@ export const pedidoUnidadRegistroSchema = z.object({
   prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
   PDI: z.boolean(),
   listaPreviaCreatedAt: z.string().nullable().optional(),
+  listaPreviaUsuario: z.string().nullable().optional(),
 });
 
 export const pedidoUnidadRegistroListResponseSchema = z.object({

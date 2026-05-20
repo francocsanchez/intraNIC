@@ -102,6 +102,7 @@ const normalizePedidoUnidadItem = (item: any) => ({
   modelo: normalizeText(item?.modelo),
   prioridad: isValidPrioridad(item?.prioridad) ? item.prioridad : "normal",
   listaPreviaCreatedAt: normalizeNullableDate(item?.listaPreviaCreatedAt),
+  listaPreviaUsuario: normalizeNullableText(item?.listaPreviaUsuario),
 });
 
 const normalizePedidoUnidad = (pedido: any) => ({
@@ -194,6 +195,7 @@ const buildPedidoItems = async (
       interno: number;
       prioridad: PedidoUnidadPrioridad;
       listaPreviaCreatedAt?: Date | string | null;
+      listaPreviaUsuario?: string | null;
     }>;
   } = {},
 ) => {
@@ -256,6 +258,7 @@ const buildPedidoItems = async (
         ? item.prioridad
         : existingItem?.prioridad ?? previa?.prioridad ?? "normal",
       listaPreviaCreatedAt: normalizeNullableDate(existingItem?.listaPreviaCreatedAt ?? previa?.createdAt),
+      listaPreviaUsuario: normalizeNullableText(existingItem?.listaPreviaUsuario ?? previa?.usuario),
       PDI: Boolean(item.PDI),
     };
   }).sort(comparePedidoUnidadItem);
@@ -536,6 +539,7 @@ export class PedidoUnidadController {
                   prioridad: "$items.prioridad",
                   PDI: "$items.PDI",
                   listaPreviaCreatedAt: "$items.listaPreviaCreatedAt",
+                  listaPreviaUsuario: "$items.listaPreviaUsuario",
                 },
               },
             ],
