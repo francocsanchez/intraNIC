@@ -65,6 +65,7 @@ import PedidoMensualView from "./views/admin/siac/PedidoMensualView";
 import ProformasView from "./views/admin/siac/ProformasView";
 import ProformaFormView from "./views/admin/siac/ProformaFormView";
 import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
+import OperacionesDashboardView from "./views/operaciones/OperacionesDashboardView";
 
 export default function Router() {
   return (
@@ -154,6 +155,12 @@ export default function Router() {
             <Route path="/proformas" element={<ProformasView />} />
             <Route path="/proformas/nueva" element={<ProformaFormView />} />
             <Route path="/proformas/:id" element={<ProformaDetailView />} />
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path="/operaciones" element={<OperacionesDashboardView />} />
+            </Route>
           </Route>
 
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>

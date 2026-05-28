@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyRole } from "@/helpers/access";
-import { CarFront, Car, Motorbike, LogOut, Cog, ClipboardList, FileText } from "lucide-react";
+import { CarFront, Car, Motorbike, LogOut, Cog, ClipboardList, FileText, BarChart3 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function Inicio() {
@@ -24,6 +24,7 @@ export default function Inicio() {
     hasAnyRole(user, ["admin", "administracion", "stock", "gerente", "supervisor", "vendedor"]);
   const hasPreventas = hasNIC;
   const hasProformas = true;
+  const hasOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
 
   const baseCard = "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
 
@@ -167,6 +168,28 @@ export default function Inicio() {
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Proformas</h2>
 
               <p className="text-sm text-gray-500 mt-1">Cotizaciones con exportacion PDF</p>
+            </div>
+          )}
+
+          {hasOperaciones ? (
+            <Link to="/operaciones" className={`${baseCard} hover:shadow-md transition group`}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
+                <BarChart3 size={26} strokeWidth={1.5} className="text-gray-900" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Operaciones</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Dashboard de seguimiento comercial</p>
+            </Link>
+          ) : (
+            <div className={disabledCard}>
+              <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
+                <BarChart3 size={26} strokeWidth={1.5} className="text-gray-600" />
+              </div>
+
+              <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Operaciones</h2>
+
+              <p className="text-sm text-gray-500 mt-1">Dashboard de seguimiento comercial</p>
             </div>
           )}
           </div>

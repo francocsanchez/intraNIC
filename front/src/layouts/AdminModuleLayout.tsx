@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { ClipboardList, FileWarning, Gauge, Home, PowerOff, ReceiptText, Shield } from "lucide-react";
+import { BarChart3, ClipboardList, FileWarning, Gauge, Home, PowerOff, ReceiptText, Shield } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -24,6 +24,7 @@ export default function AdminModuleLayout() {
   const canViewPedidoUnidades = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
   const canViewTrazabilidad = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   const canViewFacturasAnticipo = hasAnyRole(user, ["administracion"]);
+  const canViewOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -75,6 +76,13 @@ export default function AdminModuleLayout() {
               <Link to="/trazabilidad-operativa" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
                 <Gauge size={15} strokeWidth={1.5} />
                 Trazabilidad
+              </Link>
+            )}
+
+            {canViewOperaciones && (
+              <Link to="/operaciones" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+                <BarChart3 size={15} strokeWidth={1.5} />
+                Operaciones
               </Link>
             )}
           </nav>

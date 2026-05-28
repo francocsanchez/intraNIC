@@ -19,6 +19,7 @@ import preventaRoutes from "./routes/preventaRoutes";
 import pedidoMensualRoutes from "./routes/pedidoMensualRoutes";
 import proformaRoutes from "./routes/proformaRoutes";
 import facturaAnticipoRoutes from "./routes/facturaAnticipoRoutes";
+import operacionesRoutes from "./routes/operacionesRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -45,5 +46,6 @@ app.use("/api/dms/preventas", preventaRoutes);
 app.use("/api/dms/pedido-mensual", pedidoMensualRoutes);
 app.use("/api/dms/proformas", proformaRoutes);
 app.use("/api/facturas-anticipo", facturaAnticipoRoutes);
+app.use("/api/operaciones", operacionesRoutes);
 
 export default app;

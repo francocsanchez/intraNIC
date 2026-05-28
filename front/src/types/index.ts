@@ -601,6 +601,50 @@ export const trackingOperacionesResponseSchema = z.object({
 export type TrackingOperacionesResponse = z.infer<typeof trackingOperacionesResponseSchema>;
 
 //**************************** */
+// OPERACIONES DASHBOARD
+//**************************** */
+
+export const operacionDashboardSchema = z.object({
+  codigoOperacion: z.number(),
+  fechaAsignacion: z.string(),
+  vendedorNombre: z.string(),
+  sucursalNombre: z.string(),
+  modeloNombre: z.string(),
+  interno: z.string().nullable(),
+  chasis: z.string().nullable(),
+});
+
+export const operacionesDashboardGraficoItemSchema = z.object({
+  vendedor: z.string(),
+  total: z.number(),
+});
+
+export const operacionesDashboardTablaItemSchema = z.object({
+  vendedor: z.string(),
+  total: z.number(),
+  modelos: z.record(z.string(), z.number()),
+});
+
+export const operacionesDashboardFilterOptionSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
+
+export const operacionesDashboardResponseSchema = z.object({
+  operaciones: z.array(operacionDashboardSchema),
+  grafico: z.array(operacionesDashboardGraficoItemSchema),
+  tabla: z.array(operacionesDashboardTablaItemSchema),
+  filtros: z.object({
+    sucursales: z.array(operacionesDashboardFilterOptionSchema),
+    modelos: z.array(operacionesDashboardFilterOptionSchema),
+    dias: z.array(z.number()),
+  }),
+});
+
+export type OperacionDashboard = z.infer<typeof operacionDashboardSchema>;
+export type OperacionesDashboardResponse = z.infer<typeof operacionesDashboardResponseSchema>;
+
+//**************************** */
 // PEDIDO UNIDADES
 //**************************** */
 
