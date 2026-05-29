@@ -17,6 +17,13 @@ type RegistroAsignacionPayload = {
   tipo: "Asignado" | "Desasignado";
 };
 
+type GetRegistrosAsignacionesFilters = {
+  tipo?: "Asignado" | "Desasignado";
+  modelo?: string;
+  mes?: number;
+  ano?: number;
+};
+
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
     return (
@@ -55,10 +62,11 @@ export async function getRegistroAsignacionInfoOperacion(
 export async function getRegistrosAsignaciones(
   page = 1,
   limit = 30,
+  filters: GetRegistrosAsignacionesFilters = {},
 ): Promise<RegistroAsignacionListResponse> {
   try {
     const { data } = await api.get("/dms/registro-asignaciones", {
-      params: { page, limit },
+      params: { page, limit, ...filters },
     });
     const parsed = registroAsignacionListResponseSchema.safeParse(data);
 

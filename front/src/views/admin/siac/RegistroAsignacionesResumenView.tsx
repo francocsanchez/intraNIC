@@ -64,6 +64,22 @@ export default function RegistroAsignacionesResumenView() {
   const resumenMensual = data.resumenMensual;
   const resumenAnual = data.resumenAnual;
   const nombreMes = MESES.find((item) => item.value === mes)?.label ?? "";
+  const buildDetalleLink = (
+    tipo: "Asignado" | "Desasignado",
+    modelo?: string,
+  ) => {
+    const params = new URLSearchParams({
+      tipo,
+      mes: String(mes),
+      ano: String(ano),
+    });
+
+    if (modelo) {
+      params.set("modelo", modelo);
+    }
+
+    return `/registro-asignaciones?${params.toString()}`;
+  };
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -122,30 +138,42 @@ export default function RegistroAsignacionesResumenView() {
             </label>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:min-w-[820px] xl:flex-1 xl:max-w-[1120px]">
-            <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:min-w-[820px] xl:flex-1 xl:max-w-[1120px]">
+            <Link
+              to={buildDetalleLink("Asignado")}
+              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm transition hover:border-[#15aa9a] hover:bg-emerald-50/40"
+            >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                 Asignadas {nombreMes}
               </p>
-              <p className="mt-3 text-3xl font-bold text-[#15aa9a]">
+              <p className="mt-2 text-2xl font-bold text-[#15aa9a]">
                 {resumenMensual.total.asignadas}
               </p>
-            </article>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-[#12897d]">
+                Ver detalle del mes
+              </p>
+            </Link>
 
-            <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <Link
+              to={buildDetalleLink("Desasignado")}
+              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm transition hover:border-rose-300 hover:bg-rose-50/40"
+            >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                 Desasignadas {nombreMes}
               </p>
-              <p className="mt-3 text-3xl font-bold text-rose-600">
+              <p className="mt-2 text-2xl font-bold text-rose-600">
                 {resumenMensual.total.desasignadas}
               </p>
-            </article>
+              <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-rose-600">
+                Ver detalle del mes
+              </p>
+            </Link>
 
-            <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <article className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                 Neto del mes
               </p>
-              <p className="mt-3 text-3xl font-bold text-gray-900">
+              <p className="mt-2 text-2xl font-bold text-gray-900">
                 {resumenMensual.total.neto}
               </p>
             </article>
@@ -153,7 +181,7 @@ export default function RegistroAsignacionesResumenView() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 px-6 py-4">
             <h2 className="text-base font-semibold tracking-tight text-gray-900">
@@ -180,12 +208,8 @@ export default function RegistroAsignacionesResumenView() {
                     <td className="px-4 py-3 font-medium text-gray-900">
                       {item.modelo}
                     </td>
-                    <td className="px-4 py-3 text-center text-[#15aa9a]">
-                      {item.asignadas}
-                    </td>
-                    <td className="px-4 py-3 text-center text-rose-600">
-                      {item.desasignadas}
-                    </td>
+                    <td className="px-4 py-3 text-center text-[#15aa9a]">{item.asignadas}</td>
+                    <td className="px-4 py-3 text-center text-rose-600">{item.desasignadas}</td>
                     <td className="px-4 py-3 text-center font-semibold text-gray-900">
                       {item.neto}
                     </td>
