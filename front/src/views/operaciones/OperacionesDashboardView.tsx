@@ -16,6 +16,25 @@ import { toast } from "sonner";
 
 const MONTH_LABELS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
 
+const getFechaParts = (fechaAsignacion: string) => {
+  const match = fechaAsignacion.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (match) {
+    return {
+      year: Number(match[1]),
+      month: Number(match[2]),
+      day: Number(match[3]),
+    };
+  }
+
+  const fecha = new Date(fechaAsignacion);
+  return {
+    year: fecha.getFullYear(),
+    month: fecha.getMonth() + 1,
+    day: fecha.getDate(),
+  };
+};
+
 export default function OperacionesDashboardView() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -76,10 +95,10 @@ export default function OperacionesDashboardView() {
     const labelOrder = new Map<string, number>();
 
     const getDimensionValue = (item: OperacionDashboard) => {
-      const fecha = new Date(item.fechaAsignacion);
+      const fecha = getFechaParts(item.fechaAsignacion);
 
       if (chartDimension === "mes") {
-        const month = fecha.getMonth() + 1;
+        const month = fecha.month;
         return {
           label: MONTH_LABELS[month - 1] ?? String(month),
           order: month,
@@ -87,7 +106,7 @@ export default function OperacionesDashboardView() {
       }
 
       if (chartDimension === "dia") {
-        const day = fecha.getDate();
+        const day = fecha.day;
         return {
           label: String(day).padStart(2, "0"),
           order: day,
@@ -107,7 +126,7 @@ export default function OperacionesDashboardView() {
 
     operaciones.forEach((item) => {
       const { label, order } = getDimensionValue(item);
-      const yearKey = String(new Date(item.fechaAsignacion).getFullYear());
+      const yearKey = String(getFechaParts(item.fechaAsignacion).year);
 
       if (!grouped.has(label)) {
         grouped.set(label, {});
