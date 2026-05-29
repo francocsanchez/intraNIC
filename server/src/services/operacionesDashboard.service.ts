@@ -3,7 +3,7 @@ import { sequelizeNIC } from "../config/database";
 import { operacionesDashboardQuery } from "../controllers/querys/operaciones.query";
 
 type OperacionesDashboardFilters = {
-  anio: number;
+  anios: number[];
   meses: number[];
   sucursales: string[];
   modelos: string[];
@@ -76,6 +76,7 @@ export class OperacionesDashboardService {
     const [data, filterRows] = await Promise.all([
       sequelizeNIC.query<OperacionDashboardRow>(
         operacionesDashboardQuery({
+          hasAnios: filters.anios.length > 0,
           hasMeses: filters.meses.length > 0,
           hasSucursales: filters.sucursales.length > 0,
           hasModelos: filters.modelos.length > 0,
@@ -84,7 +85,7 @@ export class OperacionesDashboardService {
         {
           type: QueryTypes.SELECT,
           replacements: {
-            anio: filters.anio,
+            anios: filters.anios,
             meses: filters.meses,
             sucursales: filters.sucursales,
             modelos: filters.modelos,
@@ -94,6 +95,7 @@ export class OperacionesDashboardService {
       ),
       sequelizeNIC.query<OperacionDashboardRow>(
         operacionesDashboardQuery({
+          hasAnios: filters.anios.length > 0,
           hasMeses: filters.meses.length > 0,
           hasSucursales: false,
           hasModelos: false,
@@ -102,7 +104,7 @@ export class OperacionesDashboardService {
         {
           type: QueryTypes.SELECT,
           replacements: {
-            anio: filters.anio,
+            anios: filters.anios,
             meses: filters.meses,
           },
         },

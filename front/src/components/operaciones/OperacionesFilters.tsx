@@ -19,8 +19,8 @@ type FilterOption = {
 };
 
 type OperacionesFiltersProps = {
-  anio: number;
   anios: number[];
+  selectedAnios: number[];
   selectedMeses: number[];
   sucursales: FilterOption[];
   modelos: FilterOption[];
@@ -28,7 +28,7 @@ type OperacionesFiltersProps = {
   selectedSucursales: string[];
   selectedModelos: string[];
   selectedDias: number[];
-  onAnioChange: (anio: number) => void;
+  onAniosChange: (anios: number[]) => void;
   onMesesChange: (meses: number[]) => void;
   onSucursalesChange: (values: string[]) => void;
   onModelosChange: (values: string[]) => void;
@@ -103,8 +103,8 @@ function CompactCheckboxGroup({
 }
 
 export default function OperacionesFilters({
-  anio,
   anios,
+  selectedAnios,
   selectedMeses,
   sucursales,
   modelos,
@@ -112,12 +112,20 @@ export default function OperacionesFilters({
   selectedSucursales,
   selectedModelos,
   selectedDias,
-  onAnioChange,
+  onAniosChange,
   onMesesChange,
   onSucursalesChange,
   onModelosChange,
   onDiasChange,
 }: OperacionesFiltersProps) {
+  const toggleAnio = (nextAnio: number) => {
+    onAniosChange(
+      selectedAnios.includes(nextAnio)
+        ? selectedAnios.filter((value) => value !== nextAnio)
+        : [...selectedAnios, nextAnio].sort((a, b) => a - b),
+    );
+  };
+
   const toggleMes = (nextMes: number) => {
     onMesesChange(
       selectedMeses.includes(nextMes)
@@ -137,22 +145,20 @@ export default function OperacionesFilters({
   return (
     <section className="rounded-xl border border-[#cfe7ee] bg-[#eef8fb] p-2.5 shadow-sm">
       <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-2 xl:flex-row xl:items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Ano</span>
-            <select
-              value={anio}
-              onChange={(event) => onAnioChange(Number(event.target.value))}
-              className="rounded-sm border border-[#d6e7ed] bg-white px-2 py-1 text-xs text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
-            >
-              {anios.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max items-center gap-1">
+            {anios.map((anio) => (
+              <ToggleButton
+                key={anio}
+                active={selectedAnios.includes(anio)}
+                label={String(anio)}
+                onClick={() => toggleAnio(anio)}
+              />
+            ))}
           </div>
+        </div>
 
+        <div className="flex flex-col gap-2 xl:flex-row xl:items-center">
           <div className="overflow-x-auto">
             <div className="flex min-w-max items-center gap-1">
               {MONTHS.map((item) => (

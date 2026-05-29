@@ -23,10 +23,10 @@ const parseNumericList = (value: unknown) =>
 
 export class OperacionesController {
   static getDashboard = async (req: Request, res: Response) => {
-    const anio = parsePositiveInt(req.query.anio);
+    const anios = parseNumericList(req.query.anios);
 
-    if (!anio) {
-      return res.status(400).json({ message: "Ano no valido" });
+    if (!anios.length) {
+      return res.status(400).json({ message: "Debes seleccionar al menos un ano" });
     }
 
     const meses = parseNumericList(req.query.meses).filter((mes) => mes >= 1 && mes <= 12);
@@ -36,7 +36,7 @@ export class OperacionesController {
 
     try {
       const response = await OperacionesDashboardService.getDashboard({
-        anio,
+        anios,
         meses,
         sucursales,
         modelos,

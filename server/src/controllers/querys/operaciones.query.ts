@@ -1,4 +1,5 @@
 export const operacionesDashboardQuery = (filters: {
+  hasAnios: boolean;
   hasMeses: boolean;
   hasSucursales: boolean;
   hasModelos: boolean;
@@ -37,7 +38,7 @@ WHERE
     AND ope.ope_tipo = 5
     AND ope.ope_fecasig IS NOT NULL
     AND ope.ope_vende <> 74
-    AND YEAR(ope.ope_fecasig) = :anio
+    ${filters.hasAnios ? "AND YEAR(ope.ope_fecasig) IN (:anios)" : ""}
     ${filters.hasMeses ? "AND MONTH(ope.ope_fecasig) IN (:meses)" : ""}
     ${filters.hasSucursales ? "AND ISNULL(CAST(vende.ven_sucur AS VARCHAR(20)), 'SIN_ASIGNAR') IN (:sucursales)" : ""}
     ${filters.hasModelos ? "AND famiauto.fam_nombre IN (:modelos)" : ""}

@@ -1,6 +1,7 @@
 import {
   CartesianGrid,
   LabelList,
+  Legend,
   Line,
   LineChart,
   Tooltip,
@@ -9,16 +10,21 @@ import {
 } from "recharts";
 
 export type OperacionesChartDimension = "mes" | "dia" | "modelo" | "sucursal" | "vendedor";
+export type OperacionesChartCompare = "none" | "anio";
 
-type OperacionesChartPoint = {
+export type OperacionesChartPoint = {
   label: string;
-  total: number;
+  total?: number;
+  [seriesKey: string]: string | number | undefined;
 };
 
 type OperacionesBarChartProps = {
   data: OperacionesChartPoint[];
   dimension: OperacionesChartDimension;
+  compareBy: OperacionesChartCompare;
+  seriesKeys: string[];
   onDimensionChange: (dimension: OperacionesChartDimension) => void;
+  onCompareByChange: (value: OperacionesChartCompare) => void;
 };
 
 const DIMENSION_LABELS: Record<OperacionesChartDimension, string> = {
@@ -29,12 +35,23 @@ const DIMENSION_LABELS: Record<OperacionesChartDimension, string> = {
   vendedor: "Vendedor",
 };
 
+const COMPARE_LABELS: Record<OperacionesChartCompare, string> = {
+  none: "Sin comparar",
+  anio: "Ano",
+};
+
+const SERIES_COLORS = ["#15aa9a", "#7c7c7c", "#0f766e", "#94a3b8", "#16a34a", "#f59e0b"];
+
 export default function OperacionesBarChart({
   data,
   dimension,
+  compareBy,
+  seriesKeys,
   onDimensionChange,
+  onCompareByChange,
 }: OperacionesBarChartProps) {
   const chartWidth = Math.max(data.length * 88, 720);
+  const effectiveSeriesKeys = compareBy === "anio" ? seriesKeys : ["total"];
 
   return (
     <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm">
@@ -44,7 +61,7 @@ export default function OperacionesBarChart({
             Operaciones por {DIMENSION_LABELS[dimension].toLowerCase()}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            La linea se recompone segun la dimension elegida y los filtros activos.
+            La linea se recompone segun la dimension elegida y puede comparar por ano.
           </p>
         </div>
 
@@ -62,9 +79,25 @@ export default function OperacionesBarChart({
             >
               <option value="mes">Mes</option>
               <option value="dia">Dia</option>
-              <option value="modelo">Modelo</option>
-              <option value="sucursal">Sucursal</option>
-              <option value="vendedor">Vendedor</option>
+              <option value="modelo" disabled={compareBy === "anio"}>Modelo</option>
+              <option value="sucursal" disabled={compareBy === "anio"}>Sucursal</option>
+              <option value="vendedor" disabled={compareBy === "anio"}>Vendedor</option>
+            </select>
+          </label>
+
+          <label className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+              Comparar
+            </span>
+            <select
+              value={compareBy}
+              onChange={(event) =>
+                onCompareByChange(event.target.value as OperacionesChartCompare)
+              }
+              className="rounded-md border border-[#d6e7ed] bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+            >
+              <option value="none">{COMPARE_LABELS.none}</option>
+              <option value="anio">{COMPARE_LABELS.anio}</option>
             </select>
           </label>
 
@@ -105,19 +138,34 @@ export default function OperacionesBarChart({
                 borderColor: "#cfe7ee",
                 boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
               }}
-              formatter={(value) => [`${value} operaciones`, "Total"]}
+              formatter={(value, name) => [`${value} operaciones`, compareBy === "anio" ? name : "Total"]}
               labelFormatter={(label) => `${DIMENSION_LABELS[dimension]}: ${label}`}
             />
-            <Line
-              type="monotone"
-              dataKey="total"
-              stroke="#15aa9a"
-              strokeWidth={2.5}
-              dot={{ r: 3, fill: "#15aa9a", stroke: "#15aa9a" }}
-              activeDot={{ r: 5, fill: "#15aa9a", stroke: "#15aa9a" }}
-            >
-              <LabelList dataKey="total" position="top" fill="#0f172a" fontSize={11} />
-            </Line>
+            {compareBy === "anio" ? <Legend /> : null}
+
+            {effectiveSeriesKeys.map((seriesKey, index) => (
+              <Line
+                key={seriesKey}
+                type="monotone"
+                dataKey={seriesKey}
+                name={seriesKey}
+                stroke={SERIES_COLORS[index % SERIES_COLORS.length]}
+                strokeWidth={2.5}
+                dot={{
+                  r: 3,
+                  fill: SERIES_COLORS[index % SERIES_COLORS.length],
+                  stroke: SERIES_COLORS[index % SERIES_COLORS.length],
+                }}
+                activeDot={{
+                  r: 5,
+                  fill: SERIES_COLORS[index % SERIES_COLORS.length],
+                  stroke: SERIES_COLORS[index % SERIES_COLORS.length],
+                }}
+                connectNulls
+              >
+                <LabelList dataKey={seriesKey} position="top" fill="#0f172a" fontSize={11} />
+              </Line>
+            ))}
           </LineChart>
         </div>
       </div>

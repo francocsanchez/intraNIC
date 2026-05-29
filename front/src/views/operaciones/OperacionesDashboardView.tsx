@@ -1,6 +1,10 @@
 import Loading from "@/components/Loading";
 import OperacionesBarChart from "@/components/operaciones/OperacionesBarChart";
-import type { OperacionesChartDimension } from "@/components/operaciones/OperacionesBarChart";
+import type {
+  OperacionesChartCompare,
+  OperacionesChartDimension,
+  OperacionesChartPoint,
+} from "@/components/operaciones/OperacionesBarChart";
 import OperacionesFilters from "@/components/operaciones/OperacionesFilters";
 import OperacionesResumenTable from "@/components/operaciones/OperacionesResumenTable";
 import { getOperacionesDashboard } from "@/services/operacionesService";
@@ -10,27 +14,29 @@ import { BarChart3, Filter, Inbox } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+const MONTH_LABELS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+
 export default function OperacionesDashboardView() {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-  const [anio, setAnio] = useState(currentYear);
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const [selectedAnios, setSelectedAnios] = useState<number[]>([currentYear]);
   const [selectedMeses, setSelectedMeses] = useState<number[]>([currentMonth]);
   const [chartDimension, setChartDimension] = useState<OperacionesChartDimension>("vendedor");
+  const [chartCompareBy, setChartCompareBy] = useState<OperacionesChartCompare>("none");
   const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
   const [selectedModelos, setSelectedModelos] = useState<string[]>([]);
   const [selectedDias, setSelectedDias] = useState<number[]>([]);
 
   const anios = useMemo(
-    () => Array.from({ length: 6 }, (_, index) => currentYear - index),
+    () => Array.from({ length: 6 }, (_, index) => currentYear - 5 + index),
     [currentYear],
   );
 
   const { data, isLoading, isError, error } = useQuery<OperacionesDashboardResponse>({
-    queryKey: ["operaciones-dashboard", anio, selectedMeses, selectedSucursales, selectedModelos, selectedDias],
+    queryKey: ["operaciones-dashboard", selectedAnios, selectedMeses, selectedSucursales, selectedModelos, selectedDias],
     queryFn: () =>
       getOperacionesDashboard({
-        anio,
+        anios: selectedAnios,
         meses: selectedMeses,
         sucursales: selectedSucursales,
         modelos: selectedModelos,
@@ -46,6 +52,12 @@ export default function OperacionesDashboardView() {
   }, [error]);
 
   useEffect(() => {
+    if (chartCompareBy === "anio" && !["mes", "dia"].includes(chartDimension)) {
+      setChartDimension("mes");
+    }
+  }, [chartCompareBy, chartDimension]);
+
+  useEffect(() => {
     if (!data) return;
 
     const validSucursales = new Set(data.filtros.sucursales.map((item) => item.value));
@@ -57,77 +69,81 @@ export default function OperacionesDashboardView() {
     setSelectedDias((current) => current.filter((item) => validDias.has(item)));
   }, [data]);
 
-  const chartData = useMemo(() => {
-    const monthLabels = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+  const chartState = useMemo(() => {
     const operaciones = data?.operaciones ?? [];
-    const grouped = new Map<string, number>();
-    const monthOrder = new Map<number, string>();
-    const dayOrder = new Map<number, string>();
+    const comparisonEnabled = chartCompareBy === "anio" && selectedAnios.length > 1;
+    const grouped = new Map<string, Record<string, number>>();
+    const labelOrder = new Map<string, number>();
 
-    const pushValue = (key: string) => {
-      grouped.set(key, (grouped.get(key) ?? 0) + 1);
-    };
-
-    operaciones.forEach((item: OperacionDashboard) => {
+    const getDimensionValue = (item: OperacionDashboard) => {
       const fecha = new Date(item.fechaAsignacion);
 
       if (chartDimension === "mes") {
         const month = fecha.getMonth() + 1;
-        const label = monthLabels[month - 1] ?? String(month);
-        monthOrder.set(month, label);
-        pushValue(label);
-        return;
+        return {
+          label: MONTH_LABELS[month - 1] ?? String(month),
+          order: month,
+        };
       }
 
       if (chartDimension === "dia") {
         const day = fecha.getDate();
-        const label = String(day).padStart(2, "0");
-        dayOrder.set(day, label);
-        pushValue(label);
-        return;
+        return {
+          label: String(day).padStart(2, "0"),
+          order: day,
+        };
       }
 
       if (chartDimension === "modelo") {
-        pushValue(item.modeloNombre);
-        return;
+        return { label: item.modeloNombre, order: 0 };
       }
 
       if (chartDimension === "sucursal") {
-        pushValue(item.sucursalNombre);
-        return;
+        return { label: item.sucursalNombre, order: 0 };
       }
 
-      pushValue(item.vendedorNombre);
+      return { label: item.vendedorNombre, order: 0 };
+    };
+
+    operaciones.forEach((item) => {
+      const { label, order } = getDimensionValue(item);
+      const yearKey = String(new Date(item.fechaAsignacion).getFullYear());
+
+      if (!grouped.has(label)) {
+        grouped.set(label, {});
+      }
+
+      if (chartDimension === "mes" || chartDimension === "dia") {
+        labelOrder.set(label, order);
+      }
+
+      const bucket = grouped.get(label)!;
+      const key = comparisonEnabled ? yearKey : "total";
+      bucket[key] = (bucket[key] ?? 0) + 1;
     });
 
-    if (chartDimension === "mes") {
-      return Array.from(monthOrder.entries())
-        .map(([month, label]) => ({
-          order: month,
-          label,
-          total: grouped.get(label) ?? 0,
-        }))
-        .filter((item) => item.total > 0)
-        .sort((a, b) => a.order - b.order)
-        .map(({ label, total }) => ({ label, total }));
+    let points: OperacionesChartPoint[] = Array.from(grouped.entries()).map(([label, values]) => ({
+      label,
+      ...values,
+    }));
+
+    if (chartDimension === "mes" || chartDimension === "dia") {
+      points = points.sort((a, b) => (labelOrder.get(String(a.label)) ?? 0) - (labelOrder.get(String(b.label)) ?? 0));
+    } else {
+      const getTotal = (item: OperacionesChartPoint) =>
+        Object.entries(item)
+          .filter(([key]) => key !== "label")
+          .reduce((acc, [, value]) => acc + Number(value ?? 0), 0);
+
+      points = points.sort((a, b) => getTotal(b) - getTotal(a) || String(a.label).localeCompare(String(b.label)));
     }
 
-    if (chartDimension === "dia") {
-      return Array.from(dayOrder.entries())
-        .map(([day, label]) => ({
-          order: day,
-          label,
-          total: grouped.get(label) ?? 0,
-        }))
-        .filter((item) => item.total > 0)
-        .sort((a, b) => a.order - b.order)
-        .map(({ label, total }) => ({ label, total }));
-    }
-
-    return Array.from(grouped.entries())
-      .map(([label, total]) => ({ label, total }))
-      .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
-  }, [chartDimension, data]);
+    return {
+      data: points,
+      seriesKeys: comparisonEnabled ? selectedAnios.map(String) : ["total"],
+      comparisonEnabled,
+    };
+  }, [chartCompareBy, chartDimension, data, selectedAnios]);
 
   if (isLoading) return <Loading />;
 
@@ -156,7 +172,7 @@ export default function OperacionesDashboardView() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#128c80]">Modulo operativo</p>
             <h1 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Dashboard de operaciones</h1>
             <p className="mt-1 max-w-3xl text-xs text-gray-600">
-              Supervisa asignaciones por vendedor, cruza sucursales, modelos y dias, y detecta rapidamente donde se concentra la actividad.
+              Supervisa asignaciones por vendedor, cruza sucursales, modelos, dias y anios para detectar tendencias visuales.
             </p>
           </div>
 
@@ -180,7 +196,7 @@ export default function OperacionesDashboardView() {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Puntos</p>
-                  <p className="text-lg font-bold text-gray-900">{chartData.length}</p>
+                  <p className="text-lg font-bold text-gray-900">{chartState.data.length}</p>
                 </div>
               </div>
             </article>
@@ -191,8 +207,8 @@ export default function OperacionesDashboardView() {
                   <Inbox size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Modelos</p>
-                  <p className="text-lg font-bold text-gray-900">{modelosTabla.length}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Series</p>
+                  <p className="text-lg font-bold text-gray-900">{chartState.seriesKeys.length}</p>
                 </div>
               </div>
             </article>
@@ -201,8 +217,8 @@ export default function OperacionesDashboardView() {
       </section>
 
       <OperacionesFilters
-        anio={anio}
         anios={anios}
+        selectedAnios={selectedAnios}
         selectedMeses={selectedMeses}
         sucursales={data.filtros.sucursales}
         modelos={data.filtros.modelos}
@@ -210,7 +226,7 @@ export default function OperacionesDashboardView() {
         selectedSucursales={selectedSucursales}
         selectedModelos={selectedModelos}
         selectedDias={selectedDias}
-        onAnioChange={setAnio}
+        onAniosChange={setSelectedAnios}
         onMesesChange={setSelectedMeses}
         onSucursalesChange={setSelectedSucursales}
         onModelosChange={setSelectedModelos}
@@ -224,15 +240,18 @@ export default function OperacionesDashboardView() {
           </div>
           <h2 className="mt-3 text-lg font-semibold text-gray-900">No hay operaciones para mostrar</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Proba cambiar el ano o quitar algunos filtros para ampliar el resultado.
+            Proba cambiar los anios o quitar algunos filtros para ampliar el resultado.
           </p>
         </section>
       ) : (
         <>
           <OperacionesBarChart
-            data={chartData}
+            data={chartState.data}
             dimension={chartDimension}
+            compareBy={chartCompareBy}
+            seriesKeys={chartState.seriesKeys}
             onDimensionChange={setChartDimension}
+            onCompareByChange={setChartCompareBy}
           />
           <OperacionesResumenTable data={data.tabla} modelos={modelosTabla} />
         </>

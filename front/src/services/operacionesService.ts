@@ -6,7 +6,7 @@ import {
 import { isAxiosError } from "axios";
 
 type OperacionesDashboardParams = {
-  anio: number;
+  anios: number[];
   meses?: number[];
   sucursales?: string[];
   modelos?: string[];
@@ -27,7 +27,7 @@ export async function getOperacionesDashboard(
   try {
     const { data } = await api.get("/operaciones/dashboard", {
       params: {
-        anio: params.anio,
+        anios: params.anios.join(","),
         meses: params.meses?.length ? params.meses.join(",") : undefined,
         sucursales: params.sucursales?.length ? params.sucursales.join(",") : undefined,
         modelos: params.modelos?.length ? params.modelos.join(",") : undefined,
