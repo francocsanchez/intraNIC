@@ -284,14 +284,40 @@ export class RegistroAsignacionController {
       const page = Math.max(Number(req.query.page) || 1, 1);
       const limit = Math.min(Math.max(Number(req.query.limit) || 30, 1), 100);
       const skip = (page - 1) * limit;
+      const filtroTipo = req.query.tipo;
+      const filtroModelo = req.query.modelo;
+      const filtroMes = Number(req.query.mes);
+      const filtroAno = Number(req.query.ano);
+
+      const query: Record<string, unknown> = {};
+
+      if (isValidTipo(filtroTipo)) {
+        query.tipo = filtroTipo;
+      }
+
+      if (typeof filtroModelo === "string" && filtroModelo.trim().length) {
+        query.modelo = filtroModelo.trim();
+      }
+
+      if (
+        Number.isInteger(filtroMes) &&
+        filtroMes >= 1 &&
+        filtroMes <= 12 &&
+        Number.isInteger(filtroAno) &&
+        filtroAno >= 2020
+      ) {
+        query.fecha = {
+          $regex: `^${filtroAno}-${String(filtroMes).padStart(2, "0")}`,
+        };
+      }
 
       const [data, total] = await Promise.all([
-        RegistroAsignacion.find()
+        RegistroAsignacion.find(query)
           .sort({ fecha: -1, createdAt: -1 })
           .skip(skip)
           .limit(limit)
           .lean(),
-        RegistroAsignacion.countDocuments(),
+        RegistroAsignacion.countDocuments(query),
       ]);
 
       return res.status(200).json({

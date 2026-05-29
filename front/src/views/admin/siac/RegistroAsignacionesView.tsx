@@ -13,14 +13,15 @@ import type {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightLeft,
+  Filter,
   List,
   Pencil,
   Save,
   Search,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 30;
@@ -40,6 +41,7 @@ function formatDate(dateString: string) {
 
 export default function RegistroAsignacionesView() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState<number>(1);
   const [fecha, setFecha] = useState<string>(getToday());
   const [operacionInput, setOperacionInput] = useState<string>("");
@@ -49,11 +51,42 @@ export default function RegistroAsignacionesView() {
     useState<RegistroAsignacionInfoOperacion | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const tipoFiltroRaw = searchParams.get("tipo");
+  const tipoFiltro: "Asignado" | "Desasignado" | undefined =
+    tipoFiltroRaw === "Asignado" || tipoFiltroRaw === "Desasignado"
+      ? tipoFiltroRaw
+      : undefined;
+  const modeloFiltro = searchParams.get("modelo")?.trim() || undefined;
+  const mesFiltroValue = Number(searchParams.get("mes"));
+  const mesFiltro =
+    Number.isInteger(mesFiltroValue) && mesFiltroValue >= 1 && mesFiltroValue <= 12
+      ? mesFiltroValue
+      : undefined;
+  const anoFiltroValue = Number(searchParams.get("ano"));
+  const anoFiltro =
+    Number.isInteger(anoFiltroValue) && anoFiltroValue >= 2020
+      ? anoFiltroValue
+      : undefined;
+
+  const filtrosActivos = useMemo(
+    () => ({
+      tipo: tipoFiltro,
+      modelo: modeloFiltro,
+      mes: mesFiltro,
+      ano: anoFiltro,
+    }),
+    [anoFiltro, mesFiltro, modeloFiltro, tipoFiltro],
+  );
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["registro-asignaciones", page],
-    queryFn: () => getRegistrosAsignaciones(page, PAGE_SIZE),
+    queryKey: ["registro-asignaciones", page, filtrosActivos],
+    queryFn: () => getRegistrosAsignaciones(page, PAGE_SIZE, filtrosActivos),
     refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [filtrosActivos]);
 
   const registros = data?.data ?? [];
   const pagination = data?.pagination;
@@ -207,6 +240,14 @@ export default function RegistroAsignacionesView() {
   }
 
   const totalPages = pagination?.totalPages ?? 1;
+  const nombreMesFiltro =
+    mesFiltro && anoFiltro
+      ? new Date(anoFiltro, mesFiltro - 1, 1).toLocaleDateString("es-AR", {
+          month: "long",
+          year: "numeric",
+        })
+      : null;
+  const hayFiltrosActivos = Boolean(tipoFiltro || modeloFiltro || nombreMesFiltro);
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -427,10 +468,45 @@ export default function RegistroAsignacionesView() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
-            {pagination?.total ?? 0} registros
+          <div className="flex flex-wrap items-center gap-3">
+            {hayFiltrosActivos ? (
+              <button
+                type="button"
+                onClick={() => setSearchParams({})}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                <Filter size={15} strokeWidth={1.75} />
+                Limpiar filtros
+              </button>
+            ) : null}
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+              {pagination?.total ?? 0} registros
+            </div>
           </div>
         </div>
+
+        {hayFiltrosActivos ? (
+          <div className="flex flex-wrap gap-2 border-b border-gray-200 px-6 py-4">
+            {tipoFiltro ? (
+              <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                Tipo: {tipoFiltro}
+              </span>
+            ) : null}
+
+            {modeloFiltro ? (
+              <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-sm font-medium text-sky-700">
+                Modelo: {modeloFiltro}
+              </span>
+            ) : null}
+
+            {nombreMesFiltro ? (
+              <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium capitalize text-amber-700">
+                Periodo: {nombreMesFiltro}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="overflow-x-auto">
           <table className="min-w-[1460px] w-full text-sm">
@@ -506,7 +582,9 @@ export default function RegistroAsignacionesView() {
               {!registros.length ? (
                 <tr>
                   <td colSpan={12} className="px-6 py-12 text-center text-sm text-gray-500">
-                    Todavia no hay registros de asignaciones cargados.
+                    {hayFiltrosActivos
+                      ? "No hay registros para los filtros seleccionados."
+                      : "Todavia no hay registros de asignaciones cargados."}
                   </td>
                 </tr>
               ) : null}
