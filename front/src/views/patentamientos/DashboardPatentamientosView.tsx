@@ -149,6 +149,15 @@ export default function DashboardPatentamientosView() {
           <p className="mt-2 text-sm text-gray-500">
             Todavia no hay anos disponibles para analizar. Importa al menos un dataset de patentamientos para habilitar el dashboard.
           </p>
+          <div className="mt-5">
+            <Link
+              to="/patentamientos/importar"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              <FileSpreadsheet size={16} />
+              Cargar archivos
+            </Link>
+          </div>
         </section>
       </div>
     );
