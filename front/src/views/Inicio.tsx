@@ -195,14 +195,14 @@ export default function Inicio() {
           )}
 
           {hasPatentamientos ? (
-            <Link to="/patentamientos" className={`${baseCard} hover:shadow-md transition group`}>
+            <Link to="/patentamientos/dashboard/marcas" className={`${baseCard} hover:shadow-md transition group`}>
               <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
                 <Upload size={26} strokeWidth={1.5} className="text-gray-900" />
               </div>
 
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Patentamientos</h2>
 
-              <p className="text-sm text-gray-500 mt-1">Carga individual de archivos Excel de patentamientos</p>
+              <p className="text-sm text-gray-500 mt-1">Informe y comparativas visuales de patentamientos</p>
             </Link>
           ) : (
             <div className={disabledCard}>
@@ -212,7 +212,7 @@ export default function Inicio() {
 
               <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Patentamientos</h2>
 
-              <p className="text-sm text-gray-500 mt-1">Carga individual de archivos Excel de patentamientos</p>
+              <p className="text-sm text-gray-500 mt-1">Informe y comparativas visuales de patentamientos</p>
             </div>
           )}
           </div>

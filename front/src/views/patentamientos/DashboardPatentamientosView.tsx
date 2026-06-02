@@ -14,66 +14,96 @@ import {
   getPatentamientosToyotaEvolution,
 } from "@/services/patentamientosDashboardService";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { BarChart3, LineChart, Table2 } from "lucide-react";
+import { BarChart3, FileSpreadsheet, LineChart, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
+const dashboardSections = ["marcas", "pickup", "suv", "b-suv"] as const;
+type DashboardSection = (typeof dashboardSections)[number];
+
+const sectionContent = {
+  marcas: {
+    heading: "Top 10 Marcas Patentadas",
+    icon: Table2,
+  },
+  pickup: {
+    heading: "Comparativa Segmento Pickup",
+    icon: BarChart3,
+  },
+  suv: {
+    heading: "Comparativa Segmento SUV",
+    icon: BarChart3,
+  },
+  "b-suv": {
+    heading: "Comparativa Segmento B-SUV",
+    icon: BarChart3,
+  },
+} satisfies Record<DashboardSection, { heading: string; icon: typeof Table2 }>;
+
 export default function DashboardPatentamientosView() {
+  const { section } = useParams<{ section: string }>();
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
+
+  const isValidSection = dashboardSections.includes((section ?? "") as DashboardSection);
+  const activeSection: DashboardSection = isValidSection ? (section as DashboardSection) : "marcas";
 
   const yearsQuery = useQuery({
     queryKey: ["patentamientos-dashboard", "years"],
     queryFn: getPatentamientosAvailableYears,
   });
   const selectedYear = userSelectedYear ?? yearsQuery.data?.selectedYear ?? null;
+  const isMarcasSection = activeSection === "marcas";
+  const isPickupSection = activeSection === "pickup";
+  const isSuvSection = activeSection === "suv";
+  const isBSuvSection = activeSection === "b-suv";
 
   const results = useQueries({
     queries: [
       {
         queryKey: ["patentamientos-dashboard", "top-marcas-pais", selectedYear],
         queryFn: () => getPatentamientosTopMarcasPais(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isMarcasSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "top-marcas-zona-nic", selectedYear],
         queryFn: () => getPatentamientosTopMarcasZonaNic(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isMarcasSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "pickup-pais", selectedYear],
         queryFn: () => getPatentamientosSegmentoPickupPais(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isPickupSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "pickup-zona-nic", selectedYear],
         queryFn: () => getPatentamientosSegmentoPickupZonaNic(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isPickupSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "suv-pais", selectedYear],
         queryFn: () => getPatentamientosSegmentoSuvPais(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isSuvSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "suv-zona-nic", selectedYear],
         queryFn: () => getPatentamientosSegmentoSuvZonaNic(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isSuvSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "b-suv-pais", selectedYear],
         queryFn: () => getPatentamientosSegmentoBSuvPais(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isBSuvSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "b-suv-zona-nic", selectedYear],
         queryFn: () => getPatentamientosSegmentoBSuvZonaNic(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isBSuvSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "toyota-evolucion", selectedYear],
         queryFn: () => getPatentamientosToyotaEvolution(selectedYear!),
-        enabled: selectedYear !== null,
+        enabled: selectedYear !== null && isMarcasSection,
       },
     ],
   });
@@ -94,11 +124,15 @@ export default function DashboardPatentamientosView() {
     }
   }, [firstError]);
 
+  if (!isValidSection) {
+    return <Navigate to="/patentamientos/dashboard/marcas" replace />;
+  }
+
   if (isLoading) return <Loading />;
 
   if (firstError instanceof Error) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 py-6">
+      <div className="w-full px-1 py-1">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Dashboard Patentamientos</h1>
           <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
@@ -109,7 +143,7 @@ export default function DashboardPatentamientosView() {
 
   if (yearsQuery.isSuccess && !hasAvailableYears) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 py-6">
+      <div className="w-full px-1 py-1">
         <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
           <p className="mt-2 text-sm text-gray-500">
@@ -121,16 +155,26 @@ export default function DashboardPatentamientosView() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="w-full space-y-6 px-1 py-1">
+      <section className="px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Analisis visual</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
             <p className="mt-1 max-w-3xl text-sm text-gray-500">
               Vista descriptiva enfocada en ranking de marcas, comparativas de segmentos y evolucion mensual de Toyota.
             </p>
-            <div className="mt-4 flex items-center gap-3">
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              to="/patentamientos/importar"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              <FileSpreadsheet size={16} />
+              Actualizar base
+            </Link>
+
+            <div className="flex items-center gap-3">
               <label htmlFor="patentamientos-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
                 Ano
               </label>
@@ -148,59 +192,56 @@ export default function DashboardPatentamientosView() {
               </select>
             </div>
           </div>
-
-          <Link
-            to="/patentamientos"
-            className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-100"
-          >
-            Volver a importaciones
-          </Link>
         </div>
       </section>
 
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <Table2 size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Top 10 Marcas Patentadas</h2>
+          {(() => {
+            const SectionIcon = sectionContent[activeSection].icon;
+            return <SectionIcon size={18} className="text-[#128c80]" />;
+          })()}
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900">{sectionContent[activeSection].heading}</h2>
         </div>
-        {topPais.data ? <PatentamientosComparisonTable data={topPais.data} /> : null}
-        {topZonaNic.data ? <PatentamientosComparisonTable data={topZonaNic.data} /> : null}
+
+        {isMarcasSection ? (
+          <>
+            {topPais.data ? <PatentamientosComparisonTable data={topPais.data} /> : null}
+            {topZonaNic.data ? <PatentamientosComparisonTable data={topZonaNic.data} /> : null}
+          </>
+        ) : null}
+
+        {isPickupSection ? (
+          <>
+            {pickupPais.data ? <PatentamientosComparisonTable data={pickupPais.data} /> : null}
+            {pickupZonaNic.data ? <PatentamientosComparisonTable data={pickupZonaNic.data} /> : null}
+          </>
+        ) : null}
+
+        {isSuvSection ? (
+          <>
+            {suvPais.data ? <PatentamientosComparisonTable data={suvPais.data} /> : null}
+            {suvZonaNic.data ? <PatentamientosComparisonTable data={suvZonaNic.data} /> : null}
+          </>
+        ) : null}
+
+        {isBSuvSection ? (
+          <>
+            {bSuvPais.data ? <PatentamientosComparisonTable data={bSuvPais.data} /> : null}
+            {bSuvZonaNic.data ? <PatentamientosComparisonTable data={bSuvZonaNic.data} /> : null}
+          </>
+        ) : null}
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <BarChart3 size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Comparativa Segmento Pickup</h2>
-        </div>
-        {pickupPais.data ? <PatentamientosComparisonTable data={pickupPais.data} /> : null}
-        {pickupZonaNic.data ? <PatentamientosComparisonTable data={pickupZonaNic.data} /> : null}
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <BarChart3 size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Comparativa Segmento SUV</h2>
-        </div>
-        {suvPais.data ? <PatentamientosComparisonTable data={suvPais.data} /> : null}
-        {suvZonaNic.data ? <PatentamientosComparisonTable data={suvZonaNic.data} /> : null}
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <BarChart3 size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Comparativa Segmento B-SUV</h2>
-        </div>
-        {bSuvPais.data ? <PatentamientosComparisonTable data={bSuvPais.data} /> : null}
-        {bSuvZonaNic.data ? <PatentamientosComparisonTable data={bSuvZonaNic.data} /> : null}
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <LineChart size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Evolucion Toyota PAIS vs Zona NIC</h2>
-        </div>
-        {toyotaEvolution.data ? <PatentamientosToyotaEvolutionChart data={toyotaEvolution.data} /> : null}
-      </section>
+      {isMarcasSection ? (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <LineChart size={18} className="text-[#128c80]" />
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Evolucion Toyota PAIS vs Zona NIC</h2>
+          </div>
+          {toyotaEvolution.data ? <PatentamientosToyotaEvolutionChart data={toyotaEvolution.data} /> : null}
+        </section>
+      ) : null}
     </div>
   );
 }

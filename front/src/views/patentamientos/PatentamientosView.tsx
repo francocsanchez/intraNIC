@@ -79,15 +79,17 @@ export default function PatentamientosView() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-1 py-1">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Importacion</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">Patentamientos</h1>
-        <p className="mt-1 max-w-3xl text-sm text-gray-500">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">Actualizar Base de Patentamientos</h1>
+            <p className="mt-1 max-w-3xl text-sm text-gray-500">
           Desde esta pantalla puedes importar de forma individual los archivos Excel de patentamientos sin guardar el
           archivo original en el servidor.
-        </p>
-        <div className="mt-4">
+            </p>
+          </div>
           <Link
             to="/patentamientos/dashboard"
             className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-100"

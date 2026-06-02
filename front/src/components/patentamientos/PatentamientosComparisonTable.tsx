@@ -17,6 +17,16 @@ const formatPercentage = (value: number) =>
     maximumFractionDigits: 2,
   })}%`;
 
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+
+const isToyotaRow = (label: string) => normalizeText(label).startsWith("TOYOTA");
+
 const getHeatmapStyle = (value: number, min: number, max: number) => {
   if (max <= min) {
     return {
@@ -77,17 +87,34 @@ export default function PatentamientosComparisonTable({
               <>
                 {data.rows.map((row, index) => (
                   <tr key={`${data.title}-${row.label}`} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
-                    <td className="border border-gray-200 px-2 py-1.5 text-left font-medium text-gray-900">{row.label}</td>
+                    <td
+                      className={`border border-gray-200 px-2 py-1.5 text-left font-medium text-gray-900 ${
+                        isToyotaRow(row.label) ? "bg-red-100" : ""
+                      }`}
+                    >
+                      {row.label}
+                    </td>
                     {data.months.map((month) => (
-                      <td key={`${row.label}-${month.key}`} className="border border-gray-200 px-2 py-1.5 text-center text-gray-700">
+                      <td
+                        key={`${row.label}-${month.key}`}
+                        className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
+                          isToyotaRow(row.label) ? "bg-red-100" : ""
+                        }`}
+                      >
                         {formatInteger(row.months[month.key] ?? 0)}
                       </td>
                     ))}
-                    <td className="border border-gray-200 px-2 py-1.5 text-center font-bold text-gray-900">
+                    <td
+                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-gray-900 ${
+                        isToyotaRow(row.label) ? "bg-red-100" : ""
+                      }`}
+                    >
                       {formatInteger(row.total)}
                     </td>
                     <td
-                      className="border border-gray-200 px-2 py-1.5 text-center font-bold"
+                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold ${
+                        isToyotaRow(row.label) ? "border-red-300" : ""
+                      }`}
                       style={getHeatmapStyle(row.percentage, minPercentage, maxPercentage)}
                     >
                       {formatPercentage(row.percentage)}

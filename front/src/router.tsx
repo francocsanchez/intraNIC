@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 import NICLayout from "./layouts/NICLayout";
 import LiessLayout from "./layouts/LiessLayout";
 import ReventasLayout from "./layouts/ReventasLayout";
 import AdminModuleLayout from "./layouts/AdminModuleLayout";
+import PatentamientosLayout from "./layouts/PatentamientosLayout";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
@@ -155,8 +156,15 @@ export default function Router() {
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path="/operaciones" element={<OperacionesDashboardView />} />
-              <Route path="/patentamientos" element={<PatentamientosView />} />
-              <Route path="/patentamientos/dashboard" element={<DashboardPatentamientosView />} />
+            </Route>
+          </Route>
+
+          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
+            <Route element={<PatentamientosLayout />}>
+              <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
+              <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
+              <Route path="/patentamientos/dashboard/:section" element={<DashboardPatentamientosView />} />
+              <Route path="/patentamientos/importar" element={<PatentamientosView />} />
             </Route>
           </Route>
 
