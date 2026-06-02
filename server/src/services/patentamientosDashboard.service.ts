@@ -223,20 +223,29 @@ const buildTotalRow = (rows: DashboardTableRow[], months: DashboardMonthColumn[]
   };
 };
 
+const getRowTotalForMonths = (
+  row: PatentamientoRowNormalized,
+  months: DashboardMonthColumn[],
+) => months.reduce((sum, month) => sum + (row.months[month.key] ?? 0), 0);
+
 const buildTableRows = (
   rows: PatentamientoRowNormalized[],
   months: DashboardMonthColumn[],
 ): DashboardTableRow[] => {
-  const totalBase = rows.reduce((acc, row) => acc + row.total, 0);
+  const rowsWithYearTotal = rows.map((row) => ({
+    ...row,
+    yearTotal: getRowTotalForMonths(row, months),
+  }));
+  const totalBase = rowsWithYearTotal.reduce((acc, row) => acc + row.yearTotal, 0);
 
-  return rows.map((row) => ({
+  return rowsWithYearTotal.map((row) => ({
     label: row.primaryValue,
     months: months.reduce<Record<string, number>>((acc, month) => {
       acc[month.key] = row.months[month.key] ?? 0;
       return acc;
     }, {}),
-    total: row.total,
-    percentage: totalBase > 0 ? roundPercentage((row.total / totalBase) * 100) : 0,
+    total: row.yearTotal,
+    percentage: totalBase > 0 ? roundPercentage((row.yearTotal / totalBase) * 100) : 0,
   }));
 };
 
@@ -274,7 +283,11 @@ const getTopRows = async (
   }
 
   const rows = normalizeRows(dataset)
-    .sort((a, b) => b.total - a.total || a.primaryValue.localeCompare(b.primaryValue))
+    .sort(
+      (a, b) =>
+        getRowTotalForMonths(b, months) - getRowTotalForMonths(a, months) ||
+        a.primaryValue.localeCompare(b.primaryValue),
+    )
     .slice(0, 10);
 
   const tableRows = buildTableRows(rows, months);
@@ -305,7 +318,11 @@ const getSegmentRows = async (
   const allowedModels = new Set(models.map(normalizeText));
   const rows = normalizeRows(dataset)
     .filter((row) => allowedModels.has(normalizeText(row.primaryValue)))
-    .sort((a, b) => b.total - a.total || a.primaryValue.localeCompare(b.primaryValue));
+    .sort(
+      (a, b) =>
+        getRowTotalForMonths(b, months) - getRowTotalForMonths(a, months) ||
+        a.primaryValue.localeCompare(b.primaryValue),
+    );
 
   const tableRows = buildTableRows(rows, months);
 

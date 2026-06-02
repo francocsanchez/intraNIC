@@ -206,6 +206,62 @@ const getMonthNumberFromKey = (monthKey: string) => {
   return index === -1 ? null : index + 1;
 };
 
+const parseHeaderYear = (header: string) => {
+  const trimmedHeader = String(header).trim();
+  const shortMatch = trimmedHeader.match(/^(\d{1,2})[\/\-](\d{2,4})$/);
+
+  if (shortMatch) {
+    const rawYear = Number(shortMatch[2]);
+
+    if (Number.isInteger(rawYear)) {
+      if (rawYear >= 1000) {
+        return rawYear;
+      }
+
+      if (rawYear >= 0 && rawYear <= 99) {
+        return 2000 + rawYear;
+      }
+    }
+  }
+
+  const match = trimmedHeader.match(/^(\d{1,2})[\/\-](\d{1,4})[\/\-](\d{1,4})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const middleSegment = Number(match[2]);
+  const lastSegment = Number(match[3]);
+
+  if (middleSegment > 12 && middleSegment <= 99 && lastSegment === 1) {
+    return 2000 + middleSegment + 1;
+  }
+
+  if (!Number.isInteger(middleSegment)) {
+    return null;
+  }
+
+  if (middleSegment >= 1000) {
+    return middleSegment;
+  }
+
+  if (middleSegment >= 0 && middleSegment <= 99) {
+    return 2000 + middleSegment;
+  }
+
+  return null;
+};
+
+const buildMonthStorageKey = (header: string, monthNumber: number) => {
+  const year = parseHeaderYear(header);
+
+  if (!year) {
+    return null;
+  }
+
+  return `${year}-${String(monthNumber).padStart(2, "0")}`;
+};
+
 const buildColumnMap = (
   headerRow: unknown[],
   requiredHeaders: string[],
@@ -235,9 +291,10 @@ const buildColumnMap = (
 
     if (monthKey) {
       const monthNumber = getMonthNumberFromKey(monthKey);
+      const storageKey = monthNumber ? buildMonthStorageKey(header, monthNumber) : null;
 
-      if (monthNumber) {
-        acc.push({ index, key: monthKey, label: header, monthNumber });
+      if (monthNumber && storageKey) {
+        acc.push({ index, key: storageKey, label: header, monthNumber });
       }
     }
 

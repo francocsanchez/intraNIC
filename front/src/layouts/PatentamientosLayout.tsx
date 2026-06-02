@@ -1,6 +1,6 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileSpreadsheet } from "lucide-react";
 import { Link, NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 const dashboardSections = [
@@ -36,6 +36,16 @@ export default function PatentamientosLayout() {
               <ChevronLeft size={16} />
               Volver al inicio
             </Link>
+
+            {!isImportView ? (
+              <Link
+                to="/patentamientos/importar"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              >
+                <FileSpreadsheet size={16} />
+                Cargar archivos
+              </Link>
+            ) : null}
           </div>
 
           {!isImportView ? (
