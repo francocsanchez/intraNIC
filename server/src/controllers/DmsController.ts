@@ -1,23 +1,12 @@
 import { Response, Request } from "express";
 import { sequelizeLIESS, sequelizeNIC } from "../config/database";
-import { getAsignacionRecepcion, getControlUnidades, getFacturaReventasNic, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
+import { getAsignacionRecepcion, getFacturaReventasNic, getStockConsolidadoNic, getVendedoresActivosNic, getVendedoresNic } from "./querys/dms.query";
 import { QueryTypes } from "sequelize";
 import { logError } from "../utils/logError";
 import { getReporteAsignacionRecepcion } from "../utils/reporteAsignacionRecepcion";
 import { buildResumenLiessMarca, buildResumenStockConsolidado } from "../utils/reportStockConsolidado";
 import { getStockConsolidadoLiess } from "./querys/liess.query";
 import { buildResumenFacturasReventas } from "../utils/reportFacturaRevetnas";
-import { buildReporteTrackingOperaciones, TrackingOperacionRow } from "../utils/reportTrackingOperaciones";
-
-const parsePositiveInt = (value: unknown) => {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
-
-const parseMonth = (value: unknown) => {
-  const parsed = parsePositiveInt(value);
-  return parsed && parsed <= 12 ? parsed : null;
-};
 
 const parseTwoDigitYear = (value: unknown) => {
   const text = String(value ?? "").trim();
@@ -146,30 +135,4 @@ export class DmsController {
     }
   };
 
-  static getTrackingOperaciones = async (req: Request, res: Response) => {
-    const { mes, ano, anio } = req.params;
-    const mesNumber = parseMonth(mes);
-    const anoNumber = parsePositiveInt(ano ?? anio);
-
-    if (!mesNumber || !anoNumber) {
-      return res.status(400).json({ message: "Periodo no valido" });
-    }
-
-    try {
-      const query = getControlUnidades();
-
-      const data = await sequelizeNIC.query<TrackingOperacionRow>(query, {
-        type: QueryTypes.SELECT,
-        replacements: { ano: anoNumber, anoSiguiente: anoNumber + 1 },
-      });
-
-      const resumen = buildReporteTrackingOperaciones(data, mesNumber, anoNumber);
-
-      return res.status(200).json({ resumen });
-    } catch (error) {
-      logError("DmsController.getTrackingOperaciones");
-      console.error(error);
-      return res.status(500).json({ message: "Error del servidor SIAC" });
-    }
-  };
 }
