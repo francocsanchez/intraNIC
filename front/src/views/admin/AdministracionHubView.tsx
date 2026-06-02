@@ -1,6 +1,6 @@
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { ClipboardList, FileWarning, Gauge, ReceiptText } from "lucide-react";
+import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const cardClass =
@@ -18,9 +18,6 @@ export default function AdministracionHubView() {
     hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
   const canViewFacturasAnticipo =
     hasAnyRole(user, ["administracion"]);
-  const canViewTracking =
-    canViewAdminModule;
-
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -82,24 +79,6 @@ export default function AdministracionHubView() {
               <FileWarning size={24} strokeWidth={1.5} />
             </div>
             <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Facturas de anticipo</h2>
-            <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
-          </div>
-        )}
-
-        {canViewTracking ? (
-          <Link to="/trazabilidad-operativa" className={cardClass}>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
-              <Gauge size={24} strokeWidth={1.5} />
-            </div>
-            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Trazabilidad operativa</h2>
-            <p className="mt-1 text-sm text-gray-500">Seguimiento de entrega desde facturacion.</p>
-          </Link>
-        ) : (
-          <div className={disabledCardClass}>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200 text-gray-600">
-              <Gauge size={24} strokeWidth={1.5} />
-            </div>
-            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Trazabilidad operativa</h2>
             <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
           </div>
         )}

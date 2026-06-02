@@ -52,7 +52,6 @@ import PedidoUnidadesPreviasView from "./views/admin/siac/PedidoUnidadesPreviasV
 import FacturasAnticipoView from "./views/admin/siac/FacturasAnticipoView";
 import RegistroAsignacionesView from "./views/admin/siac/RegistroAsignacionesView";
 import RegistroAsignacionesResumenView from "./views/admin/siac/RegistroAsignacionesResumenView";
-import TrackingOperacionesView from "./views/admin/siac/TrackingOperacionesView";
 import PreventasView from "./views/admin/siac/PreventasView";
 import PreventasAsignadasView from "./views/admin/siac/PreventasAsignadasView";
 import PreventaFormView from "./views/admin/siac/PreventaFormView";
@@ -66,6 +65,8 @@ import ProformasView from "./views/admin/siac/ProformasView";
 import ProformaFormView from "./views/admin/siac/ProformaFormView";
 import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
 import OperacionesDashboardView from "./views/operaciones/OperacionesDashboardView";
+import PatentamientosView from "./views/patentamientos/PatentamientosView";
+import DashboardPatentamientosView from "./views/patentamientos/DashboardPatentamientosView";
 
 export default function Router() {
   return (
@@ -145,12 +146,6 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
-            <Route element={<AdminModuleLayout />}>
-              <Route path="/trazabilidad-operativa" element={<TrackingOperacionesView />} />
-            </Route>
-          </Route>
-
           <Route element={<AdminModuleLayout />}>
             <Route path="/proformas" element={<ProformasView />} />
             <Route path="/proformas/nueva" element={<ProformaFormView />} />
@@ -160,6 +155,8 @@ export default function Router() {
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path="/operaciones" element={<OperacionesDashboardView />} />
+              <Route path="/patentamientos" element={<PatentamientosView />} />
+              <Route path="/patentamientos/dashboard" element={<DashboardPatentamientosView />} />
             </Route>
           </Route>
 

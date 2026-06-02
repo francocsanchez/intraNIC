@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { BarChart3, ClipboardList, FileWarning, Gauge, Home, PowerOff, ReceiptText, Shield } from "lucide-react";
+import { BarChart3, ClipboardList, FileWarning, Home, PowerOff, ReceiptText, Shield, Upload } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -22,9 +22,9 @@ export default function AdminModuleLayout() {
   const canViewAdminHome = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   const canViewReventas = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   const canViewPedidoUnidades = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
-  const canViewTrazabilidad = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
   const canViewFacturasAnticipo = hasAnyRole(user, ["administracion"]);
   const canViewOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
+  const canViewPatentamientos = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -72,17 +72,17 @@ export default function AdminModuleLayout() {
               </Link>
             )}
 
-            {canViewTrazabilidad && (
-              <Link to="/trazabilidad-operativa" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
-                <Gauge size={15} strokeWidth={1.5} />
-                Trazabilidad
-              </Link>
-            )}
-
             {canViewOperaciones && (
               <Link to="/operaciones" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
                 <BarChart3 size={15} strokeWidth={1.5} />
                 Operaciones
+              </Link>
+            )}
+
+            {canViewPatentamientos && (
+              <Link to="/patentamientos" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+                <Upload size={15} strokeWidth={1.5} />
+                Patentamientos
               </Link>
             )}
           </nav>
