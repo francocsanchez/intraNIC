@@ -231,11 +231,6 @@ const parseHeaderYear = (header: string) => {
   }
 
   const middleSegment = Number(match[2]);
-  const lastSegment = Number(match[3]);
-
-  if (middleSegment > 12 && middleSegment <= 99 && lastSegment === 1) {
-    return 2000 + middleSegment + 1;
-  }
 
   if (!Number.isInteger(middleSegment)) {
     return null;
