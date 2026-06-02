@@ -101,7 +101,13 @@ const normalizeText = (value: string) =>
 
 const roundPercentage = (value: number) => Math.round(value * 100) / 100;
 
-const parseHeaderYear = (header: string) => {
+const parseHeaderYear = (header: string, storageKey?: string) => {
+  const keyMatch = String(storageKey ?? "").match(/^(\d{4})-(\d{2})$/);
+
+  if (keyMatch) {
+    return Number(keyMatch[1]);
+  }
+
   const shortMatch = header.trim().match(/^(\d{1,2})[\/\-](\d{2,4})$/);
 
   if (shortMatch) {
@@ -154,7 +160,7 @@ const parseHeaderYear = (header: string) => {
 const toDashboardMonth = (
   column: PatentamientoDatasetLean["monthColumns"][number],
 ): DashboardMonthColumn | null => {
-  const year = parseHeaderYear(column.header);
+  const year = parseHeaderYear(column.header, column.key);
 
   if (!year) {
     return null;
@@ -198,7 +204,7 @@ const normalizeRows = (dataset: PatentamientoDatasetLean): PatentamientoRowNorma
 
 const getYearsFromDataset = (dataset: PatentamientoDatasetLean | null) =>
   (dataset?.monthColumns ?? [])
-    .map((column) => parseHeaderYear(column.header))
+    .map((column) => parseHeaderYear(column.header, column.key))
     .filter((year): year is number => Boolean(year));
 
 const getFilteredMonths = (dataset: PatentamientoDatasetLean | null, year: number) =>
@@ -400,7 +406,7 @@ export class PatentamientosDashboardService {
       new Set(
         datasets.flatMap((dataset) =>
           dataset.monthColumns
-            .map((column) => parseHeaderYear(column.header))
+            .map((column) => parseHeaderYear(column.header, column.key))
             .filter((year): year is number => Boolean(year)),
         ),
       ),
