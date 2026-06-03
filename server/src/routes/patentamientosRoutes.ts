@@ -48,5 +48,6 @@ router.get("/dashboard/segmento-suv/zona-nic", PatentamientosDashboardController
 router.get("/dashboard/segmento-b-suv/pais", PatentamientosDashboardController.getSegmentoBSuvPais);
 router.get("/dashboard/segmento-b-suv/zona-nic", PatentamientosDashboardController.getSegmentoBSuvZonaNic);
 router.get("/dashboard/toyota-evolucion", PatentamientosDashboardController.getToyotaEvolution);
+router.get("/dashboard/marcas/evolucion-participacion-pais", PatentamientosDashboardController.getBrandParticipationEvolutionPais);
 
 export default router;

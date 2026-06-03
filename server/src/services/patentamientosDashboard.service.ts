@@ -52,6 +52,24 @@ type DashboardAvailableYearsResponse = {
   selectedYear: number | null;
 };
 
+type DashboardBrandParticipationValue = {
+  quantity: number;
+  percentage: number;
+};
+
+type DashboardBrandParticipationBrand = {
+  brand: string;
+  total: number;
+  values: Record<string, DashboardBrandParticipationValue>;
+};
+
+type DashboardBrandParticipationResponse = {
+  title: string;
+  description: string;
+  months: DashboardMonthColumn[];
+  brands: DashboardBrandParticipationBrand[];
+};
+
 const PICKUP_MODELS = [
   "TOYOTA HILUX",
   "FORD RANGER",
@@ -398,6 +416,59 @@ const getToyotaEvolution = async (year: number): Promise<DashboardEvolutionRespo
   };
 };
 
+const getBrandParticipationEvolutionPais = async (
+  year: number,
+): Promise<DashboardBrandParticipationResponse> => {
+  const dataset = await getDataset("pais-marcas");
+  const months = getFilteredMonths(dataset, year);
+  const title = "Evolucion mensual por participacion de marca - PAIS";
+  const description = "Comparacion porcentual mensual entre Toyota y las marcas seleccionadas sobre el total pais.";
+
+  if (!dataset || !months.length) {
+    return {
+      title,
+      description,
+      months: [],
+      brands: [],
+    };
+  }
+
+  const rows = normalizeRows(dataset);
+  const monthTotals = months.reduce<Record<string, number>>((acc, month) => {
+    acc[month.key] = rows.reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0);
+    return acc;
+  }, {});
+
+  const brands = rows
+    .map<DashboardBrandParticipationBrand>((row) => {
+      const values = months.reduce<Record<string, DashboardBrandParticipationValue>>((acc, month) => {
+        const quantity = row.months[month.key] ?? 0;
+        const totalMonth = monthTotals[month.key] ?? 0;
+
+        acc[month.key] = {
+          quantity,
+          percentage: totalMonth > 0 ? roundPercentage((quantity / totalMonth) * 100) : 0,
+        };
+
+        return acc;
+      }, {});
+
+      return {
+        brand: row.primaryValue,
+        total: getRowTotalForMonths(row, months),
+        values,
+      };
+    })
+    .sort((a, b) => b.total - a.total || a.brand.localeCompare(b.brand));
+
+  return {
+    title,
+    description,
+    months,
+    brands,
+  };
+};
+
 export class PatentamientosDashboardService {
   static async getAvailableYears(): Promise<DashboardAvailableYearsResponse> {
     const datasets = await PatentamientoDataset.find(
@@ -455,5 +526,9 @@ export class PatentamientosDashboardService {
 
   static getToyotaEvolution(year: number) {
     return getToyotaEvolution(year);
+  }
+
+  static getBrandParticipationEvolutionPais(year: number) {
+    return getBrandParticipationEvolutionPais(year);
   }
 }
