@@ -67,6 +67,8 @@ const SUV_MODELS = [
   "TOYOTA COROLLA CROSS",
   "JEEP COMPASS",
   "PEUGEOT 3008",
+  "PEUGEOT NUEVO 3008",
+  "NUEVO 3008",
 ] as const;
 
 const B_SUV_MODELS = [
