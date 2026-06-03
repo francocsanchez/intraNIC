@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import MarcaPaisParticipacionChart from "@/components/patentamientos/MarcaPaisParticipacionChart";
 import PatentamientosComparisonTable from "@/components/patentamientos/PatentamientosComparisonTable";
 import PatentamientosToyotaEvolutionChart from "@/components/patentamientos/PatentamientosToyotaEvolutionChart";
 import {
@@ -249,6 +250,7 @@ export default function DashboardPatentamientosView() {
             <h2 className="text-lg font-semibold tracking-tight text-gray-900">Evolucion Toyota PAIS vs Zona NIC</h2>
           </div>
           {toyotaEvolution.data ? <PatentamientosToyotaEvolutionChart data={toyotaEvolution.data} /> : null}
+          {selectedYear !== null ? <MarcaPaisParticipacionChart year={selectedYear} /> : null}
         </section>
       ) : null}
     </div>

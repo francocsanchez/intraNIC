@@ -40,9 +40,28 @@ const dashboardYearsSchema = z.object({
   selectedYear: z.number().nullable(),
 });
 
+const dashboardBrandParticipationValueSchema = z.object({
+  quantity: z.number(),
+  percentage: z.number(),
+});
+
+const dashboardBrandParticipationBrandSchema = z.object({
+  brand: z.string(),
+  total: z.number(),
+  values: z.record(z.string(), dashboardBrandParticipationValueSchema),
+});
+
+const dashboardBrandParticipationSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  months: z.array(dashboardMonthSchema),
+  brands: z.array(dashboardBrandParticipationBrandSchema),
+});
+
 export type PatentamientosDashboardTable = z.infer<typeof dashboardTableSchema>;
 export type PatentamientosDashboardEvolution = z.infer<typeof dashboardEvolutionSchema>;
 export type PatentamientosDashboardYears = z.infer<typeof dashboardYearsSchema>;
+export type PatentamientosBrandParticipation = z.infer<typeof dashboardBrandParticipationSchema>;
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
@@ -149,5 +168,13 @@ export const getPatentamientosToyotaEvolution = (year: number) =>
     "/patentamientos/dashboard/toyota-evolucion",
     dashboardEvolutionSchema,
     "No se pudo obtener la evolucion de Toyota",
+    { year },
+  );
+
+export const getPatentamientosBrandParticipationEvolutionPais = (year: number) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/marcas/evolucion-participacion-pais",
+    dashboardBrandParticipationSchema,
+    "No se pudo obtener la evolucion por participacion de marcas PAIS",
     { year },
   );
