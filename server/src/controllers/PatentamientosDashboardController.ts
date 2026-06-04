@@ -135,4 +135,14 @@ export class PatentamientosDashboardController {
       "PatentamientosDashboardController.getBrandParticipationEvolutionPais",
     );
   }
+
+  static getGeneralZonaNic(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getGeneralZonaNic(year),
+      "PatentamientosDashboardController.getGeneralZonaNic",
+    );
+  }
 }

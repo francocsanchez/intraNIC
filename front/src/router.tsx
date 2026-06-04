@@ -162,8 +162,8 @@ export default function Router() {
 
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
             <Route element={<PatentamientosLayout />}>
-              <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
-              <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
+              <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/general" replace />} />
+              <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/general" replace />} />
               <Route path="/patentamientos/dashboard/inscripcion-unidades" element={<InscripcionUnidadesView />} />
               <Route path="/patentamientos/dashboard/:section" element={<DashboardPatentamientosView />} />
               <Route path="/patentamientos/importar" element={<PatentamientosView />} />

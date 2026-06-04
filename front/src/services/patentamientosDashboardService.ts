@@ -58,10 +58,48 @@ const dashboardBrandParticipationSchema = z.object({
   brands: z.array(dashboardBrandParticipationBrandSchema),
 });
 
+const dashboardGeneralTopBrandSchema = z.object({
+  brand: z.string(),
+  total: z.number(),
+  percentage: z.number(),
+});
+
+const dashboardGeneralTopModelSchema = z.object({
+  rank: z.number(),
+  model: z.string(),
+  total: z.number(),
+  percentage: z.number(),
+});
+
+const dashboardGeneralTrendPointSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  total: z.number(),
+});
+
+const dashboardGeneralSchema = z.object({
+  title: z.string(),
+  months: z.array(dashboardMonthSchema),
+  summary: z.object({
+    totalPatentamientos: z.number(),
+    marketLeader: z
+      .object({
+        brand: z.string(),
+        total: z.number(),
+        percentage: z.number(),
+      })
+      .nullable(),
+  }),
+  trend: z.array(dashboardGeneralTrendPointSchema),
+  topBrands: z.array(dashboardGeneralTopBrandSchema),
+  topModels: z.array(dashboardGeneralTopModelSchema),
+});
+
 export type PatentamientosDashboardTable = z.infer<typeof dashboardTableSchema>;
 export type PatentamientosDashboardEvolution = z.infer<typeof dashboardEvolutionSchema>;
 export type PatentamientosDashboardYears = z.infer<typeof dashboardYearsSchema>;
 export type PatentamientosBrandParticipation = z.infer<typeof dashboardBrandParticipationSchema>;
+export type PatentamientosDashboardGeneral = z.infer<typeof dashboardGeneralSchema>;
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
@@ -112,6 +150,14 @@ export const getPatentamientosTopMarcasZonaNic = (year: number) =>
     "/patentamientos/dashboard/top-marcas/zona-nic",
     dashboardTableSchema,
     "No se pudo obtener el top de marcas Zona NIC",
+    { year },
+  );
+
+export const getPatentamientosGeneralZonaNic = (year: number) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/general/zona-nic",
+    dashboardGeneralSchema,
+    "No se pudo obtener la vista general de Zona NIC",
     { year },
   );
 

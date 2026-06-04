@@ -52,6 +52,43 @@ type DashboardAvailableYearsResponse = {
   selectedYear: number | null;
 };
 
+type DashboardGeneralSummary = {
+  totalPatentamientos: number;
+  marketLeader: {
+    brand: string;
+    total: number;
+    percentage: number;
+  } | null;
+};
+
+type DashboardGeneralTrendPoint = {
+  key: string;
+  label: string;
+  total: number;
+};
+
+type DashboardGeneralTopBrand = {
+  brand: string;
+  total: number;
+  percentage: number;
+};
+
+type DashboardGeneralTopModel = {
+  rank: number;
+  model: string;
+  total: number;
+  percentage: number;
+};
+
+type DashboardGeneralResponse = {
+  title: string;
+  summary: DashboardGeneralSummary;
+  months: DashboardMonthColumn[];
+  trend: DashboardGeneralTrendPoint[];
+  topBrands: DashboardGeneralTopBrand[];
+  topModels: DashboardGeneralTopModel[];
+};
+
 type DashboardBrandParticipationValue = {
   quantity: number;
   percentage: number;
@@ -121,6 +158,11 @@ const normalizeText = (value: string) =>
     .toUpperCase();
 
 const roundPercentage = (value: number) => Math.round(value * 100) / 100;
+
+const isImportedTotalRow = (value: string) => {
+  const normalized = normalizeText(value);
+  return normalized === "TOTAL" || normalized === "TOTALES";
+};
 
 const parseHeaderYear = (header: string, storageKey?: string) => {
   const keyMatch = String(storageKey ?? "").match(/^(\d{4})-(\d{2})$/);
@@ -222,6 +264,9 @@ const normalizeRows = (dataset: PatentamientoDatasetLean): PatentamientoRowNorma
     total: row.total,
     months: normalizeRowMonths(row.months),
   }));
+
+const normalizeValidRows = (dataset: PatentamientoDatasetLean): PatentamientoRowNormalized[] =>
+  normalizeRows(dataset).filter((row) => !isImportedTotalRow(row.primaryValue));
 
 const getYearsFromDataset = (dataset: PatentamientoDatasetLean | null) =>
   (dataset?.monthColumns ?? [])
@@ -469,6 +514,88 @@ const getBrandParticipationEvolutionPais = async (
   };
 };
 
+const getGeneralZonaNic = async (year: number): Promise<DashboardGeneralResponse> => {
+  const [brandsDataset, modelsDataset] = await Promise.all([
+    getDataset("zona-nic-marcas"),
+    getDataset("zona-nic-modelos"),
+  ]);
+
+  const title = "General - Zona NIC";
+  const months = getFilteredMonths(brandsDataset, year);
+
+  if (!brandsDataset || !modelsDataset || !months.length) {
+    return {
+      title,
+      months,
+      summary: {
+        totalPatentamientos: 0,
+        marketLeader: null,
+      },
+      trend: [],
+      topBrands: [],
+      topModels: [],
+    };
+  }
+
+  const brandRows = normalizeValidRows(brandsDataset).map((row) => ({
+    ...row,
+    yearTotal: getRowTotalForMonths(row, months),
+  }));
+  const modelRows = normalizeValidRows(modelsDataset).map((row) => ({
+    ...row,
+    yearTotal: getRowTotalForMonths(row, months),
+  }));
+
+  const totalPatentamientos = brandRows.reduce((sum, row) => sum + row.yearTotal, 0);
+
+  const topBrands = brandRows
+    .filter((row) => row.yearTotal > 0)
+    .sort((a, b) => b.yearTotal - a.yearTotal || a.primaryValue.localeCompare(b.primaryValue))
+    .slice(0, 5)
+    .map<DashboardGeneralTopBrand>((row) => ({
+      brand: row.primaryValue,
+      total: row.yearTotal,
+      percentage: totalPatentamientos > 0 ? roundPercentage((row.yearTotal / totalPatentamientos) * 100) : 0,
+    }));
+
+  const marketLeader = topBrands[0]
+    ? {
+        brand: topBrands[0].brand,
+        total: topBrands[0].total,
+        percentage: topBrands[0].percentage,
+      }
+    : null;
+
+  const trend = months.map<DashboardGeneralTrendPoint>((month) => ({
+    key: month.key,
+    label: month.label,
+    total: brandRows.reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0),
+  }));
+
+  const topModels = modelRows
+    .filter((row) => row.yearTotal > 0)
+    .sort((a, b) => b.yearTotal - a.yearTotal || a.primaryValue.localeCompare(b.primaryValue))
+    .slice(0, 10)
+    .map<DashboardGeneralTopModel>((row, index) => ({
+      rank: index + 1,
+      model: row.primaryValue,
+      total: row.yearTotal,
+      percentage: totalPatentamientos > 0 ? roundPercentage((row.yearTotal / totalPatentamientos) * 100) : 0,
+    }));
+
+  return {
+    title,
+    months,
+    summary: {
+      totalPatentamientos,
+      marketLeader,
+    },
+    trend,
+    topBrands,
+    topModels,
+  };
+};
+
 export class PatentamientosDashboardService {
   static async getAvailableYears(): Promise<DashboardAvailableYearsResponse> {
     const datasets = await PatentamientoDataset.find(
@@ -530,5 +657,9 @@ export class PatentamientosDashboardService {
 
   static getBrandParticipationEvolutionPais(year: number) {
     return getBrandParticipationEvolutionPais(year);
+  }
+
+  static getGeneralZonaNic(year: number) {
+    return getGeneralZonaNic(year);
   }
 }

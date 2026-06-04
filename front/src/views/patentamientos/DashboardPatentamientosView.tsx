@@ -1,9 +1,11 @@
 import Loading from "@/components/Loading";
+import PatentamientosGeneralSection from "@/components/patentamientos/PatentamientosGeneralSection";
 import MarcaPaisParticipacionChart from "@/components/patentamientos/MarcaPaisParticipacionChart";
 import PatentamientosComparisonTable from "@/components/patentamientos/PatentamientosComparisonTable";
 import PatentamientosToyotaEvolutionChart from "@/components/patentamientos/PatentamientosToyotaEvolutionChart";
 import {
   getPatentamientosAvailableYears,
+  getPatentamientosGeneralZonaNic,
   getPatentamientosSegmentoBSuvPais,
   getPatentamientosSegmentoBSuvZonaNic,
   getPatentamientosSegmentoPickupPais,
@@ -15,15 +17,19 @@ import {
   getPatentamientosToyotaEvolution,
 } from "@/services/patentamientosDashboardService";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { BarChart3, FileSpreadsheet, LineChart, Table2 } from "lucide-react";
+import { BarChart3, FileSpreadsheet, LayoutGrid, LineChart, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-const dashboardSections = ["marcas", "pickup", "suv", "b-suv"] as const;
+const dashboardSections = ["general", "marcas", "pickup", "suv", "b-suv"] as const;
 type DashboardSection = (typeof dashboardSections)[number];
 
 const sectionContent = {
+  general: {
+    heading: "Vista General",
+    icon: LayoutGrid,
+  },
   marcas: {
     heading: "Top 10 Marcas Patentadas",
     icon: Table2,
@@ -47,13 +53,14 @@ export default function DashboardPatentamientosView() {
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
 
   const isValidSection = dashboardSections.includes((section ?? "") as DashboardSection);
-  const activeSection: DashboardSection = isValidSection ? (section as DashboardSection) : "marcas";
+  const activeSection: DashboardSection = isValidSection ? (section as DashboardSection) : "general";
 
   const yearsQuery = useQuery({
     queryKey: ["patentamientos-dashboard", "years"],
     queryFn: getPatentamientosAvailableYears,
   });
   const selectedYear = userSelectedYear ?? yearsQuery.data?.selectedYear ?? null;
+  const isGeneralSection = activeSection === "general";
   const isMarcasSection = activeSection === "marcas";
   const isPickupSection = activeSection === "pickup";
   const isSuvSection = activeSection === "suv";
@@ -61,6 +68,11 @@ export default function DashboardPatentamientosView() {
 
   const results = useQueries({
     queries: [
+      {
+        queryKey: ["patentamientos-dashboard", "general-zona-nic", selectedYear],
+        queryFn: () => getPatentamientosGeneralZonaNic(selectedYear!),
+        enabled: selectedYear !== null && isGeneralSection,
+      },
       {
         queryKey: ["patentamientos-dashboard", "top-marcas-pais", selectedYear],
         queryFn: () => getPatentamientosTopMarcasPais(selectedYear!),
@@ -109,15 +121,14 @@ export default function DashboardPatentamientosView() {
     ],
   });
 
-  const [topPais, topZonaNic, pickupPais, pickupZonaNic, suvPais, suvZonaNic, bSuvPais, bSuvZonaNic, toyotaEvolution] =
+  const [generalZonaNic, topPais, topZonaNic, pickupPais, pickupZonaNic, suvPais, suvZonaNic, bSuvPais, bSuvZonaNic, toyotaEvolution] =
     results;
 
   const hasAvailableYears = (yearsQuery.data?.years.length ?? 0) > 0;
   const isWaitingYearSelection = yearsQuery.isSuccess && hasAvailableYears && selectedYear === null;
   const isLoading = yearsQuery.isLoading || isWaitingYearSelection || (selectedYear !== null && results.some((result) => result.isLoading));
   const firstError =
-    (yearsQuery.error instanceof Error ? yearsQuery.error : undefined) ??
-    results.find((result) => result.error instanceof Error)?.error;
+    (yearsQuery.error instanceof Error ? yearsQuery.error : undefined) ?? results.find((result) => result.error instanceof Error)?.error;
 
   useEffect(() => {
     if (firstError instanceof Error) {
@@ -126,7 +137,7 @@ export default function DashboardPatentamientosView() {
   }, [firstError]);
 
   if (!isValidSection) {
-    return <Navigate to="/patentamientos/dashboard/marcas" replace />;
+    return <Navigate to="/patentamientos/dashboard/general" replace />;
   }
 
   if (isLoading) return <Loading />;
@@ -168,12 +179,7 @@ export default function DashboardPatentamientosView() {
     <div className="w-full space-y-6 px-1 py-1">
       <section className="px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
-              Vista descriptiva enfocada en ranking de marcas, comparativas de segmentos y evolucion mensual de Toyota.
-            </p>
-          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
@@ -213,6 +219,10 @@ export default function DashboardPatentamientosView() {
           })()}
           <h2 className="text-lg font-semibold tracking-tight text-gray-900">{sectionContent[activeSection].heading}</h2>
         </div>
+
+        {isGeneralSection && generalZonaNic.data && selectedYear !== null ? (
+          <PatentamientosGeneralSection data={generalZonaNic.data} year={selectedYear} />
+        ) : null}
 
         {isMarcasSection ? (
           <>
