@@ -68,6 +68,7 @@ import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
 import OperacionesDashboardView from "./views/operaciones/OperacionesDashboardView";
 import PatentamientosView from "./views/patentamientos/PatentamientosView";
 import DashboardPatentamientosView from "./views/patentamientos/DashboardPatentamientosView";
+import InscripcionUnidadesView from "./views/patentamientos/InscripcionUnidadesView";
 
 export default function Router() {
   return (
@@ -163,6 +164,7 @@ export default function Router() {
             <Route element={<PatentamientosLayout />}>
               <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
               <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
+              <Route path="/patentamientos/dashboard/inscripcion-unidades" element={<InscripcionUnidadesView />} />
               <Route path="/patentamientos/dashboard/:section" element={<DashboardPatentamientosView />} />
               <Route path="/patentamientos/importar" element={<PatentamientosView />} />
             </Route>
