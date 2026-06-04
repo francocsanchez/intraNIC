@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import multer from "multer";
 import { PatentamientosController } from "../controllers/PatentamientosController";
 import { PatentamientosDashboardController } from "../controllers/PatentamientosDashboardController";
+import { UnidadesDealersController } from "../controllers/UnidadesDealersController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeRoles } from "../middleware/authorizeRoles";
 
@@ -49,5 +50,8 @@ router.get("/dashboard/segmento-b-suv/pais", PatentamientosDashboardController.g
 router.get("/dashboard/segmento-b-suv/zona-nic", PatentamientosDashboardController.getSegmentoBSuvZonaNic);
 router.get("/dashboard/toyota-evolucion", PatentamientosDashboardController.getToyotaEvolution);
 router.get("/dashboard/marcas/evolucion-participacion-pais", PatentamientosDashboardController.getBrandParticipationEvolutionPais);
+router.post("/unidades-dealers/sincronizar", UnidadesDealersController.sincronizar);
+router.get("/unidades-dealers/resumen", UnidadesDealersController.getResumen);
+router.get("/unidades-dealers/treemap", UnidadesDealersController.getTreemap);
 
 export default router;

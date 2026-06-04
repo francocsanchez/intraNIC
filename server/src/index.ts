@@ -1,6 +1,7 @@
 import colors from "colors";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
+import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
 
 const port = process.env.PORT || 4002;
 
@@ -13,4 +14,5 @@ server.listen(Number(port), "0.0.0.0", () => {
   console.log(colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━") + "\n");
 
   startFacturasAnticipoJob();
+  startUnidadesDealersJob();
 });
