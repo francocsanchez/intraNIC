@@ -8,7 +8,7 @@ const dashboardSections = [
   { key: "pickup", label: "Pickup", to: "/patentamientos/dashboard/pickup" },
   { key: "suv", label: "SUV", to: "/patentamientos/dashboard/suv" },
   { key: "b-suv", label: "B-SUV", to: "/patentamientos/dashboard/b-suv" },
-  { key: "inscripcion-unidades", label: "Inscripcion de unidades", to: "/patentamientos/dashboard/inscripcion-unidades" },
+  { key: "inscripcion-unidades", label: "Traslado de unidades", to: "/patentamientos/dashboard/inscripcion-unidades" },
 ];
 
 export default function PatentamientosLayout() {
