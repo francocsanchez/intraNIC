@@ -199,7 +199,10 @@ export class UsadosController {
       const numeroVendedor = parsePositiveInt(numberSaleNic);
 
       if (!numeroVendedor) {
-        return res.status(400).json({ message: "Numero de vendedor no valido" });
+        return res.status(200).json({
+          data: [],
+          resumen: buildResumenListaDeEspera([]),
+        });
       }
 
       const query = misReservasUsadoQuery();
