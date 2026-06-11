@@ -93,6 +93,14 @@ export default function ConfiguracionView() {
           label: "Vendedores Stock Guardado",
           values: mapCodigos(config.vendedoresStockGuardadoUsados),
         },
+        {
+          label: "Vendedores Stock No Reparado",
+          values: mapCodigos(config.vendedoresStockNoReparadoUsados ?? []),
+        },
+        {
+          label: "Vendedores Stock Pend. DocumentaciÃ³n",
+          values: mapCodigos(config.vendedoresStockPendDocuUsados ?? []),
+        },
       ],
       canView: hasAnyCompany(user, ["usados"]),
       canEdit: canEditConfiguracion && hasAnyCompany(user, ["usados"]),

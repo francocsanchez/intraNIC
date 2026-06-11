@@ -10,7 +10,9 @@ type CheckListVendedoresProps = {
   name:
     | "vendedoresReservasUsados"
     | "vendedoresDisponibleUsados"
-    | "vendedoresStockGuardadoUsados";
+    | "vendedoresStockGuardadoUsados"
+    | "vendedoresStockNoReparadoUsados"
+    | "vendedoresStockPendDocuUsados";
   register: UseFormRegister<any>;
 };
 

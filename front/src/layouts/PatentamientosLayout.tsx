@@ -4,6 +4,7 @@ import { ChevronLeft, FileSpreadsheet } from "lucide-react";
 import { Link, NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 const dashboardSections = [
+  { key: "general", label: "General", to: "/patentamientos/dashboard/general" },
   { key: "marcas", label: "Marcas", to: "/patentamientos/dashboard/marcas" },
   { key: "pickup", label: "Pickup", to: "/patentamientos/dashboard/pickup" },
   { key: "suv", label: "SUV", to: "/patentamientos/dashboard/suv" },

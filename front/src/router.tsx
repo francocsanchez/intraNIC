@@ -42,6 +42,8 @@ import AsignacionesView from "./views/admin/siac/AsignacionesView";
 import StockDisponibleUsados from "./views/usados/StockDisponibleUsados";
 import NICUsadosLayout from "./layouts/NICUsadosLayout";
 import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
+import StockNoReparadoUsadosView from "./views/usados/StockNoReparadoUsadosView";
+import StockPendDocuUsadosView from "./views/usados/StockPendDocuUsadosView";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
 import StockIngresoUsados from "./views/usados/StockIngresoUsados";
 import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
@@ -162,8 +164,8 @@ export default function Router() {
 
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
             <Route element={<PatentamientosLayout />}>
-              <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
-              <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/marcas" replace />} />
+              <Route path="/patentamientos" element={<Navigate to="/patentamientos/dashboard/general" replace />} />
+              <Route path="/patentamientos/dashboard" element={<Navigate to="/patentamientos/dashboard/general" replace />} />
               <Route path="/patentamientos/dashboard/inscripcion-unidades" element={<InscripcionUnidadesView />} />
               <Route path="/patentamientos/dashboard/:section" element={<DashboardPatentamientosView />} />
               <Route path="/patentamientos/importar" element={<PatentamientosView />} />
@@ -254,6 +256,11 @@ export default function Router() {
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
                 <Route path="/stock/guardado/usados" element={<StockGuardadoUsados />} />
                 <Route path="/stock/reservado/usados" element={<StockReservasUsados />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
+                <Route path="/stock/no-reparado/usados" element={<StockNoReparadoUsadosView />} />
+                <Route path="/stock/pendiente-documentacion/usados" element={<StockPendDocuUsadosView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>

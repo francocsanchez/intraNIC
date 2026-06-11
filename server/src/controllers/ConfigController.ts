@@ -72,6 +72,8 @@ export class ConfigController {
         "vendedoresReservasUsados",
         "vendedoresDisponibleUsados",
         "vendedoresStockGuardadoUsados",
+        "vendedoresStockNoReparadoUsados",
+        "vendedoresStockPendDocuUsados",
       ];
 
       const touchesConvencional = bodyKeys.some((key) =>

@@ -97,6 +97,8 @@ export const configuracionSchema = z.object({
   vendedoresReservasUsados: z.array(z.string()),
   vendedoresDisponibleUsados: z.array(z.string()),
   vendedoresStockGuardadoUsados: z.array(z.string()),
+  vendedoresStockNoReparadoUsados: z.array(z.string()).default([]),
+  vendedoresStockPendDocuUsados: z.array(z.string()).default([]),
 
   sistemaActivoLIESS: z.boolean(),
   vendedoresDisponibleLIESS: z.array(z.string()),
