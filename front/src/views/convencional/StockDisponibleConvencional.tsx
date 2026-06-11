@@ -17,13 +17,12 @@ export default function StockDisponibleConvencional() {
 
   const {
     data: configResponse,
-    isError: configError,
     isLoading: configLoading,
   } = useQuery({
     queryKey: ["configuracion"],
     queryFn: getConfiguracion,
     refetchOnWindowFocus: true,
-    refetchInterval: 1000,
+    retry: 0,
   });
 
   const { data, isLoading, isError, error } = useQuery({
@@ -114,7 +113,7 @@ export default function StockDisponibleConvencional() {
     );
   }
 
-  if (isError || configError) {
+  if (isError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
