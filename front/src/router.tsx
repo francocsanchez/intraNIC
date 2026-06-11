@@ -42,6 +42,7 @@ import AsignacionesView from "./views/admin/siac/AsignacionesView";
 import StockDisponibleUsados from "./views/usados/StockDisponibleUsados";
 import NICUsadosLayout from "./layouts/NICUsadosLayout";
 import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
+import MisReservasUsadosView from "./views/usados/MisReservasUsadosView";
 import StockNoReparadoUsadosView from "./views/usados/StockNoReparadoUsadosView";
 import StockPendDocuUsadosView from "./views/usados/StockPendDocuUsadosView";
 import StockReservasUsados from "./views/usados/StockReservasUsados";
@@ -251,6 +252,10 @@ export default function Router() {
             <Route element={<NICUsadosLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path="/stock/disponible/usados" element={<StockDisponibleUsados />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
+                <Route path="/mis-reservas/usados" element={<MisReservasUsadosView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>

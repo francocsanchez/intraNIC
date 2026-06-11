@@ -193,7 +193,7 @@ export class UsadosController {
     }
   };
 
-  static misReservas = async (req: Request, res: Response) => {
+  static misReservasUsados = async (req: Request, res: Response) => {
     try {
       const { numberSaleNic } = req.user;
       const numeroVendedor = parsePositiveInt(numberSaleNic);
@@ -212,7 +212,7 @@ export class UsadosController {
 
       return res.status(200).json({ data, resumen });
     } catch (error) {
-      logError("UsadosController.misReservas");
+      logError("UsadosController.misReservasUsados");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

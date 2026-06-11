@@ -4,6 +4,7 @@ import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles
 import { UsadosController } from "../controllers/UsadosController";
 
 const router = Router();
+const usadosRoles = ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"];
 router.use(authenticate);
 router.use(authorizeCompanies("usados"));
 
@@ -46,6 +47,14 @@ router.get("/stock-pendiente-documentacion", authorizeRoles("admin", "gerente", 
  *
  */
 router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", "stock"), UsadosController.stockReservado);
+
+/**
+ *
+ * @route GET /
+ * @desc Mis reservas usados.
+ *
+ */
+router.get("/mis-reservas", authorizeRoles(...usadosRoles), UsadosController.misReservasUsados);
 
 /**
  *

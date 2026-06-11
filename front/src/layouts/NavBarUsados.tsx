@@ -1,5 +1,5 @@
 import useRoleGuard from "@/hooks/useRoleGuard";
-import { Archive, BookMarked, FileClock, Import, Package, Wrench } from "lucide-react";
+import { Archive, BookMarked, FileClock, Import, Package, UserCheck, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NavBarUsados() {
@@ -50,6 +50,12 @@ export default function NavBarUsados() {
               Reservas
             </Link>
           )}
+
+          <Link to={`/mis-reservas/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <UserCheck size={16} strokeWidth={1.5} />
+            Mis Reservas
+          </Link>
+
           {buttonIngreso && (
             <Link to={`/stock/ingresos/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <Import size={16} strokeWidth={1.5} />A ingresar

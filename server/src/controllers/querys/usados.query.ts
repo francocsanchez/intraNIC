@@ -149,6 +149,7 @@ SELECT
     ISNULL(movnped.mnp_chasis, '-') AS "chasis",
     sucursal.suc_nombre AS "sucursal",
     reserva.res_fecregistro AS "fechaReserva",
+    reserva.res_nombrecliente as "clienteReserva",
     DATEADD(DAY, 5, movnped.mnp_fecrec) AS "fechaRecepcion"
 FROM
     stoauto
@@ -170,7 +171,7 @@ INNER JOIN sucursal ON
     vendedor.ven_sucur = sucursal.suc_codigo
 WHERE
     reserva.res_anulada = 0
-    AND reserva.res_tipo = 5
+    AND reserva.res_tipo = 10
     AND reserva.res_vendedor IN (:numeroVendedor)
 ORDER BY
     sucursal.suc_nombre,
