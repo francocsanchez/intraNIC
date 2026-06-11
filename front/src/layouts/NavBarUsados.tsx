@@ -1,11 +1,12 @@
 import useRoleGuard from "@/hooks/useRoleGuard";
-import { Archive, BookMarked, Import, Package } from "lucide-react";
+import { Archive, BookMarked, FileClock, Import, Package, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NavBarUsados() {
   const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
   const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
   const { allowed: buttonIngreso } = useRoleGuard(["admin", "gerente", "stock"]);
+  const { allowed: buttonNuevosEstados } = useRoleGuard(["admin", "gerente", "stock"]);
 
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
@@ -26,6 +27,20 @@ export default function NavBarUsados() {
             <Link to={`/stock/guardado/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <Archive size={16} strokeWidth={1.5} />
               Guardado
+            </Link>
+          )}
+
+          {buttonNuevosEstados && (
+            <Link to={`/stock/no-reparado/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+              <Wrench size={16} strokeWidth={1.5} />
+              Stock No Reparado
+            </Link>
+          )}
+
+          {buttonNuevosEstados && (
+            <Link to={`/stock/pendiente-documentacion/usados`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+              <FileClock size={16} strokeWidth={1.5} />
+              Stock Pend. Docu.
             </Link>
           )}
 

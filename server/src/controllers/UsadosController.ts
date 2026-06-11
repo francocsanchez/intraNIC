@@ -12,11 +12,11 @@ import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisO
 import {
   listaDeEsperaUsadoQuery,
   miListaDeEsperaUsadoQuery,
-  misReservasUsadoQuery,
-  stockUsadoQuery,
   misOperacionesQuery,
+  misReservasUsadoQuery,
   reservasUsadoQuery,
-  stockUsadoIngreso
+  stockUsadoIngreso,
+  stockUsadoQuery,
 } from "./querys/usados.query";
 import { buildReportePorMarca, UnidadRow } from "../utils/reportUnidadesPorMarca";
 
@@ -38,29 +38,49 @@ const parseMonth = (value: unknown) => {
   return parsed && parsed <= 12 ? parsed : null;
 };
 
+const getStockByConfiguredVendors = async (
+  configKey:
+    | "vendedoresDisponibleUsados"
+    | "vendedoresStockGuardadoUsados"
+    | "vendedoresStockNoReparadoUsados"
+    | "vendedoresStockPendDocuUsados",
+) => {
+  const config = await Configuration.findOne().lean();
+
+  if (!config) {
+    return { error: "No existe configuraciÃ³n inicial" as const };
+  }
+
+  const vendedores = normalizeNumericList(config[configKey]);
+
+  if (!vendedores.length) {
+    return {
+      data: [],
+      resumen: buildReportePorMarca([]),
+    };
+  }
+
+  const data = await sequelizeNIC.query<UnidadRow>(stockUsadoQuery(), {
+    type: QueryTypes.SELECT,
+    replacements: { vendedores },
+  });
+
+  return {
+    data,
+    resumen: buildReportePorMarca(data),
+  };
+};
+
 export class UsadosController {
   static stockDisponible = async (_req: Request, res: Response) => {
     try {
-      const config = await Configuration.findOne().lean();
+      const result = await getStockByConfiguredVendors("vendedoresDisponibleUsados");
 
-      if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+      if ("error" in result) {
+        return res.status(404).json({ message: result.error });
       }
 
-      const vendedoresDisponibleUsados = normalizeNumericList(config.vendedoresDisponibleUsados);
-
-      if (!vendedoresDisponibleUsados.length) {
-        return res.status(200).json({ data: [], resumen: buildReportePorMarca([]) });
-      }
-
-      const data = await sequelizeNIC.query<UnidadRow>(stockUsadoQuery(), {
-        type: QueryTypes.SELECT,
-        replacements: { vendedores: vendedoresDisponibleUsados },
-      });
-
-      const resumen = buildReportePorMarca(data);
-
-      return res.status(200).json({ data,resumen });
+      return res.status(200).json(result);
     } catch (error) {
       logError("UsadosController.stockDisponible");
       console.error(error);
@@ -69,41 +89,59 @@ export class UsadosController {
   };
 
   static stockGuardado = async (_req: Request, res: Response) => {
-     try {
-      const config = await Configuration.findOne().lean();
+    try {
+      const result = await getStockByConfiguredVendors("vendedoresStockGuardadoUsados");
 
-      if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+      if ("error" in result) {
+        return res.status(404).json({ message: result.error });
       }
 
-      const vendedoresStockGuardadoUsados = normalizeNumericList(config.vendedoresStockGuardadoUsados);
-
-      if (!vendedoresStockGuardadoUsados.length) {
-        return res.status(200).json({ data: [], resumen: buildReportePorMarca([]) });
-      }
-
-      const data = await sequelizeNIC.query<UnidadRow>(stockUsadoQuery(), {
-        type: QueryTypes.SELECT,
-        replacements: { vendedores: vendedoresStockGuardadoUsados },
-      });
-
-      const resumen = buildReportePorMarca(data);
-
-      return res.status(200).json({ data,resumen });
+      return res.status(200).json(result);
     } catch (error) {
-      logError("UsadosController.stockDisponible");
+      logError("UsadosController.stockGuardado");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }
   };
 
-  
+  static vendedoresStockNoReparadoUsados = async (_req: Request, res: Response) => {
+    try {
+      const result = await getStockByConfiguredVendors("vendedoresStockNoReparadoUsados");
+
+      if ("error" in result) {
+        return res.status(404).json({ message: result.error });
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logError("UsadosController.vendedoresStockNoReparadoUsados");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static vendedoresStockPendDocuUsados = async (_req: Request, res: Response) => {
+    try {
+      const result = await getStockByConfiguredVendors("vendedoresStockPendDocuUsados");
+
+      if ("error" in result) {
+        return res.status(404).json({ message: result.error });
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logError("UsadosController.vendedoresStockPendDocuUsados");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
   static stockReservado = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
       }
 
       const vendedoresReservasUsados = normalizeNumericList(config.vendedoresReservasUsados);
@@ -204,7 +242,7 @@ export class UsadosController {
     }
   };
 
-  static listaDeEspera = async (req: Request, res: Response) => {
+  static listaDeEspera = async (_req: Request, res: Response) => {
     try {
       const query = listaDeEsperaUsadoQuery();
 
@@ -255,14 +293,15 @@ export class UsadosController {
     }
   };
 
-    static stockIngreso = async (_req: Request, res: Response) => {
-     try {
-     
-      const data = await sequelizeNIC.query<UnidadRow>(stockUsadoIngreso(), { type: QueryTypes.SELECT });
+  static stockIngreso = async (_req: Request, res: Response) => {
+    try {
+      const data = await sequelizeNIC.query<UnidadRow>(stockUsadoIngreso(), {
+        type: QueryTypes.SELECT,
+      });
 
       const resumen = buildReportePorMarca(data);
 
-      return res.status(200).json({ data,resumen });
+      return res.status(200).json({ data, resumen });
     } catch (error) {
       logError("UsadosController.stockIngreso");
       console.error(error);

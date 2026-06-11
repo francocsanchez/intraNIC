@@ -26,6 +26,22 @@ router.get("/stock-guardado", authorizeRoles("admin", "supervisor", "gerente", "
 /**
  *
  * @route GET /
+ * @desc Listar stock no reparado.
+ *
+ */
+router.get("/stock-no-reparado", authorizeRoles("admin", "gerente", "stock"), UsadosController.vendedoresStockNoReparadoUsados);
+
+/**
+ *
+ * @route GET /
+ * @desc Listar stock pendiente de documentacion.
+ *
+ */
+router.get("/stock-pendiente-documentacion", authorizeRoles("admin", "gerente", "stock"), UsadosController.vendedoresStockPendDocuUsados);
+
+/**
+ *
+ * @route GET /
  * @desc Listar stock reservado.
  *
  */

@@ -1,18 +1,20 @@
+import { Switch } from "@headlessui/react";
 import { getConfiguracion, updateConfiguracionUsado } from "@/api/configuracionAPI";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
+import CheckListVendedoresUsados from "@/components/configuracion/CheckListVendedoresUsados";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Switch } from "@headlessui/react";
-import CheckListVendedoresUsados from "@/components/configuracion/CheckListVendedoresUsados";
 
 type ConfigUsaForm = {
   sistemaActivoUsados: boolean;
   vendedoresReservasUsados: string[];
   vendedoresDisponibleUsados: string[];
   vendedoresStockGuardadoUsados: string[];
+  vendedoresStockNoReparadoUsados: string[];
+  vendedoresStockPendDocuUsados: string[];
 };
 
 export default function EditConfiguracionUsadoView() {
@@ -48,6 +50,8 @@ export default function EditConfiguracionUsadoView() {
       vendedoresReservasUsados: [],
       vendedoresDisponibleUsados: [],
       vendedoresStockGuardadoUsados: [],
+      vendedoresStockNoReparadoUsados: [],
+      vendedoresStockPendDocuUsados: [],
     },
   });
 
@@ -63,6 +67,8 @@ export default function EditConfiguracionUsadoView() {
       vendedoresReservasUsados: (config.vendedoresReservasUsados ?? []).map(String),
       vendedoresDisponibleUsados: (config.vendedoresDisponibleUsados ?? []).map(String),
       vendedoresStockGuardadoUsados: (config.vendedoresStockGuardadoUsados ?? []).map(String),
+      vendedoresStockNoReparadoUsados: (config.vendedoresStockNoReparadoUsados ?? []).map(String),
+      vendedoresStockPendDocuUsados: (config.vendedoresStockPendDocuUsados ?? []).map(String),
     });
   }, [config, reset]);
 
@@ -91,7 +97,7 @@ export default function EditConfiguracionUsadoView() {
         </section>
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
               <div className="mt-3 h-8 w-16 animate-pulse rounded bg-gray-100" />
@@ -106,7 +112,7 @@ export default function EditConfiguracionUsadoView() {
           <div className="space-y-6 p-6">
             <div className="h-16 animate-pulse rounded-xl bg-gray-100" />
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
                   <div className="mt-4 space-y-2">
@@ -127,8 +133,8 @@ export default function EditConfiguracionUsadoView() {
     return (
       <div className="w-full px-4 py-6">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar la configuración</h1>
-          <p className="mt-2 text-sm text-red-600">No fue posible cargar la configuración.</p>
+          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar la configuracion</h1>
+          <p className="mt-2 text-sm text-red-600">No fue posible cargar la configuracion.</p>
         </section>
       </div>
     );
@@ -138,9 +144,9 @@ export default function EditConfiguracionUsadoView() {
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Editar configuración</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Editar configuracion</h1>
             <span className="rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
               Usados
             </span>
@@ -169,8 +175,8 @@ export default function EditConfiguracionUsadoView() {
 
       <form className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" noValidate onSubmit={handleSubmit(handleForm)}>
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Configuración</h2>
-          <p className="mt-1 text-sm text-gray-500">Seleccioná vendedores habilitados por módulo.</p>
+          <h2 className="text-base font-semibold tracking-tight text-gray-900">Configuracion</h2>
+          <p className="mt-1 text-sm text-gray-500">Selecciona vendedores habilitados por modulo.</p>
         </div>
 
         <div className="space-y-6 p-6">
@@ -217,7 +223,7 @@ export default function EditConfiguracionUsadoView() {
 
             <CheckListVendedoresUsados
               title="Vendedores Disponible"
-              subtitle="Habilita visualización de stock disponible."
+              subtitle="Habilita visualizacion de stock disponible."
               vendedoresNic={vendedoresNic}
               vendedores={config.vendedoresDisponibleUsados}
               name="vendedoresDisponibleUsados"
@@ -226,23 +232,41 @@ export default function EditConfiguracionUsadoView() {
 
             <CheckListVendedoresUsados
               title="Vendedores Stock Guardado"
-              subtitle="Habilita gestión de stock guardado."
+              subtitle="Habilita gestion de stock guardado."
               vendedoresNic={vendedoresNic}
               vendedores={config.vendedoresStockGuardadoUsados}
               name="vendedoresStockGuardadoUsados"
+              register={register}
+            />
+
+            <CheckListVendedoresUsados
+              title="Vendedores Stock No Reparado"
+              subtitle="Habilita gestion de stock no reparado."
+              vendedoresNic={vendedoresNic}
+              vendedores={config.vendedoresStockNoReparadoUsados ?? []}
+              name="vendedoresStockNoReparadoUsados"
+              register={register}
+            />
+
+            <CheckListVendedoresUsados
+              title="Vendedores Stock Pend. Documentacion"
+              subtitle="Habilita gestion de stock pendiente de documentacion."
+              vendedoresNic={vendedoresNic}
+              vendedores={config.vendedoresStockPendDocuUsados ?? []}
+              name="vendedoresStockPendDocuUsados"
               register={register}
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500">Guardá los cambios para actualizar la configuración.</div>
+          <div className="text-sm text-gray-500">Guarda los cambios para actualizar la configuracion.</div>
 
           <input
             type="submit"
             disabled={isPending}
             className="inline-flex cursor-pointer justify-center rounded-lg bg-black px-6 py-2.5 text-sm font-semibold uppercase text-white shadow-sm transition-colors hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
-            value={isPending ? "Guardando..." : "Guardar configuración"}
+            value={isPending ? "Guardando..." : "Guardar configuracion"}
           />
         </div>
       </form>

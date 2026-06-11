@@ -49,6 +49,8 @@ type ConfigUsaForm = {
   vendedoresReservasUsados: string[];
   vendedoresDisponibleUsados: string[];
   vendedoresStockGuardadoUsados: string[];
+  vendedoresStockNoReparadoUsados: string[];
+  vendedoresStockPendDocuUsados: string[];
 };
 
 export async function updateConfiguracionUsado(formData: ConfigUsaForm) {
