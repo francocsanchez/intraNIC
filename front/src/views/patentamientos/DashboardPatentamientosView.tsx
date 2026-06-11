@@ -221,7 +221,7 @@ export default function DashboardPatentamientosView() {
         </div>
 
         {isGeneralSection && generalZonaNic.data && selectedYear !== null ? (
-          <PatentamientosGeneralSection data={generalZonaNic.data} year={selectedYear} />
+          <PatentamientosGeneralSection data={generalZonaNic.data} />
         ) : null}
 
         {isMarcasSection ? (

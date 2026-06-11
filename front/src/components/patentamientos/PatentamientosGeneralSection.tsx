@@ -4,7 +4,6 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 
 type PatentamientosGeneralSectionProps = {
   data: PatentamientosDashboardGeneral;
-  year: number;
 };
 
 const formatInteger = (value: number) => value.toLocaleString("es-AR");
@@ -31,7 +30,6 @@ function DashboardCard({
 
 export default function PatentamientosGeneralSection({
   data,
-  year,
 }: PatentamientosGeneralSectionProps) {
   const hasTrend = data.trend.length > 0;
   const hasTopBrands = data.topBrands.length > 0;
