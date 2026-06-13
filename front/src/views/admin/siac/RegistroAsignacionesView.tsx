@@ -6,6 +6,7 @@ import {
   getRegistrosAsignaciones,
   updateRegistroAsignacion,
 } from "@/api/dms/registroAsignacionAPI";
+import { paths } from "@/routes/paths";
 import type {
   RegistroAsignacion,
   RegistroAsignacionInfoOperacion,
@@ -265,7 +266,7 @@ export default function RegistroAsignacionesView() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/registro-asignaciones/resumen"
+            to={paths.convencional.registroAsignacionesResumen}
               className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
             >
               <List size={16} strokeWidth={1.75} />

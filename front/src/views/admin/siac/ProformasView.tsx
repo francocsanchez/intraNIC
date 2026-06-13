@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import { exportProformaPdf, getProformas } from "@/api/dms/proformasAPI";
 import { formatDateAr } from "@/helpers/proformas";
+import { paths } from "@/routes/paths";
 import type { Proforma } from "@/types/index";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Eye, FileDown, FileText, Plus } from "lucide-react";
@@ -75,7 +76,7 @@ export default function ProformasView() {
           </div>
 
           <Link
-            to="/proformas/nueva"
+            to={paths.convencional.proformasNueva}
             className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-900"
           >
             <Plus size={16} />
@@ -127,7 +128,7 @@ export default function ProformasView() {
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
                       <Link
-                        to={`/proformas/${proforma._id}`}
+                    to={paths.convencional.proformasDetalle(proforma._id)}
                         className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
                       >
                         <Eye size={14} />

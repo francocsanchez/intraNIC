@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyRole } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { PowerOff, Shield } from "lucide-react";
+import { paths } from "@/routes/paths";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -37,13 +38,13 @@ export default function AdminLayout() {
             </Link>
 
             {canViewUsuarios ? (
-              <Link to="/usuarios" className="hover:text-gray-900 transition">
+              <Link to={paths.admin.usuarios} className="hover:text-gray-900 transition">
                 Usuarios
               </Link>
             ) : null}
 
             {canViewConfiguracion ? (
-              <Link to="/configuracion" className="hover:text-gray-900 transition">
+              <Link to={paths.admin.configuracion} className="hover:text-gray-900 transition">
                 Configuracion
               </Link>
             ) : null}

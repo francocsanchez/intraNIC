@@ -1,5 +1,6 @@
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -30,7 +31,7 @@ export default function AdministracionHubView() {
 
       <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {canViewReventas ? (
-          <Link to="/reventa-pendientes" className={cardClass}>
+          <Link to={paths.administracion.reventaPendientes} className={cardClass}>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
               <ReceiptText size={24} strokeWidth={1.5} />
             </div>
@@ -48,7 +49,7 @@ export default function AdministracionHubView() {
         )}
 
         {canViewListaPrevia ? (
-          <Link to="/pedido-unidades/lista-previa" className={cardClass}>
+          <Link to={paths.administracion.pedidoUnidadesListaPrevia} className={cardClass}>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
               <ClipboardList size={24} strokeWidth={1.5} />
             </div>
@@ -66,7 +67,7 @@ export default function AdministracionHubView() {
         )}
 
         {canViewFacturasAnticipo ? (
-          <Link to="/administracion/facturas-anticipo" className={cardClass}>
+          <Link to={paths.administracion.facturasAnticipo} className={cardClass}>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
               <FileWarning size={24} strokeWidth={1.5} />
             </div>

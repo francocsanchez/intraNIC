@@ -2,6 +2,7 @@ import Loading from "@/components/Loading";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import { createPreventa, getColores, getPreventaById, getVersiones, updatePreventa } from "@/api/dms/preventasAPI";
 import { toMonthInputValue } from "@/helpers/preventas";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -103,7 +104,7 @@ export default function PreventaFormView() {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["preventas"] });
       queryClient.invalidateQueries({ queryKey: ["preventas-resumen"] });
-      navigate("/preventas");
+      navigate(paths.convencional.preventas);
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
@@ -141,7 +142,7 @@ export default function PreventaFormView() {
               La unidad todavía no existe en el sistema; por eso se registra la necesidad comercial y el mes esperado de asignacion.
             </p>
           </div>
-          <Link to="/preventas" className="inline-flex items-center gap-2 text-sm font-semibold text-[#146b61] hover:text-[#128d80]">
+          <Link to={paths.convencional.preventas} className="inline-flex items-center gap-2 text-sm font-semibold text-[#146b61] hover:text-[#128d80]">
             <ArrowLeft size={16} />
             Volver al listado
           </Link>

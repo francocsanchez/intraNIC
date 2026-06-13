@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { createColor, getColores, updateColor } from "@/api/dms/preventasAPI";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -38,7 +39,7 @@ export default function ColorFormView() {
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["colores"] });
-      navigate("/preventas/colores");
+      navigate(paths.convencional.preventasColores);
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
@@ -63,7 +64,7 @@ export default function ColorFormView() {
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">{isEditing ? "Editar color" : "Nuevo color"}</h1>
           </div>
-          <Link to="/preventas/colores" className="inline-flex items-center gap-2 text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+          <Link to={paths.convencional.preventasColores} className="inline-flex items-center gap-2 text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
             <ArrowLeft size={16} />
             Volver
           </Link>

@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import { exportProformaPdf, getProformaById } from "@/api/dms/proformasAPI";
 import { formatCurrencyAr, formatPercentAr } from "@/helpers/proformas";
+import { paths } from "@/routes/paths";
 import type { Proforma } from "@/types/index";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, FileDown } from "lucide-react";
@@ -65,7 +66,7 @@ export default function ProformaDetailView() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/proformas"
+          to={paths.convencional.proformas}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
             >
               <ArrowLeft size={16} />

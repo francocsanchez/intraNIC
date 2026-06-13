@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { deleteColor, getColores } from "@/api/dms/preventasAPI";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Palette, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -44,7 +45,7 @@ export default function ColoresView() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Catalogo</p>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Colores</h1>
           </div>
-          <Link to="/preventas/colores/nuevo" className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]">
+          <Link to={paths.convencional.preventasColoresNuevo} className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]">
             <Plus size={16} />
             Nuevo color
           </Link>
@@ -81,7 +82,7 @@ export default function ColoresView() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
-                      <Link to={`/preventas/colores/${color._id}/editar`} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">
+                    <Link to={paths.convencional.preventasColoresEditar(color._id)} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">
                         <Pencil size={14} />
                         Editar
                       </Link>

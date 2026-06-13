@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import { textToColor } from "@/helpers/colores";
 import { getAsignaciones } from "@/api/dms/dmsAPI";
+import { paths } from "@/routes/paths";
 
 const MESES = [
   { label: "ENERO", value: 1 },
@@ -155,7 +156,7 @@ export default function AsignacionesView() {
           <div className="flex items-center gap-3 self-start">
             {canManagePedidos ? (
               <Link
-                to="/pedido-unidades"
+              to={paths.convencional.pedidoUnidades}
                 className="rounded-lg bg-[#15aa9a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
               >
                 Solicitar unidades

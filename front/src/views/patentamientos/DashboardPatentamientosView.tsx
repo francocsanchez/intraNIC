@@ -16,6 +16,7 @@ import {
   getPatentamientosTopMarcasZonaNic,
   getPatentamientosToyotaEvolution,
 } from "@/services/patentamientosDashboardService";
+import { paths } from "@/routes/paths";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { BarChart3, FileSpreadsheet, LayoutGrid, LineChart, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -137,7 +138,7 @@ export default function DashboardPatentamientosView() {
   }, [firstError]);
 
   if (!isValidSection) {
-    return <Navigate to="/patentamientos/dashboard/general" replace />;
+    return <Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />;
   }
 
   if (isLoading) return <Loading />;
@@ -163,7 +164,7 @@ export default function DashboardPatentamientosView() {
           </p>
           <div className="mt-5">
             <Link
-              to="/patentamientos/importar"
+              to={paths.analisis.patentamientos.importar}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
               <FileSpreadsheet size={16} />
@@ -183,7 +184,7 @@ export default function DashboardPatentamientosView() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
-              to="/patentamientos/importar"
+              to={paths.analisis.patentamientos.importar}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
               <FileSpreadsheet size={16} />

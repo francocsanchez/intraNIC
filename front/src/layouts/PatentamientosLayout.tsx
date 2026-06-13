@@ -1,15 +1,16 @@
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { ChevronLeft, FileSpreadsheet } from "lucide-react";
 import { Link, NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 const dashboardSections = [
-  { key: "general", label: "General", to: "/patentamientos/dashboard/general" },
-  { key: "marcas", label: "Marcas", to: "/patentamientos/dashboard/marcas" },
-  { key: "pickup", label: "Pickup", to: "/patentamientos/dashboard/pickup" },
-  { key: "suv", label: "SUV", to: "/patentamientos/dashboard/suv" },
-  { key: "b-suv", label: "B-SUV", to: "/patentamientos/dashboard/b-suv" },
-  { key: "inscripcion-unidades", label: "Traslado de unidades", to: "/patentamientos/dashboard/inscripcion-unidades" },
+  { key: "general", label: "General", to: paths.analisis.patentamientos.dashboardGeneral },
+  { key: "marcas", label: "Marcas", to: paths.analisis.patentamientos.dashboardMarcas },
+  { key: "pickup", label: "Pickup", to: paths.analisis.patentamientos.dashboardPickup },
+  { key: "suv", label: "SUV", to: paths.analisis.patentamientos.dashboardSuv },
+  { key: "b-suv", label: "B-SUV", to: paths.analisis.patentamientos.dashboardBSuv },
+  { key: "inscripcion-unidades", label: "Traslado de unidades", to: paths.analisis.patentamientos.dashboardInscripcionUnidades },
 ];
 
 export default function PatentamientosLayout() {
@@ -22,7 +23,7 @@ export default function PatentamientosLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const isImportView = location.pathname === "/patentamientos/importar";
+  const isImportView = location.pathname === paths.analisis.patentamientos.importar;
 
   return (
     <div className="min-h-screen bg-[#f5f5f3]">
@@ -41,7 +42,7 @@ export default function PatentamientosLayout() {
 
             {!isImportView ? (
               <Link
-                to="/patentamientos/importar"
+                to={paths.analisis.patentamientos.importar}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
                 <FileSpreadsheet size={16} />

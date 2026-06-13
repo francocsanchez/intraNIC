@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { deleteVersion, getVersiones } from "@/api/dms/preventasAPI";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bookmark, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -44,7 +45,7 @@ export default function VersionesView() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Catalogo</p>
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Versiones</h1>
           </div>
-          <Link to="/preventas/versiones/nuevo" className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]">
+          <Link to={paths.convencional.preventasVersionesNuevo} className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]">
             <Plus size={16} />
             Nueva version
           </Link>
@@ -77,7 +78,7 @@ export default function VersionesView() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
-                      <Link to={`/preventas/versiones/${version._id}/editar`} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">
+                    <Link to={paths.convencional.preventasVersionesEditar(version._id)} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">
                         <Pencil size={14} />
                         Editar
                       </Link>

@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { BookMarked, CalendarClock, CircleUserRound, Handshake, PowerOff, Wrench } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -26,6 +27,10 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
   };
 
   const canViewOperativeMenu = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
+  const profilePath = negocio === "convencional" ? paths.convencional.miPerfil : `/mi-perfil/${negocio}`;
+  const misOperacionesPath = negocio === "convencional" ? paths.convencional.misOperaciones : `/mis-operaciones/${negocio}`;
+  const misReservasPath = negocio === "convencional" ? paths.convencional.misReservas : `/mis-reservas/${negocio}`;
+  const miListaEsperaPath = negocio === "convencional" ? paths.convencional.miListaEspera : `/mi-lista-espera/${negocio}`;
   return (
     <div className="flex items-center gap-6 text-sm text-gray-600">
       {/* Perfil */}
@@ -39,7 +44,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
           <MenuItem>
             {({ focus }) => (
               <Link
-                to={`/mi-perfil/${negocio}`}
+                to={profilePath}
                 className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
               >
                 <Wrench size={16} strokeWidth={1.25} />
@@ -52,7 +57,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
             <MenuItem>
               {({ focus }) => (
                 <Link
-                  to={`/mis-operaciones/${negocio}`}
+                  to={misOperacionesPath}
                   className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                 >
                   <Handshake size={16} strokeWidth={1.25} />
@@ -66,7 +71,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
             <MenuItem>
               {({ focus }) => (
                 <Link
-                  to={`/mis-reservas/${negocio}`}
+                  to={misReservasPath}
                   className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                 >
                   <BookMarked size={16} strokeWidth={1.25} />
@@ -80,7 +85,7 @@ export default function MenuAdminNavbarNic({ negocio }: NavBarProps) {
             <MenuItem>
               {({ focus }) => (
                 <Link
-                  to={`/mi-lista-espera/${negocio}`}
+                  to={miListaEsperaPath}
                   className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                 >
                   <CalendarClock size={16} strokeWidth={1.25} />

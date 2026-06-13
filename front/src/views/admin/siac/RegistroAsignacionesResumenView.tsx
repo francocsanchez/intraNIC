@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { getResumenRegistroAsignaciones } from "@/api/dms/registroAsignacionAPI";
+import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
@@ -78,7 +79,7 @@ export default function RegistroAsignacionesResumenView() {
       params.set("modelo", modelo);
     }
 
-    return `/registro-asignaciones?${params.toString()}`;
+    return `${paths.convencional.registroAsignaciones}?${params.toString()}`;
   };
 
   return (
@@ -95,7 +96,7 @@ export default function RegistroAsignacionesResumenView() {
           </div>
 
           <Link
-            to="/registro-asignaciones"
+            to={paths.convencional.registroAsignaciones}
             className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
           >
             <CalendarDays size={16} strokeWidth={1.75} />

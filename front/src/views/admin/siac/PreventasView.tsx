@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import { deletePreventa, getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
+import { paths } from "@/routes/paths";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -74,7 +75,7 @@ export default function PreventasView() {
           <div className="flex flex-wrap gap-3">
             {canViewResumen && (
               <Link
-                to="/preventas/resumen"
+                to={paths.convencional.preventasResumen}
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#9fd6cf] bg-white px-4 py-3 text-sm font-semibold text-[#146b61] transition hover:bg-[#f4fbfa]"
               >
                 <ClipboardList size={16} />
@@ -83,7 +84,7 @@ export default function PreventasView() {
             )}
             {canCreatePreventa && (
               <Link
-                to="/preventas/nueva"
+                to={paths.convencional.preventasNueva}
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]"
               >
                 <Plus size={16} />
@@ -118,7 +119,7 @@ export default function PreventasView() {
             <p className="mt-1 text-sm text-gray-500">Las preventas asignadas se ocultan de esta vista, pero no se eliminan.</p>
           </div>
           {canViewAsignadas && (
-            <Link to="/preventas/asignadas" className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+              <Link to={paths.convencional.preventasAsignadas} className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
               Ver asignadas
             </Link>
           )}
@@ -174,7 +175,7 @@ export default function PreventasView() {
                       <div className="flex justify-center gap-2">
                         {canEditPreventa && (
                           <Link
-                            to={`/preventas/${preventa._id}/editar`}
+                        to={paths.convencional.preventasEditar(preventa._id)}
                             className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
                           >
                             <Pencil size={14} />

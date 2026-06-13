@@ -18,7 +18,8 @@
       "@/helpers/*": ["helpers/*"],
       "@/components/*": ["components/*"],
       "@/hooks/*": ["hooks/*"],
-      "@/services/*": ["services/*"]
+      "@/services/*": ["services/*"],
+      "@/routes/*": ["routes/*"]
     },
 
     /* Bundler mode */

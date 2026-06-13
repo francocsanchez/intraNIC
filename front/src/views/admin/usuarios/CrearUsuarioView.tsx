@@ -1,5 +1,6 @@
 import { createUsuario } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
+import { paths } from "@/routes/paths";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -44,7 +45,7 @@ export default function CreateUsuarioView() {
       toast.error(error.message)},
     onSuccess: (response: { message: string }) => {
       toast.success(response.message);
-      navigate("/usuarios");
+      navigate(paths.admin.usuarios);
     },
   });
 
@@ -58,7 +59,7 @@ export default function CreateUsuarioView() {
         </div>
 
         <Link
-          to="/usuarios"
+          to={paths.admin.usuarios}
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Volver

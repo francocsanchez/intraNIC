@@ -1,6 +1,7 @@
 import { getConfiguracion, updateConfiguracionConvencional } from "@/api/configuracionAPI";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import CheckListVendedores from "@/components/configuracion/CheckListVendedores";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -77,7 +78,7 @@ export default function EditConfiguracionConvView() {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["configuracion"] });
       toast.success(response.message);
-      navigate("/configuracion");
+      navigate(paths.admin.configuracion);
     },
   });
 
@@ -151,7 +152,7 @@ export default function EditConfiguracionConvView() {
         </div>
 
         <Link
-          to="/configuracion"
+          to={paths.admin.configuracion}
           className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
         >
           Volver

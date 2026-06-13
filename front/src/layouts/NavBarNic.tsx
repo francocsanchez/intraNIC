@@ -1,5 +1,6 @@
 import MenuAdminNavbarNic from "@/components/MenuAdminNavbarNic";
 import useRoleGuard from "@/hooks/useRoleGuard";
+import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Archive, BookMarked, ChartBarBig, ClipboardList, MonitorCog, Package, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -17,6 +18,10 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const { allowed: buttonRegistroAsignaciones } = useRoleGuard(["admin", "gerente", "stock"]);
   const { allowed: buttonPedidoMensual } = useRoleGuard(["admin", "gerente", "stock"]);
 
+  const disponiblePath = negocio === "convencional" ? paths.convencional.stockDisponible : `/stock/disponible/${negocio}`;
+  const reservasPath = negocio === "convencional" ? paths.convencional.stockReservado : `/stock/reservado/${negocio}`;
+  const guardadoPath = negocio === "convencional" ? paths.convencional.stockGuardado : `/stock/guardado/${negocio}`;
+
   return (
     <header className="bg-white border-b border-gray-200 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -27,20 +32,20 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-8 text-sm font-medium text-gray-600">
-          <Link to={`/stock/disponible/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+          <Link to={disponiblePath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
             <Package size={16} strokeWidth={1.5} />
             Disponible
           </Link>
 
           {buttonReservas ? (
-            <Link to={`/stock/reservado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Link to={reservasPath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <BookMarked size={16} strokeWidth={1.5} />
               Reservas
             </Link>
           ) : null}
 
           {buttonGuardado ? (
-            <Link to={`/stock/guardado/${negocio}`} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+            <Link to={guardadoPath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <Archive size={16} strokeWidth={1.5} />
               Guardado
             </Link>
@@ -58,7 +63,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/ranking-convencional"
+                        to={paths.convencional.ranking}
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <Trophy size={16} strokeWidth={1.5} />
@@ -72,7 +77,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/promedio-convencional"
+                        to={paths.convencional.promedio}
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <ChartBarBig size={16} strokeWidth={1.5} />
@@ -97,7 +102,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/asignaciones"
+                        to={paths.convencional.asignaciones}
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <MonitorCog size={16} strokeWidth={1.5} />
@@ -111,7 +116,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/registro-asignaciones"
+                        to={paths.convencional.registroAsignaciones}
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <ClipboardList size={16} strokeWidth={1.5} />
@@ -125,7 +130,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   <MenuItem>
                     {({ focus }) => (
                       <Link
-                        to="/preventas/pedido-mensual"
+                        to={paths.convencional.pedidoMensual}
                         className={`px-4 py-2 text-sm flex items-center gap-2 relative ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                       >
                         <Package size={16} strokeWidth={1.5} />

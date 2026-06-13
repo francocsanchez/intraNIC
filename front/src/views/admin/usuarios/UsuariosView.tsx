@@ -2,6 +2,7 @@ import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyRole } from "@/helpers/access";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -113,7 +114,7 @@ export default function UsuariosView() {
 
         {canManageUsers ? (
           <Link
-            to="/usuarios/crear"
+            to={paths.admin.crearUsuario}
             className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
           >
             Crear usuario
@@ -234,7 +235,7 @@ export default function UsuariosView() {
                           </button>
 
                           <Link
-                            to={`/usuarios/${u._id}/editar`}
+                    to={paths.admin.editarUsuario(u._id)}
                             className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                           >
                             Editar

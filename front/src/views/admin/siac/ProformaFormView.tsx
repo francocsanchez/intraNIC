@@ -2,6 +2,7 @@ import Loading from "@/components/Loading";
 import { createProforma } from "@/api/dms/proformasAPI";
 import { getVersiones } from "@/api/dms/preventasAPI";
 import { buildUnitRows, formatCurrencyAr, formatPercentAr } from "@/helpers/proformas";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -62,7 +63,7 @@ export default function ProformaFormView() {
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["proformas"] });
-      navigate(`/proformas/${response.data._id}`);
+      navigate(paths.convencional.proformasDetalle(response.data._id));
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
@@ -114,7 +115,7 @@ export default function ProformaFormView() {
               Cargá los datos comerciales, agregá una o varias unidades y revisá los cálculos antes de guardar.
             </p>
           </div>
-          <Link to="/proformas" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
+          <Link to={paths.convencional.proformas} className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
             <ArrowLeft size={16} />
             Volver al listado
           </Link>

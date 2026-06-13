@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import { getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
+import { paths } from "@/routes/paths";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -52,7 +53,7 @@ export default function PreventasAsignadasView() {
             <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Preventas asignadas</h1>
             <p className="mt-2 text-sm text-gray-500">Esta vista conserva el historial de registros ya asignados.</p>
           </div>
-          <Link to="/preventas" className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+        <Link to={paths.convencional.preventas} className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
             Volver a pendientes
           </Link>
         </div>

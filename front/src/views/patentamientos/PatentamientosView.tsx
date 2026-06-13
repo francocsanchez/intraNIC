@@ -1,4 +1,5 @@
 import { importPatentamientosFile, type PatentamientosImportType } from "@/services/patentamientosService";
+import { paths } from "@/routes/paths";
 import { FileSpreadsheet, LoaderCircle, UploadCloud } from "lucide-react";
 import { useRef, useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
@@ -91,7 +92,7 @@ export default function PatentamientosView() {
             </p>
           </div>
           <Link
-            to="/patentamientos/dashboard"
+            to={paths.analisis.patentamientos.dashboard}
             className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-100"
           >
             Ver Dashboard Patentamientos

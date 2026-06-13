@@ -1,6 +1,7 @@
 import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { BarChart3, ClipboardList, FileWarning, Home, PowerOff, ReceiptText, Shield, Upload } from "lucide-react";
 import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
 
@@ -32,7 +33,7 @@ export default function AdminModuleLayout() {
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {canViewAdminHome && (
-              <Link className="flex items-center gap-2 text-gray-700 font-semibold" to="/administracion">
+              <Link className="flex items-center gap-2 text-gray-700 font-semibold" to={paths.administracion.home}>
                 <Shield size={18} strokeWidth={1.5} />
                 Administracion
               </Link>
@@ -46,7 +47,7 @@ export default function AdminModuleLayout() {
 
           <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm font-medium text-gray-600">
             {canViewReventas && (
-              <Link to="/reventa-pendientes" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+              <Link to={paths.administracion.reventaPendientes} className="inline-flex items-center gap-1 hover:text-gray-900 transition">
                 <ReceiptText size={15} strokeWidth={1.5} />
                 Pendientes de reventas
               </Link>
@@ -54,7 +55,7 @@ export default function AdminModuleLayout() {
 
             {canViewPedidoUnidades && (
               <Link
-                to="/pedido-unidades/lista-previa"
+                to={paths.administracion.pedidoUnidadesListaPrevia}
                 className="inline-flex items-center gap-1 hover:text-gray-900 transition"
               >
                 <ClipboardList size={15} strokeWidth={1.5} />
@@ -64,7 +65,7 @@ export default function AdminModuleLayout() {
 
             {canViewFacturasAnticipo && (
               <Link
-                to="/administracion/facturas-anticipo"
+                to={paths.administracion.facturasAnticipo}
                 className="inline-flex items-center gap-1 hover:text-gray-900 transition"
               >
                 <FileWarning size={15} strokeWidth={1.5} />
@@ -73,14 +74,14 @@ export default function AdminModuleLayout() {
             )}
 
             {canViewOperaciones && (
-              <Link to="/operaciones" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+              <Link to={paths.analisis.operaciones} className="inline-flex items-center gap-1 hover:text-gray-900 transition">
                 <BarChart3 size={15} strokeWidth={1.5} />
                 Operaciones
               </Link>
             )}
 
             {canViewPatentamientos && (
-              <Link to="/patentamientos" className="inline-flex items-center gap-1 hover:text-gray-900 transition">
+              <Link to={paths.analisis.patentamientos.home} className="inline-flex items-center gap-1 hover:text-gray-900 transition">
                 <Upload size={15} strokeWidth={1.5} />
                 Patentamientos
               </Link>

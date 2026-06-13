@@ -9,6 +9,7 @@ import {
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Plus, Trash2 } from "lucide-react";
@@ -488,7 +489,7 @@ export default function PedidoUnidadesView() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/pedido-unidades/lista-previa"
+              to={paths.administracion.pedidoUnidadesListaPrevia}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
             >
               <ClipboardList size={16} strokeWidth={1.75} />
@@ -497,7 +498,7 @@ export default function PedidoUnidadesView() {
 
             {canOpenAsignaciones && (
               <Link
-                to="/asignaciones"
+                to={paths.convencional.asignaciones}
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
               >
                 <CalendarDays size={16} strokeWidth={1.75} />

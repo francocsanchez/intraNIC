@@ -2,6 +2,7 @@ import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
+import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
@@ -71,8 +72,8 @@ export default function ConfiguracionView() {
       canEdit: canEditConfiguracion && hasAnyCompany(user, ["convencional"]),
       catalogos: canManagePreventasCatalogs
         ? [
-            { label: "Colores", to: "/preventas/colores" },
-            { label: "Versiones", to: "/preventas/versiones" },
+            { label: "Colores", to: paths.convencional.preventasColores },
+            { label: "Versiones", to: paths.convencional.preventasVersiones },
           ]
         : [],
     },
@@ -148,7 +149,7 @@ export default function ConfiguracionView() {
 
               {sistema.canEdit ? (
                 <Link
-                  to={`/configuracion/${sistema.slug}/editar`}
+                  to={`/admin/configuracion/${sistema.slug}/editar`}
                   className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
                 >
                   Editar
