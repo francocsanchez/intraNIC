@@ -2,18 +2,25 @@ import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import {
-  BarChart3,
-  Car,
-  CarFront,
-  ClipboardList,
-  Cog,
-  FileText,
-  LogOut,
-  Motorbike,
-  Upload,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+
+type HomeItem = {
+  label: string;
+  to: string;
+  enabled: boolean;
+};
+
+type HomeSection = {
+  title: string;
+  items: HomeItem[];
+};
+
+const buttonClass =
+  "flex h-24 w-24 items-center justify-center border border-gray-300 bg-white p-3 text-center text-xs font-medium leading-tight text-gray-800 break-words transition-colors hover:bg-gray-100";
+
+const disabledButtonClass =
+  "flex h-24 w-24 items-center justify-center border border-gray-200 bg-gray-100 p-3 text-center text-xs font-medium leading-tight text-gray-400 break-words";
 
 export default function Inicio() {
   const navigate = useNavigate();
@@ -28,8 +35,8 @@ export default function Inicio() {
 
   const companies = user.company ?? [];
   const hasNIC = companies.includes("convencional");
-  const hasUSED = companies.includes("usados");
-  const hasLIESS = companies.includes("liess");
+  const hasUsed = companies.includes("usados");
+  const hasLiess = companies.includes("liess");
   const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
   const hasAdministracion = hasAnyRole(user, [
     "admin",
@@ -44,11 +51,69 @@ export default function Inicio() {
   const hasOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
   const hasPatentamientos = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
 
-  const baseCard =
-    "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center text-center";
-
-  const disabledCard =
-    "rounded-2xl border border-gray-200 bg-gray-100 p-6 shadow-sm flex flex-col items-center justify-center text-center opacity-60 cursor-not-allowed";
+  const sections: HomeSection[] = [
+    {
+      title: "Unidades",
+      items: [
+        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasNIC },
+        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasUsed },
+        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasLiess },
+      ],
+    },
+    {
+      title: "Gestion de stock convencional",
+      items: [
+        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasNIC },
+        {
+          label: "Registro asignaciones",
+          to: paths.convencional.registroAsignaciones,
+          enabled: hasNIC,
+        },
+        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasNIC },
+        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasNIC },
+      ],
+    },
+    {
+      title: "Gestion de stock usados",
+      items: [
+        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasUsed },
+        {
+          label: "Pendiente documentacion",
+          to: paths.usados.stockPendienteDocumentacion,
+          enabled: hasUsed,
+        },
+        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasUsed },
+      ],
+    },
+    {
+      title: "Comercial",
+      items: [
+        { label: "Preventas", to: paths.convencional.preventas, enabled: hasPreventas },
+        { label: "Proformas", to: paths.convencional.proformas, enabled: hasProformas },
+        { label: "Administracion", to: paths.administracion.home, enabled: hasAdministracion },
+      ],
+    },
+    {
+      title: "Analisis",
+      items: [
+        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasOperaciones },
+        { label: "Ranking", to: paths.convencional.ranking, enabled: hasNIC },
+        { label: "Promedio", to: paths.convencional.promedio, enabled: hasNIC },
+        {
+          label: "Patentamientos",
+          to: paths.analisis.patentamientos.dashboardMarcas,
+          enabled: hasPatentamientos,
+        },
+      ],
+    },
+    {
+      title: "Sistema",
+      items: [
+        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasSystem },
+        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasSystem },
+      ],
+    },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("AUTH_TOKEN");
@@ -56,212 +121,43 @@ export default function Inicio() {
   };
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-4xl">
-        <div className="flex items-center justify-between mb-10">
-          <div className="text-center w-full">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Unidades de negocio</h1>
-            <p className="text-sm text-gray-500 mt-2">Selecciona la unidad de negocio para continuar.</p>
+    <div className="min-h-[70vh] bg-white px-3 py-3">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+        <div className="flex items-start justify-between gap-3 border-b border-gray-200 pb-2">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-gray-900">Modulos</h1>
           </div>
 
           <button
             onClick={handleLogout}
-            className="absolute right-6 top-6 inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
           >
-            <LogOut size={14} strokeWidth={1.8} />
+            <LogOut size={13} strokeWidth={1.8} />
             Cerrar sesion
           </button>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {hasNIC ? (
-              <Link to={paths.convencional.stockDisponible} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <CarFront size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {sections.map((section) => (
+            <section key={section.title} className="border border-gray-200 bg-white p-2">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-gray-700">{section.title}</h2>
 
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Convencional</h2>
-                <p className="text-sm text-gray-500 mt-1">Gestion de vehiculos nuevos</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100">
-                  <CarFront size={26} strokeWidth={1.5} className="text-gray-500" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Convencional</h2>
-                <p className="text-sm text-gray-500 mt-1">Gestion de vehiculos nuevos</p>
+              <div className="flex flex-wrap gap-2">
+                {section.items.map((item) =>
+                  item.enabled ? (
+                    <Link key={item.label} to={item.to} className={buttonClass}>
+                      <span className="max-w-full">{item.label}</span>
+                    </Link>
+                  ) : (
+                    <span key={item.label} className={disabledButtonClass}>
+                      <span className="max-w-full">{item.label}</span>
+                    </span>
+                  ),
+                )}
               </div>
-            )}
-
-            {hasUSED ? (
-              <Link to={paths.usados.stockDisponible} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <Car size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Usados</h2>
-                <p className="text-sm text-gray-500 mt-1">Gestion de vehiculos usados</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100">
-                  <Car size={26} strokeWidth={1.5} className="text-gray-500" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Usados</h2>
-                <p className="text-sm text-gray-500 mt-1">Gestion de vehiculos usados</p>
-              </div>
-            )}
-
-            {hasLIESS ? (
-              <Link to={paths.liess.stockDisponible("nuevos")} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <Motorbike size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Liess</h2>
-                <p className="text-sm text-gray-500 mt-1">Motos y monopatines</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <Motorbike size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Liess</h2>
-                <p className="text-sm text-gray-500 mt-1">Motos y monopatines</p>
-              </div>
-            )}
-
-            {hasPreventas ? (
-              <Link to={paths.convencional.preventas} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <ClipboardList size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Preventas</h2>
-                <p className="text-sm text-gray-500 mt-1">Demanda pendiente de asignacion</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <ClipboardList size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Preventas</h2>
-                <p className="text-sm text-gray-500 mt-1">Demanda pendiente de asignacion</p>
-              </div>
-            )}
-
-            {hasProformas ? (
-              <Link to={paths.convencional.proformas} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <FileText size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Proformas</h2>
-                <p className="text-sm text-gray-500 mt-1">Cotizaciones con exportacion PDF</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <FileText size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Proformas</h2>
-                <p className="text-sm text-gray-500 mt-1">Cotizaciones con exportacion PDF</p>
-              </div>
-            )}
-
-            {hasOperaciones ? (
-              <Link to={paths.analisis.operaciones} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <BarChart3 size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Operaciones</h2>
-                <p className="text-sm text-gray-500 mt-1">Dashboard de seguimiento comercial</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <BarChart3 size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Operaciones</h2>
-                <p className="text-sm text-gray-500 mt-1">Dashboard de seguimiento comercial</p>
-              </div>
-            )}
-
-            {hasPatentamientos ? (
-              <Link to={paths.analisis.patentamientos.dashboardMarcas} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <Upload size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Patentamientos</h2>
-                <p className="text-sm text-gray-500 mt-1">Informe y comparativas visuales de patentamientos</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <Upload size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Patentamientos</h2>
-                <p className="text-sm text-gray-500 mt-1">Informe y comparativas visuales de patentamientos</p>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {hasSystem ? (
-              <Link to={paths.admin.configuracion} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <Cog size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Sistema</h2>
-                <p className="text-sm text-gray-500 mt-1">Config del sistema</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <Cog size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Sistema</h2>
-                <p className="text-sm text-gray-500 mt-1">Config del sistema</p>
-              </div>
-            )}
-
-            {hasAdministracion ? (
-              <Link to={paths.administracion.home} className={`${baseCard} hover:shadow-md transition group`}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition">
-                  <Cog size={26} strokeWidth={1.5} className="text-gray-900" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
-                <p className="text-sm text-gray-500 mt-1">Accesos administrativos</p>
-              </Link>
-            ) : (
-              <div className={disabledCard}>
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-gray-200">
-                  <Cog size={26} strokeWidth={1.5} className="text-gray-600" />
-                </div>
-
-                <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Administracion</h2>
-                <p className="text-sm text-gray-500 mt-1">Accesos administrativos</p>
-              </div>
-            )}
-          </div>
+            </section>
+          ))}
         </div>
-
-        <p className="text-center text-xs text-gray-500 mt-8">
-          Si no posee habilitada alguna unidad de negocio, comuniquese con el administrador del sistema.
-        </p>
       </div>
     </div>
   );
