@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
+import { formatDateAr } from "@/helpers/proformas";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import type { MisReservasResponse } from "@/types/index";
@@ -17,6 +18,15 @@ const getDiasReservada = (fecha: string) => {
   const now = Date.now();
   const diff = now - start;
   return Math.floor(diff / (1000 * 60 * 60 * 24));
+};
+
+const formatReservaDate = (value?: string | null) => {
+  if (!value) return "-";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  return formatDateAr(value);
 };
 
 export default function MisReservasViewContent({
@@ -127,8 +137,8 @@ export default function MisReservasViewContent({
                       <td className="px-4 py-4">{reserva.ubicacion ?? "EN PRODUCCION"}</td>
                       <td className="px-4 py-4">{reserva.chasis}</td>
                       <td className="px-4 py-4">{reserva.sucursal}</td>
-                      <td className="px-4 py-4">{reserva.fechaReserva}</td>
-                      <td className="px-4 py-4">{reserva.fechaRecepcion}</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaReserva)}</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaRecepcion)}</td>
                       <td className="px-4 py-4">
                         <button
                           type="button"

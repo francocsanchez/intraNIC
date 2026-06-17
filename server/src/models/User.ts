@@ -2,13 +2,11 @@ import mongoose, { Schema, Document } from "mongoose";
 import { moduleKeys, type UserModules } from "../constants/modules";
 
 export const userRole = {
-  ADMIN: "admin",
   GERENTE: "gerente",
   SUPERVISOR: "supervisor",
   VENDEDOR: "vendedor",
   SUPER_ADMIN: "superAdmin",
   STOCK: "stock",
-  REVENTA: "reventa",
   ADMINISTRACION: "administracion",
 } as const;
 

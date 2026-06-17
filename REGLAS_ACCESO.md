@@ -22,6 +22,7 @@ La logica vigente es:
   - `superAdmin`
   - `vendedor`
   - `supervisor`
+  - `gerente`
   - `administracion`
   - `stock`
 
@@ -107,7 +108,7 @@ Estado actual de definicion funcional:
 - `administracion`: definido e implementado
 - `stock`: definido e implementado
 - `supervisor`: definido e implementado
-- `gerente`
+- `gerente`: definido e implementado
 - `vendedor`: definido e implementado
 - `superAdmin`: definido e implementado
 
@@ -336,13 +337,48 @@ Estado: definido
   - en la tabla principal de preventas debe ver la columna `Acciones`, pero no la columna `Asignado`
 
 ### Rol `gerente`
-Estado: pendiente
+Estado: definido
 
 - Objetivo del rol:
+  Usuario comercial con acceso ampliado equivalente a `vendedor` + `supervisor`, sumando acceso a asignaciones para consulta.
 - Modulos que puede ver:
+  - todos los modulos habilitados para `vendedor`
+  - todos los modulos habilitados para `supervisor`
+  - `asignaciones`
 - Modulos que puede operar:
+  - todos los modulos habilitados para `vendedor`
+  - todos los modulos habilitados para `supervisor`
+  - `asignaciones` en modo consulta
+- Accesos permitidos:
+  - todos los accesos permitidos para `vendedor`
+  - todos los accesos permitidos para `supervisor`
+  - `/gestion/convencional/asignaciones`
 - Acciones restringidas:
+  - no administra usuarios
+  - no administra configuracion
+  - no accede a pendientes de reventa
+  - no accede a lista previa
+  - no accede a facturas de anticipo
+  - no accede a registro de asignaciones
+  - no accede a pedido mensual
+  - no accede a pedido de unidades
+  - no accede a usados `no reparado`
+  - no accede a usados `pendiente documentacion`
+  - no accede a usados `ingresos`
+  - no accede a `patentamientos`
+  - no puede marcar preventas como asignadas
+  - no debe ver el boton `Solicitar unidades` dentro de `/gestion/convencional/asignaciones`
 - Observaciones:
+  - `gerente` hereda la suma funcional de `vendedor` + `supervisor`
+  - en preventas puede:
+    - ver el listado principal
+    - crear nuevas preventas
+    - editar preventas
+    - eliminar preventas
+  - en preventas no puede:
+    - asignarlas
+  - en `/gestion/convencional/asignaciones` puede acceder y consultar el tablero, pero no debe disparar el flujo hacia pedido de unidades desde esa pantalla
+  - desde backend, puede consultar el estado de pedido de una unidad para ver si fue pedida o no dentro de `Asignaciones`, sin que eso le habilite el acceso completo a `/gestion/convencional/pedido-unidades`
 
 ### Rol `superAdmin`
 Estado: definido
@@ -380,6 +416,6 @@ Hasta nuevo aviso:
 
 - los modulos siguen siendo la base principal de acceso
 - no se deben volver a introducir reglas por `company`
-- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `administracion` y `stock`
+- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion` y `stock`
 - no se deben volver a introducir reglas por otros `role` hasta definir formalmente la siguiente etapa
 - `superAdmin` siempre debe tener acceso total

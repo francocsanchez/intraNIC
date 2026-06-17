@@ -2,14 +2,22 @@ import { Router } from "express";
 import { PedidoUnidadController } from "../controllers/PedidoUnidadController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
+import {
+  authorizeAnyRoleAccess,
+  authorizeRoleAccess,
+} from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
 router.use(authenticate);
 
 router.get("/unidad/:interno", authorizeModules("pedidoUnidades"), authorizeRoleAccess("convencional.pedidoUnidades"), PedidoUnidadController.getInfoInterno);
-router.post("/estado-internos", authorizeModules("pedidoUnidades"), authorizeRoleAccess("convencional.pedidoUnidades"), PedidoUnidadController.getEstadoInternos);
+router.post(
+  "/estado-internos",
+  authorizeModules("pedidoUnidades", "asignaciones"),
+  authorizeAnyRoleAccess("convencional.pedidoUnidades", "convencional.asignaciones"),
+  PedidoUnidadController.getEstadoInternos,
+);
 router.post("/estado-internos-arribo", authorizeModules("pedidoUnidades"), authorizeRoleAccess("convencional.pedidoUnidades"), PedidoUnidadController.getEstadoInternosArribo);
 
 router.get("/previas", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.listPrevias);

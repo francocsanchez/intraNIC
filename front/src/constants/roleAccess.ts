@@ -5,7 +5,7 @@ type AuthUser = Usuario | null | undefined;
 
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "administracion", "stock"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -62,6 +62,29 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.preventasNueva,
     paths.convencional.ranking,
     paths.convencional.promedio,
+    paths.usados.stockDisponible,
+    paths.usados.stockReservado,
+    /^\/liess\/stock\/(nuevos|usados)$/,
+    paths.analisis.operaciones,
+  ],
+  gerente: [
+    paths.home,
+    paths.miPerfil,
+    paths.noAutorizado,
+    paths.convencional.stockDisponible,
+    paths.convencional.stockReservado,
+    paths.convencional.misOperaciones,
+    paths.convencional.misReservas,
+    paths.convencional.miListaEspera,
+    paths.convencional.proformas,
+    paths.convencional.proformasNueva,
+    /^\/convencional\/proformas\/[^/]+$/,
+    paths.convencional.preventas,
+    paths.convencional.preventasResumen,
+    paths.convencional.preventasNueva,
+    paths.convencional.ranking,
+    paths.convencional.promedio,
+    paths.convencional.asignaciones,
     paths.usados.stockDisponible,
     paths.usados.stockReservado,
     /^\/liess\/stock\/(nuevos|usados)$/,
@@ -163,7 +186,7 @@ export function hasPreventaActionAccess(user: AuthUser, action: PreventaAction) 
   }
 
   return activeRoles.some((role) => {
-    if (role === "supervisor") {
+    if (role === "supervisor" || role === "gerente") {
       return action === "create" || action === "edit" || action === "delete";
     }
 

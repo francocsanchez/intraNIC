@@ -15,6 +15,15 @@ type UsuarioFormProps = {
   errors: FieldErrors<UsuarioFormData>;
 };
 
+const roleOptions = [
+  { value: "vendedor", label: "Vendedor" },
+  { value: "gerente", label: "Gerente" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "superAdmin", label: "Super Admin" },
+  { value: "stock", label: "Stock" },
+  { value: "administracion", label: "Administracion" },
+] as const;
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-xs font-medium text-red-600">{message}</p>;
@@ -155,14 +164,11 @@ export default function UsuarioForm({ register, control, errors }: UsuarioFormPr
               required: "Debe seleccionar al menos un rol",
             })}
           >
-            <option value="vendedor">Vendedor</option>
-            <option value="gerente">Gerente</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="superAdmin">Super Admin</option>
-            <option value="stock">Stock</option>
-            <option value="reventa">Reventa</option>
-            <option value="administracion">Administracion</option>
-            <option value="admin">Admin</option>
+            {roleOptions.map((roleOption) => (
+              <option key={roleOption.value} value={roleOption.value}>
+                {roleOption.label}
+              </option>
+            ))}
           </select>
           <FieldError message={errors.role?.message as string | undefined} />
           <p className="text-xs text-gray-500">Usa Ctrl/Cmd + click para seleccionar multiples opciones.</p>
