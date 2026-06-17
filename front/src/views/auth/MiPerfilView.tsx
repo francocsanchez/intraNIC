@@ -1,7 +1,7 @@
 import { updateMyPassword } from "@/api/usuarioAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation } from "@tanstack/react-query";
-import { Building2, CircleUserRound, Hash, KeyRound, Mail, Smartphone } from "lucide-react";
+import { CircleUserRound, Hash, KeyRound, Mail, Smartphone } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -65,15 +65,10 @@ export default function MiPerfilView() {
         <p className="mt-2 text-sm text-gray-500">Resumen general de tu cuenta dentro del sistema.</p>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usuario</p>
           <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">{fullName || "Sin nombre"}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Companias</p>
-          <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">{user.company?.length ?? 0}</p>
         </article>
 
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -133,28 +128,6 @@ export default function MiPerfilView() {
         </section>
 
         <section className="space-y-6">
-          <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-200 px-6 py-4">
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">Unidad de negocio</h2>
-            </div>
-
-            <div className="flex flex-wrap gap-2 p-6">
-              {user.company?.length ? (
-                user.company.map((company: string) => (
-                  <span
-                    key={company}
-                    className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
-                  >
-                    <Building2 size={12} strokeWidth={1.5} />
-                    {company}
-                  </span>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Sin companias asignadas</p>
-              )}
-            </div>
-          </section>
-
           <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="border-b border-gray-200 px-6 py-4">
               <div className="flex items-center gap-2">

@@ -112,21 +112,6 @@ export default function ConfiguracionView() {
       editPath: paths.admin.configuracionUsadosEditar,
       catalogos: [],
     },
-    {
-      title: "Reventas",
-      slug: "reventa",
-      activo: config.sistemaActivoConvencional,
-      bloques: [
-        {
-          label: "Vendedores Reventas",
-          values: mapCodigos(config.vendedorReventasConvencional ?? []),
-        },
-      ],
-      canView: hasPathAccess(user, paths.admin.configuracionReventaEditar),
-      canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionReventaEditar),
-      editPath: paths.admin.configuracionReventaEditar,
-      catalogos: [],
-    },
   ];
 
   return (

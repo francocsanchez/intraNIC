@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 import NICLayout from "./layouts/NICLayout";
 import LiessLayout from "./layouts/LiessLayout";
-import ReventasLayout from "./layouts/ReventasLayout";
 import AdminModuleLayout from "./layouts/AdminModuleLayout";
 import PatentamientosLayout from "./layouts/PatentamientosLayout";
 import ProfileLayout from "./layouts/ProfileLayout";
@@ -17,7 +16,6 @@ import ConfiguracionView from "./views/admin/configuracion/ConfiguracionView";
 import VendedoresView from "./views/admin/configuracion/VendedoresView";
 import EditConfiguracionConvView from "./views/admin/configuracion/EditConfiguracionConvView";
 import EditConfiguracionUsadoView from "./views/admin/configuracion/EditConfiguracionUsadoView";
-import EditConfiguracionReventaView from "./views/admin/configuracion/EditConfiguracionReventaView";
 
 import UsuariosView from "./views/admin/usuarios/UsuariosView";
 import EditUsuarioView from "./views/admin/usuarios/EditUsuarioView";
@@ -53,7 +51,6 @@ import StockIngresoUsados from "./views/usados/StockIngresoUsados";
 import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
 import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalView";
 import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView";
-import StockDisponibleReventas from "./views/reventas/StockDisponibleReventas";
 import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
 import PedidoUnidadesPreviasView from "./views/admin/siac/PedidoUnidadesPreviasView";
 import FacturasAnticipoView from "./views/admin/siac/FacturasAnticipoView";
@@ -82,9 +79,6 @@ export default function Router() {
     <BrowserRouter>
       <Routes>
         <Route path={paths.login} element={<LoginUser />} />
-        <Route element={<ReventasLayout />}>
-          <Route path={paths.stockPublico} element={<StockDisponibleReventas />} />
-        </Route>
         <Route path="*" element={<NotFoundView />} />
 
         <Route element={<ProtectedRoute />}>
@@ -122,7 +116,6 @@ export default function Router() {
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
               <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
-              <Route path={paths.admin.configuracionReventaEditar} element={<EditConfiguracionReventaView />} />
             </Route>
           </Route>
 

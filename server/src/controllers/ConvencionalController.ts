@@ -15,7 +15,6 @@ import {
   misOperacionesQuery,
   operacionesConvencional,
   operacionesConvencionalRanking,
-  stockReventaQuery,
 } from "./querys/convencional.query";
 
 import { buildResumen, StockRow } from "../utils/reportUnidadesConvencional";
@@ -48,7 +47,7 @@ export class ConvencionalController {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
       }
 
       const vendedoresDisponibleConvencional = normalizeNumericList(config.vendedoresDisponibleConvencional);
@@ -77,7 +76,7 @@ export class ConvencionalController {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
       }
 
       const vendedoresStockGuardadoConvencional = normalizeNumericList(config.vendedoresStockGuardadoConvencional);
@@ -101,41 +100,12 @@ export class ConvencionalController {
     }
   };
 
-  static stockReventa = async (_req: Request, res: Response) => {
-    try {
-      const config = await Configuration.findOne().lean();
-
-      if (!config) {
-        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
-      }
-
-      const vendedorReventasConvencional = normalizeNumericList(config.vendedorReventasConvencional);
-
-      if (!vendedorReventasConvencional.length) {
-        return res.status(200).json({ data: [], resumen: buildResumen([]) });
-      }
-
-      const data = await sequelizeNIC.query<StockRow>(stockReventaQuery(), {
-        type: QueryTypes.SELECT,
-        replacements: { vendedores: vendedorReventasConvencional },
-      });
-
-      const resumen = buildResumen(data);
-
-      return res.status(200).json({ data, resumen });
-    } catch (error) {
-      logError("ConvencionalController.stockReventa");
-      console.error(error);
-      return res.status(500).json({ message: "Error del servidor SIAC" });
-    }
-  };
-
   static stockReservado = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne().lean();
 
       if (!config) {
-        return res.status(404).json({ message: "No existe configuración inicial" });
+        return res.status(404).json({ message: "No existe configuraciÃ³n inicial" });
       }
 
       const vendedoresReservasConvencional = normalizeNumericList(config.vendedoresReservasConvencional);
@@ -317,7 +287,7 @@ export class ConvencionalController {
     }
   };
 
-   static rankingOperaciones = async (req: Request, res: Response) => {
+  static rankingOperaciones = async (req: Request, res: Response) => {
     const { ano } = req.params;
     const anoNumber = parsePositiveInt(ano);
 

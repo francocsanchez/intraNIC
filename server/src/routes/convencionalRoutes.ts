@@ -6,14 +6,6 @@ import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
-/**
- *
- * @route GET /
- * @desc Listar stock de reventa.
- *
- */
-router.get("/stock-reventa", ConvencionalController.stockReventa);
-
 router.use(authenticate);
 
 /**

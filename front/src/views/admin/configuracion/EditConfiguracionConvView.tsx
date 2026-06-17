@@ -14,7 +14,6 @@ type ConfigConvForm = {
   vendedoresReservasConvencional: string[];
   vendedoresDisponibleConvencional: string[];
   vendedoresStockGuardadoConvencional: string[];
-  vendedorReventasConvencional: string[];
 };
 
 export default function EditConfiguracionConvView() {
@@ -50,7 +49,6 @@ export default function EditConfiguracionConvView() {
       vendedoresReservasConvencional: [],
       vendedoresDisponibleConvencional: [],
       vendedoresStockGuardadoConvencional: [],
-      vendedorReventasConvencional: [],
     },
   });
 
@@ -66,7 +64,6 @@ export default function EditConfiguracionConvView() {
       vendedoresReservasConvencional: (config.vendedoresReservasConvencional ?? []).map(String),
       vendedoresDisponibleConvencional: (config.vendedoresDisponibleConvencional ?? []).map(String),
       vendedoresStockGuardadoConvencional: (config.vendedoresStockGuardadoConvencional ?? []).map(String),
-      vendedorReventasConvencional: (config.vendedorReventasConvencional ?? []).map(String),
     });
   }, [config, reset]);
 
@@ -209,7 +206,7 @@ export default function EditConfiguracionConvView() {
             </label>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <CheckListVendedores
               title="Vendedores Reservas"
               subtitle="Habilita crear y gestionar reservas."
@@ -234,15 +231,6 @@ export default function EditConfiguracionConvView() {
               vendedoresNic={vendedoresNic}
               vendedores={config.vendedoresStockGuardadoConvencional}
               name="vendedoresStockGuardadoConvencional"
-              register={register}
-            />
-
-            <CheckListVendedores
-              title="Vendedores Reventas"
-              subtitle="Habilita visualizacion de stock de reventa."
-              vendedoresNic={vendedoresNic}
-              vendedores={config.vendedorReventasConvencional ?? []}
-              name="vendedorReventasConvencional"
               register={register}
             />
           </div>

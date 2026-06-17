@@ -3,7 +3,6 @@ export const paths = {
   login: "/login",
   miPerfil: "/mi-perfil",
   noAutorizado: "/no-autorizado",
-  stockPublico: "/stock-publico",
   admin: {
     usuarios: "/admin/usuarios",
     crearUsuario: "/admin/usuarios/crear",
@@ -11,7 +10,6 @@ export const paths = {
     configuracion: "/admin/configuracion",
     configuracionConvencionalEditar: "/admin/configuracion/convencional/editar",
     configuracionUsadosEditar: "/admin/configuracion/usados/editar",
-    configuracionReventaEditar: "/admin/configuracion/reventa/editar",
   },
   administracion: {
     home: "/administracion",
