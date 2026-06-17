@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/User";
+import { sanitizeUserModules, type UserModules } from "../constants/modules";
 
 declare global {
   namespace Express {
@@ -15,6 +16,7 @@ declare global {
         numberSaleLiess?: number;
         role: string[];
         company?: string[];
+        modules?: UserModules;
         enable: boolean;
       };
     }
@@ -99,6 +101,7 @@ export const authenticate = async (
       numberSaleNic: user.numberSaleNic,
       numberSaleLiess: user.numberSaleLiess,
       company: normalizeStringArray(user.company),
+      modules: sanitizeUserModules(user.modules),
     };
 
     next();

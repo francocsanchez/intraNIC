@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -49,35 +49,22 @@ export default function Inicio() {
     return <Navigate to={paths.login} replace />;
   }
 
-  const companies = user.company ?? [];
-  const hasNIC = companies.includes("convencional");
-  const hasUsed = companies.includes("usados");
-  const hasLiess = companies.includes("liess");
-
-  const hasSystem = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const hasAdministracion = hasAnyRole(user, ["admin", "administracion", "stock", "gerente", "supervisor", "vendedor"]);
-
-  const hasPreventas = hasNIC;
-  const hasProformas = true;
-  const hasOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
-  const hasPatentamientos = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
-
   const sections: HomeSection[] = [
     {
       title: "stock de unidades",
       icon: Warehouse,
       items: [
-        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasNIC, icon: CarFront },
-        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasUsed, icon: Car },
-        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasLiess, icon: Motorbike },
+        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasModuleAccess(user, "convencional"), icon: CarFront },
+        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasModuleAccess(user, "usados"), icon: Car },
+        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModuleAccess(user, "liess"), icon: Motorbike },
       ],
     },
     {
       title: "Comercial",
       icon: ShoppingCart,
       items: [
-        { label: "Preventas", to: paths.convencional.preventas, enabled: hasPreventas, icon: ClipboardList },
-        { label: "Proformas", to: paths.convencional.proformas, enabled: hasProformas, icon: FileText },
+        { label: "Preventas", to: paths.convencional.preventas, enabled: hasModuleAccess(user, "preventas"), icon: ClipboardList },
+        { label: "Proformas", to: paths.convencional.proformas, enabled: hasModuleAccess(user, "proformas"), icon: FileText },
       ],
     },
     {
@@ -87,19 +74,19 @@ export default function Inicio() {
         {
           label: "Reventa pendientes",
           to: paths.administracion.reventaPendientes,
-          enabled: hasAdministracion,
+          enabled: hasModuleAccess(user, "reventaPendientes"),
           icon: ClipboardClock,
         },
         {
           label: "Lista previa",
           to: paths.administracion.pedidoUnidadesListaPrevia,
-          enabled: hasAdministracion,
+          enabled: hasModuleAccess(user, "listaPrevia"),
           icon: ClipboardList,
         },
         {
           label: "Facturas anticipo",
           to: paths.administracion.facturasAnticipo,
-          enabled: hasAdministracion,
+          enabled: hasModuleAccess(user, "facturasAnticipo"),
           icon: CalendarRange,
         },
       ],
@@ -108,42 +95,42 @@ export default function Inicio() {
       title: "Gestion de stock convencional",
       icon: Settings2,
       items: [
-        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasNIC, icon: Wrench },
+        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasModuleAccess(user, "asignaciones"), icon: Wrench },
         {
           label: "Registro asignaciones",
           to: paths.convencional.registroAsignaciones,
-          enabled: hasNIC,
+          enabled: hasModuleAccess(user, "registroAsignaciones"),
           icon: ClipboardList,
         },
-        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasNIC, icon: Package },
-        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasNIC, icon: Package },
+        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasModuleAccess(user, "pedidoMensual"), icon: Package },
+        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModuleAccess(user, "pedidoUnidades"), icon: Package },
       ],
     },
     {
       title: "Gestion de stock usados",
       icon: Wrench,
       items: [
-        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasUsed, icon: Cog },
+        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasModuleAccess(user, "noReparado"), icon: Cog },
         {
           label: "Pendiente documentacion",
           to: paths.usados.stockPendienteDocumentacion,
-          enabled: hasUsed,
+          enabled: hasModuleAccess(user, "pendienteDocumentacion"),
           icon: ClipboardList,
         },
-        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasUsed, icon: Handshake },
+        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModuleAccess(user, "ingresos"), icon: Handshake },
       ],
     },
     {
       title: "Analisis",
       icon: BarChart3,
       items: [
-        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasOperaciones, icon: BarChart3 },
-        { label: "Ranking", to: paths.convencional.ranking, enabled: hasNIC, icon: Trophy },
-        { label: "Promedio", to: paths.convencional.promedio, enabled: hasNIC, icon: BarChart3 },
+        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModuleAccess(user, "operaciones"), icon: BarChart3 },
+        { label: "Ranking", to: paths.convencional.ranking, enabled: hasModuleAccess(user, "ranking"), icon: Trophy },
+        { label: "Promedio", to: paths.convencional.promedio, enabled: hasModuleAccess(user, "promedio"), icon: BarChart3 },
         {
           label: "Patentamientos",
           to: paths.analisis.patentamientos.dashboardMarcas,
-          enabled: hasPatentamientos,
+          enabled: hasModuleAccess(user, "patentamientos"),
           icon: BarChart3,
         },
       ],
@@ -152,8 +139,8 @@ export default function Inicio() {
       title: "Sistema",
       icon: Cog,
       items: [
-        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasSystem, icon: UserCog },
-        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasSystem, icon: Cog },
+        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModuleAccess(user, "usuarios"), icon: UserCog },
+        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModuleAccess(user, "configuracion"), icon: Cog },
       ],
     },
   ];

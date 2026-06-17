@@ -1,15 +1,14 @@
 import { Router } from "express";
 import { ColorController } from "../controllers/ColorController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 
 router.use(authenticate);
-router.use(authorizeCompanies("convencional"));
+router.use(authorizeModules("configuracion"));
 
-router.get("/", authorizeRoles("admin", "stock", "supervisor"), ColorController.list);
-router.use(authorizeRoles("admin", "stock"));
+router.get("/", ColorController.list);
 router.post("/", ColorController.create);
 router.put("/:id", ColorController.update);
 router.delete("/:id", ColorController.remove);

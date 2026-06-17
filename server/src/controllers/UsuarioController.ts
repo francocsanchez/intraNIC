@@ -5,6 +5,7 @@ import { checkPassword, hashPassword } from "../utils/hassPassword";
 import { generateJWT } from "../utils/jwt";
 import { sendPasswordResetEmail } from "../utils/mail";
 import { generateTemporaryPassword } from "../utils/password";
+import { sanitizeUserModules } from "../constants/modules";
 
 const normalizeCelular = (value: unknown) => {
   if (typeof value !== "string") {
@@ -136,6 +137,7 @@ export class UsuarioController {
 
       const usuario = await User.create({
         ...req.body,
+        modules: sanitizeUserModules(req.body?.modules),
         celular: toWhatsappCelular(celularInput),
         password: hashedPassword,
       });
@@ -231,6 +233,7 @@ export class UsuarioController {
         "celular",
         "role",
         "company",
+        "modules",
         "numberSaleNic",
         "numberSaleLiess",
         "enable",
@@ -252,7 +255,10 @@ export class UsuarioController {
 
       for (const field of allowedFields) {
         if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-          (usuario as any)[field] = req.body[field];
+          (usuario as any)[field] =
+            field === "modules"
+              ? sanitizeUserModules(req.body[field])
+              : req.body[field];
         }
       }
 

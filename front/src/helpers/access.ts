@@ -1,27 +1,13 @@
 import type { Usuario } from "@/types/index";
+import { normalizeModules, type ModuleKey } from "@/constants/modules";
 
 type AuthUser = Usuario | null | undefined;
 
-type AccessOptions = {
-  roles?: string[];
-  companies?: string[];
-};
-
-export function hasAnyRole(user: AuthUser, allowedRoles: string[]) {
-  const roles = user?.role ?? [];
-  return roles.some((role: string) => allowedRoles.includes(role));
+export function hasModuleAccess(user: AuthUser, moduleKey: ModuleKey) {
+  const modules = normalizeModules(user?.modules);
+  return Number(modules[moduleKey] ?? 0) === 1;
 }
 
-export function hasAnyCompany(user: AuthUser, allowedCompanies: string[]) {
-  const companies = user?.company ?? [];
-  return companies.some((company: string) => allowedCompanies.includes(company));
-}
-
-export function hasAccess(user: AuthUser, options: AccessOptions) {
-  const matchesRole = options.roles ? hasAnyRole(user, options.roles) : true;
-  const matchesCompany = options.companies
-    ? hasAnyCompany(user, options.companies)
-    : true;
-
-  return matchesRole && matchesCompany;
+export function hasAnyModuleAccess(user: AuthUser, allowedModules: ModuleKey[]) {
+  return allowedModules.some((moduleKey) => hasModuleAccess(user, moduleKey));
 }

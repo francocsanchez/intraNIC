@@ -11,8 +11,7 @@ import GestionUsadosLayout from "./layouts/GestionUsadosLayout";
 import AnalisisLayout from "./layouts/AnalisisLayout";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
-import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
-import RoleProtectedRoute from "./layouts/RoleProtectedRoute";
+import ModuleProtectedRoute from "./layouts/ModuleProtectedRoute";
 
 import ConfiguracionView from "./views/admin/configuracion/ConfiguracionView";
 import VendedoresView from "./views/admin/configuracion/VendedoresView";
@@ -95,90 +94,84 @@ export default function Router() {
           </Route>
           <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.usuarios} element={<UsuariosView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.crearUsuario} element={<CrearUsuarioView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<AdminLayout />}>
-              <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
-                <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
-              </Route>
-
-              <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
-                <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
-              </Route>
-
-              <Route element={<CompanyProtectedRoute allowedCompany={["reventa"]} />}>
-                <Route path={paths.admin.configuracionReventaEditar} element={<EditConfiguracionReventaView />} />
-              </Route>
+              <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
+              <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
+              <Route path={paths.admin.configuracionReventaEditar} element={<EditConfiguracionReventaView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes", "listaPrevia", "facturasAnticipo"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.home} element={<AdministracionHubView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock", "administracion", "supervisor", "vendedor"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.reventaPendientes} element={<PendienteReventaView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["listaPrevia"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.pedidoUnidadesListaPrevia} element={<PedidoUnidadesPreviasView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["administracion"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["facturasAnticipo"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.facturasAnticipo} element={<FacturasAnticipoView />} />
             </Route>
           </Route>
 
-          <Route element={<AdminModuleLayout />}>
-            <Route path={paths.convencional.proformas} element={<ProformasView />} />
-            <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
-            <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
+          <Route element={<ModuleProtectedRoute allowedModules={["proformas"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path={paths.convencional.proformas} element={<ProformasView />} />
+              <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
+              <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
+            </Route>
           </Route>
 
           <Route element={<AnalisisLayout />}>
-            <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
+            <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
             </Route>
 
-            <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
-                <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
-                <Route path={paths.convencional.promedio} element={<PromediosConvencionalView />} />
-              </Route>
+            <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>
+              <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
+            </Route>
+            <Route element={<ModuleProtectedRoute allowedModules={["promedio"]} />}>
+              <Route path={paths.convencional.promedio} element={<PromediosConvencionalView />} />
             </Route>
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["patentamientos"]} />}>
             <Route element={<PatentamientosLayout />}>
               <Route path={paths.analisis.patentamientos.home} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboard} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
@@ -188,106 +181,94 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<NICLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
-                <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
-                <Route path={paths.convencional.stockGuardado} element={<StockGuardadoConvencioanl />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock", "administracion"]} />}>
-                <Route path={paths.convencional.preventas} element={<PreventasView />} />
-                <Route path={paths.convencional.preventasResumen} element={<PreventasResumenView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
-                <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "supervisor"]} />}>
-                <Route path={paths.convencional.preventasNueva} element={<PreventaFormView />} />
-                <Route path="/convencional/preventas/:id/editar" element={<PreventaFormView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
-                <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
-                <Route path={paths.convencional.preventasColoresNuevo} element={<ColorFormView />} />
-                <Route path="/convencional/preventas/colores/:id/editar" element={<ColorFormView />} />
-                <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
-                <Route path={paths.convencional.preventasVersionesNuevo} element={<VersionFormView />} />
-                <Route path="/convencional/preventas/versiones/:id/editar" element={<VersionFormView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
-                <Route path={paths.convencional.stockReservado} element={<StockReservasConvencional />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
-                <Route path={paths.convencional.misReservas} element={<MisReservas />} />
-                <Route path={paths.convencional.miListaEspera} element={<MiListaDeEsperaView />} />
-                <Route path={paths.convencional.misOperaciones} element={<MisOperacionesView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
-                <Route path={paths.convencional.stockDisponible} element={<StockDisponibleConvencional />} />
-              </Route>
+              <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
+              <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
+              <Route path={paths.convencional.preventasColoresNuevo} element={<ColorFormView />} />
+              <Route path="/convencional/preventas/colores/:id/editar" element={<ColorFormView />} />
+              <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
+              <Route path={paths.convencional.preventasVersionesNuevo} element={<VersionFormView />} />
+              <Route path="/convencional/preventas/versiones/:id/editar" element={<VersionFormView />} />
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["convencional"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.stockGuardado} element={<StockGuardadoConvencioanl />} />
+              <Route path={paths.convencional.stockReservado} element={<StockReservasConvencional />} />
+              <Route path={paths.convencional.misReservas} element={<MisReservas />} />
+              <Route path={paths.convencional.miListaEspera} element={<MiListaDeEsperaView />} />
+              <Route path={paths.convencional.misOperaciones} element={<MisOperacionesView />} />
+              <Route path={paths.convencional.stockDisponible} element={<StockDisponibleConvencional />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["preventas"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.preventas} element={<PreventasView />} />
+              <Route path={paths.convencional.preventasResumen} element={<PreventasResumenView />} />
+              <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
+              <Route path={paths.convencional.preventasNueva} element={<PreventaFormView />} />
+              <Route path="/convencional/preventas/:id/editar" element={<PreventaFormView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["asignaciones"]} />}>
             <Route element={<GestionConvencionalLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
-                <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
-                <Route path={paths.convencional.registroAsignaciones} element={<RegistroAsignacionesView />} />
-                <Route path={paths.convencional.registroAsignacionesResumen} element={<RegistroAsignacionesResumenView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin", "gerente"]} />}>
-                <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
-                <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
-              </Route>
+              <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["registroAsignaciones"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.registroAsignaciones} element={<RegistroAsignacionesView />} />
+              <Route path={paths.convencional.registroAsignacionesResumen} element={<RegistroAsignacionesResumenView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["pedidoMensual"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["pedidoUnidades"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["usados"]} />}>
             <Route element={<NICUsadosLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path={paths.usados.stockDisponible} element={<StockDisponibleUsados />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
                 <Route path={paths.usados.misReservas} element={<MisReservasUsadosView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
                 <Route path={paths.usados.stockGuardado} element={<StockGuardadoUsados />} />
                 <Route path={paths.usados.stockReservado} element={<StockReservasUsados />} />
-              </Route>
-
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["noReparado"]} />}>
             <Route element={<GestionUsadosLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
-                <Route path={paths.usados.stockNoReparado} element={<StockNoReparadoUsadosView />} />
-                <Route path={paths.usados.stockPendienteDocumentacion} element={<StockPendDocuUsadosView />} />
-                <Route path={paths.usados.stockIngresos} element={<StockIngresoUsados />} />
-              </Route>
+              <Route path={paths.usados.stockNoReparado} element={<StockNoReparadoUsadosView />} />
             </Route>
           </Route>
 
-          <Route element={<CompanyProtectedRoute allowedCompany={["liess"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["pendienteDocumentacion"]} />}>
+            <Route element={<GestionUsadosLayout />}>
+              <Route path={paths.usados.stockPendienteDocumentacion} element={<StockPendDocuUsadosView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["ingresos"]} />}>
+            <Route element={<GestionUsadosLayout />}>
+              <Route path={paths.usados.stockIngresos} element={<StockIngresoUsados />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["liess"]} />}>
             <Route element={<LiessLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path="/liess/stock/:tipo" element={<StockDisponibleLiess />} />
-              </Route>
             </Route>
           </Route>
 

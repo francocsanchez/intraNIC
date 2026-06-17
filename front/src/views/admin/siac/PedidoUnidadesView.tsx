@@ -7,7 +7,7 @@ import {
   getPedidoUnidadesPrevias,
   getPedidosUnidadesRegistro,
 } from "@/api/dms/pedidoUnidadAPI";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
@@ -147,10 +147,11 @@ export default function PedidoUnidadesView() {
   const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
   const [registroInterno, setRegistroInterno] = useState<string>("");
   const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
-  const canManagePriority = hasAnyRole(user, ["admin", "stock"]);
-  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
-  const canOpenAsignaciones = hasAnyRole(user, ["admin", "stock", "gerente"]);
-  const canAccess = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
+  const canManagePriority = hasModuleAccess(user, "pedidoUnidades");
+  const canManagePedidos = hasModuleAccess(user, "pedidoUnidades");
+  const canOpenAsignaciones = hasModuleAccess(user, "asignaciones");
+  const canAccess = hasModuleAccess(user, "pedidoUnidades");
+  const canOpenListaPrevia = hasModuleAccess(user, "listaPrevia");
 
   const { data: pedidosResponse, isLoading: isLoadingPedidos, isError: isErrorPedidos, error: pedidosError } = useQuery({
     queryKey: ["pedido-unidades", page],
@@ -488,13 +489,15 @@ export default function PedidoUnidadesView() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
-              to={paths.administracion.pedidoUnidadesListaPrevia}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
-            >
-              <ClipboardList size={16} strokeWidth={1.75} />
-              Lista previa
-            </Link>
+            {canOpenListaPrevia ? (
+              <Link
+                to={paths.administracion.pedidoUnidadesListaPrevia}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+              >
+                <ClipboardList size={16} strokeWidth={1.75} />
+                Lista previa
+              </Link>
+            ) : null}
 
             {canOpenAsignaciones && (
               <Link

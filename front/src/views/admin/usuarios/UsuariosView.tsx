@@ -1,7 +1,7 @@
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/usuarioAPI";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
@@ -20,7 +20,7 @@ function capitalize(value: string) {
 export default function UsuariosView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const canManageUsers = hasAnyRole(user, ["admin", "stock"]);
+  const canManageUsers = hasModuleAccess(user, "usuarios");
   const [resettingUserId, setResettingUserId] = useState<string | null>(null);
 
   const { data, isError, isLoading } = useQuery({

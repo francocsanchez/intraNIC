@@ -3,8 +3,6 @@ import { getStockDisponibleConvencional } from "@/api/convencional/stockAPI";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
 import { getConfiguracion } from "@/api/configuracionAPI";
-import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
 import Mantenimiento from "@/components/Mantenimiento";
 
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
@@ -13,7 +11,6 @@ const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", 
 
 export default function StockDisponibleConvencional() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -34,8 +31,6 @@ export default function StockDisponibleConvencional() {
 
   const items = data?.data ?? [];
   const resumen = data?.resumen;
-
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const resumenDinamico = useMemo(() => {
     const porModelo = items.reduce<Record<string, number>>((acc, item) => {
@@ -124,7 +119,7 @@ export default function StockDisponibleConvencional() {
     );
   }
 
-  if (configResponse?.data.sistemaActivoConvencional === false && !isPrivileged) {
+  if (configResponse?.data.sistemaActivoConvencional === false) {
     return <Mantenimiento />;
   }
 

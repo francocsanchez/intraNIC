@@ -2,7 +2,7 @@ import Loading from "@/components/Loading";
 import { getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
 import { paths } from "@/routes/paths";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { History, Undo2 } from "lucide-react";
@@ -42,7 +42,7 @@ export default function PreventasAsignadasView() {
   }
 
   const preventas = data?.data ?? [];
-  const canManagePreventas = hasAnyRole(user, ["admin", "stock"]);
+  const canManagePreventas = hasModuleAccess(user, "preventas");
 
   return (
     <div className="w-full space-y-6 px-4 py-6">

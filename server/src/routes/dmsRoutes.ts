@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { DmsController } from "../controllers/DmsController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 router.use(authenticate);
@@ -11,7 +11,7 @@ router.use(authenticate);
  * @desc Listar vendedores.
  *
  */
-router.get("/vendedores", authorizeRoles("admin", "stock", "supervisor"), DmsController.getVendedores);
+router.get("/vendedores", authorizeModules("usuarios", "configuracion"), DmsController.getVendedores);
 
 /**
  *
@@ -19,7 +19,7 @@ router.get("/vendedores", authorizeRoles("admin", "stock", "supervisor"), DmsCon
  * @desc Listar vendedores activos.
  *
  */
-router.get("/vendedores/activos", authorizeRoles("admin", "stock", "gerente", "supervisor"), DmsController.getVendedoresActivos);
+router.get("/vendedores/activos", authorizeModules("configuracion", "preventas"), DmsController.getVendedoresActivos);
 
 /**
  *
@@ -27,7 +27,7 @@ router.get("/vendedores/activos", authorizeRoles("admin", "stock", "gerente", "s
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/asignaciones/:mes/:anio", authorizeCompanies("convencional"), authorizeRoles("admin", "gerente", "stock"), DmsController.getAsignacion);
+router.get("/asignaciones/:mes/:anio", authorizeModules("asignaciones"), DmsController.getAsignacion);
 
 /**
  *
@@ -35,7 +35,7 @@ router.get("/asignaciones/:mes/:anio", authorizeCompanies("convencional"), autho
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRoles("admin"), DmsController.getStockConsolidado);
+router.get("/consolidado/stock", authorizeModules("convencional"), DmsController.getStockConsolidado);
 
 /**
  *
@@ -43,6 +43,6 @@ router.get("/consolidado/stock", authorizeCompanies("convencional"), authorizeRo
  * @desc Listar asignacion por mes y anio.
  *
  */
-router.get("/reventas/facturas", authorizeRoles("admin", "stock", "gerente", "supervisor", "vendedor", "administracion"), DmsController.getFactuasReventas);
+router.get("/reventas/facturas", authorizeModules("reventaPendientes"), DmsController.getFactuasReventas);
 
 export default router;

@@ -1,8 +1,6 @@
 import Mantenimiento from "@/components/Mantenimiento";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getPendienteReventas } from "@/api/dms/dmsAPI";
-import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -39,7 +37,6 @@ function getRowClassByDias(dias: number) {
 
 export default function PendienteReventaView() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -59,8 +56,6 @@ export default function PendienteReventaView() {
 
   const items: PendienteReventaItem[] = data?.data ?? [];
   const resumen = data?.resumen;
-
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const resumenDinamico = useMemo(() => {
     const porModelo = items.reduce<Record<string, number>>((acc, item) => {
@@ -140,7 +135,7 @@ export default function PendienteReventaView() {
     );
   }
 
-  if (configResponse?.data.sistemaActivoConvencional === false && !isPrivileged) {
+  if (configResponse?.data.sistemaActivoConvencional === false) {
     return <Mantenimiento />;
   }
 

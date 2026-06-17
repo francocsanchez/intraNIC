@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { moduleKeys } from "@/constants/modules";
+
+const modulesSchema = z.object(
+  Object.fromEntries(
+    moduleKeys.map((moduleKey) => [moduleKey, z.number().nullable().optional()]),
+  ) as Record<string, z.ZodTypeAny>,
+);
 
 //**************************** */
 // STOCK DISPONIBE - GUARDADO
@@ -130,6 +137,7 @@ export const usuarioSchema = z.object({
   numberSaleLiess: z.number(),
   role: z.array(z.string()),
   company: z.array(z.string()),
+  modules: modulesSchema.optional().default({}),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -148,6 +156,7 @@ export const userSchema = z.object({
   email: z.string().optional(),
   company: z.array(z.string()).optional(),
   role: z.array(z.string()),
+  modules: modulesSchema.optional().default({}),
   enable: z.boolean(),
 });
 

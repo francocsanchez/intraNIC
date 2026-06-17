@@ -2,8 +2,6 @@ import { getStockGuardadoConvencional } from "@/api/convencional/stockAPI";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
-import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -13,7 +11,6 @@ const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", 
 
 export default function StockGuardadoConvencioanl() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -66,8 +63,6 @@ export default function StockGuardadoConvencioanl() {
     if (modeloActivo === "TODOS") return items;
     return items.filter((item) => item.modelo === modeloActivo);
   }, [items, modeloActivo]);
-
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("es-AR", {
@@ -124,7 +119,7 @@ export default function StockGuardadoConvencioanl() {
     );
   }
 
-  if (configResponse?.data.sistemaActivoConvencional === false && !isPrivileged) {
+  if (configResponse?.data.sistemaActivoConvencional === false) {
     return <Mantenimiento />;
   }
 

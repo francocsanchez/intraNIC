@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { moduleKeys, type UserModules } from "../constants/modules";
 
 export const userRole = {
   ADMIN: "admin",
@@ -34,7 +35,18 @@ export interface IUser extends Document {
   company: userCompany[];
   numberSaleNic: number;
   numberSaleLiess: number;
+  modules?: UserModules;
 }
+
+const modulesSchemaDefinition = Object.fromEntries(
+  moduleKeys.map((moduleKey) => [
+    moduleKey,
+    {
+      type: Number,
+      default: undefined,
+    },
+  ]),
+);
 
 const userSchema: Schema = new Schema(
   {
@@ -85,6 +97,10 @@ const userSchema: Schema = new Schema(
     company: {
       type: [String],
       default: ["default"],
+    },
+    modules: {
+      type: new Schema(modulesSchemaDefinition, { _id: false }),
+      default: undefined,
     },
   },
   { timestamps: true },

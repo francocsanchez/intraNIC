@@ -1,5 +1,6 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
-import useRoleGuard from "@/hooks/useRoleGuard";
+import { hasModuleAccess } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Archive, BookMarked, BriefcaseBusiness, ChevronDown, ClipboardList, Package } from "lucide-react";
@@ -10,23 +11,30 @@ type NavBarProps = {
 };
 
 export default function NavBarNic({ negocio }: NavBarProps) {
-  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "stock"]);
-  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
+  const { user } = useAuth();
+  const canViewConvencional = hasModuleAccess(user, "convencional");
+  const buttonGuardado = hasModuleAccess(user, "convencional");
+  const buttonReservas = hasModuleAccess(user, "convencional");
   const { pathname } = useLocation();
 
   const disponiblePath = negocio === "convencional" ? paths.convencional.stockDisponible : `/stock/disponible/${negocio}`;
   const reservasPath = negocio === "convencional" ? paths.convencional.stockReservado : `/stock/reservado/${negocio}`;
   const guardadoPath = negocio === "convencional" ? paths.convencional.stockGuardado : `/stock/guardado/${negocio}`;
-  const showGestionMenu = negocio === "convencional" && pathname.startsWith("/convencional/");
+  const showGestionMenu =
+    negocio === "convencional" &&
+    canViewConvencional &&
+    pathname.startsWith("/convencional/");
 
   return (
     <GlobalNavbar
       centerContent={
         <>
-          <Link to={disponiblePath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-            <Package size={16} strokeWidth={1.5} />
-            Disponible
-          </Link>
+          {canViewConvencional ? (
+            <Link to={disponiblePath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+              <Package size={16} strokeWidth={1.5} />
+              Disponible
+            </Link>
+          ) : null}
 
           {buttonReservas ? (
             <Link to={reservasPath} className="flex items-center gap-2 relative hover:text-gray-900 transition">

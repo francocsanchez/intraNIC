@@ -1,5 +1,6 @@
 import { updateUsuarioById } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
+import { getDefaultModules, normalizeModules, type UserModules } from "@/constants/modules";
 import { paths } from "@/routes/paths";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -17,6 +18,7 @@ type Usuario = {
   numberSaleLiess: number;
   role: string[];
   company: string[];
+  modules?: UserModules;
 };
 
 export type UsuarioFormData = {
@@ -28,6 +30,7 @@ export type UsuarioFormData = {
   numberSaleLiess: number;
   role: string[];
   company: string[];
+  modules: UserModules;
 };
 
 type EditUsuarioFormProps = {
@@ -42,6 +45,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<UsuarioFormData>({
     defaultValues: {
@@ -53,6 +57,10 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       numberSaleLiess: data.numberSaleLiess,
       company: data.company,
       role: data.role,
+      modules: {
+        ...getDefaultModules(),
+        ...normalizeModules(data.modules),
+      },
     },
   });
 
@@ -116,7 +124,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         </div>
 
         <div className="p-6">
-          <UsuarioForm register={register} errors={errors} />
+          <UsuarioForm register={register} control={control} errors={errors} />
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">

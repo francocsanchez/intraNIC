@@ -1,7 +1,7 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { Navigate, Outlet, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
@@ -14,8 +14,8 @@ export default function AdminLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewUsuarios = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const canViewUsuarios = hasModuleAccess(user, "usuarios");
+  const canViewConfiguracion = hasModuleAccess(user, "configuracion");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

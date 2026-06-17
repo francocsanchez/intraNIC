@@ -1,15 +1,13 @@
 import { Router } from "express";
 import { VersionController } from "../controllers/VersionController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 
 router.use(authenticate);
-
+router.use(authorizeModules("configuracion"));
 router.get("/", VersionController.list);
-router.use(authorizeCompanies("convencional"));
-router.use(authorizeRoles("admin", "stock"));
 router.post("/", VersionController.create);
 router.put("/:id", VersionController.update);
 router.delete("/:id", VersionController.remove);

@@ -1,12 +1,14 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
-import useRoleGuard from "@/hooks/useRoleGuard";
+import { hasModuleAccess } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Archive, BookMarked, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NavBarUsados() {
-  const { allowed: buttonGuardado } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
-  const { allowed: buttonReservas } = useRoleGuard(["admin", "gerente", "supervisor", "stock"]);
+  const { user } = useAuth();
+  const buttonGuardado = hasModuleAccess(user, "usados");
+  const buttonReservas = hasModuleAccess(user, "usados");
 
   return (
     <GlobalNavbar

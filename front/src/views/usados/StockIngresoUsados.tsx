@@ -4,8 +4,6 @@ import { getConfiguracion } from "@/api/configuracionAPI";
 import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
 import { Dialog, Transition } from "@headlessui/react";
-import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
 import { getStockIngresoUsado } from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
@@ -13,7 +11,6 @@ type MarcaFiltro = "TODOS" | string;
 export default function StockIngresoUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [itemSeleccionado, setItemSeleccionado] = useState<any>(null);
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -70,8 +67,6 @@ export default function StockIngresoUsados() {
     }).format(value);
   };
 
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
-
   if (isLoading || configLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
@@ -120,7 +115,7 @@ export default function StockIngresoUsados() {
     );
   }
 
-  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
+  if (configResponse?.data?.sistemaActivoUsados === false) {
     return <Mantenimiento />;
   }
 

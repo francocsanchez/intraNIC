@@ -5,7 +5,7 @@ import {
   getPedidoUnidadesPrevias,
   updatePedidoUnidadPreviaPrioridad,
 } from "@/api/dms/pedidoUnidadAPI";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import type { PedidoUnidadPrioridad } from "@/types/index";
@@ -104,13 +104,13 @@ export default function PedidoUnidadesPreviasView() {
     );
   }
 
-  const canAccess = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
+  const canAccess = hasModuleAccess(user, "listaPrevia");
   if (!canAccess) return null;
 
-  const canAddPrevia = hasAnyRole(user, ["admin", "stock", "administracion"]);
-  const canManagePriority = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
-  const canDeletePrevia = hasAnyRole(user, ["admin", "stock", "administracion", "gerente"]);
-  const canOpenPedidoUnidades = hasAnyRole(user, ["admin", "stock"]);
+  const canAddPrevia = hasModuleAccess(user, "listaPrevia");
+  const canManagePriority = hasModuleAccess(user, "listaPrevia");
+  const canDeletePrevia = hasModuleAccess(user, "listaPrevia");
+  const canOpenPedidoUnidades = hasModuleAccess(user, "pedidoUnidades");
   const orderedData = [...data].sort(comparePrioridad);
 
   const handleAdd = () => {

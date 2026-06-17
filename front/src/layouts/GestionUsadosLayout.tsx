@@ -1,7 +1,7 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { Navigate, Outlet, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
@@ -14,21 +14,25 @@ export default function GestionUsadosLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewEstados = hasAnyRole(user, ["admin", "gerente", "stock"]);
-  const canViewIngresos = hasAnyRole(user, ["admin", "gerente", "stock"]);
+  const canViewNoReparado = hasModuleAccess(user, "noReparado");
+  const canViewPendienteDocumentacion = hasModuleAccess(
+    user,
+    "pendienteDocumentacion",
+  );
+  const canViewIngresos = hasModuleAccess(user, "ingresos");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <GlobalNavbar
         centerContent={
           <>
-            {canViewEstados ? (
+            {canViewNoReparado ? (
               <Link to={paths.usados.stockNoReparado} className="hover:text-gray-900 transition">
                 No reparado
               </Link>
             ) : null}
 
-            {canViewEstados ? (
+            {canViewPendienteDocumentacion ? (
               <Link to={paths.usados.stockPendienteDocumentacion} className="hover:text-gray-900 transition">
                 Pendiente documentacion
               </Link>

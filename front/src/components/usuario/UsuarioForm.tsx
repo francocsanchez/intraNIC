@@ -1,6 +1,7 @@
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import { moduleLabels, moduleSections, type ModuleKey } from "@/constants/modules";
 import type { UsuarioFormData } from "@/views/admin/usuarios/CrearUsuarioView";
 
 
@@ -11,6 +12,7 @@ type Vendedor = {
 
 type UsuarioFormProps = {
   register: UseFormRegister<UsuarioFormData>;
+  control: Control<UsuarioFormData>;
   errors: FieldErrors<UsuarioFormData>;
 };
 
@@ -19,7 +21,7 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
 
-export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
+export default function UsuarioForm({ register, control, errors }: UsuarioFormProps) {
   const { data: vendedoresResponse, isLoading } = useQuery({
     queryKey: ["vendedores"],
     queryFn: getVendedoresNic,
@@ -191,6 +193,51 @@ export default function UsuarioForm({ register, errors }: UsuarioFormProps) {
 
     <div className="px-5 pb-5">
       <FieldError message={errors.company?.message as string | undefined} />
+    </div>
+</section>
+
+  <section className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+    <div className="border-b border-gray-200 px-5 py-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        Modulos
+      </div>
+      <div className="mt-1 text-xs text-gray-500">
+        MarcÃ¡ los modulos que querÃ©s habilitar para este usuario.
+      </div>
+    </div>
+
+    <div className="space-y-5 p-5">
+      {moduleSections.map((section) => (
+        <div key={section.title} className="space-y-3">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            {section.title}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {section.modules.map((moduleKey) => (
+              <Controller
+                key={moduleKey}
+                control={control}
+                name={`modules.${moduleKey}` as const}
+                render={({ field }) => (
+                  <label className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100">
+                    <span className="text-sm font-medium text-gray-800">
+                      {moduleLabels[moduleKey as ModuleKey]}
+                    </span>
+
+                    <input
+                      type="checkbox"
+                      checked={Number(field.value ?? 0) === 1}
+                      onChange={(event) => field.onChange(event.target.checked ? 1 : 0)}
+                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                    />
+                  </label>
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   </section>
 

@@ -1,7 +1,5 @@
 import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
-import { hasAnyRole } from "@/helpers/access";
-import { useAuth } from "@/hooks/useAuthe";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +43,6 @@ export default function StockUsadosView({
 }: StockUsadosViewProps) {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [itemSeleccionado, setItemSeleccionado] = useState<StockUsadoItem | null>(null);
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -111,8 +108,6 @@ export default function StockUsadosView({
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
-
   if (isLoading || configLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
@@ -161,7 +156,7 @@ export default function StockUsadosView({
     );
   }
 
-  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
+  if (configResponse?.data?.sistemaActivoUsados === false) {
     return <Mantenimiento />;
   }
 

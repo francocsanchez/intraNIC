@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { getEstadoInternosPedido } from "@/api/dms/pedidoUnidadAPI";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Clock3 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -69,8 +69,8 @@ function formatFullDate(dateString?: string | null) {
 
 export default function AsignacionesView() {
   const { user } = useAuth();
-  const canManagePedidos = hasAnyRole(user, ["admin", "stock"]);
-  const canSeePedidoStatus = hasAnyRole(user, ["admin", "gerente", "stock"]);
+  const canManagePedidos = hasModuleAccess(user, "pedidoUnidades");
+  const canSeePedidoStatus = hasModuleAccess(user, "asignaciones");
   const anioActual = new Date().getFullYear();
   const [anio, setAnio] = useState<number>(anioActual);
   const [mes, setMes] = useState<number>(() => new Date().getMonth() + 1);

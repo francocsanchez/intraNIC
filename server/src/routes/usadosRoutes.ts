@@ -1,12 +1,10 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 import { UsadosController } from "../controllers/UsadosController";
 
 const router = Router();
-const usadosRoles = ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"];
 router.use(authenticate);
-router.use(authorizeCompanies("usados"));
 
 /**
  *
@@ -14,7 +12,7 @@ router.use(authorizeCompanies("usados"));
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), UsadosController.stockDisponible);
+router.get("/stock-disponible", authorizeModules("usados"), UsadosController.stockDisponible);
 
 /**
  *
@@ -22,7 +20,7 @@ router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente",
  * @desc Listar stock guardado.
  *
  */
-router.get("/stock-guardado", authorizeRoles("admin", "supervisor", "gerente", "stock"), UsadosController.stockGuardado);
+router.get("/stock-guardado", authorizeModules("usados"), UsadosController.stockGuardado);
 
 /**
  *
@@ -30,7 +28,7 @@ router.get("/stock-guardado", authorizeRoles("admin", "supervisor", "gerente", "
  * @desc Listar stock no reparado.
  *
  */
-router.get("/stock-no-reparado", authorizeRoles("admin", "gerente", "stock"), UsadosController.vendedoresStockNoReparadoUsados);
+router.get("/stock-no-reparado", authorizeModules("noReparado"), UsadosController.vendedoresStockNoReparadoUsados);
 
 /**
  *
@@ -38,7 +36,7 @@ router.get("/stock-no-reparado", authorizeRoles("admin", "gerente", "stock"), Us
  * @desc Listar stock pendiente de documentacion.
  *
  */
-router.get("/stock-pendiente-documentacion", authorizeRoles("admin", "gerente", "stock"), UsadosController.vendedoresStockPendDocuUsados);
+router.get("/stock-pendiente-documentacion", authorizeModules("pendienteDocumentacion"), UsadosController.vendedoresStockPendDocuUsados);
 
 /**
  *
@@ -46,7 +44,7 @@ router.get("/stock-pendiente-documentacion", authorizeRoles("admin", "gerente", 
  * @desc Listar stock reservado.
  *
  */
-router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", "stock"), UsadosController.stockReservado);
+router.get("/stock-reservado", authorizeModules("usados"), UsadosController.stockReservado);
 
 /**
  *
@@ -54,7 +52,7 @@ router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", 
  * @desc Mis reservas usados.
  *
  */
-router.get("/mis-reservas", authorizeRoles(...usadosRoles), UsadosController.misReservasUsados);
+router.get("/mis-reservas", authorizeModules("usados"), UsadosController.misReservasUsados);
 
 /**
  *
@@ -62,7 +60,7 @@ router.get("/mis-reservas", authorizeRoles(...usadosRoles), UsadosController.mis
  * @desc Listar stock a ingresar.
  *
  */
-router.get("/stock-ingreso", authorizeRoles("admin", "gerente", "stock"), UsadosController.stockIngreso);
+router.get("/stock-ingreso", authorizeModules("ingresos"), UsadosController.stockIngreso);
 
 
 export default router;

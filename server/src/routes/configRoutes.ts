@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ConfigController } from "../controllers/ConfigController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 router.use(authenticate);
@@ -20,7 +20,7 @@ router.get("/", ConfigController.listConfig);
  * @desc Crear configuracion.
  *
  */
-router.post("/", authorizeRoles("admin"), ConfigController.createConfig);
+router.post("/", authorizeModules("configuracion"), ConfigController.createConfig);
 
 /**
  *
@@ -28,7 +28,7 @@ router.post("/", authorizeRoles("admin"), ConfigController.createConfig);
  * @desc Actualizar confinguracion configuracion.
  *
  */
-router.patch("/", authorizeRoles("admin", "stock", "gerente"), ConfigController.updateConfig);
+router.patch("/", authorizeModules("configuracion"), ConfigController.updateConfig);
 
 /**
  *
@@ -36,7 +36,7 @@ router.patch("/", authorizeRoles("admin", "stock", "gerente"), ConfigController.
  * @desc Activar / Desactivar sistema Convencional.
  *
  */
-router.patch("/change-status/convencional", authorizeRoles("admin"), ConfigController.toggleSistemaConvencional);
+router.patch("/change-status/convencional", authorizeModules("configuracion"), ConfigController.toggleSistemaConvencional);
 
 /**
  *
@@ -44,7 +44,7 @@ router.patch("/change-status/convencional", authorizeRoles("admin"), ConfigContr
  * @desc Activar / Desactivar sistema Usados.
  *
  */
-router.patch("/change-status/usados", authorizeRoles("admin"), ConfigController.toggleSistemaUsados);
+router.patch("/change-status/usados", authorizeModules("configuracion"), ConfigController.toggleSistemaUsados);
 
 /**
  *
@@ -52,6 +52,6 @@ router.patch("/change-status/usados", authorizeRoles("admin"), ConfigController.
  * @desc Activar / Desactivar sistema LIESS.
  *
  */
-router.patch("/change-status/liess", authorizeRoles("admin"), ConfigController.toggleSistemaLIESS);
+router.patch("/change-status/liess", authorizeModules("configuracion"), ConfigController.toggleSistemaLIESS);
 
 export default router;

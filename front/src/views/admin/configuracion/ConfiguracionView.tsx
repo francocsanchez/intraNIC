@@ -1,7 +1,7 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasAnyCompany, hasAnyRole } from "@/helpers/access";
 import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -43,9 +43,9 @@ export default function ConfiguracionView() {
 
   if (!config) return null;
 
-  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const canEditConfiguracion = hasAnyRole(user, ["admin", "stock"]);
-  const canManagePreventasCatalogs = hasAnyRole(user, ["admin", "stock"]) && hasAnyCompany(user, ["convencional"]);
+  const canViewConfiguracion = hasModuleAccess(user, "configuracion");
+  const canEditConfiguracion = hasModuleAccess(user, "configuracion");
+  const canManagePreventasCatalogs = hasModuleAccess(user, "configuracion");
 
   if (!canViewConfiguracion) return null;
 
@@ -68,8 +68,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedoresStockGuardadoConvencional),
         },
       ],
-      canView: hasAnyCompany(user, ["convencional"]),
-      canEdit: canEditConfiguracion && hasAnyCompany(user, ["convencional"]),
+      canView: true,
+      canEdit: canEditConfiguracion,
       catalogos: canManagePreventasCatalogs
         ? [
             { label: "Colores", to: paths.convencional.preventasColores },
@@ -103,8 +103,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedoresStockPendDocuUsados ?? []),
         },
       ],
-      canView: hasAnyCompany(user, ["usados"]),
-      canEdit: canEditConfiguracion && hasAnyCompany(user, ["usados"]),
+      canView: true,
+      canEdit: canEditConfiguracion,
       catalogos: [],
     },
     {
@@ -117,8 +117,8 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedorReventasConvencional ?? []),
         },
       ],
-      canView: hasAnyCompany(user, ["reventa"]),
-      canEdit: canEditConfiguracion && hasAnyCompany(user, ["reventa"]),
+      canView: true,
+      canEdit: canEditConfiguracion,
       catalogos: [],
     },
   ];

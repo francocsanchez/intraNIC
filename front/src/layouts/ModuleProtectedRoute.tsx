@@ -1,11 +1,15 @@
+import { hasAnyModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import type { ModuleKey } from "@/constants/modules";
 import { Navigate, Outlet } from "react-router-dom";
 
-type CompanyProtectedRouteProps = {
-  allowedCompany: string[];
+type ModuleProtectedRouteProps = {
+  allowedModules: ModuleKey[];
 };
 
-export default function CompanyProtectedRoute({ allowedCompany }: CompanyProtectedRouteProps) {
+export default function ModuleProtectedRoute({
+  allowedModules,
+}: ModuleProtectedRouteProps) {
   const { user, isAuthenticated, isLoading, isError } = useAuth();
 
   if (isLoading) return null;
@@ -15,10 +19,7 @@ export default function CompanyProtectedRoute({ allowedCompany }: CompanyProtect
     return <Navigate to="/login" replace />;
   }
 
-  const userCompany = user.company ?? [];
-  const hasAccess = userCompany.some((company) => allowedCompany.includes(company));
-
-  if (!hasAccess) {
+  if (!hasAnyModuleAccess(user, allowedModules)) {
     return <Navigate to="/no-autorizado" replace />;
   }
 

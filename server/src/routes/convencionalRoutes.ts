@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { ConvencionalController } from "../controllers/ConvencionalController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeCompanies, authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
-const convencionalRoles = ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"];
 
 /**
  *
@@ -15,7 +14,6 @@ const convencionalRoles = ["admin", "stock", "gerente", "supervisor", "vendedor"
 router.get("/stock-reventa", ConvencionalController.stockReventa);
 
 router.use(authenticate);
-router.use(authorizeCompanies("convencional"));
 
 /**
  *
@@ -23,7 +21,7 @@ router.use(authorizeCompanies("convencional"));
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente", "vendedor", "stock"), ConvencionalController.stockDisponible);
+router.get("/stock-disponible", authorizeModules("convencional"), ConvencionalController.stockDisponible);
 
 /**
  *
@@ -31,7 +29,7 @@ router.get("/stock-disponible", authorizeRoles("admin", "supervisor", "gerente",
  * @desc Listar stock guardado.
  *
  */
-router.get("/stock-guardado", authorizeRoles("admin", "gerente", "stock"), ConvencionalController.stockGuardado);
+router.get("/stock-guardado", authorizeModules("convencional"), ConvencionalController.stockGuardado);
 
 /**
  *
@@ -39,7 +37,7 @@ router.get("/stock-guardado", authorizeRoles("admin", "gerente", "stock"), Conve
  * @desc Listar stock reservado.
  *
  */
-router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", "stock"), ConvencionalController.stockReservado);
+router.get("/stock-reservado", authorizeModules("convencional"), ConvencionalController.stockReservado);
 
 /**
  *
@@ -49,7 +47,7 @@ router.get("/stock-reservado", authorizeRoles("admin", "supervisor", "gerente", 
  */
 router.get(
   "/stock-reservado/:numeroVendedor",
-  authorizeRoles(...convencionalRoles),
+  authorizeModules("convencional"),
   ConvencionalController.misReservas,
 );
 
@@ -59,7 +57,7 @@ router.get(
  * @desc Mi lista de espera.
  *
  */
-router.get("/mi-lista-de-espera", authorizeRoles(...convencionalRoles), ConvencionalController.miListaDeEspera);
+router.get("/mi-lista-de-espera", authorizeModules("convencional"), ConvencionalController.miListaDeEspera);
 
 /**
  *
@@ -75,9 +73,9 @@ router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
  * @desc Mi lista de espera.
  *
  */
-router.get("/mis-reservas", authorizeRoles(...convencionalRoles), ConvencionalController.misReservas);
+router.get("/mis-reservas", authorizeModules("convencional"), ConvencionalController.misReservas);
 
-router.get("/mis-operaciones/:mes/:ano", authorizeRoles(...convencionalRoles), ConvencionalController.misOperaciones);
-router.get("/promedio-operaciones/:mes/:ano", authorizeRoles("admin", "stock", "gerente", "vendedor"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeRoles("admin", "stock", "gerente", "vendedor"), ConvencionalController.rankingOperaciones);
+router.get("/mis-operaciones/:mes/:ano", authorizeModules("convencional"), ConvencionalController.misOperaciones);
+router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), ConvencionalController.promedioOperaciones);
+router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), ConvencionalController.rankingOperaciones);
 export default router;

@@ -1,5 +1,6 @@
 import { createUsuario } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
+import { getDefaultModules, type UserModules } from "@/constants/modules";
 import { paths } from "@/routes/paths";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -15,6 +16,7 @@ export type UsuarioFormData = {
   numberSaleLiess: number;
   role: string[];
   company: string[];
+  modules: UserModules;
 };
 
 export default function CreateUsuarioView() {
@@ -29,11 +31,13 @@ export default function CreateUsuarioView() {
     numberSaleLiess: 0,
     role: [],
     company: [],
+    modules: getDefaultModules(),
   };
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<UsuarioFormData>({
     defaultValues: initialValues,
@@ -77,7 +81,7 @@ export default function CreateUsuarioView() {
         </div>
 
         <div className="p-6">
-          <UsuarioForm register={register} errors={errors} />
+          <UsuarioForm register={register} control={control} errors={errors} />
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">

@@ -4,7 +4,7 @@ import {
   deleteFacturaAnticipo,
   getFacturasAnticipo,
 } from "@/api/facturasAnticipoAPI";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
@@ -82,7 +82,7 @@ export default function FacturasAnticipoView() {
     );
   }
 
-  const canAccess = hasAnyRole(user, ["administracion"]);
+  const canAccess = hasModuleAccess(user, "facturasAnticipo");
   if (!canAccess) return null;
 
   const onSubmit = handleSubmit((values) => {

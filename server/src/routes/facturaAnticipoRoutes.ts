@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { FacturaAnticipoController } from "../controllers/FacturaAnticipoController";
 import { authenticate } from "../middleware/authenticate";
-import { authorizeRoles } from "../middleware/authorizeRoles";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 
 router.use(authenticate);
-router.use(authorizeRoles("administracion"));
+router.use(authorizeModules("facturasAnticipo"));
 
 router.get("/", FacturaAnticipoController.list);
 router.post("/", FacturaAnticipoController.create);

@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Mantenimiento from "@/components/Mantenimiento";
-import { useAuth } from "@/hooks/useAuthe";
 import { getConfiguracion } from "@/api/configuracionAPI";
-import { hasAnyRole } from "@/helpers/access";
 import { textToColor } from "@/helpers/colores";
 import { getStockDisponibleUsados } from "@/api/usados/stockAPI";
 
@@ -11,7 +9,6 @@ type MarcaFiltro = "TODOS" | string;
 
 export default function StockDisponibleUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
-  const { user } = useAuth();
 
   const {
     data: configResponse,
@@ -33,8 +30,6 @@ export default function StockDisponibleUsados() {
 
   const items = data?.data ?? [];
   const resumen = data?.resumen;
-
-  const isPrivileged = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   const marcasDisponibles = useMemo(() => {
     const marcas = Array.from(new Set(items.map((item: any) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
@@ -126,7 +121,7 @@ export default function StockDisponibleUsados() {
     );
   }
 
-  if (configResponse?.data?.sistemaActivoUsados === false && !isPrivileged) {
+  if (configResponse?.data?.sistemaActivoUsados === false) {
     return <Mantenimiento />;
   }
 

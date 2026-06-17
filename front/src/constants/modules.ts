@@ -1,0 +1,108 @@
+export const moduleKeys = [
+  "convencional",
+  "usados",
+  "liess",
+  "preventas",
+  "proformas",
+  "reventaPendientes",
+  "listaPrevia",
+  "facturasAnticipo",
+  "asignaciones",
+  "registroAsignaciones",
+  "pedidoMensual",
+  "pedidoUnidades",
+  "noReparado",
+  "pendienteDocumentacion",
+  "ingresos",
+  "operaciones",
+  "ranking",
+  "promedio",
+  "patentamientos",
+  "usuarios",
+  "configuracion",
+] as const;
+
+export type ModuleKey = (typeof moduleKeys)[number];
+export type UserModules = Partial<Record<ModuleKey, number | null>>;
+
+export const moduleLabels: Record<ModuleKey, string> = {
+  convencional: "Convencional",
+  usados: "Usados",
+  liess: "Liess",
+  preventas: "Preventas",
+  proformas: "Proformas",
+  reventaPendientes: "Reventa pendientes",
+  listaPrevia: "Lista previa",
+  facturasAnticipo: "Facturas anticipo",
+  asignaciones: "Asignaciones",
+  registroAsignaciones: "Registro asignaciones",
+  pedidoMensual: "Pedido mensual",
+  pedidoUnidades: "Pedido unidades",
+  noReparado: "No reparado",
+  pendienteDocumentacion: "Pendiente documentacion",
+  ingresos: "Ingresos",
+  operaciones: "Operaciones",
+  ranking: "Ranking",
+  promedio: "Promedio",
+  patentamientos: "Patentamientos",
+  usuarios: "Usuarios",
+  configuracion: "Configuracion",
+};
+
+export const moduleSections: Array<{
+  title: string;
+  modules: ModuleKey[];
+}> = [
+  {
+    title: "Stock de unidades",
+    modules: ["convencional", "usados", "liess"],
+  },
+  {
+    title: "Comercial",
+    modules: ["preventas", "proformas"],
+  },
+  {
+    title: "Administracion convencional",
+    modules: ["reventaPendientes", "listaPrevia", "facturasAnticipo"],
+  },
+  {
+    title: "Gestion de stock convencional",
+    modules: ["asignaciones", "registroAsignaciones", "pedidoMensual", "pedidoUnidades"],
+  },
+  {
+    title: "Gestion de stock usados",
+    modules: ["noReparado", "pendienteDocumentacion", "ingresos"],
+  },
+  {
+    title: "Analisis",
+    modules: ["operaciones", "ranking", "promedio", "patentamientos"],
+  },
+  {
+    title: "Sistema",
+    modules: ["usuarios", "configuracion"],
+  },
+];
+
+export const normalizeModules = (value: unknown): UserModules => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  const modules: UserModules = {};
+
+  for (const moduleKey of moduleKeys) {
+    const moduleValue = (value as Record<string, unknown>)[moduleKey];
+
+    if (moduleValue === undefined) {
+      continue;
+    }
+
+    modules[moduleKey] =
+      moduleValue === 1 || moduleValue === "1" || moduleValue === true ? 1 : 0;
+  }
+
+  return modules;
+};
+
+export const getDefaultModules = (): UserModules =>
+  Object.fromEntries(moduleKeys.map((moduleKey) => [moduleKey, 0])) as UserModules;

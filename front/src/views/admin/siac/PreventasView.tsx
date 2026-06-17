@@ -2,7 +2,7 @@ import Loading from "@/components/Loading";
 import { deletePreventa, getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
 import { paths } from "@/routes/paths";
-import { hasAnyRole } from "@/helpers/access";
+import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
@@ -52,12 +52,12 @@ export default function PreventasView() {
   }
 
   const preventas = data?.data ?? [];
-  const canViewResumen = hasAnyRole(user, ["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]);
-  const canCreatePreventa = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const canViewAsignadas = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const canAssignPreventa = hasAnyRole(user, ["admin", "stock"]);
-  const canEditPreventa = hasAnyRole(user, ["admin", "stock", "supervisor"]);
-  const canDeletePreventa = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const canViewResumen = hasModuleAccess(user, "preventas");
+  const canCreatePreventa = hasModuleAccess(user, "preventas");
+  const canViewAsignadas = hasModuleAccess(user, "preventas");
+  const canAssignPreventa = hasModuleAccess(user, "preventas");
+  const canEditPreventa = hasModuleAccess(user, "preventas");
+  const canDeletePreventa = hasModuleAccess(user, "preventas");
   const canModifyPreventa = canEditPreventa || canDeletePreventa;
 
   return (
