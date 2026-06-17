@@ -1,6 +1,6 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import Loading from "@/components/Loading";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
@@ -15,9 +15,9 @@ export default function AdminModuleLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewReventas = hasModuleAccess(user, "reventaPendientes");
-  const canViewPedidoUnidades = hasModuleAccess(user, "listaPrevia");
-  const canViewFacturasAnticipo = hasModuleAccess(user, "facturasAnticipo");
+  const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
+  const canViewPedidoUnidades = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
+  const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

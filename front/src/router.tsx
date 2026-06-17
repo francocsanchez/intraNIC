@@ -151,7 +151,7 @@ export default function Router() {
           </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["proformas"]} />}>
-            <Route element={<AdminModuleLayout />}>
+            <Route element={<NICLayout />}>
               <Route path={paths.convencional.proformas} element={<ProformasView />} />
               <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
               <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
@@ -210,7 +210,7 @@ export default function Router() {
               <Route path={paths.convencional.preventasResumen} element={<PreventasResumenView />} />
               <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
               <Route path={paths.convencional.preventasNueva} element={<PreventaFormView />} />
-              <Route path="/convencional/preventas/:id/editar" element={<PreventaFormView />} />
+              <Route path="/gestion/convencional/preventas/:id/editar" element={<PreventaFormView />} />
             </Route>
           </Route>
 

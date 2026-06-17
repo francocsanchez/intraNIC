@@ -2,6 +2,10 @@ import { Router } from "express";
 import { LieesController } from "../controllers/LiessController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
+import {
+  authorizeLiessTipoByRole,
+  authorizeRoleAccess,
+} from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 router.use(authenticate);
@@ -12,6 +16,6 @@ router.use(authenticate);
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible/:tipo", authorizeModules("liess"), LieesController.stockDisponible);
+router.get("/stock-disponible/:tipo", authorizeModules("liess"), authorizeRoleAccess("liess.stockDisponible"), authorizeLiessTipoByRole(), LieesController.stockDisponible);
 
 export default router;

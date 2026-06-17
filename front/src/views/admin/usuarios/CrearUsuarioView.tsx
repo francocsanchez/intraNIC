@@ -15,7 +15,6 @@ export type UsuarioFormData = {
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];
-  company: string[];
   modules: UserModules;
 };
 
@@ -30,7 +29,6 @@ export default function CreateUsuarioView() {
     numberSaleNic: 0,
     numberSaleLiess: 0,
     role: [],
-    company: [],
     modules: getDefaultModules(),
   };
 
@@ -46,7 +44,8 @@ export default function CreateUsuarioView() {
   const mutation = useMutation({
     mutationFn: createUsuario,
     onError: (error: Error) => {
-      toast.error(error.message)},
+      toast.error(error.message);
+    },
     onSuccess: (response: { message: string }) => {
       toast.success(response.message);
       navigate(paths.admin.usuarios);
@@ -54,11 +53,10 @@ export default function CreateUsuarioView() {
   });
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+    <div className="w-full space-y-6 px-4 py-6">
+      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
-
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Crear usuario</h1>
         </div>
 
@@ -77,7 +75,9 @@ export default function CreateUsuarioView() {
       >
         <div className="border-b border-gray-200 px-6 py-4">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
-          <p className="mt-1 text-sm text-gray-500">Completá la información principal, roles, compañías y vendedor asociado.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Completa la informacion principal, los modulos habilitados y el vendedor asociado.
+          </p>
         </div>
 
         <div className="p-6">

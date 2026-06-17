@@ -1,7 +1,7 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { Navigate, Outlet, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
@@ -14,10 +14,10 @@ export default function GestionConvencionalLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewAsignaciones = hasModuleAccess(user, "asignaciones");
-  const canViewRegistroAsignaciones = hasModuleAccess(user, "registroAsignaciones");
-  const canViewPedidoMensual = hasModuleAccess(user, "pedidoMensual");
-  const canViewPedidoUnidades = hasModuleAccess(user, "pedidoUnidades");
+  const canViewAsignaciones = hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones);
+  const canViewRegistroAsignaciones = hasModulePathAccess(user, "registroAsignaciones", paths.convencional.registroAsignaciones);
+  const canViewPedidoMensual = hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual);
+  const canViewPedidoUnidades = hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

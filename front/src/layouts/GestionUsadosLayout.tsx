@@ -1,7 +1,7 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { Navigate, Outlet, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
@@ -14,12 +14,13 @@ export default function GestionUsadosLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewNoReparado = hasModuleAccess(user, "noReparado");
-  const canViewPendienteDocumentacion = hasModuleAccess(
+  const canViewNoReparado = hasModulePathAccess(user, "noReparado", paths.usados.stockNoReparado);
+  const canViewPendienteDocumentacion = hasModulePathAccess(
     user,
     "pendienteDocumentacion",
+    paths.usados.stockPendienteDocumentacion,
   );
-  const canViewIngresos = hasModuleAccess(user, "ingresos");
+  const canViewIngresos = hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

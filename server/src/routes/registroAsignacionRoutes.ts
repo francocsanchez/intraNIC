@@ -2,11 +2,13 @@ import { Router } from "express";
 import { RegistroAsignacionController } from "../controllers/RegistroAsignacionController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
+import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
 router.use(authenticate);
 router.use(authorizeModules("registroAsignaciones"));
+router.use(authorizeRoleAccess("convencional.registroAsignaciones"));
 
 router.get("/operacion/:operacion", RegistroAsignacionController.getInfoOperacion);
 router.get("/resumen", RegistroAsignacionController.summary);

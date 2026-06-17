@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -49,22 +49,25 @@ export default function Inicio() {
     return <Navigate to={paths.login} replace />;
   }
 
+  const preventasHomePath = hasModulePathAccess(user, "preventas", paths.convencional.preventas)
+    ? paths.convencional.preventas
+    : paths.convencional.preventasResumen;
+
   const sections: HomeSection[] = [
     {
       title: "stock de unidades",
       icon: Warehouse,
       items: [
-        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasModuleAccess(user, "convencional"), icon: CarFront },
-        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasModuleAccess(user, "usados"), icon: Car },
-        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModuleAccess(user, "liess"), icon: Motorbike },
+        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasModulePathAccess(user, "convencional", paths.convencional.stockDisponible), icon: CarFront },
+        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasModulePathAccess(user, "usados", paths.usados.stockDisponible), icon: Car },
+        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
       ],
     },
     {
       title: "Comercial",
       icon: ShoppingCart,
       items: [
-        { label: "Preventas", to: paths.convencional.preventas, enabled: hasModuleAccess(user, "preventas"), icon: ClipboardList },
-        { label: "Proformas", to: paths.convencional.proformas, enabled: hasModuleAccess(user, "proformas"), icon: FileText },
+        { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
       ],
     },
     {
@@ -74,19 +77,19 @@ export default function Inicio() {
         {
           label: "Reventa pendientes",
           to: paths.administracion.reventaPendientes,
-          enabled: hasModuleAccess(user, "reventaPendientes"),
+          enabled: hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes),
           icon: ClipboardClock,
         },
         {
           label: "Lista previa",
           to: paths.administracion.pedidoUnidadesListaPrevia,
-          enabled: hasModuleAccess(user, "listaPrevia"),
+          enabled: hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia),
           icon: ClipboardList,
         },
         {
           label: "Facturas anticipo",
           to: paths.administracion.facturasAnticipo,
-          enabled: hasModuleAccess(user, "facturasAnticipo"),
+          enabled: hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo),
           icon: CalendarRange,
         },
       ],
@@ -95,42 +98,43 @@ export default function Inicio() {
       title: "Gestion de stock convencional",
       icon: Settings2,
       items: [
-        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasModuleAccess(user, "asignaciones"), icon: Wrench },
+        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones), icon: Wrench },
         {
           label: "Registro asignaciones",
           to: paths.convencional.registroAsignaciones,
-          enabled: hasModuleAccess(user, "registroAsignaciones"),
+          enabled: hasModulePathAccess(user, "registroAsignaciones", paths.convencional.registroAsignaciones),
           icon: ClipboardList,
         },
-        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasModuleAccess(user, "pedidoMensual"), icon: Package },
-        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModuleAccess(user, "pedidoUnidades"), icon: Package },
+        { label: "Preventas", to: preventasHomePath, enabled: hasModulePathAccess(user, "preventas", preventasHomePath), icon: ClipboardList },
+        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual), icon: Package },
+        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades), icon: Package },
       ],
     },
     {
       title: "Gestion de stock usados",
       icon: Wrench,
       items: [
-        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasModuleAccess(user, "noReparado"), icon: Cog },
+        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasModulePathAccess(user, "noReparado", paths.usados.stockNoReparado), icon: Cog },
         {
           label: "Pendiente documentacion",
           to: paths.usados.stockPendienteDocumentacion,
-          enabled: hasModuleAccess(user, "pendienteDocumentacion"),
+          enabled: hasModulePathAccess(user, "pendienteDocumentacion", paths.usados.stockPendienteDocumentacion),
           icon: ClipboardList,
         },
-        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModuleAccess(user, "ingresos"), icon: Handshake },
+        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos), icon: Handshake },
       ],
     },
     {
       title: "Analisis",
       icon: BarChart3,
       items: [
-        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModuleAccess(user, "operaciones"), icon: BarChart3 },
-        { label: "Ranking", to: paths.convencional.ranking, enabled: hasModuleAccess(user, "ranking"), icon: Trophy },
-        { label: "Promedio", to: paths.convencional.promedio, enabled: hasModuleAccess(user, "promedio"), icon: BarChart3 },
+        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones), icon: BarChart3 },
+        { label: "Ranking", to: paths.convencional.ranking, enabled: hasModulePathAccess(user, "ranking", paths.convencional.ranking), icon: Trophy },
+        { label: "Promedio", to: paths.convencional.promedio, enabled: hasModulePathAccess(user, "promedio", paths.convencional.promedio), icon: BarChart3 },
         {
           label: "Patentamientos",
           to: paths.analisis.patentamientos.dashboardMarcas,
-          enabled: hasModuleAccess(user, "patentamientos"),
+          enabled: hasModulePathAccess(user, "patentamientos", paths.analisis.patentamientos.dashboardMarcas),
           icon: BarChart3,
         },
       ],
@@ -139,8 +143,8 @@ export default function Inicio() {
       title: "Sistema",
       icon: Cog,
       items: [
-        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModuleAccess(user, "usuarios"), icon: UserCog },
-        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModuleAccess(user, "configuracion"), icon: Cog },
+        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
+        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
       ],
     },
   ];

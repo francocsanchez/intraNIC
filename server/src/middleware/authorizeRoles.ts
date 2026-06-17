@@ -34,6 +34,10 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
     const normalizedAllowedRoles = normalizeValues(allowedRoles);
     const userRoles = normalizeValues(req.user.role);
 
+    if (userRoles.includes("superadmin")) {
+      return next();
+    }
+
     const hasPermission = userRoles.some((role) =>
       normalizedAllowedRoles.includes(role),
     );

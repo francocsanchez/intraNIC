@@ -5,6 +5,7 @@ import { PatentamientosDashboardController } from "../controllers/Patentamientos
 import { UnidadesDealersController } from "../controllers/UnidadesDealersController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
+import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
@@ -34,6 +35,7 @@ const singleFileUpload = (req: Request, res: Response, next: NextFunction) => {
 
 router.use(authenticate);
 router.use(authorizeModules("patentamientos"));
+router.use(authorizeRoleAccess("analisis.patentamientos"));
 
 router.post("/importar/pais-marcas", singleFileUpload, PatentamientosController.importPaisMarcas);
 router.post("/importar/zona-nic-marcas", singleFileUpload, PatentamientosController.importZonaNicMarcas);

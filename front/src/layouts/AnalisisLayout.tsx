@@ -1,7 +1,7 @@
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { Navigate, Outlet, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthe";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
@@ -14,9 +14,9 @@ export default function AnalisisLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewOperaciones = hasModuleAccess(user, "operaciones");
-  const canViewRanking = hasModuleAccess(user, "ranking");
-  const canViewPromedio = hasModuleAccess(user, "promedio");
+  const canViewOperaciones = hasModulePathAccess(user, "operaciones", paths.analisis.operaciones);
+  const canViewRanking = hasModulePathAccess(user, "ranking", paths.convencional.ranking);
+  const canViewPromedio = hasModulePathAccess(user, "promedio", paths.convencional.promedio);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

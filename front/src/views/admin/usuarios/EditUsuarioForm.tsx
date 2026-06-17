@@ -17,7 +17,6 @@ type Usuario = {
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];
-  company: string[];
   modules?: UserModules;
 };
 
@@ -29,7 +28,6 @@ export type UsuarioFormData = {
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];
-  company: string[];
   modules: UserModules;
 };
 
@@ -55,7 +53,6 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       celular: data.celular ?? "",
       numberSaleNic: data.numberSaleNic,
       numberSaleLiess: data.numberSaleLiess,
-      company: data.company,
       role: data.role,
       modules: {
         ...getDefaultModules(),
@@ -82,11 +79,10 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
   };
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+    <div className="w-full space-y-6 px-4 py-6">
+      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
-
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Editar usuario</h1>
         </div>
 
@@ -113,14 +109,18 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
 
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Email</p>
-          <p className="mt-2 text-sm font-medium break-all text-gray-900">{data.email}</p>
+          <p className="mt-2 break-all text-sm font-medium text-gray-900">{data.email}</p>
         </article>
       </section>
 
-      <form className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+      <form
+        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+        onSubmit={handleSubmit(handleFormSubmit)}
+        noValidate
+      >
         <div className="border-b border-gray-200 px-6 py-4">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
-          <p className="mt-1 text-sm text-gray-500">Actualizá los datos y guardá los cambios.</p>
+          <p className="mt-1 text-sm text-gray-500">Actualiza los datos, los modulos habilitados y guarda los cambios.</p>
         </div>
 
         <div className="p-6">
@@ -128,7 +128,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500">Revisá los datos antes de guardar la edición.</div>
+          <div className="text-sm text-gray-500">Revisa los datos antes de guardar la edicion.</div>
 
           <input
             type="submit"

@@ -1,4 +1,4 @@
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
@@ -11,9 +11,9 @@ const disabledCardClass =
 
 export default function AdministracionHubView() {
   const { user } = useAuth();
-  const canViewReventas = hasModuleAccess(user, "reventaPendientes");
-  const canViewListaPrevia = hasModuleAccess(user, "listaPrevia");
-  const canViewFacturasAnticipo = hasModuleAccess(user, "facturasAnticipo");
+  const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
+  const canViewListaPrevia = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
+  const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

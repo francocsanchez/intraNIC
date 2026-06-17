@@ -89,7 +89,9 @@ export default function UsuariosView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">Error al cargar los usuarios</div>
+        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">
+          Error al cargar los usuarios
+        </div>
       </div>
     );
   }
@@ -97,18 +99,11 @@ export default function UsuariosView() {
   const totalUsuarios = usuarios.length;
   const activos = usuarios.filter((u: any) => u.enable).length;
 
-  const companyStats = usuarios.reduce((acc: Record<string, number>, u: any) => {
-    u.company.forEach((company: string) => {
-      acc[company] = (acc[company] || 0) + 1;
-    });
-    return acc;
-  }, {});
-
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+    <div className="w-full space-y-6 px-4 py-6">
+      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Usuarios</h1>
         </div>
 
@@ -122,7 +117,7 @@ export default function UsuariosView() {
         ) : null}
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total usuarios</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalUsuarios}</p>
@@ -131,24 +126,6 @@ export default function UsuariosView() {
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{activos}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Compañías</p>
-
-          <div
-            className="mt-3 grid divide-x divide-gray-200"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(Object.keys(companyStats).length, 1)}, minmax(0, 1fr))`,
-            }}
-          >
-            {Object.entries(companyStats).map(([company, total]) => (
-              <div key={company} className="px-3 first:pl-0 last:pr-0">
-                <p className="text-xs text-gray-500 uppercase">{company}</p>
-                <p className="text-lg font-semibold text-gray-900">{total}</p>
-              </div>
-            ))}
-          </div>
         </article>
       </section>
 
@@ -163,7 +140,6 @@ export default function UsuariosView() {
               <tr>
                 <th className="px-6 py-3 text-left">Usuario</th>
                 <th className="px-6 py-3 text-left">Rol</th>
-                <th className="px-6 py-3 text-left">Empresa</th>
                 <th className="px-6 py-3 text-left">Celular</th>
                 <th className="px-6 py-3 text-left">NIC</th>
                 <th className="px-6 py-3 text-left">LIESS</th>
@@ -178,24 +154,17 @@ export default function UsuariosView() {
                     <div className="font-medium text-gray-900">
                       {capitalize(u.lastName)}, {capitalize(u.name)}
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">{u.email}</div>
+                    <div className="mt-0.5 text-xs text-gray-500">{u.email}</div>
                   </td>
 
                   <td className="px-6 py-3">
                     <div className="flex flex-wrap gap-2">
                       {u.role.map((r: string) => (
-                        <span key={r} className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                        <span
+                          key={r}
+                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+                        >
                           {r}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {u.company.map((c: string) => (
-                        <span key={c} className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-                          {c}
                         </span>
                       ))}
                     </div>
@@ -203,9 +172,13 @@ export default function UsuariosView() {
 
                   <td className="px-6 py-3 text-gray-700">{u.celular || "-"}</td>
 
-                  <td className="px-6 py-3 text-gray-700">{u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}</td>
+                  <td className="px-6 py-3 text-gray-700">
+                    {u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}
+                  </td>
 
-                  <td className="px-6 py-3 text-gray-700">{u.numberSaleLiess ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess) : "-"}</td>
+                  <td className="px-6 py-3 text-gray-700">
+                    {u.numberSaleLiess ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess) : "-"}
+                  </td>
 
                   <td className="px-6 py-3">
                     <div className="flex justify-end gap-2">
@@ -228,14 +201,14 @@ export default function UsuariosView() {
                             type="button"
                             onClick={() => resetPasswordUser(u._id)}
                             disabled={resettingUserId === u._id}
-                            className="inline-flex items-center gap-1 justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                            className="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
                           >
                             <RotateCcw size={14} strokeWidth={1.8} />
                             {resettingUserId === u._id ? "Enviando..." : "Enviar nueva pass"}
                           </button>
 
                           <Link
-                    to={paths.admin.editarUsuario(u._id)}
+                            to={paths.admin.editarUsuario(u._id)}
                             className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                           >
                             Editar
@@ -247,13 +220,13 @@ export default function UsuariosView() {
                 </tr>
               ))}
 
-              {usuarios.length === 0 && (
+              {usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay usuarios para mostrar.
                   </td>
                 </tr>
-              )}
+              ) : null}
             </tbody>
           </table>
         </div>

@@ -80,7 +80,7 @@ const isValidPrioridad = (value: unknown): value is PedidoUnidadPrioridad =>
   typeof value === "string" && PEDIDO_UNIDAD_PRIORIDADES.includes(value as PedidoUnidadPrioridad);
 
 const canManagePrioridad = (roles: string[] | undefined) =>
-  (roles ?? []).some((role) => ["stock", "gerente", "admin"].includes(role));
+  (roles ?? []).some((role) => ["stock", "gerente", "admin", "superadmin"].includes(String(role).trim().toLowerCase()));
 
 const comparePedidoUnidadItem = (a: { prioridad: PedidoUnidadPrioridad; interno: number }, b: { prioridad: PedidoUnidadPrioridad; interno: number }) => {
   const priorityDiff = PRIORIDAD_ORDER[a.prioridad] - PRIORIDAD_ORDER[b.prioridad];

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ConvencionalController } from "../controllers/ConvencionalController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
+import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.use(authenticate);
  * @desc Listar stock disponible.
  *
  */
-router.get("/stock-disponible", authorizeModules("convencional"), ConvencionalController.stockDisponible);
+router.get("/stock-disponible", authorizeModules("convencional"), authorizeRoleAccess("convencional.stockDisponible"), ConvencionalController.stockDisponible);
 
 /**
  *
@@ -29,7 +30,7 @@ router.get("/stock-disponible", authorizeModules("convencional"), ConvencionalCo
  * @desc Listar stock guardado.
  *
  */
-router.get("/stock-guardado", authorizeModules("convencional"), ConvencionalController.stockGuardado);
+router.get("/stock-guardado", authorizeModules("convencional"), authorizeRoleAccess("convencional.stockGuardado"), ConvencionalController.stockGuardado);
 
 /**
  *
@@ -37,7 +38,7 @@ router.get("/stock-guardado", authorizeModules("convencional"), ConvencionalCont
  * @desc Listar stock reservado.
  *
  */
-router.get("/stock-reservado", authorizeModules("convencional"), ConvencionalController.stockReservado);
+router.get("/stock-reservado", authorizeModules("convencional"), authorizeRoleAccess("convencional.stockReservado"), ConvencionalController.stockReservado);
 
 /**
  *
@@ -48,6 +49,7 @@ router.get("/stock-reservado", authorizeModules("convencional"), ConvencionalCon
 router.get(
   "/stock-reservado/:numeroVendedor",
   authorizeModules("convencional"),
+  authorizeRoleAccess("convencional.misReservas"),
   ConvencionalController.misReservas,
 );
 
@@ -57,7 +59,7 @@ router.get(
  * @desc Mi lista de espera.
  *
  */
-router.get("/mi-lista-de-espera", authorizeModules("convencional"), ConvencionalController.miListaDeEspera);
+router.get("/mi-lista-de-espera", authorizeModules("convencional"), authorizeRoleAccess("convencional.miListaEspera"), ConvencionalController.miListaDeEspera);
 
 /**
  *
@@ -65,7 +67,7 @@ router.get("/mi-lista-de-espera", authorizeModules("convencional"), Convencional
  * @desc Lista de espera.
  *
  */
-router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
+router.get("/lista-de-espera", authorizeModules("convencional"), authorizeRoleAccess("convencional.listaEsperaGeneral"), ConvencionalController.listaDeEspera);
 
 /**
  *
@@ -73,9 +75,9 @@ router.get("/lista-de-espera", ConvencionalController.listaDeEspera);
  * @desc Mi lista de espera.
  *
  */
-router.get("/mis-reservas", authorizeModules("convencional"), ConvencionalController.misReservas);
+router.get("/mis-reservas", authorizeModules("convencional"), authorizeRoleAccess("convencional.misReservas"), ConvencionalController.misReservas);
 
-router.get("/mis-operaciones/:mes/:ano", authorizeModules("convencional"), ConvencionalController.misOperaciones);
-router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), ConvencionalController.rankingOperaciones);
+router.get("/mis-operaciones/:mes/:ano", authorizeModules("convencional"), authorizeRoleAccess("convencional.misOperaciones"), ConvencionalController.misOperaciones);
+router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), authorizeRoleAccess("convencional.promedio"), ConvencionalController.promedioOperaciones);
+router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), authorizeRoleAccess("convencional.ranking"), ConvencionalController.rankingOperaciones);
 export default router;

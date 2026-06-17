@@ -1,9 +1,9 @@
 import Loading from "@/components/Loading";
 import { deletePreventa, getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
-import { paths } from "@/routes/paths";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -19,7 +19,8 @@ export default function PreventasView() {
   });
 
   const assignMutation = useMutation({
-    mutationFn: ({ id, asignado }: { id: string; asignado: boolean }) => patchPreventaAsignado(id, asignado),
+    mutationFn: ({ id, asignado }: { id: string; asignado: boolean }) =>
+      patchPreventaAsignado(id, asignado),
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["preventas"] });
@@ -52,13 +53,14 @@ export default function PreventasView() {
   }
 
   const preventas = data?.data ?? [];
-  const canViewResumen = hasModuleAccess(user, "preventas");
-  const canCreatePreventa = hasModuleAccess(user, "preventas");
-  const canViewAsignadas = hasModuleAccess(user, "preventas");
-  const canAssignPreventa = hasModuleAccess(user, "preventas");
-  const canEditPreventa = hasModuleAccess(user, "preventas");
-  const canDeletePreventa = hasModuleAccess(user, "preventas");
+  const canViewResumen = hasPathAccess(user, paths.convencional.preventasResumen);
+  const canCreatePreventa = hasPathAccess(user, paths.convencional.preventasNueva);
+  const canViewAsignadas = hasPathAccess(user, paths.convencional.preventasAsignadas);
+  const canAssignPreventa = false;
+  const canEditPreventa = false;
+  const canDeletePreventa = false;
   const canModifyPreventa = canEditPreventa || canDeletePreventa;
+  const canManagePreventaColumns = canAssignPreventa || canModifyPreventa;
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -73,7 +75,7 @@ export default function PreventasView() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {canViewResumen && (
+            {canViewResumen ? (
               <Link
                 to={paths.convencional.preventasResumen}
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#9fd6cf] bg-white px-4 py-3 text-sm font-semibold text-[#146b61] transition hover:bg-[#f4fbfa]"
@@ -81,8 +83,9 @@ export default function PreventasView() {
                 <ClipboardList size={16} />
                 Ver resumen
               </Link>
-            )}
-            {canCreatePreventa && (
+            ) : null}
+
+            {canCreatePreventa ? (
               <Link
                 to={paths.convencional.preventasNueva}
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]"
@@ -90,7 +93,7 @@ export default function PreventasView() {
                 <Plus size={16} />
                 Nueva preventa
               </Link>
-            )}
+            ) : null}
           </div>
         </div>
       </section>
@@ -108,7 +111,9 @@ export default function PreventasView() {
         </article>
         <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Colores múltiples</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{preventas.filter((item) => item.colores.length > 1).length}</p>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {preventas.filter((item) => item.colores.length > 1).length}
+          </p>
         </article>
       </section>
 
@@ -116,13 +121,16 @@ export default function PreventasView() {
         <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-base font-semibold tracking-tight text-gray-900">Listado operativo</h2>
-            <p className="mt-1 text-sm text-gray-500">Las preventas asignadas se ocultan de esta vista, pero no se eliminan.</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Las preventas asignadas se ocultan de esta vista, pero no se eliminan.
+            </p>
           </div>
-          {canViewAsignadas && (
-              <Link to={paths.convencional.preventasAsignadas} className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+
+          {canViewAsignadas ? (
+            <Link to={paths.convencional.preventasAsignadas} className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
               Ver asignadas
             </Link>
-          )}
+          ) : null}
         </div>
 
         <div className="overflow-x-auto">
@@ -136,10 +144,11 @@ export default function PreventasView() {
                 <th className="px-4 py-3 text-left">Vendedor</th>
                 <th className="px-4 py-3 text-left">Nro OP</th>
                 <th className="px-4 py-3 text-left">Reserva</th>
-                <th className="px-4 py-3 text-center">Asignado</th>
-                <th className="px-4 py-3 text-center">Acciones</th>
+                {canManagePreventaColumns ? <th className="px-4 py-3 text-center">Asignado</th> : null}
+                {canManagePreventaColumns ? <th className="px-4 py-3 text-center">Acciones</th> : null}
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-100">
               {preventas.map((preventa) => (
                 <tr key={preventa._id} className="hover:bg-[#f8fcfc]">
@@ -153,55 +162,70 @@ export default function PreventasView() {
                   <td className="px-4 py-3 text-gray-700">{preventa.vendedorNombre}</td>
                   <td className="px-4 py-3 text-gray-700">{preventa.numero_op ?? "-"}</td>
                   <td className="px-4 py-3 text-gray-700">{formatCurrency(preventa.monto_reserva)}</td>
-                  <td className="px-4 py-3 text-center">
-                    {canAssignPreventa ? (
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#bde2dc] bg-[#eef9f7] px-3 py-2 text-xs font-semibold text-[#146b61]">
-                        <input
-                          type="checkbox"
-                          checked={preventa.asignado}
-                          onChange={(event) => assignMutation.mutate({ id: preventa._id, asignado: event.target.checked })}
-                          className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
-                        />
-                        Asignado
-                      </label>
-                    ) : (
-                      <span className="inline-flex rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-500">
-                        Pendiente
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {canModifyPreventa ? (
-                      <div className="flex justify-center gap-2">
-                        {canEditPreventa && (
-                          <Link
-                        to={paths.convencional.preventasEditar(preventa._id)}
-                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
-                          >
-                            <Pencil size={14} />
-                            Editar
-                          </Link>
-                        )}
-                        {canDeletePreventa && (
-                          <button
-                            type="button"
-                            onClick={() => deleteMutation.mutate(preventa._id)}
-                            className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
-                          >
-                            <Trash2 size={14} />
-                            Eliminar
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center text-xs font-semibold text-gray-400">Solo lectura</div>
-                    )}
-                  </td>
+
+                  {canManagePreventaColumns ? (
+                    <td className="px-4 py-3 text-center">
+                      {canAssignPreventa ? (
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#bde2dc] bg-[#eef9f7] px-3 py-2 text-xs font-semibold text-[#146b61]">
+                          <input
+                            type="checkbox"
+                            checked={preventa.asignado}
+                            onChange={(event) => assignMutation.mutate({ id: preventa._id, asignado: event.target.checked })}
+                            className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                          />
+                          Asignado
+                        </label>
+                      ) : (
+                        <span
+                          className={[
+                            "inline-flex rounded-full border px-3 py-2 text-xs font-semibold",
+                            preventa.asignado
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-gray-200 bg-gray-50 text-gray-500",
+                          ].join(" ")}
+                        >
+                          {preventa.asignado ? "Asignado" : "Pendiente"}
+                        </span>
+                      )}
+                    </td>
+                  ) : null}
+
+                  {canManagePreventaColumns ? (
+                    <td className="px-4 py-3">
+                      {canModifyPreventa ? (
+                        <div className="flex justify-center gap-2">
+                          {canEditPreventa ? (
+                            <Link
+                              to={paths.convencional.preventasEditar(preventa._id)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                            >
+                              <Pencil size={14} />
+                              Editar
+                            </Link>
+                          ) : null}
+
+                          {canDeletePreventa ? (
+                            <button
+                              type="button"
+                              onClick={() => deleteMutation.mutate(preventa._id)}
+                              className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                            >
+                              <Trash2 size={14} />
+                              Eliminar
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div className="text-center text-xs font-semibold text-gray-400">Solo lectura</div>
+                      )}
+                    </td>
+                  ) : null}
                 </tr>
               ))}
+
               {!preventas.length ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={canManagePreventaColumns ? 9 : 7} className="px-6 py-12 text-center text-sm text-gray-500">
                     No hay preventas pendientes. Las que marques como asignadas quedarán disponibles en la vista histórica.
                   </td>
                 </tr>
