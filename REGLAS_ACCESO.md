@@ -11,6 +11,7 @@ La logica vigente es:
 - Un modulo esta **habilitado** solo cuando su valor es `1`.
 - Un modulo esta **deshabilitado** cuando su valor es `0`, `null` o no existe.
 - Si el usuario tiene el rol `superAdmin`, debe saltear cualquier restriccion funcional del sistema.
+- Si el usuario tiene mas de un rol activo, los permisos deben combinarse por **union de accesos permitidos**.
 - La validacion de modulos debe aplicarse en:
   - frontend
   - rutas protegidas
@@ -50,16 +51,31 @@ La logica vigente es:
 Para cualquier pantalla, menu, accion o endpoint:
 
 - Si el usuario tiene el rol `superAdmin`, el acceso debe permitirse siempre.
+- Si el usuario tiene varios roles activos definidos, debe permitirse la **suma de permisos** de esos roles, sin convertir eso en acceso total.
 - Si el modulo requerido esta en `1`, el acceso debe permitirse.
 - Si el modulo requerido esta en `0`, `null` o ausente, el acceso debe bloquearse.
 
 Esto implica:
 
 - `superAdmin` debe ver todos los accesos y entrar a cualquier URL sin depender de `modules`
+- combinar roles nunca debe abrir acceso global; solo debe sumar los accesos explicitamente definidos para cada rol
 - no mostrar accesos habilitables en `Inicio` cuando el modulo no esta activo
 - no mostrar links o acciones internas cuando el modulo no esta activo
 - bloquear ingreso por URL directa cuando el modulo no esta activo
 - responder `403` desde backend cuando el modulo no esta activo
+
+## Regla de combinacion de roles
+Cuando un usuario tenga mas de un rol definido:
+
+- se debe aplicar la **union** de permisos de todos sus roles activos
+- no se debe tomar la presencia de multiples roles como acceso total
+- `superAdmin` sigue siendo la unica excepcion con acceso irrestricto
+
+Ejemplo:
+
+- `vendedor` + `administracion` = accesos de `vendedor` + accesos de `administracion`
+- `vendedor` + `supervisor` = accesos de `vendedor` + accesos extra de `supervisor`
+- cualquier combinacion con `superAdmin` = acceso total
 
 ## Relacion actual modulo -> acceso funcional
 - `convencional`: stock y vistas generales de convencional
