@@ -5,7 +5,7 @@ import { hasAnyRole } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
-export default function AdminLayout() {
+export default function GestionUsadosLayout() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) return <Loading />;
@@ -14,23 +14,29 @@ export default function AdminLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewUsuarios = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const canViewEstados = hasAnyRole(user, ["admin", "gerente", "stock"]);
+  const canViewIngresos = hasAnyRole(user, ["admin", "gerente", "stock"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <GlobalNavbar
         centerContent={
           <>
-            {canViewUsuarios ? (
-              <Link to={paths.admin.usuarios} className="hover:text-gray-900 transition">
-                Usuarios
+            {canViewEstados ? (
+              <Link to={paths.usados.stockNoReparado} className="hover:text-gray-900 transition">
+                No reparado
               </Link>
             ) : null}
 
-            {canViewConfiguracion ? (
-              <Link to={paths.admin.configuracion} className="hover:text-gray-900 transition">
-                Configuracion
+            {canViewEstados ? (
+              <Link to={paths.usados.stockPendienteDocumentacion} className="hover:text-gray-900 transition">
+                Pendiente documentacion
+              </Link>
+            ) : null}
+
+            {canViewIngresos ? (
+              <Link to={paths.usados.stockIngresos} className="hover:text-gray-900 transition">
+                Ingresos
               </Link>
             ) : null}
           </>
@@ -45,7 +51,7 @@ export default function AdminLayout() {
 
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between text-sm text-gray-500">
-          <span>Panel de administracion</span>
+          <span>Gestion usados</span>
           <span>{new Date().getFullYear()}</span>
         </div>
       </footer>

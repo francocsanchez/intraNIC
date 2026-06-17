@@ -5,7 +5,7 @@ import { hasAnyRole } from "@/helpers/access";
 import Loading from "@/components/Loading";
 import { paths } from "@/routes/paths";
 
-export default function AdminLayout() {
+export default function AnalisisLayout() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) return <Loading />;
@@ -14,23 +14,30 @@ export default function AdminLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const canViewUsuarios = hasAnyRole(user, ["admin", "supervisor", "stock"]);
-  const canViewConfiguracion = hasAnyRole(user, ["admin", "stock", "supervisor"]);
+  const canViewOperaciones = hasAnyRole(user, ["admin", "supervisor", "gerente"]);
+  const canViewRanking = hasAnyRole(user, ["admin", "gerente", "vendedor", "stock"]);
+  const canViewPromedio = hasAnyRole(user, ["admin", "gerente", "vendedor", "stock"]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <GlobalNavbar
         centerContent={
           <>
-            {canViewUsuarios ? (
-              <Link to={paths.admin.usuarios} className="hover:text-gray-900 transition">
-                Usuarios
+            {canViewOperaciones ? (
+              <Link to={paths.analisis.operaciones} className="hover:text-gray-900 transition">
+                Operaciones
               </Link>
             ) : null}
 
-            {canViewConfiguracion ? (
-              <Link to={paths.admin.configuracion} className="hover:text-gray-900 transition">
-                Configuracion
+            {canViewRanking ? (
+              <Link to={paths.convencional.ranking} className="hover:text-gray-900 transition">
+                Ranking
+              </Link>
+            ) : null}
+
+            {canViewPromedio ? (
+              <Link to={paths.convencional.promedio} className="hover:text-gray-900 transition">
+                Promedio
               </Link>
             ) : null}
           </>
@@ -45,7 +52,7 @@ export default function AdminLayout() {
 
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between text-sm text-gray-500">
-          <span>Panel de administracion</span>
+          <span>Analisis</span>
           <span>{new Date().getFullYear()}</span>
         </div>
       </footer>

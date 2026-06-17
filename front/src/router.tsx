@@ -5,6 +5,10 @@ import LiessLayout from "./layouts/LiessLayout";
 import ReventasLayout from "./layouts/ReventasLayout";
 import AdminModuleLayout from "./layouts/AdminModuleLayout";
 import PatentamientosLayout from "./layouts/PatentamientosLayout";
+import ProfileLayout from "./layouts/ProfileLayout";
+import GestionConvencionalLayout from "./layouts/GestionConvencionalLayout";
+import GestionUsadosLayout from "./layouts/GestionUsadosLayout";
+import AnalisisLayout from "./layouts/AnalisisLayout";
 
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import CompanyProtectedRoute from "./layouts/CompanyProtectedRoute";
@@ -86,6 +90,9 @@ export default function Router() {
 
         <Route element={<ProtectedRoute />}>
           <Route path={paths.home} element={<Inicio />} />
+          <Route element={<ProfileLayout />}>
+            <Route path={paths.miPerfil} element={<MiPerfilView />} />
+          </Route>
           <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
 
           <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "stock"]} />}>
@@ -158,9 +165,16 @@ export default function Router() {
             <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
           </Route>
 
-          <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
-            <Route element={<AdminModuleLayout />}>
+          <Route element={<AnalisisLayout />}>
+            <Route element={<RoleProtectedRoute allowedRoles={["admin", "supervisor", "gerente"]} />}>
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
+            </Route>
+
+            <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
+                <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
+                <Route path={paths.convencional.promedio} element={<PromediosConvencionalView />} />
+              </Route>
             </Route>
           </Route>
 
@@ -176,17 +190,12 @@ export default function Router() {
 
           <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
             <Route element={<NICLayout />}>
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "gerente", "supervisor", "vendedor", "administracion"]} />}>
-                <Route path={paths.convencional.miPerfil} element={<MiPerfilView />} />
-              </Route>
-
               <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path={paths.convencional.stockGuardado} element={<StockGuardadoConvencioanl />} />
-                <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock", "administracion"]} />}>
@@ -203,19 +212,6 @@ export default function Router() {
                 <Route path="/convencional/preventas/:id/editar" element={<PreventaFormView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
-                <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
-                <Route path={paths.convencional.registroAsignaciones} element={<RegistroAsignacionesView />} />
-                <Route path={paths.convencional.registroAsignacionesResumen} element={<RegistroAsignacionesResumenView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin", "gerente"]} />}>
-                <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
-              </Route>
-
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock"]} />}>
                 <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
                 <Route path={paths.convencional.preventasColoresNuevo} element={<ColorFormView />} />
@@ -223,10 +219,6 @@ export default function Router() {
                 <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
                 <Route path={paths.convencional.preventasVersionesNuevo} element={<VersionFormView />} />
                 <Route path="/convencional/preventas/versiones/:id/editar" element={<VersionFormView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
-                <Route path={paths.convencional.promedio} element={<PromediosConvencionalView />} />
               </Route>
 
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "stock"]} />}>
@@ -239,12 +231,26 @@ export default function Router() {
                 <Route path={paths.convencional.misOperaciones} element={<MisOperacionesView />} />
               </Route>
 
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "vendedor", "stock"]} />}>
-                <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
-              </Route>
-
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
                 <Route path={paths.convencional.stockDisponible} element={<StockDisponibleConvencional />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route element={<CompanyProtectedRoute allowedCompany={["convencional"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
+                <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
+                <Route path={paths.convencional.registroAsignaciones} element={<RegistroAsignacionesView />} />
+                <Route path={paths.convencional.registroAsignacionesResumen} element={<RegistroAsignacionesResumenView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["stock", "admin", "gerente"]} />}>
+                <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
+              </Route>
+
+              <Route element={<RoleProtectedRoute allowedRoles={["admin", "stock", "administracion", "gerente"]} />}>
+                <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
               </Route>
             </Route>
           </Route>
@@ -264,12 +270,14 @@ export default function Router() {
                 <Route path={paths.usados.stockReservado} element={<StockReservasUsados />} />
               </Route>
 
+            </Route>
+          </Route>
+
+          <Route element={<CompanyProtectedRoute allowedCompany={["usados"]} />}>
+            <Route element={<GestionUsadosLayout />}>
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path={paths.usados.stockNoReparado} element={<StockNoReparadoUsadosView />} />
                 <Route path={paths.usados.stockPendienteDocumentacion} element={<StockPendDocuUsadosView />} />
-              </Route>
-
-              <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "stock"]} />}>
                 <Route path={paths.usados.stockIngresos} element={<StockIngresoUsados />} />
               </Route>
             </Route>
@@ -277,10 +285,8 @@ export default function Router() {
 
           <Route element={<CompanyProtectedRoute allowedCompany={["liess"]} />}>
             <Route element={<LiessLayout />}>
-              <Route path="/mi-perfil/liess" element={<MiPerfilView />} />
-
               <Route element={<RoleProtectedRoute allowedRoles={["admin", "gerente", "supervisor", "vendedor", "stock"]} />}>
-                <Route path="/stock/disponible/liess/:tipo" element={<StockDisponibleLiess />} />
+                <Route path="/liess/stock/:tipo" element={<StockDisponibleLiess />} />
               </Route>
             </Route>
           </Route>

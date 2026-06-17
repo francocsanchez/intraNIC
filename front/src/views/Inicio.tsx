@@ -2,18 +2,35 @@ import Loading from "@/components/Loading";
 import { hasAnyRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { LogOut } from "lucide-react";
+import {
+  BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
+  Cog,
+  FileText,
+  FolderCog,
+  Handshake,
+  LogOut,
+  Motorbike,
+  Package,
+  Settings2, ShoppingCart,
+  Trophy,
+  UserCog,
+  Warehouse,
+  Wrench
+} from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
 
 type HomeItem = {
   label: string;
   to: string;
   enabled: boolean;
+  icon: LucideIcon;
 };
 
 type HomeSection = {
   title: string;
   items: HomeItem[];
+  icon: LucideIcon;
 };
 
 const cardClass =
@@ -48,83 +65,95 @@ export default function Inicio() {
   const sections: HomeSection[] = [
     {
       title: "stock de unidades",
+      icon: Warehouse,
       items: [
-        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasNIC },
-        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasUsed },
-        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasLiess },
+        { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasNIC, icon: CarFront },
+        { label: "Usados", to: paths.usados.stockDisponible, enabled: hasUsed, icon: Car },
+        { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasLiess, icon: Motorbike },
       ],
     },
     {
       title: "Comercial",
+      icon: ShoppingCart,
       items: [
-        { label: "Preventas", to: paths.convencional.preventas, enabled: hasPreventas },
-        { label: "Proformas", to: paths.convencional.proformas, enabled: hasProformas },
-        { label: "Administracion", to: paths.administracion.home, enabled: hasAdministracion },
+        { label: "Preventas", to: paths.convencional.preventas, enabled: hasPreventas, icon: ClipboardList },
+        { label: "Proformas", to: paths.convencional.proformas, enabled: hasProformas, icon: FileText },
       ],
     },
     {
       title: "Administracion convencional",
+      icon: FolderCog,
       items: [
         {
           label: "Reventa pendientes",
           to: paths.administracion.reventaPendientes,
           enabled: hasAdministracion,
+          icon: ClipboardClock,
         },
         {
           label: "Lista previa",
           to: paths.administracion.pedidoUnidadesListaPrevia,
           enabled: hasAdministracion,
+          icon: ClipboardList,
         },
         {
           label: "Facturas anticipo",
           to: paths.administracion.facturasAnticipo,
           enabled: hasAdministracion,
+          icon: CalendarRange,
         },
       ],
     },
     {
       title: "Gestion de stock convencional",
+      icon: Settings2,
       items: [
-        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasNIC },
+        { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasNIC, icon: Wrench },
         {
           label: "Registro asignaciones",
           to: paths.convencional.registroAsignaciones,
           enabled: hasNIC,
+          icon: ClipboardList,
         },
-        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasNIC },
-        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasNIC },
+        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasNIC, icon: Package },
+        { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasNIC, icon: Package },
       ],
     },
     {
       title: "Gestion de stock usados",
+      icon: Wrench,
       items: [
-        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasUsed },
+        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasUsed, icon: Cog },
         {
           label: "Pendiente documentacion",
           to: paths.usados.stockPendienteDocumentacion,
           enabled: hasUsed,
+          icon: ClipboardList,
         },
-        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasUsed },
+        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasUsed, icon: Handshake },
       ],
     },
     {
       title: "Analisis",
+      icon: BarChart3,
       items: [
-        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasOperaciones },
-        { label: "Ranking", to: paths.convencional.ranking, enabled: hasNIC },
-        { label: "Promedio", to: paths.convencional.promedio, enabled: hasNIC },
+        { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasOperaciones, icon: BarChart3 },
+        { label: "Ranking", to: paths.convencional.ranking, enabled: hasNIC, icon: Trophy },
+        { label: "Promedio", to: paths.convencional.promedio, enabled: hasNIC, icon: BarChart3 },
         {
           label: "Patentamientos",
           to: paths.analisis.patentamientos.dashboardMarcas,
           enabled: hasPatentamientos,
+          icon: BarChart3,
         },
       ],
     },
     {
       title: "Sistema",
+      icon: Cog,
       items: [
-        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasSystem },
-        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasSystem },
+        { label: "Usuarios", to: paths.admin.usuarios, enabled: hasSystem, icon: UserCog },
+        { label: "Configuracion", to: paths.admin.configuracion, enabled: hasSystem, icon: Cog },
       ],
     },
   ];
@@ -259,7 +288,7 @@ export default function Inicio() {
   padding: 0 18px !important;
 }
 
-          .inicio-card-text {
+.inicio-card-text {
   color: #374151;
   font-size: 13px;
   line-height: 18px;
@@ -268,6 +297,19 @@ export default function Inicio() {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+          .inicio-section-title-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .inicio-card-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+          }
 
           .home-module-card:hover .inicio-card-text {
             color: #000000;
@@ -320,17 +362,28 @@ export default function Inicio() {
           <div className="inicio-grid">
             {sections.map((section) => (
               <section key={section.title}>
-                <h2 className="inicio-section-title">{section.title}</h2>
+                <h2 className="inicio-section-title">
+                  <span className="inicio-section-title-content">
+                    <section.icon size={14} strokeWidth={2} />
+                    <span>{section.title}</span>
+                  </span>
+                </h2>
 
                 <div className="inicio-cards">
                   {section.items.map((item) =>
                     item.enabled ? (
                       <Link key={item.label} to={item.to} className={cardClass}>
-                        <span className="inicio-card-text">{item.label}</span>
+                        <span className="inicio-card-content">
+                          <item.icon size={13} strokeWidth={2} />
+                          <span className="inicio-card-text">{item.label}</span>
+                        </span>
                       </Link>
                     ) : (
                       <span key={item.label} className={disabledCardClass}>
-                        <span className="inicio-card-text">{item.label}</span>
+                        <span className="inicio-card-content">
+                          <item.icon size={13} strokeWidth={2} />
+                          <span className="inicio-card-text">{item.label}</span>
+                        </span>
                       </span>
                     ),
                   )}

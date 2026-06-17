@@ -5,7 +5,7 @@ export default function LiessLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Navbar */}
-      <NavBarLiess negocio={`liess`} />
+      <NavBarLiess />
 
       {/* Main */}
       <main className="flex-1">
