@@ -20,7 +20,7 @@ router.get("/vendedores", authorizeModules("usuarios", "configuracion"), authori
  * @desc Listar vendedores activos.
  *
  */
-router.get("/vendedores/activos", authorizeModules("configuracion", "preventas"), authorizeRoleAccess("preventas.manage"), DmsController.getVendedoresActivos);
+router.get("/vendedores/activos", authorizeModules("configuracion", "preventas"), authorizeRoleAccess("preventas.create"), DmsController.getVendedoresActivos);
 
 /**
  *

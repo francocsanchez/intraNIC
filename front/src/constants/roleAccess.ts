@@ -3,6 +3,8 @@ import type { Usuario } from "@/types/index";
 
 type AuthUser = Usuario | null | undefined;
 
+export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
+
 const normalizeRole = (role: unknown) =>
   String(role)
     .normalize("NFKC")
@@ -40,6 +42,23 @@ const vendedorAllowedPaths: Array<string | RegExp> = [
   /^\/liess\/stock\/(nuevos|usados)$/,
 ];
 
+const supervisorAllowedPaths: Array<string | RegExp> = [
+  ...vendedorAllowedPaths,
+  paths.analisis.operaciones,
+  paths.convencional.stockReservado,
+  paths.usados.stockReservado,
+  paths.convencional.preventasNueva,
+];
+
+const administracionAllowedPaths: Array<string | RegExp> = [
+  paths.home,
+  paths.miPerfil,
+  paths.noAutorizado,
+  paths.administracion.reventaPendientes,
+  paths.administracion.pedidoUnidadesListaPrevia,
+  paths.administracion.facturasAnticipo,
+];
+
 const restrictedPrefixes = [
   "/admin",
   "/administracion",
@@ -50,13 +69,26 @@ const restrictedPrefixes = [
   "/liess",
 ];
 
+const getNormalizedRoles = (user: AuthUser) =>
+  (user?.role ?? []).map(normalizeRole).filter(Boolean);
+
 export function hasSuperAdminRole(user: AuthUser) {
-  return (user?.role ?? []).some((role) => normalizeRole(role) === "superadmin");
+  return getNormalizedRoles(user).includes("superadmin");
 }
 
 export function hasOnlyVendedorRole(user: AuthUser) {
-  const normalizedRoles = (user?.role ?? []).map(normalizeRole).filter(Boolean);
+  const normalizedRoles = getNormalizedRoles(user);
   return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "vendedor");
+}
+
+export function hasOnlySupervisorRole(user: AuthUser) {
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "supervisor");
+}
+
+export function hasOnlyAdministracionRole(user: AuthUser) {
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "administracion");
 }
 
 export function hasPathAccess(user: AuthUser, path: string) {
@@ -64,17 +96,53 @@ export function hasPathAccess(user: AuthUser, path: string) {
     return true;
   }
 
-  if (!hasOnlyVendedorRole(user)) {
-    return true;
-  }
-
   const normalizedPath = normalizePath(path);
 
-  if (vendedorAllowedPaths.some((matcher) => pathMatches(normalizedPath, matcher))) {
+  if (hasOnlyVendedorRole(user)) {
+    if (vendedorAllowedPaths.some((matcher) => pathMatches(normalizedPath, matcher))) {
+      return true;
+    }
+
+    return !restrictedPrefixes.some(
+      (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+    );
+  }
+
+  if (hasOnlySupervisorRole(user)) {
+    if (supervisorAllowedPaths.some((matcher) => pathMatches(normalizedPath, matcher))) {
+      return true;
+    }
+
+    return !restrictedPrefixes.some(
+      (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+    );
+  }
+
+  if (hasOnlyAdministracionRole(user)) {
+    if (administracionAllowedPaths.some((matcher) => pathMatches(normalizedPath, matcher))) {
+      return true;
+    }
+
+    return !restrictedPrefixes.some(
+      (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
+    );
+  }
+
+  return true;
+}
+
+export function hasPreventaActionAccess(user: AuthUser, action: PreventaAction) {
+  if (hasSuperAdminRole(user)) {
     return true;
   }
 
-  return !restrictedPrefixes.some(
-    (prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`),
-  );
+  if (hasOnlyVendedorRole(user)) {
+    return false;
+  }
+
+  if (hasOnlySupervisorRole(user)) {
+    return action === "create" || action === "edit" || action === "delete";
+  }
+
+  return true;
 }

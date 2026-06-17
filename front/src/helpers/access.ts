@@ -1,6 +1,10 @@
 import type { Usuario } from "@/types/index";
 import { normalizeModules, type ModuleKey } from "@/constants/modules";
-import { hasPathAccess, hasSuperAdminRole } from "@/constants/roleAccess";
+import {
+  hasPathAccess,
+  hasPreventaActionAccess,
+  hasSuperAdminRole,
+} from "@/constants/roleAccess";
 
 type AuthUser = Usuario | null | undefined;
 
@@ -25,4 +29,4 @@ export function hasModulePathAccess(user: AuthUser, moduleKey: ModuleKey, path: 
   return hasModuleAccess(user, moduleKey) && hasPathAccess(user, path);
 }
 
-export { hasPathAccess, hasSuperAdminRole };
+export { hasPathAccess, hasPreventaActionAccess, hasSuperAdminRole };

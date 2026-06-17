@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import { deletePreventa, getPreventas, patchPreventaAsignado } from "@/api/dms/preventasAPI";
 import { formatCurrency } from "@/helpers/preventas";
-import { hasPathAccess } from "@/helpers/access";
+import { hasPathAccess, hasPreventaActionAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,9 +56,9 @@ export default function PreventasView() {
   const canViewResumen = hasPathAccess(user, paths.convencional.preventasResumen);
   const canCreatePreventa = hasPathAccess(user, paths.convencional.preventasNueva);
   const canViewAsignadas = hasPathAccess(user, paths.convencional.preventasAsignadas);
-  const canAssignPreventa = false;
-  const canEditPreventa = false;
-  const canDeletePreventa = false;
+  const canAssignPreventa = hasPreventaActionAccess(user, "assign");
+  const canEditPreventa = hasPreventaActionAccess(user, "edit");
+  const canDeletePreventa = hasPreventaActionAccess(user, "delete");
   const canModifyPreventa = canEditPreventa || canDeletePreventa;
   const canManagePreventaColumns = canAssignPreventa || canModifyPreventa;
 

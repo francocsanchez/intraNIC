@@ -20,6 +20,8 @@ La logica vigente es:
 - `role` ya participa en accesos **solo** para los roles actualmente definidos:
   - `superAdmin`
   - `vendedor`
+  - `supervisor`
+  - `administracion`
 
 ## Catalogo actual de modulos
 - `convencional`
@@ -85,8 +87,8 @@ Esto implica:
 ## Roles
 Estado actual de definicion funcional:
 
-- `administrativa`
-- `supervisor`
+- `administracion`: definido e implementado
+- `supervisor`: definido e implementado
 - `gerente`
 - `vendedor`: definido e implementado
 - `superAdmin`: definido e implementado
@@ -161,23 +163,84 @@ Estado: definido
     - `/convencional/mis-reservas`
     - `/convencional/mi-lista-espera`
 
-### Rol `administrativa`
-Estado: pendiente
+### Rol `administracion`
+Estado: definido
 
 - Objetivo del rol:
+  Usuario administrativo orientado a tareas de reventas pendientes, lista previa y facturas de anticipo.
 - Modulos que puede ver:
+  - `reventaPendientes`
+  - `listaPrevia`
+  - `facturasAnticipo`
 - Modulos que puede operar:
+  - `reventaPendientes`
+  - `listaPrevia`
+  - `facturasAnticipo`
+- Accesos permitidos:
+  - `/administracion/reventa-pendientes`
+  - `/administracion/pedido-unidades/lista-previa`
+  - `/administracion/facturas-anticipo`
 - Acciones restringidas:
+  - no accede a convencional
+  - no accede a usados
+  - no accede a liess
+  - no accede a preventas
+  - no accede a proformas
+  - no accede a operaciones
+  - no accede a ranking
+  - no accede a promedio
+  - no accede a patentamientos
+  - no administra usuarios
+  - no administra configuracion
 - Observaciones:
+  - este rol queda limitado exclusivamente al dominio administrativo definido en esos tres links
+  - cualquier acceso fuera de esos tres modulos debe devolver bloqueo por rol aunque el usuario tenga modulos en `1`
 
 ### Rol `supervisor`
-Estado: pendiente
+Estado: definido
 
 - Objetivo del rol:
+  Usuario comercial con mas capacidad operativa que `vendedor`, incluyendo seguimiento de reservados, analisis de operaciones y gestion parcial de preventas.
 - Modulos que puede ver:
+  - todos los modulos habilitados para `vendedor`
+  - `operaciones`
 - Modulos que puede operar:
+  - todos los modulos habilitados para `vendedor`
+  - `operaciones`
+  - preventas con permisos parciales de alta y baja
+- Accesos permitidos:
+  - todos los accesos permitidos para `vendedor`
+  - `/analisis/operaciones`
+  - `/convencional/stock/reservado`
+  - `/usados/stock/reservado`
+  - `/gestion/convencional/preventas`
+  - `/gestion/convencional/preventas/nueva`
 - Acciones restringidas:
+  - no administra usuarios
+  - no administra configuracion
+  - no accede a pendientes de reventa
+  - no accede a lista previa
+  - no accede a facturas de anticipo
+  - no accede a asignaciones
+  - no accede a registro de asignaciones
+  - no accede a pedido mensual
+  - no accede a pedido de unidades
+  - no accede a usados `no reparado`
+  - no accede a usados `pendiente documentacion`
+  - no accede a usados `ingresos`
+  - no accede a `patentamientos`
+  - no puede marcar preventas como asignadas
+  - no debe ver la columna `Asignado` en la pantalla principal de preventas
 - Observaciones:
+  - `supervisor` hereda todos los accesos de `vendedor`
+  - en preventas puede:
+    - ver el listado principal
+    - crear nuevas preventas
+    - editar preventas
+    - eliminar preventas
+  - en preventas no puede:
+    - asignarlas
+  - en la tabla principal de preventas debe ver la columna `Acciones`, pero no la columna `Asignado`
 
 ### Rol `gerente`
 Estado: pendiente
@@ -224,6 +287,6 @@ Hasta nuevo aviso:
 
 - los modulos siguen siendo la base principal de acceso
 - no se deben volver a introducir reglas por `company`
-- los unicos roles activos en codigo son `superAdmin` y `vendedor`
+- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor` y `administracion`
 - no se deben volver a introducir reglas por otros `role` hasta definir formalmente la siguiente etapa
 - `superAdmin` siempre debe tener acceso total

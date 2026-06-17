@@ -14,7 +14,10 @@ export type RoleAccessKey =
   | "convencional.pedidoUnidades"
   | "preventas.read"
   | "preventas.resumen"
-  | "preventas.manage"
+  | "preventas.create"
+  | "preventas.update"
+  | "preventas.delete"
+  | "preventas.assign"
   | "proformas"
   | "usados.stockDisponible"
   | "usados.stockGuardado"
@@ -57,8 +60,17 @@ export const hasSuperAdminRole = (roles: unknown) =>
 
 export const hasOnlyVendedorRole = (roles: unknown) => {
   const normalizedRoles = normalizeRoles(roles);
-
   return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "vendedor");
+};
+
+export const hasOnlySupervisorRole = (roles: unknown) => {
+  const normalizedRoles = normalizeRoles(roles);
+  return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "supervisor");
+};
+
+export const hasOnlyAdministracionRole = (roles: unknown) => {
+  const normalizedRoles = normalizeRoles(roles);
+  return normalizedRoles.length > 0 && normalizedRoles.every((role) => role === "administracion");
 };
 
 const vendedorAllowedAccess = new Set<RoleAccessKey>([
@@ -75,20 +87,47 @@ const vendedorAllowedAccess = new Set<RoleAccessKey>([
   "liess.stockDisponible",
 ]);
 
+const supervisorAllowedAccess = new Set<RoleAccessKey>([
+  ...vendedorAllowedAccess,
+  "analisis.operaciones",
+  "convencional.stockReservado",
+  "usados.stockReservado",
+  "preventas.create",
+  "preventas.update",
+  "preventas.delete",
+]);
+
+const administracionAllowedAccess = new Set<RoleAccessKey>([
+  "administracion.reventaPendientes",
+  "administracion.listaPrevia",
+  "administracion.facturasAnticipo",
+]);
+
 export const canAccessByRole = (roles: unknown, accessKey: RoleAccessKey) => {
   if (hasSuperAdminRole(roles)) {
     return true;
   }
 
-  if (!hasOnlyVendedorRole(roles)) {
-    return true;
+  if (hasOnlyVendedorRole(roles)) {
+    return vendedorAllowedAccess.has(accessKey);
   }
 
-  return vendedorAllowedAccess.has(accessKey);
+  if (hasOnlySupervisorRole(roles)) {
+    return supervisorAllowedAccess.has(accessKey);
+  }
+
+  if (hasOnlyAdministracionRole(roles)) {
+    return administracionAllowedAccess.has(accessKey);
+  }
+
+  return true;
 };
 
 export const canAccessLiessTipoByRole = (roles: unknown, tipo: unknown) => {
-  if (hasSuperAdminRole(roles) || !hasOnlyVendedorRole(roles)) {
+  if (
+    hasSuperAdminRole(roles) ||
+    (!hasOnlyVendedorRole(roles) && !hasOnlySupervisorRole(roles) && !hasOnlyAdministracionRole(roles))
+  ) {
     return true;
   }
 

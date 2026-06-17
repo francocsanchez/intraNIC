@@ -21,13 +21,13 @@ router.get(
 );
 
 router.get("/", authorizeRoleAccess("preventas.read"), PreventaController.list);
-router.get("/:id", authorizeRoleAccess("preventas.manage"), PreventaController.getById);
-router.post("/", authorizeRoleAccess("preventas.manage"), PreventaController.create);
-router.put("/:id", authorizeRoleAccess("preventas.manage"), PreventaController.update);
-router.delete("/:id", authorizeRoleAccess("preventas.manage"), PreventaController.remove);
+router.get("/:id", authorizeRoleAccess("preventas.update"), PreventaController.getById);
+router.post("/", authorizeRoleAccess("preventas.create"), PreventaController.create);
+router.put("/:id", authorizeRoleAccess("preventas.update"), PreventaController.update);
+router.delete("/:id", authorizeRoleAccess("preventas.delete"), PreventaController.remove);
 router.patch(
   "/:id/asignado",
-  authorizeRoleAccess("preventas.manage"),
+  authorizeRoleAccess("preventas.assign"),
   PreventaController.updateAsignado,
 );
 
