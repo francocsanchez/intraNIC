@@ -1,6 +1,6 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModuleAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
@@ -43,9 +43,12 @@ export default function ConfiguracionView() {
 
   if (!config) return null;
 
-  const canViewConfiguracion = hasModuleAccess(user, "configuracion");
+  const canViewConfiguracion = hasModuleAccess(user, "configuracion") && hasPathAccess(user, paths.admin.configuracion);
   const canEditConfiguracion = hasModuleAccess(user, "configuracion");
-  const canManagePreventasCatalogs = hasModuleAccess(user, "configuracion");
+  const canManagePreventasCatalogs =
+    hasModuleAccess(user, "configuracion") &&
+    (hasPathAccess(user, paths.convencional.preventasColores) ||
+      hasPathAccess(user, paths.convencional.preventasVersiones));
 
   if (!canViewConfiguracion) return null;
 
@@ -69,7 +72,8 @@ export default function ConfiguracionView() {
         },
       ],
       canView: true,
-      canEdit: canEditConfiguracion,
+      canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionConvencionalEditar),
+      editPath: paths.admin.configuracionConvencionalEditar,
       catalogos: canManagePreventasCatalogs
         ? [
             { label: "Colores", to: paths.convencional.preventasColores },
@@ -104,7 +108,8 @@ export default function ConfiguracionView() {
         },
       ],
       canView: true,
-      canEdit: canEditConfiguracion,
+      canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionUsadosEditar),
+      editPath: paths.admin.configuracionUsadosEditar,
       catalogos: [],
     },
     {
@@ -117,8 +122,9 @@ export default function ConfiguracionView() {
           values: mapCodigos(config.vendedorReventasConvencional ?? []),
         },
       ],
-      canView: true,
-      canEdit: canEditConfiguracion,
+      canView: hasPathAccess(user, paths.admin.configuracionReventaEditar),
+      canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionReventaEditar),
+      editPath: paths.admin.configuracionReventaEditar,
       catalogos: [],
     },
   ];
@@ -149,7 +155,7 @@ export default function ConfiguracionView() {
 
               {sistema.canEdit ? (
                 <Link
-                  to={`/admin/configuracion/${sistema.slug}/editar`}
+                  to={sistema.editPath}
                   className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
                 >
                   Editar

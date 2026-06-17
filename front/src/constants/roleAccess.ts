@@ -5,7 +5,7 @@ type AuthUser = Usuario | null | undefined;
 
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "administracion"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "administracion", "stock"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -75,6 +75,34 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.administracion.pedidoUnidadesListaPrevia,
     paths.administracion.facturasAnticipo,
   ],
+  stock: [
+    paths.home,
+    paths.miPerfil,
+    paths.noAutorizado,
+    paths.administracion.pedidoUnidadesListaPrevia,
+    paths.liess.stockDisponible("nuevos"),
+    paths.liess.stockDisponible("usados"),
+    paths.convencional.stockDisponible,
+    paths.convencional.stockReservado,
+    paths.convencional.stockGuardado,
+    paths.usados.stockDisponible,
+    paths.usados.stockReservado,
+    paths.usados.stockGuardado,
+    paths.usados.stockNoReparado,
+    paths.usados.stockPendienteDocumentacion,
+    paths.usados.stockIngresos,
+    paths.convencional.asignaciones,
+    paths.convencional.pedidoMensual,
+    paths.convencional.pedidoUnidades,
+    paths.convencional.registroAsignaciones,
+    paths.convencional.registroAsignacionesResumen,
+    paths.convencional.preventas,
+    paths.convencional.preventasNueva,
+    paths.convencional.preventasResumen,
+    paths.admin.configuracion,
+    paths.admin.configuracionConvencionalEditar,
+    paths.admin.configuracionUsadosEditar,
+  ],
 };
 
 const restrictedPrefixes = [
@@ -137,6 +165,10 @@ export function hasPreventaActionAccess(user: AuthUser, action: PreventaAction) 
   return activeRoles.some((role) => {
     if (role === "supervisor") {
       return action === "create" || action === "edit" || action === "delete";
+    }
+
+    if (role === "stock") {
+      return action === "create" || action === "assign";
     }
 
     return false;

@@ -23,6 +23,7 @@ La logica vigente es:
   - `vendedor`
   - `supervisor`
   - `administracion`
+  - `stock`
 
 ## Catalogo actual de modulos
 - `convencional`
@@ -104,6 +105,7 @@ Ejemplo:
 Estado actual de definicion funcional:
 
 - `administracion`: definido e implementado
+- `stock`: definido e implementado
 - `supervisor`: definido e implementado
 - `gerente`
 - `vendedor`: definido e implementado
@@ -212,6 +214,81 @@ Estado: definido
   - este rol queda limitado exclusivamente al dominio administrativo definido en esos tres links
   - cualquier acceso fuera de esos tres modulos debe devolver bloqueo por rol aunque el usuario tenga modulos en `1`
 
+### Rol `stock`
+Estado: definido
+
+- Objetivo del rol:
+  Usuario operativo de stock con acceso transversal a stocks, asignaciones, pedido de unidades, registro de asignaciones y preventas con permisos parciales.
+- Modulos que puede ver:
+  - `convencional`
+  - `usados`
+  - `noReparado`
+  - `pendienteDocumentacion`
+  - `ingresos`
+  - `asignaciones`
+  - `pedidoUnidades`
+  - `registroAsignaciones`
+  - `preventas`
+- Modulos que puede operar:
+  - `convencional`
+  - `usados`
+  - `noReparado`
+  - `pendienteDocumentacion`
+  - `ingresos`
+  - `asignaciones`
+  - `pedidoUnidades`
+  - `registroAsignaciones`
+  - `preventas` con permisos parciales
+- Accesos permitidos:
+  - `/administracion/pedido-unidades/lista-previa`
+  - `/liess/stock/nuevos`
+  - `/liess/stock/usados`
+  - `/convencional/stock/disponible`
+  - `/convencional/stock/reservado`
+  - `/convencional/stock/guardado`
+  - `/usados/stock/disponible`
+  - `/usados/stock/reservado`
+  - `/usados/stock/guardado`
+  - `/gestion/usados/stock/no-reparado`
+  - `/gestion/usados/stock/pendiente-documentacion`
+  - `/gestion/usados/stock/ingresos`
+  - `/gestion/convencional/asignaciones`
+  - `/gestion/convencional/pedido-mensual`
+  - `/gestion/convencional/pedido-unidades`
+  - `/gestion/convencional/registro-asignaciones`
+  - `/gestion/convencional/registro-asignaciones/resumen`
+  - `/gestion/convencional/preventas`
+  - `/gestion/convencional/preventas/nueva`
+  - `/gestion/convencional/preventas/resumen`
+  - `/admin/configuracion`
+  - `/admin/configuracion/convencional/editar`
+  - `/admin/configuracion/usados/editar`
+- Acciones restringidas:
+  - no administra usuarios
+  - no administra configuracion
+  - no accede a proformas
+  - no accede a ranking
+  - no accede a promedio
+  - no accede a operaciones
+  - no accede a patentamientos
+  - no accede a reventa pendientes
+  - no accede a facturas de anticipo
+  - no accede a `/admin/configuracion/reventa/editar`
+  - no puede editar preventas
+  - no puede eliminar preventas
+- Observaciones:
+  - en preventas puede:
+    - ver el listado principal
+    - crear nuevas preventas
+    - marcar preventas como asignadas
+  - en preventas no puede:
+    - editar preventas
+    - eliminar preventas
+  - en configuracion puede entrar al panel general y editar solo convencional y usados
+  - tambien puede acceder a `/administracion/pedido-unidades/lista-previa`
+  - en la tabla principal de preventas debe ver la columna `Asignado`
+  - en la tabla principal de preventas no debe ver la columna `Acciones` salvo que combine este rol con otro que la habilite
+
 ### Rol `supervisor`
 Estado: definido
 
@@ -303,6 +380,6 @@ Hasta nuevo aviso:
 
 - los modulos siguen siendo la base principal de acceso
 - no se deben volver a introducir reglas por `company`
-- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor` y `administracion`
+- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `administracion` y `stock`
 - no se deben volver a introducir reglas por otros `role` hasta definir formalmente la siguiente etapa
 - `superAdmin` siempre debe tener acceso total

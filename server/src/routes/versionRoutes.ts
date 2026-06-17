@@ -2,15 +2,23 @@ import { Router } from "express";
 import { VersionController } from "../controllers/VersionController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
+import {
+  authorizeAnyRoleAccess,
+  authorizeRoleAccess,
+} from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
 router.use(authenticate);
 router.get(
   "/",
-  authorizeModules("configuracion", "proformas"),
-  authorizeRoleAccess("proformas"),
+  authorizeModules("configuracion", "proformas", "pedidoMensual", "preventas"),
+  authorizeAnyRoleAccess(
+    "sistema.configuracion",
+    "proformas",
+    "convencional.pedidoMensual",
+    "preventas.create",
+  ),
   VersionController.list,
 );
 router.post(

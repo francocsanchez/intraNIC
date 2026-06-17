@@ -136,7 +136,7 @@ function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
 
 export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [fecha, setFecha] = useState<string>("");
   const [internoInput, setInternoInput] = useState<string>("");
@@ -170,7 +170,7 @@ export default function PedidoUnidadesView() {
   const { data: previasData = EMPTY_PREVIAS, isLoading: isLoadingPrevias } = useQuery({
     queryKey: ["pedido-unidades-previas"],
     queryFn: getPedidoUnidadesPrevias,
-    enabled: canManagePedidos,
+    enabled: canManagePedidos && canOpenListaPrevia && viewMode === "carga",
     refetchOnWindowFocus: true,
   });
 
@@ -345,8 +345,7 @@ export default function PedidoUnidadesView() {
   });
 
   const isLoading =
-    authLoading ||
-    (viewMode === "carga" && canManagePedidos && isLoadingPrevias) ||
+    (viewMode === "carga" && canManagePedidos && canOpenListaPrevia && isLoadingPrevias) ||
     (viewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
     (viewMode === "registros" && canManagePedidos && isLoadingEstadoPedidos) ||
     (viewMode === "registros" && !canManagePedidos && isLoadingEstadoRegistros) ||
@@ -603,91 +602,93 @@ export default function PedidoUnidadesView() {
               </button>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Seleccionar desde lista previa</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Puedes mezclar unidades previas con carga manual en el mismo pedido.
-                  </p>
+            {canOpenListaPrevia ? (
+              <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Seleccionar desde lista previa</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Puedes mezclar unidades previas con carga manual en el mismo pedido.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddSelectedPrevias}
+                    disabled={!selectedPrevias.length || !canAddMore}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+                  >
+                    <Plus size={16} strokeWidth={2} />
+                    Agregar seleccionadas
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleAddSelectedPrevias}
-                  disabled={!selectedPrevias.length || !canAddMore}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
-                >
-                  <Plus size={16} strokeWidth={2} />
-                  Agregar seleccionadas
-                </button>
-              </div>
-
-              <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
-                <table className="min-w-[1320px] w-full text-sm">
-                  <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
-                    <tr>
-                      <th className="px-4 py-3 text-center">Sel.</th>
-                      <th className="px-4 py-3 text-left">Interno</th>
-                      <th className="px-4 py-3 text-left">Cliente</th>
-                      <th className="px-4 py-3 text-left">Vendedor</th>
-                      <th className="px-4 py-3 text-left">Version</th>
-                      <th className="px-4 py-3 text-left">Modelo</th>
-                      <th className="px-4 py-3 text-left">Chasis</th>
-                      <th className="px-4 py-3 text-left">Prioridad</th>
-                      <th className="px-4 py-3 text-left">Cargado</th>
-                      <th className="px-4 py-3 text-left">Adm</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {previasOrdenadas.map((previa) => {
-                      const alreadyAdded = items.some((item) => item.interno === previa.interno);
-                      const checked = selectedPrevias.includes(previa.interno);
-
-                      return (
-                        <tr key={previa._id} className={alreadyAdded ? "bg-gray-50 text-gray-400" : "hover:bg-gray-50"}>
-                          <td className="px-4 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              disabled={alreadyAdded}
-                              onChange={() => handleTogglePreviaSelection(previa.interno)}
-                              className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a] disabled:cursor-not-allowed"
-                            />
-                          </td>
-                          <td className="px-4 py-3 font-semibold">{previa.interno}</td>
-                          <td className="px-4 py-3">{previa.clienteNombre}</td>
-                          <td className="px-4 py-3">{previa.vendedorNombre}</td>
-                          <td className="px-4 py-3">{previa.version}</td>
-                          <td className="px-4 py-3">{previa.modelo}</td>
-                          <td className="px-4 py-3">{previa.chasis ?? "-"}</td>
-                          <td className="px-4 py-3">
-                            <span
-                              className={[
-                                "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                prioridadBadgeClass[previa.prioridad],
-                              ].join(" ")}
-                            >
-                              {previa.prioridad}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">{formatDateTime(previa.createdAt)}</td>
-                          <td className="px-4 py-3 text-gray-700">{previa.usuario}</td>
-                        </tr>
-                      );
-                    })}
-
-                    {!previasData.length ? (
+                <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
+                  <table className="min-w-[1320px] w-full text-sm">
+                    <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                       <tr>
-                        <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
-                          Todavia no hay unidades en la lista previa.
-                        </td>
+                        <th className="px-4 py-3 text-center">Sel.</th>
+                        <th className="px-4 py-3 text-left">Interno</th>
+                        <th className="px-4 py-3 text-left">Cliente</th>
+                        <th className="px-4 py-3 text-left">Vendedor</th>
+                        <th className="px-4 py-3 text-left">Version</th>
+                        <th className="px-4 py-3 text-left">Modelo</th>
+                        <th className="px-4 py-3 text-left">Chasis</th>
+                        <th className="px-4 py-3 text-left">Prioridad</th>
+                        <th className="px-4 py-3 text-left">Cargado</th>
+                        <th className="px-4 py-3 text-left">Adm</th>
                       </tr>
-                    ) : null}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {previasOrdenadas.map((previa) => {
+                        const alreadyAdded = items.some((item) => item.interno === previa.interno);
+                        const checked = selectedPrevias.includes(previa.interno);
+
+                        return (
+                          <tr key={previa._id} className={alreadyAdded ? "bg-gray-50 text-gray-400" : "hover:bg-gray-50"}>
+                            <td className="px-4 py-3 text-center">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                disabled={alreadyAdded}
+                                onChange={() => handleTogglePreviaSelection(previa.interno)}
+                                className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a] disabled:cursor-not-allowed"
+                              />
+                            </td>
+                            <td className="px-4 py-3 font-semibold">{previa.interno}</td>
+                            <td className="px-4 py-3">{previa.clienteNombre}</td>
+                            <td className="px-4 py-3">{previa.vendedorNombre}</td>
+                            <td className="px-4 py-3">{previa.version}</td>
+                            <td className="px-4 py-3">{previa.modelo}</td>
+                            <td className="px-4 py-3">{previa.chasis ?? "-"}</td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={[
+                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                                  prioridadBadgeClass[previa.prioridad],
+                                ].join(" ")}
+                              >
+                                {previa.prioridad}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">{formatDateTime(previa.createdAt)}</td>
+                            <td className="px-4 py-3 text-gray-700">{previa.usuario}</td>
+                          </tr>
+                        );
+                      })}
+
+                      {!previasData.length ? (
+                        <tr>
+                          <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
+                            Todavia no hay unidades en la lista previa.
+                          </td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
               <div className="overflow-x-auto">

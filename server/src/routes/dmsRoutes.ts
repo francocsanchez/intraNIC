@@ -12,7 +12,7 @@ router.use(authenticate);
  * @desc Listar vendedores.
  *
  */
-router.get("/vendedores", authorizeModules("usuarios", "configuracion"), authorizeRoleAccess("sistema.usuarios"), DmsController.getVendedores);
+router.get("/vendedores", authorizeModules("usuarios", "configuracion"), DmsController.getVendedores);
 
 /**
  *

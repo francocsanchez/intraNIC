@@ -35,7 +35,7 @@ export type RoleAccessKey =
   | "sistema.usuarios"
   | "sistema.configuracion";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "administracion"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "administracion", "stock"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -104,6 +104,28 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "administracion.listaPrevia",
     "administracion.facturasAnticipo",
   ]),
+  stock: new Set<RoleAccessKey>([
+    "administracion.listaPrevia",
+    "liess.stockDisponible",
+    "convencional.stockDisponible",
+    "convencional.stockGuardado",
+    "convencional.stockReservado",
+    "usados.stockDisponible",
+    "usados.stockGuardado",
+    "usados.stockReservado",
+    "usados.noReparado",
+    "usados.pendienteDocumentacion",
+    "usados.ingresos",
+    "convencional.asignaciones",
+    "convencional.pedidoMensual",
+    "convencional.pedidoUnidades",
+    "convencional.registroAsignaciones",
+    "sistema.configuracion",
+    "preventas.read",
+    "preventas.resumen",
+    "preventas.create",
+    "preventas.assign",
+  ]),
 };
 
 export const canAccessByRole = (roles: unknown, accessKey: RoleAccessKey) => {
@@ -126,7 +148,7 @@ export const canAccessLiessTipoByRole = (roles: unknown, tipo: unknown) => {
 
   const activeRoles = getActiveRoles(roles);
   const restrictLiessTipos = activeRoles.some(
-    (role) => role === "vendedor" || role === "supervisor",
+    (role) => role === "vendedor" || role === "supervisor" || role === "stock",
   );
 
   if (!restrictLiessTipos) {
