@@ -12,8 +12,8 @@ const router = Router();
 router.use(authenticate);
 router.get(
   "/",
-  authorizeModules("configuracion", "preventas"),
-  authorizeAnyRoleAccess("sistema.configuracion", "preventas.create"),
+  authorizeModules("configuracion", "preventas", "testDrive"),
+  authorizeAnyRoleAccess("sistema.configuracion", "preventas.create", "sistema.testDrive"),
   ColorController.list,
 );
 router.post("/", ColorController.create);

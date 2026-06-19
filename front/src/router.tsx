@@ -20,6 +20,7 @@ import EditConfiguracionUsadoView from "./views/admin/configuracion/EditConfigur
 import UsuariosView from "./views/admin/usuarios/UsuariosView";
 import EditUsuarioView from "./views/admin/usuarios/EditUsuarioView";
 import CrearUsuarioView from "./views/admin/usuarios/CrearUsuarioView";
+import TestDriveView from "./views/admin/testDrive/TestDriveView";
 
 import MiPerfilView from "./views/auth/MiPerfilView";
 import MisOperacionesView from "./views/auth/MisOperacionesView";
@@ -68,6 +69,8 @@ import PedidoMensualView from "./views/admin/siac/PedidoMensualView";
 import ProformasView from "./views/admin/siac/ProformasView";
 import ProformaFormView from "./views/admin/siac/ProformaFormView";
 import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
+import TestDriveRegistroView from "./views/comercial/TestDriveRegistroView";
+import TestDriveCalendarioView from "./views/comercial/TestDriveCalendarioView";
 import OperacionesDashboardView from "./views/operaciones/OperacionesDashboardView";
 import PatentamientosView from "./views/patentamientos/PatentamientosView";
 import DashboardPatentamientosView from "./views/patentamientos/DashboardPatentamientosView";
@@ -97,6 +100,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["testDrive"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path={paths.admin.testDrive} element={<TestDriveView />} />
             </Route>
           </Route>
 
@@ -148,6 +157,64 @@ export default function Router() {
               <Route path={paths.convencional.proformas} element={<ProformasView />} />
               <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
               <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["registroTestDriveConvencional"]} />}>
+            <Route element={<NICLayout />}>
+              <Route
+                path={paths.convencional.registroTestDrive}
+                element={
+                  <TestDriveRegistroView
+                    negocio="convencional"
+                    sectionLabel="Comercial"
+                    title="Registro TestDrive"
+                    calendarPath={paths.convencional.registroTestDriveCalendario}
+                    queryKeyPrefix="test-drive-registros-convencional"
+                  />
+                }
+              />
+              <Route
+                path={paths.convencional.registroTestDriveCalendario}
+                element={
+                  <TestDriveCalendarioView
+                    negocio="convencional"
+                    sectionLabel="Comercial"
+                    title="Calendario TestDrive"
+                    listPath={paths.convencional.registroTestDrive}
+                    queryKeyPrefix="test-drive-registros-convencional"
+                  />
+                }
+              />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["registroTestDrive"]} />}>
+            <Route element={<NICLayout />}>
+              <Route
+                path={paths.planAhorro.registroTestDrive}
+                element={
+                  <TestDriveRegistroView
+                    negocio="planAhorro"
+                    sectionLabel="Plan de ahorro"
+                    title="Registro TestDrive"
+                    calendarPath={paths.planAhorro.registroTestDriveCalendario}
+                    queryKeyPrefix="test-drive-registros-plan-ahorro"
+                  />
+                }
+              />
+              <Route
+                path={paths.planAhorro.registroTestDriveCalendario}
+                element={
+                  <TestDriveCalendarioView
+                    negocio="planAhorro"
+                    sectionLabel="Plan de ahorro"
+                    title="Calendario TestDrive"
+                    listPath={paths.planAhorro.registroTestDrive}
+                    queryKeyPrefix="test-drive-registros-plan-ahorro"
+                  />
+                }
+              />
             </Route>
           </Route>
 

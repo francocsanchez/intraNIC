@@ -4,6 +4,7 @@ import type { Usuario } from "@/types/index";
 type AuthUser = Usuario | null | undefined;
 
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
+export type RegistroTestDriveAction = "deleteManaged";
 
 const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
@@ -40,6 +41,10 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     /^\/convencional\/proformas\/[^/]+$/,
     paths.convencional.preventas,
     paths.convencional.preventasResumen,
+    paths.convencional.registroTestDrive,
+    paths.convencional.registroTestDriveCalendario,
+    paths.planAhorro.registroTestDrive,
+    paths.planAhorro.registroTestDriveCalendario,
     paths.convencional.ranking,
     paths.convencional.promedio,
     paths.usados.stockDisponible,
@@ -60,12 +65,17 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.preventas,
     paths.convencional.preventasResumen,
     paths.convencional.preventasNueva,
+    paths.convencional.registroTestDrive,
+    paths.convencional.registroTestDriveCalendario,
+    paths.planAhorro.registroTestDrive,
+    paths.planAhorro.registroTestDriveCalendario,
     paths.convencional.ranking,
     paths.convencional.promedio,
     paths.usados.stockDisponible,
     paths.usados.stockReservado,
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
+    paths.admin.testDrive,
   ],
   gerente: [
     paths.home,
@@ -82,6 +92,10 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.preventas,
     paths.convencional.preventasResumen,
     paths.convencional.preventasNueva,
+    paths.convencional.registroTestDrive,
+    paths.convencional.registroTestDriveCalendario,
+    paths.planAhorro.registroTestDrive,
+    paths.planAhorro.registroTestDriveCalendario,
     paths.convencional.ranking,
     paths.convencional.promedio,
     paths.convencional.asignaciones,
@@ -89,6 +103,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.usados.stockReservado,
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
+    paths.admin.testDrive,
   ],
   administracion: [
     paths.home,
@@ -192,6 +207,25 @@ export function hasPreventaActionAccess(user: AuthUser, action: PreventaAction) 
 
     if (role === "stock") {
       return action === "create" || action === "assign";
+    }
+
+    return false;
+  });
+}
+
+export function hasRegistroTestDriveActionAccess(user: AuthUser, action: RegistroTestDriveAction) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const activeRoles = getActiveRoles(user);
+  if (!activeRoles.length) {
+    return false;
+  }
+
+  return activeRoles.some((role) => {
+    if (action === "deleteManaged") {
+      return role === "supervisor" || role === "gerente";
     }
 
     return false;

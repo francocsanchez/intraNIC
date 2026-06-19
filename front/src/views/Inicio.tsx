@@ -36,8 +36,6 @@ type HomeSection = {
 const cardClass =
   "home-module-card group block rounded-sm border border-[#E5E7EB] bg-white text-left shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#111827]";
 
-const disabledCardClass = "home-module-card block rounded-sm border border-[#E5E7EB] bg-[#F3F4F6] text-left shadow-sm opacity-50 cursor-not-allowed";
-
 export default function Inicio() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, isError } = useAuth();
@@ -68,6 +66,14 @@ export default function Inicio() {
       icon: ShoppingCart,
       items: [
         { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
+        { label: "Registro TestDrive", to: paths.convencional.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive), icon: CarFront },
+      ],
+    },
+    {
+      title: "Plan de ahorro",
+      icon: CarFront,
+      items: [
+        { label: "Registro TestDrive", to: paths.planAhorro.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDrive", paths.planAhorro.registroTestDrive), icon: CarFront },
       ],
     },
     {
@@ -145,9 +151,17 @@ export default function Inicio() {
       items: [
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
+        { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
       ],
     },
   ];
+
+  const visibleSections = sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item.enabled),
+    }))
+    .filter((section) => section.items.length > 0);
 
   const handleLogout = () => {
     localStorage.removeItem("AUTH_TOKEN");
@@ -351,7 +365,7 @@ export default function Inicio() {
 
         <main className="inicio-main">
           <div className="inicio-grid">
-            {sections.map((section) => (
+            {visibleSections.map((section) => (
               <section key={section.title}>
                 <h2 className="inicio-section-title">
                   <span className="inicio-section-title-content">
@@ -361,23 +375,14 @@ export default function Inicio() {
                 </h2>
 
                 <div className="inicio-cards">
-                  {section.items.map((item) =>
-                    item.enabled ? (
-                      <Link key={item.label} to={item.to} className={cardClass}>
-                        <span className="inicio-card-content">
-                          <item.icon size={13} strokeWidth={2} />
-                          <span className="inicio-card-text">{item.label}</span>
-                        </span>
-                      </Link>
-                    ) : (
-                      <span key={item.label} className={disabledCardClass}>
-                        <span className="inicio-card-content">
-                          <item.icon size={13} strokeWidth={2} />
-                          <span className="inicio-card-text">{item.label}</span>
-                        </span>
+                  {section.items.map((item) => (
+                    <Link key={item.label} to={item.to} className={cardClass}>
+                      <span className="inicio-card-content">
+                        <item.icon size={13} strokeWidth={2} />
+                        <span className="inicio-card-text">{item.label}</span>
                       </span>
-                    ),
-                  )}
+                    </Link>
+                  ))}
                 </div>
               </section>
             ))}

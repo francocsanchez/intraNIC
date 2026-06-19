@@ -21,6 +21,8 @@ import proformaRoutes from "./routes/proformaRoutes";
 import facturaAnticipoRoutes from "./routes/facturaAnticipoRoutes";
 import operacionesRoutes from "./routes/operacionesRoutes";
 import patentamientosRoutes from "./routes/patentamientosRoutes";
+import testDriveRoutes from "./routes/testDriveRoutes";
+import testDriveRegistroRoutes from "./routes/testDriveRegistroRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -49,5 +51,7 @@ app.use("/api/dms/proformas", proformaRoutes);
 app.use("/api/facturas-anticipo", facturaAnticipoRoutes);
 app.use("/api/operaciones", operacionesRoutes);
 app.use("/api/patentamientos", patentamientosRoutes);
+app.use("/api/test-drive", testDriveRoutes);
+app.use("/api/test-drive-registros", testDriveRegistroRoutes);
 
 export default app;

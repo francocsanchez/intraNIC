@@ -3,6 +3,7 @@ import { normalizeModules, type ModuleKey } from "@/constants/modules";
 import {
   hasPathAccess,
   hasPreventaActionAccess,
+  hasRegistroTestDriveActionAccess,
   hasSuperAdminRole,
 } from "@/constants/roleAccess";
 
@@ -29,4 +30,4 @@ export function hasModulePathAccess(user: AuthUser, moduleKey: ModuleKey, path: 
   return hasModuleAccess(user, moduleKey) && hasPathAccess(user, path);
 }
 
-export { hasPathAccess, hasPreventaActionAccess, hasSuperAdminRole };
+export { hasPathAccess, hasPreventaActionAccess, hasRegistroTestDriveActionAccess, hasSuperAdminRole };

@@ -32,6 +32,7 @@ La logica vigente es:
 - `liess`
 - `preventas`
 - `proformas`
+- `registroTestDrive`
 - `reventaPendientes`
 - `listaPrevia`
 - `facturasAnticipo`
@@ -48,6 +49,8 @@ La logica vigente es:
 - `patentamientos`
 - `usuarios`
 - `configuracion`
+- `testDrive`
+- `registroTestDriveConvencional`
 
 ## Regla general vigente
 Para cualquier pantalla, menu, accion o endpoint:
@@ -85,6 +88,8 @@ Ejemplo:
 - `liess`: vistas de Liess
 - `preventas`: modulo de preventas
 - `proformas`: modulo de proformas
+- `registroTestDriveConvencional`: registro de solicitudes de test drive para `Comercial / Convencional`
+- `registroTestDrive`: registro de solicitudes de test drive en la seccion `Plan de ahorro`
 - `reventaPendientes`: pendientes de reventa
 - `listaPrevia`: lista previa de pedido de unidades
 - `facturasAnticipo`: facturas de anticipo
@@ -101,6 +106,7 @@ Ejemplo:
 - `patentamientos`: analisis de patentamientos
 - `usuarios`: ABM de usuarios
 - `configuracion`: configuracion del sistema
+- `testDrive`: ABM de unidades para test drive
 
 ## Roles
 Estado actual de definicion funcional:
@@ -124,6 +130,7 @@ Estado: definido
   - `usados`
   - `liess`
   - `proformas`
+  - `registroTestDrive`
   - `ranking`
   - `promedio`
 - Modulos que puede operar:
@@ -131,6 +138,7 @@ Estado: definido
   - `usados` para consulta
   - `liess` para consulta
   - `proformas`, incluyendo alta de nuevas proformas
+  - `registroTestDrive`, incluyendo alta, edicion propia y eliminacion propia
   - `ranking`
   - `promedio`
 - Accesos permitidos:
@@ -142,6 +150,7 @@ Estado: definido
   - `/gestion/convencional/preventas` en modo solo lectura
   - `/convencional/proformas`
   - `/convencional/proformas/nueva`
+  - `/gestion/convencional/test-drive`
   - `/convencional/preventas/resumen`
   - `/analisis/ranking-convencional`
   - `/analisis/promedio-convencional`
@@ -151,6 +160,7 @@ Estado: definido
 - Acciones restringidas:
   - no administra usuarios
   - no administra configuracion
+  - no administra TestDrive
   - no accede a pendientes de reventa
   - no accede a lista previa
   - no accede a facturas de anticipo
@@ -211,6 +221,7 @@ Estado: definido
   - no accede a patentamientos
   - no administra usuarios
   - no administra configuracion
+  - no administra TestDrive
 - Observaciones:
   - este rol queda limitado exclusivamente al dominio administrativo definido en esos tres links
   - cualquier acceso fuera de esos tres modulos debe devolver bloqueo por rol aunque el usuario tenga modulos en `1`
@@ -267,6 +278,7 @@ Estado: definido
 - Acciones restringidas:
   - no administra usuarios
   - no administra configuracion
+  - no administra TestDrive
   - no accede a proformas
   - no accede a ranking
   - no accede a promedio
@@ -298,10 +310,14 @@ Estado: definido
 - Modulos que puede ver:
   - todos los modulos habilitados para `vendedor`
   - `operaciones`
+  - `testDrive`
+  - `registroTestDrive`
 - Modulos que puede operar:
   - todos los modulos habilitados para `vendedor`
   - `operaciones`
   - preventas con permisos parciales de alta y baja
+  - `testDrive`
+  - `registroTestDrive`
 - Accesos permitidos:
   - todos los accesos permitidos para `vendedor`
   - `/analisis/operaciones`
@@ -309,6 +325,8 @@ Estado: definido
   - `/usados/stock/reservado`
   - `/gestion/convencional/preventas`
   - `/gestion/convencional/preventas/nueva`
+  - `/admin/test-drive`
+  - `/gestion/convencional/test-drive`
 - Acciones restringidas:
   - no administra usuarios
   - no administra configuracion
@@ -345,14 +363,20 @@ Estado: definido
   - todos los modulos habilitados para `vendedor`
   - todos los modulos habilitados para `supervisor`
   - `asignaciones`
+  - `testDrive`
+  - `registroTestDrive`
 - Modulos que puede operar:
   - todos los modulos habilitados para `vendedor`
   - todos los modulos habilitados para `supervisor`
   - `asignaciones` en modo consulta
+  - `testDrive`
+  - `registroTestDrive`
 - Accesos permitidos:
   - todos los accesos permitidos para `vendedor`
   - todos los accesos permitidos para `supervisor`
   - `/gestion/convencional/asignaciones`
+  - `/admin/test-drive`
+  - `/gestion/convencional/test-drive`
 - Acciones restringidas:
   - no administra usuarios
   - no administra configuracion
@@ -401,6 +425,68 @@ Estado: definido
   - `superAdmin` es la unica excepcion activa a la regla general basada en `modules`
   - si el usuario tiene `role: ["superAdmin"]` o comparte ese rol junto con otros, siempre debe prevalecer `superAdmin`
   - no debe requerirse que tenga modulos en `1` para ver o usar funcionalidades
+
+## Acceso especifico del modulo `testDrive`
+- Modulo asociado: `testDrive`
+- Acceso funcional asociado: `sistema.testDrive`
+- Ruta principal: `/admin/test-drive`
+- Accion habilitada: ABM de unidades destinadas a test drive
+- Roles permitidos:
+  - `supervisor`
+  - `gerente`
+  - `superAdmin`
+- Reglas:
+  - `supervisor` y `gerente` deben tener `modules.testDrive = 1` para acceder
+  - `stock`, `administracion` y `vendedor` no deben acceder aunque tengan `modules.testDrive = 1`
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
+
+## Acceso especifico del modulo `registroTestDrive`
+- Modulo asociado: `registroTestDrive`
+- Seccion visible en UI: `Plan de ahorro`
+- Accesos funcionales asociados:
+  - `comercial.testDriveRegistro.read`
+  - `comercial.testDriveRegistro.create`
+  - `comercial.testDriveRegistro.updateOwn`
+  - `comercial.testDriveRegistro.deleteOwn`
+  - `comercial.testDriveRegistro.deleteManaged`
+- Ruta principal: `/gestion/convencional/test-drive`
+- Accion habilitada: registro comercial de solicitudes de test drive
+- Roles permitidos:
+  - `vendedor`
+  - `supervisor`
+  - `gerente`
+  - `superAdmin`
+- Reglas:
+  - `vendedor`, `supervisor` y `gerente` deben tener `modules.registroTestDrive = 1` para acceder
+  - `vendedor` puede crear, editar solo sus propios registros y eliminar solo sus propios registros
+  - `supervisor` y `gerente` pueden crear, editar solo sus propios registros y eliminar registros propios o ajenos
+  - `stock` y `administracion` no deben acceder aunque tengan `modules.registroTestDrive = 1`
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
+  - una unidad no puede tener dos registros superpuestos en el tiempo
+
+## Acceso especifico del modulo `registroTestDriveConvencional`
+- Modulo asociado: `registroTestDriveConvencional`
+- Seccion visible en UI: `Comercial`
+- Accesos funcionales asociados:
+  - `comercial.testDriveRegistroConvencional.read`
+  - `comercial.testDriveRegistroConvencional.create`
+  - `comercial.testDriveRegistroConvencional.updateOwn`
+  - `comercial.testDriveRegistroConvencional.deleteOwn`
+  - `comercial.testDriveRegistroConvencional.deleteManaged`
+- Ruta principal: `/gestion/convencional/test-drive`
+- Accion habilitada: registro comercial de solicitudes de test drive para unidades `convencional`
+- Roles permitidos:
+  - `vendedor`
+  - `supervisor`
+  - `gerente`
+  - `superAdmin`
+- Reglas:
+  - `vendedor`, `supervisor` y `gerente` deben tener `modules.registroTestDriveConvencional = 1` para acceder
+  - `vendedor` puede crear, editar solo sus propios registros y eliminar solo sus propios registros
+  - `supervisor` y `gerente` pueden crear, editar solo sus propios registros y eliminar registros propios o ajenos
+  - `stock` y `administracion` no deben acceder aunque tengan `modules.registroTestDriveConvencional = 1`
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
+  - una unidad no puede tener dos registros superpuestos en el tiempo
 
 ## Regla para futuras definiciones
 Cuando se agreguen permisos por rol, cada definicion debe indicar:

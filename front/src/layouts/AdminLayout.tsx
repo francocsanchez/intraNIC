@@ -16,6 +16,7 @@ export default function AdminLayout() {
 
   const canViewUsuarios = hasModulePathAccess(user, "usuarios", paths.admin.usuarios);
   const canViewConfiguracion = hasModulePathAccess(user, "configuracion", paths.admin.configuracion);
+  const canViewTestDrive = hasModulePathAccess(user, "testDrive", paths.admin.testDrive);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -31,6 +32,12 @@ export default function AdminLayout() {
             {canViewConfiguracion ? (
               <Link to={paths.admin.configuracion} className="hover:text-gray-900 transition">
                 Configuracion
+              </Link>
+            ) : null}
+
+            {canViewTestDrive ? (
+              <Link to={paths.admin.testDrive} className="hover:text-gray-900 transition">
+                TestDrive
               </Link>
             ) : null}
           </>

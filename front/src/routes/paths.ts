@@ -10,6 +10,7 @@ export const paths = {
     configuracion: "/admin/configuracion",
     configuracionConvencionalEditar: "/admin/configuracion/convencional/editar",
     configuracionUsadosEditar: "/admin/configuracion/usados/editar",
+    testDrive: "/admin/test-drive",
   },
   administracion: {
     home: "/administracion",
@@ -60,6 +61,12 @@ export const paths = {
     misReservas: "/convencional/mis-reservas",
     miListaEspera: "/convencional/mi-lista-espera",
     misOperaciones: "/convencional/mis-operaciones",
+    registroTestDrive: "/gestion/convencional/test-drive",
+    registroTestDriveCalendario: "/gestion/convencional/test-drive/calendario",
+  },
+  planAhorro: {
+    registroTestDrive: "/gestion/plan-ahorro/test-drive",
+    registroTestDriveCalendario: "/gestion/plan-ahorro/test-drive/calendario",
   },
   usados: {
     stockDisponible: "/usados/stock/disponible",

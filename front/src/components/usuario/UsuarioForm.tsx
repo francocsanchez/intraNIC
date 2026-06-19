@@ -115,25 +115,25 @@ export default function UsuarioForm({ register, control, errors }: UsuarioFormPr
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-5 py-4">
+        <div className="border-b border-gray-200 px-4 py-3">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modulos</div>
           <div className="mt-1 text-xs text-gray-500">Marca los modulos que queres habilitar para este usuario.</div>
         </div>
 
-        <div className="space-y-5 p-5">
+        <div className="space-y-4 p-4">
           {moduleSections.map((section) => (
-            <div key={section.title} className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">{section.title}</div>
+            <div key={section.title} className="rounded-xl border border-gray-100 bg-gray-50/60 p-3">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">{section.title}</div>
 
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
                 {section.modules.map((moduleKey) => (
                   <Controller
                     key={moduleKey}
                     control={control}
-                    name={`modules.${moduleKey}` as const}
+                    name={`modules.${moduleKey}` as `modules.${ModuleKey}`}
                     render={({ field }) => (
-                      <label className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100">
-                        <span className="text-sm font-medium text-gray-800">{moduleLabels[moduleKey as ModuleKey]}</span>
+                      <label className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 transition-colors hover:bg-gray-100">
+                        <span className="text-xs font-medium leading-4 text-gray-800">{moduleLabels[moduleKey as ModuleKey]}</span>
 
                         <input
                           type="checkbox"

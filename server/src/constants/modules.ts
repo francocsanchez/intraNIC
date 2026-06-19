@@ -20,6 +20,9 @@ export const moduleKeys = [
   "patentamientos",
   "usuarios",
   "configuracion",
+  "testDrive",
+  "registroTestDriveConvencional",
+  "registroTestDrive",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];

@@ -899,6 +899,75 @@ export const catalogoResponseSchema = z.object({
   message: z.string(),
 });
 
+export const testDriveSchema = z.object({
+  _id: z.string(),
+  dominio: z.string(),
+  modelo: z.string(),
+  version: z.string(),
+  versionNombre: z.string(),
+  chasis: z.string(),
+  color: z.string(),
+    colorNombre: z.string(),
+    negocio: z.enum(["convencional", "planAhorro"]),
+    anio: z.number(),
+    permiteStarlink: z.boolean(),
+    activo: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const testDriveListResponseSchema = z.object({
+  data: z.array(testDriveSchema),
+});
+
+export const testDriveResponseSchema = z.object({
+  data: testDriveSchema.nullable().optional(),
+  message: z.string(),
+});
+
+export const testDriveOptionSchema = z.object({
+    _id: z.string(),
+    dominio: z.string(),
+    version: z.string(),
+    versionNombre: z.string(),
+    permiteStarlink: z.boolean(),
+  });
+
+export const testDriveOptionListResponseSchema = z.object({
+  data: z.array(testDriveOptionSchema),
+});
+
+export const testDriveRegistroSchema = z.object({
+  _id: z.string(),
+  unidadId: z.string(),
+  dominio: z.string(),
+  versionNombre: z.string(),
+  negocio: z.enum(["convencional", "planAhorro"]),
+  fechaSolicitado: z.string(),
+  fechaRetiro: z.string(),
+  horaRetiro: z.string(),
+  fechaRegreso: z.string(),
+  horaRegreso: z.string(),
+    retiroAt: z.string(),
+    regresoAt: z.string(),
+    starlink: z.boolean(),
+    permiteStarlink: z.boolean().optional().default(false),
+    observacion: z.string().optional().default(""),
+  solicitadoPorId: z.string(),
+  solicitadoPorNombre: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const testDriveRegistroListResponseSchema = z.object({
+  data: z.array(testDriveRegistroSchema),
+});
+
+export const testDriveRegistroResponseSchema = z.object({
+  data: testDriveRegistroSchema.nullable().optional(),
+  message: z.string(),
+});
+
 export const preventaSchema = z.object({
   _id: z.string(),
   vendedor: z.number(),
@@ -970,6 +1039,14 @@ export const resumenPedidoMensualResponseSchema = z.object({
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
+export type TestDrive = z.infer<typeof testDriveSchema>;
+export type TestDriveListResponse = z.infer<typeof testDriveListResponseSchema>;
+export type TestDriveResponse = z.infer<typeof testDriveResponseSchema>;
+export type TestDriveOption = z.infer<typeof testDriveOptionSchema>;
+export type TestDriveOptionListResponse = z.infer<typeof testDriveOptionListResponseSchema>;
+export type TestDriveRegistro = z.infer<typeof testDriveRegistroSchema>;
+export type TestDriveRegistroListResponse = z.infer<typeof testDriveRegistroListResponseSchema>;
+export type TestDriveRegistroResponse = z.infer<typeof testDriveRegistroResponseSchema>;
 export type Preventa = z.infer<typeof preventaSchema>;
 export type PreventaListResponse = z.infer<typeof preventaListResponseSchema>;
 export type PreventaResponse = z.infer<typeof preventaResponseSchema>;

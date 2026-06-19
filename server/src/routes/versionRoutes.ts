@@ -12,12 +12,13 @@ const router = Router();
 router.use(authenticate);
 router.get(
   "/",
-  authorizeModules("configuracion", "proformas", "pedidoMensual", "preventas"),
+  authorizeModules("configuracion", "proformas", "pedidoMensual", "preventas", "testDrive"),
   authorizeAnyRoleAccess(
     "sistema.configuracion",
     "proformas",
     "convencional.pedidoMensual",
     "preventas.create",
+    "sistema.testDrive",
   ),
   VersionController.list,
 );
