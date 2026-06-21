@@ -298,10 +298,11 @@ export default function Router() {
 
           <Route element={<ModuleProtectedRoute allowedModules={["usados"]} />}>
             <Route element={<NICUsadosLayout />}>
-                <Route path={paths.usados.stockDisponible} element={<StockDisponibleUsados />} />
-                <Route path={paths.usados.misReservas} element={<MisReservasUsadosView />} />
-                <Route path={paths.usados.stockGuardado} element={<StockGuardadoUsados />} />
-                <Route path={paths.usados.stockReservado} element={<StockReservasUsados />} />
+              <Route path={paths.usados.stockDisponible} element={<StockDisponibleUsados />} />
+              <Route path={paths.usados.misOperaciones} element={<MisOperacionesView />} />
+              <Route path={paths.usados.misReservas} element={<MisReservasUsadosView />} />
+              <Route path={paths.usados.stockGuardado} element={<StockGuardadoUsados />} />
+              <Route path={paths.usados.stockReservado} element={<StockReservasUsados />} />
             </Route>
           </Route>
 

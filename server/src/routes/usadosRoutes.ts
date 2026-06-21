@@ -58,6 +58,14 @@ router.get("/mis-reservas", authorizeModules("usados"), authorizeRoleAccess("usa
 /**
  *
  * @route GET /
+ * @desc Mis operaciones usados.
+ *
+ */
+router.get("/mis-operaciones/:mes/:ano", authorizeModules("usados"), authorizeRoleAccess("usados.misOperaciones"), UsadosController.misOperaciones);
+
+/**
+ *
+ * @route GET /
  * @desc Listar stock a ingresar.
  *
  */

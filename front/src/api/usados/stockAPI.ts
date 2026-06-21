@@ -1,5 +1,14 @@
 import api from "@/libs/axios";
-import { misReservasResponseSchema, stockUsadosResponseSchema,ReservasUsadosResumenSchema, type MisReservasResponse, type ReservasUsadosResumen, stockIngresoUsadosSchema } from "@/types/index";
+import {
+  misOperacionesSchema,
+  misReservasResponseSchema,
+  stockUsadosResponseSchema,
+  ReservasUsadosResumenSchema,
+  type MisOperacionesResponse,
+  type MisReservasResponse,
+  type ReservasUsadosResumen,
+  stockIngresoUsadosSchema,
+} from "@/types/index";
 import { isAxiosError } from "axios";
 
 export async function getStockDisponibleUsados() {
@@ -163,5 +172,28 @@ export async function getMisReservasUsados(): Promise<MisReservasResponse> {
     }
 
     throw new Error("Error inesperado al obtener mis reservas usados");
+  }
+}
+
+export async function misOperacionesUsados(mes: number, anio: number): Promise<MisOperacionesResponse> {
+  try {
+    const { data } = await api.get(`/dms/usados/mis-operaciones/${mes}/${anio}`);
+
+    const parsed = misOperacionesSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener mis operaciones usados",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener mis operaciones usados");
   }
 }

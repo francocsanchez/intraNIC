@@ -23,6 +23,7 @@ export type RoleAccessKey =
   | "usados.stockGuardado"
   | "usados.stockReservado"
   | "usados.misReservas"
+  | "usados.misOperaciones"
   | "usados.noReparado"
   | "usados.pendienteDocumentacion"
   | "usados.ingresos"
@@ -106,6 +107,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.updateOwn",
     "comercial.testDriveRegistro.deleteOwn",
     "usados.stockDisponible",
+    "usados.misOperaciones",
     "liess.stockDisponible",
   ]),
   supervisor: new Set<RoleAccessKey>([
@@ -139,6 +141,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.deleteManaged",
     "usados.stockDisponible",
     "usados.stockReservado",
+    "usados.misOperaciones",
     "liess.stockDisponible",
     "analisis.operaciones",
     "sistema.testDrive",
@@ -175,6 +178,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.deleteManaged",
     "usados.stockDisponible",
     "usados.stockReservado",
+    "usados.misOperaciones",
     "liess.stockDisponible",
     "analisis.operaciones",
     "sistema.testDrive",

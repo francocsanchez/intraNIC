@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
-import NavBarUsados from "./NavBarUsados";
+import NavBarNic from "./NavBarNic";
 
 export default function NICUsadosLayout() {
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-gray-50">
       {/* Navbar */}
-      <NavBarUsados />
+      <NavBarNic negocio="usados" />
 
       {/* Main */}
       <main className="flex-1 overflow-x-hidden">

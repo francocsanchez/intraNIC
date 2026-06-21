@@ -14,20 +14,25 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const { user } = useAuth();
   const { pathname } = useLocation();
 
-  const disponiblePath = negocio === "convencional" ? paths.convencional.stockDisponible : `/stock/disponible/${negocio}`;
-  const reservasPath = negocio === "convencional" ? paths.convencional.stockReservado : `/stock/reservado/${negocio}`;
-  const guardadoPath = negocio === "convencional" ? paths.convencional.stockGuardado : `/stock/guardado/${negocio}`;
-  const canViewConvencional = hasModulePathAccess(user, "convencional", disponiblePath);
+  const isConvencional = negocio === "convencional";
+  const moduleKey = isConvencional ? "convencional" : "usados";
+  const disponiblePath = isConvencional ? paths.convencional.stockDisponible : paths.usados.stockDisponible;
+  const reservasPath = isConvencional ? paths.convencional.stockReservado : paths.usados.stockReservado;
+  const guardadoPath = isConvencional ? paths.convencional.stockGuardado : paths.usados.stockGuardado;
+  const misOperacionesPath = isConvencional ? paths.convencional.misOperaciones : paths.usados.misOperaciones;
+  const canViewConvencional = hasModulePathAccess(user, moduleKey, disponiblePath);
   const canViewPreventas = hasModulePathAccess(user, "preventas", paths.convencional.preventasResumen);
-  const buttonGuardado = hasModulePathAccess(user, "convencional", guardadoPath);
-  const buttonReservas = hasModulePathAccess(user, "convencional", reservasPath);
-  const canViewMisOperaciones = hasModulePathAccess(user, "convencional", paths.convencional.misOperaciones);
-  const canViewMisReservas = hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
-  const canViewMiListaEspera = hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
+  const buttonGuardado = hasModulePathAccess(user, moduleKey, guardadoPath);
+  const buttonReservas = hasModulePathAccess(user, moduleKey, reservasPath);
+  const canViewMisOperaciones = hasModulePathAccess(user, moduleKey, misOperacionesPath);
+  const canViewMisReservas = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
+  const canViewMiListaEspera = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
+  const isGestionPath = isConvencional
+    ? pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/")
+    : pathname.startsWith("/usados/");
   const showGestionMenu =
-    negocio === "convencional" &&
-    (canViewMisOperaciones || canViewMisReservas || canViewMiListaEspera) &&
-    (pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/"));
+    isGestionPath &&
+    (canViewMisOperaciones || canViewMisReservas || canViewMiListaEspera);
 
   return (
     <GlobalNavbar
@@ -54,7 +59,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
             </Link>
           ) : null}
 
-          {negocio === "convencional" && canViewPreventas ? (
+          {isConvencional && canViewPreventas ? (
             <Link to={paths.convencional.preventasResumen} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <ClipboardList size={16} strokeWidth={1.5} />
               P. Resumen
@@ -76,7 +81,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                 <MenuItem>
                   {({ focus }) => (
                     <Link
-                      to={paths.convencional.misOperaciones}
+                      to={misOperacionesPath}
                       className={`px-4 py-2 text-sm flex items-center gap-2 ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
                     >
                       <ClipboardList size={16} strokeWidth={1.5} />

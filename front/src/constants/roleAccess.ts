@@ -48,6 +48,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.ranking,
     paths.convencional.promedio,
     paths.usados.stockDisponible,
+    paths.usados.misOperaciones,
     /^\/liess\/stock\/(nuevos|usados)$/,
   ],
   supervisor: [
@@ -73,6 +74,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.promedio,
     paths.usados.stockDisponible,
     paths.usados.stockReservado,
+    paths.usados.misOperaciones,
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
     paths.admin.testDrive,
@@ -103,6 +105,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.usados.stockDisponible,
     paths.usados.stockReservado,
     paths.usados.stockGuardado,
+    paths.usados.misOperaciones,
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
     paths.admin.testDrive,

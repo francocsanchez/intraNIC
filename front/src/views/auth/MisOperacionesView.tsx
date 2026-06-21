@@ -1,11 +1,13 @@
 import Loading from "@/components/Loading";
 import { misOperaciones } from "@/api/convencional/stockAPI";
+import { misOperacionesUsados } from "@/api/usados/stockAPI";
 import { useAuth } from "@/hooks/useAuthe";
 import { useQuery } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } from "recharts";
 import { textToColor } from "@/helpers/colores";
+import { useLocation } from "react-router-dom";
 
 const MESES = [
   { label: "ENERO", value: 1 },
@@ -40,6 +42,8 @@ function formatShortDate(dateString: string) {
 
 export default function MisOperacionesView() {
   const { user } = useAuth();
+  const { pathname } = useLocation();
+  const negocio = pathname.startsWith("/usados/") ? "usados" : "convencional";
 
   const anioActual = new Date().getFullYear();
   const [anio, setAnio] = useState<number>(anioActual);
@@ -48,8 +52,8 @@ export default function MisOperacionesView() {
   const ANIOS = Array.from({ length: 5 }, (_, i) => anioActual - i);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["misVentas", mes, anio, user?._id],
-    queryFn: () => misOperaciones(mes, anio),
+    queryKey: ["misVentas", negocio, mes, anio, user?._id],
+    queryFn: () => (negocio === "usados" ? misOperacionesUsados(mes, anio) : misOperaciones(mes, anio)),
     refetchOnWindowFocus: true,
     refetchInterval: 10000,
   });

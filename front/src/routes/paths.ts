@@ -84,6 +84,7 @@ export const paths = {
     stockReservado: "/usados/stock/reservado",
     stockIngresos: "/gestion/usados/stock/ingresos",
     misReservas: "/usados/mis-reservas",
+    misOperaciones: "/usados/mis-operaciones",
   },
   liess: {
     stockDisponibleRoute: "/liess/stock/:tipo",
