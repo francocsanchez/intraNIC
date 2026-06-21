@@ -3,6 +3,7 @@ import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/u
 import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
+import type { Usuario, Vendedor } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -17,18 +18,32 @@ function capitalize(value: string) {
     .join(" ");
 }
 
+function getResponseMessage(response: unknown, fallback: string) {
+  if (
+    response &&
+    typeof response === "object" &&
+    "message" in response &&
+    typeof (response as { message?: unknown }).message === "string"
+  ) {
+    return (response as { message: string }).message;
+  }
+
+  return fallback;
+}
+
 export default function UsuariosView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const canManageUsers = hasModuleAccess(user, "usuarios");
   const [resettingUserId, setResettingUserId] = useState<string | null>(null);
+  const [visibleSection, setVisibleSection] = useState<"habilitados" | "deshabilitados">("habilitados");
 
-  const { data, isError, isLoading } = useQuery({
+  const { data, isError, isLoading } = useQuery<Usuario[] | undefined>({
     queryKey: ["usuarios", "listar"],
     queryFn: getUsuarios,
   });
 
-  const { data: vendedoresData } = useQuery({
+  const { data: vendedoresData } = useQuery<{ data: Vendedor[] }>({
     queryKey: ["vendedores", "listar"],
     queryFn: getVendedoresNic,
   });
@@ -50,11 +65,11 @@ export default function UsuariosView() {
 
   const { mutate: changeStatus } = useMutation({
     mutationFn: (id: string) => changeStatusUsuario(id),
-    onError: (error: any) => {
-      toast.error(error.message || "Error al cambiar el estado del usuario");
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : "Error al cambiar el estado del usuario");
     },
-    onSuccess: (response: any) => {
-      toast.success(response.message || "Estado del usuario actualizado");
+    onSuccess: (response: unknown) => {
+      toast.success(getResponseMessage(response, "Estado del usuario actualizado"));
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
     },
   });
@@ -64,11 +79,11 @@ export default function UsuariosView() {
     onMutate: (id: string) => {
       setResettingUserId(id);
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Error al enviar la nueva contrasena");
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : "Error al enviar la nueva contrasena");
     },
-    onSuccess: (response: any) => {
-      toast.success(response.message || "Nueva contrasena enviada correctamente");
+    onSuccess: (response: unknown) => {
+      toast.success(getResponseMessage(response, "Nueva contrasena enviada correctamente"));
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
     },
     onSettled: () => {
@@ -76,7 +91,7 @@ export default function UsuariosView() {
     },
   });
 
-  const usuarios = data ?? [];
+  const usuarios = (data ?? []) as Usuario[];
 
   if (isLoading) {
     return (
@@ -97,7 +112,11 @@ export default function UsuariosView() {
   }
 
   const totalUsuarios = usuarios.length;
-  const activos = usuarios.filter((u: any) => u.enable).length;
+  const usuariosHabilitados = usuarios.filter((u) => u.enable);
+  const usuariosDeshabilitados = usuarios.filter((u) => !u.enable);
+  const activos = usuariosHabilitados.length;
+  const deshabilitados = usuariosDeshabilitados.length;
+  const usuariosVisibles = visibleSection === "habilitados" ? usuariosHabilitados : usuariosDeshabilitados;
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -117,7 +136,7 @@ export default function UsuariosView() {
         ) : null}
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total usuarios</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalUsuarios}</p>
@@ -127,11 +146,49 @@ export default function UsuariosView() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{activos}</p>
         </article>
+
+        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Deshabilitados</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{deshabilitados}</p>
+        </article>
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de usuarios</h2>
+        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de usuarios</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {visibleSection === "habilitados"
+                ? "Vista limpia con solo usuarios habilitados."
+                : "Listado separado de usuarios deshabilitados."}
+            </p>
+          </div>
+
+          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+            <button
+              type="button"
+              onClick={() => setVisibleSection("habilitados")}
+              className={[
+                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                visibleSection === "habilitados" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Habilitados ({activos})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setVisibleSection("deshabilitados")}
+              className={[
+                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                visibleSection === "deshabilitados"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Deshabilitados ({deshabilitados})
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -148,7 +205,7 @@ export default function UsuariosView() {
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {usuarios.map((u: any) => (
+              {usuariosVisibles.map((u) => (
                 <tr key={u.email} className="hover:bg-gray-50">
                   <td className="px-6 py-3">
                     <div className="font-medium text-gray-900">
@@ -159,7 +216,7 @@ export default function UsuariosView() {
 
                   <td className="px-6 py-3">
                     <div className="flex flex-wrap gap-2">
-                      {u.role.map((r: string) => (
+                      {u.role.map((r) => (
                         <span
                           key={r}
                           className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
@@ -220,10 +277,12 @@ export default function UsuariosView() {
                 </tr>
               ))}
 
-              {usuarios.length === 0 ? (
+              {usuariosVisibles.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No hay usuarios para mostrar.
+                    {visibleSection === "habilitados"
+                      ? "No hay usuarios habilitados para mostrar."
+                      : "No hay usuarios deshabilitados para mostrar."}
                   </td>
                 </tr>
               ) : null}

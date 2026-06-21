@@ -1,6 +1,13 @@
 import type { UseFormRegister } from "react-hook-form";
 
-type Vendedor = { codigo: number; vendedor: string };
+import type { Vendedor } from "@/types/index";
+
+type ConfigConvChecklistForm = {
+  sistemaActivoConvencional: boolean;
+  vendedoresReservasConvencional: string[];
+  vendedoresDisponibleConvencional: string[];
+  vendedoresStockGuardadoConvencional: string[];
+};
 
 type CheckListVendedoresProps = {
   title: string;
@@ -11,7 +18,7 @@ type CheckListVendedoresProps = {
     | "vendedoresReservasConvencional"
     | "vendedoresDisponibleConvencional"
     | "vendedoresStockGuardadoConvencional";
-  register: UseFormRegister<any>;
+  register: UseFormRegister<ConfigConvChecklistForm>;
 };
 
 export default function CheckListVendedores({

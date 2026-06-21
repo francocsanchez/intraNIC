@@ -21,6 +21,12 @@ import {
 import { textToColor } from "@/helpers/colores";
 import { getAsignaciones } from "@/api/dms/dmsAPI";
 import { paths } from "@/routes/paths";
+import type {
+  AsignacionRecepcionItem,
+  GetAsignacionRecepcionResponse,
+  PedidoUnidadInternosEstadoResponse,
+  ResumenAsignacionRecepcion,
+} from "@/types/index";
 
 const MESES = [
   { label: "ENERO", value: 1 },
@@ -49,6 +55,8 @@ const CHART_COLORS = [
 ];
 
 type FiltroEstado = "todos" | "recibidos" | "pendientes";
+
+const EMPTY_ASIGNACIONES: GetAsignacionRecepcionResponse["data"] = [];
 
 function formatShortDate(dateString?: string | null) {
   if (!dateString) return "-";
@@ -90,18 +98,19 @@ export default function AsignacionesView() {
     refetchOnWindowFocus: true
   });
 
-  const registros = data?.data ?? [];
-  const resumen = data?.resumen;
+  const registros: GetAsignacionRecepcionResponse["data"] = data?.data ?? EMPTY_ASIGNACIONES;
+  const resumen: ResumenAsignacionRecepcion | undefined = data?.resumen;
 
   const { data: estadoPedidos = {}, isLoading: pedidosLoading } = useQuery({
-    queryKey: ["pedido-unidades-estado", registros.map((item: any) => item.interno).join("-")],
-    queryFn: () => getEstadoInternosPedido(registros.map((item: any) => Number(item.interno))),
+    queryKey: ["pedido-unidades-estado", registros.map((item) => item.interno).join("-")],
+    queryFn: () => getEstadoInternosPedido(registros.map((item) => Number(item.interno))),
     enabled: registros.length > 0 && canSeePedidoStatus,
     refetchOnWindowFocus: true,
   });
+  const pedidoStatus = estadoPedidos as PedidoUnidadInternosEstadoResponse["data"];
 
   const recepcionesPorDia = useMemo(() => {
-    return (resumen?.porDiaRecepcion ?? []).map((item: any) => ({
+    return (resumen?.porDiaRecepcion ?? []).map((item) => ({
       ...item,
       fechaCorta: formatShortDate(item.fecha),
     }));
@@ -114,7 +123,7 @@ export default function AsignacionesView() {
   const registrosFiltrados = useMemo(() => {
     if (filtroEstado === "todos") return registros;
 
-    return registros.filter((item: any) => {
+    return registros.filter((item) => {
       const recibido = Boolean(item.fechaRecepcionRemito);
       return filtroEstado === "recibidos" ? recibido : !recibido;
     });
@@ -283,7 +292,7 @@ export default function AsignacionesView() {
                   outerRadius={95}
                   paddingAngle={3}
                 >
-                  {estadoRecepcion.map((entry: any, index: number) => (
+                  {estadoRecepcion.map((entry, index: number) => (
                     <Cell
                       key={`${entry.name}-${index}`}
                       fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -311,7 +320,7 @@ export default function AsignacionesView() {
           </div>
 
           <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {estadoRecepcion.map((item: any, index: number) => (
+            {estadoRecepcion.map((item, index: number) => (
               <div key={item.name} className="flex items-center gap-2 text-sm text-gray-700">
                 <span
                   className="h-3 w-3 rounded-full"
@@ -403,9 +412,9 @@ export default function AsignacionesView() {
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {registrosFiltrados.map((item: any, index: number) => {
+              {registrosFiltrados.map((item: AsignacionRecepcionItem, index: number) => {
                 const recibido = Boolean(item.fechaRecepcionRemito);
-                const fuePedido = Boolean(estadoPedidos[String(item.interno)]);
+                const fuePedido = Boolean(pedidoStatus[String(item.interno)]);
 
                 return (
                   <tr key={`${item.interno}-${item.nrofab}`} className="hover:bg-gray-50">

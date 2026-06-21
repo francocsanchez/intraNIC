@@ -8,6 +8,9 @@ import { useMemo, useState } from "react";
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const EMPTY_STOCK_GUARDADO_CONVENCIONAL: Awaited<
+  ReturnType<typeof getStockGuardadoConvencional>
+>["data"] = [];
 
 export default function StockGuardadoConvencioanl() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
@@ -29,7 +32,7 @@ export default function StockGuardadoConvencioanl() {
     refetchInterval: 1000,
   });
 
-  const items = data?.data ?? [];
+  const items = data?.data ?? EMPTY_STOCK_GUARDADO_CONVENCIONAL;
   const resumen = data?.resumen;
 
   const resumenDinamico = useMemo(() => {

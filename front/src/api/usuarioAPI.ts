@@ -1,7 +1,7 @@
 import api from "@/libs/axios";
 import { isAxiosError } from "axios";
 import { usuarioSchema, usuariosResponseSchema, type Usuario } from "../types";
-import type { UsuarioFormData } from "@/views/admin/usuarios/CrearUsuarioView";
+import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {

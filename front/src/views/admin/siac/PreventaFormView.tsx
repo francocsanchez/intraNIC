@@ -5,7 +5,7 @@ import { toMonthInputValue } from "@/helpers/preventas";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -31,50 +31,26 @@ const initialForm: PreventaFormState = {
   mes_asigna: "",
 };
 
-export default function PreventaFormView() {
-  const { id } = useParams();
+type PreventaFormContentProps = {
+  colores: Awaited<ReturnType<typeof getColores>>["data"];
+  initialValues: PreventaFormState;
+  isEditing: boolean;
+  preventaId?: string;
+  vendedores: Awaited<ReturnType<typeof getVendedoresActivosNic>>["data"];
+  versiones: Awaited<ReturnType<typeof getVersiones>>["data"];
+};
+
+function PreventaFormContent({
+  colores,
+  initialValues,
+  isEditing,
+  preventaId,
+  vendedores,
+  versiones,
+}: PreventaFormContentProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(id);
-  const [form, setForm] = useState<PreventaFormState>(initialForm);
-
-  const vendedoresQuery = useQuery({
-    queryKey: ["vendedores", "nic", "activos"],
-    queryFn: getVendedoresActivosNic,
-  });
-
-  const versionesQuery = useQuery({
-    queryKey: ["versiones", "activas"],
-    queryFn: () => getVersiones(true),
-  });
-
-  const coloresQuery = useQuery({
-    queryKey: ["colores", "activos"],
-    queryFn: () => getColores(true),
-  });
-
-  const preventaQuery = useQuery({
-    queryKey: ["preventa", id],
-    queryFn: () => getPreventaById(id!),
-    enabled: isEditing,
-  });
-
-  useEffect(() => {
-    if (!preventaQuery.data?.data) return;
-
-    const preventa = preventaQuery.data.data;
-
-    setForm({
-      vendedor: String(preventa.vendedor),
-      numero_op: preventa.numero_op?.toString() ?? "",
-      cliente: preventa.cliente,
-      version: preventa.version._id,
-      colores: preventa.colores.map((color) => color._id),
-      monto_reserva: preventa.monto_reserva?.toString() ?? "",
-      observaciones: preventa.observaciones ?? "",
-      mes_asigna: toMonthInputValue(preventa.mes_asigna),
-    });
-  }, [preventaQuery.data]);
+  const [form, setForm] = useState<PreventaFormState>(initialValues);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -94,8 +70,8 @@ export default function PreventaFormView() {
         mes_asigna: form.mes_asigna,
       };
 
-      if (isEditing && id) {
-        return updatePreventa(id, payload);
+      if (isEditing && preventaId) {
+        return updatePreventa(preventaId, payload);
       }
 
       return createPreventa(payload);
@@ -109,26 +85,6 @@ export default function PreventaFormView() {
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  const loading = vendedoresQuery.isLoading || versionesQuery.isLoading || coloresQuery.isLoading || preventaQuery.isLoading;
-  const firstError = vendedoresQuery.error || versionesQuery.error || coloresQuery.error || preventaQuery.error;
-
-  const vendedores = vendedoresQuery.data?.data ?? [];
-  const versiones = versionesQuery.data?.data ?? [];
-  const colores = coloresQuery.data?.data ?? [];
-
-  if (loading) return <Loading />;
-
-  if (firstError instanceof Error) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el formulario de preventa</h1>
-          <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-6 px-4 py-6">
       <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
@@ -139,7 +95,7 @@ export default function PreventaFormView() {
               {isEditing ? "Editar preventa" : "Nueva preventa"}
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              La unidad todavía no existe en el sistema; por eso se registra la necesidad comercial y el mes esperado de asignacion.
+              La unidad todavia no existe en el sistema; por eso se registra la necesidad comercial y el mes esperado de asignacion.
             </p>
           </div>
           <Link to={paths.convencional.preventas} className="inline-flex items-center gap-2 text-sm font-semibold text-[#146b61] hover:text-[#128d80]">
@@ -231,7 +187,7 @@ export default function PreventaFormView() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-gray-900">Colores</h2>
-                <p className="mt-1 text-xs text-gray-500">Podés seleccionar varios colores posibles para una misma unidad.</p>
+                <p className="mt-1 text-xs text-gray-500">Podes seleccionar varios colores posibles para una misma unidad.</p>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#146b61] shadow-sm">
                 {form.colores.length} seleccionados
@@ -295,5 +251,87 @@ export default function PreventaFormView() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function PreventaFormView() {
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+
+  const vendedoresQuery = useQuery({
+    queryKey: ["vendedores", "nic", "activos"],
+    queryFn: getVendedoresActivosNic,
+  });
+
+  const versionesQuery = useQuery({
+    queryKey: ["versiones", "activas"],
+    queryFn: () => getVersiones(true),
+  });
+
+  const coloresQuery = useQuery({
+    queryKey: ["colores", "activos"],
+    queryFn: () => getColores(true),
+  });
+
+  const preventaQuery = useQuery({
+    queryKey: ["preventa", id],
+    queryFn: () => getPreventaById(id!),
+    enabled: isEditing,
+  });
+
+  const loading = vendedoresQuery.isLoading || versionesQuery.isLoading || coloresQuery.isLoading || preventaQuery.isLoading;
+  const firstError = vendedoresQuery.error || versionesQuery.error || coloresQuery.error || preventaQuery.error;
+
+  if (loading) return <Loading />;
+
+  if (firstError instanceof Error) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el formulario de preventa</h1>
+          <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
+        </section>
+      </div>
+    );
+  }
+
+  const vendedores = vendedoresQuery.data?.data ?? [];
+  const versiones = versionesQuery.data?.data ?? [];
+  const colores = coloresQuery.data?.data ?? [];
+  const preventa = preventaQuery.data?.data;
+
+  if (isEditing && !preventa) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">Preventa no encontrada</h1>
+          <p className="mt-2 text-sm text-red-600">No fue posible cargar la preventa solicitada.</p>
+        </section>
+      </div>
+    );
+  }
+
+  const initialValues = preventa
+    ? {
+        vendedor: String(preventa.vendedor),
+        numero_op: preventa.numero_op?.toString() ?? "",
+        cliente: preventa.cliente,
+        version: preventa.version._id,
+        colores: preventa.colores.map((color) => color._id),
+        monto_reserva: preventa.monto_reserva?.toString() ?? "",
+        observaciones: preventa.observaciones ?? "",
+        mes_asigna: toMonthInputValue(preventa.mes_asigna),
+      }
+    : initialForm;
+
+  return (
+    <PreventaFormContent
+      colores={colores}
+      initialValues={initialValues}
+      isEditing={isEditing}
+      preventaId={id}
+      vendedores={vendedores}
+      versiones={versiones}
+    />
   );
 }

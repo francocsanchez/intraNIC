@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 30;
+const EMPTY_PROFORMAS: Proforma[] = [];
 
 const downloadBlob = (blob: Blob, filename: string) => {
   const url = window.URL.createObjectURL(blob);
@@ -40,7 +41,7 @@ export default function ProformasView() {
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  const proformas = data?.data ?? [];
+  const proformas = data?.data ?? EMPTY_PROFORMAS;
 
   const totalPages = Math.max(1, Math.ceil(proformas.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);

@@ -86,6 +86,7 @@ export const vendedorSchema = z.object({
 export const vendedoresResponseSchema = z.object({
   data: z.array(vendedorSchema),
 });
+export type Vendedor = z.infer<typeof vendedorSchema>;
 
 //**************************** */
 // CONFIGURACION
@@ -192,6 +193,8 @@ export const stockDisponibleLiessSchema = z.object({
   data: z.array(stockDisponibleLiesslItemSchema),
   resumen: stockDisponibleLiessResumenSchema,
 });
+export type StockDisponibleLiessItem = z.infer<typeof stockDisponibleLiesslItemSchema>;
+export type StockDisponibleLiessResponse = z.infer<typeof stockDisponibleLiessSchema>;
 
 //**************************** */
 // MIS RESERVAS
@@ -314,6 +317,15 @@ export const getAsignacionRecepcionResponseSchema = z.object({
   data: z.array(asignacionRecepcionItemSchema),
   resumen: resumenAsignacionRecepcionSchema,
 });
+export type AsignacionRecepcionItem = z.infer<
+  typeof asignacionRecepcionItemSchema
+>;
+export type ResumenAsignacionRecepcion = z.infer<
+  typeof resumenAsignacionRecepcionSchema
+>;
+export type GetAsignacionRecepcionResponse = z.infer<
+  typeof getAsignacionRecepcionResponseSchema
+>;
 
 //**************************** */
 // STOCK DISPONIBLE USADOS
@@ -340,6 +352,8 @@ export const stockUsadosResponseSchema = z.object({
   data: z.array(unidadRowSchema),
   resumen: resumenPorMarcaSchema,
 });
+export type UnidadRow = z.infer<typeof unidadRowSchema>;
+export type StockUsadosResponse = z.infer<typeof stockUsadosResponseSchema>;
 
 //**************************** */
 // STOCK RESERVADO USADOS
@@ -434,6 +448,8 @@ export const stockIngresoUsadosItemSchema = z.object({
   color: z.string().nullable(),
   anio: z.number(),
   km: z.number(),
+  observaciones: z.string().nullable().optional(),
+  precioVenta: z.number().nullable().optional(),
 });
 
 export const stockIngresoUsadosResumenSchema = z.object({
@@ -687,6 +703,9 @@ export const pedidoUnidadResponseSchema = z.object({
 export const pedidoUnidadInternosEstadoResponseSchema = z.object({
   data: z.record(z.string(), z.boolean()),
 });
+export type PedidoUnidadInternosEstadoResponse = z.infer<
+  typeof pedidoUnidadInternosEstadoResponseSchema
+>;
 
 export const pedidoUnidadPreviaSchema = z.object({
   _id: z.string(),

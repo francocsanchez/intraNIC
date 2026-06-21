@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getStockDisponibleLiess } from "@/api/liess/stockAPI";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
+import type { StockDisponibleLiessItem, StockDisponibleLiessResponse } from "@/types/index";
 
 type MarcaFiltro = string;
 type TipoLiess = "usados" | "nuevos";
@@ -29,8 +30,9 @@ export default function StockDisponibleLiess() {
   const tipoSeleccionado: TipoLiess = tipo === "usados" ? "usados" : "nuevos";
 
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
+  const [currentTime] = useState(() => Date.now());
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<StockDisponibleLiessResponse>({
     queryKey: ["stockDisponible", "liess", tipoSeleccionado],
     queryFn: () => getStockDisponibleLiess(tipoSeleccionado),
     refetchOnWindowFocus: true,
@@ -68,12 +70,11 @@ export default function StockDisponibleLiess() {
 
   const diasEnStock = (fecha: string) => {
     const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
+    const diff = currentTime - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  const getAnioUnidad = (item: any) => {
+  const getAnioUnidad = (item: StockDisponibleLiessItem) => {
     const tipoUnidad = String(item.tipo ?? "").toLowerCase();
 
     if (tipoUnidad === "nuevo" || tipoSeleccionado === "nuevos") {
@@ -87,7 +88,7 @@ export default function StockDisponibleLiess() {
     if (tipoSeleccionado === "usados") return true;
 
     return Object.values(tablasPorMarca).some((rows) =>
-      rows.some((item: any) => item.precioVentaUsado !== null && item.precioVentaUsado !== undefined),
+      rows.some((item) => item.precioVentaUsado !== null && item.precioVentaUsado !== undefined),
     );
   }, [tablasPorMarca, tipoSeleccionado]);
 

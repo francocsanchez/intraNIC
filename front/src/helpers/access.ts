@@ -8,6 +8,7 @@ import {
 } from "@/constants/roleAccess";
 
 type AuthUser = Usuario | null | undefined;
+type BusinessMaintenanceKey = "convencional" | "usados";
 
 export function hasModuleAccess(user: AuthUser, moduleKey: ModuleKey) {
   if (hasSuperAdminRole(user)) {
@@ -28,6 +29,25 @@ export function hasAnyModuleAccess(user: AuthUser, allowedModules: ModuleKey[]) 
 
 export function hasModulePathAccess(user: AuthUser, moduleKey: ModuleKey, path: string) {
   return hasModuleAccess(user, moduleKey) && hasPathAccess(user, path);
+}
+
+export function shouldShowMaintenanceForBusiness(user: AuthUser, business: BusinessMaintenanceKey, isSystemActive: boolean) {
+  if (isSystemActive) {
+    return false;
+  }
+
+  if (hasSuperAdminRole(user)) {
+    return false;
+  }
+
+  const normalizedRoles = (user?.role ?? []).map((role) => String(role).trim().toLowerCase());
+  const isRestrictedRole = normalizedRoles.includes("vendedor") || normalizedRoles.includes("supervisor");
+
+  if (!isRestrictedRole) {
+    return false;
+  }
+
+  return business === "convencional" || business === "usados";
 }
 
 export { hasPathAccess, hasPreventaActionAccess, hasRegistroTestDriveActionAccess, hasSuperAdminRole };

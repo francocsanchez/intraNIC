@@ -1,6 +1,15 @@
 import type { UseFormRegister } from "react-hook-form";
 
-type Vendedor = { codigo: number; vendedor: string };
+import type { Vendedor } from "@/types/index";
+
+type ConfigUsadosChecklistForm = {
+  sistemaActivoUsados: boolean;
+  vendedoresReservasUsados: string[];
+  vendedoresDisponibleUsados: string[];
+  vendedoresStockGuardadoUsados: string[];
+  vendedoresStockNoReparadoUsados: string[];
+  vendedoresStockPendDocuUsados: string[];
+};
 
 type CheckListVendedoresProps = {
   title: string;
@@ -13,7 +22,7 @@ type CheckListVendedoresProps = {
     | "vendedoresStockGuardadoUsados"
     | "vendedoresStockNoReparadoUsados"
     | "vendedoresStockPendDocuUsados";
-  register: UseFormRegister<any>;
+  register: UseFormRegister<ConfigUsadosChecklistForm>;
 };
 
 export default function CheckListVendedoresUsados({

@@ -116,7 +116,7 @@ export default function MisReservasViewContent({
                     <th className="px-4 py-3">Color</th>
                     <th className="px-4 py-3">Ubicacion</th>
                     <th className="px-4 py-3">Chasis</th>
-                    <th className="px-4 py-3">Sucursal</th>
+                   
                     <th className="px-4 py-3">Fecha reserva</th>
                     <th className="px-4 py-3">Fecha recepcion</th>
                     <th className="px-4 py-3">Cliente</th>
@@ -137,7 +137,7 @@ export default function MisReservasViewContent({
                       </td>
                       <td className="px-4 py-4">{reserva.ubicacion ?? "EN PRODUCCION"}</td>
                       <td className="px-4 py-4">{reserva.chasis}</td>
-                      <td className="px-4 py-4">{reserva.sucursal}</td>
+                     
                       <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaReserva)}</td>
                       <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaRecepcion)}</td>
                       <td className="px-4 py-4">

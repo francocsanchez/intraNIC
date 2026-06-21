@@ -5,29 +5,11 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
+import type { StockUsadosResponse, UnidadRow } from "@/types/index";
 
 type MarcaFiltro = "TODOS" | string;
 
-type StockUsadoItem = {
-  interno: number;
-  modelo?: string;
-  marca: string;
-  version: string;
-  color: string | null;
-  anio: number;
-  precioVenta?: number;
-  fechaRecepcion: string | null;
-  kilometros?: number;
-  observaciones?: string | null;
-};
-
-type StockUsadosResponse = {
-  data: StockUsadoItem[];
-  resumen?: {
-    total?: number;
-    porMarca?: Record<string, number>;
-  };
-};
+type StockUsadoItem = UnidadRow;
 
 type StockUsadosViewProps = {
   queryKey: string[];
@@ -35,6 +17,8 @@ type StockUsadosViewProps = {
   title: string;
   subtitle?: string;
 };
+
+const EMPTY_STOCK_USADOS: StockUsadoItem[] = [];
 
 export default function StockUsadosView({
   queryKey,
@@ -44,6 +28,7 @@ export default function StockUsadosView({
 }: StockUsadosViewProps) {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [itemSeleccionado, setItemSeleccionado] = useState<StockUsadoItem | null>(null);
+  const [currentTime] = useState(() => Date.now());
 
   const {
     data: configResponse,
@@ -62,7 +47,7 @@ export default function StockUsadosView({
     refetchInterval: 1000,
   });
 
-  const items: StockUsadoItem[] = data?.data ?? [];
+  const items: StockUsadoItem[] = data?.data ?? EMPTY_STOCK_USADOS;
   const resumen = data?.resumen;
 
   const marcasDisponibles = useMemo(() => {
@@ -104,8 +89,7 @@ export default function StockUsadosView({
     if (!fecha) return "-";
 
     const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
+    const diff = currentTime - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
@@ -245,8 +229,8 @@ export default function StockUsadosView({
             </thead>
 
             <tbody>
-              {itemsFiltrados.map((item: any) => (
-                <tr key={`${item.interno}-${item.modelo}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
+              {itemsFiltrados.map((item) => (
+                <tr key={`${item.interno}-${item.marca}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>

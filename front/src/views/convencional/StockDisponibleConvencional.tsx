@@ -2,14 +2,20 @@ import { useMemo, useState } from "react";
 import { getStockDisponibleConvencional } from "@/api/convencional/stockAPI";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
+import { shouldShowMaintenanceForBusiness } from "@/helpers/access";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import Mantenimiento from "@/components/Mantenimiento";
+import { useAuth } from "@/hooks/useAuthe";
 
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const EMPTY_STOCK_CONVENCIONAL: Awaited<
+  ReturnType<typeof getStockDisponibleConvencional>
+>["data"] = [];
 
 export default function StockDisponibleConvencional() {
+  const { user, isLoading: authLoading } = useAuth();
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
 
   const {
@@ -29,7 +35,7 @@ export default function StockDisponibleConvencional() {
     refetchInterval: 1000,
   });
 
-  const items = data?.data ?? [];
+  const items = data?.data ?? EMPTY_STOCK_CONVENCIONAL;
   const resumen = data?.resumen;
 
   const resumenDinamico = useMemo(() => {
@@ -71,7 +77,7 @@ export default function StockDisponibleConvencional() {
       year: "numeric",
     }).format(new Date(value));
 
-  if (isLoading || configLoading) {
+  if (isLoading || configLoading || authLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -119,7 +125,7 @@ export default function StockDisponibleConvencional() {
     );
   }
 
-  if (configResponse?.data.sistemaActivoConvencional === false) {
+  if (shouldShowMaintenanceForBusiness(user, "convencional", configResponse?.data.sistemaActivoConvencional !== false)) {
     return <Mantenimiento />;
   }
 

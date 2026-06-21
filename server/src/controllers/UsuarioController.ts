@@ -109,7 +109,7 @@ export class UsuarioController {
 
   static createUsuario = async (req: Request, res: Response) => {
     try {
-      const { email } = req.body;
+      const { email, password } = req.body;
       const celularInput = normalizeCelular(req.body?.celular);
       const celularError = validateCelular(celularInput);
 
@@ -129,11 +129,14 @@ export class UsuarioController {
         });
       }
 
-      const defaultPassword = email.includes("@liess.com.ar")
-        ? "Liess111+"
-        : "Nippon111+";
+      if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({
+          data: null,
+          message: "La contrasena debe tener al menos 8 caracteres",
+        });
+      }
 
-      const hashedPassword = await hashPassword(defaultPassword);
+      const hashedPassword = await hashPassword(password);
 
       const usuario = await User.create({
         ...req.body,

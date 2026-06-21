@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Home, ShieldX } from "lucide-react";
+import { paths } from "@/routes/paths";
 
 export default function NoAutorizadoView() {
   return (
@@ -36,7 +37,7 @@ export default function NoAutorizadoView() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  to="/"
+                  to={paths.home}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
                 >
                   <Home className="h-4 w-4" />

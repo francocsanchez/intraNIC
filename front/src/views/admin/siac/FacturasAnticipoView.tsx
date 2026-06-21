@@ -6,6 +6,7 @@ import {
 } from "@/api/facturasAnticipoAPI";
 import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
+import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -108,7 +109,7 @@ export default function FacturasAnticipoView() {
           </div>
 
           <Link
-            to="/administracion"
+            to={paths.administracion.home}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
           >
             <ArrowLeft size={16} strokeWidth={1.75} />

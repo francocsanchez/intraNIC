@@ -1,6 +1,7 @@
 import { hasAnyModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { ModuleKey } from "@/constants/modules";
+import { paths } from "@/routes/paths";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { hasPathAccess } from "@/helpers/access";
 
@@ -18,15 +19,15 @@ export default function ModuleProtectedRoute({
 
   if (isError || !isAuthenticated || !user) {
     localStorage.removeItem("AUTH_TOKEN");
-    return <Navigate to="/login" replace />;
+    return <Navigate to={paths.login} replace />;
   }
 
   if (!hasAnyModuleAccess(user, allowedModules)) {
-    return <Navigate to="/no-autorizado" replace />;
+    return <Navigate to={paths.noAutorizado} replace />;
   }
 
   if (!hasPathAccess(user, pathname)) {
-    return <Navigate to="/no-autorizado" replace />;
+    return <Navigate to={paths.noAutorizado} replace />;
   }
 
   return <Outlet />;

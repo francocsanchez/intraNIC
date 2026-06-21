@@ -2,13 +2,19 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Mantenimiento from "@/components/Mantenimiento";
 import { getConfiguracion } from "@/api/configuracionAPI";
+import { shouldShowMaintenanceForBusiness } from "@/helpers/access";
 import { textToColor } from "@/helpers/colores";
+import { useAuth } from "@/hooks/useAuthe";
+import type { StockUsadosResponse, UnidadRow } from "@/types/index";
 import { getStockDisponibleUsados } from "@/api/usados/stockAPI";
 
 type MarcaFiltro = "TODOS" | string;
+const EMPTY_STOCK_USADOS: UnidadRow[] = [];
 
 export default function StockDisponibleUsados() {
+  const { user, isLoading: authLoading } = useAuth();
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
+  const [currentTime] = useState(() => Date.now());
 
   const {
     data: configResponse,
@@ -21,18 +27,18 @@ export default function StockDisponibleUsados() {
     refetchInterval: 1000,
   });
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<StockUsadosResponse>({
     queryKey: ["stockDisponible", "usados"],
     queryFn: getStockDisponibleUsados,
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
 
-  const items = data?.data ?? [];
+  const items: UnidadRow[] = data?.data ?? EMPTY_STOCK_USADOS;
   const resumen = data?.resumen;
 
   const marcasDisponibles = useMemo(() => {
-    const marcas = Array.from(new Set(items.map((item: any) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
+    const marcas = Array.from(new Set(items.map((item) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
       a.localeCompare(b),
     );
 
@@ -42,7 +48,7 @@ export default function StockDisponibleUsados() {
   const itemsFiltrados = useMemo(() => {
     if (marcaActiva === "TODOS") return items;
 
-    return items.filter((item: any) => (item.marca || "").trim().toUpperCase() === marcaActiva);
+    return items.filter((item) => (item.marca || "").trim().toUpperCase() === marcaActiva);
   }, [items, marcaActiva]);
 
   const resumenMarcas = useMemo(() => {
@@ -66,14 +72,15 @@ export default function StockDisponibleUsados() {
     }).format(value);
   };
 
-  const diasEnStock = (fecha: string) => {
+  const diasEnStock = (fecha: string | null) => {
+    if (!fecha) return "-";
+
     const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
+    const diff = currentTime - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading || configLoading) {
+  if (isLoading || configLoading || authLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -121,7 +128,7 @@ export default function StockDisponibleUsados() {
     );
   }
 
-  if (configResponse?.data?.sistemaActivoUsados === false) {
+  if (shouldShowMaintenanceForBusiness(user, "usados", configResponse?.data?.sistemaActivoUsados !== false)) {
     return <Mantenimiento />;
   }
 
@@ -209,8 +216,8 @@ export default function StockDisponibleUsados() {
             </thead>
 
             <tbody>
-              {itemsFiltrados.map((item: any) => (
-                <tr key={`${item.interno}-${item.modelo}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
+              {itemsFiltrados.map((item) => (
+                <tr key={`${item.interno}-${item.marca}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>

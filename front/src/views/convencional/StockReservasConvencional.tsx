@@ -12,6 +12,7 @@ const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", 
 
 export default function StockReservasConvencional() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const [currentTime] = useState(() => Date.now());
 
   const {
     data: configResponse,
@@ -59,8 +60,7 @@ export default function StockReservasConvencional() {
 
   const diasReserva = (fecha: string) => {
     const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
+    const diff = currentTime - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 

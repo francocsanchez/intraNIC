@@ -3,36 +3,28 @@ import { createVersion, getVersiones, updateVersion } from "@/api/dms/preventasA
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function VersionFormView() {
-  const { id } = useParams();
-  const isEditing = Boolean(id);
+type VersionFormContentProps = {
+  initialActivo: boolean;
+  initialNombre: string;
+  isEditing: boolean;
+  versionId?: string;
+};
+
+function VersionFormContent({ initialActivo, initialNombre, isEditing, versionId }: VersionFormContentProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [nombre, setNombre] = useState("");
-  const [activo, setActivo] = useState(true);
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["versiones"],
-    queryFn: () => getVersiones(),
-  });
-
-  useEffect(() => {
-    if (!isEditing) return;
-    const item = data?.data.find((version) => version._id === id);
-    if (!item) return;
-    setNombre(item.nombre);
-    setActivo(item.activo);
-  }, [data, id, isEditing]);
+  const [nombre, setNombre] = useState(initialNombre);
+  const [activo, setActivo] = useState(initialActivo);
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (!nombre.trim()) throw new Error("El nombre es obligatorio");
-      if (isEditing && id) {
-        return updateVersion(id, { nombre: nombre.trim(), activo });
+      if (isEditing && versionId) {
+        return updateVersion(versionId, { nombre: nombre.trim(), activo });
       }
       return createVersion({ nombre: nombre.trim(), activo });
     },
@@ -43,19 +35,6 @@ export default function VersionFormView() {
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
-
-  if (isLoading) return <Loading />;
-
-  if (isError) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar version</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
-        </section>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -104,5 +83,50 @@ export default function VersionFormView() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function VersionFormView() {
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["versiones"],
+    queryFn: () => getVersiones(),
+  });
+
+  if (isLoading) return <Loading />;
+
+  if (isError) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">Error al cargar version</h1>
+          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+        </section>
+      </div>
+    );
+  }
+
+  const item = isEditing ? data?.data.find((version) => version._id === id) : null;
+
+  if (isEditing && !item) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">Version no encontrada</h1>
+          <p className="mt-2 text-sm text-red-600">No fue posible cargar la version solicitada.</p>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <VersionFormContent
+      initialActivo={item?.activo ?? true}
+      initialNombre={item?.nombre ?? ""}
+      isEditing={isEditing}
+      versionId={id}
+    />
   );
 }

@@ -11,6 +11,9 @@ import { Pencil, Save, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+const EMPTY_PEDIDOS_MENSUALES: Awaited<ReturnType<typeof getPedidoMensual>>["data"] = [];
+const EMPTY_VERSIONES: Awaited<ReturnType<typeof getVersiones>>["data"] = [];
+
 export default function PedidoMensualView() {
   const queryClient = useQueryClient();
   const [version, setVersion] = useState("");
@@ -66,8 +69,8 @@ export default function PedidoMensualView() {
   const loading = pedidoMensualQuery.isLoading || versionesQuery.isLoading;
   const error = pedidoMensualQuery.error || versionesQuery.error;
 
-  const pedidos = pedidoMensualQuery.data?.data ?? [];
-  const versiones = versionesQuery.data?.data ?? [];
+  const pedidos = pedidoMensualQuery.data?.data ?? EMPTY_PEDIDOS_MENSUALES;
+  const versiones = versionesQuery.data?.data ?? EMPTY_VERSIONES;
 
   const versionesDisponibles = useMemo(() => {
     if (editingId) return versiones;

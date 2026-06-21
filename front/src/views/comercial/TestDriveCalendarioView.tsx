@@ -131,7 +131,10 @@ function MonthRow({
 }) {
   const monthStart = startOfDay(monthDays[0]);
   const monthEnd = endOfDay(monthDays[monthDays.length - 1]);
-  const laidOutEvents = useMemo(() => buildMonthLanes(events, monthStart, monthEnd), [events, monthStart.getTime(), monthEnd.getTime()]);
+  const laidOutEvents = useMemo(
+    () => buildMonthLanes(events, monthStart, monthEnd),
+    [events, monthStart, monthEnd],
+  );
   const laneCount = Math.max(1, ...laidOutEvents.map((event) => event.lane + 1));
   const rowHeight = Math.max(72, laneCount * 34 + 12);
 
@@ -378,7 +381,7 @@ function WeekView({ units, records, visibleDate }: { units: TestDriveOption[]; r
     });
 
     return map;
-  }, [units, records, weekStart.getTime(), weekEnd.getTime()]);
+  }, [units, records, weekStart, weekEnd]);
 
   return (
     <div className="space-y-6">

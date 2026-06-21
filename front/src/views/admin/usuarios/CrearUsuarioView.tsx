@@ -1,22 +1,12 @@
 import { createUsuario } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
-import { getDefaultModules, type UserModules } from "@/constants/modules";
+import { getDefaultModules } from "@/constants/modules";
 import { paths } from "@/routes/paths";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-export type UsuarioFormData = {
-  name: string;
-  lastName: string;
-  email: string;
-  celular: string;
-  numberSaleNic: number;
-  numberSaleLiess: number;
-  role: string[];
-  modules: UserModules;
-};
+import type { UsuarioFormData } from "./formTypes";
 
 export default function CreateUsuarioView() {
   const navigate = useNavigate();
@@ -25,6 +15,7 @@ export default function CreateUsuarioView() {
     name: "",
     lastName: "",
     email: "",
+    password: "",
     celular: "",
     numberSaleNic: 0,
     numberSaleLiess: 0,
@@ -81,7 +72,7 @@ export default function CreateUsuarioView() {
         </div>
 
         <div className="p-6">
-          <UsuarioForm register={register} control={control} errors={errors} />
+          <UsuarioForm register={register} control={control} errors={errors} showPasswordField />
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">

@@ -3,8 +3,8 @@ import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import CheckListVendedores from "@/components/configuracion/CheckListVendedores";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Switch } from "@headlessui/react";
@@ -40,10 +40,7 @@ export default function EditConfiguracionConvView() {
 
   const config = configResponse?.data;
   const vendedoresNic = vendedoresResponse?.data ?? [];
-
-  const [enabled, setEnabled] = useState(false);
-
-  const { register, handleSubmit, setValue, reset } = useForm<ConfigConvForm>({
+  const { control, register, handleSubmit, setValue, reset } = useForm<ConfigConvForm>({
     defaultValues: {
       sistemaActivoConvencional: false,
       vendedoresReservasConvencional: [],
@@ -57,8 +54,6 @@ export default function EditConfiguracionConvView() {
 
     const activo = !!config.sistemaActivoConvencional;
 
-    setEnabled(activo);
-
     reset({
       sistemaActivoConvencional: activo,
       vendedoresReservasConvencional: (config.vendedoresReservasConvencional ?? []).map(String),
@@ -66,6 +61,11 @@ export default function EditConfiguracionConvView() {
       vendedoresStockGuardadoConvencional: (config.vendedoresStockGuardadoConvencional ?? []).map(String),
     });
   }, [config, reset]);
+
+  const enabled = useWatch({
+    control,
+    name: "sistemaActivoConvencional",
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: updateConfiguracionConvencional,
@@ -185,9 +185,9 @@ export default function EditConfiguracionConvView() {
               <Switch
                 checked={enabled}
                 onChange={(val) => {
-                  setEnabled(val);
                   setValue("sistemaActivoConvencional", val, {
                     shouldDirty: true,
+                    shouldTouch: true,
                   });
                 }}
                 className={`${
@@ -202,7 +202,7 @@ export default function EditConfiguracionConvView() {
                 />
               </Switch>
 
-              <input type="hidden" value={enabled ? "true" : "false"} {...register("sistemaActivoConvencional")} />
+              <input type="hidden" {...register("sistemaActivoConvencional")} />
             </label>
           </div>
 

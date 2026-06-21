@@ -21,7 +21,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -84,10 +84,6 @@ export default function RegistroAsignacionesView() {
     queryFn: () => getRegistrosAsignaciones(page, PAGE_SIZE, filtrosActivos),
     refetchOnWindowFocus: true,
   });
-
-  useEffect(() => {
-    setPage(1);
-  }, [filtrosActivos]);
 
   const registros = data?.data ?? [];
   const pagination = data?.pagination;
@@ -473,7 +469,10 @@ export default function RegistroAsignacionesView() {
             {hayFiltrosActivos ? (
               <button
                 type="button"
-                onClick={() => setSearchParams({})}
+                onClick={() => {
+                  setPage(1);
+                  setSearchParams({});
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
               >
                 <Filter size={15} strokeWidth={1.75} />

@@ -2,7 +2,7 @@ import { Controller, type Control, type FieldErrors, type UseFormRegister } from
 import { useQuery } from "@tanstack/react-query";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { moduleLabels, moduleSections, type ModuleKey } from "@/constants/modules";
-import type { UsuarioFormData } from "@/views/admin/usuarios/CrearUsuarioView";
+import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
 
 type Vendedor = {
   codigo: number;
@@ -13,6 +13,7 @@ type UsuarioFormProps = {
   register: UseFormRegister<UsuarioFormData>;
   control: Control<UsuarioFormData>;
   errors: FieldErrors<UsuarioFormData>;
+  showPasswordField?: boolean;
 };
 
 const roleOptions = [
@@ -29,7 +30,7 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
 
-export default function UsuarioForm({ register, control, errors }: UsuarioFormProps) {
+export default function UsuarioForm({ register, control, errors, showPasswordField = false }: UsuarioFormProps) {
   const { data: vendedoresResponse, isLoading } = useQuery({
     queryKey: ["vendedores"],
     queryFn: getVendedoresNic,
@@ -112,6 +113,29 @@ export default function UsuarioForm({ register, control, errors }: UsuarioFormPr
           <p className="text-xs text-gray-500">Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.</p>
           <FieldError message={errors.celular?.message} />
         </div>
+
+        {showPasswordField ? (
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              Contrasena inicial
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Minimo 8 caracteres"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              {...register("password", {
+                required: "La contrasena es obligatoria",
+                minLength: {
+                  value: 8,
+                  message: "La contrasena debe tener al menos 8 caracteres",
+                },
+              })}
+            />
+            <p className="text-xs text-gray-500">Esta sera la contrasena con la que el usuario ingresara por primera vez.</p>
+            <FieldError message={errors.password?.message} />
+          </div>
+        ) : null}
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white">

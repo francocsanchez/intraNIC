@@ -18,6 +18,7 @@ type PendienteReventaItem = {
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const EMPTY_PENDIENTE_REVENTAS: PendienteReventaItem[] = [];
 
 function formatDate(value?: string) {
   if (!value) return "-";
@@ -54,7 +55,7 @@ export default function PendienteReventaView() {
     refetchOnWindowFocus: true,
   });
 
-  const items: PendienteReventaItem[] = data?.data ?? [];
+  const items: PendienteReventaItem[] = data?.data ?? EMPTY_PENDIENTE_REVENTAS;
   const resumen = data?.resumen;
 
   const resumenDinamico = useMemo(() => {

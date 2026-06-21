@@ -4,8 +4,8 @@ import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import CheckListVendedoresUsados from "@/components/configuracion/CheckListVendedoresUsados";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -42,10 +42,7 @@ export default function EditConfiguracionUsadoView() {
 
   const config = configResponse?.data;
   const vendedoresNic = vendedoresResponse?.data ?? [];
-
-  const [enabled, setEnabled] = useState(false);
-
-  const { register, handleSubmit, setValue, reset } = useForm<ConfigUsaForm>({
+  const { control, register, handleSubmit, setValue, reset } = useForm<ConfigUsaForm>({
     defaultValues: {
       sistemaActivoUsados: false,
       vendedoresReservasUsados: [],
@@ -61,8 +58,6 @@ export default function EditConfiguracionUsadoView() {
 
     const activo = !!config.sistemaActivoUsados;
 
-    setEnabled(activo);
-
     reset({
       sistemaActivoUsados: activo,
       vendedoresReservasUsados: (config.vendedoresReservasUsados ?? []).map(String),
@@ -72,6 +67,11 @@ export default function EditConfiguracionUsadoView() {
       vendedoresStockPendDocuUsados: (config.vendedoresStockPendDocuUsados ?? []).map(String),
     });
   }, [config, reset]);
+
+  const enabled = useWatch({
+    control,
+    name: "sistemaActivoUsados",
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: updateConfiguracionUsado,
@@ -191,9 +191,9 @@ export default function EditConfiguracionUsadoView() {
               <Switch
                 checked={enabled}
                 onChange={(val) => {
-                  setEnabled(val);
                   setValue("sistemaActivoUsados", val, {
                     shouldDirty: true,
+                    shouldTouch: true,
                   });
                 }}
                 className={`${
@@ -208,7 +208,7 @@ export default function EditConfiguracionUsadoView() {
                 />
               </Switch>
 
-              <input type="hidden" value={enabled ? "true" : "false"} {...register("sistemaActivoUsados")} />
+              <input type="hidden" {...register("sistemaActivoUsados")} />
             </label>
           </div>
 

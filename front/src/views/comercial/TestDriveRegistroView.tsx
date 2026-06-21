@@ -14,7 +14,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -71,10 +71,10 @@ function RegistroModal({
   const queryClient = useQueryClient();
   const isEditing = !!item;
   const {
+    control,
     register,
     reset,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<RegistroFormValues>({
@@ -114,7 +114,10 @@ function RegistroModal({
     });
   }, [item, options, reset]);
 
-  const selectedUnidadId = watch("unidadId");
+  const selectedUnidadId = useWatch({
+    control,
+    name: "unidadId",
+  });
   const selectedOption = useMemo(
     () => options.find((option) => option._id === selectedUnidadId) ?? null,
     [options, selectedUnidadId],

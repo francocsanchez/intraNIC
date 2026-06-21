@@ -20,7 +20,7 @@ export default function PatentamientosLayout() {
   if (isLoading) return <Loading />;
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={paths.login} replace />;
   }
 
   const isImportView = location.pathname === paths.analisis.patentamientos.importar;
@@ -33,7 +33,7 @@ export default function PatentamientosLayout() {
 
           <div className="mt-5 space-y-3">
             <Link
-              to="/"
+              to={paths.home}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-100"
             >
               <ChevronLeft size={16} />

@@ -13,7 +13,7 @@ import { paths } from "@/routes/paths";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Plus, Trash2 } from "lucide-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -138,39 +138,47 @@ export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const [fecha, setFecha] = useState<string>("");
-  const [internoInput, setInternoInput] = useState<string>("");
-  const [items, setItems] = useState<PedidoUnidadItem[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("carga");
-  const [page, setPage] = useState<number>(1);
-  const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
-  const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
-  const [registroInterno, setRegistroInterno] = useState<string>("");
-  const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
+  const requestedView = searchParams.get("view");
   const canManagePriority = hasModuleAccess(user, "pedidoUnidades");
   const canManagePedidos = hasModuleAccess(user, "pedidoUnidades");
   const canOpenAsignaciones = hasModuleAccess(user, "asignaciones");
   const canAccess = hasModuleAccess(user, "pedidoUnidades");
   const canOpenListaPrevia = hasModuleAccess(user, "listaPrevia");
+  const [fecha, setFecha] = useState<string>("");
+  const [internoInput, setInternoInput] = useState<string>("");
+  const [items, setItems] = useState<PedidoUnidadItem[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (!canManagePedidos) {
+      return "registros";
+    }
+
+    return requestedView === "registros" ? "registros" : "carga";
+  });
+  const [page, setPage] = useState<number>(1);
+  const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
+  const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
+  const [registroInterno, setRegistroInterno] = useState<string>("");
+  const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
+  const effectiveViewMode: ViewMode = canManagePedidos ? viewMode : "registros";
 
   const { data: pedidosResponse, isLoading: isLoadingPedidos, isError: isErrorPedidos, error: pedidosError } = useQuery({
     queryKey: ["pedido-unidades", page],
     queryFn: () => getPedidosUnidades(page, PAGE_SIZE),
-    enabled: canManagePedidos && viewMode === "registros",
+    enabled: canManagePedidos && effectiveViewMode === "registros",
     refetchOnWindowFocus: true,
   });
 
   const { data: registrosResponse, isLoading: isLoadingRegistros, isError: isErrorRegistros, error: registrosError } = useQuery({
     queryKey: ["pedido-unidades-registros", page, registroInterno],
     queryFn: () => getPedidosUnidadesRegistro(page, PAGE_SIZE, registroInterno),
-    enabled: !canManagePedidos && viewMode === "registros",
+    enabled: !canManagePedidos && effectiveViewMode === "registros",
     refetchOnWindowFocus: true,
   });
 
   const { data: previasData = EMPTY_PREVIAS, isLoading: isLoadingPrevias } = useQuery({
     queryKey: ["pedido-unidades-previas"],
     queryFn: getPedidoUnidadesPrevias,
-    enabled: canManagePedidos && canOpenListaPrevia && viewMode === "carga",
+    enabled: canManagePedidos && canOpenListaPrevia && effectiveViewMode === "carga",
     refetchOnWindowFocus: true,
   });
 
@@ -179,28 +187,6 @@ export default function PedidoUnidadesView() {
   const pagination = canManagePedidos ? pedidosResponse?.pagination : registrosResponse?.pagination;
   const previasOrdenadas = useMemo(() => [...previasData].sort(comparePrevia), [previasData]);
   const itemsOrdenados = useMemo(() => [...items].sort(comparePedidoItem), [items]);
-
-  useEffect(() => {
-    const requestedView = searchParams.get("view");
-
-    if (!canManagePedidos) {
-      setViewMode("registros");
-      return;
-    }
-
-    if (requestedView === "registros") {
-      setViewMode("registros");
-      return;
-    }
-
-    if (requestedView === "carga") {
-      setViewMode("carga");
-    }
-  }, [canManagePedidos, searchParams]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [registroInterno]);
 
   const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
     const groups = new Map<string, PedidoUnidad[]>();
@@ -248,7 +234,7 @@ export default function PedidoUnidadesView() {
   const { data: estadoPedidos = {}, isLoading: isLoadingEstadoPedidos } = useQuery({
     queryKey: ["pedido-unidades-estado-arribo", internosEnPagina.join("-")],
     queryFn: () => getEstadoInternosArribo(internosEnPagina),
-    enabled: canManagePedidos && viewMode === "registros" && internosEnPagina.length > 0,
+    enabled: canManagePedidos && effectiveViewMode === "registros" && internosEnPagina.length > 0,
     refetchOnWindowFocus: true,
   });
 
@@ -260,7 +246,7 @@ export default function PedidoUnidadesView() {
   const { data: estadoRegistros = {}, isLoading: isLoadingEstadoRegistros } = useQuery({
     queryKey: ["pedido-unidades-estado-arribo-registros", internosRegistros.join("-")],
     queryFn: () => getEstadoInternosArribo(internosRegistros),
-    enabled: !canManagePedidos && viewMode === "registros" && internosRegistros.length > 0,
+    enabled: !canManagePedidos && effectiveViewMode === "registros" && internosRegistros.length > 0,
     refetchOnWindowFocus: true,
   });
 
@@ -345,11 +331,11 @@ export default function PedidoUnidadesView() {
   });
 
   const isLoading =
-    (viewMode === "carga" && canManagePedidos && canOpenListaPrevia && isLoadingPrevias) ||
-    (viewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
-    (viewMode === "registros" && canManagePedidos && isLoadingEstadoPedidos) ||
-    (viewMode === "registros" && !canManagePedidos && isLoadingEstadoRegistros) ||
-    (viewMode === "registros" && !canManagePedidos && isLoadingRegistros);
+    (effectiveViewMode === "carga" && canManagePedidos && canOpenListaPrevia && isLoadingPrevias) ||
+    (effectiveViewMode === "registros" && canManagePedidos && isLoadingPedidos) ||
+    (effectiveViewMode === "registros" && canManagePedidos && isLoadingEstadoPedidos) ||
+    (effectiveViewMode === "registros" && !canManagePedidos && isLoadingEstadoRegistros) ||
+    (effectiveViewMode === "registros" && !canManagePedidos && isLoadingRegistros);
 
   const hasActiveError = canManagePedidos ? isErrorPedidos : isErrorRegistros;
   const activeError = canManagePedidos ? pedidosError : registrosError;
@@ -527,7 +513,7 @@ export default function PedidoUnidadesView() {
             onClick={() => setViewMode("carga")}
             className={[
               "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-              viewMode === "carga" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+              effectiveViewMode === "carga" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
             ].join(" ")}
           >
             Nueva carga
@@ -539,14 +525,14 @@ export default function PedidoUnidadesView() {
           onClick={() => setViewMode("registros")}
           className={[
             "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-            viewMode === "registros" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+            effectiveViewMode === "registros" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
           ].join(" ")}
         >
           Registros
         </button>
       </section>
 
-      {viewMode === "carga" && canManagePedidos ? (
+      {effectiveViewMode === "carga" && canManagePedidos ? (
         <section>
           <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">

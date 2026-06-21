@@ -19,6 +19,16 @@ const MESES = [
   { label: "Diciembre", shortLabel: "dic", value: 12 },
 ];
 
+const EMPTY_PROMEDIO_MESES: NonNullable<
+  PromedioOperacionesConvencionalResponse["resumen"]
+>["meses"] = [];
+const EMPTY_PROMEDIO_SUCURSALES: NonNullable<
+  PromedioOperacionesConvencionalResponse["resumen"]
+>["sucursales"] = [];
+const EMPTY_PROMEDIO_VENDEDORES: NonNullable<
+  PromedioOperacionesConvencionalResponse["resumen"]
+>["vendedores"] = [];
+
 function getPromedioCellClass(value: number) {
   if (value >= 11) return "bg-emerald-100 text-emerald-800";
   if (value >= 6) return "bg-amber-100 text-amber-800";
@@ -46,9 +56,9 @@ export default function PromediosConvencionalView() {
   });
 
   const resumen = data?.resumen;
-  const meses = resumen?.meses ?? [];
-  const sucursales = resumen?.sucursales ?? [];
-  const vendedores = resumen?.vendedores ?? [];
+  const meses = resumen?.meses ?? EMPTY_PROMEDIO_MESES;
+  const sucursales = resumen?.sucursales ?? EMPTY_PROMEDIO_SUCURSALES;
+  const vendedores = resumen?.vendedores ?? EMPTY_PROMEDIO_VENDEDORES;
 
   const cards = useMemo(() => {
     const totalVendedores = vendedores.length;

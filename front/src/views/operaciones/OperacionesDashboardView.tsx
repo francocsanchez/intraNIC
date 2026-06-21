@@ -45,6 +45,8 @@ export default function OperacionesDashboardView() {
   const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
   const [selectedModelos, setSelectedModelos] = useState<string[]>([]);
   const [selectedDias, setSelectedDias] = useState<number[]>([]);
+  const effectiveChartDimension =
+    chartCompareBy === "anio" && !["mes", "dia"].includes(chartDimension) ? "mes" : chartDimension;
 
   const anios = useMemo(
     () => Array.from({ length: 6 }, (_, index) => currentYear - 5 + index),
@@ -70,23 +72,31 @@ export default function OperacionesDashboardView() {
     }
   }, [error]);
 
-  useEffect(() => {
-    if (chartCompareBy === "anio" && !["mes", "dia"].includes(chartDimension)) {
-      setChartDimension("mes");
-    }
-  }, [chartCompareBy, chartDimension]);
+  const validSucursales = useMemo(
+    () => new Set(data?.filtros.sucursales.map((item) => item.value) ?? []),
+    [data],
+  );
+  const validModelos = useMemo(
+    () => new Set(data?.filtros.modelos.map((item) => item.value) ?? []),
+    [data],
+  );
+  const validDias = useMemo(
+    () => new Set(data?.filtros.dias ?? []),
+    [data],
+  );
 
-  useEffect(() => {
-    if (!data) return;
-
-    const validSucursales = new Set(data.filtros.sucursales.map((item) => item.value));
-    const validModelos = new Set(data.filtros.modelos.map((item) => item.value));
-    const validDias = new Set(data.filtros.dias);
-
-    setSelectedSucursales((current) => current.filter((item) => validSucursales.has(item)));
-    setSelectedModelos((current) => current.filter((item) => validModelos.has(item)));
-    setSelectedDias((current) => current.filter((item) => validDias.has(item)));
-  }, [data]);
+  const effectiveSelectedSucursales = useMemo(
+    () => selectedSucursales.filter((item) => validSucursales.size === 0 || validSucursales.has(item)),
+    [selectedSucursales, validSucursales],
+  );
+  const effectiveSelectedModelos = useMemo(
+    () => selectedModelos.filter((item) => validModelos.size === 0 || validModelos.has(item)),
+    [selectedModelos, validModelos],
+  );
+  const effectiveSelectedDias = useMemo(
+    () => selectedDias.filter((item) => validDias.size === 0 || validDias.has(item)),
+    [selectedDias, validDias],
+  );
 
   const chartState = useMemo(() => {
     const operaciones = data?.operaciones ?? [];
@@ -97,7 +107,7 @@ export default function OperacionesDashboardView() {
     const getDimensionValue = (item: OperacionDashboard) => {
       const fecha = getFechaParts(item.fechaAsignacion);
 
-      if (chartDimension === "mes") {
+      if (effectiveChartDimension === "mes") {
         const month = fecha.month;
         return {
           label: MONTH_LABELS[month - 1] ?? String(month),
@@ -105,7 +115,7 @@ export default function OperacionesDashboardView() {
         };
       }
 
-      if (chartDimension === "dia") {
+      if (effectiveChartDimension === "dia") {
         const day = fecha.day;
         return {
           label: String(day).padStart(2, "0"),
@@ -113,11 +123,11 @@ export default function OperacionesDashboardView() {
         };
       }
 
-      if (chartDimension === "modelo") {
+      if (effectiveChartDimension === "modelo") {
         return { label: item.modeloNombre, order: 0 };
       }
 
-      if (chartDimension === "sucursal") {
+      if (effectiveChartDimension === "sucursal") {
         return { label: item.sucursalNombre, order: 0 };
       }
 
@@ -132,7 +142,7 @@ export default function OperacionesDashboardView() {
         grouped.set(label, {});
       }
 
-      if (chartDimension === "mes" || chartDimension === "dia") {
+      if (effectiveChartDimension === "mes" || effectiveChartDimension === "dia") {
         labelOrder.set(label, order);
       }
 
@@ -146,7 +156,7 @@ export default function OperacionesDashboardView() {
       ...values,
     }));
 
-    if (chartDimension === "mes" || chartDimension === "dia") {
+    if (effectiveChartDimension === "mes" || effectiveChartDimension === "dia") {
       points = points.sort((a, b) => (labelOrder.get(String(a.label)) ?? 0) - (labelOrder.get(String(b.label)) ?? 0));
     } else {
       const getTotal = (item: OperacionesChartPoint) =>
@@ -162,7 +172,7 @@ export default function OperacionesDashboardView() {
       seriesKeys: comparisonEnabled ? selectedAnios.map(String) : ["total"],
       comparisonEnabled,
     };
-  }, [chartCompareBy, chartDimension, data, selectedAnios]);
+  }, [chartCompareBy, data, effectiveChartDimension, selectedAnios]);
 
   if (isLoading) return <Loading />;
 
@@ -242,9 +252,9 @@ export default function OperacionesDashboardView() {
         sucursales={data.filtros.sucursales}
         modelos={data.filtros.modelos}
         dias={data.filtros.dias}
-        selectedSucursales={selectedSucursales}
-        selectedModelos={selectedModelos}
-        selectedDias={selectedDias}
+        selectedSucursales={effectiveSelectedSucursales}
+        selectedModelos={effectiveSelectedModelos}
+        selectedDias={effectiveSelectedDias}
         onAniosChange={setSelectedAnios}
         onMesesChange={setSelectedMeses}
         onSucursalesChange={setSelectedSucursales}
@@ -266,7 +276,7 @@ export default function OperacionesDashboardView() {
         <>
           <OperacionesBarChart
             data={chartState.data}
-            dimension={chartDimension}
+            dimension={effectiveChartDimension}
             compareBy={chartCompareBy}
             seriesKeys={chartState.seriesKeys}
             onDimensionChange={setChartDimension}

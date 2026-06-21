@@ -5,12 +5,18 @@ import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
 import { Dialog, Transition } from "@headlessui/react";
 import { getStockIngresoUsado } from "@/api/usados/stockAPI";
+import type { StockIngresoUsadosItem, StockIngresoUsadosResponse } from "@/types/index";
 
 type MarcaFiltro = "TODOS" | string;
+type StockIngresoItem = StockIngresoUsadosItem & {
+  observaciones?: string | null;
+  precioVenta?: number | null;
+};
+const EMPTY_STOCK_INGRESO_USADOS: StockIngresoItem[] = [];
 
 export default function StockIngresoUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
-  const [itemSeleccionado, setItemSeleccionado] = useState<any>(null);
+  const [itemSeleccionado, setItemSeleccionado] = useState<StockIngresoItem | null>(null);
 
   const {
     data: configResponse,
@@ -22,18 +28,18 @@ export default function StockIngresoUsados() {
     refetchOnWindowFocus: true,
   });
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<StockIngresoUsadosResponse>({
     queryKey: ["strockIngreso", "usados"],
     queryFn: getStockIngresoUsado,
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
 
-  const items = data?.data ?? [];
+  const items: StockIngresoItem[] = data?.data ?? EMPTY_STOCK_INGRESO_USADOS;
   const resumen = data?.resumen;
 
   const marcasDisponibles = useMemo(() => {
-    const marcas = Array.from(new Set(items.map((item: any) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
+    const marcas = Array.from(new Set(items.map((item) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
       a.localeCompare(b),
     );
 
@@ -43,7 +49,7 @@ export default function StockIngresoUsados() {
   const itemsFiltrados = useMemo(() => {
     if (marcaActiva === "TODOS") return items;
 
-    return items.filter((item: any) => (item.marca || "").trim().toUpperCase() === marcaActiva);
+    return items.filter((item) => (item.marca || "").trim().toUpperCase() === marcaActiva);
   }, [items, marcaActiva]);
 
   const resumenMarcas = useMemo(() => {
@@ -204,8 +210,8 @@ export default function StockIngresoUsados() {
             </thead>
 
             <tbody>
-              {itemsFiltrados.map((item: any) => (
-                <tr key={`${item.interno}-${item.modelo}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
+              {itemsFiltrados.map((item) => (
+                <tr key={`${item.interno}-${item.marca}-${item.version}`} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
@@ -220,7 +226,7 @@ export default function StockIngresoUsados() {
                   </td>
                   <td className="px-4 py-2 text-gray-700">{item.anio}</td>
                   <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.km ?? 0)}</td>
-                  <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta)}</td>
+                  <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta ?? undefined)}</td>
                   <td className="px-4 py-2 text-gray-700 uppercase">{item.ultimoDueno}</td>
                   <td className="px-4 py-2 text-center">
                     {item.observaciones ? (

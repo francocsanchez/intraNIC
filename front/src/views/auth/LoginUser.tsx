@@ -10,6 +10,19 @@ export type UserLoginForm = {
   password: string;
 };
 
+function getResponseMessage(response: unknown, fallback: string) {
+  if (
+    typeof response === "object" &&
+    response !== null &&
+    "message" in response &&
+    typeof response.message === "string"
+  ) {
+    return response.message;
+  }
+
+  return fallback;
+}
+
 export default function LoginUser() {
   const navigate = useNavigate();
 
@@ -38,8 +51,8 @@ export default function LoginUser() {
 
   const { mutate: recoverPassword, isPending: isRecoveringPassword } = useMutation({
     mutationFn: forgotPassword,
-    onSuccess: (response: any) => {
-      toast.success(response.message || "Te enviamos una nueva contrasena por email");
+    onSuccess: (response: unknown) => {
+      toast.success(getResponseMessage(response, "Te enviamos una nueva contrasena por email"));
     },
     onError: (error: Error) => {
       toast.error(error.message || "Error al recuperar la contrasena");

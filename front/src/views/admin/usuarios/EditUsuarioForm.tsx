@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import type { UsuarioFormData } from "./formTypes";
 
 type Usuario = {
   _id: string;
@@ -18,17 +19,6 @@ type Usuario = {
   numberSaleLiess: number;
   role: string[];
   modules?: UserModules;
-};
-
-export type UsuarioFormData = {
-  name: string;
-  lastName: string;
-  email: string;
-  celular: string;
-  numberSaleNic: number;
-  numberSaleLiess: number;
-  role: string[];
-  modules: UserModules;
 };
 
 type EditUsuarioFormProps = {

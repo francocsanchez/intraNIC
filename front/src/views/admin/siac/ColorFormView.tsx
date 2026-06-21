@@ -3,36 +3,28 @@ import { createColor, getColores, updateColor } from "@/api/dms/preventasAPI";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function ColorFormView() {
-  const { id } = useParams();
-  const isEditing = Boolean(id);
+type ColorFormContentProps = {
+  colorId?: string;
+  initialActivo: boolean;
+  initialNombre: string;
+  isEditing: boolean;
+};
+
+function ColorFormContent({ colorId, initialActivo, initialNombre, isEditing }: ColorFormContentProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [nombre, setNombre] = useState("");
-  const [activo, setActivo] = useState(true);
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["colores"],
-    queryFn: () => getColores(),
-  });
-
-  useEffect(() => {
-    if (!isEditing) return;
-    const item = data?.data.find((color) => color._id === id);
-    if (!item) return;
-    setNombre(item.nombre);
-    setActivo(item.activo);
-  }, [data, id, isEditing]);
+  const [nombre, setNombre] = useState(initialNombre);
+  const [activo, setActivo] = useState(initialActivo);
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (!nombre.trim()) throw new Error("El nombre es obligatorio");
-      if (isEditing && id) {
-        return updateColor(id, { nombre: nombre.trim(), activo });
+      if (isEditing && colorId) {
+        return updateColor(colorId, { nombre: nombre.trim(), activo });
       }
       return createColor({ nombre: nombre.trim(), activo });
     },
@@ -43,19 +35,6 @@ export default function ColorFormView() {
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
-
-  if (isLoading) return <Loading />;
-
-  if (isError) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar color</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
-        </section>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -104,5 +83,50 @@ export default function ColorFormView() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function ColorFormView() {
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["colores"],
+    queryFn: () => getColores(),
+  });
+
+  if (isLoading) return <Loading />;
+
+  if (isError) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">Error al cargar color</h1>
+          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+        </section>
+      </div>
+    );
+  }
+
+  const item = isEditing ? data?.data.find((color) => color._id === id) : null;
+
+  if (isEditing && !item) {
+    return (
+      <div className="w-full px-4 py-6">
+        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-gray-900">Color no encontrado</h1>
+          <p className="mt-2 text-sm text-red-600">No fue posible cargar el color solicitado.</p>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <ColorFormContent
+      colorId={id}
+      initialActivo={item?.activo ?? true}
+      initialNombre={item?.nombre ?? ""}
+      isEditing={isEditing}
+    />
   );
 }

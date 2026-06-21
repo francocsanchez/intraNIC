@@ -31,6 +31,7 @@ type MarcaFiltro = "TODOS" | string;
 
 export default function StockReservasUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
+  const [currentTime] = useState(() => Date.now());
 
   const {
     data: configResponse,
@@ -81,8 +82,7 @@ export default function StockReservasUsados() {
 
   const diasReserva = (fecha: string) => {
     const start = new Date(fecha).getTime();
-    const now = Date.now();
-    const diff = now - start;
+    const diff = currentTime - start;
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 

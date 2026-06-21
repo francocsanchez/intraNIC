@@ -1,95 +1,92 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
-
-import NICLayout from "./layouts/NICLayout";
-import LiessLayout from "./layouts/LiessLayout";
-import AdminModuleLayout from "./layouts/AdminModuleLayout";
-import PatentamientosLayout from "./layouts/PatentamientosLayout";
-import ProfileLayout from "./layouts/ProfileLayout";
-import GestionConvencionalLayout from "./layouts/GestionConvencionalLayout";
-import GestionUsadosLayout from "./layouts/GestionUsadosLayout";
-import AnalisisLayout from "./layouts/AnalisisLayout";
-
-import ProtectedRoute from "./layouts/ProtectedRoute";
-import ModuleProtectedRoute from "./layouts/ModuleProtectedRoute";
-
-import ConfiguracionView from "./views/admin/configuracion/ConfiguracionView";
-import VendedoresView from "./views/admin/configuracion/VendedoresView";
-import EditConfiguracionConvView from "./views/admin/configuracion/EditConfiguracionConvView";
-import EditConfiguracionUsadoView from "./views/admin/configuracion/EditConfiguracionUsadoView";
-
-import UsuariosView from "./views/admin/usuarios/UsuariosView";
-import EditUsuarioView from "./views/admin/usuarios/EditUsuarioView";
-import CrearUsuarioView from "./views/admin/usuarios/CrearUsuarioView";
-import TestDriveView from "./views/admin/testDrive/TestDriveView";
-
-import MiPerfilView from "./views/auth/MiPerfilView";
-import MisOperacionesView from "./views/auth/MisOperacionesView";
-import MisReservas from "./views/auth/MisReservas";
-import MiListaDeEsperaView from "./views/auth/MiListaDeEsperaView";
-import LoginUser from "./views/auth/LoginUser";
-
-import Inicio from "./views/Inicio";
-import AdministracionHubView from "./views/admin/AdministracionHubView";
-
-import NotFoundView from "./views/NotFoundView";
-import NoAutorizadoView from "./views/NoAutorizadoView";
-
-import StockDisponibleConvencional from "./views/convencional/StockDisponibleConvencional";
-import StockGuardadoConvencioanl from "./views/convencional/StockGuardadoConvencioanl";
-import StockReservasConvencional from "./views/convencional/StockReservasConvencional";
-
-import StockDisponibleLiess from "./views/liess/StockDisponibleLiess";
-import AdminLayout from "./layouts/AdminLayout";
-import AsignacionesView from "./views/admin/siac/AsignacionesView";
-import StockDisponibleUsados from "./views/usados/StockDisponibleUsados";
-import NICUsadosLayout from "./layouts/NICUsadosLayout";
-import StockGuardadoUsados from "./views/usados/StockGuardadoUsados";
-import MisReservasUsadosView from "./views/usados/MisReservasUsadosView";
-import StockNoReparadoUsadosView from "./views/usados/StockNoReparadoUsadosView";
-import StockPendDocuUsadosView from "./views/usados/StockPendDocuUsadosView";
-import StockReservasUsados from "./views/usados/StockReservasUsados";
-import StockIngresoUsados from "./views/usados/StockIngresoUsados";
-import PendienteReventaView from "./views/admin/siac/PendienteReventaView";
-import PromediosConvencionalView from "./views/admin/siac/PromediosConvencionalView";
-import RankingConvencionalView from "./views/admin/siac/RankingConvencionalView";
-import PedidoUnidadesView from "./views/admin/siac/PedidoUnidadesView";
-import PedidoUnidadesPreviasView from "./views/admin/siac/PedidoUnidadesPreviasView";
-import FacturasAnticipoView from "./views/admin/siac/FacturasAnticipoView";
-import RegistroAsignacionesView from "./views/admin/siac/RegistroAsignacionesView";
-import RegistroAsignacionesResumenView from "./views/admin/siac/RegistroAsignacionesResumenView";
-import PreventasView from "./views/admin/siac/PreventasView";
-import PreventasAsignadasView from "./views/admin/siac/PreventasAsignadasView";
-import PreventaFormView from "./views/admin/siac/PreventaFormView";
-import PreventasResumenView from "./views/admin/siac/PreventasResumenView";
-import ColoresView from "./views/admin/siac/ColoresView";
-import ColorFormView from "./views/admin/siac/ColorFormView";
-import VersionesView from "./views/admin/siac/VersionesView";
-import VersionFormView from "./views/admin/siac/VersionFormView";
-import PedidoMensualView from "./views/admin/siac/PedidoMensualView";
-import ProformasView from "./views/admin/siac/ProformasView";
-import ProformaFormView from "./views/admin/siac/ProformaFormView";
-import ProformaDetailView from "./views/admin/siac/ProformaDetailView";
-import TestDriveRegistroView from "./views/comercial/TestDriveRegistroView";
-import TestDriveCalendarioView from "./views/comercial/TestDriveCalendarioView";
-import OperacionesDashboardView from "./views/operaciones/OperacionesDashboardView";
-import PatentamientosView from "./views/patentamientos/PatentamientosView";
-import DashboardPatentamientosView from "./views/patentamientos/DashboardPatentamientosView";
-import InscripcionUnidadesView from "./views/patentamientos/InscripcionUnidadesView";
+import Loading from "./components/Loading";
 import { paths } from "./routes/paths";
+
+const NICLayout = lazy(() => import("./layouts/NICLayout"));
+const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
+const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
+const PatentamientosLayout = lazy(() => import("./layouts/PatentamientosLayout"));
+const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
+const GestionConvencionalLayout = lazy(() => import("./layouts/GestionConvencionalLayout"));
+const GestionUsadosLayout = lazy(() => import("./layouts/GestionUsadosLayout"));
+const AnalisisLayout = lazy(() => import("./layouts/AnalisisLayout"));
+const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute"));
+const ModuleProtectedRoute = lazy(() => import("./layouts/ModuleProtectedRoute"));
+const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
+
+const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
+const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
+const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
+const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
+const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
+const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
+const CrearUsuarioView = lazy(() => import("./views/admin/usuarios/CrearUsuarioView"));
+const TestDriveView = lazy(() => import("./views/admin/testDrive/TestDriveView"));
+const MiPerfilView = lazy(() => import("./views/auth/MiPerfilView"));
+const MisOperacionesView = lazy(() => import("./views/auth/MisOperacionesView"));
+const MisReservas = lazy(() => import("./views/auth/MisReservas"));
+const MiListaDeEsperaView = lazy(() => import("./views/auth/MiListaDeEsperaView"));
+const LoginUser = lazy(() => import("./views/auth/LoginUser"));
+const Inicio = lazy(() => import("./views/Inicio"));
+const AdministracionHubView = lazy(() => import("./views/admin/AdministracionHubView"));
+const NotFoundView = lazy(() => import("./views/NotFoundView"));
+const NoAutorizadoView = lazy(() => import("./views/NoAutorizadoView"));
+const StockDisponibleConvencional = lazy(() => import("./views/convencional/StockDisponibleConvencional"));
+const StockGuardadoConvencioanl = lazy(() => import("./views/convencional/StockGuardadoConvencioanl"));
+const StockReservasConvencional = lazy(() => import("./views/convencional/StockReservasConvencional"));
+const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
+const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
+const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
+const StockGuardadoUsados = lazy(() => import("./views/usados/StockGuardadoUsados"));
+const MisReservasUsadosView = lazy(() => import("./views/usados/MisReservasUsadosView"));
+const StockNoReparadoUsadosView = lazy(() => import("./views/usados/StockNoReparadoUsadosView"));
+const StockPendDocuUsadosView = lazy(() => import("./views/usados/StockPendDocuUsadosView"));
+const StockReservasUsados = lazy(() => import("./views/usados/StockReservasUsados"));
+const StockIngresoUsados = lazy(() => import("./views/usados/StockIngresoUsados"));
+const PendienteReventaView = lazy(() => import("./views/admin/siac/PendienteReventaView"));
+const PromediosConvencionalView = lazy(() => import("./views/admin/siac/PromediosConvencionalView"));
+const RankingConvencionalView = lazy(() => import("./views/admin/siac/RankingConvencionalView"));
+const PedidoUnidadesView = lazy(() => import("./views/admin/siac/PedidoUnidadesView"));
+const PedidoUnidadesPreviasView = lazy(() => import("./views/admin/siac/PedidoUnidadesPreviasView"));
+const FacturasAnticipoView = lazy(() => import("./views/admin/siac/FacturasAnticipoView"));
+const RegistroAsignacionesView = lazy(() => import("./views/admin/siac/RegistroAsignacionesView"));
+const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/RegistroAsignacionesResumenView"));
+const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
+const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
+const PreventaFormView = lazy(() => import("./views/admin/siac/PreventaFormView"));
+const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
+const ColoresView = lazy(() => import("./views/admin/siac/ColoresView"));
+const ColorFormView = lazy(() => import("./views/admin/siac/ColorFormView"));
+const VersionesView = lazy(() => import("./views/admin/siac/VersionesView"));
+const VersionFormView = lazy(() => import("./views/admin/siac/VersionFormView"));
+const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualView"));
+const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
+const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
+const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailView"));
+const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
+const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
+const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
+const PatentamientosView = lazy(() => import("./views/patentamientos/PatentamientosView"));
+const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
+const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
 
 export default function Router() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path={paths.login} element={<LoginUser />} />
-        <Route path="*" element={<NotFoundView />} />
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route path={paths.login} element={<LoginUser />} />
+          <Route path={paths.notFound} element={<NotFoundView />} />
+          <Route path="*" element={<NotFoundView />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path={paths.home} element={<Inicio />} />
-          <Route element={<ProfileLayout />}>
-            <Route path={paths.miPerfil} element={<MiPerfilView />} />
-          </Route>
-          <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path={paths.home} element={<Inicio />} />
+            <Route element={<ProfileLayout />}>
+              <Route path={paths.miPerfil} element={<MiPerfilView />} />
+            </Route>
+            <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
 
           <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>
@@ -117,7 +114,7 @@ export default function Router() {
 
           <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>
-              <Route path="/admin/usuarios/:idUsuario/editar" element={<EditUsuarioView />} />
+              <Route path={paths.admin.editarUsuarioRoute} element={<EditUsuarioView />} />
             </Route>
           </Route>
 
@@ -156,7 +153,7 @@ export default function Router() {
             <Route element={<NICLayout />}>
               <Route path={paths.convencional.proformas} element={<ProformasView />} />
               <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
-              <Route path="/convencional/proformas/:id" element={<ProformaDetailView />} />
+              <Route path={paths.convencional.proformasDetalleRoute} element={<ProformaDetailView />} />
             </Route>
           </Route>
 
@@ -236,20 +233,20 @@ export default function Router() {
               <Route path={paths.analisis.patentamientos.home} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboard} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboardInscripcionUnidades} element={<InscripcionUnidadesView />} />
-              <Route path="/analisis/patentamientos/dashboard/:section" element={<DashboardPatentamientosView />} />
+              <Route path={paths.analisis.patentamientos.dashboardSectionRoute} element={<DashboardPatentamientosView />} />
               <Route path={paths.analisis.patentamientos.importar} element={<PatentamientosView />} />
             </Route>
           </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<NICLayout />}>
-              <Route path="/admin/dms/vendedores" element={<VendedoresView />} />
+              <Route path={paths.admin.vendedores} element={<VendedoresView />} />
               <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
               <Route path={paths.convencional.preventasColoresNuevo} element={<ColorFormView />} />
-              <Route path="/convencional/preventas/colores/:id/editar" element={<ColorFormView />} />
+              <Route path={paths.convencional.preventasColoresEditarRoute} element={<ColorFormView />} />
               <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
               <Route path={paths.convencional.preventasVersionesNuevo} element={<VersionFormView />} />
-              <Route path="/convencional/preventas/versiones/:id/editar" element={<VersionFormView />} />
+              <Route path={paths.convencional.preventasVersionesEditarRoute} element={<VersionFormView />} />
             </Route>
           </Route>
 
@@ -270,7 +267,7 @@ export default function Router() {
               <Route path={paths.convencional.preventasResumen} element={<PreventasResumenView />} />
               <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
               <Route path={paths.convencional.preventasNueva} element={<PreventaFormView />} />
-              <Route path="/gestion/convencional/preventas/:id/editar" element={<PreventaFormView />} />
+              <Route path={paths.convencional.preventasEditarRoute} element={<PreventaFormView />} />
             </Route>
           </Route>
 
@@ -328,12 +325,13 @@ export default function Router() {
 
           <Route element={<ModuleProtectedRoute allowedModules={["liess"]} />}>
             <Route element={<LiessLayout />}>
-                <Route path="/liess/stock/:tipo" element={<StockDisponibleLiess />} />
+                <Route path={paths.liess.stockDisponibleRoute} element={<StockDisponibleLiess />} />
             </Route>
           </Route>
 
-        </Route>
-      </Routes>
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

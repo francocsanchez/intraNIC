@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, useParams } from "react-router-dom";
 import { getUsuarioById } from "@/api/usuarioAPI";
+import { paths } from "@/routes/paths";
 import EditUsuarioForm from "./EditUsuarioForm";
 
 function LoadingState() {
@@ -46,8 +47,8 @@ export default function EditUsuario() {
   });
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <Navigate to="/404" />;
-  if (!data) return <Navigate to="/404" />;
+  if (isError) return <Navigate to={paths.notFound} replace />;
+  if (!data) return <Navigate to={paths.notFound} replace />;
 
   return <EditUsuarioForm data={data} usuarioId={usuarioId} />;
 }
