@@ -3,6 +3,7 @@ import { textToColor } from "@/helpers/colores";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 
 type MarcaFiltro = "TODOS" | string;
@@ -296,15 +297,65 @@ export default function StockUsadosView({
 
       <Transition appear show={!!itemSeleccionado} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setItemSeleccionado(null)}>
-          <div className="fixed inset-0 bg-black/40" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Dialog.Panel className="w-full max-w-md rounded-xl bg-white p-6">
-              <Dialog.Title className="font-semibold">Observaciones</Dialog.Title>
-              <p className="mt-4">{itemSeleccionado?.observaciones || "Sin observaciones"}</p>
-              <button onClick={() => setItemSeleccionado(null)} className="mt-4 rounded bg-gray-900 px-4 py-2 text-white">
-                Cerrar
-              </button>
-            </Dialog.Panel>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/40" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+                  <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">{subtitle}</p>
+                      <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                        Observaciones
+                      </Dialog.Title>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setItemSeleccionado(null)}
+                      className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="px-6 py-5">
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
+                      <p className="text-sm font-medium text-gray-900">{itemSeleccionado?.observaciones || "Sin observaciones"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end border-t border-gray-200 bg-gray-50 px-6 py-4">
+                    <button
+                      type="button"
+                      onClick={() => setItemSeleccionado(null)}
+                      className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
         </Dialog>
       </Transition>
