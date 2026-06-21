@@ -71,6 +71,7 @@ const OperacionesDashboardView = lazy(() => import("./views/operaciones/Operacio
 const PatentamientosView = lazy(() => import("./views/patentamientos/PatentamientosView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
+const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosPlanAhorroView"));
 
 export default function Router() {
   return (
@@ -212,6 +213,12 @@ export default function Router() {
                   />
                 }
               />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["promediosPlanAhorro"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.planAhorro.promedios} element={<PromediosPlanAhorroView />} />
             </Route>
           </Route>
 

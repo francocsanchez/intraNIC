@@ -1,6 +1,7 @@
 import api from "@/libs/axios";
 import {
   getAsignacionRecepcionResponseSchema,
+  promedioPlanAhorroResponseSchema,
   promedioOperacionesConvencionalResponseSchema,
   rankingOperacionesConvencionalResponseSchema,
   resumenGeneralSchema,
@@ -194,6 +195,32 @@ export async function getRankingOperacionesConvencional(anio: number) {
     }
 
     throw new Error("Error inesperado al obtener el ranking de operaciones convencional");
+  }
+}
+
+export async function getPromediosPlanAhorro(anio: number) {
+  try {
+    const { data } = await api.get(`/dms/plan-ahorro/promedios/${anio}`);
+
+    const parsed = promedioPlanAhorroResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Error al obtener los promedios de plan de ahorro",
+      );
+    }
+
+    throw new Error("Error inesperado al obtener los promedios de plan de ahorro");
   }
 }
 

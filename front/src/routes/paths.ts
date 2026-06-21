@@ -75,6 +75,7 @@ export const paths = {
   planAhorro: {
     registroTestDrive: "/gestion/plan-ahorro/test-drive",
     registroTestDriveCalendario: "/gestion/plan-ahorro/test-drive/calendario",
+    promedios: "/gestion/plan-ahorro/promedios",
   },
   usados: {
     stockDisponible: "/usados/stock/disponible",

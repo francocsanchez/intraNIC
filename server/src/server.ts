@@ -23,6 +23,7 @@ import operacionesRoutes from "./routes/operacionesRoutes";
 import patentamientosRoutes from "./routes/patentamientosRoutes";
 import testDriveRoutes from "./routes/testDriveRoutes";
 import testDriveRegistroRoutes from "./routes/testDriveRegistroRoutes";
+import planAhorroRoutes from "./routes/planAhorroRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -53,5 +54,6 @@ app.use("/api/operaciones", operacionesRoutes);
 app.use("/api/patentamientos", patentamientosRoutes);
 app.use("/api/test-drive", testDriveRoutes);
 app.use("/api/test-drive-registros", testDriveRegistroRoutes);
+app.use("/api/dms/plan-ahorro", planAhorroRoutes);
 
 export default app;

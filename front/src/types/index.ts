@@ -577,6 +577,63 @@ export const rankingOperacionesConvencionalResponseSchema = z.object({
 export type RankingOperacionesConvencionalResponse = z.infer<typeof rankingOperacionesConvencionalResponseSchema>;
 
 //**************************** */
+// PROMEDIOS PLAN AHORRO
+//**************************** */
+
+export const promedioPlanAhorroMesSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  mes: z.number(),
+  ano: z.number(),
+});
+
+export const promedioPlanAhorroVendedorSchema = z.object({
+  vendedor: z.string(),
+  sucursal: z.string(),
+  meses: z.record(z.string(), z.number()),
+  promedioAnualParcial: z.number(),
+});
+
+export const promedioPlanAhorroSucursalSchema = z.object({
+  sucursal: z.string(),
+  vendedores: z.array(promedioPlanAhorroVendedorSchema),
+  meses: z.record(z.string(), z.number()),
+  promedioAnualParcial: z.number(),
+});
+
+export const promedioPlanAhorroTablaItemSchema = z.object({
+  tipo: z.enum(["vendedor", "sucursal"]).default("vendedor"),
+  vendedor: z.string(),
+  meses: z.record(z.string(), z.number()),
+  promedioAnualParcial: z.number(),
+});
+
+export const promedioPlanAhorroResponseSchema = z.object({
+  resumen: z.object({
+    total: z.number(),
+    periodo: z.object({
+      ano: z.number(),
+      hastaMes: z.number(),
+    }),
+    meses: z.array(promedioPlanAhorroMesSchema),
+    vendedores: z.array(promedioPlanAhorroVendedorSchema),
+    sucursales: z.array(promedioPlanAhorroSucursalSchema),
+    tablasPorSucursal: z.record(z.string(), z.array(promedioPlanAhorroTablaItemSchema)),
+    metricas: z.object({
+      totalVendedores: z.number(),
+      promedioGeneral: z.number(),
+      mejorPromedio: z.number(),
+      mejorSucursal: z.object({
+        sucursal: z.string(),
+        promedioAnualParcial: z.number(),
+      }),
+    }),
+  }),
+});
+
+export type PromedioPlanAhorroResponse = z.infer<typeof promedioPlanAhorroResponseSchema>;
+
+//**************************** */
 // OPERACIONES DASHBOARD
 //**************************** */
 

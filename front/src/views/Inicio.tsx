@@ -74,6 +74,7 @@ export default function Inicio() {
       icon: CarFront,
       items: [
         { label: "Registro TestDrive", to: paths.planAhorro.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDrive", paths.planAhorro.registroTestDrive), icon: CarFront },
+        { label: "Promedios", to: paths.planAhorro.promedios, enabled: hasModulePathAccess(user, "promediosPlanAhorro", paths.planAhorro.promedios), icon: BarChart3 },
       ],
     },
     {

@@ -48,6 +48,7 @@ export type RoleAccessKey =
   | "planAhorro.testDriveRegistro.updateOwn"
   | "planAhorro.testDriveRegistro.deleteOwn"
   | "planAhorro.testDriveRegistro.deleteManaged"
+  | "planAhorro.promedios"
   | "sistema.usuarios"
   | "sistema.configuracion"
   | "sistema.testDrive";
@@ -102,6 +103,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "planAhorro.testDriveRegistro.create",
     "planAhorro.testDriveRegistro.updateOwn",
     "planAhorro.testDriveRegistro.deleteOwn",
+    "planAhorro.promedios",
     "comercial.testDriveRegistro.read",
     "comercial.testDriveRegistro.create",
     "comercial.testDriveRegistro.updateOwn",
@@ -134,6 +136,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "planAhorro.testDriveRegistro.updateOwn",
     "planAhorro.testDriveRegistro.deleteOwn",
     "planAhorro.testDriveRegistro.deleteManaged",
+    "planAhorro.promedios",
     "comercial.testDriveRegistro.read",
     "comercial.testDriveRegistro.create",
     "comercial.testDriveRegistro.updateOwn",
@@ -171,6 +174,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "planAhorro.testDriveRegistro.updateOwn",
     "planAhorro.testDriveRegistro.deleteOwn",
     "planAhorro.testDriveRegistro.deleteManaged",
+    "planAhorro.promedios",
     "comercial.testDriveRegistro.read",
     "comercial.testDriveRegistro.create",
     "comercial.testDriveRegistro.updateOwn",
