@@ -31,17 +31,17 @@ export default function BaseAppLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col overflow-x-hidden bg-gray-50">
       <GlobalNavbar centerContent={centerContent} rightContent={rightContent} />
 
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <div className={mainClassName}>
           <Outlet />
         </div>
       </main>
 
       <footer className="bg-white border-t border-gray-200">
-        <div className={`max-w-7xl mx-auto px-6 ${footerHeightClassName} flex items-center justify-between text-sm text-gray-500`}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 ${footerHeightClassName} flex flex-col gap-1 py-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between sm:py-0 sm:text-sm`}>
           <span>{footerLeft}</span>
           <span>{footerRight}</span>
         </div>

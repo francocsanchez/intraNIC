@@ -8,6 +8,8 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+const EMPTY_TEST_DRIVES: TestDrive[] = [];
+
 type TestDriveFormValues = {
   dominio: string;
   modelo: string;
@@ -373,7 +375,7 @@ export default function TestDriveView() {
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  const items = data?.data ?? [];
+  const items = data?.data ?? EMPTY_TEST_DRIVES;
   const versiones = useMemo(() => versionesResponse?.data ?? [], [versionesResponse]);
   const colores = useMemo(() => coloresResponse?.data ?? [], [coloresResponse]);
   const unidadesActivas = useMemo(() => items.filter((item) => item.activo), [items]);
