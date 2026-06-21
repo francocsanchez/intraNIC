@@ -1,6 +1,4 @@
-import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
-import { getConfiguracion } from "@/api/configuracionAPI";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -29,16 +27,6 @@ export default function StockUsadosView({
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [itemSeleccionado, setItemSeleccionado] = useState<StockUsadoItem | null>(null);
   const [currentTime] = useState(() => Date.now());
-
-  const {
-    data: configResponse,
-    isError: configError,
-    isLoading: configLoading,
-  } = useQuery({
-    queryKey: ["configuracion"],
-    queryFn: getConfiguracion,
-    refetchOnWindowFocus: true,
-  });
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey,
@@ -93,7 +81,7 @@ export default function StockUsadosView({
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading || configLoading) {
+  if (isLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -130,7 +118,7 @@ export default function StockUsadosView({
     );
   }
 
-  if (isError || configError) {
+  if (isError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
@@ -139,10 +127,6 @@ export default function StockUsadosView({
         </div>
       </div>
     );
-  }
-
-  if (configResponse?.data?.sistemaActivoUsados === false) {
-    return <Mantenimiento />;
   }
 
   return (

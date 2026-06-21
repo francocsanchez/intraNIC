@@ -347,6 +347,7 @@ export default function TestDriveView() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TestDrive | null>(null);
+  const [visibleSection, setVisibleSection] = useState<"activas" | "deshabilitadas">("activas");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["test-drive", "listar"],
@@ -375,6 +376,9 @@ export default function TestDriveView() {
   const items = data?.data ?? [];
   const versiones = useMemo(() => versionesResponse?.data ?? [], [versionesResponse]);
   const colores = useMemo(() => coloresResponse?.data ?? [], [coloresResponse]);
+  const unidadesActivas = useMemo(() => items.filter((item) => item.activo), [items]);
+  const unidadesDeshabilitadas = useMemo(() => items.filter((item) => !item.activo), [items]);
+  const unidadesVisibles = visibleSection === "activas" ? unidadesActivas : unidadesDeshabilitadas;
 
   const handleCreate = () => {
     setEditingItem(null);
@@ -429,23 +433,42 @@ export default function TestDriveView() {
         </button>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total unidades</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{items.length}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activas</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            {items.filter((item) => item.activo).length}
-          </p>
-        </article>
-      </section>
-
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de unidades TestDrive</h2>
+        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de unidades TestDrive</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {visibleSection === "activas"
+                ? "Vista principal con las unidades habilitadas."
+                : "Listado separado de unidades deshabilitadas."}
+            </p>
+          </div>
+
+          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+            <button
+              type="button"
+              onClick={() => setVisibleSection("activas")}
+              className={[
+                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                visibleSection === "activas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Activas ({unidadesActivas.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setVisibleSection("deshabilitadas")}
+              className={[
+                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                visibleSection === "deshabilitadas"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Deshabilitadas ({unidadesDeshabilitadas.length})
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -465,7 +488,7 @@ export default function TestDriveView() {
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {items.map((item) => (
+              {unidadesVisibles.map((item) => (
                 <tr key={item._id} className="hover:bg-gray-50">
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2 font-medium text-gray-900">
@@ -509,10 +532,12 @@ export default function TestDriveView() {
                 </tr>
               ))}
 
-              {items.length === 0 ? (
+              {unidadesVisibles.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No hay unidades de TestDrive cargadas.
+                    {visibleSection === "activas"
+                      ? "No hay unidades activas de TestDrive cargadas."
+                      : "No hay unidades deshabilitadas de TestDrive."}
                   </td>
                 </tr>
               ) : null}

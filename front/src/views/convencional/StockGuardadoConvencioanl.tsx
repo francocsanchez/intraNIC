@@ -1,6 +1,4 @@
 import { getStockGuardadoConvencional } from "@/api/convencional/stockAPI";
-import { getConfiguracion } from "@/api/configuracionAPI";
-import Mantenimiento from "@/components/Mantenimiento";
 import { textToColor } from "@/helpers/colores";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -14,16 +12,6 @@ const EMPTY_STOCK_GUARDADO_CONVENCIONAL: Awaited<
 
 export default function StockGuardadoConvencioanl() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
-
-  const {
-    data: configResponse,
-    isError: configError,
-    isLoading: configLoading,
-  } = useQuery({
-    queryKey: ["configuracion"],
-    queryFn: getConfiguracion,
-    refetchOnWindowFocus: true,
-  });
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stockGuardado", "convencional"],
@@ -74,7 +62,7 @@ export default function StockGuardadoConvencioanl() {
       year: "numeric",
     }).format(new Date(value));
 
-  if (isLoading || configLoading) {
+  if (isLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -111,7 +99,7 @@ export default function StockGuardadoConvencioanl() {
     );
   }
 
-  if (isError || configError) {
+  if (isError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
@@ -120,10 +108,6 @@ export default function StockGuardadoConvencioanl() {
         </div>
       </div>
     );
-  }
-
-  if (configResponse?.data.sistemaActivoConvencional === false) {
-    return <Mantenimiento />;
   }
 
   return (

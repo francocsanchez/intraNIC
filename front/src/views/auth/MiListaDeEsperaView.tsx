@@ -24,8 +24,6 @@ export default function MiListaDeEsperaView() {
   }
 
   const operaciones = data?.data ?? [];
-  const resumen = data?.resumen;
-  const porModelo = resumen?.porModelo ?? {};
 
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("es-AR", {
@@ -40,39 +38,6 @@ export default function MiListaDeEsperaView() {
         <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mi lista de espera</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Resumen de operaciones</h1>
-        </section>
-
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen?.total ?? 0}</p>
-            <p className="mt-2 text-sm text-gray-500">Cantidad total de reservas activas del usuario.</p>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Por modelo</p>
-                <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">Distribución de reservas</h2>
-              </div>
-            </div>
-
-            {Object.keys(porModelo).length === 0 ? (
-              <div className="mt-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-500">
-                No hay datos agrupados por modelo para mostrar.
-              </div>
-            ) : (
-              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {Object.entries(porModelo).map(([modelo, cantidad]) => (
-                  <div key={modelo} className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
-                    <p className="text-sm font-medium text-gray-900">{modelo}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">{cantidad}</p>
-                    <p className="mt-1 text-xs text-gray-500">{cantidad === 1 ? "unidad reservada" : "unidades reservadas"}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">

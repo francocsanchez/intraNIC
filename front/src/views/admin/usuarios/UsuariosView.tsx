@@ -111,7 +111,6 @@ export default function UsuariosView() {
     );
   }
 
-  const totalUsuarios = usuarios.length;
   const usuariosHabilitados = usuarios.filter((u) => u.enable);
   const usuariosDeshabilitados = usuarios.filter((u) => !u.enable);
   const activos = usuariosHabilitados.length;
@@ -135,24 +134,6 @@ export default function UsuariosView() {
           </Link>
         ) : null}
       </section>
-
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total usuarios</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalUsuarios}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activos</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{activos}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Deshabilitados</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{deshabilitados}</p>
-        </article>
-      </section>
-
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
