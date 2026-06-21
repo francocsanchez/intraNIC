@@ -11,6 +11,7 @@ export const tablaColores: Record<string, string> = {
   "Rojo Mica": "bg-red-50 text-red-600",
   "Rojo Mica ": "bg-red-50 text-red-600",
   "RED METALL": "bg-red-50 text-red-600",
+  "Rojo Metal": "bg-red-50 text-red-600",
 
   // PLATA / GRIS CLARO
   "Plata Metalizado": "bg-slate-100 text-slate-600",
@@ -33,6 +34,8 @@ export const tablaColores: Record<string, string> = {
   "GRIS OSC": "bg-slate-200 text-slate-700",
   "Gris Oscur": "bg-slate-200 text-slate-700",
   "GRAY METAL": "bg-slate-200 text-slate-700",
+  "GRAY METALLIC": "bg-slate-200 text-slate-700",
+  "DARK STEEL MICA": "bg-slate-300 text-slate-800",
 
   // BORDO
   BORDO: "bg-rose-200 text-rose-700",
@@ -53,10 +56,12 @@ export const tablaColores: Record<string, string> = {
   "Azul Metal": "bg-blue-50 text-blue-600",
   "AZUL METAL": "bg-blue-50 text-blue-600",
   "Azul Oscur": "bg-blue-50 text-blue-600",
+  "DARK BLUE MICA": "bg-blue-100 text-blue-800",
 
   // NEGROS
   "Negro Mica": "bg-gray-200 text-gray-700",
   BLACK: "bg-gray-200 text-gray-700",
+  "BLACK MICA": "bg-gray-200 text-gray-700",
   NEGRO: "bg-gray-200 text-gray-700",
   Negro: "bg-gray-200 text-gray-700",
   NEG: "bg-gray-200 text-gray-700",
@@ -67,9 +72,13 @@ export const tablaColores: Record<string, string> = {
   // BRONCE
   BRONCE: "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
   "SILKY GOLD": "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
+  "SILKY GOLD MICA META": "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
+  MARRON: "bg-amber-100 text-amber-800 ring-1 ring-amber-200",
+  CREMA: "bg-stone-100 text-stone-700 ring-1 ring-stone-200",
 
   // VERDE
   VERDE: "bg-green-50 text-green-600 ring-1 ring-green-200",
+  "DARK GREEN MICA": "bg-green-100 text-green-800 ring-1 ring-green-200",
 };
 
 export function textToColor(color: string | null | undefined): string | null {
