@@ -6,7 +6,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "entregador"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -149,6 +149,14 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.admin.configuracionConvencionalEditar,
     paths.admin.configuracionUsadosEditar,
   ],
+  entregador: [
+    paths.home,
+    paths.miPerfil,
+    paths.noAutorizado,
+    paths.entregas.agenda,
+    paths.entregas.sucursales,
+    paths.entregas.registros,
+  ],
 };
 
 const restrictedPrefixes = [
@@ -238,4 +246,12 @@ export function hasRegistroTestDriveActionAccess(user: AuthUser, action: Registr
 
     return false;
   });
+}
+
+export function hasEntregaAgendaManageAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("entregador");
 }

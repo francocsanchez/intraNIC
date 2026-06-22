@@ -81,6 +81,7 @@ const buildRows = (items: AgendaEntrega[]) =>
           <td class="interno">
             <div>${escapeHtml(String(item.interno))}</div>
             ${item.equipado ? '<div class="equipado">EQUIPADO</div>' : ""}
+            ${item.entregaUsado ? '<div class="equipado">ENTREGA USADO</div>' : ""}
           </td>
           <td class="datos">
             <div class="cliente">${escapeHtml(item.siac.cliente || "-")}</div>

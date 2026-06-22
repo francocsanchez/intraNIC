@@ -8,6 +8,7 @@ import {
   lookupAgendaEntregaInternos,
   type AgendaEntregaLookup,
 } from "../services/agendaEntregaSiac.service";
+import { normalizeRoles } from "../constants/roleAccess";
 import { logError } from "../utils/logError";
 
 type AgendaPayload = {
@@ -16,11 +17,20 @@ type AgendaPayload = {
   fechaAgenda?: unknown;
   horaAgenda?: unknown;
   equipado?: unknown;
+  entregaUsado?: unknown;
   observaciones?: unknown;
 };
 
 const OBSERVACIONES_MAX_LENGTH = 1000;
 const ENTREGADO_STATES = new Set([35, 40]);
+const ALLOWED_TIME_SLOTS = new Set(
+  Array.from({ length: 18 }, (_, index) => {
+    const totalMinutes = 9 * 60 + index * 30;
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+    const minutes = String(totalMinutes % 60).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }),
+);
 
 const normalizeText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
@@ -36,6 +46,50 @@ const isValidTimeString = (value: unknown) =>
 
 const buildUserName = (req: Request) =>
   req.user ? `${req.user.lastName}, ${req.user.name}` : "";
+
+const userHasAgendaWriteAccess = (req: Request) => {
+  const roles = normalizeRoles(req.user?.role);
+  return roles.includes("superadmin") || roles.includes("entregador");
+};
+
+const getAssignedSucursalEntregaId = (req: Request) =>
+  req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
+
+const ensureAgendaWriteAccess = (req: Request) => {
+  if (!req.user?._id) {
+    return "Usuario no autenticado";
+  }
+
+  if (!userHasAgendaWriteAccess(req)) {
+    return "No tienes permisos para crear, editar o eliminar turnos de entrega";
+  }
+
+  return null;
+};
+
+const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
+  const roles = normalizeRoles(req.user?.role);
+
+  if (roles.includes("superadmin")) {
+    return null;
+  }
+
+  if (!roles.includes("entregador")) {
+    return "No tienes permisos para operar sobre turnos de entrega";
+  }
+
+  const assignedSucursalId = getAssignedSucursalEntregaId(req);
+
+  if (!assignedSucursalId) {
+    return "El usuario entregador no tiene una sucursal de entrega asignada";
+  }
+
+  if (assignedSucursalId !== sucursalId) {
+    return "Solo puedes operar turnos de tu sucursal de entrega asignada";
+  }
+
+  return null;
+};
 
 const formatLookupWithFallback = (interno: number) => ({
   siac: {
@@ -67,6 +121,7 @@ const formatAgendaRow = (item: any, lookup?: AgendaEntregaLookup | null, lookupE
   fechaAgenda: item.fechaAgenda,
   horaAgenda: item.horaAgenda,
   equipado: Boolean(item.equipado),
+  entregaUsado: Boolean(item.entregaUsado),
   observaciones: item.observaciones ?? "",
   createdBy: String(item.createdBy),
   createdByName: item.createdByName,
@@ -101,8 +156,9 @@ const buildAgendaDetailLabel = (
   fechaAgenda: string,
   horaAgenda: string,
   equipado: boolean,
+  entregaUsado: boolean,
 ) =>
-  `Sucursal: ${sucursalNombre} | Fecha: ${fechaAgenda} | Hora: ${horaAgenda} | Equipado: ${equipado ? "SI" : "NO"}`;
+  `Sucursal: ${sucursalNombre} | Fecha: ${fechaAgenda} | Hora: ${horaAgenda} | Equipado: ${equipado ? "SI" : "NO"} | Entrega usado: ${entregaUsado ? "SI" : "NO"}`;
 
 const createAgendaLog = async (params: {
   agendaEntrega: mongoose.Types.ObjectId | string | null;
@@ -132,6 +188,7 @@ const validateAgendaPayload = async (
   const fechaAgenda = normalizeText(payload.fechaAgenda);
   const horaAgenda = normalizeText(payload.horaAgenda);
   const equipado = Boolean(payload.equipado);
+  const entregaUsado = Boolean(payload.entregaUsado);
   const observaciones = normalizeText(payload.observaciones);
 
   if (!Number.isInteger(interno) || interno <= 0) {
@@ -148,6 +205,10 @@ const validateAgendaPayload = async (
 
   if (!isValidTimeString(horaAgenda)) {
     return { error: "La hora de agenda es obligatoria y debe tener formato HH:mm" };
+  }
+
+  if (!ALLOWED_TIME_SLOTS.has(horaAgenda)) {
+    return { error: "La hora de agenda debe ser un turno valido entre 09:00 y 17:30 cada 30 minutos" };
   }
 
   if (observaciones.length > OBSERVACIONES_MAX_LENGTH) {
@@ -199,6 +260,7 @@ const validateAgendaPayload = async (
       fechaAgenda,
       horaAgenda,
       equipado,
+      entregaUsado,
       observaciones,
       lookup,
     },
@@ -313,14 +375,20 @@ export class AgendaEntregaController {
   };
 
   static create = async (req: Request, res: Response) => {
-    if (!req.user?._id) {
-      return res.status(401).json({ error: "Usuario no autenticado" });
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
     }
 
     try {
       const validation = await validateAgendaPayload(req.body ?? {});
       if ("error" in validation) {
         return res.status(400).json({ error: validation.error });
+      }
+
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      if (sucursalAccessError) {
+        return res.status(403).json({ error: sucursalAccessError });
       }
 
       const usuarioNombre = buildUserName(req);
@@ -332,6 +400,7 @@ export class AgendaEntregaController {
         fechaAgenda: validation.data.fechaAgenda,
         horaAgenda: validation.data.horaAgenda,
         equipado: validation.data.equipado,
+        entregaUsado: validation.data.entregaUsado,
         observaciones: validation.data.observaciones,
         createdBy: new mongoose.Types.ObjectId(req.user._id),
         createdByName: usuarioNombre,
@@ -348,6 +417,7 @@ export class AgendaEntregaController {
           validation.data.fechaAgenda,
           validation.data.horaAgenda,
           validation.data.equipado,
+          validation.data.entregaUsado,
         ),
       });
 
@@ -372,8 +442,9 @@ export class AgendaEntregaController {
   };
 
   static update = async (req: Request, res: Response) => {
-    if (!req.user?._id) {
-      return res.status(401).json({ error: "Usuario no autenticado" });
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
     }
 
     try {
@@ -386,9 +457,20 @@ export class AgendaEntregaController {
         return res.status(404).json({ error: "Agenda no encontrada" });
       }
 
+      const currentSucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      if (currentSucursalAccessError) {
+        return res.status(403).json({ error: currentSucursalAccessError });
+      }
+
       const validation = await validateAgendaPayload(req.body ?? {}, agendaId);
       if ("error" in validation) {
         return res.status(400).json({ error: validation.error });
+      }
+
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      if (nextSucursalAccessError) {
+        return res.status(403).json({ error: nextSucursalAccessError });
       }
 
       const usuarioNombre = buildUserName(req);
@@ -411,6 +493,9 @@ export class AgendaEntregaController {
       if (Boolean(agenda.equipado) !== validation.data.equipado) {
         changes.push(`Equipado: ${agenda.equipado ? "SI" : "NO"} -> ${validation.data.equipado ? "SI" : "NO"}`);
       }
+      if (Boolean(agenda.entregaUsado) !== validation.data.entregaUsado) {
+        changes.push(`Entrega usado: ${agenda.entregaUsado ? "SI" : "NO"} -> ${validation.data.entregaUsado ? "SI" : "NO"}`);
+      }
       if ((agenda.observaciones ?? "") !== validation.data.observaciones) {
         changes.push("Observaciones actualizadas");
       }
@@ -424,6 +509,7 @@ export class AgendaEntregaController {
           fechaAgenda: validation.data.fechaAgenda,
           horaAgenda: validation.data.horaAgenda,
           equipado: validation.data.equipado,
+          entregaUsado: validation.data.entregaUsado,
           observaciones: validation.data.observaciones,
           updatedBy: new mongoose.Types.ObjectId(req.user._id),
           updatedByName: usuarioNombre,
@@ -459,8 +545,9 @@ export class AgendaEntregaController {
   };
 
   static remove = async (req: Request, res: Response) => {
-    if (!req.user?._id) {
-      return res.status(401).json({ error: "Usuario no autenticado" });
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
     }
 
     try {
@@ -471,6 +558,21 @@ export class AgendaEntregaController {
 
       if (!agenda) {
         return res.status(404).json({ error: "Agenda no encontrada" });
+      }
+
+      const sucursalAccessError = ensureSucursalAllowedForMutation(
+        req,
+        String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? ""),
+      );
+      if (sucursalAccessError) {
+        return res.status(403).json({ error: sucursalAccessError });
+      }
+
+      const lookup = await lookupAgendaEntregaInterno(agenda.interno);
+      if (lookup && ENTREGADO_STATES.has(Number(lookup.estado))) {
+        return res.status(400).json({
+          error: `El interno ${agenda.interno} ya figura entregado en SIAC y no se puede eliminar de la agenda`,
+        });
       }
 
       await AgendaEntrega.findByIdAndDelete(agendaId);
@@ -486,6 +588,7 @@ export class AgendaEntregaController {
           agenda.fechaAgenda,
           agenda.horaAgenda,
           Boolean(agenda.equipado),
+          Boolean(agenda.entregaUsado),
         ),
       });
 

@@ -5,6 +5,8 @@ import {
   type AgendaEntregaPayload,
 } from "@/api/entregasAPI";
 import InternoLookupCard from "@/components/entregas/InternoLookupCard";
+import { hasSuperAdminRole } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega, AgendaEntregaLookup, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +21,7 @@ type AgendaEntregaFormValues = {
   fechaAgenda: string;
   horaAgenda: string;
   equipado: boolean;
+  entregaUsado: boolean;
   observaciones: string;
 };
 
@@ -34,16 +37,26 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
 
+const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
+  const totalMinutes = 9 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
+
 export default function AgendaEntregaForm({
   open,
   item,
   sucursales,
   onClose,
 }: AgendaEntregaFormProps) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(item?.siac ?? null);
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
+  const isSuperAdmin = hasSuperAdminRole(user);
+  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
 
   const {
     register,
@@ -58,6 +71,7 @@ export default function AgendaEntregaForm({
       fechaAgenda: "",
       horaAgenda: "",
       equipado: false,
+      entregaUsado: false,
       observaciones: "",
     },
   });
@@ -65,17 +79,20 @@ export default function AgendaEntregaForm({
   useEffect(() => {
     if (!open) return;
 
+    const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
+
     reset({
       interno: item?.interno ?? 0,
-      sucursal: item?.sucursal?._id ?? "",
+      sucursal: item?.sucursal?._id ?? defaultSucursal,
       fechaAgenda: item?.fechaAgenda ?? "",
       horaAgenda: item?.horaAgenda ?? "",
       equipado: item?.equipado ?? false,
+      entregaUsado: item?.entregaUsado ?? false,
       observaciones: item?.observaciones ?? "",
     });
     setLookup(item?.siac ?? null);
     setLookupError("");
-  }, [item, open, reset]);
+  }, [assignedSucursalId, isSuperAdmin, item, open, reset]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
@@ -138,6 +155,7 @@ export default function AgendaEntregaForm({
       fechaAgenda: values.fechaAgenda,
       horaAgenda: values.horaAgenda,
       equipado: Boolean(values.equipado),
+      entregaUsado: Boolean(values.entregaUsado),
       observaciones: values.observaciones?.trim() ?? "",
     };
 
@@ -151,6 +169,9 @@ export default function AgendaEntregaForm({
 
   const pending = createMutation.isPending || updateMutation.isPending;
   const activeSucursales = sucursales.filter((sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id);
+  const availableSucursales = isSuperAdmin
+    ? activeSucursales
+    : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -229,13 +250,18 @@ export default function AgendaEntregaForm({
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
                         >
                           <option value="">-- Selecciona una sucursal --</option>
-                          {activeSucursales.map((sucursal) => (
+                          {availableSucursales.map((sucursal) => (
                             <option key={sucursal._id} value={sucursal._id}>
                               {sucursal.nombre}{!sucursal.activa ? " (Inactiva)" : ""}
                             </option>
                           ))}
                         </select>
                         <FieldError message={errors.sucursal?.message} />
+                        {!isSuperAdmin ? (
+                          <p className="text-xs text-gray-500">
+                            Como usuario entregador solo puedes operar turnos de tu sucursal asignada.
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="space-y-2">
@@ -255,12 +281,21 @@ export default function AgendaEntregaForm({
                         <label htmlFor="agenda-hora-agenda" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                           Hora
                         </label>
-                        <input
+                        <select
                           id="agenda-hora-agenda"
-                          type="time"
                           className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
                           {...register("horaAgenda", { required: "La hora es obligatoria" })}
-                        />
+                        >
+                          <option value="">-- Selecciona un horario --</option>
+                          {TIME_SLOT_OPTIONS.map((timeSlot) => (
+                            <option key={timeSlot} value={timeSlot}>
+                              {timeSlot}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-gray-500">
+                          Turnos cada 30 minutos desde las 09:00 hasta las 17:30.
+                        </p>
                         <FieldError message={errors.horaAgenda?.message} />
                       </div>
 
@@ -270,6 +305,17 @@ export default function AgendaEntregaForm({
                           <input
                             type="checkbox"
                             {...register("equipado")}
+                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                          <span className="text-sm font-medium text-gray-800">Entrega usado?</span>
+                          <input
+                            type="checkbox"
+                            {...register("entregaUsado")}
                             className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
                           />
                         </label>

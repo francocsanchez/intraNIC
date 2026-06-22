@@ -138,6 +138,15 @@ export const usuarioSchema = z.object({
   role: z.array(z.string()),
   company: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
+  sucursalEntrega: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -158,6 +167,15 @@ export const userSchema = z.object({
   role: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
   enable: z.boolean(),
+  sucursalEntrega: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
 });
 
 //**************************** */
@@ -1267,6 +1285,7 @@ export const agendaEntregaSchema = z.object({
   fechaAgenda: z.string(),
   horaAgenda: z.string(),
   equipado: z.boolean(),
+  entregaUsado: z.boolean(),
   observaciones: z.string().optional().default(""),
   createdBy: z.string(),
   createdByName: z.string(),

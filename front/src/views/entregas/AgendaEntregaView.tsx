@@ -6,6 +6,8 @@ import {
 import AgendaEntregaFilters from "@/components/entregas/AgendaEntregaFilters";
 import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import AgendaEntregaTable from "@/components/entregas/AgendaEntregaTable";
+import { hasEntregaAgendaManageAccess, hasSuperAdminRole } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega } from "@/types/index";
 import { openAgendaEntregaPrintView } from "@/utils/agendaEntregaPrint";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +24,7 @@ const getTodayDate = () => {
 };
 
 export default function AgendaEntregaView() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ fecha: getTodayDate(), sucursalId: "" });
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,9 +52,19 @@ export default function AgendaEntregaView() {
 
   const items = data?.data ?? [];
   const sucursales = useMemo(() => sucursalesResponse?.data ?? [], [sucursalesResponse]);
+  const canManageAgenda = hasEntregaAgendaManageAccess(user);
+  const isSuperAdmin = hasSuperAdminRole(user);
+  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
   const activeSucursales = useMemo(
-    () => sucursales.filter((sucursal) => sucursal.activa),
-    [sucursales],
+    () =>
+      sucursales.filter((sucursal) => {
+        if (isSuperAdmin) {
+          return sucursal.activa;
+        }
+
+        return sucursal.activa && (!assignedSucursalId || sucursal._id === assignedSucursalId);
+      }),
+    [assignedSucursalId, isSuperAdmin, sucursales],
   );
 
   useEffect(() => {
@@ -128,9 +141,7 @@ export default function AgendaEntregaView() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Agenda de entrega</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
-              Programa entregas por interno, fecha, hora y sucursal sin modificar el estado formal de SIAC.
-            </p>
+         
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -143,14 +154,16 @@ export default function AgendaEntregaView() {
               Imprimir agenda
             </button>
 
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
-            >
-              <Plus size={16} />
-              Nuevo turno
-            </button>
+            {canManageAgenda ? (
+              <button
+                type="button"
+                onClick={handleCreate}
+                className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+              >
+                <Plus size={16} />
+                Nuevo turno
+              </button>
+            ) : null}
           </div>
         </div>
       </section>
@@ -163,22 +176,24 @@ export default function AgendaEntregaView() {
       />
 
       {filters.sucursalId ? (
-        <AgendaEntregaTable items={items} onEdit={handleEdit} onDelete={handleDelete} />
+        <AgendaEntregaTable items={items} onEdit={handleEdit} onDelete={handleDelete} canManage={canManageAgenda} />
       ) : (
         <section className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500 shadow-sm">
           Selecciona una sucursal para ver la agenda individual.
         </section>
       )}
 
-      <AgendaEntregaForm
-        open={modalOpen}
-        item={editingItem}
-        sucursales={sucursales}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingItem(null);
-        }}
-      />
+      {canManageAgenda ? (
+        <AgendaEntregaForm
+          open={modalOpen}
+          item={editingItem}
+          sucursales={sucursales}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingItem(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

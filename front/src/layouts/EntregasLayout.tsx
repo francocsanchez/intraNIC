@@ -1,4 +1,6 @@
 import BaseAppLayout from "./BaseAppLayout";
+import { hasSuperAdminRole } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import { Link, useLocation } from "react-router-dom";
 import { paths } from "@/routes/paths";
 import { CalendarDays, Building2, History } from "lucide-react";
@@ -22,7 +24,11 @@ const navItems = [
 ];
 
 export default function EntregasLayout() {
+  const { user } = useAuth();
   const { pathname } = useLocation();
+  const visibleNavItems = navItems.filter((item) =>
+    item.to === paths.entregas.sucursales ? hasSuperAdminRole(user) : true,
+  );
 
   return (
     <BaseAppLayout
@@ -30,7 +36,7 @@ export default function EntregasLayout() {
       footerRight={`Franco Sanchez`}
       centerContent={
         <>
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = pathname === item.to;
 
             return (

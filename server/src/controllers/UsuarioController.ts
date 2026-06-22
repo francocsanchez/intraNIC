@@ -1,6 +1,8 @@
 import { Response, Request } from "express";
+import mongoose from "mongoose";
 import { logError } from "../utils/logError";
 import User from "../models/User";
+import SucursalEntrega from "../models/SucursalEntrega";
 import { checkPassword, hashPassword } from "../utils/hassPassword";
 import { generateJWT } from "../utils/jwt";
 import { sendPasswordResetEmail } from "../utils/mail";
@@ -55,6 +57,15 @@ const validateCelular = (celular: string) => {
   return null;
 };
 
+const normalizeSucursalEntrega = (value: unknown) => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length ? normalized : null;
+};
+
 const resetAndSendPassword = async (usuario: any) => {
   const temporaryPassword = generateTemporaryPassword();
   const previousPassword = usuario.password;
@@ -79,6 +90,7 @@ export class UsuarioController {
   static listUsuarios = async (_req: Request, res: Response) => {
     try {
       const usuarios = await User.find({}, { password: 0 })
+        .populate("sucursalEntrega", "nombre activa direccion")
         .sort({
           enable: -1,
           lastName: 1,
@@ -112,12 +124,31 @@ export class UsuarioController {
       const { email, password } = req.body;
       const celularInput = normalizeCelular(req.body?.celular);
       const celularError = validateCelular(celularInput);
+      const sucursalEntregaId = normalizeSucursalEntrega(req.body?.sucursalEntrega);
 
       if (celularError) {
         return res.status(400).json({
           data: null,
           message: celularError,
         });
+      }
+
+      if (sucursalEntregaId) {
+        if (!mongoose.isValidObjectId(sucursalEntregaId)) {
+          return res.status(400).json({
+            data: null,
+            message: "La sucursal de entrega seleccionada no es valida",
+          });
+        }
+
+        const sucursalEntrega = await SucursalEntrega.findById(sucursalEntregaId).lean();
+
+        if (!sucursalEntrega) {
+          return res.status(400).json({
+            data: null,
+            message: "La sucursal de entrega seleccionada no existe",
+          });
+        }
       }
 
       const exists = await User.findOne({ email }).lean();
@@ -143,6 +174,7 @@ export class UsuarioController {
         modules: sanitizeUserModules(req.body?.modules),
         celular: toWhatsappCelular(celularInput),
         password: hashedPassword,
+        sucursalEntrega: sucursalEntregaId,
       });
 
       return res.status(201).json({
@@ -193,7 +225,9 @@ export class UsuarioController {
     try {
       const { idUsuario } = req.params;
 
-      const usuario = await User.findById(idUsuario, { password: 0 }).lean();
+      const usuario = await User.findById(idUsuario, { password: 0 })
+        .populate("sucursalEntrega", "nombre activa direccion")
+        .lean();
 
       if (!usuario) {
         return res.status(404).json({
@@ -240,7 +274,32 @@ export class UsuarioController {
         "numberSaleNic",
         "numberSaleLiess",
         "enable",
+        "sucursalEntrega",
       ] as const;
+
+      if (Object.prototype.hasOwnProperty.call(req.body, "sucursalEntrega")) {
+        const sucursalEntregaId = normalizeSucursalEntrega(req.body.sucursalEntrega);
+
+        if (sucursalEntregaId) {
+          if (!mongoose.isValidObjectId(sucursalEntregaId)) {
+            return res.status(400).json({
+              data: null,
+              message: "La sucursal de entrega seleccionada no es valida",
+            });
+          }
+
+          const sucursalEntrega = await SucursalEntrega.findById(sucursalEntregaId).lean();
+
+          if (!sucursalEntrega) {
+            return res.status(400).json({
+              data: null,
+              message: "La sucursal de entrega seleccionada no existe",
+            });
+          }
+        }
+
+        req.body.sucursalEntrega = sucursalEntregaId;
+      }
 
       if (Object.prototype.hasOwnProperty.call(req.body, "celular")) {
         const celularInput = normalizeCelular(req.body.celular);

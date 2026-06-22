@@ -21,6 +21,7 @@ export type AgendaEntregaPayload = {
   fechaAgenda: string;
   horaAgenda: string;
   equipado: boolean;
+  entregaUsado: boolean;
   observaciones?: string;
 };
 

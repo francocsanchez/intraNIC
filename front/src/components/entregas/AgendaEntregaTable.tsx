@@ -1,17 +1,19 @@
 import type { AgendaEntrega } from "@/types/index";
 import { textToColor } from "@/helpers/colores";
-import { Pencil, Trash2, AlertTriangle, Package } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle, Package, CarFront } from "lucide-react";
 
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
   onEdit: (item: AgendaEntrega) => void;
   onDelete: (item: AgendaEntrega) => void;
+  canManage: boolean;
 };
 
 export default function AgendaEntregaTable({
   items,
   onEdit,
   onDelete,
+  canManage,
 }: AgendaEntregaTableProps) {
   const isEntregada = (item: AgendaEntrega) =>
     item.siac.estado === 35 || item.siac.estado === 40;
@@ -60,7 +62,7 @@ export default function AgendaEntregaTable({
               <th className="px-3 py-3 text-center">Vendedor</th>
               <th className="px-3 py-3 text-center">Operacion</th>
               <th className="px-3 py-3 text-center">Observaciones</th>
-              <th className="px-3 py-3 text-center">Acciones</th>
+              {canManage ? <th className="px-3 py-3 text-center">Acciones</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -91,6 +93,12 @@ export default function AgendaEntregaTable({
                         <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
                           <Package size={12} />
                           Equipado
+                        </div>
+                      ) : null}
+                      {item.entregaUsado ? (
+                        <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                          <CarFront size={12} />
+                          Entrega usado
                         </div>
                       ) : null}
                     </div>
@@ -134,33 +142,41 @@ export default function AgendaEntregaTable({
                       {item.observaciones?.trim() || "-"}
                     </div>
                   </td>
-                  <td className="px-3 py-3 align-middle">
-                    <div className="flex items-center justify-center gap-2 whitespace-nowrap text-[12px]">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(item)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
-                      >
-                        <Pencil size={13} />
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
-                      >
-                        <Trash2 size={13} />
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
+                  {canManage ? (
+                    <td className="px-3 py-3 align-middle">
+                      {entregada ? (
+                        <div className="text-center text-[11px] font-semibold uppercase tracking-wide text-green-800">
+                          Entregado
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2 whitespace-nowrap text-[12px]">
+                          <button
+                            type="button"
+                            onClick={() => onEdit(item)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
+                          >
+                            <Pencil size={13} />
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDelete(item)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
+                          >
+                            <Trash2 size={13} />
+                            Eliminar
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  ) : null}
                 </tr>
               );
             })}
 
             {!items.length ? (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={canManage ? 7 : 6} className="px-6 py-12 text-center text-sm text-gray-500">
                   No hay agendas de entrega para los filtros seleccionados.
                 </td>
               </tr>

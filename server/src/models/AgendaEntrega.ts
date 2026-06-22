@@ -7,6 +7,7 @@ export interface IAgendaEntrega extends Document {
   fechaAgenda: string;
   horaAgenda: string;
   equipado: boolean;
+  entregaUsado: boolean;
   observaciones?: string;
   createdBy: Types.ObjectId;
   createdByName: string;
@@ -43,6 +44,10 @@ const agendaEntregaSchema = new Schema<IAgendaEntrega>(
       trim: true,
     },
     equipado: {
+      type: Boolean,
+      default: false,
+    },
+    entregaUsado: {
       type: Boolean,
       default: false,
     },

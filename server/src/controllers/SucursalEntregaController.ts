@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import AgendaEntrega from "../models/AgendaEntrega";
 import SucursalEntrega from "../models/SucursalEntrega";
+import { hasSuperAdminRole } from "../constants/roleAccess";
 import { logError } from "../utils/logError";
 
 const normalizeText = (value: unknown) =>
@@ -19,6 +20,18 @@ const formatSucursal = (item: any) => ({
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
 });
+
+const ensureSucursalAdminAccess = (req: Request) => {
+  if (!req.user?._id) {
+    return "Usuario no autenticado";
+  }
+
+  if (!hasSuperAdminRole(req.user.role)) {
+    return "Solo superAdmin puede crear, editar o eliminar sucursales de entrega";
+  }
+
+  return null;
+};
 
 const validatePayload = async (
   payload: Record<string, unknown>,
@@ -69,6 +82,11 @@ export class SucursalEntregaController {
   };
 
   static create = async (req: Request, res: Response) => {
+    const accessError = ensureSucursalAdminAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
     try {
       const validation = await validatePayload(req.body ?? {});
       if ("error" in validation) {
@@ -93,6 +111,11 @@ export class SucursalEntregaController {
   };
 
   static update = async (req: Request, res: Response) => {
+    const accessError = ensureSucursalAdminAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
     try {
       const sucursalId = String(req.params.id);
       const sucursal = await SucursalEntrega.findById(sucursalId);
@@ -125,6 +148,11 @@ export class SucursalEntregaController {
   };
 
   static remove = async (req: Request, res: Response) => {
+    const accessError = ensureSucursalAdminAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
     try {
       const sucursalId = String(req.params.id);
       const sucursal = await SucursalEntrega.findById(sucursalId).lean();

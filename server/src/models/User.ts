@@ -5,6 +5,7 @@ export const userRole = {
   GERENTE: "gerente",
   SUPERVISOR: "supervisor",
   VENDEDOR: "vendedor",
+  ENTREGADOR: "entregador",
   SUPER_ADMIN: "superAdmin",
   STOCK: "stock",
   ADMINISTRACION: "administracion",
@@ -35,6 +36,7 @@ export interface IUser extends Document {
   numberSaleNic: number;
   numberSaleLiess: number;
   modules?: UserModules;
+  sucursalEntrega?: mongoose.Types.ObjectId | null;
 }
 
 const modulesSchemaDefinition = Object.fromEntries(
@@ -100,6 +102,11 @@ const userSchema: Schema = new Schema(
     modules: {
       type: new Schema(modulesSchemaDefinition, { _id: false }),
       default: undefined,
+    },
+    sucursalEntrega: {
+      type: Schema.Types.ObjectId,
+      ref: "sucursales_entrega",
+      default: null,
     },
   },
   { timestamps: true },
