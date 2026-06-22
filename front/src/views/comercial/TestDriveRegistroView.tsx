@@ -70,6 +70,18 @@ function RegistroModal({
 }) {
   const queryClient = useQueryClient();
   const isEditing = !!item;
+  const defaultValues = useMemo<RegistroFormValues>(
+    () => ({
+      unidadId: options[0]?._id ?? "",
+      fechaRetiro: "",
+      horaRetiro: "",
+      fechaRegreso: "",
+      horaRegreso: "",
+      starlink: false,
+      observacion: "",
+    }),
+    [options],
+  );
   const {
     control,
     register,
@@ -78,18 +90,15 @@ function RegistroModal({
     setValue,
     formState: { errors },
   } = useForm<RegistroFormValues>({
-    defaultValues: {
-      unidadId: "",
-      fechaRetiro: "",
-      horaRetiro: "",
-      fechaRegreso: "",
-      horaRegreso: "",
-      starlink: false,
-      observacion: "",
-    },
+    defaultValues,
   });
 
   useEffect(() => {
+    if (!open) {
+      reset(defaultValues);
+      return;
+    }
+
     if (item) {
       reset({
         unidadId: item.unidadId,
@@ -103,16 +112,8 @@ function RegistroModal({
       return;
     }
 
-    reset({
-      unidadId: options[0]?._id ?? "",
-      fechaRetiro: "",
-      horaRetiro: "",
-      fechaRegreso: "",
-      horaRegreso: "",
-      starlink: false,
-      observacion: "",
-    });
-  }, [item, options, reset]);
+    reset(defaultValues);
+  }, [open, item, reset, defaultValues]);
 
   const selectedUnidadId = useWatch({
     control,

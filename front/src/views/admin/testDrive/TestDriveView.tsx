@@ -50,6 +50,19 @@ function TestDriveModal({
 }) {
   const queryClient = useQueryClient();
   const isEditing = !!item;
+  const defaultValues = useMemo<TestDriveFormValues>(
+    () => ({
+      dominio: "",
+      modelo: "",
+      versionId: versiones[0]?._id ?? "",
+      chasis: "",
+      colorId: colores[0]?._id ?? "",
+      negocio: "convencional",
+      anio: new Date().getFullYear(),
+      permiteStarlink: false,
+    }),
+    [colores, versiones],
+  );
 
   const {
     register,
@@ -57,19 +70,15 @@ function TestDriveModal({
     reset,
     formState: { errors },
   } = useForm<TestDriveFormValues>({
-    defaultValues: {
-      dominio: "",
-      modelo: "",
-      versionId: "",
-      chasis: "",
-      colorId: "",
-      negocio: "convencional",
-      anio: new Date().getFullYear(),
-      permiteStarlink: false,
-    },
+    defaultValues,
   });
 
   useEffect(() => {
+    if (!open) {
+      reset(defaultValues);
+      return;
+    }
+
     if (item) {
       reset({
         dominio: item.dominio,
@@ -84,17 +93,8 @@ function TestDriveModal({
       return;
     }
 
-    reset({
-      dominio: "",
-      modelo: "",
-      versionId: versiones[0]?._id ?? "",
-      chasis: "",
-      colorId: colores[0]?._id ?? "",
-      negocio: "convencional",
-      anio: new Date().getFullYear(),
-      permiteStarlink: false,
-    });
-  }, [item, reset, colores, versiones]);
+    reset(defaultValues);
+  }, [open, item, reset, defaultValues]);
 
   const createMutation = useMutation({
     mutationFn: createTestDrive,
