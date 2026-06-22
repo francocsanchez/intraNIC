@@ -14,6 +14,12 @@ declare global {
         celular?: string;
         numberSaleNic?: number;
         numberSaleLiess?: number;
+        sucursalEntrega?: {
+          _id: string;
+          nombre: string;
+          activa: boolean;
+          direccion?: string;
+        } | null;
         role: string[];
         company?: string[];
         modules?: UserModules;
@@ -78,7 +84,9 @@ export const authenticate = async (
       return;
     }
 
-    const user = await User.findById(userId).lean();
+    const user = await User.findById(userId)
+      .populate("sucursalEntrega", "nombre activa direccion")
+      .lean();
 
     if (!user) {
       res.status(401).json({ error: "Token inválido" });
@@ -90,6 +98,16 @@ export const authenticate = async (
       return;
     }
     
+    const sucursalEntrega =
+      user.sucursalEntrega && typeof user.sucursalEntrega === "object"
+        ? (user.sucursalEntrega as {
+            _id: unknown;
+            nombre?: string;
+            activa?: boolean;
+            direccion?: string;
+          })
+        : null;
+
     req.user = {
       _id: String(user._id),
       name: user.name,
@@ -100,6 +118,15 @@ export const authenticate = async (
       enable: user.enable,
       numberSaleNic: user.numberSaleNic,
       numberSaleLiess: user.numberSaleLiess,
+      sucursalEntrega:
+        sucursalEntrega
+          ? {
+              _id: String(sucursalEntrega._id),
+              nombre: sucursalEntrega.nombre ?? "",
+              activa: Boolean(sucursalEntrega.activa),
+              direccion: sucursalEntrega.direccion ?? "",
+            }
+          : null,
       company: normalizeStringArray(user.company),
       modules: sanitizeUserModules(user.modules),
     };

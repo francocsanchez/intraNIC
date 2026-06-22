@@ -6,6 +6,7 @@ export type UsuarioFormData = {
   email: string;
   password?: string;
   celular: string;
+  sucursalEntrega: string;
   numberSaleNic: number;
   numberSaleLiess: number;
   role: string[];

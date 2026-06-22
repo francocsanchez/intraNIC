@@ -1,10 +1,11 @@
 import Loading from "@/components/Loading";
-import { hasModulePathAccess } from "@/helpers/access";
+import { hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
+  CalendarDays,
   FileText,
   FolderCog,
   Handshake,
@@ -59,6 +60,18 @@ export default function Inicio() {
         { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasModulePathAccess(user, "convencional", paths.convencional.stockDisponible), icon: CarFront },
         { label: "Usados", to: paths.usados.stockDisponible, enabled: hasModulePathAccess(user, "usados", paths.usados.stockDisponible), icon: Car },
         { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
+      ],
+    },
+    {
+      title: "Entregas",
+      icon: CalendarDays,
+      items: [
+        {
+          label: "Agenda de entrega",
+          to: paths.entregas.agenda,
+          enabled: hasPathAccess(user, paths.entregas.agenda),
+          icon: CalendarDays,
+        },
       ],
     },
     {

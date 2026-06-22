@@ -1,8 +1,10 @@
 import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import { getSucursalesEntrega } from "@/api/entregasAPI";
 import { moduleLabels, moduleSections, type ModuleKey } from "@/constants/modules";
 import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
+import type { SucursalEntrega } from "@/types/index";
 
 type Vendedor = {
   codigo: number;
@@ -18,6 +20,7 @@ type UsuarioFormProps = {
 
 const roleOptions = [
   { value: "vendedor", label: "Vendedor" },
+  { value: "entregador", label: "Entregador" },
   { value: "gerente", label: "Gerente" },
   { value: "supervisor", label: "Supervisor" },
   { value: "superAdmin", label: "Super Admin" },
@@ -35,8 +38,13 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
     queryKey: ["vendedores"],
     queryFn: getVendedoresNic,
   });
+  const { data: sucursalesResponse, isLoading: isLoadingSucursales } = useQuery({
+    queryKey: ["entregas", "sucursales"],
+    queryFn: getSucursalesEntrega,
+  });
 
   const vendedores: Vendedor[] = vendedoresResponse?.data ?? [];
+  const sucursales: SucursalEntrega[] = sucursalesResponse?.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -84,6 +92,32 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             })}
           />
           <FieldError message={errors.email?.message} />
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="sucursalEntrega"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
+            Sucursal de entrega
+          </label>
+          <select
+            id="sucursalEntrega"
+            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            {...register("sucursalEntrega")}
+          >
+            <option value="">-- Sin asignar --</option>
+            {sucursales.map((sucursal) => (
+              <option key={sucursal._id} value={sucursal._id}>
+                {sucursal.nombre}{sucursal.activa ? "" : " (Inactiva)"}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500">
+            Se usara para futuras alertas de entrega y para el rol de usuario entregador por sucursal.
+          </p>
+          {isLoadingSucursales ? <p className="text-xs text-gray-500">Cargando sucursales de entrega...</p> : null}
+          <FieldError message={errors.sucursalEntrega?.message} />
         </div>
 
         <div className="space-y-2">

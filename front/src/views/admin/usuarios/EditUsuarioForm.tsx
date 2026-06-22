@@ -2,6 +2,7 @@ import { updateUsuarioById } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
 import { getDefaultModules, normalizeModules, type UserModules } from "@/constants/modules";
 import { paths } from "@/routes/paths";
+import type { SucursalEntrega } from "@/types/index";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ type Usuario = {
   numberSaleLiess: number;
   role: string[];
   modules?: UserModules;
+  sucursalEntrega?: SucursalEntrega | null;
 };
 
 type EditUsuarioFormProps = {
@@ -41,6 +43,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       lastName: data.lastName,
       email: data.email,
       celular: data.celular ?? "",
+      sucursalEntrega: data.sucursalEntrega?._id ?? "",
       numberSaleNic: data.numberSaleNic,
       numberSaleLiess: data.numberSaleLiess,
       role: data.role,
@@ -84,7 +87,7 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         </Link>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usuario</p>
           <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">
@@ -101,6 +104,13 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Email</p>
           <p className="mt-2 break-all text-sm font-medium text-gray-900">{data.email}</p>
         </article>
+
+        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursal de entrega</p>
+          <p className="mt-2 text-sm font-medium text-gray-900">
+            {data.sucursalEntrega?.nombre ?? "Sin asignar"}
+          </p>
+        </article>
       </section>
 
       <form
@@ -110,7 +120,9 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       >
         <div className="border-b border-gray-200 px-6 py-4">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
-          <p className="mt-1 text-sm text-gray-500">Actualiza los datos, los modulos habilitados y guarda los cambios.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Actualiza los datos, la sucursal de entrega, los modulos habilitados y guarda los cambios.
+          </p>
         </div>
 
         <div className="p-6">

@@ -110,8 +110,6 @@ export async function getStockReservaUsados(): Promise<ReservasUsadosResumen> {
     const { data } = await api.get("/dms/usados/stock-reservado");
     const parsed = ReservasUsadosResumenSchema.safeParse(data);
 
-    console.log(parsed);
-
     if (!parsed.success) {
       console.error(parsed.error.issues);
       throw new Error("La respuesta del endpoint no tiene el formato esperado");

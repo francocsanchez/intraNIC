@@ -138,6 +138,15 @@ export const usuarioSchema = z.object({
   role: z.array(z.string()),
   company: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
+  sucursalEntrega: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -158,6 +167,15 @@ export const userSchema = z.object({
   role: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
   enable: z.boolean(),
+  sucursalEntrega: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
 });
 
 //**************************** */
@@ -1192,3 +1210,134 @@ export const proformaResponseSchema = z.object({
 export type Proforma = z.infer<typeof proformaSchema>;
 export type ProformaListResponse = z.infer<typeof proformaListResponseSchema>;
 export type ProformaResponse = z.infer<typeof proformaResponseSchema>;
+
+//**************************** */
+// ENTREGAS
+//**************************** */
+
+export const agendaEntregaLookupSchema = z.object({
+  interno: z.number(),
+  estado: z.number().nullable(),
+  tipoOperacion: z.string(),
+  operacion: z.number().nullable().optional(),
+  grupo: z.number().nullable().optional(),
+  orden: z.number().nullable().optional(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  version: z.string().nullable().optional(),
+  modelo: z.string().nullable().optional(),
+  chasis: z.string().nullable().optional(),
+  serie: z.string().nullable().optional(),
+  nroFabricacion: z.string().nullable().optional(),
+  color: z.string(),
+});
+
+export const agendaEntregaLookupResponseSchema = z.object({
+  data: agendaEntregaLookupSchema,
+});
+
+export const sucursalEntregaSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  direccion: z.string().optional().default(""),
+  activa: z.boolean(),
+  observaciones: z.string().optional().default(""),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const sucursalEntregaListResponseSchema = z.object({
+  data: z.array(sucursalEntregaSchema),
+});
+
+export const sucursalEntregaResponseSchema = z.object({
+  data: sucursalEntregaSchema,
+  message: z.string(),
+});
+
+export const agendaEntregaSiacSchema = z.object({
+  interno: z.number(),
+  estado: z.number().nullable(),
+  tipoOperacion: z.string(),
+  operacion: z.number().nullable().optional(),
+  grupo: z.number().nullable().optional(),
+  orden: z.number().nullable().optional(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  version: z.string().nullable().optional(),
+  modelo: z.string().nullable().optional(),
+  chasis: z.string().nullable().optional(),
+  serie: z.string().nullable().optional(),
+  nroFabricacion: z.string().nullable().optional(),
+  color: z.string(),
+});
+
+export const agendaEntregaSchema = z.object({
+  _id: z.string(),
+  interno: z.number(),
+  tipoOperacion: z.string(),
+  sucursal: z.object({
+    _id: z.string(),
+    nombre: z.string(),
+    direccion: z.string().optional().default(""),
+    activa: z.boolean(),
+  }).nullable(),
+  fechaAgenda: z.string(),
+  horaAgenda: z.string(),
+  equipado: z.boolean(),
+  entregaUsado: z.boolean(),
+  observaciones: z.string().optional().default(""),
+  createdBy: z.string(),
+  createdByName: z.string(),
+  updatedBy: z.string().nullable().optional(),
+  updatedByName: z.string().optional().default(""),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  siac: agendaEntregaSiacSchema,
+  siacSyncError: z.boolean(),
+  siacSyncMessage: z.string().optional().default(""),
+});
+
+export const agendaEntregaListResponseSchema = z.object({
+  data: z.array(agendaEntregaSchema),
+});
+
+export const agendaEntregaResponseSchema = z.object({
+  data: agendaEntregaSchema.nullable().optional(),
+  message: z.string(),
+});
+
+export const agendaEntregaLogSchema = z.object({
+  _id: z.string(),
+  agendaEntrega: z.string().nullable(),
+  interno: z.number(),
+  accion: z.enum(["CREADA", "MODIFICADA", "ELIMINADA"]),
+  usuario: z.string().nullable(),
+  usuarioNombre: z.string(),
+  fecha: z.string(),
+  detalle: z.string().optional().default(""),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const paginationSchema = z.object({
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  totalPages: z.number(),
+});
+
+export const agendaEntregaLogListResponseSchema = z.object({
+  data: z.array(agendaEntregaLogSchema),
+  pagination: paginationSchema,
+});
+
+export type AgendaEntregaLookup = z.infer<typeof agendaEntregaLookupSchema>;
+export type AgendaEntrega = z.infer<typeof agendaEntregaSchema>;
+export type AgendaEntregaResponse = z.infer<typeof agendaEntregaResponseSchema>;
+export type SucursalEntrega = z.infer<typeof sucursalEntregaSchema>;
+export type SucursalEntregaListResponse = z.infer<typeof sucursalEntregaListResponseSchema>;
+export type SucursalEntregaResponse = z.infer<typeof sucursalEntregaResponseSchema>;
+export type AgendaEntregaListResponse = z.infer<typeof agendaEntregaListResponseSchema>;
+export type AgendaEntregaLog = z.infer<typeof agendaEntregaLogSchema>;
+export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListResponseSchema>;
