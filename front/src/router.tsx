@@ -8,6 +8,7 @@ const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const PatentamientosLayout = lazy(() => import("./layouts/PatentamientosLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
+const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
 const GestionConvencionalLayout = lazy(() => import("./layouts/GestionConvencionalLayout"));
 const GestionUsadosLayout = lazy(() => import("./layouts/GestionUsadosLayout"));
 const AnalisisLayout = lazy(() => import("./layouts/AnalisisLayout"));
@@ -69,6 +70,9 @@ const PatentamientosView = lazy(() => import("./views/patentamientos/Patentamien
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
 const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosPlanAhorroView"));
+const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"));
+const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
+const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 
 export default function Router() {
   return (
@@ -85,6 +89,12 @@ export default function Router() {
               <Route path={paths.miPerfil} element={<MiPerfilView />} />
             </Route>
             <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
+
+            <Route element={<EntregasLayout />}>
+              <Route path={paths.entregas.agenda} element={<AgendaEntregaView />} />
+              <Route path={paths.entregas.sucursales} element={<SucursalesEntregaView />} />
+              <Route path={paths.entregas.registros} element={<AgendaEntregaRegistrosView />} />
+            </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
             <Route element={<AdminLayout />}>

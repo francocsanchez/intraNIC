@@ -79,13 +79,80 @@ export const tablaColores: Record<string, string> = {
   // VERDE
   VERDE: "bg-green-50 text-green-600 ring-1 ring-green-200",
   "DARK GREEN MICA": "bg-green-100 text-green-800 ring-1 ring-green-200",
+  // BLANCO
+  BLANCO: "bg-neutral-50 text-neutral-700 ring-1 ring-neutral-300",
+  "BLANCO PERLADO": "bg-neutral-50 text-neutral-700 ring-1 ring-neutral-300",
+  "SUPER WHITE": "bg-neutral-50 text-neutral-700 ring-1 ring-neutral-300",
 };
+
+const normalizeColorText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+
+const normalizedColorTable = Object.fromEntries(
+  Object.entries(tablaColores).map(([key, value]) => [normalizeColorText(key), value]),
+) as Record<string, string>;
 
 export function textToColor(color: string | null | undefined): string | null {
   if (color) {
-    const colorFinal = tablaColores[color as keyof typeof tablaColores];
+    const normalized = normalizeColorText(color);
+
+    const colorFinal =
+      normalizedColorTable[normalized] ??
+      Object.entries(normalizedColorTable).find(([key]) => normalized.includes(key) || key.includes(normalized))?.[1];
+
     if (colorFinal) {
       return colorFinal;
+    }
+
+    if (normalized.includes("BLANCO") || normalized.includes("WHITE") || normalized.includes("PERLA")) {
+      return "bg-neutral-50 text-neutral-700 ring-1 ring-neutral-300";
+    }
+
+    if (normalized.includes("NEGRO") || normalized.includes("BLACK")) {
+      return "bg-gray-200 text-gray-700";
+    }
+
+    if (normalized.includes("ROJO") || normalized.includes("RED")) {
+      return "bg-red-50 text-red-600";
+    }
+
+    if (normalized.includes("AZUL") || normalized.includes("BLUE") || normalized.includes("CELESTE")) {
+      return "bg-blue-50 text-blue-600";
+    }
+
+    if (normalized.includes("VERDE") || normalized.includes("GREEN")) {
+      return "bg-green-50 text-green-600 ring-1 ring-green-200";
+    }
+
+    if (
+      normalized.includes("PLATA") ||
+      normalized.includes("SILVER") ||
+      normalized.includes("GRIS") ||
+      normalized.includes("GRAY")
+    ) {
+      return "bg-slate-100 text-slate-700";
+    }
+
+    if (normalized.includes("BORDO") || normalized.includes("VINOTINTO")) {
+      return "bg-rose-200 text-rose-700";
+    }
+
+    if (normalized.includes("NARANJA")) {
+      return "bg-orange-50 text-orange-600 ring-1 ring-orange-200";
+    }
+
+    if (
+      normalized.includes("BRONCE") ||
+      normalized.includes("GOLD") ||
+      normalized.includes("MARRON") ||
+      normalized.includes("CREMA")
+    ) {
+      return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
     }
   }
   return null;
