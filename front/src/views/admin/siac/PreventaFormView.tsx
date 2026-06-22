@@ -2,11 +2,10 @@ import Loading from "@/components/Loading";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import { createPreventa, getColores, getPreventaById, getVersiones, updatePreventa } from "@/api/dms/preventasAPI";
 import { toMonthInputValue } from "@/helpers/preventas";
-import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Save } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Dialog, Transition } from "@headlessui/react";
+import { Save, X } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type PreventaFormState = {
@@ -35,6 +34,8 @@ type PreventaFormContentProps = {
   colores: Awaited<ReturnType<typeof getColores>>["data"];
   initialValues: PreventaFormState;
   isEditing: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
   preventaId?: string;
   vendedores: Awaited<ReturnType<typeof getVendedoresActivosNic>>["data"];
   versiones: Awaited<ReturnType<typeof getVersiones>>["data"];
@@ -44,13 +45,18 @@ function PreventaFormContent({
   colores,
   initialValues,
   isEditing,
+  onClose,
+  onSuccess,
   preventaId,
   vendedores,
   versiones,
 }: PreventaFormContentProps) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<PreventaFormState>(initialValues);
+
+  useEffect(() => {
+    setForm(initialValues);
+  }, [initialValues]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -80,32 +86,35 @@ function PreventaFormContent({
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["preventas"] });
       queryClient.invalidateQueries({ queryKey: ["preventas-resumen"] });
-      navigate(paths.convencional.preventas);
+      onSuccess();
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Preventas</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-              {isEditing ? "Editar preventa" : "Nueva preventa"}
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              La unidad todavia no existe en el sistema; por eso se registra la necesidad comercial y el mes esperado de asignacion.
-            </p>
-          </div>
-          <Link to={paths.convencional.preventas} className="inline-flex items-center gap-2 text-sm font-semibold text-[#146b61] hover:text-[#128d80]">
-            <ArrowLeft size={16} />
-            Volver al listado
-          </Link>
+    <>
+      <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Preventas</p>
+          <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+            {isEditing ? "Editar preventa" : "Nueva preventa"}
+          </Dialog.Title>
+          <p className="mt-2 text-sm text-gray-600">
+            Registra la necesidad comercial y el mes esperado de asignacion para la unidad.
+          </p>
         </div>
-      </section>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={saveMutation.isPending}
+          className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-6">
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
           <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-4">
             Vendedor
@@ -237,79 +246,77 @@ function PreventaFormContent({
             />
           </label>
         </div>
+      </div>
 
-        <div className="mt-6 flex justify-end">
+      <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-gray-500">Guarda los cambios para actualizar el listado operativo.</div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saveMutation.isPending}
+            className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancelar
+          </button>
           <button
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80] disabled:cursor-not-allowed disabled:bg-[#8fd2ca]"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#15aa9a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#128d80] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save size={16} />
-            {isEditing ? "Guardar cambios" : "Crear preventa"}
+            {saveMutation.isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear preventa"}
           </button>
         </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }
 
-export default function PreventaFormView() {
-  const { id } = useParams();
-  const isEditing = Boolean(id);
+export function PreventaModal({
+  open,
+  onClose,
+  preventaId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  preventaId?: string;
+}) {
+  const isEditing = Boolean(preventaId);
 
   const vendedoresQuery = useQuery({
     queryKey: ["vendedores", "nic", "activos"],
     queryFn: getVendedoresActivosNic,
+    enabled: open,
   });
 
   const versionesQuery = useQuery({
     queryKey: ["versiones", "activas"],
     queryFn: () => getVersiones(true),
+    enabled: open,
   });
 
   const coloresQuery = useQuery({
     queryKey: ["colores", "activos"],
     queryFn: () => getColores(true),
+    enabled: open,
   });
 
   const preventaQuery = useQuery({
-    queryKey: ["preventa", id],
-    queryFn: () => getPreventaById(id!),
-    enabled: isEditing,
+    queryKey: ["preventa", preventaId],
+    queryFn: () => getPreventaById(preventaId!),
+    enabled: open && isEditing,
   });
 
   const loading = vendedoresQuery.isLoading || versionesQuery.isLoading || coloresQuery.isLoading || preventaQuery.isLoading;
   const firstError = vendedoresQuery.error || versionesQuery.error || coloresQuery.error || preventaQuery.error;
 
-  if (loading) return <Loading />;
-
-  if (firstError instanceof Error) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el formulario de preventa</h1>
-          <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
-        </section>
-      </div>
-    );
-  }
-
   const vendedores = vendedoresQuery.data?.data ?? [];
   const versiones = versionesQuery.data?.data ?? [];
   const colores = coloresQuery.data?.data ?? [];
   const preventa = preventaQuery.data?.data;
-
-  if (isEditing && !preventa) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Preventa no encontrada</h1>
-          <p className="mt-2 text-sm text-red-600">No fue posible cargar la preventa solicitada.</p>
-        </section>
-      </div>
-    );
-  }
 
   const initialValues = preventa
     ? {
@@ -325,13 +332,67 @@ export default function PreventaFormView() {
     : initialForm;
 
   return (
-    <PreventaFormContent
-      colores={colores}
-      initialValues={initialValues}
-      isEditing={isEditing}
-      preventaId={id}
-      vendedores={vendedores}
-      versiones={versiones}
-    />
+    <Transition appear show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/40" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+                {loading ? (
+                  <div className="p-10">
+                    <Loading />
+                  </div>
+                ) : firstError instanceof Error ? (
+                  <div className="p-6">
+                    <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el formulario de preventa</h1>
+                    <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
+                  </div>
+                ) : isEditing && !preventa ? (
+                  <div className="p-6">
+                    <h1 className="text-lg font-semibold text-gray-900">Preventa no encontrada</h1>
+                    <p className="mt-2 text-sm text-red-600">No fue posible cargar la preventa solicitada.</p>
+                  </div>
+                ) : (
+                  <PreventaFormContent
+                    colores={colores}
+                    initialValues={initialValues}
+                    isEditing={isEditing}
+                    onClose={onClose}
+                    onSuccess={onClose}
+                    preventaId={preventaId}
+                    vendedores={vendedores}
+                    versiones={versiones}
+                  />
+                )}
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
   );
+}
+
+export default function PreventaFormView() {
+  return null;
 }

@@ -55,12 +55,9 @@ const RegistroAsignacionesView = lazy(() => import("./views/admin/siac/RegistroA
 const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/RegistroAsignacionesResumenView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
 const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
-const PreventaFormView = lazy(() => import("./views/admin/siac/PreventaFormView"));
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
 const ColoresView = lazy(() => import("./views/admin/siac/ColoresView"));
-const ColorFormView = lazy(() => import("./views/admin/siac/ColorFormView"));
 const VersionesView = lazy(() => import("./views/admin/siac/VersionesView"));
-const VersionFormView = lazy(() => import("./views/admin/siac/VersionFormView"));
 const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualView"));
 const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
 const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
@@ -249,11 +246,11 @@ export default function Router() {
             <Route element={<NICLayout />}>
               <Route path={paths.admin.vendedores} element={<VendedoresView />} />
               <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
-              <Route path={paths.convencional.preventasColoresNuevo} element={<ColorFormView />} />
-              <Route path={paths.convencional.preventasColoresEditarRoute} element={<ColorFormView />} />
+              <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.convencional.preventasColores} replace />} />
+              <Route path={paths.convencional.preventasColoresEditarRoute} element={<Navigate to={paths.convencional.preventasColores} replace />} />
               <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
-              <Route path={paths.convencional.preventasVersionesNuevo} element={<VersionFormView />} />
-              <Route path={paths.convencional.preventasVersionesEditarRoute} element={<VersionFormView />} />
+              <Route path={paths.convencional.preventasVersionesNuevo} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
+              <Route path={paths.convencional.preventasVersionesEditarRoute} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
             </Route>
           </Route>
 
@@ -273,8 +270,8 @@ export default function Router() {
               <Route path={paths.convencional.preventas} element={<PreventasView />} />
               <Route path={paths.convencional.preventasResumen} element={<PreventasResumenView />} />
               <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
-              <Route path={paths.convencional.preventasNueva} element={<PreventaFormView />} />
-              <Route path={paths.convencional.preventasEditarRoute} element={<PreventaFormView />} />
+              <Route path={paths.convencional.preventasNueva} element={<PreventasView />} />
+              <Route path={paths.convencional.preventasEditarRoute} element={<PreventasView />} />
             </Route>
           </Route>
 

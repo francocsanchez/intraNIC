@@ -350,44 +350,38 @@ export default function AsignacionesView() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 lg:w-auto">
               <button
                 type="button"
                 onClick={() => setFiltroEstado("todos")}
                 className={[
-                  "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  filtroEstado === "todos"
-                    ? "bg-gray-950 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
+                  filtroEstado === "todos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
                 ].join(" ")}
               >
-                Todos
+                Todos ({totalUnidades})
               </button>
 
               <button
                 type="button"
                 onClick={() => setFiltroEstado("recibidos")}
                 className={[
-                  "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  filtroEstado === "recibidos"
-                    ? "bg-[#15aa9a] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
+                  filtroEstado === "recibidos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
                 ].join(" ")}
               >
-                Recibidos
+                Recibidos ({totalRecibidos})
               </button>
 
               <button
                 type="button"
                 onClick={() => setFiltroEstado("pendientes")}
                 className={[
-                  "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  filtroEstado === "pendientes"
-                    ? "bg-amber-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
+                  filtroEstado === "pendientes" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
                 ].join(" ")}
               >
-                Pendientes
+                Pendientes ({totalPendientes})
               </button>
             </div>
           </div>
