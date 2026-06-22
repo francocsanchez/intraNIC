@@ -1,8 +1,8 @@
 import BaseAppLayout from "@/layouts/BaseAppLayout";
-import { hasModulePathAccess } from "@/helpers/access";
+import { hasAnyModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
+import { ClipboardList, FileWarning, List, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -11,6 +11,8 @@ export default function AdminModuleLayout() {
   const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
   const canViewPedidoUnidades = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
+  const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
+    && hasPathAccess(user, paths.convencional.pedidoUnidades);
 
   return (
     <BaseAppLayout
@@ -32,6 +34,16 @@ export default function AdminModuleLayout() {
             >
               <ClipboardList size={15} strokeWidth={1.5} />
               Pedido de Unidades
+            </Link>
+          )}
+
+          {canViewPedidoUnidadesRegistros && (
+            <Link
+              to={`${paths.convencional.pedidoUnidades}?view=registros`}
+              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
+            >
+              <List size={15} strokeWidth={1.5} />
+              Registros de pedidos
             </Link>
           )}
 

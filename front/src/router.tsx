@@ -294,7 +294,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<ModuleProtectedRoute allowedModules={["pedidoUnidades"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["pedidoUnidades", "listaPrevia"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
             </Route>

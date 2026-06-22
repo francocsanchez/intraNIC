@@ -7,7 +7,7 @@ import {
   getPedidoUnidadesPrevias,
   getPedidosUnidadesRegistro,
 } from "@/api/dms/pedidoUnidadAPI";
-import { hasModuleAccess } from "@/helpers/access";
+import { hasModuleAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
@@ -142,7 +142,7 @@ export default function PedidoUnidadesView() {
   const canManagePriority = hasModuleAccess(user, "pedidoUnidades");
   const canManagePedidos = hasModuleAccess(user, "pedidoUnidades");
   const canOpenAsignaciones = hasModuleAccess(user, "asignaciones");
-  const canAccess = hasModuleAccess(user, "pedidoUnidades");
+  const canAccess = hasPathAccess(user, paths.convencional.pedidoUnidades);
   const canOpenListaPrevia = hasModuleAccess(user, "listaPrevia");
   const [fecha, setFecha] = useState<string>("");
   const [internoInput, setInternoInput] = useState<string>("");

@@ -1,7 +1,7 @@
-import { hasModulePathAccess } from "@/helpers/access";
+import { hasAnyModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ClipboardList, FileWarning, ReceiptText } from "lucide-react";
+import { ClipboardList, FileWarning, List, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const cardClass =
@@ -14,6 +14,9 @@ export default function AdministracionHubView() {
   const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
   const canViewListaPrevia = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
+  const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
+    && hasPathAccess(user, paths.convencional.pedidoUnidades);
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -57,6 +60,24 @@ export default function AdministracionHubView() {
               <ClipboardList size={24} strokeWidth={1.5} />
             </div>
             <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Pedido previo de unidades</h2>
+            <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
+          </div>
+        )}
+
+        {canViewPedidoUnidadesRegistros ? (
+          <Link to={`${paths.convencional.pedidoUnidades}?view=registros`} className={cardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
+              <List size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Registros de pedido de unidades</h2>
+            <p className="mt-1 text-sm text-gray-500">Consulta el historial de unidades pedidas sin ingresar al flujo de carga.</p>
+          </Link>
+        ) : (
+          <div className={disabledCardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200 text-gray-600">
+              <List size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Registros de pedido de unidades</h2>
             <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
           </div>
         )}
