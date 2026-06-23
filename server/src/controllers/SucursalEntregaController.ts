@@ -11,11 +11,35 @@ const normalizeText = (value: unknown) =>
 const isValidObjectId = (value: unknown) =>
   typeof value === "string" && mongoose.Types.ObjectId.isValid(value);
 
+const ALLOWED_TIME_SLOTS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
+
+const ALLOWED_TIME_SLOT_SET = new Set(ALLOWED_TIME_SLOTS);
+
+const normalizeHorariosHabilitados = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [...ALLOWED_TIME_SLOTS];
+  }
+
+  const unique = new Set(
+    value
+      .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+      .filter(Boolean),
+  );
+
+  return ALLOWED_TIME_SLOTS.filter((timeSlot) => unique.has(timeSlot));
+};
+
 const formatSucursal = (item: any) => ({
   _id: String(item._id),
   nombre: item.nombre,
   direccion: item.direccion ?? "",
   activa: Boolean(item.activa),
+  horariosHabilitados: normalizeHorariosHabilitados(item.horariosHabilitados),
   observaciones: item.observaciones ?? "",
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
@@ -42,9 +66,20 @@ const validatePayload = async (
   const observaciones = normalizeText(payload.observaciones);
   const activa =
     payload.activa === undefined ? true : Boolean(payload.activa);
+  const horariosHabilitados = normalizeHorariosHabilitados(payload.horariosHabilitados);
 
   if (!nombre) {
     return { error: "El nombre de la sucursal es obligatorio" };
+  }
+
+  if (Array.isArray(payload.horariosHabilitados)) {
+    const invalid = payload.horariosHabilitados.some(
+      (entry) => typeof entry !== "string" || !ALLOWED_TIME_SLOT_SET.has(entry.trim()),
+    );
+
+    if (invalid) {
+      return { error: "Los horarios habilitados contienen valores invalidos" };
+    }
   }
 
   const existing = await SucursalEntrega.findOne({
@@ -62,6 +97,7 @@ const validatePayload = async (
       direccion,
       observaciones,
       activa,
+      horariosHabilitados,
     },
   };
 };

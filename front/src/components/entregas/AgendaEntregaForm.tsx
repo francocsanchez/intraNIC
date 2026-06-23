@@ -11,7 +11,7 @@ import type { AgendaEntrega, AgendaEntregaLookup, SucursalEntrega } from "@/type
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -37,8 +37,8 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
 
-const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
-  const totalMinutes = 9 * 60 + index * 30;
+const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
   const minutes = String(totalMinutes % 60).padStart(2, "0");
   return `${hours}:${minutes}`;
@@ -63,6 +63,8 @@ export default function AgendaEntregaForm({
     handleSubmit,
     reset,
     getValues,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<AgendaEntregaFormValues>({
     defaultValues: {
@@ -75,6 +77,9 @@ export default function AgendaEntregaForm({
       observaciones: "",
     },
   });
+
+  const selectedSucursalId = watch("sucursal");
+  const selectedHour = watch("horaAgenda");
 
   useEffect(() => {
     if (!open) return;
@@ -172,6 +177,39 @@ export default function AgendaEntregaForm({
   const availableSucursales = isSuperAdmin
     ? activeSucursales
     : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
+  const selectedSucursal = useMemo(
+    () => availableSucursales.find((sucursal) => sucursal._id === selectedSucursalId) ?? null,
+    [availableSucursales, selectedSucursalId],
+  );
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedSucursal) {
+      return [];
+    }
+
+    const slots = selectedSucursal.horariosHabilitados.length
+      ? selectedSucursal.horariosHabilitados
+      : TIME_SLOT_OPTIONS;
+
+    if (
+      item?.horaAgenda &&
+      selectedSucursal._id === item.sucursal?._id &&
+      !slots.includes(item.horaAgenda)
+    ) {
+      return [...slots, item.horaAgenda].sort((left, right) => left.localeCompare(right));
+    }
+
+    return slots;
+  }, [item?.horaAgenda, item?.sucursal?._id, selectedSucursal]);
+
+  useEffect(() => {
+    if (!selectedHour) {
+      return;
+    }
+
+    if (!availableTimeSlots.includes(selectedHour)) {
+      setValue("horaAgenda", "");
+    }
+  }, [availableTimeSlots, selectedHour, setValue]);
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -288,15 +326,17 @@ export default function AgendaEntregaForm({
                           className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
                           {...register("horaAgenda", { required: "La hora es obligatoria" })}
                         >
-                          <option value="">-- Selecciona un horario --</option>
-                          {TIME_SLOT_OPTIONS.map((timeSlot) => (
+                          <option value="">
+                            {selectedSucursal ? "-- Selecciona un horario --" : "-- Selecciona una sucursal primero --"}
+                          </option>
+                          {availableTimeSlots.map((timeSlot) => (
                             <option key={timeSlot} value={timeSlot}>
                               {timeSlot}
                             </option>
                           ))}
                         </select>
                         <p className="text-xs text-gray-500">
-                          Turnos cada 30 minutos desde las 09:00 hasta las 17:30.
+                          Turnos cada 30 minutos desde las 08:00 hasta las 18:00 segun configuracion de la sucursal.
                         </p>
                         <FieldError message={errors.horaAgenda?.message} />
                       </div>

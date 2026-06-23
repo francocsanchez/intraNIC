@@ -1241,6 +1241,7 @@ export const sucursalEntregaSchema = z.object({
   nombre: z.string(),
   direccion: z.string().optional().default(""),
   activa: z.boolean(),
+  horariosHabilitados: z.array(z.string()).default([]),
   observaciones: z.string().optional().default(""),
   createdAt: z.string(),
   updatedAt: z.string(),

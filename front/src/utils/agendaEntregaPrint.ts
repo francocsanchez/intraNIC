@@ -68,16 +68,34 @@ const formatOperacion = (item: AgendaEntrega) => {
   return "-";
 };
 
-const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
-  const totalMinutes = 9 * 60 + index * 30;
+const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
   const minutes = String(totalMinutes % 60).padStart(2, "0");
   return `${hours}:${minutes}`;
 });
 
-const buildRows = (items: AgendaEntrega[]) =>
-  TIME_SLOT_OPTIONS.flatMap((timeSlot) => {
+const buildRows = (items: AgendaEntrega[], horariosHabilitados: string[]) => {
+  const enabledTimeSlots = new Set(horariosHabilitados);
+
+  return TIME_SLOT_OPTIONS.flatMap((timeSlot) => {
     const matchingItems = items.filter((item) => item.horaAgenda === timeSlot);
+
+    if (!matchingItems.length && !enabledTimeSlots.has(timeSlot)) {
+      return `
+        <tr class="bloqueado">
+          <td class="hora">${escapeHtml(timeSlot)}</td>
+          <td class="interno">BLOQUEADO</td>
+          <td class="datos">
+            <div class="cliente">Horario bloqueado</div>
+            <div class="modelo">&nbsp;</div>
+            <div class="detalle">No disponible para agendar</div>
+          </td>
+          <td class="vendedor">-</td>
+          <td class="operacion">-</td>
+        </tr>
+      `;
+    }
 
     if (!matchingItems.length) {
       return `
@@ -125,6 +143,7 @@ const buildRows = (items: AgendaEntrega[]) =>
       `;
     });
   }).join("");
+};
 
 export function openAgendaEntregaPrintView(params: {
   items: AgendaEntrega[];
@@ -132,8 +151,9 @@ export function openAgendaEntregaPrintView(params: {
   sucursalId: string;
   sucursales: SucursalEntrega[];
 }) {
-  const sucursal =
-    params.sucursales.find((item) => item._id === params.sucursalId)?.nombre ?? "Sucursal no seleccionada";
+  const sucursalData = params.sucursales.find((item) => item._id === params.sucursalId) ?? null;
+  const sucursal = sucursalData?.nombre ?? "Sucursal no seleccionada";
+  const horariosHabilitados = sucursalData?.horariosHabilitados ?? [];
   const title = `Agenda de entrega ${params.fecha} - ${sucursal}`;
   const iframe = document.createElement("iframe");
   iframe.style.position = "fixed";
@@ -228,6 +248,15 @@ export function openAgendaEntregaPrintView(params: {
 
           tbody tr.entregada td {
             background: #dcfce7;
+          }
+
+          tbody tr.bloqueado td {
+            background: #e5e7eb;
+            color: #4b5563;
+          }
+
+          tbody tr.bloqueado .interno {
+            background: #d1d5db;
           }
 
           .hora, .interno, .vendedor, .operacion {
@@ -341,7 +370,7 @@ export function openAgendaEntregaPrintView(params: {
               </tr>
             </thead>
             <tbody>
-              ${buildRows(params.items)}
+              ${buildRows(params.items, horariosHabilitados)}
             </tbody>
           </table>
         </div>

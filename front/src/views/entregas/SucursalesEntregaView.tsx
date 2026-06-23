@@ -172,6 +172,7 @@ export default function SucursalesEntregaView() {
               nombre: values.nombre.trim(),
               direccion: values.direccion.trim(),
               activa: Boolean(values.activa),
+              horariosHabilitados: values.horariosHabilitados,
               observaciones: values.observaciones.trim(),
             };
 

@@ -24,8 +24,8 @@ type AgendaPayload = {
 const OBSERVACIONES_MAX_LENGTH = 1000;
 const ENTREGADO_STATES = new Set([35, 40]);
 const ALLOWED_TIME_SLOTS = new Set(
-  Array.from({ length: 18 }, (_, index) => {
-    const totalMinutes = 9 * 60 + index * 30;
+  Array.from({ length: 21 }, (_, index) => {
+    const totalMinutes = 8 * 60 + index * 30;
     const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
     const minutes = String(totalMinutes % 60).padStart(2, "0");
     return `${hours}:${minutes}`;
@@ -43,6 +43,20 @@ const isValidDateString = (value: unknown) =>
 
 const isValidTimeString = (value: unknown) =>
   typeof value === "string" && /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
+const getSucursalHorariosHabilitados = (sucursal: any) => {
+  if (!Array.isArray(sucursal?.horariosHabilitados)) {
+    return Array.from(ALLOWED_TIME_SLOTS);
+  }
+
+  const available = new Set(
+    sucursal.horariosHabilitados
+      .map((entry: unknown) => (typeof entry === "string" ? entry.trim() : ""))
+      .filter((entry: string) => ALLOWED_TIME_SLOTS.has(entry)),
+  );
+
+  return Array.from(ALLOWED_TIME_SLOTS).filter((timeSlot) => available.has(timeSlot));
+};
 
 const buildUserName = (req: Request) =>
   req.user ? `${req.user.lastName}, ${req.user.name}` : "";
@@ -208,7 +222,7 @@ const validateAgendaPayload = async (
   }
 
   if (!ALLOWED_TIME_SLOTS.has(horaAgenda)) {
-    return { error: "La hora de agenda debe ser un turno valido entre 09:00 y 17:30 cada 30 minutos" };
+    return { error: "La hora de agenda debe ser un turno valido entre 08:00 y 18:00 cada 30 minutos" };
   }
 
   if (observaciones.length > OBSERVACIONES_MAX_LENGTH) {
@@ -217,7 +231,7 @@ const validateAgendaPayload = async (
     };
   }
 
-  const [lookup, sucursal, duplicated] = await Promise.all([
+  const [lookup, sucursal, duplicated, currentAgenda] = await Promise.all([
     lookupAgendaEntregaInterno(interno),
     SucursalEntrega.findById(sucursalId).lean(),
     AgendaEntrega.findOne(
@@ -225,6 +239,7 @@ const validateAgendaPayload = async (
         ? { interno, _id: { $ne: currentId } }
         : { interno },
     ).lean(),
+    currentId ? AgendaEntrega.findById(currentId).lean() : Promise.resolve(null),
   ]);
 
   if (!lookup) {
@@ -243,6 +258,18 @@ const validateAgendaPayload = async (
 
   if (!sucursal.activa) {
     return { error: "La sucursal seleccionada esta inactiva" };
+  }
+
+  const horariosHabilitados = getSucursalHorariosHabilitados(sucursal);
+  const preservesCurrentDisabledSlot =
+    currentAgenda &&
+    String(currentAgenda.sucursal) === sucursalId &&
+    currentAgenda.horaAgenda === horaAgenda;
+
+  if (!horariosHabilitados.includes(horaAgenda) && !preservesCurrentDisabledSlot) {
+    return {
+      error: `La hora ${horaAgenda} no esta habilitada para la sucursal seleccionada`,
+    };
   }
 
   if (duplicated) {
