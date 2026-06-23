@@ -15,7 +15,7 @@ export default function AdministracionHubView() {
   const canViewListaPrevia = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
   const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
-    && hasPathAccess(user, paths.convencional.pedidoUnidades);
+    && hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
@@ -65,7 +65,7 @@ export default function AdministracionHubView() {
         )}
 
         {canViewPedidoUnidadesRegistros ? (
-          <Link to={`${paths.convencional.pedidoUnidades}?view=registros`} className={cardClass}>
+          <Link to={paths.administracion.pedidoUnidadesRegistros} className={cardClass}>
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
               <List size={24} strokeWidth={1.5} />
             </div>

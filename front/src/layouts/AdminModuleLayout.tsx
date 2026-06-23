@@ -12,7 +12,7 @@ export default function AdminModuleLayout() {
   const canViewPedidoUnidades = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
   const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
-    && hasPathAccess(user, paths.convencional.pedidoUnidades);
+    && hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros);
 
   return (
     <BaseAppLayout
@@ -39,7 +39,7 @@ export default function AdminModuleLayout() {
 
           {canViewPedidoUnidadesRegistros && (
             <Link
-              to={`${paths.convencional.pedidoUnidades}?view=registros`}
+              to={paths.administracion.pedidoUnidadesRegistros}
               className="inline-flex items-center gap-1 hover:text-gray-900 transition"
             >
               <List size={15} strokeWidth={1.5} />

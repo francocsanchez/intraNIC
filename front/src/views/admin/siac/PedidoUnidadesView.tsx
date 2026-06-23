@@ -14,7 +14,7 @@ import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPr
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Plus, Trash2 } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const MAX_UNIDADES = 8;
@@ -137,12 +137,16 @@ function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
 export default function PedidoUnidadesView() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const requestedView = searchParams.get("view");
+  const isAdminRegistrosRoute = pathname === paths.administracion.pedidoUnidadesRegistros;
   const canManagePriority = hasModuleAccess(user, "pedidoUnidades");
   const canManagePedidos = hasModuleAccess(user, "pedidoUnidades");
   const canOpenAsignaciones = hasModuleAccess(user, "asignaciones");
-  const canAccess = hasPathAccess(user, paths.convencional.pedidoUnidades);
+  const canAccess = isAdminRegistrosRoute
+    ? hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros)
+    : hasPathAccess(user, paths.convencional.pedidoUnidades);
   const canOpenListaPrevia = hasModuleAccess(user, "listaPrevia");
   const [fecha, setFecha] = useState<string>("");
   const [internoInput, setInternoInput] = useState<string>("");

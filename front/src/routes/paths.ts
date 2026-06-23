@@ -29,6 +29,7 @@ export const paths = {
     home: "/administracion",
     reventaPendientes: "/administracion/reventa-pendientes",
     pedidoUnidadesListaPrevia: "/administracion/pedido-unidades/lista-previa",
+    pedidoUnidadesRegistros: "/administracion/pedido-unidades/registros",
     facturasAnticipo: "/administracion/facturas-anticipo",
   },
   analisis: {

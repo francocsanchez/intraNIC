@@ -161,6 +161,7 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["listaPrevia"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.pedidoUnidadesListaPrevia} element={<PedidoUnidadesPreviasView />} />
+              <Route path={paths.administracion.pedidoUnidadesRegistros} element={<PedidoUnidadesView />} />
             </Route>
           </Route>
 

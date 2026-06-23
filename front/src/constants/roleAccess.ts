@@ -133,6 +133,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.callCenter.origenesDatos,
     paths.administracion.reventaPendientes,
     paths.administracion.pedidoUnidadesListaPrevia,
+    paths.administracion.pedidoUnidadesRegistros,
     paths.administracion.facturasAnticipo,
     paths.convencional.pedidoUnidades,
   ],

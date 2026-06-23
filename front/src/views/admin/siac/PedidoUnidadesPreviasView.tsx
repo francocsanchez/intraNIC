@@ -142,7 +142,7 @@ export default function PedidoUnidadesPreviasView() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to={`${paths.convencional.pedidoUnidades}?view=registros`}
+              to={paths.administracion.pedidoUnidadesRegistros}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
             >
               <List size={16} strokeWidth={1.75} />
