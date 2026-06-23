@@ -66,6 +66,10 @@ export default function AgendaEntregaView() {
       }),
     [assignedSucursalId, isSuperAdmin, sucursales],
   );
+  const selectedSucursal = useMemo(
+    () => sucursales.find((sucursal) => sucursal._id === filters.sucursalId) ?? null,
+    [filters.sucursalId, sucursales],
+  );
 
   useEffect(() => {
     if (!filters.sucursalId && activeSucursales[0]?._id) {
@@ -98,11 +102,6 @@ export default function AgendaEntregaView() {
 
     if (!filters.sucursalId) {
       toast.error("Selecciona una sucursal para imprimir la agenda");
-      return;
-    }
-
-    if (!items.length) {
-      toast.error("No hay agendas para imprimir con los filtros actuales");
       return;
     }
 
@@ -176,7 +175,13 @@ export default function AgendaEntregaView() {
       />
 
       {filters.sucursalId ? (
-        <AgendaEntregaTable items={items} onEdit={handleEdit} onDelete={handleDelete} canManage={canManageAgenda} />
+        <AgendaEntregaTable
+          items={items}
+          horariosHabilitados={selectedSucursal?.horariosHabilitados ?? []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          canManage={canManageAgenda}
+        />
       ) : (
         <section className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500 shadow-sm">
           Selecciona una sucursal para ver la agenda individual.

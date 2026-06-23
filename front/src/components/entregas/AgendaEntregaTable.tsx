@@ -4,6 +4,7 @@ import { Pencil, Trash2, AlertTriangle, Package, CarFront } from "lucide-react";
 
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
+  horariosHabilitados: string[];
   onEdit: (item: AgendaEntrega) => void;
   onDelete: (item: AgendaEntrega) => void;
   canManage: boolean;
@@ -14,10 +15,15 @@ type EmptyAgendaRow = {
   horaAgenda: string;
 };
 
-type AgendaDisplayRow = AgendaEntrega | EmptyAgendaRow;
+type BlockedAgendaRow = {
+  _blocked: true;
+  horaAgenda: string;
+};
 
-const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
-  const totalMinutes = 9 * 60 + index * 30;
+type AgendaDisplayRow = AgendaEntrega | EmptyAgendaRow | BlockedAgendaRow;
+
+const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
   const minutes = String(totalMinutes % 60).padStart(2, "0");
   return `${hours}:${minutes}`;
@@ -25,13 +31,23 @@ const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
 
 export default function AgendaEntregaTable({
   items,
+  horariosHabilitados,
   onEdit,
   onDelete,
   canManage,
 }: AgendaEntregaTableProps) {
+  const enabledTimeSlots = new Set(horariosHabilitados);
   const displayRows: AgendaDisplayRow[] = TIME_SLOT_OPTIONS.flatMap((timeSlot): AgendaDisplayRow[] => {
     const matchingItems = items.filter((item) => item.horaAgenda === timeSlot);
-    return matchingItems.length ? matchingItems : [{ _empty: true, horaAgenda: timeSlot }];
+    if (matchingItems.length) {
+      return matchingItems;
+    }
+
+    if (!enabledTimeSlots.has(timeSlot)) {
+      return [{ _blocked: true, horaAgenda: timeSlot }];
+    }
+
+    return [{ _empty: true, horaAgenda: timeSlot }];
   });
 
   const isEntregada = (item: AgendaEntrega) =>
@@ -39,6 +55,9 @@ export default function AgendaEntregaTable({
 
   const isEmptyRow = (row: AgendaDisplayRow): row is EmptyAgendaRow =>
     "_empty" in row && row._empty === true;
+
+  const isBlockedRow = (row: AgendaDisplayRow): row is BlockedAgendaRow =>
+    "_blocked" in row && row._blocked === true;
 
   const formatOperacion = (item: AgendaEntrega) => {
     if (item.siac.operacion) {
@@ -89,6 +108,36 @@ export default function AgendaEntregaTable({
           </thead>
           <tbody>
             {displayRows.map((row, index) => {
+              if (isBlockedRow(row)) {
+                return (
+                  <tr key={`blocked-${row.horaAgenda}-${index}`} className="border-b border-gray-400 align-middle bg-gray-200 text-gray-600">
+                    <td className="px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none">
+                      <div className="flex items-center justify-center">{row.horaAgenda}</div>
+                    </td>
+                    <td className="bg-gray-300 px-3 py-3 text-center align-middle text-[1rem] font-bold leading-none">
+                      <div className="flex items-center justify-center uppercase tracking-wide">
+                        Bloqueado
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-[12px] font-semibold uppercase leading-tight">
+                        Horario bloqueado
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight">
+                      <div className="flex items-center justify-center">-</div>
+                    </td>
+                    <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none">
+                      <div className="flex items-center justify-center">-</div>
+                    </td>
+                    <td className="px-3 py-3 align-middle text-[11px] font-medium leading-tight">
+                      <div className="min-w-[160px] uppercase text-gray-600">No disponible para agendar</div>
+                    </td>
+                    {canManage ? <td className="px-3 py-3 align-middle" /> : null}
+                  </tr>
+                );
+              }
+
               if (isEmptyRow(row)) {
                 return (
                   <tr key={`empty-${row.horaAgenda}-${index}`} className="border-b border-gray-400 align-middle bg-white">

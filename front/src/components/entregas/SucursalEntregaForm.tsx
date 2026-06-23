@@ -8,6 +8,7 @@ type SucursalEntregaFormValues = {
   nombre: string;
   direccion: string;
   activa: boolean;
+  horariosHabilitados: string[];
   observaciones: string;
 };
 
@@ -23,6 +24,13 @@ function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
+
+const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
 
 export default function SucursalEntregaForm({
   open,
@@ -41,6 +49,7 @@ export default function SucursalEntregaForm({
       nombre: "",
       direccion: "",
       activa: true,
+      horariosHabilitados: TIME_SLOT_OPTIONS,
       observaciones: "",
     },
   });
@@ -52,6 +61,7 @@ export default function SucursalEntregaForm({
       nombre: item?.nombre ?? "",
       direccion: item?.direccion ?? "",
       activa: item?.activa ?? true,
+      horariosHabilitados: item ? item.horariosHabilitados : TIME_SLOT_OPTIONS,
       observaciones: item?.observaciones ?? "",
     });
   }, [item, open, reset]);
@@ -109,6 +119,28 @@ export default function SucursalEntregaForm({
                         className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
                         {...register("direccion")}
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        Horarios habilitados
+                      </label>
+                      <div className="grid grid-cols-3 gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-4">
+                        {TIME_SLOT_OPTIONS.map((timeSlot) => (
+                          <label
+                            key={timeSlot}
+                            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800"
+                          >
+                            <input
+                              type="checkbox"
+                              value={timeSlot}
+                              {...register("horariosHabilitados")}
+                              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                            />
+                            <span>{timeSlot}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="space-y-2">

@@ -29,6 +29,7 @@ export type SucursalEntregaPayload = {
   nombre: string;
   direccion?: string;
   activa?: boolean;
+  horariosHabilitados?: string[];
   observaciones?: string;
 };
 
