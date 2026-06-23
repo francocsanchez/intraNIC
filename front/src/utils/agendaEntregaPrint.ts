@@ -136,8 +136,8 @@ export function openAgendaEntregaPrintView(params: {
         <title>${escapeHtml(title)}</title>
         <style>
           @page {
-            size: A4 landscape;
-            margin: 8mm;
+            size: A4 portrait;
+            margin: 7mm;
           }
 
           * {
@@ -159,23 +159,24 @@ export function openAgendaEntregaPrintView(params: {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            gap: 8px;
           }
 
           .header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
           }
 
           .header p {
             margin: 3px 0 0;
-            font-size: 11px;
+            font-size: 10px;
             color: #4b5563;
           }
 
           .meta {
             text-align: right;
-            font-size: 11px;
+            font-size: 10px;
           }
 
           table {
@@ -187,17 +188,17 @@ export function openAgendaEntregaPrintView(params: {
           thead th {
             background: #b7b7b7;
             color: #000;
-            font-size: 11px;
-            padding: 6px 8px;
+            font-size: 9px;
+            padding: 5px 5px;
             text-transform: uppercase;
             border: 1px solid #9ca3af;
           }
 
           tbody td {
             border: 1px solid #9ca3af;
-            padding: 6px 8px;
+            padding: 4px 5px;
             vertical-align: middle;
-            font-size: 10px;
+            font-size: 8px;
           }
 
           tbody tr.entregada td {
@@ -210,13 +211,13 @@ export function openAgendaEntregaPrintView(params: {
           }
 
           .hora {
-            width: 9%;
-            font-size: 16px;
+            width: 11%;
+            font-size: 12px;
           }
 
           .interno {
-            width: 12%;
-            font-size: 16px;
+            width: 14%;
+            font-size: 12px;
             background: #f3f4f6;
           }
 
@@ -226,30 +227,30 @@ export function openAgendaEntregaPrintView(params: {
 
           .vendedor {
             width: 18%;
-            font-size: 12px;
+            font-size: 9px;
           }
 
           .operacion {
             width: 12%;
-            font-size: 15px;
+            font-size: 11px;
           }
 
           .datos {
-            width: 49%;
+            width: 45%;
             vertical-align: top;
           }
 
           .cliente {
             border-bottom: 1px dotted #9ca3af;
             padding-bottom: 2px;
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
           }
 
           .modelo {
             margin-top: 2px;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: 700;
             text-transform: uppercase;
             color: #374151;
@@ -259,9 +260,9 @@ export function openAgendaEntregaPrintView(params: {
             margin-top: 2px;
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 3px;
             align-items: center;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: 700;
             text-transform: uppercase;
           }
@@ -270,21 +271,21 @@ export function openAgendaEntregaPrintView(params: {
             display: inline-flex;
             align-items: center;
             border-radius: 6px;
-            padding: 2px 6px;
-            font-size: 9px;
+            padding: 2px 4px;
+            font-size: 8px;
             line-height: 1;
             font-weight: 700;
           }
 
           .obs {
             margin-top: 3px;
-            font-size: 9px;
+            font-size: 8px;
             color: #4b5563;
           }
 
           .equipado {
-            margin-top: 4px;
-            font-size: 9px;
+            margin-top: 3px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 0.04em;
           }
