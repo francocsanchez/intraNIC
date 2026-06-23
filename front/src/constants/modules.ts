@@ -2,6 +2,7 @@ export const moduleKeys = [
   "convencional",
   "usados",
   "liess",
+  "callCenter",
   "preventas",
   "proformas",
   "reventaPendientes",
@@ -18,6 +19,7 @@ export const moduleKeys = [
   "ranking",
   "promedio",
   "patentamientos",
+  "agendaEntrega",
   "usuarios",
   "configuracion",
   "testDrive",
@@ -33,6 +35,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   convencional: "Convencional",
   usados: "Usados",
   liess: "Liess",
+  callCenter: "Call Center",
   preventas: "Preventas",
   proformas: "Proformas",
   reventaPendientes: "Reventa pendientes",
@@ -49,6 +52,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   ranking: "Ranking",
   promedio: "Promedio",
   patentamientos: "Patentamientos",
+  agendaEntrega: "Agenda de entrega",
   usuarios: "Usuarios",
   configuracion: "Configuracion",
   testDrive: "TestDrive",
@@ -64,6 +68,10 @@ export const moduleSections: Array<{
   {
     title: "Stock de unidades",
     modules: ["convencional", "usados", "liess"],
+  },
+  {
+    title: "Call Center",
+    modules: ["callCenter"],
   },
   {
     title: "Comercial",
@@ -88,6 +96,10 @@ export const moduleSections: Array<{
   {
     title: "Analisis",
     modules: ["operaciones", "ranking", "promedio", "patentamientos"],
+  },
+  {
+    title: "Entregas",
+    modules: ["agendaEntrega"],
   },
   {
     title: "Sistema",

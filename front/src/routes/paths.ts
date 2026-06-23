@@ -4,6 +4,11 @@ export const paths = {
   notFound: "/404",
   miPerfil: "/mi-perfil",
   noAutorizado: "/no-autorizado",
+  callCenter: {
+    home: "/call-center",
+    importar: "/call-center/importador",
+    origenesDatos: "/call-center/origenes-datos",
+  },
   entregas: {
     agenda: "/entregas/agenda",
     sucursales: "/entregas/sucursales",

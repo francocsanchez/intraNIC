@@ -13,7 +13,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     files: 1,
-    fileSize: 15 * 1024 * 1024,
+    fileSize: 50 * 1024 * 1024,
   },
 });
 
@@ -22,7 +22,7 @@ const singleFileUpload = (req: Request, res: Response, next: NextFunction) => {
     if (error) {
       const message =
         error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE"
-          ? "El archivo supera el limite permitido de 15 MB"
+          ? "El archivo supera el limite permitido de 50 MB"
           : "No se pudo recibir el archivo seleccionado";
 
       res.status(400).json({ error: message });
