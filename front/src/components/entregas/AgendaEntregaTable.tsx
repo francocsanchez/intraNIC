@@ -9,14 +9,36 @@ type AgendaEntregaTableProps = {
   canManage: boolean;
 };
 
+type EmptyAgendaRow = {
+  _empty: true;
+  horaAgenda: string;
+};
+
+type AgendaDisplayRow = AgendaEntrega | EmptyAgendaRow;
+
+const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
+  const totalMinutes = 9 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
+
 export default function AgendaEntregaTable({
   items,
   onEdit,
   onDelete,
   canManage,
 }: AgendaEntregaTableProps) {
+  const displayRows: AgendaDisplayRow[] = TIME_SLOT_OPTIONS.flatMap((timeSlot): AgendaDisplayRow[] => {
+    const matchingItems = items.filter((item) => item.horaAgenda === timeSlot);
+    return matchingItems.length ? matchingItems : [{ _empty: true, horaAgenda: timeSlot }];
+  });
+
   const isEntregada = (item: AgendaEntrega) =>
     item.siac.estado === 35 || item.siac.estado === 40;
+
+  const isEmptyRow = (row: AgendaDisplayRow): row is EmptyAgendaRow =>
+    "_empty" in row && row._empty === true;
 
   const formatOperacion = (item: AgendaEntrega) => {
     if (item.siac.operacion) {
@@ -66,7 +88,38 @@ export default function AgendaEntregaTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => {
+            {displayRows.map((row, index) => {
+              if (isEmptyRow(row)) {
+                return (
+                  <tr key={`empty-${row.horaAgenda}-${index}`} className="border-b border-gray-400 align-middle bg-white">
+                    <td className="px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none text-black">
+                      <div className="flex items-center justify-center">{row.horaAgenda}</div>
+                    </td>
+                    <td className="bg-[#F3F3F3] px-3 py-3 text-center align-middle text-[1.15rem] font-bold leading-none text-black">
+                      <div className="min-h-[20px]" />
+                    </td>
+                    <td className="px-4 py-3 text-black">
+                      <div className="space-y-0.5">
+                        <div className="min-h-[14px] border-b border-dotted border-gray-400 pb-0.5" />
+                        <div className="min-h-[14px]" />
+                        <div className="min-h-[14px]" />
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight text-black">
+                      <div className="min-h-[20px]" />
+                    </td>
+                    <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none text-black">
+                      <div className="min-h-[20px]" />
+                    </td>
+                    <td className="px-3 py-3 align-middle text-[11px] leading-tight text-gray-700">
+                      <div className="min-w-[160px] min-h-[20px]" />
+                    </td>
+                    {canManage ? <td className="px-3 py-3 align-middle" /> : null}
+                  </tr>
+                );
+              }
+
+              const item = row;
               const datos = formatDatos(item);
               const entregada = isEntregada(item);
 
@@ -173,14 +226,6 @@ export default function AgendaEntregaTable({
                 </tr>
               );
             })}
-
-            {!items.length ? (
-              <tr>
-                <td colSpan={canManage ? 7 : 6} className="px-6 py-12 text-center text-sm text-gray-500">
-                  No hay agendas de entrega para los filtros seleccionados.
-                </td>
-              </tr>
-            ) : null}
           </tbody>
         </table>
       </div>

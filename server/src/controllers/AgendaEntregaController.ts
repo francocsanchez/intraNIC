@@ -49,7 +49,7 @@ const buildUserName = (req: Request) =>
 
 const userHasAgendaWriteAccess = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
-  return roles.includes("superadmin") || roles.includes("entregador");
+  return roles.includes("superadmin") || roles.includes("coordinador");
 };
 
 const getAssignedSucursalEntregaId = (req: Request) =>
@@ -74,14 +74,14 @@ const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
     return null;
   }
 
-  if (!roles.includes("entregador")) {
+  if (!roles.includes("coordinador")) {
     return "No tienes permisos para operar sobre turnos de entrega";
   }
 
   const assignedSucursalId = getAssignedSucursalEntregaId(req);
 
   if (!assignedSucursalId) {
-    return "El usuario entregador no tiene una sucursal de entrega asignada";
+    return "El usuario coordinador no tiene una sucursal de entrega asignada";
   }
 
   if (assignedSucursalId !== sucursalId) {
