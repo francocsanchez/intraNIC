@@ -1,10 +1,11 @@
 import Loading from "@/components/Loading";
-import { hasModulePathAccess, hasPathAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
+  Headset,
   CalendarDays,
   FileText,
   FolderCog,
@@ -63,13 +64,31 @@ export default function Inicio() {
       ],
     },
     {
+      title: "Call Center",
+      icon: Headset,
+      items: [
+        {
+          label: "Importador de datos",
+          to: paths.callCenter.importar,
+          enabled: hasModulePathAccess(user, "callCenter", paths.callCenter.importar),
+          icon: FileText,
+        },
+        {
+          label: "Origenes de datos",
+          to: paths.callCenter.origenesDatos,
+          enabled: hasModulePathAccess(user, "callCenter", paths.callCenter.origenesDatos),
+          icon: Cog,
+        },
+      ],
+    },
+    {
       title: "Entregas",
       icon: CalendarDays,
       items: [
         {
           label: "Agenda de entrega",
           to: paths.entregas.agenda,
-          enabled: hasPathAccess(user, paths.entregas.agenda),
+          enabled: hasModulePathAccess(user, "agendaEntrega", paths.entregas.agenda),
           icon: CalendarDays,
         },
       ],

@@ -1341,3 +1341,64 @@ export type SucursalEntregaResponse = z.infer<typeof sucursalEntregaResponseSche
 export type AgendaEntregaListResponse = z.infer<typeof agendaEntregaListResponseSchema>;
 export type AgendaEntregaLog = z.infer<typeof agendaEntregaLogSchema>;
 export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListResponseSchema>;
+
+//**************************** */
+// CALL CENTER
+//**************************** */
+
+export const callCenterImportDataSchema = z.object({
+  worksheetName: z.string(),
+  importedRows: z.number(),
+  createdOrigins: z.number(),
+});
+
+export const callCenterImportResponseSchema = z.object({
+  data: callCenterImportDataSchema,
+  message: z.string(),
+});
+
+export const callCenterSummaryOriginSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const callCenterDataOriginSchema = z.object({
+  _id: z.string(),
+  origen: z.string(),
+  origenResumidoId: z.string().nullable(),
+  origenResumido: callCenterSummaryOriginSchema.nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const callCenterDataOriginsResponseSchema = z.object({
+  data: z.array(callCenterDataOriginSchema),
+  message: z.string(),
+});
+
+export const callCenterOriginResponseSchema = z.object({
+  data: callCenterDataOriginSchema,
+  message: z.string(),
+});
+
+export const callCenterSummaryOriginsResponseSchema = z.object({
+  data: z.array(callCenterSummaryOriginSchema),
+  message: z.string(),
+});
+
+export const callCenterSummaryOriginResponseSchema = z.object({
+  data: callCenterSummaryOriginSchema,
+  message: z.string(),
+});
+
+export type CallCenterImportData = z.infer<typeof callCenterImportDataSchema>;
+export type CallCenterImportResponse = z.infer<typeof callCenterImportResponseSchema>;
+export type CallCenterSummaryOrigin = z.infer<typeof callCenterSummaryOriginSchema>;
+export type CallCenterDataOrigin = z.infer<typeof callCenterDataOriginSchema>;
+export type CallCenterDataOriginsResponse = z.infer<typeof callCenterDataOriginsResponseSchema>;
+export type CallCenterOriginResponse = z.infer<typeof callCenterOriginResponseSchema>;
+export type CallCenterSummaryOriginsResponse = z.infer<typeof callCenterSummaryOriginsResponseSchema>;
+export type CallCenterSummaryOriginResponse = z.infer<typeof callCenterSummaryOriginResponseSchema>;

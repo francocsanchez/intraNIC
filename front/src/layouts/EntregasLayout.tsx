@@ -1,5 +1,5 @@
 import BaseAppLayout from "./BaseAppLayout";
-import { hasSuperAdminRole } from "@/helpers/access";
+import { hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { Link, useLocation } from "react-router-dom";
 import { paths } from "@/routes/paths";
@@ -27,7 +27,9 @@ export default function EntregasLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
   const visibleNavItems = navItems.filter((item) =>
-    item.to === paths.entregas.sucursales ? hasSuperAdminRole(user) : true,
+    item.to === paths.entregas.sucursales
+      ? hasSuperAdminRole(user) && hasModulePathAccess(user, "agendaEntrega", item.to)
+      : hasModulePathAccess(user, "agendaEntrega", item.to),
   );
 
   return (

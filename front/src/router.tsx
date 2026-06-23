@@ -7,6 +7,7 @@ const NICLayout = lazy(() => import("./layouts/NICLayout"));
 const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const PatentamientosLayout = lazy(() => import("./layouts/PatentamientosLayout"));
+const CallCenterLayout = lazy(() => import("./layouts/CallCenterLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
 const GestionConvencionalLayout = lazy(() => import("./layouts/GestionConvencionalLayout"));
@@ -73,6 +74,8 @@ const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosP
 const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"));
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
+const CallCenterImportView = lazy(() => import("./views/callCenter/CallCenterImportView"));
+const CallCenterOriginsView = lazy(() => import("./views/callCenter/CallCenterOriginsView"));
 
 export default function Router() {
   return (
@@ -90,10 +93,20 @@ export default function Router() {
             </Route>
             <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
 
-            <Route element={<EntregasLayout />}>
-              <Route path={paths.entregas.agenda} element={<AgendaEntregaView />} />
-              <Route path={paths.entregas.sucursales} element={<SucursalesEntregaView />} />
-              <Route path={paths.entregas.registros} element={<AgendaEntregaRegistrosView />} />
+            <Route element={<ModuleProtectedRoute allowedModules={["callCenter"]} />}>
+              <Route element={<CallCenterLayout />}>
+                <Route path={paths.callCenter.home} element={<Navigate to={paths.callCenter.importar} replace />} />
+                <Route path={paths.callCenter.importar} element={<CallCenterImportView />} />
+                <Route path={paths.callCenter.origenesDatos} element={<CallCenterOriginsView />} />
+              </Route>
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["agendaEntrega"]} />}>
+              <Route element={<EntregasLayout />}>
+                <Route path={paths.entregas.agenda} element={<AgendaEntregaView />} />
+                <Route path={paths.entregas.sucursales} element={<SucursalesEntregaView />} />
+                <Route path={paths.entregas.registros} element={<AgendaEntregaRegistrosView />} />
+              </Route>
             </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["usuarios"]} />}>
