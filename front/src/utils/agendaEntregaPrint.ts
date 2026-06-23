@@ -68,9 +68,34 @@ const formatOperacion = (item: AgendaEntrega) => {
   return "-";
 };
 
+const TIME_SLOT_OPTIONS = Array.from({ length: 18 }, (_, index) => {
+  const totalMinutes = 9 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
+
 const buildRows = (items: AgendaEntrega[]) =>
-  items
-    .map((item) => {
+  TIME_SLOT_OPTIONS.flatMap((timeSlot) => {
+    const matchingItems = items.filter((item) => item.horaAgenda === timeSlot);
+
+    if (!matchingItems.length) {
+      return `
+        <tr>
+          <td class="hora">${escapeHtml(timeSlot)}</td>
+          <td class="interno"></td>
+          <td class="datos">
+            <div class="cliente">&nbsp;</div>
+            <div class="modelo">&nbsp;</div>
+            <div class="detalle">&nbsp;</div>
+          </td>
+          <td class="vendedor"></td>
+          <td class="operacion"></td>
+        </tr>
+      `;
+    }
+
+    return matchingItems.map((item) => {
       const identificado = (item.siac.chasis ?? item.siac.serie ?? item.siac.nroFabricacion ?? "-").trim();
       const entregada = item.siac.estado === 35 || item.siac.estado === 40;
       const colorStyle = getInlineBadgeStyle(item.siac.color);
@@ -98,8 +123,8 @@ const buildRows = (items: AgendaEntrega[]) =>
           <td class="operacion">${escapeHtml(formatOperacion(item))}</td>
         </tr>
       `;
-    })
-    .join("");
+    });
+  }).join("");
 
 export function openAgendaEntregaPrintView(params: {
   items: AgendaEntrega[];

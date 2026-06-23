@@ -6,7 +6,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "entregador"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -150,7 +150,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.admin.configuracionConvencionalEditar,
     paths.admin.configuracionUsadosEditar,
   ],
-  entregador: [
+  coordinador: [
     paths.home,
     paths.miPerfil,
     paths.noAutorizado,
@@ -254,5 +254,5 @@ export function hasEntregaAgendaManageAccess(user: AuthUser) {
     return true;
   }
 
-  return getNormalizedRoles(user).includes("entregador");
+  return getNormalizedRoles(user).includes("coordinador");
 }

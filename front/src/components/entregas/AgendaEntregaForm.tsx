@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type AgendaEntregaFormValues = {
-  interno: number;
+  interno?: number;
   sucursal: string;
   fechaAgenda: string;
   horaAgenda: string;
@@ -66,7 +66,7 @@ export default function AgendaEntregaForm({
     formState: { errors },
   } = useForm<AgendaEntregaFormValues>({
     defaultValues: {
-      interno: 0,
+      interno: undefined,
       sucursal: "",
       fechaAgenda: "",
       horaAgenda: "",
@@ -82,7 +82,7 @@ export default function AgendaEntregaForm({
     const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
 
     reset({
-      interno: item?.interno ?? 0,
+      interno: item?.interno ?? undefined,
       sucursal: item?.sucursal?._id ?? defaultSucursal,
       fechaAgenda: item?.fechaAgenda ?? "",
       horaAgenda: item?.horaAgenda ?? "",
@@ -218,7 +218,9 @@ export default function AgendaEntregaForm({
                             required: "El interno es obligatorio",
                             valueAsNumber: true,
                             validate: (value) =>
-                              Number.isInteger(value) && value > 0 ? true : "Ingresa un interno valido",
+                              typeof value === "number" && Number.isInteger(value) && value > 0
+                                ? true
+                                : "Ingresa un interno valido",
                           })}
                         />
                         <FieldError message={errors.interno?.message} />
@@ -259,7 +261,7 @@ export default function AgendaEntregaForm({
                         <FieldError message={errors.sucursal?.message} />
                         {!isSuperAdmin ? (
                           <p className="text-xs text-gray-500">
-                            Como usuario entregador solo puedes operar turnos de tu sucursal asignada.
+                            Como usuario coordinador solo puedes operar turnos de tu sucursal asignada.
                           </p>
                         ) : null}
                       </div>
