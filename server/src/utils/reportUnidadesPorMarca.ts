@@ -7,6 +7,7 @@ export type UnidadRow = {
   anio: number;
   precioVenta: number;
   fechaRecepcion: string;
+  dominio: string | null;
   kilometros: number;
 };
 

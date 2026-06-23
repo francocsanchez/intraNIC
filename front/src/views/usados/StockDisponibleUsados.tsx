@@ -205,6 +205,7 @@ export default function StockDisponibleUsados() {
             <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Dominio</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
@@ -219,6 +220,7 @@ export default function StockDisponibleUsados() {
               {itemsFiltrados.map((item) => (
                 <tr key={`${item.interno}-${item.marca}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
+                  <td className="px-4 py-2 text-gray-700">{item.dominio || "-"}</td>
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
                   </td>

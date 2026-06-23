@@ -8,6 +8,7 @@ SELECT
 	anexusa.aus_anio as anio,
 	anexusa.aus_precio as precioVenta,
 	anexusa.aus_fecrep as fechaRecepcion,
+    anexusa.aus_dominio as dominio,
 	anexusa.aus_km as kilometros
 FROM
 	reserva

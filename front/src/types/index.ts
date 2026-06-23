@@ -358,6 +358,7 @@ export const unidadRowSchema = z.object({
   anio: z.number(),
   precioVenta: z.number(),
   fechaRecepcion: z.string().nullable(),
+  dominio: z.string().nullable(),
   kilometros: z.number(),
 });
 
