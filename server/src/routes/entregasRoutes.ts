@@ -14,6 +14,7 @@ router.get("/agendas", AgendaEntregaController.list);
 router.get("/agendas/:id", AgendaEntregaController.getById);
 router.post("/agendas", AgendaEntregaController.create);
 router.put("/agendas/:id", AgendaEntregaController.update);
+router.patch("/agendas/:id/entregada-por", AgendaEntregaController.toggleEntregadaPor);
 router.delete("/agendas/:id", AgendaEntregaController.remove);
 
 router.get("/sucursales", SucursalEntregaController.list);

@@ -6,7 +6,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -54,6 +54,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.usados.stockDisponible,
     paths.usados.misOperaciones,
     /^\/liess\/stock\/(nuevos|usados)$/,
+    paths.entregas.registros,
   ],
   supervisor: [
     paths.home,
@@ -87,6 +88,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
     paths.admin.testDrive,
+    paths.entregas.registros,
   ],
   gerente: [
     paths.home,
@@ -123,6 +125,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     /^\/liess\/stock\/(nuevos|usados)$/,
     paths.analisis.operaciones,
     paths.admin.testDrive,
+    paths.entregas.registros,
   ],
   administracion: [
     paths.home,
@@ -136,6 +139,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.administracion.pedidoUnidadesRegistros,
     paths.administracion.facturasAnticipo,
     paths.convencional.pedidoUnidades,
+    paths.entregas.registros,
   ],
   stock: [
     paths.home,
@@ -167,6 +171,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.admin.configuracion,
     paths.admin.configuracionConvencionalEditar,
     paths.admin.configuracionUsadosEditar,
+    paths.entregas.registros,
   ],
   coordinador: [
     paths.home,
@@ -176,7 +181,13 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.callCenter.importar,
     paths.callCenter.origenesDatos,
     paths.entregas.agenda,
-    paths.entregas.sucursales,
+    paths.entregas.registros,
+  ],
+  entrega: [
+    paths.home,
+    paths.miPerfil,
+    paths.noAutorizado,
+    paths.entregas.agenda,
     paths.entregas.registros,
   ],
 };
@@ -277,4 +288,12 @@ export function hasEntregaAgendaManageAccess(user: AuthUser) {
   }
 
   return getNormalizedRoles(user).includes("coordinador");
+}
+
+export function hasEntregaAgendaToggleAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("entrega");
 }

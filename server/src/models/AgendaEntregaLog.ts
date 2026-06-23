@@ -1,6 +1,12 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
-export const AGENDA_ENTREGA_LOG_ACTIONS = ["CREADA", "MODIFICADA", "ELIMINADA"] as const;
+export const AGENDA_ENTREGA_LOG_ACTIONS = [
+  "CREADA",
+  "MODIFICADA",
+  "ELIMINADA",
+  "ENTREGA_MARCADA",
+  "ENTREGA_DESMARCADA",
+] as const;
 export type AgendaEntregaLogAction = (typeof AGENDA_ENTREGA_LOG_ACTIONS)[number];
 
 export interface IAgendaEntregaLog extends Document {

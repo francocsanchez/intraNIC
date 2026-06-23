@@ -21,6 +21,7 @@ type UsuarioFormProps = {
 const roleOptions = [
   { value: "vendedor", label: "Vendedor" },
   { value: "coordinador", label: "Coordinador" },
+  { value: "entrega", label: "Entrega" },
   { value: "gerente", label: "Gerente" },
   { value: "supervisor", label: "Supervisor" },
   { value: "superAdmin", label: "Super Admin" },
@@ -114,7 +115,7 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             ))}
           </select>
           <p className="text-xs text-gray-500">
-            Se usara para futuras alertas de entrega y para el rol de usuario coordinador por sucursal.
+            Se usara para futuras alertas de entrega y para los roles de coordinador y entrega por sucursal.
           </p>
           {isLoadingSucursales ? <p className="text-xs text-gray-500">Cargando sucursales de entrega...</p> : null}
           <FieldError message={errors.sucursalEntrega?.message} />

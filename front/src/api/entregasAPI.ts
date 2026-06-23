@@ -110,6 +110,14 @@ export function updateAgendaEntrega(id: string, payload: AgendaEntregaPayload): 
   );
 }
 
+export function toggleAgendaEntregaEntregadaPor(id: string, checked: boolean): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.patch(`/entregas/agendas/${id}/entregada-por`, { checked }),
+    agendaEntregaResponseSchema,
+    "Error al actualizar quien entrego la unidad",
+  );
+}
+
 export async function deleteAgendaEntrega(id: string): Promise<{ message: string }> {
   try {
     const { data } = await api.delete(`/entregas/agendas/${id}`);

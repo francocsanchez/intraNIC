@@ -21,6 +21,10 @@ type AgendaPayload = {
   observaciones?: unknown;
 };
 
+type ToggleEntregadaPorPayload = {
+  checked?: unknown;
+};
+
 const OBSERVACIONES_MAX_LENGTH = 1000;
 const ENTREGADO_STATES = new Set([35, 40]);
 const ALLOWED_TIME_SLOTS = new Set(
@@ -66,6 +70,11 @@ const userHasAgendaWriteAccess = (req: Request) => {
   return roles.includes("superadmin") || roles.includes("coordinador");
 };
 
+const userHasEntregadaPorToggleAccess = (req: Request) => {
+  const roles = normalizeRoles(req.user?.role);
+  return roles.includes("superadmin") || roles.includes("entrega");
+};
+
 const getAssignedSucursalEntregaId = (req: Request) =>
   req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
 
@@ -76,6 +85,38 @@ const ensureAgendaWriteAccess = (req: Request) => {
 
   if (!userHasAgendaWriteAccess(req)) {
     return "No tienes permisos para crear, editar o eliminar turnos de entrega";
+  }
+
+  return null;
+};
+
+const ensureEntregadaPorToggleAccess = (req: Request, sucursalId: string) => {
+  if (!req.user?._id) {
+    return "Usuario no autenticado";
+  }
+
+  if (!userHasEntregadaPorToggleAccess(req)) {
+    return "No tienes permisos para marcar quien entrego la unidad";
+  }
+
+  const roles = normalizeRoles(req.user?.role);
+
+  if (roles.includes("superadmin")) {
+    return null;
+  }
+
+  if (!roles.includes("entrega")) {
+    return "No tienes permisos para marcar quien entrego la unidad";
+  }
+
+  const assignedSucursalId = getAssignedSucursalEntregaId(req);
+
+  if (!assignedSucursalId) {
+    return "El usuario entrega no tiene una sucursal de entrega asignada";
+  }
+
+  if (assignedSucursalId !== sucursalId) {
+    return "Solo puedes marcar entregas de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -136,6 +177,10 @@ const formatAgendaRow = (item: any, lookup?: AgendaEntregaLookup | null, lookupE
   horaAgenda: item.horaAgenda,
   equipado: Boolean(item.equipado),
   entregaUsado: Boolean(item.entregaUsado),
+  entregadaPorMarcada: Boolean(item.entregadaPorMarcada),
+  entregadaPorUser: item.entregadaPorUser ? String(item.entregadaPorUser) : null,
+  entregadaPorNombre: item.entregadaPorNombre ?? "",
+  entregadaPorFecha: item.entregadaPorFecha ?? null,
   observaciones: item.observaciones ?? "",
   createdBy: String(item.createdBy),
   createdByName: item.createdByName,
@@ -568,6 +613,94 @@ export class AgendaEntregaController {
       }
 
       return res.status(500).json({ message: "Error al actualizar la agenda de entrega" });
+    }
+  };
+
+  static toggleEntregadaPor = async (req: Request, res: Response) => {
+    if (!req.user?._id) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+
+    const agendaId = String(req.params.id);
+    const { checked } = (req.body ?? {}) as ToggleEntregadaPorPayload;
+
+    if (typeof checked !== "boolean") {
+      return res.status(400).json({ error: "El campo checked es obligatorio" });
+    }
+
+    try {
+      const agenda = await AgendaEntrega.findById(agendaId)
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      if (!agenda) {
+        return res.status(404).json({ error: "Agenda no encontrada" });
+      }
+
+      const sucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
+      const accessError = ensureEntregadaPorToggleAccess(req, sucursalId);
+      if (accessError) {
+        return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+      }
+
+      const lookup = await lookupAgendaEntregaInterno(agenda.interno);
+      if (!lookup) {
+        return res.status(400).json({ error: "No se pudo obtener informacion actualizada desde SIAC" });
+      }
+
+      if (!ENTREGADO_STATES.has(Number(lookup.estado))) {
+        return res.status(400).json({
+          error: `El interno ${agenda.interno} todavia no figura entregado en SIAC`,
+        });
+      }
+
+      const alreadyChecked = Boolean(agenda.entregadaPorMarcada);
+      if (alreadyChecked === checked) {
+        const current = formatAgendaRow(agenda, lookup);
+        return res.status(200).json({
+          message: checked ? "La entrega ya estaba marcada" : "La entrega ya estaba desmarcada",
+          data: current,
+        });
+      }
+
+      const usuarioNombre = buildUserName(req);
+      const updatePayload = checked
+        ? {
+            entregadaPorMarcada: true,
+            entregadaPorUser: new mongoose.Types.ObjectId(req.user._id),
+            entregadaPorNombre: usuarioNombre,
+            entregadaPorFecha: new Date(),
+          }
+        : {
+            entregadaPorMarcada: false,
+            entregadaPorUser: null,
+            entregadaPorNombre: "",
+            entregadaPorFecha: null,
+          };
+
+      const updated = await AgendaEntrega.findByIdAndUpdate(agendaId, updatePayload, { new: true })
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      await createAgendaLog({
+        agendaEntrega: agendaId,
+        interno: agenda.interno,
+        accion: checked ? "ENTREGA_MARCADA" : "ENTREGA_DESMARCADA",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: checked
+          ? `Entrega marcada por ${usuarioNombre}`
+          : `Entrega desmarcada por ${usuarioNombre}`,
+      });
+
+      return res.status(200).json({
+        message: checked ? "Entrega marcada correctamente" : "Entrega desmarcada correctamente",
+        data: updated ? formatAgendaRow(updated, lookup) : null,
+      });
+    } catch (error) {
+      logError("AgendaEntregaController.toggleEntregadaPor");
+      console.error(error);
+      return res.status(500).json({ message: "Error al actualizar la marca de entrega" });
     }
   };
 

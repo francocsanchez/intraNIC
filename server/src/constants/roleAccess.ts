@@ -55,7 +55,7 @@ export type RoleAccessKey =
   | "sistema.configuracion"
   | "sistema.testDrive";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "entrega"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -222,6 +222,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "preventas.create",
     "preventas.assign",
   ]),
+  entrega: new Set<RoleAccessKey>([]),
 };
 
 export const canAccessByRole = (roles: unknown, accessKey: RoleAccessKey) => {

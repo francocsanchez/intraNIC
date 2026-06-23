@@ -5,8 +5,11 @@ import { Pencil, Trash2, AlertTriangle, Package, CarFront } from "lucide-react";
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
   horariosHabilitados: string[];
+  canToggleEntregadaPor: boolean;
+  togglePendingId: string | null;
   onEdit: (item: AgendaEntrega) => void;
   onDelete: (item: AgendaEntrega) => void;
+  onToggleEntregadaPor: (item: AgendaEntrega, checked: boolean) => void;
   canManage: boolean;
 };
 
@@ -32,8 +35,11 @@ const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
 export default function AgendaEntregaTable({
   items,
   horariosHabilitados,
+  canToggleEntregadaPor,
+  togglePendingId,
   onEdit,
   onDelete,
+  onToggleEntregadaPor,
   canManage,
 }: AgendaEntregaTableProps) {
   const enabledTimeSlots = new Set(horariosHabilitados);
@@ -103,6 +109,7 @@ export default function AgendaEntregaTable({
               <th className="px-3 py-3 text-center">Vendedor</th>
               <th className="px-3 py-3 text-center">Operacion</th>
               <th className="px-3 py-3 text-center">Observaciones</th>
+              <th className="px-3 py-3 text-center">Entregada por</th>
               {canManage ? <th className="px-3 py-3 text-center">Acciones</th> : null}
             </tr>
           </thead>
@@ -132,6 +139,9 @@ export default function AgendaEntregaTable({
                     </td>
                     <td className="px-3 py-3 align-middle text-[11px] font-medium leading-tight">
                       <div className="min-w-[160px] uppercase text-gray-600">No disponible para agendar</div>
+                    </td>
+                    <td className="px-3 py-3 text-center align-middle text-[11px] font-medium uppercase leading-tight">
+                      -
                     </td>
                     {canManage ? <td className="px-3 py-3 align-middle" /> : null}
                   </tr>
@@ -163,6 +173,9 @@ export default function AgendaEntregaTable({
                     <td className="px-3 py-3 align-middle text-[11px] leading-tight text-gray-700">
                       <div className="min-w-[160px] min-h-[20px]" />
                     </td>
+                    <td className="px-3 py-3 text-center align-middle text-[11px] leading-tight text-gray-700">
+                      <div className="min-h-[20px]" />
+                    </td>
                     {canManage ? <td className="px-3 py-3 align-middle" /> : null}
                   </tr>
                 );
@@ -171,6 +184,7 @@ export default function AgendaEntregaTable({
               const item = row;
               const datos = formatDatos(item);
               const entregada = isEntregada(item);
+              const togglePending = togglePendingId === item._id;
 
               return (
                 <tr
@@ -243,6 +257,31 @@ export default function AgendaEntregaTable({
                     <div className="line-clamp-3 min-w-[160px]">
                       {item.observaciones?.trim() || "-"}
                     </div>
+                  </td>
+                  <td className="px-3 py-3 text-center align-middle text-[11px] leading-tight text-gray-700">
+                    {entregada ? (
+                      <div className="flex min-w-[170px] flex-col items-center justify-center gap-1">
+                        {canToggleEntregadaPor ? (
+                          <label className="inline-flex items-center gap-2 font-semibold text-gray-800">
+                            <input
+                              type="checkbox"
+                              checked={item.entregadaPorMarcada}
+                              disabled={togglePending}
+                              onChange={(event) => onToggleEntregadaPor(item, event.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:opacity-50"
+                            />
+                            <span>Entregada por</span>
+                          </label>
+                        ) : (
+                          <span className="font-semibold uppercase tracking-wide text-gray-700">Entregada por</span>
+                        )}
+                        <div className="text-center font-medium text-gray-700">
+                          {item.entregadaPorMarcada ? item.entregadaPorNombre || "-" : "-"}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>-</div>
+                    )}
                   </td>
                   {canManage ? (
                     <td className="px-3 py-3 align-middle">

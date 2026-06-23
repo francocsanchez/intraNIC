@@ -6,6 +6,7 @@ export const userRole = {
   SUPERVISOR: "supervisor",
   VENDEDOR: "vendedor",
   COORDINADOR: "coordinador",
+  ENTREGA: "entrega",
   SUPER_ADMIN: "superAdmin",
   STOCK: "stock",
   ADMINISTRACION: "administracion",

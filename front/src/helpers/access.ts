@@ -2,6 +2,7 @@ import type { Usuario } from "@/types/index";
 import { normalizeModules, type ModuleKey } from "@/constants/modules";
 import {
   hasEntregaAgendaManageAccess,
+  hasEntregaAgendaToggleAccess,
   hasPathAccess,
   hasPreventaActionAccess,
   hasRegistroTestDriveActionAccess,
@@ -51,4 +52,11 @@ export function shouldShowMaintenanceForBusiness(user: AuthUser, business: Busin
   return business === "convencional" || business === "usados";
 }
 
-export { hasEntregaAgendaManageAccess, hasPathAccess, hasPreventaActionAccess, hasRegistroTestDriveActionAccess, hasSuperAdminRole };
+export {
+  hasEntregaAgendaManageAccess,
+  hasEntregaAgendaToggleAccess,
+  hasPathAccess,
+  hasPreventaActionAccess,
+  hasRegistroTestDriveActionAccess,
+  hasSuperAdminRole,
+};
