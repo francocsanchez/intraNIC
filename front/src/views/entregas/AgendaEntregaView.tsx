@@ -1,5 +1,6 @@
 import {
   deleteAgendaEntrega,
+  deleteReservaEntrega,
   getAgendasEntrega,
   getSucursalesEntrega,
   toggleAgendaEntregaEntregadaPor,
@@ -7,12 +8,13 @@ import {
 import AgendaEntregaFilters from "@/components/entregas/AgendaEntregaFilters";
 import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import AgendaEntregaTable from "@/components/entregas/AgendaEntregaTable";
+import ReservaEntregaForm from "@/components/entregas/ReservaEntregaForm";
 import { hasEntregaAgendaManageAccess, hasEntregaAgendaToggleAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega } from "@/types/index";
 import { openAgendaEntregaPrintView } from "@/utils/agendaEntregaPrint";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileSpreadsheet, Plus } from "lucide-react";
+import { CalendarPlus, FileSpreadsheet, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -28,8 +30,11 @@ export default function AgendaEntregaView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ fecha: getTodayDate(), sucursalId: "" });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<AgendaEntrega | null>(null);
+  const [turnoModalOpen, setTurnoModalOpen] = useState(false);
+  const [reservaModalOpen, setReservaModalOpen] = useState(false);
+  const [editingTurno, setEditingTurno] = useState<AgendaEntrega | null>(null);
+  const [editingReserva, setEditingReserva] = useState<AgendaEntrega | null>(null);
+  const [reservationToConvert, setReservationToConvert] = useState<AgendaEntrega | null>(null);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["entregas", "agendas", filters],
@@ -41,7 +46,7 @@ export default function AgendaEntregaView() {
     queryFn: getSucursalesEntrega,
   });
 
-  const deleteMutation = useMutation({
+  const deleteTurnoMutation = useMutation({
     mutationFn: deleteAgendaEntrega,
     onSuccess: (response) => {
       toast.success(response.message);
@@ -50,6 +55,17 @@ export default function AgendaEntregaView() {
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
+
+  const deleteReservaMutation = useMutation({
+    mutationFn: deleteReservaEntrega,
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
+      queryClient.invalidateQueries({ queryKey: ["entregas", "logs"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
+
   const toggleEntregadaPorMutation = useMutation({
     mutationFn: ({ id, checked }: { id: string; checked: boolean }) =>
       toggleAgendaEntregaEntregadaPor(id, checked),
@@ -103,18 +119,53 @@ export default function AgendaEntregaView() {
     }
   }, [activeSucursales, filters.sucursalId]);
 
-  const handleCreate = () => {
-    setEditingItem(null);
-    setModalOpen(true);
+  const closeTurnoModal = () => {
+    setTurnoModalOpen(false);
+    setEditingTurno(null);
+    setReservationToConvert(null);
+  };
+
+  const closeReservaModal = () => {
+    setReservaModalOpen(false);
+    setEditingReserva(null);
+  };
+
+  const handleCreateTurno = () => {
+    setEditingTurno(null);
+    setReservationToConvert(null);
+    setTurnoModalOpen(true);
+  };
+
+  const handleCreateReserva = () => {
+    setEditingReserva(null);
+    setReservaModalOpen(true);
   };
 
   const handleEdit = (item: AgendaEntrega) => {
-    setEditingItem(item);
-    setModalOpen(true);
+    if (item.tipoRegistro === "reserva") {
+      setEditingReserva(item);
+      setReservaModalOpen(true);
+      return;
+    }
+
+    setEditingTurno(item);
+    setReservationToConvert(null);
+    setTurnoModalOpen(true);
   };
 
   const handleDelete = (item: AgendaEntrega) => {
-    deleteMutation.mutate(item._id);
+    if (item.tipoRegistro === "reserva") {
+      deleteReservaMutation.mutate(item._id);
+      return;
+    }
+
+    deleteTurnoMutation.mutate(item._id);
+  };
+
+  const handleConvertReservation = (item: AgendaEntrega) => {
+    setEditingTurno(null);
+    setReservationToConvert(item);
+    setTurnoModalOpen(true);
   };
 
   const handleToggleEntregadaPor = (item: AgendaEntrega, checked: boolean) => {
@@ -167,7 +218,6 @@ export default function AgendaEntregaView() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Agenda de entrega</h1>
-         
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -181,14 +231,24 @@ export default function AgendaEntregaView() {
             </button>
 
             {canManageAgenda ? (
-              <button
-                type="button"
-                onClick={handleCreate}
-                className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
-              >
-                <Plus size={16} />
-                Nuevo turno
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleCreateReserva}
+                  className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+                >
+                  <CalendarPlus size={16} />
+                  Nueva reserva
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateTurno}
+                  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+                >
+                  <Plus size={16} />
+                  Nuevo turno
+                </button>
+              </>
             ) : null}
           </div>
         </div>
@@ -209,6 +269,7 @@ export default function AgendaEntregaView() {
           togglePendingId={toggleEntregadaPorMutation.isPending ? (toggleEntregadaPorMutation.variables?.id ?? null) : null}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onConvertReservation={handleConvertReservation}
           onToggleEntregadaPor={handleToggleEntregadaPor}
           canManage={canManageAgenda}
         />
@@ -219,15 +280,21 @@ export default function AgendaEntregaView() {
       )}
 
       {canManageAgenda ? (
-        <AgendaEntregaForm
-          open={modalOpen}
-          item={editingItem}
-          sucursales={sucursales}
-          onClose={() => {
-            setModalOpen(false);
-            setEditingItem(null);
-          }}
-        />
+        <>
+          <AgendaEntregaForm
+            open={turnoModalOpen}
+            item={editingTurno}
+            reservationToConvert={reservationToConvert}
+            sucursales={sucursales}
+            onClose={closeTurnoModal}
+          />
+          <ReservaEntregaForm
+            open={reservaModalOpen}
+            item={editingReserva}
+            sucursales={sucursales}
+            onClose={closeReservaModal}
+          />
+        </>
       ) : null}
     </div>
   );

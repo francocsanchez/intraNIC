@@ -21,20 +21,97 @@ type AgendaPayload = {
   observaciones?: unknown;
 };
 
+type ReservaPayload = {
+  sucursal?: unknown;
+  fechaAgenda?: unknown;
+  horaAgenda?: unknown;
+  observaciones?: unknown;
+};
+
+type ConvertReservaPayload = {
+  interno?: unknown;
+  equipado?: unknown;
+  entregaUsado?: unknown;
+  observaciones?: unknown;
+};
+
 type ToggleEntregadaPorPayload = {
   checked?: unknown;
 };
 
+type SlotValidationResult =
+  | { error: string }
+  | {
+      data: {
+        sucursalId: string;
+        sucursalNombre: string;
+        fechaAgenda: string;
+        horaAgenda: string;
+        currentAgenda: any;
+      };
+    };
+
+type AgendaValidationResult =
+  | { error: string }
+  | {
+      data: {
+        interno: number;
+        tipoOperacion: string;
+        sucursalId: string;
+        sucursalNombre: string;
+        fechaAgenda: string;
+        horaAgenda: string;
+        equipado: boolean;
+        entregaUsado: boolean;
+        observaciones: string;
+        lookup: AgendaEntregaLookup;
+      };
+    };
+
+type ReservaValidationResult =
+  | { error: string }
+  | {
+      data: {
+        sucursalId: string;
+        sucursalNombre: string;
+        fechaAgenda: string;
+        horaAgenda: string;
+        observaciones: string;
+      };
+    };
+
+type AgendaLean = {
+  _id: mongoose.Types.ObjectId | string;
+  tipoRegistro?: "turno" | "reserva";
+  interno?: number | null;
+  tipoOperacion?: string;
+  sucursal: any;
+  fechaAgenda: string;
+  horaAgenda: string;
+  equipado?: boolean;
+  entregaUsado?: boolean;
+  entregadaPorMarcada?: boolean;
+  entregadaPorUser?: mongoose.Types.ObjectId | string | null;
+  entregadaPorNombre?: string;
+  entregadaPorFecha?: Date | null;
+  observaciones?: string;
+  createdBy: mongoose.Types.ObjectId | string;
+  createdByName: string;
+  updatedBy?: mongoose.Types.ObjectId | string | null;
+  updatedByName?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 const OBSERVACIONES_MAX_LENGTH = 1000;
 const ENTREGADO_STATES = new Set([35, 40]);
-const ALLOWED_TIME_SLOTS = new Set(
-  Array.from({ length: 21 }, (_, index) => {
-    const totalMinutes = 8 * 60 + index * 30;
-    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-    const minutes = String(totalMinutes % 60).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  }),
-);
+const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
+  const totalMinutes = 8 * 60 + index * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
+const ALLOWED_TIME_SLOTS = new Set(TIME_SLOT_OPTIONS);
 
 const normalizeText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
@@ -50,7 +127,7 @@ const isValidTimeString = (value: unknown) =>
 
 const getSucursalHorariosHabilitados = (sucursal: any) => {
   if (!Array.isArray(sucursal?.horariosHabilitados)) {
-    return Array.from(ALLOWED_TIME_SLOTS);
+    return TIME_SLOT_OPTIONS;
   }
 
   const available = new Set(
@@ -59,11 +136,14 @@ const getSucursalHorariosHabilitados = (sucursal: any) => {
       .filter((entry: string) => ALLOWED_TIME_SLOTS.has(entry)),
   );
 
-  return Array.from(ALLOWED_TIME_SLOTS).filter((timeSlot) => available.has(timeSlot));
+  return TIME_SLOT_OPTIONS.filter((timeSlot) => available.has(timeSlot));
 };
 
 const buildUserName = (req: Request) =>
   req.user ? `${req.user.lastName}, ${req.user.name}` : "";
+
+const getAssignedSucursalEntregaId = (req: Request) =>
+  req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
 
 const userHasAgendaWriteAccess = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
@@ -75,16 +155,13 @@ const userHasEntregadaPorToggleAccess = (req: Request) => {
   return roles.includes("superadmin") || roles.includes("entrega");
 };
 
-const getAssignedSucursalEntregaId = (req: Request) =>
-  req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
-
 const ensureAgendaWriteAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
   }
 
   if (!userHasAgendaWriteAccess(req)) {
-    return "No tienes permisos para crear, editar o eliminar turnos de entrega";
+    return "No tienes permisos para crear, editar o eliminar turnos o reservas de entrega";
   }
 
   return null;
@@ -130,7 +207,7 @@ const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
   }
 
   if (!roles.includes("coordinador")) {
-    return "No tienes permisos para operar sobre turnos de entrega";
+    return "No tienes permisos para operar sobre turnos o reservas de entrega";
   }
 
   const assignedSucursalId = getAssignedSucursalEntregaId(req);
@@ -140,75 +217,76 @@ const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
   }
 
   if (assignedSucursalId !== sucursalId) {
-    return "Solo puedes operar turnos de tu sucursal de entrega asignada";
+    return "Solo puedes operar registros de tu sucursal de entrega asignada";
   }
 
   return null;
 };
 
-const formatLookupWithFallback = (interno: number) => ({
-  siac: {
-    interno,
-    estado: null,
-    tipoOperacion: "-",
-    cliente: "-",
-    vendedor: "-",
-    version: null,
-    modelo: null,
-    color: "-",
-  },
-  siacSyncError: true,
-  siacSyncMessage: "No se pudo obtener informacion actualizada desde SIAC",
-});
+const getAgendaTipoRegistro = (item: AgendaLean | any) =>
+  item?.tipoRegistro === "reserva" ? "reserva" : "turno";
 
-const formatAgendaRow = (item: any, lookup?: AgendaEntregaLookup | null, lookupError?: string) => ({
-  _id: String(item._id),
-  interno: item.interno,
-  tipoOperacion: item.tipoOperacion,
-  sucursal: item.sucursal && typeof item.sucursal === "object"
-    ? {
-        _id: String(item.sucursal._id),
-        nombre: item.sucursal.nombre,
-        direccion: item.sucursal.direccion ?? "",
-        activa: Boolean(item.sucursal.activa),
-      }
-    : null,
-  fechaAgenda: item.fechaAgenda,
-  horaAgenda: item.horaAgenda,
-  equipado: Boolean(item.equipado),
-  entregaUsado: Boolean(item.entregaUsado),
-  entregadaPorMarcada: Boolean(item.entregadaPorMarcada),
-  entregadaPorUser: item.entregadaPorUser ? String(item.entregadaPorUser) : null,
-  entregadaPorNombre: item.entregadaPorNombre ?? "",
-  entregadaPorFecha: item.entregadaPorFecha ?? null,
-  observaciones: item.observaciones ?? "",
-  createdBy: String(item.createdBy),
-  createdByName: item.createdByName,
-  updatedBy: item.updatedBy ? String(item.updatedBy) : null,
-  updatedByName: item.updatedByName ?? "",
-  createdAt: item.createdAt,
-  updatedAt: item.updatedAt,
-  siac: lookup
-    ? {
-        interno: lookup.interno,
-        estado: lookup.estado,
-        tipoOperacion: lookup.tipoOperacion,
-        operacion: lookup.operacion ?? null,
-        grupo: lookup.grupo ?? null,
-        orden: lookup.orden ?? null,
-        cliente: lookup.cliente,
-        vendedor: lookup.vendedor,
-        version: lookup.version ?? null,
-        modelo: lookup.modelo ?? null,
-        chasis: lookup.chasis ?? null,
-        serie: lookup.serie ?? null,
-        nroFabricacion: lookup.nroFabricacion ?? null,
-        color: lookup.color,
-      }
-    : formatLookupWithFallback(item.interno).siac,
-  siacSyncError: !lookup,
-  siacSyncMessage: !lookup ? lookupError ?? formatLookupWithFallback(item.interno).siacSyncMessage : "",
-});
+const isReservaAgenda = (item: AgendaLean | any) =>
+  getAgendaTipoRegistro(item) === "reserva";
+
+const formatAgendaRow = (item: AgendaLean, lookup?: AgendaEntregaLookup | null, lookupError?: string) => {
+  const tipoRegistro = getAgendaTipoRegistro(item);
+  const hasLookup = tipoRegistro === "turno" && Boolean(lookup);
+
+  return {
+    _id: String(item._id),
+    tipoRegistro,
+    interno: tipoRegistro === "turno" ? item.interno ?? null : null,
+    tipoOperacion: tipoRegistro === "turno" ? item.tipoOperacion ?? "" : "",
+    sucursal: item.sucursal && typeof item.sucursal === "object"
+      ? {
+          _id: String(item.sucursal._id),
+          nombre: item.sucursal.nombre,
+          direccion: item.sucursal.direccion ?? "",
+          activa: Boolean(item.sucursal.activa),
+        }
+      : null,
+    fechaAgenda: item.fechaAgenda,
+    horaAgenda: item.horaAgenda,
+    equipado: tipoRegistro === "turno" ? Boolean(item.equipado) : false,
+    entregaUsado: tipoRegistro === "turno" ? Boolean(item.entregaUsado) : false,
+    entregadaPorMarcada: tipoRegistro === "turno" ? Boolean(item.entregadaPorMarcada) : false,
+    entregadaPorUser:
+      tipoRegistro === "turno" && item.entregadaPorUser ? String(item.entregadaPorUser) : null,
+    entregadaPorNombre: tipoRegistro === "turno" ? item.entregadaPorNombre ?? "" : "",
+    entregadaPorFecha: tipoRegistro === "turno" ? item.entregadaPorFecha ?? null : null,
+    observaciones: item.observaciones ?? "",
+    createdBy: String(item.createdBy),
+    createdByName: item.createdByName,
+    updatedBy: item.updatedBy ? String(item.updatedBy) : null,
+    updatedByName: item.updatedByName ?? "",
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    siac: hasLookup
+      ? {
+          interno: lookup!.interno,
+          estado: lookup!.estado,
+          tipoOperacion: lookup!.tipoOperacion,
+          operacion: lookup!.operacion ?? null,
+          grupo: lookup!.grupo ?? null,
+          orden: lookup!.orden ?? null,
+          cliente: lookup!.cliente,
+          vendedor: lookup!.vendedor,
+          version: lookup!.version ?? null,
+          modelo: lookup!.modelo ?? null,
+          chasis: lookup!.chasis ?? null,
+          serie: lookup!.serie ?? null,
+          nroFabricacion: lookup!.nroFabricacion ?? null,
+          color: lookup!.color,
+        }
+      : null,
+    siacSyncError: tipoRegistro === "turno" ? !lookup : false,
+    siacSyncMessage:
+      tipoRegistro === "turno" && !lookup
+        ? lookupError ?? "No se pudo obtener informacion actualizada desde SIAC"
+        : "",
+  };
+};
 
 const buildAgendaDetailLabel = (
   sucursalNombre: string,
@@ -216,12 +294,39 @@ const buildAgendaDetailLabel = (
   horaAgenda: string,
   equipado: boolean,
   entregaUsado: boolean,
+  observaciones: string,
+) => {
+  const details = [
+    `Sucursal: ${sucursalNombre}`,
+    `Fecha: ${fechaAgenda}`,
+    `Hora: ${horaAgenda}`,
+    `Equipado: ${equipado ? "SI" : "NO"}`,
+    `Entrega usado: ${entregaUsado ? "SI" : "NO"}`,
+  ];
+
+  if (observaciones.trim()) {
+    details.push(`Observaciones: ${observaciones.trim()}`);
+  }
+
+  return details.join(" | ");
+};
+
+const buildReservaDetailLabel = (
+  sucursalNombre: string,
+  fechaAgenda: string,
+  horaAgenda: string,
+  observaciones: string,
 ) =>
-  `Sucursal: ${sucursalNombre} | Fecha: ${fechaAgenda} | Hora: ${horaAgenda} | Equipado: ${equipado ? "SI" : "NO"} | Entrega usado: ${entregaUsado ? "SI" : "NO"}`;
+  [
+    `Sucursal: ${sucursalNombre}`,
+    `Fecha: ${fechaAgenda}`,
+    `Hora: ${horaAgenda}`,
+    `Detalle: ${observaciones.trim()}`,
+  ].join(" | ");
 
 const createAgendaLog = async (params: {
   agendaEntrega: mongoose.Types.ObjectId | string | null;
-  interno: number;
+  interno?: number | null;
   accion: AgendaEntregaLogAction;
   usuario: string;
   usuarioNombre: string;
@@ -229,7 +334,7 @@ const createAgendaLog = async (params: {
 }) => {
   await AgendaEntregaLog.create({
     agendaEntrega: params.agendaEntrega,
-    interno: params.interno,
+    interno: params.interno ?? null,
     accion: params.accion,
     usuario: new mongoose.Types.ObjectId(params.usuario),
     usuarioNombre: params.usuarioNombre,
@@ -238,21 +343,39 @@ const createAgendaLog = async (params: {
   });
 };
 
-const validateAgendaPayload = async (
-  payload: AgendaPayload,
-  currentId?: string,
-) => {
-  const interno = Number(payload.interno);
-  const sucursalId = typeof payload.sucursal === "string" ? payload.sucursal.trim() : "";
-  const fechaAgenda = normalizeText(payload.fechaAgenda);
-  const horaAgenda = normalizeText(payload.horaAgenda);
-  const equipado = Boolean(payload.equipado);
-  const entregaUsado = Boolean(payload.entregaUsado);
-  const observaciones = normalizeText(payload.observaciones);
+const getSlotConflict = async (params: {
+  sucursalId: string;
+  fechaAgenda: string;
+  horaAgenda: string;
+  currentId?: string;
+}) =>
+  AgendaEntrega.findOne(
+    params.currentId
+      ? {
+          sucursal: params.sucursalId,
+          fechaAgenda: params.fechaAgenda,
+          horaAgenda: params.horaAgenda,
+          _id: { $ne: params.currentId },
+        }
+      : {
+          sucursal: params.sucursalId,
+          fechaAgenda: params.fechaAgenda,
+          horaAgenda: params.horaAgenda,
+        },
+  ).lean();
 
-  if (!Number.isInteger(interno) || interno <= 0) {
-    return { error: "El interno ingresado no es valido" };
-  }
+const validateSlot = async (params: {
+  sucursal: unknown;
+  fechaAgenda: unknown;
+  horaAgenda: unknown;
+  currentId?: string;
+}): Promise<SlotValidationResult> => {
+  const sucursalId = typeof params.sucursal === "string" ? params.sucursal.trim() : "";
+  const fechaAgenda = normalizeText(params.fechaAgenda);
+  const horaAgenda = normalizeText(params.horaAgenda);
+  const currentAgenda = params.currentId
+    ? await AgendaEntrega.findById(params.currentId).lean()
+    : null;
 
   if (!isValidObjectId(sucursalId)) {
     return { error: "La sucursal seleccionada no es valida" };
@@ -270,32 +393,7 @@ const validateAgendaPayload = async (
     return { error: "La hora de agenda debe ser un turno valido entre 08:00 y 18:00 cada 30 minutos" };
   }
 
-  if (observaciones.length > OBSERVACIONES_MAX_LENGTH) {
-    return {
-      error: `Las observaciones no pueden superar los ${OBSERVACIONES_MAX_LENGTH} caracteres`,
-    };
-  }
-
-  const [lookup, sucursal, duplicated, currentAgenda] = await Promise.all([
-    lookupAgendaEntregaInterno(interno),
-    SucursalEntrega.findById(sucursalId).lean(),
-    AgendaEntrega.findOne(
-      currentId
-        ? { interno, _id: { $ne: currentId } }
-        : { interno },
-    ).lean(),
-    currentId ? AgendaEntrega.findById(currentId).lean() : Promise.resolve(null),
-  ]);
-
-  if (!lookup) {
-    return { error: "No se encontro informacion para el interno solicitado" };
-  }
-
-  if (ENTREGADO_STATES.has(Number(lookup.estado))) {
-    return {
-      error: `El interno ${interno} ya figura entregado en SIAC y no se puede agendar`,
-    };
-  }
+  const sucursal = await SucursalEntrega.findById(sucursalId).lean();
 
   if (!sucursal) {
     return { error: "La sucursal seleccionada no existe" };
@@ -317,9 +415,81 @@ const validateAgendaPayload = async (
     };
   }
 
+  const conflict = await getSlotConflict({
+    sucursalId,
+    fechaAgenda,
+    horaAgenda,
+    currentId: params.currentId,
+  });
+
+  if (conflict) {
+    return {
+      error: `Ya existe un ${isReservaAgenda(conflict) ? "reserva" : "turno"} para ${fechaAgenda} a las ${horaAgenda} en la sucursal seleccionada`,
+    };
+  }
+
+  return {
+    data: {
+      sucursalId,
+      sucursalNombre: sucursal.nombre,
+      fechaAgenda,
+      horaAgenda,
+      currentAgenda,
+    },
+  };
+};
+
+const validateAgendaPayload = async (
+  payload: AgendaPayload,
+  currentId?: string,
+): Promise<AgendaValidationResult> => {
+  const interno = Number(payload.interno);
+  const equipado = Boolean(payload.equipado);
+  const entregaUsado = Boolean(payload.entregaUsado);
+  const observaciones = normalizeText(payload.observaciones);
+
+  if (!Number.isInteger(interno) || interno <= 0) {
+    return { error: "El interno ingresado no es valido" };
+  }
+
+  if (observaciones.length > OBSERVACIONES_MAX_LENGTH) {
+    return {
+      error: `Las observaciones no pueden superar los ${OBSERVACIONES_MAX_LENGTH} caracteres`,
+    };
+  }
+
+  const slotValidation = await validateSlot({
+    sucursal: payload.sucursal,
+    fechaAgenda: payload.fechaAgenda,
+    horaAgenda: payload.horaAgenda,
+    currentId,
+  });
+
+  if ("error" in slotValidation) {
+    return slotValidation;
+  }
+
+  const duplicated = await AgendaEntrega.findOne(
+    currentId
+      ? { tipoRegistro: "turno", interno, _id: { $ne: currentId } }
+      : { tipoRegistro: "turno", interno },
+  ).lean();
+
   if (duplicated) {
     return {
       error: `El interno ${interno} ya esta agendado para ${duplicated.fechaAgenda} a las ${duplicated.horaAgenda}`,
+    };
+  }
+
+  const lookup = await lookupAgendaEntregaInterno(interno);
+
+  if (!lookup) {
+    return { error: "No se encontro informacion para el interno solicitado" };
+  }
+
+  if (ENTREGADO_STATES.has(Number(lookup.estado))) {
+    return {
+      error: `El interno ${interno} ya figura entregado en SIAC y no se puede agendar`,
     };
   }
 
@@ -327,14 +497,52 @@ const validateAgendaPayload = async (
     data: {
       interno,
       tipoOperacion: lookup.tipoOperacion,
-      sucursalId,
-      sucursalNombre: sucursal.nombre,
-      fechaAgenda,
-      horaAgenda,
+      sucursalId: slotValidation.data.sucursalId,
+      sucursalNombre: slotValidation.data.sucursalNombre,
+      fechaAgenda: slotValidation.data.fechaAgenda,
+      horaAgenda: slotValidation.data.horaAgenda,
       equipado,
       entregaUsado,
       observaciones,
       lookup,
+    },
+  };
+};
+
+const validateReservaPayload = async (
+  payload: ReservaPayload,
+  currentId?: string,
+): Promise<ReservaValidationResult> => {
+  const observaciones = normalizeText(payload.observaciones);
+
+  if (!observaciones) {
+    return { error: "Las observaciones son obligatorias para crear una reserva" };
+  }
+
+  if (observaciones.length > OBSERVACIONES_MAX_LENGTH) {
+    return {
+      error: `Las observaciones no pueden superar los ${OBSERVACIONES_MAX_LENGTH} caracteres`,
+    };
+  }
+
+  const slotValidation = await validateSlot({
+    sucursal: payload.sucursal,
+    fechaAgenda: payload.fechaAgenda,
+    horaAgenda: payload.horaAgenda,
+    currentId,
+  });
+
+  if ("error" in slotValidation) {
+    return slotValidation;
+  }
+
+  return {
+    data: {
+      sucursalId: slotValidation.data.sucursalId,
+      sucursalNombre: slotValidation.data.sucursalNombre,
+      fechaAgenda: slotValidation.data.fechaAgenda,
+      horaAgenda: slotValidation.data.horaAgenda,
+      observaciones,
     },
   };
 };
@@ -378,10 +586,13 @@ export class AgendaEntregaController {
 
       const agendas = await AgendaEntrega.find(query)
         .populate("sucursal", "nombre direccion activa")
-        .sort({ fechaAgenda: 1, horaAgenda: 1, interno: 1 })
+        .sort({ fechaAgenda: 1, horaAgenda: 1, createdAt: 1 })
         .lean();
 
-      const internos = agendas.map((agenda) => agenda.interno);
+      const turnos = agendas.filter((agenda) => !isReservaAgenda(agenda));
+      const internos = turnos
+        .map((agenda) => Number(agenda.interno))
+        .filter((interno) => Number.isInteger(interno) && interno > 0);
       let lookups = new Map<number, AgendaEntregaLookup>();
       let missing: number[] = [];
 
@@ -395,15 +606,20 @@ export class AgendaEntregaController {
       }
 
       return res.status(200).json({
-        data: agendas.map((agenda) =>
-          formatAgendaRow(
+        data: agendas.map((agenda) => {
+          if (isReservaAgenda(agenda)) {
+            return formatAgendaRow(agenda);
+          }
+
+          const interno = Number(agenda.interno);
+          return formatAgendaRow(
             agenda,
-            lookups.get(agenda.interno) ?? null,
-            missing.includes(agenda.interno)
+            lookups.get(interno) ?? null,
+            missing.includes(interno)
               ? "No se pudo obtener informacion actualizada desde SIAC"
               : "",
-          ),
-        ),
+          );
+        }),
       });
     } catch (error) {
       logError("AgendaEntregaController.list");
@@ -423,11 +639,17 @@ export class AgendaEntregaController {
         return res.status(404).json({ error: "Agenda no encontrada" });
       }
 
+      if (isReservaAgenda(agenda)) {
+        return res.status(200).json({
+          data: formatAgendaRow(agenda),
+        });
+      }
+
       let lookup: AgendaEntregaLookup | null = null;
       let lookupError = "";
 
       try {
-        lookup = await lookupAgendaEntregaInterno(agenda.interno);
+        lookup = await lookupAgendaEntregaInterno(Number(agenda.interno));
         if (!lookup) {
           lookupError = "No se pudo obtener informacion actualizada desde SIAC";
         }
@@ -466,6 +688,7 @@ export class AgendaEntregaController {
       const usuarioNombre = buildUserName(req);
 
       const agenda = await AgendaEntrega.create({
+        tipoRegistro: "turno",
         interno: validation.data.interno,
         tipoOperacion: validation.data.lookup.tipoOperacion,
         sucursal: new mongoose.Types.ObjectId(validation.data.sucursalId),
@@ -480,7 +703,7 @@ export class AgendaEntregaController {
 
       await createAgendaLog({
         agendaEntrega: agenda._id,
-        interno: agenda.interno,
+        interno: validation.data.interno,
         accion: "CREADA",
         usuario: req.user._id,
         usuarioNombre,
@@ -490,6 +713,7 @@ export class AgendaEntregaController {
           validation.data.horaAgenda,
           validation.data.equipado,
           validation.data.entregaUsado,
+          validation.data.observaciones,
         ),
       });
 
@@ -506,10 +730,80 @@ export class AgendaEntregaController {
       console.error(error);
 
       if (error?.code === 11000) {
-        return res.status(409).json({ error: "Ese interno ya esta agendado" });
+        if (error?.keyPattern?.interno) {
+          return res.status(409).json({ error: "Ese interno ya esta agendado" });
+        }
+
+        if (error?.keyPattern?.sucursal && error?.keyPattern?.fechaAgenda && error?.keyPattern?.horaAgenda) {
+          return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
+        }
       }
 
       return res.status(500).json({ message: "Error al crear la agenda de entrega" });
+    }
+  };
+
+  static createReserva = async (req: Request, res: Response) => {
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
+    try {
+      const validation = await validateReservaPayload(req.body ?? {});
+      if ("error" in validation) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      if (sucursalAccessError) {
+        return res.status(403).json({ error: sucursalAccessError });
+      }
+
+      const usuarioNombre = buildUserName(req);
+
+      const reserva = await AgendaEntrega.create({
+        tipoRegistro: "reserva",
+        interno: null,
+        tipoOperacion: "",
+        sucursal: new mongoose.Types.ObjectId(validation.data.sucursalId),
+        fechaAgenda: validation.data.fechaAgenda,
+        horaAgenda: validation.data.horaAgenda,
+        observaciones: validation.data.observaciones,
+        createdBy: new mongoose.Types.ObjectId(req.user._id),
+        createdByName: usuarioNombre,
+      });
+
+      await createAgendaLog({
+        agendaEntrega: reserva._id,
+        accion: "RESERVA_CREADA",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: buildReservaDetailLabel(
+          validation.data.sucursalNombre,
+          validation.data.fechaAgenda,
+          validation.data.horaAgenda,
+          validation.data.observaciones,
+        ),
+      });
+
+      const populated = await AgendaEntrega.findById(reserva._id)
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      return res.status(201).json({
+        message: "Reserva creada correctamente",
+        data: populated ? formatAgendaRow(populated) : null,
+      });
+    } catch (error: any) {
+      logError("AgendaEntregaController.createReserva");
+      console.error(error);
+
+      if (error?.code === 11000) {
+        return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
+      }
+
+      return res.status(500).json({ message: "Error al crear la reserva de entrega" });
     }
   };
 
@@ -522,11 +816,15 @@ export class AgendaEntregaController {
     try {
       const agendaId = String(req.params.id);
       const agenda = await AgendaEntrega.findById(agendaId)
-        .populate("sucursal", "nombre")
+        .populate("sucursal", "nombre direccion activa")
         .lean();
 
       if (!agenda) {
         return res.status(404).json({ error: "Agenda no encontrada" });
+      }
+
+      if (isReservaAgenda(agenda)) {
+        return res.status(400).json({ error: "La reserva debe editarse desde su endpoint especifico" });
       }
 
       const currentSucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
@@ -552,9 +850,7 @@ export class AgendaEntregaController {
         changes.push(`Interno: ${agenda.interno} -> ${validation.data.interno}`);
       }
       if (String((agenda.sucursal as any)?._id ?? agenda.sucursal) !== validation.data.sucursalId) {
-        changes.push(
-          `Sucursal: ${((agenda.sucursal as any)?.nombre ?? "-")} -> ${validation.data.sucursalNombre}`,
-        );
+        changes.push(`Sucursal: ${((agenda.sucursal as any)?.nombre ?? "-")} -> ${validation.data.sucursalNombre}`);
       }
       if (agenda.fechaAgenda !== validation.data.fechaAgenda) {
         changes.push(`Fecha: ${agenda.fechaAgenda} -> ${validation.data.fechaAgenda}`);
@@ -575,6 +871,7 @@ export class AgendaEntregaController {
       const updated = await AgendaEntrega.findByIdAndUpdate(
         agendaId,
         {
+          tipoRegistro: "turno",
           interno: validation.data.interno,
           tipoOperacion: validation.data.lookup.tipoOperacion,
           sucursal: new mongoose.Types.ObjectId(validation.data.sucursalId),
@@ -609,10 +906,226 @@ export class AgendaEntregaController {
       console.error(error);
 
       if (error?.code === 11000) {
-        return res.status(409).json({ error: "Ese interno ya esta agendado" });
+        if (error?.keyPattern?.interno) {
+          return res.status(409).json({ error: "Ese interno ya esta agendado" });
+        }
+
+        if (error?.keyPattern?.sucursal && error?.keyPattern?.fechaAgenda && error?.keyPattern?.horaAgenda) {
+          return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
+        }
       }
 
       return res.status(500).json({ message: "Error al actualizar la agenda de entrega" });
+    }
+  };
+
+  static updateReserva = async (req: Request, res: Response) => {
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
+    try {
+      const agendaId = String(req.params.id);
+      const agenda = await AgendaEntrega.findById(agendaId)
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      if (!agenda) {
+        return res.status(404).json({ error: "Reserva no encontrada" });
+      }
+
+      if (!isReservaAgenda(agenda)) {
+        return res.status(400).json({ error: "El registro seleccionado no es una reserva" });
+      }
+
+      const currentSucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      if (currentSucursalAccessError) {
+        return res.status(403).json({ error: currentSucursalAccessError });
+      }
+
+      const validation = await validateReservaPayload(req.body ?? {}, agendaId);
+      if ("error" in validation) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      if (nextSucursalAccessError) {
+        return res.status(403).json({ error: nextSucursalAccessError });
+      }
+
+      const usuarioNombre = buildUserName(req);
+      const changes: string[] = [];
+
+      if (String((agenda.sucursal as any)?._id ?? agenda.sucursal) !== validation.data.sucursalId) {
+        changes.push(`Sucursal: ${((agenda.sucursal as any)?.nombre ?? "-")} -> ${validation.data.sucursalNombre}`);
+      }
+      if (agenda.fechaAgenda !== validation.data.fechaAgenda) {
+        changes.push(`Fecha: ${agenda.fechaAgenda} -> ${validation.data.fechaAgenda}`);
+      }
+      if (agenda.horaAgenda !== validation.data.horaAgenda) {
+        changes.push(`Hora: ${agenda.horaAgenda} -> ${validation.data.horaAgenda}`);
+      }
+      if ((agenda.observaciones ?? "") !== validation.data.observaciones) {
+        changes.push("Detalle de reserva actualizado");
+      }
+
+      const updated = await AgendaEntrega.findByIdAndUpdate(
+        agendaId,
+        {
+          tipoRegistro: "reserva",
+          interno: null,
+          tipoOperacion: "",
+          sucursal: new mongoose.Types.ObjectId(validation.data.sucursalId),
+          fechaAgenda: validation.data.fechaAgenda,
+          horaAgenda: validation.data.horaAgenda,
+          equipado: false,
+          entregaUsado: false,
+          observaciones: validation.data.observaciones,
+          updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          updatedByName: usuarioNombre,
+        },
+        { new: true },
+      )
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      await createAgendaLog({
+        agendaEntrega: agendaId,
+        accion: "RESERVA_MODIFICADA",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: changes.length ? changes.join(" | ") : "Sin cambios relevantes en campos visibles",
+      });
+
+      return res.status(200).json({
+        message: "Reserva actualizada correctamente",
+        data: updated ? formatAgendaRow(updated) : null,
+      });
+    } catch (error: any) {
+      logError("AgendaEntregaController.updateReserva");
+      console.error(error);
+
+      if (error?.code === 11000) {
+        return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
+      }
+
+      return res.status(500).json({ message: "Error al actualizar la reserva de entrega" });
+    }
+  };
+
+  static convertReserva = async (req: Request, res: Response) => {
+    const accessError = ensureAgendaWriteAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
+    try {
+      const agendaId = String(req.params.id);
+      const reserva = await AgendaEntrega.findById(agendaId)
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      if (!reserva) {
+        return res.status(404).json({ error: "Reserva no encontrada" });
+      }
+
+      if (!isReservaAgenda(reserva)) {
+        return res.status(400).json({ error: "El registro seleccionado no es una reserva" });
+      }
+
+      const sucursalId = String((reserva.sucursal as any)?._id ?? reserva.sucursal ?? "");
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req, sucursalId);
+      if (sucursalAccessError) {
+        return res.status(403).json({ error: sucursalAccessError });
+      }
+
+      const validation = await validateAgendaPayload(
+        {
+          interno: req.body?.interno,
+          sucursal: sucursalId,
+          fechaAgenda: reserva.fechaAgenda,
+          horaAgenda: reserva.horaAgenda,
+          equipado: req.body?.equipado,
+          entregaUsado: req.body?.entregaUsado,
+          observaciones:
+            typeof req.body?.observaciones === "string" ? req.body.observaciones : reserva.observaciones ?? "",
+        },
+        agendaId,
+      );
+
+      if ("error" in validation) {
+        return res.status(400).json({ error: validation.error });
+      }
+
+      const usuarioNombre = buildUserName(req);
+
+      const converted = await AgendaEntrega.findByIdAndUpdate(
+        agendaId,
+        {
+          tipoRegistro: "turno",
+          interno: validation.data.interno,
+          tipoOperacion: validation.data.lookup.tipoOperacion,
+          equipado: validation.data.equipado,
+          entregaUsado: validation.data.entregaUsado,
+          observaciones: validation.data.observaciones,
+          entregadaPorMarcada: false,
+          entregadaPorUser: null,
+          entregadaPorNombre: "",
+          entregadaPorFecha: null,
+          updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          updatedByName: usuarioNombre,
+        },
+        { new: true },
+      )
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      await createAgendaLog({
+        agendaEntrega: agendaId,
+        accion: "RESERVA_CONVERTIDA",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: `Reserva convertida a turno | Interno: ${validation.data.interno} | ${buildReservaDetailLabel(
+          validation.data.sucursalNombre,
+          validation.data.fechaAgenda,
+          validation.data.horaAgenda,
+          reserva.observaciones ?? "",
+        )}`,
+      });
+
+      await createAgendaLog({
+        agendaEntrega: agendaId,
+        interno: validation.data.interno,
+        accion: "CREADA",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: buildAgendaDetailLabel(
+          validation.data.sucursalNombre,
+          validation.data.fechaAgenda,
+          validation.data.horaAgenda,
+          validation.data.equipado,
+          validation.data.entregaUsado,
+          validation.data.observaciones,
+        ),
+      });
+
+      return res.status(200).json({
+        message: "Turno agendado correctamente a partir de la reserva",
+        data: converted ? formatAgendaRow(converted, validation.data.lookup) : null,
+      });
+    } catch (error: any) {
+      logError("AgendaEntregaController.convertReserva");
+      console.error(error);
+
+      if (error?.code === 11000) {
+        if (error?.keyPattern?.interno) {
+          return res.status(409).json({ error: "Ese interno ya esta agendado" });
+        }
+      }
+
+      return res.status(500).json({ message: "Error al convertir la reserva en turno" });
     }
   };
 
@@ -637,13 +1150,17 @@ export class AgendaEntregaController {
         return res.status(404).json({ error: "Agenda no encontrada" });
       }
 
+      if (isReservaAgenda(agenda)) {
+        return res.status(400).json({ error: "Las reservas no pueden marcarse como entregadas por" });
+      }
+
       const sucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
       const accessError = ensureEntregadaPorToggleAccess(req, sucursalId);
       if (accessError) {
         return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
       }
 
-      const lookup = await lookupAgendaEntregaInterno(agenda.interno);
+      const lookup = await lookupAgendaEntregaInterno(Number(agenda.interno));
       if (!lookup) {
         return res.status(400).json({ error: "No se pudo obtener informacion actualizada desde SIAC" });
       }
@@ -684,7 +1201,7 @@ export class AgendaEntregaController {
 
       await createAgendaLog({
         agendaEntrega: agendaId,
-        interno: agenda.interno,
+        interno: Number(agenda.interno),
         accion: checked ? "ENTREGA_MARCADA" : "ENTREGA_DESMARCADA",
         usuario: req.user._id,
         usuarioNombre,
@@ -713,7 +1230,7 @@ export class AgendaEntregaController {
     try {
       const agendaId = String(req.params.id);
       const agenda = await AgendaEntrega.findById(agendaId)
-        .populate("sucursal", "nombre")
+        .populate("sucursal", "nombre direccion activa")
         .lean();
 
       if (!agenda) {
@@ -728,31 +1245,45 @@ export class AgendaEntregaController {
         return res.status(403).json({ error: sucursalAccessError });
       }
 
-      const lookup = await lookupAgendaEntregaInterno(agenda.interno);
-      if (lookup && ENTREGADO_STATES.has(Number(lookup.estado))) {
-        return res.status(400).json({
-          error: `El interno ${agenda.interno} ya figura entregado en SIAC y no se puede eliminar de la agenda`,
-        });
+      if (!isReservaAgenda(agenda)) {
+        const lookup = await lookupAgendaEntregaInterno(Number(agenda.interno));
+        if (lookup && ENTREGADO_STATES.has(Number(lookup.estado))) {
+          return res.status(400).json({
+            error: `El interno ${agenda.interno} ya figura entregado en SIAC y no se puede eliminar de la agenda`,
+          });
+        }
       }
 
       await AgendaEntrega.findByIdAndDelete(agendaId);
 
       await createAgendaLog({
         agendaEntrega: agenda._id,
-        interno: agenda.interno,
-        accion: "ELIMINADA",
+        interno: isReservaAgenda(agenda) ? null : Number(agenda.interno),
+        accion: isReservaAgenda(agenda) ? "RESERVA_ELIMINADA" : "ELIMINADA",
         usuario: req.user._id,
         usuarioNombre: buildUserName(req),
-        detalle: buildAgendaDetailLabel(
-          (agenda.sucursal as any)?.nombre ?? "-",
-          agenda.fechaAgenda,
-          agenda.horaAgenda,
-          Boolean(agenda.equipado),
-          Boolean(agenda.entregaUsado),
-        ),
+        detalle: isReservaAgenda(agenda)
+          ? buildReservaDetailLabel(
+              (agenda.sucursal as any)?.nombre ?? "-",
+              agenda.fechaAgenda,
+              agenda.horaAgenda,
+              agenda.observaciones ?? "",
+            )
+          : buildAgendaDetailLabel(
+              (agenda.sucursal as any)?.nombre ?? "-",
+              agenda.fechaAgenda,
+              agenda.horaAgenda,
+              Boolean(agenda.equipado),
+              Boolean(agenda.entregaUsado),
+              agenda.observaciones ?? "",
+            ),
       });
 
-      return res.status(200).json({ message: "Agenda de entrega eliminada correctamente" });
+      return res.status(200).json({
+        message: isReservaAgenda(agenda)
+          ? "Reserva eliminada correctamente"
+          : "Agenda de entrega eliminada correctamente",
+      });
     } catch (error) {
       logError("AgendaEntregaController.remove");
       console.error(error);

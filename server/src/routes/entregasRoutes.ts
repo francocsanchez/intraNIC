@@ -11,6 +11,10 @@ router.use(authenticate);
 router.get("/interno/:interno", AgendaEntregaController.getInterno);
 
 router.get("/agendas", AgendaEntregaController.list);
+router.post("/agendas/reservas", AgendaEntregaController.createReserva);
+router.put("/agendas/reservas/:id", AgendaEntregaController.updateReserva);
+router.delete("/agendas/reservas/:id", AgendaEntregaController.remove);
+router.post("/agendas/reservas/:id/convertir", AgendaEntregaController.convertReserva);
 router.get("/agendas/:id", AgendaEntregaController.getById);
 router.post("/agendas", AgendaEntregaController.create);
 router.put("/agendas/:id", AgendaEntregaController.update);

@@ -28,7 +28,7 @@ export default function AgendaEntregaLogsTable({ items }: AgendaEntregaLogsTable
                 <td className="px-4 py-3 text-gray-700">
                   {new Date(item.fecha).toLocaleString("es-AR")}
                 </td>
-                <td className="px-4 py-3 font-medium text-gray-900">{item.interno}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{item.interno ?? "Reserva"}</td>
                 <td className="px-4 py-3 text-gray-700">{item.accion}</td>
                 <td className="px-4 py-3 text-gray-700">{item.usuarioNombre}</td>
                 <td className="px-4 py-3 text-gray-700">

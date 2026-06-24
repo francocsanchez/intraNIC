@@ -1276,8 +1276,9 @@ export const agendaEntregaSiacSchema = z.object({
 
 export const agendaEntregaSchema = z.object({
   _id: z.string(),
-  interno: z.number(),
-  tipoOperacion: z.string(),
+  tipoRegistro: z.enum(["turno", "reserva"]).default("turno"),
+  interno: z.number().nullable(),
+  tipoOperacion: z.string().default(""),
   sucursal: z.object({
     _id: z.string(),
     nombre: z.string(),
@@ -1299,7 +1300,7 @@ export const agendaEntregaSchema = z.object({
   updatedByName: z.string().optional().default(""),
   createdAt: z.string(),
   updatedAt: z.string(),
-  siac: agendaEntregaSiacSchema,
+  siac: agendaEntregaSiacSchema.nullable().optional(),
   siacSyncError: z.boolean(),
   siacSyncMessage: z.string().optional().default(""),
 });
@@ -1316,8 +1317,18 @@ export const agendaEntregaResponseSchema = z.object({
 export const agendaEntregaLogSchema = z.object({
   _id: z.string(),
   agendaEntrega: z.string().nullable(),
-  interno: z.number(),
-  accion: z.enum(["CREADA", "MODIFICADA", "ELIMINADA", "ENTREGA_MARCADA", "ENTREGA_DESMARCADA"]),
+  interno: z.number().nullable(),
+  accion: z.enum([
+    "CREADA",
+    "MODIFICADA",
+    "ELIMINADA",
+    "RESERVA_CREADA",
+    "RESERVA_MODIFICADA",
+    "RESERVA_ELIMINADA",
+    "RESERVA_CONVERTIDA",
+    "ENTREGA_MARCADA",
+    "ENTREGA_DESMARCADA",
+  ]),
   usuario: z.string().nullable(),
   usuarioNombre: z.string(),
   fecha: z.string(),

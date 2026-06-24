@@ -63,6 +63,7 @@ const getInlineBadgeStyle = (colorName: string | null | undefined) => {
 };
 
 const formatOperacion = (item: AgendaEntrega) => {
+  if (item.tipoRegistro === "reserva" || !item.siac) return "-";
   if (item.siac.operacion) return String(item.siac.operacion);
   if (item.siac.grupo && item.siac.orden) return `[${item.siac.grupo} | ${item.siac.orden}]`;
   return "-";
@@ -114,9 +115,25 @@ const buildRows = (items: AgendaEntrega[], horariosHabilitados: string[]) => {
     }
 
     return matchingItems.map((item) => {
-      const identificado = (item.siac.chasis ?? item.siac.serie ?? item.siac.nroFabricacion ?? "-").trim();
-      const entregada = item.siac.estado === 35 || item.siac.estado === 40;
-      const colorStyle = getInlineBadgeStyle(item.siac.color);
+      if (item.tipoRegistro === "reserva") {
+        return `
+          <tr class="reserva">
+            <td class="hora">${escapeHtml(item.horaAgenda)}</td>
+            <td class="interno">RESERVA</td>
+            <td class="datos">
+              <div class="cliente">Reserva</div>
+              <div class="modelo">&nbsp;</div>
+              <div class="detalle">${escapeHtml(item.observaciones?.trim() || "-")}</div>
+            </td>
+            <td class="vendedor">-</td>
+            <td class="operacion">-</td>
+          </tr>
+        `;
+      }
+
+      const identificado = (item.siac?.chasis ?? item.siac?.serie ?? item.siac?.nroFabricacion ?? "-").trim();
+      const entregada = item.siac?.estado === 35 || item.siac?.estado === 40;
+      const colorStyle = getInlineBadgeStyle(item.siac?.color);
 
       return `
         <tr class="${entregada ? "entregada" : ""}">
@@ -127,17 +144,17 @@ const buildRows = (items: AgendaEntrega[], horariosHabilitados: string[]) => {
             ${item.entregaUsado ? '<div class="equipado">ENTREGA USADO</div>' : ""}
           </td>
           <td class="datos">
-            <div class="cliente">${escapeHtml(item.siac.cliente || "-")}</div>
-            <div class="modelo">${escapeHtml([item.siac.modelo, item.siac.version].filter(Boolean).join(" ") || "-")}</div>
+            <div class="cliente">${escapeHtml(item.siac?.cliente || "-")}</div>
+            <div class="modelo">${escapeHtml([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || "-")}</div>
             <div class="detalle">
               <span>${escapeHtml(identificado)}</span>
               <span>/</span>
               <span>COLOR:</span>
-              <span class="badge-color" style="${colorStyle}">${escapeHtml(item.siac.color || "-")}</span>
+              <span class="badge-color" style="${colorStyle}">${escapeHtml(item.siac?.color || "-")}</span>
             </div>
             ${item.observaciones?.trim() ? `<div class="obs">Obs: ${escapeHtml(item.observaciones.trim())}</div>` : ""}
           </td>
-          <td class="vendedor">${escapeHtml(item.siac.vendedor || "-")}</td>
+          <td class="vendedor">${escapeHtml(item.siac?.vendedor || "-")}</td>
           <td class="operacion">${escapeHtml(formatOperacion(item))}</td>
         </tr>
       `;
@@ -248,6 +265,14 @@ export function openAgendaEntregaPrintView(params: {
 
           tbody tr.entregada td {
             background: #dcfce7;
+          }
+
+          tbody tr.reserva td {
+            background: #fef3c7;
+          }
+
+          tbody tr.reserva .interno {
+            background: #fde68a;
           }
 
           tbody tr.bloqueado td {

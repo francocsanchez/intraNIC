@@ -1,6 +1,6 @@
 import type { AgendaEntrega } from "@/types/index";
 import { textToColor } from "@/helpers/colores";
-import { Pencil, Trash2, AlertTriangle, Package, CarFront } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle, Package, CarFront, CalendarPlus } from "lucide-react";
 
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
@@ -9,6 +9,7 @@ type AgendaEntregaTableProps = {
   togglePendingId: string | null;
   onEdit: (item: AgendaEntrega) => void;
   onDelete: (item: AgendaEntrega) => void;
+  onConvertReservation: (item: AgendaEntrega) => void;
   onToggleEntregadaPor: (item: AgendaEntrega, checked: boolean) => void;
   canManage: boolean;
 };
@@ -39,6 +40,7 @@ export default function AgendaEntregaTable({
   togglePendingId,
   onEdit,
   onDelete,
+  onConvertReservation,
   onToggleEntregadaPor,
   canManage,
 }: AgendaEntregaTableProps) {
@@ -56,8 +58,10 @@ export default function AgendaEntregaTable({
     return [{ _empty: true, horaAgenda: timeSlot }];
   });
 
+  const isReserva = (item: AgendaEntrega) => item.tipoRegistro === "reserva";
+  const isTurno = (item: AgendaEntrega) => item.tipoRegistro === "turno";
   const isEntregada = (item: AgendaEntrega) =>
-    item.siac.estado === 35 || item.siac.estado === 40;
+    isTurno(item) && (item.siac?.estado === 35 || item.siac?.estado === 40);
 
   const isEmptyRow = (row: AgendaDisplayRow): row is EmptyAgendaRow =>
     "_empty" in row && row._empty === true;
@@ -66,6 +70,10 @@ export default function AgendaEntregaTable({
     "_blocked" in row && row._blocked === true;
 
   const formatOperacion = (item: AgendaEntrega) => {
+    if (!item.siac) {
+      return "-";
+    }
+
     if (item.siac.operacion) {
       return String(item.siac.operacion);
     }
@@ -78,18 +86,28 @@ export default function AgendaEntregaTable({
   };
 
   const formatDatos = (item: AgendaEntrega) => {
-    const cliente = item.siac.cliente || "-";
-    const versionModelo = [item.siac.modelo, item.siac.version]
+    if (isReserva(item)) {
+      return {
+        cliente: item.observaciones?.trim() || "Reserva",
+        versionModelo: "",
+        identificador: "",
+        color: "",
+        colorClass: "",
+      };
+    }
+
+    const cliente = item.siac?.cliente || "-";
+    const versionModelo = [item.siac?.modelo, item.siac?.version]
       .filter((value) => typeof value === "string" && value.trim().length)
       .join(" ");
-    const identificador = (item.siac.chasis ?? item.siac.serie ?? "").trim();
+    const identificador = (item.siac?.chasis ?? item.siac?.serie ?? "").trim();
 
     return {
       cliente,
       versionModelo: versionModelo || "-",
-      identificador: identificador || item.siac.nroFabricacion || "-",
-      color: item.siac.color || "-",
-      colorClass: textToColor(item.siac.color),
+      identificador: identificador || item.siac?.nroFabricacion || "-",
+      color: item.siac?.color || "-",
+      colorClass: textToColor(item.siac?.color),
     };
   };
 
@@ -184,78 +202,104 @@ export default function AgendaEntregaTable({
               const item = row;
               const datos = formatDatos(item);
               const entregada = isEntregada(item);
+              const reserva = isReserva(item);
               const togglePending = togglePendingId === item._id;
 
               return (
                 <tr
                   key={item._id}
-                  className={`border-b border-gray-400 align-middle ${entregada ? "bg-green-100" : "bg-white"}`}
+                  className={`border-b border-gray-400 align-middle ${
+                    reserva ? "bg-yellow-100" : entregada ? "bg-green-100" : "bg-white"
+                  }`}
                 >
                   <td
                     className={`px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none text-black ${
-                      entregada ? "bg-green-100" : "bg-white"
+                      reserva ? "bg-yellow-100" : entregada ? "bg-green-100" : "bg-white"
                     }`}
                   >
                     <div className="flex items-center justify-center">{item.horaAgenda}</div>
                   </td>
                   <td
                     className={`px-3 py-3 text-center align-middle text-[1.15rem] font-bold leading-none text-black ${
-                      entregada ? "bg-green-200" : "bg-[#F3F3F3]"
+                      reserva ? "bg-yellow-200" : entregada ? "bg-green-200" : "bg-[#F3F3F3]"
                     }`}
                   >
                     <div className="flex flex-col items-center justify-center gap-1">
-                      <div>{item.interno}</div>
-                      {item.equipado ? (
-                        <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
-                          <Package size={12} />
-                          Equipado
+                      <div>{reserva ? "RESERVA" : item.interno}</div>
+                      {reserva ? (
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-800">
+                          Lugar reservado
                         </div>
-                      ) : null}
-                      {item.entregaUsado ? (
-                        <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
-                          <CarFront size={12} />
-                          Entrega usado
-                        </div>
-                      ) : null}
+                      ) : (
+                        <>
+                          {item.equipado ? (
+                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                              <Package size={12} />
+                              Equipado
+                            </div>
+                          ) : null}
+                          {item.entregaUsado ? (
+                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                              <CarFront size={12} />
+                              Entrega usado
+                            </div>
+                          ) : null}
+                        </>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-black">
-                    <div className="space-y-0.5">
-                      <div className="border-b border-dotted border-gray-400 pb-0.5 text-[12px] font-medium uppercase leading-tight">
-                        {datos.cliente}
-                      </div>
-                      <div className="text-[12px] font-semibold uppercase leading-tight text-gray-700">
-                        {datos.versionModelo}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1 text-[12px] font-bold uppercase leading-tight">
-                        <span>{datos.identificador}</span>
-                        <span>/</span>
-                        <span className="text-gray-700">COLOR:</span>
-                        <span
-                          className={`inline-flex items-center rounded-md border border-slate-200 px-1.5 py-0.5 text-[12px] font-bold leading-none ${
-                            datos.colorClass ?? "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {datos.color}
-                        </span>
-                      </div>
-                      {item.siacSyncError ? (
-                        <div className="inline-flex items-center gap-1 pt-0.5 text-[10px] font-semibold uppercase text-amber-700">
-                          <AlertTriangle size={10} />
-                          {item.siacSyncMessage || "Sin SIAC"}
+                    {reserva ? (
+                      <div className="space-y-1">
+                        <div className="border-b border-dotted border-yellow-400 pb-0.5 text-[12px] font-bold uppercase leading-tight text-amber-900">
+                          Reserva
                         </div>
-                      ) : null}
-                    </div>
+                        <div className="text-[12px] font-medium leading-tight text-amber-900">
+                          {item.observaciones?.trim() || "-"}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        <div className="border-b border-dotted border-gray-400 pb-0.5 text-[12px] font-medium uppercase leading-tight">
+                          {datos.cliente}
+                        </div>
+                        <div className="text-[12px] font-semibold uppercase leading-tight text-gray-700">
+                          {datos.versionModelo}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1 text-[12px] font-bold uppercase leading-tight">
+                          <span>{datos.identificador}</span>
+                          <span>/</span>
+                          <span className="text-gray-700">COLOR:</span>
+                          <span
+                            className={`inline-flex items-center rounded-md border border-slate-200 px-1.5 py-0.5 text-[12px] font-bold leading-none ${
+                              datos.colorClass ?? "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {datos.color}
+                          </span>
+                        </div>
+                        {item.siacSyncError ? (
+                          <div className="inline-flex items-center gap-1 pt-0.5 text-[10px] font-semibold uppercase text-amber-700">
+                            <AlertTriangle size={10} />
+                            {item.siacSyncMessage || "Sin SIAC"}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </td>
                   <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight text-black">
-                    <div className="flex items-center justify-center">{item.siac.vendedor}</div>
+                    <div className="flex items-center justify-center">
+                      {reserva ? "-" : (item.siac?.vendedor || "-")}
+                    </div>
                   </td>
                   <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none text-black">
-                    <div className="flex items-center justify-center">{formatOperacion(item)}</div>
+                    <div className="flex items-center justify-center">
+                      {reserva ? "-" : formatOperacion(item)}
+                    </div>
                   </td>
                   <td className="px-3 py-3 align-middle text-[11px] leading-tight text-gray-700">
                     <div className="line-clamp-3 min-w-[160px]">
-                      {item.observaciones?.trim() || "-"}
+                      {reserva ? "-" : item.observaciones?.trim() || "-"}
                     </div>
                   </td>
                   <td className="px-3 py-3 text-center align-middle text-[11px] leading-tight text-gray-700">
@@ -291,22 +335,53 @@ export default function AgendaEntregaTable({
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-2 whitespace-nowrap text-[12px]">
-                          <button
-                            type="button"
-                            onClick={() => onEdit(item)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
-                          >
-                            <Pencil size={13} />
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onDelete(item)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
-                          >
-                            <Trash2 size={13} />
-                            Eliminar
-                          </button>
+                          {reserva ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onConvertReservation(item)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-[12px] font-semibold text-amber-900 transition hover:bg-amber-100"
+                              >
+                                <CalendarPlus size={13} />
+                                Agendar turno
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onEdit(item)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
+                              >
+                                <Pencil size={13} />
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDelete(item)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3.5 py-2 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
+                              >
+                                <Trash2 size={13} />
+                                Eliminar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onEdit(item)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
+                              >
+                                <Pencil size={13} />
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDelete(item)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3.5 py-2 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
+                              >
+                                <Trash2 size={13} />
+                                Eliminar
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </td>

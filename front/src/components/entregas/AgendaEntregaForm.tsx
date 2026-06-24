@@ -1,8 +1,10 @@
 import {
+  convertReservaEntrega,
   createAgendaEntrega,
   getAgendaEntregaLookup,
   updateAgendaEntrega,
   type AgendaEntregaPayload,
+  type ReservaEntregaConvertPayload,
 } from "@/api/entregasAPI";
 import InternoLookupCard from "@/components/entregas/InternoLookupCard";
 import { hasSuperAdminRole } from "@/helpers/access";
@@ -28,6 +30,7 @@ type AgendaEntregaFormValues = {
 type AgendaEntregaFormProps = {
   open: boolean;
   item: AgendaEntrega | null;
+  reservationToConvert?: AgendaEntrega | null;
   sucursales: SucursalEntrega[];
   onClose: () => void;
 };
@@ -47,16 +50,21 @@ const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
 export default function AgendaEntregaForm({
   open,
   item,
+  reservationToConvert = null,
   sucursales,
   onClose,
 }: AgendaEntregaFormProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(item?.siac ?? null);
+  const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(
+    item?.tipoRegistro === "turno" ? (item.siac ?? null) : null,
+  );
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const isSuperAdmin = hasSuperAdminRole(user);
   const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const isEditing = Boolean(item && item.tipoRegistro === "turno");
+  const isConvertingReservation = Boolean(reservationToConvert);
 
   const {
     register,
@@ -84,20 +92,21 @@ export default function AgendaEntregaForm({
   useEffect(() => {
     if (!open) return;
 
-    const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
+    const defaultSucursal = !item && !reservationToConvert && !isSuperAdmin ? assignedSucursalId : "";
+    const source = reservationToConvert ?? item;
 
     reset({
-      interno: item?.interno ?? undefined,
-      sucursal: item?.sucursal?._id ?? defaultSucursal,
-      fechaAgenda: item?.fechaAgenda ?? "",
-      horaAgenda: item?.horaAgenda ?? "",
-      equipado: item?.equipado ?? false,
-      entregaUsado: item?.entregaUsado ?? false,
-      observaciones: item?.observaciones ?? "",
+      interno: item?.tipoRegistro === "turno" ? item.interno ?? undefined : undefined,
+      sucursal: source?.sucursal?._id ?? defaultSucursal,
+      fechaAgenda: source?.fechaAgenda ?? "",
+      horaAgenda: source?.horaAgenda ?? "",
+      equipado: item?.tipoRegistro === "turno" ? item.equipado : false,
+      entregaUsado: item?.tipoRegistro === "turno" ? item.entregaUsado : false,
+      observaciones: source?.observaciones ?? "",
     });
-    setLookup(item?.siac ?? null);
+    setLookup(item?.tipoRegistro === "turno" ? (item.siac ?? null) : null);
     setLookupError("");
-  }, [assignedSucursalId, isSuperAdmin, item, open, reset]);
+  }, [assignedSucursalId, isSuperAdmin, item, open, reset, reservationToConvert]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
@@ -117,6 +126,17 @@ export default function AgendaEntregaForm({
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: AgendaEntregaPayload }) =>
       updateAgendaEntrega(id, payload),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      invalidate();
+      onClose();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const convertMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: ReservaEntregaConvertPayload }) =>
+      convertReservaEntrega(id, payload),
     onSuccess: (response) => {
       toast.success(response.message);
       invalidate();
@@ -154,7 +174,7 @@ export default function AgendaEntregaForm({
       return;
     }
 
-    const payload: AgendaEntregaPayload = {
+    const agendaPayload: AgendaEntregaPayload = {
       interno: Number(values.interno),
       sucursal: values.sucursal,
       fechaAgenda: values.fechaAgenda,
@@ -164,16 +184,31 @@ export default function AgendaEntregaForm({
       observaciones: values.observaciones?.trim() ?? "",
     };
 
-    if (item) {
-      updateMutation.mutate({ id: item._id, payload });
+    if (isConvertingReservation && reservationToConvert) {
+      const convertPayload: ReservaEntregaConvertPayload = {
+        interno: agendaPayload.interno,
+        equipado: agendaPayload.equipado,
+        entregaUsado: agendaPayload.entregaUsado,
+        observaciones: agendaPayload.observaciones,
+      };
+
+      convertMutation.mutate({ id: reservationToConvert._id, payload: convertPayload });
       return;
     }
 
-    createMutation.mutate(payload);
+    if (isEditing && item) {
+      updateMutation.mutate({ id: item._id, payload: agendaPayload });
+      return;
+    }
+
+    createMutation.mutate(agendaPayload);
   };
 
-  const pending = createMutation.isPending || updateMutation.isPending;
-  const activeSucursales = sucursales.filter((sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id);
+  const pending =
+    createMutation.isPending || updateMutation.isPending || convertMutation.isPending;
+  const activeSucursales = sucursales.filter(
+    (sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id || sucursal._id === reservationToConvert?.sucursal?._id,
+  );
   const availableSucursales = isSuperAdmin
     ? activeSucursales
     : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
@@ -190,16 +225,17 @@ export default function AgendaEntregaForm({
       ? selectedSucursal.horariosHabilitados
       : TIME_SLOT_OPTIONS;
 
+    const currentSource = reservationToConvert ?? item;
     if (
-      item?.horaAgenda &&
-      selectedSucursal._id === item.sucursal?._id &&
-      !slots.includes(item.horaAgenda)
+      currentSource?.horaAgenda &&
+      selectedSucursal._id === currentSource.sucursal?._id &&
+      !slots.includes(currentSource.horaAgenda)
     ) {
-      return [...slots, item.horaAgenda].sort((left, right) => left.localeCompare(right));
+      return [...slots, currentSource.horaAgenda].sort((left, right) => left.localeCompare(right));
     }
 
     return slots;
-  }, [item?.horaAgenda, item?.sucursal?._id, selectedSucursal]);
+  }, [item, reservationToConvert, selectedSucursal]);
 
   useEffect(() => {
     if (!selectedHour) {
@@ -210,6 +246,20 @@ export default function AgendaEntregaForm({
       setValue("horaAgenda", "");
     }
   }, [availableTimeSlots, selectedHour, setValue]);
+
+  const title = isConvertingReservation
+    ? "Agendar turno desde reserva"
+    : isEditing
+      ? "Editar agenda de entrega"
+      : "Nuevo turno de entrega";
+
+  const submitLabel = pending
+    ? "Guardando..."
+    : isConvertingReservation
+      ? "Agendar turno"
+      : isEditing
+        ? "Guardar cambios"
+        : "Crear agenda";
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -226,7 +276,7 @@ export default function AgendaEntregaForm({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
                     <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
-                      {item ? "Editar agenda de entrega" : "Nuevo turno de entrega"}
+                      {title}
                     </Dialog.Title>
                   </div>
 
@@ -286,7 +336,8 @@ export default function AgendaEntregaForm({
                         </label>
                         <select
                           id="agenda-sucursal"
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          disabled={isConvertingReservation}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
                         >
                           <option value="">-- Selecciona una sucursal --</option>
@@ -297,11 +348,6 @@ export default function AgendaEntregaForm({
                           ))}
                         </select>
                         <FieldError message={errors.sucursal?.message} />
-                        {!isSuperAdmin ? (
-                          <p className="text-xs text-gray-500">
-                            Como usuario coordinador solo puedes operar turnos de tu sucursal asignada.
-                          </p>
-                        ) : null}
                       </div>
 
                       <div className="space-y-2">
@@ -311,7 +357,8 @@ export default function AgendaEntregaForm({
                         <input
                           id="agenda-fecha-agenda"
                           type="date"
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          disabled={isConvertingReservation}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
                           {...register("fechaAgenda", { required: "La fecha es obligatoria" })}
                         />
                         <FieldError message={errors.fechaAgenda?.message} />
@@ -323,7 +370,8 @@ export default function AgendaEntregaForm({
                         </label>
                         <select
                           id="agenda-hora-agenda"
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          disabled={isConvertingReservation}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
                           {...register("horaAgenda", { required: "La hora es obligatoria" })}
                         >
                           <option value="">
@@ -391,7 +439,7 @@ export default function AgendaEntregaForm({
                       disabled={pending}
                       className="rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:opacity-60"
                     >
-                      {pending ? "Guardando..." : item ? "Guardar cambios" : "Crear agenda"}
+                      {submitLabel}
                     </button>
                   </div>
                 </form>

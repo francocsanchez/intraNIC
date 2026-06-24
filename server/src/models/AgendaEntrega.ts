@@ -1,8 +1,12 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
+export const AGENDA_ENTREGA_TIPOS = ["turno", "reserva"] as const;
+export type AgendaEntregaTipoRegistro = (typeof AGENDA_ENTREGA_TIPOS)[number];
+
 export interface IAgendaEntrega extends Document {
-  interno: number;
-  tipoOperacion: string;
+  tipoRegistro: AgendaEntregaTipoRegistro;
+  interno?: number | null;
+  tipoOperacion?: string;
   sucursal: Types.ObjectId;
   fechaAgenda: string;
   horaAgenda: string;
@@ -23,13 +27,20 @@ export interface IAgendaEntrega extends Document {
 
 const agendaEntregaSchema = new Schema<IAgendaEntrega>(
   {
+    tipoRegistro: {
+      type: String,
+      enum: AGENDA_ENTREGA_TIPOS,
+      default: "turno",
+      required: true,
+      trim: true,
+    },
     interno: {
       type: Number,
-      required: true,
+      default: null,
     },
     tipoOperacion: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     sucursal: {
@@ -102,7 +113,17 @@ const agendaEntregaSchema = new Schema<IAgendaEntrega>(
   { timestamps: true, collection: "agendas_entrega" },
 );
 
-agendaEntregaSchema.index({ interno: 1 }, { unique: true });
+agendaEntregaSchema.index(
+  { interno: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { tipoRegistro: "turno" },
+  },
+);
+agendaEntregaSchema.index(
+  { sucursal: 1, fechaAgenda: 1, horaAgenda: 1 },
+  { unique: true },
+);
 agendaEntregaSchema.index({ fechaAgenda: 1, sucursal: 1 });
 
 const AgendaEntrega = mongoose.model<IAgendaEntrega>(

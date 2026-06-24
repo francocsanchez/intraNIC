@@ -25,6 +25,20 @@ export type AgendaEntregaPayload = {
   observaciones?: string;
 };
 
+export type ReservaEntregaPayload = {
+  sucursal: string;
+  fechaAgenda: string;
+  horaAgenda: string;
+  observaciones: string;
+};
+
+export type ReservaEntregaConvertPayload = {
+  interno: number;
+  equipado: boolean;
+  entregaUsado: boolean;
+  observaciones?: string;
+};
+
 export type SucursalEntregaPayload = {
   nombre: string;
   direccion?: string;
@@ -110,6 +124,30 @@ export function updateAgendaEntrega(id: string, payload: AgendaEntregaPayload): 
   );
 }
 
+export function createReservaEntrega(payload: ReservaEntregaPayload): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.post("/entregas/agendas/reservas", payload),
+    agendaEntregaResponseSchema,
+    "Error al crear la reserva de entrega",
+  );
+}
+
+export function updateReservaEntrega(id: string, payload: ReservaEntregaPayload): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.put(`/entregas/agendas/reservas/${id}`, payload),
+    agendaEntregaResponseSchema,
+    "Error al actualizar la reserva de entrega",
+  );
+}
+
+export function convertReservaEntrega(id: string, payload: ReservaEntregaConvertPayload): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.post(`/entregas/agendas/reservas/${id}/convertir`, payload),
+    agendaEntregaResponseSchema,
+    "Error al convertir la reserva en turno",
+  );
+}
+
 export function toggleAgendaEntregaEntregadaPor(id: string, checked: boolean): Promise<AgendaEntregaResponse> {
   return parseResponse(
     api.patch(`/entregas/agendas/${id}/entregada-por`, { checked }),
@@ -124,6 +162,15 @@ export async function deleteAgendaEntrega(id: string): Promise<{ message: string
     return data as { message: string };
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al eliminar la agenda de entrega"));
+  }
+}
+
+export async function deleteReservaEntrega(id: string): Promise<{ message: string }> {
+  try {
+    const { data } = await api.delete(`/entregas/agendas/reservas/${id}`);
+    return data as { message: string };
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al eliminar la reserva de entrega"));
   }
 }
 

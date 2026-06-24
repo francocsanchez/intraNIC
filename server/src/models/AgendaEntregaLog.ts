@@ -4,6 +4,10 @@ export const AGENDA_ENTREGA_LOG_ACTIONS = [
   "CREADA",
   "MODIFICADA",
   "ELIMINADA",
+  "RESERVA_CREADA",
+  "RESERVA_MODIFICADA",
+  "RESERVA_ELIMINADA",
+  "RESERVA_CONVERTIDA",
   "ENTREGA_MARCADA",
   "ENTREGA_DESMARCADA",
 ] as const;
@@ -11,7 +15,7 @@ export type AgendaEntregaLogAction = (typeof AGENDA_ENTREGA_LOG_ACTIONS)[number]
 
 export interface IAgendaEntregaLog extends Document {
   agendaEntrega: Types.ObjectId | null;
-  interno: number;
+  interno?: number | null;
   accion: AgendaEntregaLogAction;
   usuario: Types.ObjectId;
   usuarioNombre: string;
@@ -30,7 +34,7 @@ const agendaEntregaLogSchema = new Schema<IAgendaEntregaLog>(
     },
     interno: {
       type: Number,
-      required: true,
+      default: null,
     },
     accion: {
       type: String,

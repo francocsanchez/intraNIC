@@ -7,7 +7,7 @@ const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$
 const formatLog = (item: any) => ({
   _id: String(item._id),
   agendaEntrega: item.agendaEntrega ? String(item.agendaEntrega) : null,
-  interno: item.interno,
+  interno: item.interno ?? null,
   accion: item.accion,
   usuario: item.usuario ? String(item.usuario) : null,
   usuarioNombre: item.usuarioNombre,
