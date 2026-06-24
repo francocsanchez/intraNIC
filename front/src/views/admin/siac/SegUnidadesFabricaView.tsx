@@ -3,11 +3,9 @@ import { getSegUnidadesFabrica, importSegUnidadesFabrica } from "@/api/segUnidad
 import { hasModuleAccess, hasSegUnidadesFabricaImportAccess } from "@/helpers/access";
 import { textToColor } from "@/helpers/colores";
 import { useAuth } from "@/hooks/useAuthe";
-import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, LoaderCircle, UploadCloud } from "lucide-react";
+import { LoaderCircle, UploadCloud } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const ACCEPTED_TXT_TYPES = ".txt,text/plain";
@@ -122,21 +120,11 @@ export default function SegUnidadesFabricaView() {
   return (
     <div className="w-full space-y-6 px-4 py-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Seg. unidades fabrica</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
-              Importa el TXT de fabrica y manten sincronizada la base con las unidades NIC activas pendientes.
-            </p>
-          </div>
-
-          <Link
-            to={paths.administracion.home}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
-          >
-            <ArrowLeft size={16} strokeWidth={1.75} />
-            Volver a Administracion
-          </Link>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Seg. unidades fabrica</h1>
+          <p className="mt-1 max-w-3xl text-sm text-gray-500">
+            Importa el TXT de fabrica y manten sincronizada la base con las unidades NIC activas pendientes.
+          </p>
         </div>
       </section>
 
