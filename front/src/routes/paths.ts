@@ -31,6 +31,7 @@ export const paths = {
     pedidoUnidadesListaPrevia: "/administracion/pedido-unidades/lista-previa",
     pedidoUnidadesRegistros: "/administracion/pedido-unidades/registros",
     facturasAnticipo: "/administracion/facturas-anticipo",
+    segUnidadesFabrica: "/administracion/seg-unidades-fabrica",
   },
   analisis: {
     operaciones: "/analisis/operaciones",

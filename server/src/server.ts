@@ -26,6 +26,7 @@ import testDriveRegistroRoutes from "./routes/testDriveRegistroRoutes";
 import planAhorroRoutes from "./routes/planAhorroRoutes";
 import entregasRoutes from "./routes/entregasRoutes";
 import callCenterRoutes from "./routes/callCenterRoutes";
+import segUnidadesFabricaRoutes from "./routes/segUnidadesFabricaRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -59,5 +60,6 @@ app.use("/api/test-drive-registros", testDriveRegistroRoutes);
 app.use("/api/dms/plan-ahorro", planAhorroRoutes);
 app.use("/api/entregas", entregasRoutes);
 app.use("/api/call-center", callCenterRoutes);
+app.use("/api/seg-unidades-fabrica", segUnidadesFabricaRoutes);
 
 export default app;

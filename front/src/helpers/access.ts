@@ -12,6 +12,14 @@ import {
 type AuthUser = Usuario | null | undefined;
 type BusinessMaintenanceKey = "convencional" | "usados";
 
+const normalizeRole = (role: unknown) =>
+  String(role)
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\s+/g, "")
+    .trim()
+    .toLowerCase();
+
 export function hasModuleAccess(user: AuthUser, moduleKey: ModuleKey) {
   if (hasSuperAdminRole(user)) {
     return true;
@@ -50,6 +58,15 @@ export function shouldShowMaintenanceForBusiness(user: AuthUser, business: Busin
   }
 
   return business === "convencional" || business === "usados";
+}
+
+export function hasSegUnidadesFabricaImportAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = (user?.role ?? []).map(normalizeRole);
+  return normalizedRoles.includes("stock");
 }
 
 export {

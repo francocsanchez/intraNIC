@@ -8,6 +8,7 @@ export const moduleKeys = [
   "reventaPendientes",
   "listaPrevia",
   "facturasAnticipo",
+  "segUnidadesFabrica",
   "asignaciones",
   "registroAsignaciones",
   "pedidoMensual",
@@ -41,6 +42,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   reventaPendientes: "Reventa pendientes",
   listaPrevia: "Lista previa",
   facturasAnticipo: "Facturas anticipo",
+  segUnidadesFabrica: "Seg. unidades fabrica",
   asignaciones: "Asignaciones",
   registroAsignaciones: "Registro asignaciones",
   pedidoMensual: "Pedido mensual",
@@ -83,7 +85,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Administracion convencional",
-    modules: ["reventaPendientes", "listaPrevia", "facturasAnticipo"],
+    modules: ["reventaPendientes", "listaPrevia", "facturasAnticipo", "segUnidadesFabrica"],
   },
   {
     title: "Gestion de stock convencional",

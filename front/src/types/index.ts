@@ -844,6 +844,45 @@ export const facturaAnticipoResponseSchema = z.object({
 export type FacturaAnticipo = z.infer<typeof facturaAnticipoSchema>;
 
 //**************************** */
+// SEG. UNIDADES FABRICA
+//**************************** */
+
+export const segUnidadFabricaSchema = z.object({
+  _id: z.string(),
+  orderNumber: z.string(),
+  modelo: z.string().nullable(),
+  version: z.string().nullable(),
+  opera: z.number().nullable().optional(),
+  cliente: z.string().optional().default("-"),
+  color: z.string().optional().default("-"),
+  ubicacion: z.string().nullable(),
+  fechaLimiteDePago: z.string().nullable(),
+  habilitacionFinanzas: z.string().nullable(),
+  usuarioImportacion: z.string(),
+  fechaImportacion: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const segUnidadesFabricaListResponseSchema = z.object({
+  data: z.array(segUnidadFabricaSchema),
+});
+
+export const segUnidadesFabricaImportResponseSchema = z.object({
+  data: z.object({
+    totalRows: z.number(),
+    importedRows: z.number(),
+    omittedRows: z.number(),
+    removedWithVin: z.number(),
+    removedWithFinanzas: z.number(),
+    removedMissing: z.number(),
+  }),
+  message: z.string(),
+});
+
+export type SegUnidadFabrica = z.infer<typeof segUnidadFabricaSchema>;
+
+//**************************** */
 // REGISTRO ASIGNACIONES
 //**************************** */
 

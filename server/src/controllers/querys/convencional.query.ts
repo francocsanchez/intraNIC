@@ -408,6 +408,78 @@ ORDER BY
 	auto.au_nombre
     `;
 
+export const infoOrderNumberQuery = () => `
+SELECT
+	stoauto.sa_codigo as "interno",
+	stoauto.sa_nrofab as "order",
+	ISNULL(stoauto.sa_opera, 0) as "opera",
+	ISNULL(c.cli_nombre, '-') as "cliente",
+	ISNULL(v.ven_nombre, '-') as "vendedor",
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+	ISNULL(famiauto.fam_nombre, '-') AS "modelo",
+	ISNULL(auto.au_nombre, '-') as "version",
+	ISNULL(color.col_nombre, '-') AS "color"
+FROM
+	stoauto
+LEFT JOIN opera ON
+	stoauto.sa_opera = opera.ope_codigo
+	AND stoauto.sa_tipo = opera.ope_tipo
+LEFT JOIN vendedor v ON
+	opera.ope_vende = v.ven_codigo
+LEFT JOIN cliente c ON
+	opera.ope_cliente = c.cli_codigo
+INNER JOIN movnped ON
+	stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto ON
+	stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+LEFT JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+LEFT JOIN color ON
+	movnped.mnp_col1 = color.col_codigo
+WHERE
+	stoauto.sa_tipo = 5
+	AND stoauto.sa_nrofab = :orderNumber
+ORDER BY
+	auto.au_nombre
+    `;
+
+export const infoOrderNumbersQuery = () => `
+SELECT
+	stoauto.sa_codigo as "interno",
+	stoauto.sa_nrofab as "order",
+	ISNULL(stoauto.sa_opera, 0) as "opera",
+	ISNULL(c.cli_nombre, '-') as "cliente",
+	ISNULL(v.ven_nombre, '-') as "vendedor",
+	ISNULL(movnped.mnp_chasis, '-') AS "chasis",
+	ISNULL(famiauto.fam_nombre, '-') AS "modelo",
+	ISNULL(auto.au_nombre, '-') as "version",
+	ISNULL(color.col_nombre, '-') AS "color"
+FROM
+	stoauto
+LEFT JOIN opera ON
+	stoauto.sa_opera = opera.ope_codigo
+	AND stoauto.sa_tipo = opera.ope_tipo
+LEFT JOIN vendedor v ON
+	opera.ope_vende = v.ven_codigo
+LEFT JOIN cliente c ON
+	opera.ope_cliente = c.cli_codigo
+INNER JOIN movnped ON
+	stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto ON
+	stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+LEFT JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+LEFT JOIN color ON
+	movnped.mnp_col1 = color.col_codigo
+WHERE
+	stoauto.sa_tipo = 5
+	AND stoauto.sa_nrofab IN (:orderNumbers)
+ORDER BY
+	auto.au_nombre
+    `;
+
 export const infoOperaRegistroQuery = () => `
 SELECT
 	ope.ope_codigo as "opera",

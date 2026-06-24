@@ -53,6 +53,7 @@ const RankingConvencionalView = lazy(() => import("./views/admin/siac/RankingCon
 const PedidoUnidadesView = lazy(() => import("./views/admin/siac/PedidoUnidadesView"));
 const PedidoUnidadesPreviasView = lazy(() => import("./views/admin/siac/PedidoUnidadesPreviasView"));
 const FacturasAnticipoView = lazy(() => import("./views/admin/siac/FacturasAnticipoView"));
+const SegUnidadesFabricaView = lazy(() => import("./views/admin/siac/SegUnidadesFabricaView"));
 const RegistroAsignacionesView = lazy(() => import("./views/admin/siac/RegistroAsignacionesView"));
 const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/RegistroAsignacionesResumenView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
@@ -146,7 +147,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes", "listaPrevia", "facturasAnticipo"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes", "listaPrevia", "facturasAnticipo", "segUnidadesFabrica"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.home} element={<AdministracionHubView />} />
             </Route>
@@ -168,6 +169,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["facturasAnticipo"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.facturasAnticipo} element={<FacturasAnticipoView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["segUnidadesFabrica"]} />}>
+            <Route element={<AdminModuleLayout />}>
+              <Route path={paths.administracion.segUnidadesFabrica} element={<SegUnidadesFabricaView />} />
             </Route>
           </Route>
 

@@ -8,6 +8,7 @@ export const moduleKeys = [
   "reventaPendientes",
   "listaPrevia",
   "facturasAnticipo",
+  "segUnidadesFabrica",
   "asignaciones",
   "registroAsignaciones",
   "pedidoMensual",

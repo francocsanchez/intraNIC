@@ -138,6 +138,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.administracion.pedidoUnidadesListaPrevia,
     paths.administracion.pedidoUnidadesRegistros,
     paths.administracion.facturasAnticipo,
+    paths.administracion.segUnidadesFabrica,
     paths.convencional.pedidoUnidades,
     paths.entregas.registros,
   ],

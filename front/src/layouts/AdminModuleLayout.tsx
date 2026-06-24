@@ -1,8 +1,8 @@
 import BaseAppLayout from "@/layouts/BaseAppLayout";
-import { hasAnyModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
+import { hasAnyModuleAccess, hasModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ClipboardList, FileWarning, List, ReceiptText } from "lucide-react";
+import { ClipboardList, FileWarning, List, ReceiptText, Factory } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -11,6 +11,7 @@ export default function AdminModuleLayout() {
   const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
   const canViewPedidoUnidades = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
+  const canViewSegUnidadesFabrica = hasModuleAccess(user, "segUnidadesFabrica");
   const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
     && hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros);
 
@@ -54,6 +55,16 @@ export default function AdminModuleLayout() {
             >
               <FileWarning size={15} strokeWidth={1.5} />
               Facturas de anticipo
+            </Link>
+          )}
+
+          {canViewSegUnidadesFabrica && (
+            <Link
+              to={paths.administracion.segUnidadesFabrica}
+              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
+            >
+              <Factory size={15} strokeWidth={1.5} />
+              Seg. unidades fabrica
             </Link>
           )}
         </>

@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasModulePathAccess } from "@/helpers/access";
+import { hasModuleAccess, hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -9,6 +9,7 @@ import {
   CalendarDays,
   FileText,
   FolderCog,
+  Factory,
   Handshake,
   LogOut,
   Motorbike,
@@ -130,6 +131,12 @@ export default function Inicio() {
           to: paths.administracion.facturasAnticipo,
           enabled: hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo),
           icon: CalendarRange,
+        },
+        {
+          label: "Seg. unidades fabrica",
+          to: paths.administracion.segUnidadesFabrica,
+          enabled: hasModuleAccess(user, "segUnidadesFabrica"),
+          icon: Factory,
         },
       ],
     },

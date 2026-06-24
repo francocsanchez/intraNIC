@@ -1,7 +1,7 @@
-import { hasAnyModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
+import { hasAnyModuleAccess, hasModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ClipboardList, FileWarning, List, ReceiptText } from "lucide-react";
+import { ClipboardList, Factory, FileWarning, List, ReceiptText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const cardClass =
@@ -14,6 +14,7 @@ export default function AdministracionHubView() {
   const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
   const canViewListaPrevia = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
   const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
+  const canViewSegUnidadesFabrica = hasModuleAccess(user, "segUnidadesFabrica");
   const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
     && hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros);
 
@@ -96,6 +97,24 @@ export default function AdministracionHubView() {
               <FileWarning size={24} strokeWidth={1.5} />
             </div>
             <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Facturas de anticipo</h2>
+            <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
+          </div>
+        )}
+
+        {canViewSegUnidadesFabrica ? (
+          <Link to={paths.administracion.segUnidadesFabrica} className={cardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-900">
+              <Factory size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-900">Seg. unidades fabrica</h2>
+            <p className="mt-1 text-sm text-gray-500">Importa el TXT y consulta las unidades NIC activas sin VIN.</p>
+          </Link>
+        ) : (
+          <div className={disabledCardClass}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200 text-gray-600">
+              <Factory size={24} strokeWidth={1.5} />
+            </div>
+            <h2 className="mt-4 text-base font-semibold tracking-tight text-gray-700">Seg. unidades fabrica</h2>
             <p className="mt-1 text-sm text-gray-500">No disponible para tu perfil actual.</p>
           </div>
         )}

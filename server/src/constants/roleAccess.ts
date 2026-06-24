@@ -35,6 +35,7 @@ export type RoleAccessKey =
   | "administracion.listaPrevia"
   | "administracion.pedidoUnidadesRegistros"
   | "administracion.facturasAnticipo"
+  | "administracion.segUnidadesFabrica"
   | "comercial.testDriveRegistroConvencional.read"
   | "comercial.testDriveRegistroConvencional.create"
   | "comercial.testDriveRegistroConvencional.updateOwn"
@@ -198,6 +199,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "administracion.listaPrevia",
     "administracion.pedidoUnidadesRegistros",
     "administracion.facturasAnticipo",
+    "administracion.segUnidadesFabrica",
   ]),
   stock: new Set<RoleAccessKey>([
     "callCenter",
