@@ -35,48 +35,51 @@ const parseDateFromFileName = (fileName: string) => {
 };
 
 export class SftpFileDiscoveryService {
+  static listByPrefixSorted(
+    files: SftpFileEntry[],
+    remoteDirectory: string,
+    prefix: string,
+    buildRemotePath: (remoteDirectory: string, fileName: string) => string,
+  ): LatestSftpFileSelection[] {
+    return files
+      .filter((file) => file.type !== "d" && file.name.toLowerCase().startsWith(prefix.toLowerCase()))
+      .sort((left, right) => {
+        const leftDate = parseDateFromFileName(left.name);
+        const rightDate = parseDateFromFileName(right.name);
+
+        if (leftDate !== null && rightDate !== null && leftDate !== rightDate) {
+          return leftDate - rightDate;
+        }
+
+        if (leftDate !== null && rightDate === null) {
+          return -1;
+        }
+
+        if (leftDate === null && rightDate !== null) {
+          return 1;
+        }
+
+        if (left.modifyTime !== right.modifyTime) {
+          return left.modifyTime - right.modifyTime;
+        }
+
+        return left.name.localeCompare(right.name);
+      })
+      .map((file) => ({
+        fileName: file.name,
+        remotePath: buildRemotePath(remoteDirectory, file.name),
+        modifyTime: file.modifyTime,
+        size: file.size,
+      }));
+  }
+
   static selectLatestByPrefix(
     files: SftpFileEntry[],
     remoteDirectory: string,
     prefix: string,
     buildRemotePath: (remoteDirectory: string, fileName: string) => string,
   ): LatestSftpFileSelection | null {
-    const matchingFiles = files.filter(
-      (file) => file.type !== "d" && file.name.toLowerCase().startsWith(prefix.toLowerCase()),
-    );
-
-    if (!matchingFiles.length) {
-      return null;
-    }
-
-    const selected = [...matchingFiles].sort((left, right) => {
-      const leftDate = parseDateFromFileName(left.name);
-      const rightDate = parseDateFromFileName(right.name);
-
-      if (leftDate !== null && rightDate !== null && leftDate !== rightDate) {
-        return rightDate - leftDate;
-      }
-
-      if (leftDate !== null && rightDate === null) {
-        return -1;
-      }
-
-      if (leftDate === null && rightDate !== null) {
-        return 1;
-      }
-
-      if (right.modifyTime !== left.modifyTime) {
-        return right.modifyTime - left.modifyTime;
-      }
-
-      return right.name.localeCompare(left.name);
-    })[0];
-
-    return {
-      fileName: selected.name,
-      remotePath: buildRemotePath(remoteDirectory, selected.name),
-      modifyTime: selected.modifyTime,
-      size: selected.size,
-    };
+    const matchingFiles = SftpFileDiscoveryService.listByPrefixSorted(files, remoteDirectory, prefix, buildRemotePath);
+    return matchingFiles.at(-1) ?? null;
   }
 }

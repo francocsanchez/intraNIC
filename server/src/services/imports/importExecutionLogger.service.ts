@@ -3,6 +3,7 @@ import ImportExecutionLog, {
   type IImportExecutionLog,
   type ImportExecutionStatus,
 } from "../../models/ImportExecutionLog";
+import ImportedSourceFile from "../../models/ImportedSourceFile";
 
 type StartExecutionInput = {
   jobName: string;
@@ -27,6 +28,38 @@ type FinishExecutionInput = {
 };
 
 export class ImportExecutionLoggerService {
+  static async getProcessedFileNames(jobName: string) {
+    const files = await ImportedSourceFile.find(
+      {
+        jobName,
+      },
+      { fileName: 1, _id: 0 },
+    ).lean<Array<{ fileName: string }>>();
+
+    return new Set(
+      files
+        .map((file) => file.fileName)
+        .map((fileName) => String(fileName ?? "").trim())
+        .filter(Boolean),
+    );
+  }
+
+  static async registerProcessedFile(jobName: string, fileName: string) {
+    await ImportedSourceFile.updateOne(
+      { jobName, fileName },
+      {
+        $set: {
+          processedAt: new Date(),
+        },
+        $setOnInsert: {
+          jobName,
+          fileName,
+        },
+      },
+      { upsert: true },
+    );
+  }
+
   static async startExecution(input: StartExecutionInput) {
     return ImportExecutionLog.create({
       jobName: input.jobName,

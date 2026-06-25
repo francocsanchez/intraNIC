@@ -56,6 +56,8 @@ const formatDuration = (durationMs: number | null) => {
   return `${minutes}m ${seconds}s`;
 };
 
+const formatInteger = (value: number) => value.toLocaleString("es-AR");
+
 export default function PatentamientosRegistrosView() {
   const queryClient = useQueryClient();
 
@@ -216,6 +218,43 @@ export default function PatentamientosRegistrosView() {
             Hay una importacion en curso. El estado se actualiza automaticamente.
           </div>
         ) : null}
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full border-collapse text-xs">
+            <thead className="bg-gray-100 text-gray-700">
+              <tr>
+                <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Fecha de procesado</th>
+                <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Nombre del archivo procesado</th>
+                <th className="border border-gray-200 px-3 py-2 text-right font-semibold">Cant. leidos</th>
+                <th className="border border-gray-200 px-3 py-2 text-right font-semibold">Insertados</th>
+                <th className="border border-gray-200 px-3 py-2 text-right font-semibold">Actualizados</th>
+                <th className="border border-gray-200 px-3 py-2 text-right font-semibold">Descartados</th>
+                <th className="border border-gray-200 px-3 py-2 text-right font-semibold">Con error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {status.executionHistory.length ? (
+                status.executionHistory.map((execution, index) => (
+                  <tr key={`${execution.processedAt ?? "sin-fecha"}-${execution.fileName ?? "sin-archivo"}-${index}`} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                    <td className="border border-gray-200 px-3 py-2 text-left text-gray-700">{formatDateTime(execution.processedAt)}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-left text-gray-700">{execution.fileName ?? "Sin archivo"}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-right text-gray-700">{formatInteger(execution.totalRead)}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-right text-emerald-700">{formatInteger(execution.inserted)}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-right text-sky-700">{formatInteger(execution.updated)}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-right text-amber-700">{formatInteger(execution.discarded)}</td>
+                    <td className="border border-gray-200 px-3 py-2 text-right text-red-700">{formatInteger(execution.errored)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="border border-gray-200 px-3 py-6 text-center text-sm text-gray-500">
+                    Todavia no hay ejecuciones registradas.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

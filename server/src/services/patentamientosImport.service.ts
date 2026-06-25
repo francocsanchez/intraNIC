@@ -2,6 +2,9 @@ import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import type { IImportExecutionErrorDetail, ImportExecutionStatus } from "../models/ImportExecutionLog";
+import ImportedSourceFile from "../models/ImportedSourceFile";
+import ImportedPatentamientoIdentifier from "../models/ImportedPatentamientoIdentifier";
+import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
 import { ImportExecutionLoggerService } from "./imports/importExecutionLogger.service";
 import { PatentamientosPrendasCsvService } from "./patentamientosPrendasCsv.service";
 import { ReusableSftpClientService } from "./sftp/sftpClient.service";
@@ -130,68 +133,128 @@ export class PatentamientosImportService {
       await sftpClient.connect();
 
       const remoteFiles = await sftpClient.list(remotePath);
-      const latestFile = SftpFileDiscoveryService.selectLatestByPrefix(
+      const matchingFiles = SftpFileDiscoveryService.listByPrefixSorted(
         remoteFiles,
         remotePath,
         REMOTE_FILE_PREFIX,
         (directory, fileName) => sftpClient.buildRemoteFilePath(directory, fileName),
       );
+      const [trackedIdentifiersCount, totalizadosCount] = await Promise.all([
+        ImportedPatentamientoIdentifier.estimatedDocumentCount(),
+        PatentamientoTotalizado.estimatedDocumentCount(),
+      ]);
+      let shouldRebuildFromScratch = false;
 
-      if (!latestFile) {
+      if (!matchingFiles.length) {
         throw new PatentamientosImportSkippedError("No se encontro ningun archivo Patent_Prendas para importar");
       }
 
-      localTempFilePath = await buildTempFilePath(tempDirectory, latestFile.fileName);
-      await sftpClient.download(latestFile.remotePath, localTempFilePath);
+      if (trackedIdentifiersCount === 0 && totalizadosCount > 0) {
+        console.warn("[patentamientos-import] base legacy detectada sin huella de IdentificadorUnico; se reinicia para reconstruir");
+        await Promise.all([
+          PatentamientoTotalizado.deleteMany({}),
+          ImportedPatentamientoIdentifier.deleteMany({}),
+          ImportedSourceFile.deleteMany({ jobName: JOB_NAME }),
+        ]);
+        shouldRebuildFromScratch = true;
+      }
 
-      const csvSummary = await PatentamientosPrendasCsvService.processFile(localTempFilePath);
+      const processedFileNames = shouldRebuildFromScratch
+        ? new Set<string>()
+        : await ImportExecutionLoggerService.getProcessedFileNames(JOB_NAME);
+      const pendingFiles = matchingFiles.filter((file) => !processedFileNames.has(file.fileName));
+
+      if (!pendingFiles.length) {
+        throw new PatentamientosImportSkippedError("No hay archivos Patent_Prendas pendientes para acumular");
+      }
+
+      const aggregatedSummary = {
+        totalRead: 0,
+        inserted: 0,
+        updated: 0,
+        discarded: 0,
+        errored: 0,
+        totalizedRows: 0,
+        errorSummary: [] as string[],
+        errorDetailsSample: [] as IImportExecutionErrorDetail[],
+      };
+      let lastProcessedFileName = pendingFiles[0].fileName;
+
+      for (const pendingFile of pendingFiles) {
+        localTempFilePath = await buildTempFilePath(tempDirectory, pendingFile.fileName);
+        await sftpClient.download(pendingFile.remotePath, localTempFilePath);
+
+        const csvSummary = await PatentamientosPrendasCsvService.processFile(localTempFilePath, {
+          batchSize,
+          sourceFileName: pendingFile.fileName,
+        });
+        lastProcessedFileName = pendingFile.fileName;
+
+        aggregatedSummary.totalRead += csvSummary.totalRead;
+        aggregatedSummary.inserted += csvSummary.inserted;
+        aggregatedSummary.updated += csvSummary.updated;
+        aggregatedSummary.discarded += csvSummary.discarded;
+        aggregatedSummary.errored += csvSummary.errored;
+        aggregatedSummary.totalizedRows += csvSummary.totalizedRows;
+        aggregatedSummary.errorSummary.push(...csvSummary.errorSummary);
+        aggregatedSummary.errorDetailsSample.push(...csvSummary.errorDetailsSample);
+
+        console.log(`[patentamientos-import] archivo acumulado: ${pendingFile.fileName}`);
+        await ImportExecutionLoggerService.registerProcessedFile(JOB_NAME, pendingFile.fileName);
+
+        await fs.rm(localTempFilePath, { force: true }).catch(() => undefined);
+        localTempFilePath = "";
+      }
 
       const finishedAt = new Date();
       const status = resolveStatus(
-        csvSummary.totalRead,
-        csvSummary.inserted,
-        csvSummary.updated,
-        csvSummary.errored,
+        aggregatedSummary.totalRead,
+        aggregatedSummary.inserted,
+        aggregatedSummary.updated,
+        aggregatedSummary.errored,
       );
       const message =
         status === "failed"
-          ? `Archivo ${latestFile.fileName} leido, pero no se pudo importar ningun registro valido`
-          : `Archivo ${latestFile.fileName} procesado correctamente y totalizacion regenerada (${csvSummary.totalizedRows} filas)`;
+          ? `Se leyeron ${pendingFiles.length} archivos, pero no se pudo acumular ningun registro valido`
+          : pendingFiles.length === 1
+            ? `Archivo ${lastProcessedFileName} acumulado correctamente (${aggregatedSummary.totalizedRows} grupos actualizados)`
+            : `${pendingFiles.length} archivos acumulados correctamente hasta ${lastProcessedFileName} (${aggregatedSummary.totalizedRows} grupos actualizados)`;
 
       await ImportExecutionLoggerService.finishExecution(String(log._id), {
         status,
-        fileName: latestFile.fileName,
+        fileName: lastProcessedFileName,
         message,
-        totalRead: csvSummary.totalRead,
-        inserted: csvSummary.inserted,
-        updated: csvSummary.updated,
-        discarded: csvSummary.discarded,
-        errored: csvSummary.errored,
-        errorSummary: csvSummary.errorSummary,
-        errorDetailsSample: csvSummary.errorDetailsSample,
+        totalRead: aggregatedSummary.totalRead,
+        inserted: aggregatedSummary.inserted,
+        updated: aggregatedSummary.updated,
+        discarded: aggregatedSummary.discarded,
+        errored: aggregatedSummary.errored,
+        errorSummary: aggregatedSummary.errorSummary.slice(0, 20),
+        errorDetailsSample: aggregatedSummary.errorDetailsSample.slice(0, 20),
       });
 
-      console.log(`[patentamientos-import] archivo procesado: ${latestFile.fileName}`);
-      console.log(`[patentamientos-import] leidos: ${csvSummary.totalRead}`);
-      console.log(`[patentamientos-import] insertados: ${csvSummary.inserted}`);
-      console.log(`[patentamientos-import] actualizados: ${csvSummary.updated}`);
-      console.log(`[patentamientos-import] descartados: ${csvSummary.discarded}`);
-      console.log(`[patentamientos-import] con error: ${csvSummary.errored}`);
-      console.log(`[patentamientos-import] totalizacion regenerada: ${csvSummary.totalizedRows}`);
+      console.log(`[patentamientos-import] archivos acumulados: ${pendingFiles.length}`);
+      console.log(`[patentamientos-import] ultimo archivo procesado: ${lastProcessedFileName}`);
+      console.log(`[patentamientos-import] leidos: ${aggregatedSummary.totalRead}`);
+      console.log(`[patentamientos-import] insertados: ${aggregatedSummary.inserted}`);
+      console.log(`[patentamientos-import] actualizados: ${aggregatedSummary.updated}`);
+      console.log(`[patentamientos-import] descartados: ${aggregatedSummary.discarded}`);
+      console.log(`[patentamientos-import] con error: ${aggregatedSummary.errored}`);
+      console.log(`[patentamientos-import] grupos acumulados: ${aggregatedSummary.totalizedRows}`);
 
       return {
         status,
-        fileName: latestFile.fileName,
+        fileName: lastProcessedFileName,
         startedAt: startedAt.toISOString(),
         finishedAt: finishedAt.toISOString(),
         durationMs: finishedAt.getTime() - startedAt.getTime(),
-        totalRead: csvSummary.totalRead,
-        inserted: csvSummary.inserted,
-        updated: csvSummary.updated,
-        discarded: csvSummary.discarded,
-        errored: csvSummary.errored,
+        totalRead: aggregatedSummary.totalRead,
+        inserted: aggregatedSummary.inserted,
+        updated: aggregatedSummary.updated,
+        discarded: aggregatedSummary.discarded,
+        errored: aggregatedSummary.errored,
         message,
-        errorSummary: csvSummary.errorSummary,
+        errorSummary: aggregatedSummary.errorSummary.slice(0, 20),
       };
     } catch (error) {
       const finishedAt = new Date();
@@ -205,10 +268,8 @@ export class PatentamientosImportService {
         errorDetailsSample: summarizeFatalError(error),
       });
 
-      console.error("[patentamientos-import] error en la importacion");
-      console.error(error);
-
       if (isSkipped) {
+        console.log(`[patentamientos-import] sin novedades: ${message}`);
         return {
           status: "skipped",
           fileName: null,
@@ -224,6 +285,9 @@ export class PatentamientosImportService {
           errorSummary: [message],
         };
       }
+
+      console.error("[patentamientos-import] error en la importacion");
+      console.error(error);
 
       throw error;
     } finally {

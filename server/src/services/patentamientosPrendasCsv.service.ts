@@ -1,6 +1,7 @@
 import fs from "fs";
 import csv from "csv-parser";
 import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
+import ImportedPatentamientoIdentifier from "../models/ImportedPatentamientoIdentifier";
 import type { IImportExecutionErrorDetail } from "../models/ImportExecutionLog";
 
 const CSV_HEADERS = [
@@ -42,6 +43,11 @@ export type PatentamientosCsvImportSummary = {
   totalizedRows: number;
   errorSummary: string[];
   errorDetailsSample: IImportExecutionErrorDetail[];
+};
+
+type ProcessFileOptions = {
+  batchSize: number;
+  sourceFileName: string;
 };
 
 const ERROR_SAMPLE_LIMIT = 20;
@@ -198,8 +204,40 @@ const pushError = (
   }
 };
 
+const incrementAggregation = (
+  totalsByKey: Map<
+    string,
+    Omit<PatentamientoTotalizadoWritePayload, "total" | "sourceUpdatedAt" | "createdAt" | "updatedAt"> & {
+      total: number;
+    }
+  >,
+  payload: Omit<PatentamientoTotalizadoWritePayload, "total" | "sourceUpdatedAt" | "createdAt" | "updatedAt">,
+) => {
+  const key = buildAggregationKey(payload);
+  const current = totalsByKey.get(key);
+
+  if (current) {
+    current.total += 1;
+  } else {
+    totalsByKey.set(key, {
+      ...payload,
+      total: 1,
+    });
+  }
+};
+
 export class PatentamientosPrendasCsvService {
-  static async processFile(filePath: string): Promise<PatentamientosCsvImportSummary> {
+  private static async ensureCollectionIndexes() {
+    const existingIndexes = await PatentamientoTotalizado.collection.indexes().catch(() => []);
+
+    if (existingIndexes.some((index) => index.name === LEGACY_TOTALIZED_UNIQUE_INDEX)) {
+      await PatentamientoTotalizado.collection.dropIndex(LEGACY_TOTALIZED_UNIQUE_INDEX);
+    }
+
+    await PatentamientoTotalizado.syncIndexes();
+  }
+
+  static async processFile(filePath: string, options: ProcessFileOptions): Promise<PatentamientosCsvImportSummary> {
     const summary: PatentamientosCsvImportSummary = {
       totalRead: 0,
       inserted: 0,
@@ -217,6 +255,11 @@ export class PatentamientosPrendasCsvService {
         total: number;
       }
     >();
+    const fileSeenIdentifiers = new Set<string>();
+    let pendingRows: Array<{
+      identificadorUnico: string;
+      payload: Omit<PatentamientoTotalizadoWritePayload, "total" | "sourceUpdatedAt" | "createdAt" | "updatedAt">;
+    }> = [];
     let lineNumber = 1;
     let hasHeaders = false;
     let hasAtLeastOneDataRow = false;
@@ -240,6 +283,40 @@ export class PatentamientosPrendasCsvService {
         reject(error);
       };
 
+      const flushPendingRows = async () => {
+        if (!pendingRows.length) {
+          return;
+        }
+
+        const identifiers = pendingRows.map((row) => row.identificadorUnico);
+        const existingIdentifiers = await ImportedPatentamientoIdentifier.find(
+          { identificadorUnico: { $in: identifiers } },
+          { identificadorUnico: 1, _id: 0 },
+        ).lean<Array<{ identificadorUnico: string }>>();
+        const existingIdentifierSet = new Set(existingIdentifiers.map((item) => item.identificadorUnico));
+        const newRows = pendingRows.filter((row) => !existingIdentifierSet.has(row.identificadorUnico));
+
+        newRows.forEach((row) => {
+          incrementAggregation(totalsByKey, row.payload);
+        });
+
+        if (newRows.length) {
+          await ImportedPatentamientoIdentifier.collection.insertMany(
+            newRows.map((row) => ({
+              identificadorUnico: row.identificadorUnico,
+              sourceFileName: options.sourceFileName,
+              importedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })),
+            { ordered: false },
+          );
+        }
+
+        summary.discarded += pendingRows.length - newRows.length;
+        pendingRows = [];
+      };
+
       parser.on("headers", (headers: string[]) => {
         try {
           validateHeaders(headers);
@@ -249,38 +326,52 @@ export class PatentamientosPrendasCsvService {
         }
       });
 
-      parser.on("data", (rawRow: Record<string, string>) => {
+      parser.on("data", async (rawRow: Record<string, string>) => {
         lineNumber += 1;
+        parser.pause();
 
         try {
           hasAtLeastOneDataRow = true;
           summary.totalRead += 1;
 
           const row = rawRow as CsvRow;
-          const payload = buildTotalizadoPayload(row);
-          const key = buildAggregationKey(payload);
-          const current = totalsByKey.get(key);
+          const identificadorUnico = trimCell(row.IdentificadorUnico);
 
-          if (current) {
-            current.total += 1;
-          } else {
-            totalsByKey.set(key, {
-              ...payload,
-              total: 1,
-            });
+          if (!identificadorUnico) {
+            throw new Error('El campo "IdentificadorUnico" es obligatorio');
+          }
+
+          if (fileSeenIdentifiers.has(identificadorUnico)) {
+            summary.discarded += 1;
+            return;
+          }
+
+          fileSeenIdentifiers.add(identificadorUnico);
+          const payload = buildTotalizadoPayload(row);
+          pendingRows.push({
+            identificadorUnico,
+            payload,
+          });
+
+          if (pendingRows.length >= options.batchSize) {
+            await flushPendingRows();
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "No se pudo procesar la fila";
           pushError(summary, lineNumber, errorMessage, trimCell(rawRow.IdentificadorUnico));
+        } finally {
+          parser.resume();
         }
       });
 
-      parser.on("end", () => {
+      parser.on("end", async () => {
         if (isSettled) {
           return;
         }
 
         try {
+          await flushPendingRows();
+
           if (!hasHeaders) {
             throw new Error("El archivo CSV no contiene cabeceras validas");
           }
@@ -308,27 +399,52 @@ export class PatentamientosPrendasCsvService {
     });
 
     const sourceUpdatedAt = new Date();
-    const timestamps = {
-      createdAt: sourceUpdatedAt,
-      updatedAt: sourceUpdatedAt,
-    };
-    const totalizedRows = Array.from(totalsByKey.values()).map((row) => ({
-      ...row,
-      sourceUpdatedAt,
-      ...timestamps,
-    }));
+    const totalizedRows = Array.from(totalsByKey.values());
 
-    await PatentamientoTotalizado.deleteMany({});
-    const existingIndexes = await PatentamientoTotalizado.collection.indexes().catch(() => []);
+    await PatentamientosPrendasCsvService.ensureCollectionIndexes();
 
-    if (existingIndexes.some((index) => index.name === LEGACY_TOTALIZED_UNIQUE_INDEX)) {
-      await PatentamientoTotalizado.collection.dropIndex(LEGACY_TOTALIZED_UNIQUE_INDEX);
-    }
-
-    await PatentamientoTotalizado.syncIndexes();
+    const totalsBefore = await PatentamientoTotalizado.aggregate([
+      { $group: { _id: null, total: { $sum: "$total" } } },
+    ]);
+    const previousPersistedTotal = totalsBefore[0]?.total ?? 0;
 
     if (totalizedRows.length) {
-      await PatentamientoTotalizado.collection.insertMany(totalizedRows, { ordered: false });
+      const bulkOperations = totalizedRows.map((row) => ({
+        updateOne: {
+          filter: {
+            anio: row.anio,
+            mes: row.mes,
+            dia: row.dia,
+            marca: row.marca,
+            ranger: row.ranger,
+            registroProvincia: row.registroProvincia,
+            registroLocalidad: row.registroLocalidad,
+            prendado: row.prendado,
+            tipoAcreedorPrendario: row.tipoAcreedorPrendario,
+          },
+          update: {
+            $inc: { total: row.total },
+            $set: { sourceUpdatedAt, updatedAt: sourceUpdatedAt },
+            $setOnInsert: {
+              anio: row.anio,
+              mes: row.mes,
+              dia: row.dia,
+              marca: row.marca,
+              ranger: row.ranger,
+              registroProvincia: row.registroProvincia,
+              registroLocalidad: row.registroLocalidad,
+              prendado: row.prendado,
+              tipoAcreedorPrendario: row.tipoAcreedorPrendario,
+              createdAt: sourceUpdatedAt,
+            },
+          },
+          upsert: true,
+        },
+      }));
+
+      const bulkResult = await PatentamientoTotalizado.collection.bulkWrite(bulkOperations, { ordered: false });
+      summary.inserted = bulkResult.upsertedCount ?? 0;
+      summary.updated = bulkResult.modifiedCount ?? 0;
     }
 
     const insertedAggregation = await PatentamientoTotalizado.aggregate([
@@ -339,13 +455,12 @@ export class PatentamientosPrendasCsvService {
     const persistedTotalCount = insertedAggregation[0]?.total ?? 0;
     const validReadCount = summary.totalRead - summary.discarded;
 
-    if (persistedTotalCount !== validReadCount) {
+    if (persistedTotalCount - previousPersistedTotal !== validReadCount) {
       throw new Error(
-        `La totalizacion quedo inconsistente. Filas validas=${validReadCount}, total persistido=${persistedTotalCount}`,
+        `La acumulacion quedo inconsistente. Filas validas=${validReadCount}, delta persistido=${persistedTotalCount - previousPersistedTotal}`,
       );
     }
 
-    summary.inserted = persistedRowCount;
     summary.totalizedRows = totalizedRows.length;
 
     if (summary.errorDetailsSample.length) {

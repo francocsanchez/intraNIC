@@ -1,7 +1,7 @@
 import { PatentamientosImportService } from "../services/patentamientosImport.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
-const JOB_SCHEDULES = new Set(["05:00", "16:00"]);
+const JOB_SCHEDULES = new Set(["22:00"]);
 const CHECK_INTERVAL_MS = 60 * 1000;
 
 let isRunning = false;
@@ -72,7 +72,7 @@ const executeIfNeeded = async () => {
 };
 
 export const startPatentamientosImportJob = () => {
-  console.log("[patentamientos-import-cron] programado todos los dias a las 05:00 y 16:00 (America/Argentina/Buenos_Aires)");
+  console.log("[patentamientos-import-cron] programado todos los dias a las 22:00 (America/Argentina/Buenos_Aires)");
 
   void executeIfNeeded();
   setInterval(() => {

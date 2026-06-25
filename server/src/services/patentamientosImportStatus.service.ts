@@ -14,11 +14,20 @@ export type PatentamientosImportStatusResponse = {
   discarded: number;
   errored: number;
   message: string;
+  executionHistory: Array<{
+    processedAt: string | null;
+    fileName: string | null;
+    totalRead: number;
+    inserted: number;
+    updated: number;
+    discarded: number;
+    errored: number;
+  }>;
 };
 
 export class PatentamientosImportStatusService {
   static async getLatestStatus(): Promise<PatentamientosImportStatusResponse> {
-    const [latestExecution, latestSuccessfulExecution] = await Promise.all([
+    const [latestExecution, latestSuccessfulExecution, executionHistory] = await Promise.all([
       ImportExecutionLog.findOne({ jobName: PatentamientosImportService.getJobName() })
         .sort({ startedAt: -1 })
         .lean(),
@@ -27,6 +36,10 @@ export class PatentamientosImportStatusService {
         status: { $in: ["success", "partial"] },
       })
         .sort({ finishedAt: -1, startedAt: -1 })
+        .lean(),
+      ImportExecutionLog.find({ jobName: PatentamientosImportService.getJobName() })
+        .sort({ startedAt: -1 })
+        .limit(15)
         .lean(),
     ]);
 
@@ -49,6 +62,15 @@ export class PatentamientosImportStatusService {
       discarded: latestExecution?.discarded ?? 0,
       errored: latestExecution?.errored ?? 0,
       message: latestExecution?.message ?? "Todavia no hay ejecuciones registradas",
+      executionHistory: executionHistory.map((execution) => ({
+        processedAt: execution.finishedAt?.toISOString?.() ?? execution.startedAt?.toISOString?.() ?? null,
+        fileName: execution.fileName ?? null,
+        totalRead: execution.totalRead ?? 0,
+        inserted: execution.inserted ?? 0,
+        updated: execution.updated ?? 0,
+        discarded: execution.discarded ?? 0,
+        errored: execution.errored ?? 0,
+      })),
     };
   }
 }

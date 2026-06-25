@@ -15,6 +15,19 @@ const patentamientosImportStatusSchema = z.object({
   discarded: z.number(),
   errored: z.number(),
   message: z.string(),
+  executionHistory: z
+    .array(
+      z.object({
+        processedAt: z.string().nullable(),
+        fileName: z.string().nullable(),
+        totalRead: z.number(),
+        inserted: z.number(),
+        updated: z.number(),
+        discarded: z.number(),
+        errored: z.number(),
+      }),
+    )
+    .default([]),
 });
 
 const patentamientosImportExecutionSchema = z.object({
