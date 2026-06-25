@@ -20,6 +20,7 @@ export const moduleKeys = [
   "ranking",
   "promedio",
   "patentamientos",
+  "actualizacionRegistros",
   "agendaEntrega",
   "usuarios",
   "configuracion",
@@ -54,6 +55,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   ranking: "Ranking",
   promedio: "Promedio",
   patentamientos: "Patentamientos",
+  actualizacionRegistros: "Act. Registros",
   agendaEntrega: "Agenda de entrega",
   usuarios: "Usuarios",
   configuracion: "Configuracion",
@@ -105,7 +107,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Sistema",
-    modules: ["usuarios", "configuracion", "testDrive"],
+    modules: ["usuarios", "configuracion", "testDrive", "actualizacionRegistros"],
   },
 ];
 

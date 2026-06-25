@@ -8,6 +8,7 @@ import {
   Headset,
   CalendarDays,
   FileText,
+  FileSpreadsheet,
   FolderCog,
   Factory,
   Handshake,
@@ -192,6 +193,12 @@ export default function Inicio() {
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
+        {
+          label: "Act. Registros",
+          to: paths.analisis.registros,
+          enabled: hasModulePathAccess(user, "actualizacionRegistros", paths.analisis.registros),
+          icon: FileSpreadsheet,
+        },
       ],
     },
   ];

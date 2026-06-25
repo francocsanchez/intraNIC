@@ -35,6 +35,7 @@ export const paths = {
   },
   analisis: {
     operaciones: "/analisis/operaciones",
+    registros: "/analisis/registros",
     patentamientos: {
       home: "/analisis/patentamientos",
       importar: "/analisis/patentamientos/importar",

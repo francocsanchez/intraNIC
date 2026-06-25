@@ -51,7 +51,6 @@ router.get("/dashboard/segmento-suv/zona-nic", PatentamientosDashboardController
 router.get("/dashboard/segmento-b-suv/pais", PatentamientosDashboardController.getSegmentoBSuvPais);
 router.get("/dashboard/segmento-b-suv/zona-nic", PatentamientosDashboardController.getSegmentoBSuvZonaNic);
 router.get("/dashboard/toyota-evolucion", PatentamientosDashboardController.getToyotaEvolution);
-router.get("/dashboard/marcas/evolucion-participacion-pais", PatentamientosDashboardController.getBrandParticipationEvolutionPais);
 router.get("/dashboard/general/zona-nic", PatentamientosDashboardController.getGeneralZonaNic);
 router.post("/unidades-dealers/sincronizar", UnidadesDealersController.sincronizar);
 router.get("/unidades-dealers/resumen", UnidadesDealersController.getResumen);

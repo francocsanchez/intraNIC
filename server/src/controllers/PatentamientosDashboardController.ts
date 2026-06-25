@@ -7,6 +7,11 @@ const parseYear = (value: unknown) => {
   return Number.isInteger(parsed) && parsed > 2000 ? parsed : null;
 };
 
+const parsePlanFilter = (value: unknown) => {
+  const normalized = String(value ?? "with-plan").trim().toLowerCase();
+  return normalized === "without-plan" ? "without-plan" : "with-plan";
+};
+
 const handleDashboardRequest = async (
   res: Response,
   action: () => Promise<unknown>,
@@ -38,20 +43,22 @@ export class PatentamientosDashboardController {
 
   static getTopMarcasPais(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getTopMarcasPais(year),
+      () => PatentamientosDashboardService.getTopMarcasPais(year, planFilter),
       "PatentamientosDashboardController.getTopMarcasPais",
     );
   }
 
   static getTopMarcasZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getTopMarcasZonaNic(year),
+      () => PatentamientosDashboardService.getTopMarcasZonaNic(year, planFilter),
       "PatentamientosDashboardController.getTopMarcasZonaNic",
     );
   }
@@ -118,21 +125,12 @@ export class PatentamientosDashboardController {
 
   static getToyotaEvolution(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getToyotaEvolution(year),
+      () => PatentamientosDashboardService.getToyotaEvolution(year, planFilter),
       "PatentamientosDashboardController.getToyotaEvolution",
-    );
-  }
-
-  static getBrandParticipationEvolutionPais(req: Request, res: Response) {
-    const year = parseYear(req.query.year);
-    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
-    return handleDashboardRequest(
-      res,
-      () => PatentamientosDashboardService.getBrandParticipationEvolutionPais(year),
-      "PatentamientosDashboardController.getBrandParticipationEvolutionPais",
     );
   }
 

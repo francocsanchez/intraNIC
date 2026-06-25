@@ -152,6 +152,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "usados.misOperaciones",
     "liess.stockDisponible",
     "analisis.operaciones",
+    "analisis.patentamientos",
     "sistema.testDrive",
   ]),
   gerente: new Set<RoleAccessKey>([
@@ -191,6 +192,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "usados.misOperaciones",
     "liess.stockDisponible",
     "analisis.operaciones",
+    "analisis.patentamientos",
     "sistema.testDrive",
   ]),
   administracion: new Set<RoleAccessKey>([

@@ -2,6 +2,7 @@ import PatentamientoDataset, {
   type IPatentamientoDataset,
   type PatentamientoDatasetType,
 } from "../models/PatentamientoDataset";
+import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
 
 type PatentamientoDatasetLean = Pick<
   IPatentamientoDataset,
@@ -89,23 +90,7 @@ type DashboardGeneralResponse = {
   topModels: DashboardGeneralTopModel[];
 };
 
-type DashboardBrandParticipationValue = {
-  quantity: number;
-  percentage: number;
-};
-
-type DashboardBrandParticipationBrand = {
-  brand: string;
-  total: number;
-  values: Record<string, DashboardBrandParticipationValue>;
-};
-
-type DashboardBrandParticipationResponse = {
-  title: string;
-  description: string;
-  months: DashboardMonthColumn[];
-  brands: DashboardBrandParticipationBrand[];
-};
+type DashboardPlanFilter = "with-plan" | "without-plan";
 
 const PICKUP_MODELS = [
   "TOYOTA HILUX",
@@ -149,6 +134,27 @@ const MONTH_LABELS_SHORT: Record<number, string> = {
   12: "dic",
 };
 
+const ZONA_NIC_LOCALITIES = new Set([
+  "ALLEN",
+  "BARILOCHE",
+  "CENTENARIO",
+  "CHOELE CHOEL",
+  "CINCO SALTOS",
+  "CIPOLLETTI",
+  "CUTRAL CO",
+  "GENERAL ROCA",
+  "MAQUINCHAO",
+  "NEUQUEN",
+  "PLAZA HUINCUL",
+  "PLOTTIER",
+  "SAN MARTIN DE LOS ANDES",
+  "SAN MARTIN DE ANDES",
+  "VILLA REGINA",
+  "VILLA LA ANGOSTURA",
+  "VILLA LANGOSTURA",
+  "ZAPALA",
+]);
+
 const normalizeText = (value: string) =>
   value
     .normalize("NFD")
@@ -158,6 +164,7 @@ const normalizeText = (value: string) =>
     .toUpperCase();
 
 const roundPercentage = (value: number) => Math.round(value * 100) / 100;
+const TERMINAL_AHORRO_ACREEDOR_PATTERN = /^Terminal Ahorro$/i;
 
 const isImportedTotalRow = (value: string) => {
   const normalized = normalizeText(value);
@@ -373,6 +380,142 @@ const getTopRows = async (
   };
 };
 
+const buildDashboardMonthKey = (year: number, monthNumber: number) =>
+  `${year}-${String(monthNumber).padStart(2, "0")}`;
+
+const buildDashboardMonthLabel = (year: number, monthNumber: number) => {
+  const shortMonth = MONTH_LABELS_SHORT[monthNumber];
+  return shortMonth ? `${shortMonth}-${String(year).slice(-2)}` : String(monthNumber);
+};
+
+const buildPlanFilterMatch = (planFilter: DashboardPlanFilter) =>
+  planFilter === "without-plan"
+    ? {
+        tipoAcreedorPrendario: {
+          $not: TERMINAL_AHORRO_ACREEDOR_PATTERN,
+        },
+      }
+    : {};
+
+const getBrandRowsFromTotalizados = async (
+  title: string,
+  year: number,
+  scope: "pais" | "zona-nic",
+  planFilter: DashboardPlanFilter,
+): Promise<DashboardTableResponse> => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    marca: {
+      $exists: true,
+      $ne: "",
+    },
+    ...buildPlanFilterMatch(planFilter),
+  };
+
+  if (scope === "zona-nic") {
+    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+  }
+
+  const monthlyCounts = await PatentamientoTotalizado.aggregate<{
+    brand: string;
+    monthNumber: number;
+    total: number;
+  }>([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: {
+          brand: "$marca",
+          monthNumber: "$mes",
+        },
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        brand: "$_id.brand",
+        monthNumber: "$_id.monthNumber",
+        total: 1,
+      },
+    },
+    {
+      $sort: {
+        brand: 1,
+        monthNumber: 1,
+      },
+    },
+  ]);
+
+  const monthNumbers = Array.from(
+    new Set(
+      monthlyCounts
+        .map((item) => item.monthNumber)
+        .filter((monthNumber) => Number.isInteger(monthNumber) && monthNumber >= 1 && monthNumber <= 12),
+    ),
+  ).sort((left, right) => left - right);
+
+  const months: DashboardMonthColumn[] = monthNumbers.map((monthNumber) => ({
+    key: buildDashboardMonthKey(year, monthNumber),
+    monthNumber,
+    year,
+    label: buildDashboardMonthLabel(year, monthNumber),
+  }));
+
+  if (!months.length) {
+    return buildEmptyTable(title, "Marca", []);
+  }
+
+  const rowsByBrand = new Map<string, PatentamientoRowNormalized>();
+
+  monthlyCounts.forEach((item) => {
+    const brand = String(item.brand ?? "").trim();
+
+    if (!brand) {
+      return;
+    }
+
+    const monthKey = buildDashboardMonthKey(year, item.monthNumber);
+    const current = rowsByBrand.get(brand) ?? {
+      primaryValue: brand,
+      total: 0,
+      months: {},
+    };
+
+    current.months[monthKey] = item.total;
+    current.total += item.total;
+    rowsByBrand.set(brand, current);
+  });
+
+  const allRows = Array.from(rowsByBrand.values())
+    .sort((left, right) => right.total - left.total || left.primaryValue.localeCompare(right.primaryValue));
+  const topRows = allRows.slice(0, 10);
+  const otherRows = allRows.slice(10);
+  const otherBrandsRow = otherRows.length
+    ? {
+        primaryValue: "OTRAS MARCAS",
+        total: otherRows.reduce((sum, row) => sum + row.total, 0),
+        months: months.reduce<Record<string, number>>((acc, month) => {
+          acc[month.key] = otherRows.reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0);
+          return acc;
+        }, {}),
+      }
+    : null;
+
+  const rows = otherBrandsRow ? [...topRows, otherBrandsRow] : topRows;
+
+  const tableRows = buildTableRows(rows, months);
+  const totalRow = buildTotalRow(buildTableRows(allRows, months), months);
+
+  return {
+    title,
+    entityLabel: "Marca",
+    months,
+    rows: tableRows,
+    totalRow,
+  };
+};
+
 const getSegmentRows = async (
   datasetType: PatentamientoDatasetType,
   title: string,
@@ -407,110 +550,105 @@ const getSegmentRows = async (
   };
 };
 
-const getToyotaEvolution = async (year: number): Promise<DashboardEvolutionResponse> => {
-  const [paisDataset, zonaNicDataset] = await Promise.all([
-    getDataset("pais-marcas"),
-    getDataset("zona-nic-marcas"),
+const getToyotaMonthlyShareFromTotalizados = async (
+  year: number,
+  scope: "pais" | "zona-nic",
+  planFilter: DashboardPlanFilter,
+) => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    ...buildPlanFilterMatch(planFilter),
+  };
+
+  if (scope === "zona-nic") {
+    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+  }
+
+  const monthlyTotals = await PatentamientoTotalizado.aggregate<{
+    monthNumber: number;
+    total: number;
+    toyota: number;
+  }>([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: "$mes",
+        total: { $sum: "$total" },
+        toyota: {
+          $sum: {
+            $cond: [{ $eq: ["$marca", "TOYOTA"] }, "$total", 0],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        monthNumber: "$_id",
+        total: 1,
+        toyota: 1,
+      },
+    },
+    { $sort: { monthNumber: 1 } },
+  ]);
+
+  return monthlyTotals.filter(
+    (item) => Number.isInteger(item.monthNumber) && item.monthNumber >= 1 && item.monthNumber <= 12,
+  );
+};
+
+const getToyotaEvolution = async (
+  year: number,
+  planFilter: DashboardPlanFilter,
+): Promise<DashboardEvolutionResponse> => {
+  const [paisMonthly, zonaNicMonthly] = await Promise.all([
+    getToyotaMonthlyShareFromTotalizados(year, "pais", planFilter),
+    getToyotaMonthlyShareFromTotalizados(year, "zona-nic", planFilter),
   ]);
 
   const title = "Toyota - Evolucion Mensual PAIS vs Zona NIC";
 
-  if (!paisDataset || !zonaNicDataset) {
+  if (!paisMonthly.length && !zonaNicMonthly.length) {
     return { title, series: [] };
   }
 
-  const paisMonths = getFilteredMonths(paisDataset, year);
-  const zonaNicMonths = getFilteredMonths(zonaNicDataset, year);
+  const monthNumbers = Array.from(
+    new Set([
+      ...paisMonthly.map((item) => item.monthNumber),
+      ...zonaNicMonthly.map((item) => item.monthNumber),
+    ]),
+  ).sort((left, right) => left - right);
 
-  if (!paisMonths.length || !zonaNicMonths.length) {
-    return { title, series: [] };
-  }
-
-  const toyotaPais = normalizeRows(paisDataset).find((row) => normalizeText(row.primaryValue) === "TOYOTA");
-  const toyotaZonaNic = normalizeRows(zonaNicDataset).find((row) => normalizeText(row.primaryValue) === "TOYOTA");
-
-  if (!toyotaPais || !toyotaZonaNic) {
-    return { title, series: [] };
-  }
-
-  const monthMap = new Map<string, DashboardMonthColumn>();
-  [...paisMonths, ...zonaNicMonths].forEach((month) => {
-    if (!monthMap.has(month.key)) {
-      monthMap.set(month.key, month);
-    }
+  const monthMap = new Map<number, DashboardMonthColumn>();
+  monthNumbers.forEach((monthNumber) => {
+    monthMap.set(monthNumber, {
+      key: buildDashboardMonthKey(year, monthNumber),
+      monthNumber,
+      year,
+      label: buildDashboardMonthLabel(year, monthNumber),
+    });
   });
+
+  const paisByMonth = new Map(paisMonthly.map((item) => [item.monthNumber, item]));
+  const zonaNicByMonth = new Map(zonaNicMonthly.map((item) => [item.monthNumber, item]));
 
   const series = Array.from(monthMap.values())
     .sort((a, b) => a.monthNumber - b.monthNumber)
     .map((month) => {
-      const paisTotal = normalizeRows(paisDataset).reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0);
-      const zonaNicTotal = normalizeRows(zonaNicDataset).reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0);
-      const toyotaPaisValue = toyotaPais.months[month.key] ?? 0;
-      const toyotaZonaNicValue = toyotaZonaNic.months[month.key] ?? 0;
+      const paisValue = paisByMonth.get(month.monthNumber);
+      const zonaNicValue = zonaNicByMonth.get(month.monthNumber);
 
       return {
         label: month.label,
-        pais: paisTotal > 0 ? roundPercentage((toyotaPaisValue / paisTotal) * 100) : 0,
-        zonaNic: zonaNicTotal > 0 ? roundPercentage((toyotaZonaNicValue / zonaNicTotal) * 100) : 0,
+        pais: paisValue && paisValue.total > 0 ? roundPercentage((paisValue.toyota / paisValue.total) * 100) : 0,
+        zonaNic:
+          zonaNicValue && zonaNicValue.total > 0 ? roundPercentage((zonaNicValue.toyota / zonaNicValue.total) * 100) : 0,
       };
     });
 
   return {
     title,
     series,
-  };
-};
-
-const getBrandParticipationEvolutionPais = async (
-  year: number,
-): Promise<DashboardBrandParticipationResponse> => {
-  const dataset = await getDataset("pais-marcas");
-  const months = getFilteredMonths(dataset, year);
-  const title = "Evolucion mensual por participacion de marca - PAIS";
-  const description = "Comparacion porcentual mensual entre Toyota y las marcas seleccionadas sobre el total pais.";
-
-  if (!dataset || !months.length) {
-    return {
-      title,
-      description,
-      months: [],
-      brands: [],
-    };
-  }
-
-  const rows = normalizeRows(dataset);
-  const monthTotals = months.reduce<Record<string, number>>((acc, month) => {
-    acc[month.key] = rows.reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0);
-    return acc;
-  }, {});
-
-  const brands = rows
-    .map<DashboardBrandParticipationBrand>((row) => {
-      const values = months.reduce<Record<string, DashboardBrandParticipationValue>>((acc, month) => {
-        const quantity = row.months[month.key] ?? 0;
-        const totalMonth = monthTotals[month.key] ?? 0;
-
-        acc[month.key] = {
-          quantity,
-          percentage: totalMonth > 0 ? roundPercentage((quantity / totalMonth) * 100) : 0,
-        };
-
-        return acc;
-      }, {});
-
-      return {
-        brand: row.primaryValue,
-        total: getRowTotalForMonths(row, months),
-        values,
-      };
-    })
-    .sort((a, b) => b.total - a.total || a.brand.localeCompare(b.brand));
-
-  return {
-    title,
-    description,
-    months,
-    brands,
   };
 };
 
@@ -598,18 +736,24 @@ const getGeneralZonaNic = async (year: number): Promise<DashboardGeneralResponse
 
 export class PatentamientosDashboardService {
   static async getAvailableYears(): Promise<DashboardAvailableYearsResponse> {
-    const datasets = await PatentamientoDataset.find(
+    const [datasets, totalizadosYears] = await Promise.all([
+      PatentamientoDataset.find(
       {},
       { monthColumns: 1, _id: 0 },
-    ).lean<Array<Pick<PatentamientoDatasetLean, "monthColumns">>>();
+      ).lean<Array<Pick<PatentamientoDatasetLean, "monthColumns">>>(),
+      PatentamientoTotalizado.distinct("anio"),
+    ]);
 
     const years = Array.from(
       new Set(
-        datasets.flatMap((dataset) =>
-          dataset.monthColumns
-            .map((column) => parseHeaderYear(column.header, column.key))
-            .filter((year): year is number => Boolean(year)),
-        ),
+        [
+          ...datasets.flatMap((dataset) =>
+            dataset.monthColumns
+              .map((column) => parseHeaderYear(column.header, column.key))
+              .filter((year): year is number => Boolean(year)),
+          ),
+          ...totalizadosYears.filter((year): year is number => Number.isInteger(year)),
+        ],
       ),
     ).sort((a, b) => b - a);
 
@@ -619,12 +763,12 @@ export class PatentamientosDashboardService {
     };
   }
 
-  static getTopMarcasPais(year: number) {
-    return getTopRows("pais-marcas", "Top 10 Marcas Patentadas - PAIS", year);
+  static getTopMarcasPais(year: number, planFilter: DashboardPlanFilter) {
+    return getBrandRowsFromTotalizados("Top 10 Marcas Patentadas - PAIS", year, "pais", planFilter);
   }
 
-  static getTopMarcasZonaNic(year: number) {
-    return getTopRows("zona-nic-marcas", "Top 10 Marcas Patentadas - Zona NIC", year);
+  static getTopMarcasZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getBrandRowsFromTotalizados("Top 10 Marcas Patentadas - Zona NIC", year, "zona-nic", planFilter);
   }
 
   static getSegmentoPickupPais(year: number) {
@@ -651,12 +795,8 @@ export class PatentamientosDashboardService {
     return getSegmentRows("zona-nic-modelos", "Segmento B-SUV - Zona NIC", B_SUV_MODELS, year);
   }
 
-  static getToyotaEvolution(year: number) {
-    return getToyotaEvolution(year);
-  }
-
-  static getBrandParticipationEvolutionPais(year: number) {
-    return getBrandParticipationEvolutionPais(year);
+  static getToyotaEvolution(year: number, planFilter: DashboardPlanFilter) {
+    return getToyotaEvolution(year, planFilter);
   }
 
   static getGeneralZonaNic(year: number) {

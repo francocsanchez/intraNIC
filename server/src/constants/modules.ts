@@ -20,6 +20,7 @@ export const moduleKeys = [
   "ranking",
   "promedio",
   "patentamientos",
+  "actualizacionRegistros",
   "agendaEntrega",
   "usuarios",
   "configuracion",

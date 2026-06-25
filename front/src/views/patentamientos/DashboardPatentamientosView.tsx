@@ -1,11 +1,11 @@
 import Loading from "@/components/Loading";
 import PatentamientosGeneralSection from "@/components/patentamientos/PatentamientosGeneralSection";
-import MarcaPaisParticipacionChart from "@/components/patentamientos/MarcaPaisParticipacionChart";
 import PatentamientosComparisonTable from "@/components/patentamientos/PatentamientosComparisonTable";
 import PatentamientosToyotaEvolutionChart from "@/components/patentamientos/PatentamientosToyotaEvolutionChart";
 import {
   getPatentamientosAvailableYears,
   getPatentamientosGeneralZonaNic,
+  type PatentamientosPlanFilter,
   getPatentamientosSegmentoBSuvPais,
   getPatentamientosSegmentoBSuvZonaNic,
   getPatentamientosSegmentoPickupPais,
@@ -52,6 +52,7 @@ const sectionContent = {
 export default function DashboardPatentamientosView() {
   const { section } = useParams<{ section: string }>();
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
+  const [planFilter, setPlanFilter] = useState<PatentamientosPlanFilter>("with-plan");
 
   const isValidSection = dashboardSections.includes((section ?? "") as DashboardSection);
   const activeSection: DashboardSection = isValidSection ? (section as DashboardSection) : "general";
@@ -75,13 +76,13 @@ export default function DashboardPatentamientosView() {
         enabled: selectedYear !== null && isGeneralSection,
       },
       {
-        queryKey: ["patentamientos-dashboard", "top-marcas-pais", selectedYear],
-        queryFn: () => getPatentamientosTopMarcasPais(selectedYear!),
+        queryKey: ["patentamientos-dashboard", "top-marcas-pais", selectedYear, planFilter],
+        queryFn: () => getPatentamientosTopMarcasPais(selectedYear!, planFilter),
         enabled: selectedYear !== null && isMarcasSection,
       },
       {
-        queryKey: ["patentamientos-dashboard", "top-marcas-zona-nic", selectedYear],
-        queryFn: () => getPatentamientosTopMarcasZonaNic(selectedYear!),
+        queryKey: ["patentamientos-dashboard", "top-marcas-zona-nic", selectedYear, planFilter],
+        queryFn: () => getPatentamientosTopMarcasZonaNic(selectedYear!, planFilter),
         enabled: selectedYear !== null && isMarcasSection,
       },
       {
@@ -115,8 +116,8 @@ export default function DashboardPatentamientosView() {
         enabled: selectedYear !== null && isBSuvSection,
       },
       {
-        queryKey: ["patentamientos-dashboard", "toyota-evolucion", selectedYear],
-        queryFn: () => getPatentamientosToyotaEvolution(selectedYear!),
+        queryKey: ["patentamientos-dashboard", "toyota-evolucion", selectedYear, planFilter],
+        queryFn: () => getPatentamientosToyotaEvolution(selectedYear!, planFilter),
         enabled: selectedYear !== null && isMarcasSection,
       },
     ],
@@ -192,6 +193,23 @@ export default function DashboardPatentamientosView() {
             </Link>
 
             <div className="flex items-center gap-3">
+              {isMarcasSection ? (
+                <>
+                  <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                    C/ Plan
+                  </label>
+                  <select
+                    id="patentamientos-plan-filter"
+                    value={planFilter}
+                    onChange={(event) => setPlanFilter(event.target.value as PatentamientosPlanFilter)}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  >
+                    <option value="with-plan">Si</option>
+                    <option value="without-plan">No</option>
+                  </select>
+                </>
+              ) : null}
+
               <label htmlFor="patentamientos-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
                 Ano
               </label>
@@ -209,8 +227,8 @@ export default function DashboardPatentamientosView() {
               </select>
             </div>
           </div>
-        </div>
-      </section>
+          </div>
+        </section>
 
       <section className="space-y-4">
         <div className="flex items-center gap-2">
@@ -261,7 +279,6 @@ export default function DashboardPatentamientosView() {
             <h2 className="text-lg font-semibold tracking-tight text-gray-900">Evolucion Toyota PAIS vs Zona NIC</h2>
           </div>
           {toyotaEvolution.data ? <PatentamientosToyotaEvolutionChart data={toyotaEvolution.data} /> : null}
-          {selectedYear !== null ? <MarcaPaisParticipacionChart year={selectedYear} /> : null}
         </section>
       ) : null}
     </div>

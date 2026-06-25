@@ -40,24 +40,6 @@ const dashboardYearsSchema = z.object({
   selectedYear: z.number().nullable(),
 });
 
-const dashboardBrandParticipationValueSchema = z.object({
-  quantity: z.number(),
-  percentage: z.number(),
-});
-
-const dashboardBrandParticipationBrandSchema = z.object({
-  brand: z.string(),
-  total: z.number(),
-  values: z.record(z.string(), dashboardBrandParticipationValueSchema),
-});
-
-const dashboardBrandParticipationSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  months: z.array(dashboardMonthSchema),
-  brands: z.array(dashboardBrandParticipationBrandSchema),
-});
-
 const dashboardGeneralTopBrandSchema = z.object({
   brand: z.string(),
   total: z.number(),
@@ -98,8 +80,8 @@ const dashboardGeneralSchema = z.object({
 export type PatentamientosDashboardTable = z.infer<typeof dashboardTableSchema>;
 export type PatentamientosDashboardEvolution = z.infer<typeof dashboardEvolutionSchema>;
 export type PatentamientosDashboardYears = z.infer<typeof dashboardYearsSchema>;
-export type PatentamientosBrandParticipation = z.infer<typeof dashboardBrandParticipationSchema>;
 export type PatentamientosDashboardGeneral = z.infer<typeof dashboardGeneralSchema>;
+export type PatentamientosPlanFilter = "with-plan" | "without-plan";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
@@ -137,20 +119,20 @@ export const getPatentamientosAvailableYears = () =>
     "No se pudieron obtener los anos disponibles",
   );
 
-export const getPatentamientosTopMarcasPais = (year: number) =>
+export const getPatentamientosTopMarcasPais = (year: number, planFilter: PatentamientosPlanFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/top-marcas/pais",
     dashboardTableSchema,
     "No se pudo obtener el top de marcas PAIS",
-    { year },
+    { year, planFilter },
   );
 
-export const getPatentamientosTopMarcasZonaNic = (year: number) =>
+export const getPatentamientosTopMarcasZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/top-marcas/zona-nic",
     dashboardTableSchema,
     "No se pudo obtener el top de marcas Zona NIC",
-    { year },
+    { year, planFilter },
   );
 
 export const getPatentamientosGeneralZonaNic = (year: number) =>
@@ -209,18 +191,10 @@ export const getPatentamientosSegmentoBSuvZonaNic = (year: number) =>
     { year },
   );
 
-export const getPatentamientosToyotaEvolution = (year: number) =>
+export const getPatentamientosToyotaEvolution = (year: number, planFilter: PatentamientosPlanFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/toyota-evolucion",
     dashboardEvolutionSchema,
     "No se pudo obtener la evolucion de Toyota",
-    { year },
-  );
-
-export const getPatentamientosBrandParticipationEvolutionPais = (year: number) =>
-  fetchAndParse(
-    "/patentamientos/dashboard/marcas/evolucion-participacion-pais",
-    dashboardBrandParticipationSchema,
-    "No se pudo obtener la evolucion por participacion de marcas PAIS",
-    { year },
+    { year, planFilter },
   );

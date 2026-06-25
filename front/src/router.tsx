@@ -71,6 +71,7 @@ const OperacionesDashboardView = lazy(() => import("./views/operaciones/Operacio
 const PatentamientosView = lazy(() => import("./views/patentamientos/PatentamientosView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
+const PatentamientosRegistrosView = lazy(() => import("./views/patentamientos/PatentamientosRegistrosView"));
 const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosPlanAhorroView"));
 const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"));
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
@@ -253,6 +254,10 @@ export default function Router() {
           <Route element={<AnalisisLayout />}>
             <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["actualizacionRegistros"]} />}>
+              <Route path={paths.analisis.registros} element={<PatentamientosRegistrosView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>
