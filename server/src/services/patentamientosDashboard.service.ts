@@ -1117,20 +1117,19 @@ const getGeneralTrendFromTotalizados = async (
       { $sort: { dayNumber: 1 } },
     ]);
 
-    const totalsByDay = new Map(rows.map((row) => [row.dayNumber, row.total]));
-    const totalDays = new Date(year, month, 0).getDate();
-
-    return Array.from({ length: totalDays }, (_, index) => {
-      const dayNumber = index + 1;
+    return rows
+      .filter((row) => row.total > 0)
+      .map((row) => {
+        const dayNumber = row.dayNumber;
       const monthKey = String(month).padStart(2, "0");
       const dayKey = String(dayNumber).padStart(2, "0");
 
       return {
         key: `${year}-${monthKey}-${dayKey}`,
         label: dayKey,
-        total: totalsByDay.get(dayNumber) ?? 0,
+        total: row.total,
       };
-    });
+      });
   }
 
   const rows = await PatentamientoTotalizado.aggregate<{ monthNumber: number; total: number }>([
