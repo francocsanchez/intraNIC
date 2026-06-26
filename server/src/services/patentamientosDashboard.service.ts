@@ -97,7 +97,12 @@ type SegmentModelDefinition = {
   aliases: readonly string[];
 };
 
-const PICKUP_MODELS: readonly SegmentModelDefinition[] = [
+type SegmentDefinition = {
+  title: string;
+  models: readonly SegmentModelDefinition[];
+};
+
+const HILUX_MODELS: readonly SegmentModelDefinition[] = [
   { label: "Toyota Hilux", aliases: ["HILUX", "TOYOTA HILUX"] },
   { label: "Ford Ranger", aliases: ["RANGER", "FORD RANGER"] },
   { label: "Volkswagen Amarok", aliases: ["AMAROK", "VOLKSWAGEN AMAROK", "VOLKWAGEN AMAROK"] },
@@ -111,23 +116,79 @@ const PICKUP_MODELS: readonly SegmentModelDefinition[] = [
   { label: "BYD Shark", aliases: ["SHARK", "BYD SHARK"] },
 ] as const;
 
-const SUV_MODELS = [
-  "FORD TERRITORY",
-  "VOLKSWAGEN TAOS",
-  "TOYOTA COROLLA CROSS",
-  "JEEP COMPASS",
-  "PEUGEOT 3008",
-  "PEUGEOT NUEVO 3008",
-  "NUEVO 3008",
+const SW4_MODELS: readonly SegmentModelDefinition[] = [
+  { label: "Toyota SW4", aliases: ["SW4", "TOYOTA SW4"] },
+  { label: "Ford Everest", aliases: ["EVEREST", "FORD EVEREST"] },
+  { label: "Jeep Commander", aliases: ["COMMANDER", "JEEP COMMANDER"] },
+  { label: "Mitsubishi Outlander", aliases: ["OUTLANDER", "MITSUBISHI OUTLANDER"] },
+  { label: "Hyundai Santa Fe", aliases: ["SANTA FE", "HYUNDAI SANTA FE"] },
+  { label: "BAIC BJ60", aliases: ["BJ60", "BAIC BJ60"] },
+  { label: "Jeep Grand Cherokee", aliases: ["GRAND CHEROKEE", "JEEP GRAND CHEROKEE"] },
+  { label: "GAC GS8", aliases: ["GS8", "GAC GS8"] },
 ] as const;
 
-const B_SUV_MODELS = [
-  "TOYOTA TERA",
-  "VOLKSWAGEN TERA",
-  "TOYOTA YARIS CROSS",
-  "JEEP RENEGADE",
-  "NISSAN KICKS",
+const C_CROSS_MODELS: readonly SegmentModelDefinition[] = [
+  { label: "Ford Territory", aliases: ["TERRITORY", "FORD TERRITORY"] },
+  { label: "Volkswagen Taos", aliases: ["TAOS", "VOLKSWAGEN TAOS"] },
+  { label: "Toyota Corolla Cross", aliases: ["COROLLA CROSS", "TOYOTA COROLLA CROSS"] },
+  { label: "Jeep Compass", aliases: ["COMPASS", "JEEP COMPASS"] },
+  { label: "BAIC BJ30", aliases: ["BJ30", "BAIC BJ30"] },
+  { label: "BYD Song Pro", aliases: ["SONG PRO", "BYD SONG PRO", "KIA SONG PRO"] },
+  { label: "Chevrolet Captiva", aliases: ["CAPTIVA", "CHEVROLET CAPTIVA"] },
+  { label: "Chery Tiggo 7", aliases: ["TIGGO 7", "CHERY TIGGO 7"] },
+  { label: "Ford Bronco Sport", aliases: ["BRONCO SPORT", "FORD BRONCO SPORT"] },
+  { label: "Jaecoo J7", aliases: ["J7", "JAECOO J7"] },
+  { label: "Chevrolet Trailblazer", aliases: ["TRAILBLAZER", "CHEVROLET TRAILBLAZER"] },
 ] as const;
+
+const YARIS_MODELS: readonly SegmentModelDefinition[] = [
+  { label: "Peugeot 208", aliases: ["208", "PEUGEOT 208"] },
+  { label: "Fiat Cronos", aliases: ["CRONOS", "FIAT CRONOS"] },
+  { label: "Chevrolet Onix", aliases: ["ONIX", "CHEVROLET ONIX"] },
+  { label: "Toyota Yaris", aliases: ["YARIS", "TOYOTA YARIS"] },
+  { label: "Volkswagen Polo", aliases: ["POLO", "VOLKSWAGEN POLO"] },
+  { label: "Fiat Argo", aliases: ["ARGO", "FIAT ARGO"] },
+  { label: "Citroen C3", aliases: ["C3", "CITROEN C3", "CITROËN C3"] },
+  { label: "Hyundai HB20", aliases: ["HB20", "HB 20", "HYUNDAI HB20", "HYUNDAI HB 20"] },
+  { label: "BYD Dolphin Mini", aliases: ["DOLPHIN MINI", "BYD DOLPHIN MINI"] },
+  { label: "Volkswagen Virtus", aliases: ["VIRTUS", "VOLKSWAGEN VIRTUS", "RENAULT VIRTUS"] },
+] as const;
+
+const Y_CROSS_MODELS: readonly SegmentModelDefinition[] = [
+  { label: "Volkswagen Tera", aliases: ["TERA", "VOLKSWAGEN TERA"] },
+  { label: "Chevrolet Tracker", aliases: ["TRACKER", "CHEVROLET TRACKER"] },
+  { label: "Peugeot 2008", aliases: ["2008", "PEUGEOT 2008"] },
+  { label: "Renault Kardian", aliases: ["KARDIAN", "RENAULT KARDIAN"] },
+  { label: "Toyota Yaris Cross", aliases: ["YARIS CROSS", "TOYOTA YARIS CROSS"] },
+  { label: "Volkswagen T-Cross", aliases: ["T-CROSS", "TCROSS", "VOLKSWAGEN T-CROSS", "VOLKSWAGEN TCROSS"] },
+  { label: "Nissan Kicks", aliases: ["KICKS", "NISSAN KICKS"] },
+  { label: "Jeep Renegade", aliases: ["RENEGADE", "JEEP RENEGADE"] },
+  { label: "BYD Atto 2", aliases: ["ATTO 2", "BYD ATTO 2", "GWM HAVAL H2", "HAVAL H2"] },
+  { label: "Fiat Pulse", aliases: ["PULSE", "FIAT PULSE"] },
+] as const;
+
+const SEGMENT_DEFINITIONS = {
+  hilux: {
+    title: "Comparativa Hilux",
+    models: HILUX_MODELS,
+  },
+  sw4: {
+    title: "Comparativa SW4",
+    models: SW4_MODELS,
+  },
+  "c-cross": {
+    title: "Comparativa C. Cross",
+    models: C_CROSS_MODELS,
+  },
+  yaris: {
+    title: "Comparativa Yaris",
+    models: YARIS_MODELS,
+  },
+  "y-cross": {
+    title: "Comparativa Y. Cross",
+    models: Y_CROSS_MODELS,
+  },
+} as const satisfies Record<string, SegmentDefinition>;
 
 const MONTH_LABELS_SHORT: Record<number, string> = {
   1: "ene",
@@ -334,15 +395,17 @@ const buildTableRows = (
   }));
   const totalBase = rowsWithYearTotal.reduce((acc, row) => acc + row.yearTotal, 0);
 
-  return rowsWithYearTotal.map((row) => ({
-    label: row.primaryValue,
-    months: months.reduce<Record<string, number>>((acc, month) => {
-      acc[month.key] = row.months[month.key] ?? 0;
-      return acc;
-    }, {}),
-    total: row.yearTotal,
-    percentage: totalBase > 0 ? roundPercentage((row.yearTotal / totalBase) * 100) : 0,
-  }));
+  return rowsWithYearTotal
+    .map((row) => ({
+      label: row.primaryValue,
+      months: months.reduce<Record<string, number>>((acc, month) => {
+        acc[month.key] = row.months[month.key] ?? 0;
+        return acc;
+      }, {}),
+      total: row.yearTotal,
+      percentage: totalBase > 0 ? roundPercentage((row.yearTotal / totalBase) * 100) : 0,
+    }))
+    .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label, "es"));
 };
 
 const buildEmptyTable = (
@@ -913,27 +976,43 @@ export class PatentamientosDashboardService {
   }
 
   static getSegmentoPickupPais(year: number, planFilter: DashboardPlanFilter) {
-    return getSegmentRowsFromTotalizados("Segmento Pickup - PAIS", year, "pais", PICKUP_MODELS, planFilter);
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.hilux.title} - PAIS`, year, "pais", SEGMENT_DEFINITIONS.hilux.models, planFilter);
   }
 
   static getSegmentoPickupZonaNic(year: number, planFilter: DashboardPlanFilter) {
-    return getSegmentRowsFromTotalizados("Segmento Pickup - Zona NIC", year, "zona-nic", PICKUP_MODELS, planFilter);
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.hilux.title} - Zona NIC`, year, "zona-nic", SEGMENT_DEFINITIONS.hilux.models, planFilter);
   }
 
-  static getSegmentoSuvPais(year: number) {
-    return getSegmentRows("pais-modelos", "Segmento SUV - PAIS", SUV_MODELS, year);
+  static getSegmentoSw4Pais(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.sw4.title} - PAIS`, year, "pais", SEGMENT_DEFINITIONS.sw4.models, planFilter);
   }
 
-  static getSegmentoSuvZonaNic(year: number) {
-    return getSegmentRows("zona-nic-modelos", "Segmento SUV - Zona NIC", SUV_MODELS, year);
+  static getSegmentoSw4ZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.sw4.title} - Zona NIC`, year, "zona-nic", SEGMENT_DEFINITIONS.sw4.models, planFilter);
   }
 
-  static getSegmentoBSuvPais(year: number) {
-    return getSegmentRows("pais-modelos", "Segmento B-SUV - PAIS", B_SUV_MODELS, year);
+  static getSegmentoCCrossPais(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS["c-cross"].title} - PAIS`, year, "pais", SEGMENT_DEFINITIONS["c-cross"].models, planFilter);
   }
 
-  static getSegmentoBSuvZonaNic(year: number) {
-    return getSegmentRows("zona-nic-modelos", "Segmento B-SUV - Zona NIC", B_SUV_MODELS, year);
+  static getSegmentoCCrossZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS["c-cross"].title} - Zona NIC`, year, "zona-nic", SEGMENT_DEFINITIONS["c-cross"].models, planFilter);
+  }
+
+  static getSegmentoYarisPais(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.yaris.title} - PAIS`, year, "pais", SEGMENT_DEFINITIONS.yaris.models, planFilter);
+  }
+
+  static getSegmentoYarisZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS.yaris.title} - Zona NIC`, year, "zona-nic", SEGMENT_DEFINITIONS.yaris.models, planFilter);
+  }
+
+  static getSegmentoYCrossPais(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS["y-cross"].title} - PAIS`, year, "pais", SEGMENT_DEFINITIONS["y-cross"].models, planFilter);
+  }
+
+  static getSegmentoYCrossZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados(`${SEGMENT_DEFINITIONS["y-cross"].title} - Zona NIC`, year, "zona-nic", SEGMENT_DEFINITIONS["y-cross"].models, planFilter);
   }
 
   static getToyotaEvolution(year: number, planFilter: DashboardPlanFilter) {

@@ -85,43 +85,91 @@ export class PatentamientosDashboardController {
     );
   }
 
-  static getSegmentoSuvPais(req: Request, res: Response) {
+  static getSegmentoSw4Pais(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoSuvPais(year),
-      "PatentamientosDashboardController.getSegmentoSuvPais",
+      () => PatentamientosDashboardService.getSegmentoSw4Pais(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoSw4Pais",
     );
   }
 
-  static getSegmentoSuvZonaNic(req: Request, res: Response) {
+  static getSegmentoSw4ZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoSuvZonaNic(year),
-      "PatentamientosDashboardController.getSegmentoSuvZonaNic",
+      () => PatentamientosDashboardService.getSegmentoSw4ZonaNic(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoSw4ZonaNic",
     );
   }
 
-  static getSegmentoBSuvPais(req: Request, res: Response) {
+  static getSegmentoCCrossPais(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoBSuvPais(year),
-      "PatentamientosDashboardController.getSegmentoBSuvPais",
+      () => PatentamientosDashboardService.getSegmentoCCrossPais(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoCCrossPais",
     );
   }
 
-  static getSegmentoBSuvZonaNic(req: Request, res: Response) {
+  static getSegmentoCCrossZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoBSuvZonaNic(year),
-      "PatentamientosDashboardController.getSegmentoBSuvZonaNic",
+      () => PatentamientosDashboardService.getSegmentoCCrossZonaNic(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoCCrossZonaNic",
+    );
+  }
+
+  static getSegmentoYarisPais(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getSegmentoYarisPais(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoYarisPais",
+    );
+  }
+
+  static getSegmentoYarisZonaNic(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getSegmentoYarisZonaNic(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoYarisZonaNic",
+    );
+  }
+
+  static getSegmentoYCrossPais(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getSegmentoYCrossPais(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoYCrossPais",
+    );
+  }
+
+  static getSegmentoYCrossZonaNic(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getSegmentoYCrossZonaNic(year, planFilter),
+      "PatentamientosDashboardController.getSegmentoYCrossZonaNic",
     );
   }
 

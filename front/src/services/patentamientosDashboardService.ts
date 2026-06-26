@@ -159,6 +159,70 @@ export const getPatentamientosSegmentoPickupZonaNic = (year: number, planFilter:
     { year, planFilter },
   );
 
+export const getPatentamientosSegmentoSw4Pais = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-sw4/pais",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa SW4 PAIS",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoSw4ZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-sw4/zona-nic",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa SW4 Zona NIC",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoCCrossPais = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-c-cross/pais",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa C. Cross PAIS",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoCCrossZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-c-cross/zona-nic",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa C. Cross Zona NIC",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoYarisPais = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-yaris/pais",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa Yaris PAIS",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoYarisZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-yaris/zona-nic",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa Yaris Zona NIC",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoYCrossPais = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-y-cross/pais",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa Y. Cross PAIS",
+    { year, planFilter },
+  );
+
+export const getPatentamientosSegmentoYCrossZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/segmento-y-cross/zona-nic",
+    dashboardTableSchema,
+    "No se pudo obtener la comparativa Y. Cross Zona NIC",
+    { year, planFilter },
+  );
+
 export const getPatentamientosSegmentoSuvPais = (year: number) =>
   fetchAndParse(
     "/patentamientos/dashboard/segmento-suv/pais",

@@ -4,14 +4,18 @@ import PatentamientosComparisonTable from "@/components/patentamientos/Patentami
 import PatentamientosToyotaEvolutionChart from "@/components/patentamientos/PatentamientosToyotaEvolutionChart";
 import {
   getPatentamientosAvailableYears,
+  getPatentamientosSegmentoCCrossPais,
+  getPatentamientosSegmentoCCrossZonaNic,
   getPatentamientosGeneralZonaNic,
   type PatentamientosPlanFilter,
-  getPatentamientosSegmentoBSuvPais,
-  getPatentamientosSegmentoBSuvZonaNic,
   getPatentamientosSegmentoPickupPais,
   getPatentamientosSegmentoPickupZonaNic,
-  getPatentamientosSegmentoSuvPais,
-  getPatentamientosSegmentoSuvZonaNic,
+  getPatentamientosSegmentoSw4Pais,
+  getPatentamientosSegmentoSw4ZonaNic,
+  getPatentamientosSegmentoYarisPais,
+  getPatentamientosSegmentoYarisZonaNic,
+  getPatentamientosSegmentoYCrossPais,
+  getPatentamientosSegmentoYCrossZonaNic,
   getPatentamientosTopMarcasPais,
   getPatentamientosTopMarcasZonaNic,
   getPatentamientosToyotaEvolution,
@@ -23,7 +27,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-const dashboardSections = ["general", "marcas", "pickup", "suv", "b-suv"] as const;
+const dashboardSections = ["general", "marcas", "pickup", "sw4", "c-cross", "y-cross", "yaris"] as const;
 type DashboardSection = (typeof dashboardSections)[number];
 
 const sectionContent = {
@@ -36,15 +40,23 @@ const sectionContent = {
     icon: Table2,
   },
   pickup: {
-    heading: "Comparativa Segmento Pickup",
+    heading: "Comparativa Hilux",
     icon: BarChart3,
   },
-  suv: {
-    heading: "Comparativa Segmento SUV",
+  sw4: {
+    heading: "Comparativa SW4",
     icon: BarChart3,
   },
-  "b-suv": {
-    heading: "Comparativa Segmento B-SUV",
+  "c-cross": {
+    heading: "Comparativa C. Cross",
+    icon: BarChart3,
+  },
+  "y-cross": {
+    heading: "Comparativa Y. Cross",
+    icon: BarChart3,
+  },
+  yaris: {
+    heading: "Comparativa Yaris",
     icon: BarChart3,
   },
 } satisfies Record<DashboardSection, { heading: string; icon: typeof Table2 }>;
@@ -65,8 +77,10 @@ export default function DashboardPatentamientosView() {
   const isGeneralSection = activeSection === "general";
   const isMarcasSection = activeSection === "marcas";
   const isPickupSection = activeSection === "pickup";
-  const isSuvSection = activeSection === "suv";
-  const isBSuvSection = activeSection === "b-suv";
+  const isSw4Section = activeSection === "sw4";
+  const isCCrossSection = activeSection === "c-cross";
+  const isYCrossSection = activeSection === "y-cross";
+  const isYarisSection = activeSection === "yaris";
 
   const results = useQueries({
     queries: [
@@ -96,24 +110,44 @@ export default function DashboardPatentamientosView() {
         enabled: selectedYear !== null && isPickupSection,
       },
       {
-        queryKey: ["patentamientos-dashboard", "suv-pais", selectedYear],
-        queryFn: () => getPatentamientosSegmentoSuvPais(selectedYear!),
-        enabled: selectedYear !== null && isSuvSection,
+        queryKey: ["patentamientos-dashboard", "sw4-pais", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoSw4Pais(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isSw4Section,
       },
       {
-        queryKey: ["patentamientos-dashboard", "suv-zona-nic", selectedYear],
-        queryFn: () => getPatentamientosSegmentoSuvZonaNic(selectedYear!),
-        enabled: selectedYear !== null && isSuvSection,
+        queryKey: ["patentamientos-dashboard", "sw4-zona-nic", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoSw4ZonaNic(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isSw4Section,
       },
       {
-        queryKey: ["patentamientos-dashboard", "b-suv-pais", selectedYear],
-        queryFn: () => getPatentamientosSegmentoBSuvPais(selectedYear!),
-        enabled: selectedYear !== null && isBSuvSection,
+        queryKey: ["patentamientos-dashboard", "c-cross-pais", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoCCrossPais(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isCCrossSection,
       },
       {
-        queryKey: ["patentamientos-dashboard", "b-suv-zona-nic", selectedYear],
-        queryFn: () => getPatentamientosSegmentoBSuvZonaNic(selectedYear!),
-        enabled: selectedYear !== null && isBSuvSection,
+        queryKey: ["patentamientos-dashboard", "c-cross-zona-nic", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoCCrossZonaNic(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isCCrossSection,
+      },
+      {
+        queryKey: ["patentamientos-dashboard", "y-cross-pais", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoYCrossPais(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isYCrossSection,
+      },
+      {
+        queryKey: ["patentamientos-dashboard", "y-cross-zona-nic", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoYCrossZonaNic(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isYCrossSection,
+      },
+      {
+        queryKey: ["patentamientos-dashboard", "yaris-pais", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoYarisPais(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isYarisSection,
+      },
+      {
+        queryKey: ["patentamientos-dashboard", "yaris-zona-nic", selectedYear, planFilter],
+        queryFn: () => getPatentamientosSegmentoYarisZonaNic(selectedYear!, planFilter),
+        enabled: selectedYear !== null && isYarisSection,
       },
       {
         queryKey: ["patentamientos-dashboard", "toyota-evolucion", selectedYear, planFilter],
@@ -123,8 +157,22 @@ export default function DashboardPatentamientosView() {
     ],
   });
 
-  const [generalZonaNic, topPais, topZonaNic, pickupPais, pickupZonaNic, suvPais, suvZonaNic, bSuvPais, bSuvZonaNic, toyotaEvolution] =
-    results;
+  const [
+    generalZonaNic,
+    topPais,
+    topZonaNic,
+    pickupPais,
+    pickupZonaNic,
+    sw4Pais,
+    sw4ZonaNic,
+    cCrossPais,
+    cCrossZonaNic,
+    yCrossPais,
+    yCrossZonaNic,
+    yarisPais,
+    yarisZonaNic,
+    toyotaEvolution,
+  ] = results;
 
   const hasAvailableYears = (yearsQuery.data?.years.length ?? 0) > 0;
   const isWaitingYearSelection = yearsQuery.isSuccess && hasAvailableYears && selectedYear === null;
@@ -175,7 +223,7 @@ export default function DashboardPatentamientosView() {
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
 
           <div className="flex items-center gap-3">
-            {isMarcasSection || isPickupSection ? (
+            {isMarcasSection || isPickupSection || isSw4Section || isCCrossSection || isYCrossSection || isYarisSection ? (
               <>
                 <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
                   C/ Plan
@@ -238,19 +286,34 @@ export default function DashboardPatentamientosView() {
           </>
         ) : null}
 
-        {isSuvSection ? (
+        {isSw4Section ? (
           <>
-            {suvPais.data ? <PatentamientosComparisonTable data={suvPais.data} /> : null}
-            {suvZonaNic.data ? <PatentamientosComparisonTable data={suvZonaNic.data} /> : null}
+            {sw4Pais.data ? <PatentamientosComparisonTable data={sw4Pais.data} showMonthlyParticipation /> : null}
+            {sw4ZonaNic.data ? <PatentamientosComparisonTable data={sw4ZonaNic.data} showMonthlyParticipation /> : null}
           </>
         ) : null}
 
-        {isBSuvSection ? (
+        {isCCrossSection ? (
           <>
-            {bSuvPais.data ? <PatentamientosComparisonTable data={bSuvPais.data} /> : null}
-            {bSuvZonaNic.data ? <PatentamientosComparisonTable data={bSuvZonaNic.data} /> : null}
+            {cCrossPais.data ? <PatentamientosComparisonTable data={cCrossPais.data} showMonthlyParticipation /> : null}
+            {cCrossZonaNic.data ? <PatentamientosComparisonTable data={cCrossZonaNic.data} showMonthlyParticipation /> : null}
           </>
         ) : null}
+
+        {isYCrossSection ? (
+          <>
+            {yCrossPais.data ? <PatentamientosComparisonTable data={yCrossPais.data} showMonthlyParticipation /> : null}
+            {yCrossZonaNic.data ? <PatentamientosComparisonTable data={yCrossZonaNic.data} showMonthlyParticipation /> : null}
+          </>
+        ) : null}
+
+        {isYarisSection ? (
+          <>
+            {yarisPais.data ? <PatentamientosComparisonTable data={yarisPais.data} showMonthlyParticipation /> : null}
+            {yarisZonaNic.data ? <PatentamientosComparisonTable data={yarisZonaNic.data} showMonthlyParticipation /> : null}
+          </>
+        ) : null}
+
       </section>
 
       {isMarcasSection ? (

@@ -8,9 +8,11 @@ import { Link, NavLink, Navigate, Outlet } from "react-router-dom";
 const dashboardSections = [
   { key: "general", label: "General", to: paths.analisis.patentamientos.dashboardGeneral },
   { key: "marcas", label: "Marcas", to: paths.analisis.patentamientos.dashboardMarcas },
-  { key: "pickup", label: "Pickup", to: paths.analisis.patentamientos.dashboardPickup },
-  { key: "suv", label: "SUV", to: paths.analisis.patentamientos.dashboardSuv },
-  { key: "b-suv", label: "B-SUV", to: paths.analisis.patentamientos.dashboardBSuv },
+  { key: "pickup", label: "Hilux", to: paths.analisis.patentamientos.dashboardPickup },
+  { key: "sw4", label: "SW4", to: paths.analisis.patentamientos.dashboardSw4 },
+  { key: "c-cross", label: "C. Cross", to: paths.analisis.patentamientos.dashboardCCross },
+  { key: "y-cross", label: "Y. Cross", to: paths.analisis.patentamientos.dashboardYCross },
+  { key: "yaris", label: "Yaris", to: paths.analisis.patentamientos.dashboardYaris },
   { key: "inscripcion-unidades", label: "Traslado de unidades", to: paths.analisis.patentamientos.dashboardInscripcionUnidades },
 ];
 
