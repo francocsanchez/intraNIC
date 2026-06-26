@@ -92,13 +92,23 @@ type DashboardGeneralResponse = {
 
 type DashboardPlanFilter = "with-plan" | "without-plan";
 
-const PICKUP_MODELS = [
-  "TOYOTA HILUX",
-  "FORD RANGER",
-  "VOLKSWAGEN AMAROK",
-  "CHEVROLET S10",
-  "NISSAN FRONTIER",
-  "BYD SHARK",
+type SegmentModelDefinition = {
+  label: string;
+  aliases: readonly string[];
+};
+
+const PICKUP_MODELS: readonly SegmentModelDefinition[] = [
+  { label: "Toyota Hilux", aliases: ["HILUX", "TOYOTA HILUX"] },
+  { label: "Ford Ranger", aliases: ["RANGER", "FORD RANGER"] },
+  { label: "Volkswagen Amarok", aliases: ["AMAROK", "VOLKSWAGEN AMAROK", "VOLKWAGEN AMAROK"] },
+  { label: "Chevrolet S10", aliases: ["S10", "S-10", "CHEVROLET S10", "CHEVROLET S-10"] },
+  { label: "Fiat Titano", aliases: ["TITANO", "FIAT TITANO"] },
+  { label: "Nissan Frontier", aliases: ["FRONTIER", "NISSAN FRONTIER"] },
+  { label: "Ram Dakota", aliases: ["DAKOTA", "RAM DAKOTA"] },
+  { label: "Ford F-150", aliases: ["F-150", "F150", "FORD F-150", "FORD F150"] },
+  { label: "Renault Alaskan", aliases: ["ALASKAN", "RENAULT ALASKAN"] },
+  { label: "Foton Tunland", aliases: ["TUNLAND", "TUNLAND G7", "FOTON TUNLAND", "FOTON TUNLAND G7"] },
+  { label: "BYD Shark", aliases: ["SHARK", "BYD SHARK"] },
 ] as const;
 
 const SUV_MODELS = [
@@ -306,6 +316,13 @@ const getRowTotalForMonths = (
   row: PatentamientoRowNormalized,
   months: DashboardMonthColumn[],
 ) => months.reduce((sum, month) => sum + (row.months[month.key] ?? 0), 0);
+
+const matchesSegmentAlias = (primaryValue: string, alias: string) => {
+  const normalizedValue = normalizeText(primaryValue);
+  const normalizedAlias = normalizeText(alias);
+
+  return normalizedValue === normalizedAlias || normalizedValue.startsWith(`${normalizedAlias} `);
+};
 
 const buildTableRows = (
   rows: PatentamientoRowNormalized[],
@@ -516,10 +533,114 @@ const getBrandRowsFromTotalizados = async (
   };
 };
 
+const getSegmentRowsFromTotalizados = async (
+  title: string,
+  year: number,
+  scope: "pais" | "zona-nic",
+  models: readonly SegmentModelDefinition[],
+  planFilter: DashboardPlanFilter,
+): Promise<DashboardTableResponse> => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    modelo: {
+      $exists: true,
+      $ne: "",
+    },
+    ...buildPlanFilterMatch(planFilter),
+  };
+
+  if (scope === "zona-nic") {
+    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+  }
+
+  const monthlyCounts = await PatentamientoTotalizado.aggregate<{
+    model: string;
+    monthNumber: number;
+    total: number;
+  }>([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: {
+          model: "$modelo",
+          monthNumber: "$mes",
+        },
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        model: "$_id.model",
+        monthNumber: "$_id.monthNumber",
+        total: 1,
+      },
+    },
+    {
+      $sort: {
+        model: 1,
+        monthNumber: 1,
+      },
+    },
+  ]);
+
+  const monthNumbers = Array.from(
+    new Set(
+      monthlyCounts
+        .map((item) => item.monthNumber)
+        .filter((monthNumber) => Number.isInteger(monthNumber) && monthNumber >= 1 && monthNumber <= 12),
+    ),
+  ).sort((left, right) => left - right);
+
+  const months: DashboardMonthColumn[] = monthNumbers.map((monthNumber) => ({
+    key: buildDashboardMonthKey(year, monthNumber),
+    monthNumber,
+    year,
+    label: buildDashboardMonthLabel(year, monthNumber),
+  }));
+
+  if (!months.length) {
+    return buildEmptyTable(title, "Modelo", []);
+  }
+
+  const rows = models.map<PatentamientoRowNormalized>((definition) => {
+    const monthsMap = months.reduce<Record<string, number>>((acc, month) => {
+      const total = monthlyCounts.reduce((sum, item) => {
+        if (item.monthNumber !== month.monthNumber) {
+          return sum;
+        }
+
+        return definition.aliases.some((alias) => matchesSegmentAlias(item.model, alias))
+          ? sum + item.total
+          : sum;
+      }, 0);
+
+      acc[month.key] = total;
+      return acc;
+    }, {});
+
+    return {
+      primaryValue: definition.label,
+      total: Object.values(monthsMap).reduce((sum, value) => sum + value, 0),
+      months: monthsMap,
+    };
+  });
+
+  const tableRows = buildTableRows(rows, months);
+
+  return {
+    title,
+    entityLabel: "Modelo",
+    months,
+    rows: tableRows,
+    totalRow: buildTotalRow(tableRows, months),
+  };
+};
+
 const getSegmentRows = async (
   datasetType: PatentamientoDatasetType,
   title: string,
-  models: readonly string[],
+  models: readonly string[] | readonly SegmentModelDefinition[],
   year: number,
 ): Promise<DashboardTableResponse> => {
   const dataset = await getDataset(datasetType);
@@ -530,14 +651,34 @@ const getSegmentRows = async (
     return buildEmptyTable(title, entityLabel, months);
   }
 
-  const allowedModels = new Set(models.map(normalizeText));
-  const rows = normalizeRows(dataset)
-    .filter((row) => allowedModels.has(normalizeText(row.primaryValue)))
-    .sort(
-      (a, b) =>
-        getRowTotalForMonths(b, months) - getRowTotalForMonths(a, months) ||
-        a.primaryValue.localeCompare(b.primaryValue),
+  const definitions: readonly SegmentModelDefinition[] = models.map((model) =>
+    typeof model === "string"
+      ? {
+          label: model,
+          aliases: [model],
+        }
+      : model,
+  );
+
+  const normalizedRows = normalizeRows(dataset);
+  const rows = definitions.map<PatentamientoRowNormalized>((definition) => {
+    const matchedRow = normalizedRows.find((row) =>
+      definition.aliases.some((alias) => matchesSegmentAlias(row.primaryValue, alias)),
     );
+
+    if (matchedRow) {
+      return {
+        ...matchedRow,
+        primaryValue: definition.label,
+      };
+    }
+
+    return {
+      primaryValue: definition.label,
+      total: 0,
+      months: {},
+    };
+  });
 
   const tableRows = buildTableRows(rows, months);
 
@@ -771,12 +912,12 @@ export class PatentamientosDashboardService {
     return getBrandRowsFromTotalizados("Top 10 Marcas Patentadas - Zona NIC", year, "zona-nic", planFilter);
   }
 
-  static getSegmentoPickupPais(year: number) {
-    return getSegmentRows("pais-modelos", "Segmento Pickup - PAIS", PICKUP_MODELS, year);
+  static getSegmentoPickupPais(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados("Segmento Pickup - PAIS", year, "pais", PICKUP_MODELS, planFilter);
   }
 
-  static getSegmentoPickupZonaNic(year: number) {
-    return getSegmentRows("zona-nic-modelos", "Segmento Pickup - Zona NIC", PICKUP_MODELS, year);
+  static getSegmentoPickupZonaNic(year: number, planFilter: DashboardPlanFilter) {
+    return getSegmentRowsFromTotalizados("Segmento Pickup - Zona NIC", year, "zona-nic", PICKUP_MODELS, planFilter);
   }
 
   static getSegmentoSuvPais(year: number) {

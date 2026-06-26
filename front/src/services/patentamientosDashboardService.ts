@@ -143,20 +143,20 @@ export const getPatentamientosGeneralZonaNic = (year: number) =>
     { year },
   );
 
-export const getPatentamientosSegmentoPickupPais = (year: number) =>
+export const getPatentamientosSegmentoPickupPais = (year: number, planFilter: PatentamientosPlanFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/segmento-pickup/pais",
     dashboardTableSchema,
     "No se pudo obtener el segmento Pickup PAIS",
-    { year },
+    { year, planFilter },
   );
 
-export const getPatentamientosSegmentoPickupZonaNic = (year: number) =>
+export const getPatentamientosSegmentoPickupZonaNic = (year: number, planFilter: PatentamientosPlanFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/segmento-pickup/zona-nic",
     dashboardTableSchema,
     "No se pudo obtener el segmento Pickup Zona NIC",
-    { year },
+    { year, planFilter },
   );
 
 export const getPatentamientosSegmentoSuvPais = (year: number) =>

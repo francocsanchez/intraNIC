@@ -23,7 +23,7 @@ type PatentamientoTotalizadoWritePayload = {
   mes: number;
   dia: number;
   marca: string;
-  ranger: boolean;
+  modelo: string;
   registroProvincia: string;
   registroLocalidad: string;
   prendado: boolean | null;
@@ -149,7 +149,7 @@ const buildAggregationKey = (
     payload.mes,
     payload.dia,
     payload.marca,
-    payload.ranger ? "1" : "0",
+    payload.modelo,
     payload.registroProvincia,
     payload.registroLocalidad,
     payload.prendado === null ? "null" : payload.prendado ? "1" : "0",
@@ -178,7 +178,7 @@ const buildTotalizadoPayload = (
     mes: fechaPatentamiento.getUTCMonth() + 1,
     dia: fechaPatentamiento.getUTCDate(),
     marca,
-    ranger: modelo.includes("RANGER"),
+    modelo: modelo || "SIN MODELO",
     registroProvincia: normalizeDimensionValue(row.RegistroProvincia, EMPTY_PROVINCE_LABEL),
     registroLocalidad: normalizeDimensionValue(row.RegistroLocalidad, EMPTY_LOCALITY_LABEL),
     prendado: parseNullableBoolean(row.Prendado, "Prendado"),
@@ -416,7 +416,7 @@ export class PatentamientosPrendasCsvService {
             mes: row.mes,
             dia: row.dia,
             marca: row.marca,
-            ranger: row.ranger,
+            modelo: row.modelo,
             registroProvincia: row.registroProvincia,
             registroLocalidad: row.registroLocalidad,
             prendado: row.prendado,
@@ -430,7 +430,7 @@ export class PatentamientosPrendasCsvService {
               mes: row.mes,
               dia: row.dia,
               marca: row.marca,
-              ranger: row.ranger,
+              modelo: row.modelo,
               registroProvincia: row.registroProvincia,
               registroLocalidad: row.registroLocalidad,
               prendado: row.prendado,

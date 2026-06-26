@@ -68,7 +68,6 @@ const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailV
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
-const PatentamientosView = lazy(() => import("./views/patentamientos/PatentamientosView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
 const PatentamientosRegistrosView = lazy(() => import("./views/patentamientos/PatentamientosRegistrosView"));
@@ -274,7 +273,6 @@ export default function Router() {
               <Route path={paths.analisis.patentamientos.dashboard} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboardInscripcionUnidades} element={<InscripcionUnidadesView />} />
               <Route path={paths.analisis.patentamientos.dashboardSectionRoute} element={<DashboardPatentamientosView />} />
-              <Route path={paths.analisis.patentamientos.importar} element={<PatentamientosView />} />
             </Route>
           </Route>
 

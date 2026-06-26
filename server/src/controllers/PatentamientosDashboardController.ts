@@ -65,20 +65,22 @@ export class PatentamientosDashboardController {
 
   static getSegmentoPickupPais(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoPickupPais(year),
+      () => PatentamientosDashboardService.getSegmentoPickupPais(year, planFilter),
       "PatentamientosDashboardController.getSegmentoPickupPais",
     );
   }
 
   static getSegmentoPickupZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getSegmentoPickupZonaNic(year),
+      () => PatentamientosDashboardService.getSegmentoPickupZonaNic(year, planFilter),
       "PatentamientosDashboardController.getSegmentoPickupZonaNic",
     );
   }

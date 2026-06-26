@@ -1,7 +1,9 @@
 import type { PatentamientosDashboardTable } from "@/services/patentamientosDashboardService";
+import { Fragment } from "react";
 
 type PatentamientosComparisonTableProps = {
   data: PatentamientosDashboardTable;
+  showMonthlyParticipation?: boolean;
 };
 
 const ZONA_NIC_LEGEND = [
@@ -47,11 +49,21 @@ const getHeatmapStyle = (value: number, min: number, max: number) => {
 
 export default function PatentamientosComparisonTable({
   data,
+  showMonthlyParticipation = false,
 }: PatentamientosComparisonTableProps) {
   const percentages = data.rows.map((row) => row.percentage);
   const minPercentage = percentages.length ? Math.min(...percentages) : 0;
   const maxPercentage = percentages.length ? Math.max(...percentages) : 0;
   const isZonaNicTable = data.title.includes("Zona NIC");
+  const getMonthlyParticipation = (value: number, monthKey: string) => {
+    const monthTotal = data.totalRow.months[monthKey] ?? 0;
+
+    if (monthTotal <= 0) {
+      return 0;
+    }
+
+    return (value / monthTotal) * 100;
+  };
 
   return (
     <section className="overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
@@ -72,9 +84,18 @@ export default function PatentamientosComparisonTable({
             <tr>
               <th className="border border-gray-300 px-2 py-1.5 text-left font-semibold">{data.entityLabel}</th>
               {data.months.map((month) => (
-                <th key={`${data.title}-${month.key}-${month.year}`} className="border border-gray-300 px-2 py-1.5 text-center font-semibold">
-                  {month.label}
-                </th>
+                <Fragment key={`${data.title}-${month.key}-${month.year}-group`}>
+                  <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">
+                    {month.label}
+                  </th>
+                  {showMonthlyParticipation ? (
+                    <th
+                      className="border border-gray-300 px-2 py-1.5 text-center font-semibold"
+                    >
+                      %
+                    </th>
+                  ) : null}
+                </Fragment>
               ))}
               <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">Total</th>
               <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">%</th>
@@ -94,14 +115,24 @@ export default function PatentamientosComparisonTable({
                       {row.label}
                     </td>
                     {data.months.map((month) => (
-                      <td
-                        key={`${row.label}-${month.key}`}
-                        className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
-                          isToyotaRow(row.label) ? "bg-red-100" : ""
-                        }`}
-                      >
-                        {formatInteger(row.months[month.key] ?? 0)}
-                      </td>
+                      <Fragment key={`${row.label}-${month.key}-group`}>
+                        <td
+                          className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
+                            isToyotaRow(row.label) ? "bg-red-100" : ""
+                          }`}
+                        >
+                          {formatInteger(row.months[month.key] ?? 0)}
+                        </td>
+                        {showMonthlyParticipation ? (
+                          <td
+                            className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
+                              isToyotaRow(row.label) ? "bg-red-100" : ""
+                            }`}
+                          >
+                            {formatPercentage(getMonthlyParticipation(row.months[month.key] ?? 0, month.key))}
+                          </td>
+                        ) : null}
+                      </Fragment>
                     ))}
                     <td
                       className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-gray-900 ${
@@ -126,9 +157,16 @@ export default function PatentamientosComparisonTable({
                     {data.totalRow.label}
                   </td>
                   {data.months.map((month) => (
-                    <td key={`total-${month.key}`} className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
-                      {formatInteger(data.totalRow.months[month.key] ?? 0)}
-                    </td>
+                    <Fragment key={`total-${month.key}-group`}>
+                      <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                        {formatInteger(data.totalRow.months[month.key] ?? 0)}
+                      </td>
+                      {showMonthlyParticipation ? (
+                        <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                          {formatPercentage(data.totalRow.months[month.key] > 0 ? 100 : 0)}
+                        </td>
+                      ) : null}
+                    </Fragment>
                   ))}
                   <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
                     {formatInteger(data.totalRow.total)}
@@ -141,7 +179,7 @@ export default function PatentamientosComparisonTable({
             ) : (
               <tr>
                 <td
-                  colSpan={data.months.length + 3}
+                  colSpan={data.months.length * (showMonthlyParticipation ? 2 : 1) + 3}
                   className="border border-gray-200 px-3 py-6 text-center text-sm text-gray-500"
                 >
                   No hay informacion importada para esta comparativa en el ano seleccionado.
