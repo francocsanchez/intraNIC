@@ -79,7 +79,7 @@ export default function PatentamientosComparisonTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className='min-w-full border-collapse text-[12px] font-["IBM_Plex_Mono"]'>
+        <table className="min-w-full border-collapse text-[12px]">
           <thead className="bg-black text-white">
             <tr>
               <th className="border border-gray-300 px-2 py-1.5 text-left font-semibold">{data.entityLabel}</th>

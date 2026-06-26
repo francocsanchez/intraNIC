@@ -48,6 +48,7 @@ const dashboardGeneralTopBrandSchema = z.object({
 
 const dashboardGeneralTopModelSchema = z.object({
   rank: z.number(),
+  brand: z.string(),
   model: z.string(),
   total: z.number(),
   percentage: z.number(),

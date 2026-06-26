@@ -173,17 +173,14 @@ export default function PatentamientosGeneralSection({
                 Ranking de modelos de Zona NIC ordenado de mayor a menor.
               </p>
             </div>
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#128c80]">
-              Zona NIC
-              <ArrowRight size={16} />
-            </span>
           </div>
 
           <div className="overflow-x-auto px-4 py-3">
-            <table className='min-w-full text-left font-["IBM_Plex_Mono"]'>
+            <table className="min-w-full text-left">
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Rank</th>
+                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Marca</th>
                   <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Modelo</th>
                   <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Unidades</th>
                   <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Share</th>
@@ -192,8 +189,9 @@ export default function PatentamientosGeneralSection({
               <tbody className="divide-y divide-slate-100">
                 {hasTopModels ? (
                   data.topModels.map((model) => (
-                    <tr key={`${model.rank}-${model.model}`} className="transition hover:bg-slate-50">
+                    <tr key={`${model.rank}-${model.brand}-${model.model}`} className="transition hover:bg-slate-50">
                       <td className="py-2.5 text-xs text-slate-500">{String(model.rank).padStart(2, "0")}</td>
+                      <td className="py-2.5 text-xs text-slate-700">{model.brand}</td>
                       <td className="py-2.5 text-xs font-semibold text-slate-950">{model.model}</td>
                       <td className="py-2.5 text-xs text-slate-700">{formatInteger(model.total)}</td>
                       <td className="py-2.5 text-xs font-semibold text-[#128c80]">{formatPercentage(model.percentage)}</td>
@@ -201,7 +199,7 @@ export default function PatentamientosGeneralSection({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-sm text-slate-500">
+                    <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
                       No hay modelos disponibles para el anio seleccionado.
                     </td>
                   </tr>
@@ -211,14 +209,14 @@ export default function PatentamientosGeneralSection({
           </div>
 
           <div className="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className='text-xs font-["IBM_Plex_Mono"] text-slate-500'>
+            <p className="text-xs text-slate-500">
               {topModelsPagination.total > 0
                 ? `Mostrando ${data.topModels.length} de ${formatInteger(topModelsPagination.total)} modelos.`
                 : "No hay modelos disponibles para paginar."}
             </p>
 
             <div className="flex items-center gap-3">
-              <span className='text-xs font-semibold font-["IBM_Plex_Mono"] text-slate-700'>
+              <span className="text-xs font-semibold text-slate-700">
                 Pagina {topModelsPagination.page} de {Math.max(topModelsPagination.totalPages, 1)}
               </span>
 
@@ -227,7 +225,7 @@ export default function PatentamientosGeneralSection({
                   type="button"
                   onClick={() => onTopModelsPageChange?.(topModelsPagination.page - 1)}
                   disabled={topModelsPagination.page <= 1}
-                  className='inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold font-["IBM_Plex_Mono"] text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowLeft size={16} />
                   Anterior
@@ -237,7 +235,7 @@ export default function PatentamientosGeneralSection({
                   type="button"
                   onClick={() => onTopModelsPageChange?.(topModelsPagination.page + 1)}
                   disabled={topModelsPagination.totalPages === 0 || topModelsPagination.page >= topModelsPagination.totalPages}
-                  className='inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold font-["IBM_Plex_Mono"] text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Siguiente
                   <ArrowRight size={16} />

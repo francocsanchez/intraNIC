@@ -76,6 +76,7 @@ type DashboardGeneralTopBrand = {
 
 type DashboardGeneralTopModel = {
   rank: number;
+  brand: string;
   model: string;
   total: number;
   percentage: number;
@@ -1174,6 +1175,7 @@ const getGeneralTopModelsFromTotalizados = async (
     anio: year,
     registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
     modelo: { $exists: true, $ne: "" },
+    marca: { $exists: true, $ne: "" },
   };
 
   if (month !== null) {
@@ -1181,26 +1183,32 @@ const getGeneralTopModelsFromTotalizados = async (
   }
 
   const rows = await PatentamientoTotalizado.aggregate<{
+    brand: string;
     model: string;
     total: number;
   }>([
     { $match: matchStage },
     {
       $group: {
-        _id: "$modelo",
+        _id: {
+          brand: "$marca",
+          model: "$modelo",
+        },
         total: { $sum: "$total" },
       },
     },
     {
       $project: {
         _id: 0,
-        model: "$_id",
+        brand: "$_id.brand",
+        model: "$_id.model",
         total: 1,
       },
     },
     {
       $sort: {
         total: -1,
+        brand: 1,
         model: 1,
       },
     },
@@ -1215,6 +1223,7 @@ const getGeneralTopModelsFromTotalizados = async (
     .slice(startIndex, startIndex + pageSize)
     .map<DashboardGeneralTopModel>((row, index) => ({
       rank: startIndex + index + 1,
+      brand: row.brand,
       model: row.model,
       total: row.total,
       percentage: totalPatentamientos > 0 ? roundPercentage((row.total / totalPatentamientos) * 100) : 0,
