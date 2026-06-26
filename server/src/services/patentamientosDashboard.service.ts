@@ -405,7 +405,15 @@ const buildTableRows = (
       total: row.yearTotal,
       percentage: totalBase > 0 ? roundPercentage((row.yearTotal / totalBase) * 100) : 0,
     }))
-    .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label, "es"));
+    .sort((a, b) => {
+      const aIsOtherBrands = normalizeText(a.label) === "OTRAS MARCAS";
+      const bIsOtherBrands = normalizeText(b.label) === "OTRAS MARCAS";
+
+      if (aIsOtherBrands && !bIsOtherBrands) return 1;
+      if (!aIsOtherBrands && bIsOtherBrands) return -1;
+
+      return b.total - a.total || a.label.localeCompare(b.label, "es");
+    });
 };
 
 const buildEmptyTable = (
