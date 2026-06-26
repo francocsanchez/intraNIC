@@ -21,6 +21,20 @@ const parseMonth = (value: unknown) => {
   return Number.isInteger(parsed) && parsed >= 1 && parsed <= 12 ? parsed : null;
 };
 
+const parseOptionalText = (value: unknown) => {
+  const parsed = String(value ?? "").trim();
+  return parsed.length ? parsed : null;
+};
+
+const parsePositiveInteger = (value: unknown, fallback: number) => {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
 const handleDashboardRequest = async (
   res: Response,
   action: () => Promise<unknown>,
@@ -196,14 +210,45 @@ export class PatentamientosDashboardController {
   static getGeneralZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
     const month = parseMonth(req.query.month);
+    const page = parsePositiveInteger(req.query.page, 1);
+    const pageSize = parsePositiveInteger(req.query.pageSize, 15);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
     if (req.query.month !== undefined && req.query.month !== "" && month === null) {
       return res.status(400).json({ error: "Debes seleccionar un mes valido" });
     }
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getGeneralZonaNic(year, month),
+      () => PatentamientosDashboardService.getGeneralZonaNic(year, month, page, pageSize),
       "PatentamientosDashboardController.getGeneralZonaNic",
+    );
+  }
+
+  static getLocationOptions(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const province = parseOptionalText(req.query.province);
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getLocationOptions(year, province),
+      "PatentamientosDashboardController.getLocationOptions",
+    );
+  }
+
+  static getLocationAnalysis(req: Request, res: Response) {
+    const year = parseYear(req.query.year);
+    const planFilter = parsePlanFilter(req.query.planFilter);
+    const province = parseOptionalText(req.query.province);
+    const locality = parseOptionalText(req.query.locality);
+
+    if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    if (locality && !province) {
+      return res.status(400).json({ error: "Debes seleccionar una provincia antes de elegir una localidad" });
+    }
+
+    return handleDashboardRequest(
+      res,
+      () => PatentamientosDashboardService.getLocationAnalysis(year, planFilter, { province, locality }),
+      "PatentamientosDashboardController.getLocationAnalysis",
     );
   }
 }

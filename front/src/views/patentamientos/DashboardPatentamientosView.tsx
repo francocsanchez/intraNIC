@@ -4,6 +4,8 @@ import PatentamientosComparisonTable from "@/components/patentamientos/Patentami
 import PatentamientosToyotaEvolutionChart from "@/components/patentamientos/PatentamientosToyotaEvolutionChart";
 import {
   getPatentamientosAvailableYears,
+  getPatentamientosLocationAnalysis,
+  getPatentamientosLocationOptions,
   getPatentamientosSegmentoCCrossPais,
   getPatentamientosSegmentoCCrossZonaNic,
   getPatentamientosGeneralZonaNic,
@@ -23,12 +25,12 @@ import {
 } from "@/services/patentamientosDashboardService";
 import { paths } from "@/routes/paths";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { BarChart3, LayoutGrid, LineChart, Table2 } from "lucide-react";
+import { BarChart3, LayoutGrid, LineChart, MapPinned, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-const dashboardSections = ["general", "marcas", "pickup", "sw4", "c-cross", "y-cross", "yaris"] as const;
+const dashboardSections = ["general", "marcas", "pickup", "sw4", "c-cross", "y-cross", "yaris", "localidad"] as const;
 type DashboardSection = (typeof dashboardSections)[number];
 
 const monthOptions = [
@@ -76,13 +78,20 @@ const sectionContent = {
     heading: "Comparativa Yaris",
     icon: BarChart3,
   },
+  localidad: {
+    heading: "Analisis por Localidad",
+    icon: MapPinned,
+  },
 } satisfies Record<DashboardSection, { heading: string; icon: typeof Table2 }>;
 
 export default function DashboardPatentamientosView() {
   const { section } = useParams<{ section: string }>();
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<PatentamientosMonthFilter>(null);
+  const [generalTopModelsPage, setGeneralTopModelsPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<PatentamientosPlanFilter>("with-plan");
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [selectedLocality, setSelectedLocality] = useState<string>("");
 
   const isValidSection = dashboardSections.includes((section ?? "") as DashboardSection);
   const activeSection: DashboardSection = isValidSection ? (section as DashboardSection) : "general";
@@ -99,12 +108,19 @@ export default function DashboardPatentamientosView() {
   const isCCrossSection = activeSection === "c-cross";
   const isYCrossSection = activeSection === "y-cross";
   const isYarisSection = activeSection === "yaris";
+  const isLocalidadSection = activeSection === "localidad";
+
+  const locationOptionsQuery = useQuery({
+    queryKey: ["patentamientos-dashboard", "location-options", selectedYear, selectedProvince],
+    queryFn: () => getPatentamientosLocationOptions(selectedYear!, selectedProvince || null),
+    enabled: selectedYear !== null && isLocalidadSection,
+  });
 
   const results = useQueries({
     queries: [
       {
-        queryKey: ["patentamientos-dashboard", "general-zona-nic", selectedYear, selectedMonth],
-        queryFn: () => getPatentamientosGeneralZonaNic(selectedYear!, selectedMonth),
+        queryKey: ["patentamientos-dashboard", "general-zona-nic", selectedYear, selectedMonth, generalTopModelsPage],
+        queryFn: () => getPatentamientosGeneralZonaNic(selectedYear!, selectedMonth, generalTopModelsPage, 15),
         enabled: selectedYear !== null && isGeneralSection,
       },
       {
@@ -172,6 +188,17 @@ export default function DashboardPatentamientosView() {
         queryFn: () => getPatentamientosToyotaEvolution(selectedYear!, planFilter),
         enabled: selectedYear !== null && isMarcasSection,
       },
+      {
+        queryKey: ["patentamientos-dashboard", "localidad-analysis", selectedYear, planFilter, selectedProvince, selectedLocality],
+        queryFn: () =>
+          getPatentamientosLocationAnalysis(
+            selectedYear!,
+            planFilter,
+            selectedProvince || null,
+            selectedLocality || null,
+          ),
+        enabled: selectedYear !== null && isLocalidadSection,
+      },
     ],
   });
 
@@ -190,19 +217,48 @@ export default function DashboardPatentamientosView() {
     yarisPais,
     yarisZonaNic,
     toyotaEvolution,
+    locationAnalysis,
   ] = results;
 
   const hasAvailableYears = (yearsQuery.data?.years.length ?? 0) > 0;
   const isWaitingYearSelection = yearsQuery.isSuccess && hasAvailableYears && selectedYear === null;
-  const isLoading = yearsQuery.isLoading || isWaitingYearSelection || (selectedYear !== null && results.some((result) => result.isLoading));
+  const isLoading =
+    yearsQuery.isLoading ||
+    isWaitingYearSelection ||
+    (selectedYear !== null && results.some((result) => result.isLoading)) ||
+    locationOptionsQuery.isLoading;
   const firstError =
-    (yearsQuery.error instanceof Error ? yearsQuery.error : undefined) ?? results.find((result) => result.error instanceof Error)?.error;
+    (yearsQuery.error instanceof Error ? yearsQuery.error : undefined) ??
+    (locationOptionsQuery.error instanceof Error ? locationOptionsQuery.error : undefined) ??
+    results.find((result) => result.error instanceof Error)?.error;
 
   useEffect(() => {
     if (firstError instanceof Error) {
       toast.error(firstError.message);
     }
   }, [firstError]);
+
+  useEffect(() => {
+    setSelectedProvince("");
+    setSelectedLocality("");
+  }, [selectedYear]);
+
+  useEffect(() => {
+    setGeneralTopModelsPage(1);
+  }, [selectedYear, selectedMonth]);
+
+  useEffect(() => {
+    if (!selectedProvince) {
+      setSelectedLocality("");
+      return;
+    }
+
+    const availableLocalities = locationOptionsQuery.data?.localities ?? [];
+
+    if (selectedLocality && !availableLocalities.includes(selectedLocality)) {
+      setSelectedLocality("");
+    }
+  }, [selectedProvince, selectedLocality, locationOptionsQuery.data?.localities]);
 
   if (!isValidSection) {
     return <Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />;
@@ -261,7 +317,7 @@ export default function DashboardPatentamientosView() {
               </>
             ) : null}
 
-            {isMarcasSection || isPickupSection || isSw4Section || isCCrossSection || isYCrossSection || isYarisSection ? (
+            {isMarcasSection || isPickupSection || isSw4Section || isCCrossSection || isYCrossSection || isYarisSection || isLocalidadSection ? (
               <>
                 <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
                   C/ Plan
@@ -274,6 +330,48 @@ export default function DashboardPatentamientosView() {
                 >
                   <option value="with-plan">Si</option>
                   <option value="without-plan">No</option>
+                </select>
+              </>
+            ) : null}
+
+            {isLocalidadSection ? (
+              <>
+                <label htmlFor="patentamientos-province" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                  Provincia
+                </label>
+                <select
+                  id="patentamientos-province"
+                  value={selectedProvince}
+                  onChange={(event) => {
+                    setSelectedProvince(event.target.value);
+                    setSelectedLocality("");
+                  }}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                >
+                  <option value="">Todas</option>
+                  {(locationOptionsQuery.data?.provinces ?? []).map((province) => (
+                    <option key={province} value={province}>
+                      {province}
+                    </option>
+                  ))}
+                </select>
+
+                <label htmlFor="patentamientos-locality" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                  Localidad
+                </label>
+                <select
+                  id="patentamientos-locality"
+                  value={selectedLocality}
+                  onChange={(event) => setSelectedLocality(event.target.value)}
+                  disabled={!selectedProvince}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 focus:border-[#15aa9a]"
+                >
+                  <option value="">{selectedProvince ? "Todas" : "Elegi provincia"}</option>
+                  {(locationOptionsQuery.data?.localities ?? []).map((locality) => (
+                    <option key={locality} value={locality}>
+                      {locality}
+                    </option>
+                  ))}
                 </select>
               </>
             ) : null}
@@ -309,6 +407,7 @@ export default function DashboardPatentamientosView() {
         {isGeneralSection && generalZonaNic.data && selectedYear !== null ? (
           <PatentamientosGeneralSection
             data={generalZonaNic.data}
+            onTopModelsPageChange={setGeneralTopModelsPage}
             selectedMonthLabel={
               selectedMonth === null
                 ? null
@@ -356,6 +455,29 @@ export default function DashboardPatentamientosView() {
           <>
             {yarisPais.data ? <PatentamientosComparisonTable data={yarisPais.data} showMonthlyParticipation /> : null}
             {yarisZonaNic.data ? <PatentamientosComparisonTable data={yarisZonaNic.data} showMonthlyParticipation /> : null}
+          </>
+        ) : null}
+
+        {isLocalidadSection && locationAnalysis.data ? (
+          <>
+            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm">
+              Analisis aplicado sobre{" "}
+              <span className="font-semibold text-gray-900">
+                {locationAnalysis.data.filters.province ?? "todas las provincias"}
+              </span>
+              {locationAnalysis.data.filters.locality ? (
+                <>
+                  {" / "}
+                  <span className="font-semibold text-gray-900">{locationAnalysis.data.filters.locality}</span>
+                </>
+              ) : null}
+              .
+            </div>
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.hilux} showMonthlyParticipation />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.sw4} showMonthlyParticipation />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.cCross} showMonthlyParticipation />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yCross} showMonthlyParticipation />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yaris} showMonthlyParticipation />
           </>
         ) : null}
 

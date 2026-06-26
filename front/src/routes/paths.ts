@@ -46,6 +46,7 @@ export const paths = {
       dashboardCCross: "/analisis/patentamientos/dashboard/c-cross",
       dashboardYaris: "/analisis/patentamientos/dashboard/yaris",
       dashboardYCross: "/analisis/patentamientos/dashboard/y-cross",
+      dashboardLocalidad: "/analisis/patentamientos/dashboard/localidad",
       dashboardSuv: "/analisis/patentamientos/dashboard/suv",
       dashboardBSuv: "/analisis/patentamientos/dashboard/b-suv",
       dashboardInscripcionUnidades: "/analisis/patentamientos/dashboard/inscripcion-unidades",

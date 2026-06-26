@@ -53,6 +53,13 @@ const dashboardGeneralTopModelSchema = z.object({
   percentage: z.number(),
 });
 
+const dashboardGeneralTopModelsPaginationSchema = z.object({
+  page: z.number(),
+  pageSize: z.number(),
+  total: z.number(),
+  totalPages: z.number(),
+});
+
 const dashboardGeneralTrendPointSchema = z.object({
   key: z.string(),
   label: z.string(),
@@ -75,12 +82,35 @@ const dashboardGeneralSchema = z.object({
   trend: z.array(dashboardGeneralTrendPointSchema),
   topBrands: z.array(dashboardGeneralTopBrandSchema),
   topModels: z.array(dashboardGeneralTopModelSchema),
+  topModelsPagination: dashboardGeneralTopModelsPaginationSchema,
+});
+
+const dashboardLocationOptionsSchema = z.object({
+  provinces: z.array(z.string()),
+  localities: z.array(z.string()),
+});
+
+const dashboardLocationAnalysisSchema = z.object({
+  title: z.string(),
+  filters: z.object({
+    province: z.string().nullable(),
+    locality: z.string().nullable(),
+  }),
+  tables: z.object({
+    hilux: dashboardTableSchema,
+    sw4: dashboardTableSchema,
+    cCross: dashboardTableSchema,
+    yCross: dashboardTableSchema,
+    yaris: dashboardTableSchema,
+  }),
 });
 
 export type PatentamientosDashboardTable = z.infer<typeof dashboardTableSchema>;
 export type PatentamientosDashboardEvolution = z.infer<typeof dashboardEvolutionSchema>;
 export type PatentamientosDashboardYears = z.infer<typeof dashboardYearsSchema>;
 export type PatentamientosDashboardGeneral = z.infer<typeof dashboardGeneralSchema>;
+export type PatentamientosDashboardLocationOptions = z.infer<typeof dashboardLocationOptionsSchema>;
+export type PatentamientosDashboardLocationAnalysis = z.infer<typeof dashboardLocationAnalysisSchema>;
 export type PatentamientosPlanFilter = "with-plan" | "without-plan";
 export type PatentamientosMonthFilter = number | null;
 
@@ -136,12 +166,17 @@ export const getPatentamientosTopMarcasZonaNic = (year: number, planFilter: Pate
     { year, planFilter },
   );
 
-export const getPatentamientosGeneralZonaNic = (year: number, month?: PatentamientosMonthFilter) =>
+export const getPatentamientosGeneralZonaNic = (
+  year: number,
+  month?: PatentamientosMonthFilter,
+  page = 1,
+  pageSize = 15,
+) =>
   fetchAndParse(
     "/patentamientos/dashboard/general/zona-nic",
     dashboardGeneralSchema,
     "No se pudo obtener la vista general de Zona NIC",
-    month ? { year, month } : { year },
+    month ? { year, month, page, pageSize } : { year, page, pageSize },
   );
 
 export const getPatentamientosSegmentoPickupPais = (year: number, planFilter: PatentamientosPlanFilter) =>
@@ -262,4 +297,30 @@ export const getPatentamientosToyotaEvolution = (year: number, planFilter: Paten
     dashboardEvolutionSchema,
     "No se pudo obtener la evolucion de Toyota",
     { year, planFilter },
+  );
+
+export const getPatentamientosLocationOptions = (year: number, province?: string | null) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/localidad/options",
+    dashboardLocationOptionsSchema,
+    "No se pudieron obtener las ubicaciones disponibles",
+    province ? { year, province } : { year },
+  );
+
+export const getPatentamientosLocationAnalysis = (
+  year: number,
+  planFilter: PatentamientosPlanFilter,
+  province?: string | null,
+  locality?: string | null,
+) =>
+  fetchAndParse(
+    "/patentamientos/dashboard/localidad/analysis",
+    dashboardLocationAnalysisSchema,
+    "No se pudo obtener el analisis por localidad",
+    {
+      year,
+      planFilter,
+      ...(province ? { province } : {}),
+      ...(locality ? { locality } : {}),
+    },
   );

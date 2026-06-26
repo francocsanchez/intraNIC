@@ -13,6 +13,7 @@ const dashboardSections = [
   { key: "c-cross", label: "C. Cross", to: paths.analisis.patentamientos.dashboardCCross },
   { key: "y-cross", label: "Y. Cross", to: paths.analisis.patentamientos.dashboardYCross },
   { key: "yaris", label: "Yaris", to: paths.analisis.patentamientos.dashboardYaris },
+  { key: "localidad", label: "Localidad", to: paths.analisis.patentamientos.dashboardLocalidad },
   { key: "inscripcion-unidades", label: "Traslado de unidades", to: paths.analisis.patentamientos.dashboardInscripcionUnidades },
 ];
 

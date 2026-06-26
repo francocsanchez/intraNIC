@@ -81,6 +81,13 @@ type DashboardGeneralTopModel = {
   percentage: number;
 };
 
+type DashboardGeneralTopModelsPagination = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
 type DashboardGeneralResponse = {
   title: string;
   summary: DashboardGeneralSummary;
@@ -88,9 +95,32 @@ type DashboardGeneralResponse = {
   trend: DashboardGeneralTrendPoint[];
   topBrands: DashboardGeneralTopBrand[];
   topModels: DashboardGeneralTopModel[];
+  topModelsPagination: DashboardGeneralTopModelsPagination;
 };
 
 type DashboardPlanFilter = "with-plan" | "without-plan";
+
+type DashboardLocationFilters = {
+  province: string | null;
+  locality: string | null;
+};
+
+type DashboardLocationOptionsResponse = {
+  provinces: string[];
+  localities: string[];
+};
+
+type DashboardLocationAnalysisResponse = {
+  title: string;
+  filters: DashboardLocationFilters;
+  tables: {
+    hilux: DashboardTableResponse;
+    sw4: DashboardTableResponse;
+    cCross: DashboardTableResponse;
+    yCross: DashboardTableResponse;
+    yaris: DashboardTableResponse;
+  };
+};
 
 type SegmentModelDefinition = {
   label: string;
@@ -485,6 +515,32 @@ const buildPlanFilterMatch = (planFilter: DashboardPlanFilter) =>
       }
     : {};
 
+const buildLocationMatch = ({ province, locality }: DashboardLocationFilters) => {
+  const matchStage: Record<string, unknown> = {};
+
+  if (province) {
+    matchStage.registroProvincia = province;
+  }
+
+  if (locality) {
+    matchStage.registroLocalidad = locality;
+  }
+
+  return matchStage;
+};
+
+const buildLocationTitleSuffix = ({ province, locality }: DashboardLocationFilters) => {
+  if (province && locality) {
+    return ` - ${province} / ${locality}`;
+  }
+
+  if (province) {
+    return ` - ${province}`;
+  }
+
+  return " - Todas las provincias";
+};
+
 const getBrandRowsFromTotalizados = async (
   title: string,
   year: number,
@@ -623,6 +679,107 @@ const getSegmentRowsFromTotalizados = async (
   if (scope === "zona-nic") {
     matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
   }
+
+  const monthlyCounts = await PatentamientoTotalizado.aggregate<{
+    model: string;
+    monthNumber: number;
+    total: number;
+  }>([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: {
+          model: "$modelo",
+          monthNumber: "$mes",
+        },
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        model: "$_id.model",
+        monthNumber: "$_id.monthNumber",
+        total: 1,
+      },
+    },
+    {
+      $sort: {
+        model: 1,
+        monthNumber: 1,
+      },
+    },
+  ]);
+
+  const monthNumbers = Array.from(
+    new Set(
+      monthlyCounts
+        .map((item) => item.monthNumber)
+        .filter((monthNumber) => Number.isInteger(monthNumber) && monthNumber >= 1 && monthNumber <= 12),
+    ),
+  ).sort((left, right) => left - right);
+
+  const months: DashboardMonthColumn[] = monthNumbers.map((monthNumber) => ({
+    key: buildDashboardMonthKey(year, monthNumber),
+    monthNumber,
+    year,
+    label: buildDashboardMonthLabel(year, monthNumber),
+  }));
+
+  if (!months.length) {
+    return buildEmptyTable(title, "Modelo", []);
+  }
+
+  const rows = models.map<PatentamientoRowNormalized>((definition) => {
+    const monthsMap = months.reduce<Record<string, number>>((acc, month) => {
+      const total = monthlyCounts.reduce((sum, item) => {
+        if (item.monthNumber !== month.monthNumber) {
+          return sum;
+        }
+
+        return definition.aliases.some((alias) => matchesSegmentAlias(item.model, alias))
+          ? sum + item.total
+          : sum;
+      }, 0);
+
+      acc[month.key] = total;
+      return acc;
+    }, {});
+
+    return {
+      primaryValue: definition.label,
+      total: Object.values(monthsMap).reduce((sum, value) => sum + value, 0),
+      months: monthsMap,
+    };
+  });
+
+  const tableRows = buildTableRows(rows, months);
+
+  return {
+    title,
+    entityLabel: "Modelo",
+    months,
+    rows: tableRows,
+    totalRow: buildTotalRow(tableRows, months),
+  };
+};
+
+const getSegmentRowsFromCustomLocation = async (
+  title: string,
+  year: number,
+  models: readonly SegmentModelDefinition[],
+  planFilter: DashboardPlanFilter,
+  locationFilters: DashboardLocationFilters,
+): Promise<DashboardTableResponse> => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    modelo: {
+      $exists: true,
+      $ne: "",
+    },
+    ...buildPlanFilterMatch(planFilter),
+    ...buildLocationMatch(locationFilters),
+  };
 
   const monthlyCounts = await PatentamientoTotalizado.aggregate<{
     model: string;
@@ -1007,43 +1164,100 @@ const getGeneralTrendFromTotalizados = async (
   }));
 };
 
-const getGeneralZonaNic = async (year: number, month: number | null): Promise<DashboardGeneralResponse> => {
-  const [modelsDataset, summary, months] = await Promise.all([
-    getDataset("zona-nic-modelos"),
+const getGeneralTopModelsFromTotalizados = async (
+  year: number,
+  month: number | null,
+  page: number,
+  pageSize: number,
+): Promise<Pick<DashboardGeneralResponse, "topModels" | "topModelsPagination">> => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+    modelo: { $exists: true, $ne: "" },
+  };
+
+  if (month !== null) {
+    matchStage.mes = month;
+  }
+
+  const rows = await PatentamientoTotalizado.aggregate<{
+    model: string;
+    total: number;
+  }>([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: "$modelo",
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        model: "$_id",
+        total: 1,
+      },
+    },
+    {
+      $sort: {
+        total: -1,
+        model: 1,
+      },
+    },
+  ]);
+
+  const totalModels = rows.length;
+  const totalPatentamientos = rows.reduce((sum, row) => sum + row.total, 0);
+  const totalPages = totalModels > 0 ? Math.ceil(totalModels / pageSize) : 0;
+  const normalizedPage = totalPages > 0 ? Math.min(Math.max(page, 1), totalPages) : 1;
+  const startIndex = (normalizedPage - 1) * pageSize;
+  const topModels = rows
+    .slice(startIndex, startIndex + pageSize)
+    .map<DashboardGeneralTopModel>((row, index) => ({
+      rank: startIndex + index + 1,
+      model: row.model,
+      total: row.total,
+      percentage: totalPatentamientos > 0 ? roundPercentage((row.total / totalPatentamientos) * 100) : 0,
+    }));
+
+  return {
+    topModels,
+    topModelsPagination: {
+      page: normalizedPage,
+      pageSize,
+      total: totalModels,
+      totalPages,
+    },
+  };
+};
+
+const getGeneralZonaNic = async (
+  year: number,
+  month: number | null,
+  page: number,
+  pageSize: number,
+): Promise<DashboardGeneralResponse> => {
+  const [summary, months, topModelsData] = await Promise.all([
     getGeneralSummaryFromTotalizados(year),
     getGeneralMonthsFromTotalizados(year),
+    getGeneralTopModelsFromTotalizados(year, month, page, pageSize),
   ]);
 
   const title = "General - Zona NIC";
 
-  if (!modelsDataset || !months.length) {
+  if (!months.length) {
     return {
       title,
       months,
       summary,
       trend: [],
       topBrands: [],
-      topModels: [],
+      topModels: topModelsData.topModels,
+      topModelsPagination: topModelsData.topModelsPagination,
     };
   }
 
-  const modelRows = normalizeValidRows(modelsDataset).map((row) => ({
-    ...row,
-    yearTotal: getRowTotalForMonths(row, months),
-  }));
-  const totalPatentamientos = summary.totalPatentamientos;
   const trend = await getGeneralTrendFromTotalizados(year, month, months);
-
-  const topModels = modelRows
-    .filter((row) => row.yearTotal > 0)
-    .sort((a, b) => b.yearTotal - a.yearTotal || a.primaryValue.localeCompare(b.primaryValue))
-    .slice(0, 10)
-    .map<DashboardGeneralTopModel>((row, index) => ({
-      rank: index + 1,
-      model: row.primaryValue,
-      total: row.yearTotal,
-      percentage: totalPatentamientos > 0 ? roundPercentage((row.yearTotal / totalPatentamientos) * 100) : 0,
-    }));
 
   return {
     title,
@@ -1051,7 +1265,62 @@ const getGeneralZonaNic = async (year: number, month: number | null): Promise<Da
     summary,
     trend,
     topBrands: [],
-    topModels,
+    topModels: topModelsData.topModels,
+    topModelsPagination: topModelsData.topModelsPagination,
+  };
+};
+
+const getLocationOptions = async (year: number, province: string | null): Promise<DashboardLocationOptionsResponse> => {
+  const provinceMatch: Record<string, unknown> = {
+    anio: year,
+    registroProvincia: { $exists: true, $ne: "" },
+  };
+  const localityMatch: Record<string, unknown> = {
+    anio: year,
+    registroLocalidad: { $exists: true, $ne: "" },
+  };
+
+  if (province) {
+    localityMatch.registroProvincia = province;
+  }
+
+  const [provinces, localities] = await Promise.all([
+    PatentamientoTotalizado.distinct("registroProvincia", provinceMatch),
+    PatentamientoTotalizado.distinct("registroLocalidad", localityMatch),
+  ]);
+
+  return {
+    provinces: provinces.map(String).filter(Boolean).sort((a, b) => a.localeCompare(b, "es")),
+    localities: localities.map(String).filter(Boolean).sort((a, b) => a.localeCompare(b, "es")),
+  };
+};
+
+const getLocationAnalysis = async (
+  year: number,
+  planFilter: DashboardPlanFilter,
+  filters: DashboardLocationFilters,
+): Promise<DashboardLocationAnalysisResponse> => {
+  const title = `Analisis por localidad${buildLocationTitleSuffix(filters)}`;
+  const titleSuffix = buildLocationTitleSuffix(filters);
+
+  const [hilux, sw4, cCross, yCross, yaris] = await Promise.all([
+    getSegmentRowsFromCustomLocation(`${SEGMENT_DEFINITIONS.hilux.title}${titleSuffix}`, year, SEGMENT_DEFINITIONS.hilux.models, planFilter, filters),
+    getSegmentRowsFromCustomLocation(`${SEGMENT_DEFINITIONS.sw4.title}${titleSuffix}`, year, SEGMENT_DEFINITIONS.sw4.models, planFilter, filters),
+    getSegmentRowsFromCustomLocation(`${SEGMENT_DEFINITIONS["c-cross"].title}${titleSuffix}`, year, SEGMENT_DEFINITIONS["c-cross"].models, planFilter, filters),
+    getSegmentRowsFromCustomLocation(`${SEGMENT_DEFINITIONS["y-cross"].title}${titleSuffix}`, year, SEGMENT_DEFINITIONS["y-cross"].models, planFilter, filters),
+    getSegmentRowsFromCustomLocation(`${SEGMENT_DEFINITIONS.yaris.title}${titleSuffix}`, year, SEGMENT_DEFINITIONS.yaris.models, planFilter, filters),
+  ]);
+
+  return {
+    title,
+    filters,
+    tables: {
+      hilux,
+      sw4,
+      cCross,
+      yCross,
+      yaris,
+    },
   };
 };
 
@@ -1136,7 +1405,15 @@ export class PatentamientosDashboardService {
     return getToyotaEvolution(year, planFilter);
   }
 
-  static getGeneralZonaNic(year: number, month: number | null) {
-    return getGeneralZonaNic(year, month);
+  static getGeneralZonaNic(year: number, month: number | null, page: number, pageSize: number) {
+    return getGeneralZonaNic(year, month, page, pageSize);
+  }
+
+  static getLocationOptions(year: number, province: string | null) {
+    return getLocationOptions(year, province);
+  }
+
+  static getLocationAnalysis(year: number, planFilter: DashboardPlanFilter, filters: DashboardLocationFilters) {
+    return getLocationAnalysis(year, planFilter, filters);
   }
 }
