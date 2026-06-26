@@ -25,7 +25,7 @@ import {
 } from "@/services/patentamientosDashboardService";
 import { paths } from "@/routes/paths";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { BarChart3, LayoutGrid, LineChart, MapPinned, Table2 } from "lucide-react";
+import { BarChart3, LayoutGrid, LineChart, MapPinned, Printer, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -292,11 +292,20 @@ export default function DashboardPatentamientosView() {
 
   return (
     <div className="w-full space-y-6 px-1 py-1">
-      <section className="px-1 py-1">
+      <section className="print-hidden px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-[#15aa9a] hover:text-[#0f766e]"
+            >
+              <Printer size={16} />
+              Imprimir PDF
+            </button>
+
             {isGeneralSection ? (
               <>
                 <label htmlFor="patentamientos-month" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
@@ -395,8 +404,8 @@ export default function DashboardPatentamientosView() {
         </div>
         </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
+      <section className="dashboard-print-area space-y-4">
+        <div className="print-hidden flex items-center gap-2">
           {(() => {
             const SectionIcon = sectionContent[activeSection].icon;
             return <SectionIcon size={18} className="text-[#128c80]" />;

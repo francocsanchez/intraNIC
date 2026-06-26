@@ -66,11 +66,11 @@ export default function PatentamientosComparisonTable({
   };
 
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
+    <section className="print-comparison-card overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
       <div className="border-b border-gray-200 px-3 py-2">
         <h2 className="text-base font-semibold tracking-tight text-gray-900">{data.title}</h2>
         {isZonaNicTable ? (
-          <div className="mt-2 space-y-1 text-[11px] leading-snug text-gray-400">
+          <div className="print-comparison-legend mt-2 space-y-1 text-[11px] leading-snug text-gray-400">
             {ZONA_NIC_LEGEND.map((item) => (
               <p key={item}>{item}</p>
             ))}
@@ -78,8 +78,8 @@ export default function PatentamientosComparisonTable({
         ) : null}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-[12px]">
+      <div className="print-comparison-scroll overflow-x-auto">
+        <table className="print-comparison-table min-w-full border-collapse text-[12px]">
           <thead className="bg-black text-white">
             <tr>
               <th className="border border-gray-300 px-2 py-1.5 text-left font-semibold">{data.entityLabel}</th>

@@ -22,3 +22,72 @@
     overscroll-behavior-x: contain;
   }
 }
+
+@media print {
+  html,
+  body,
+  #root {
+    overflow: visible;
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .dashboard-print-area,
+  .dashboard-print-area * {
+    visibility: visible;
+  }
+
+  .dashboard-print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .print-hidden,
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+
+  .print-main-area {
+    padding: 0 !important;
+  }
+
+  .print-comparison-card {
+    break-inside: avoid;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .print-comparison-scroll {
+    overflow: visible !important;
+  }
+
+  .print-comparison-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: auto;
+    font-size: 9px !important;
+  }
+
+  .print-comparison-table th,
+  .print-comparison-table td {
+    padding: 3px 4px !important;
+    white-space: nowrap;
+  }
+
+  .print-comparison-legend {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+}

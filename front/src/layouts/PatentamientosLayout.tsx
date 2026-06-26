@@ -30,6 +30,7 @@ export default function PatentamientosLayout() {
     <div className="min-h-screen bg-[#f5f5f3]">
       <div className="flex min-h-screen w-full">
         <aside
+          data-print-hidden="true"
           className={`relative shrink-0 border-r border-gray-200 bg-white py-8 transition-all duration-200 ${
             sidebarCollapsed ? "w-[88px] px-3" : "w-[280px] px-5"
           }`}
@@ -89,7 +90,7 @@ export default function PatentamientosLayout() {
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 px-8 py-8">
+        <main className="min-w-0 flex-1 px-8 py-8 print-main-area">
           <Outlet />
         </main>
       </div>
