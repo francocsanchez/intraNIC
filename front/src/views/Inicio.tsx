@@ -180,7 +180,7 @@ export default function Inicio() {
         { label: "Promedio", to: paths.convencional.promedio, enabled: hasModulePathAccess(user, "promedio", paths.convencional.promedio), icon: BarChart3 },
         {
           label: "Patentamientos",
-          to: paths.analisis.patentamientos.dashboardMarcas,
+          to: paths.analisis.patentamientos.dashboardGeneral,
           enabled: hasModulePathAccess(user, "patentamientos", paths.analisis.patentamientos.dashboardMarcas),
           icon: BarChart3,
         },

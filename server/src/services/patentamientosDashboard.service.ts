@@ -864,63 +864,175 @@ const getToyotaEvolution = async (
   };
 };
 
-const getGeneralZonaNic = async (year: number): Promise<DashboardGeneralResponse> => {
-  const [brandsDataset, modelsDataset] = await Promise.all([
-    getDataset("zona-nic-marcas"),
+const getGeneralSummaryFromTotalizados = async (year: number): Promise<DashboardGeneralSummary> => {
+  const rows = await PatentamientoTotalizado.aggregate<{
+    brand: string;
+    total: number;
+  }>([
+    {
+      $match: {
+        anio: year,
+        registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+        marca: { $exists: true, $ne: "" },
+      },
+    },
+    {
+      $group: {
+        _id: "$marca",
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        brand: "$_id",
+        total: 1,
+      },
+    },
+    {
+      $sort: {
+        total: -1,
+        brand: 1,
+      },
+    },
+  ]);
+
+  const totalPatentamientos = rows.reduce((sum, row) => sum + row.total, 0);
+  const leader = rows[0];
+
+  return {
+    totalPatentamientos,
+    marketLeader: leader
+      ? {
+          brand: leader.brand,
+          total: leader.total,
+          percentage: totalPatentamientos > 0 ? roundPercentage((leader.total / totalPatentamientos) * 100) : 0,
+        }
+      : null,
+  };
+};
+
+const getGeneralMonthsFromTotalizados = async (year: number): Promise<DashboardMonthColumn[]> => {
+  const monthNumbers = await PatentamientoTotalizado.distinct("mes", {
+    anio: year,
+    registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+  });
+
+  return monthNumbers
+    .filter((monthNumber): monthNumber is number => Number.isInteger(monthNumber) && monthNumber >= 1 && monthNumber <= 12)
+    .sort((left, right) => left - right)
+    .map((monthNumber) => ({
+      key: buildDashboardMonthKey(year, monthNumber),
+      monthNumber,
+      year,
+      label: buildDashboardMonthLabel(year, monthNumber),
+    }));
+};
+
+const getGeneralTrendFromTotalizados = async (
+  year: number,
+  month: number | null,
+  months: DashboardMonthColumn[],
+): Promise<DashboardGeneralTrendPoint[]> => {
+  if (month) {
+    const rows = await PatentamientoTotalizado.aggregate<{ dayNumber: number; total: number }>([
+      {
+        $match: {
+          anio: year,
+          mes: month,
+          registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+        },
+      },
+      {
+        $group: {
+          _id: "$dia",
+          total: { $sum: "$total" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          dayNumber: "$_id",
+          total: 1,
+        },
+      },
+      { $sort: { dayNumber: 1 } },
+    ]);
+
+    const totalsByDay = new Map(rows.map((row) => [row.dayNumber, row.total]));
+    const totalDays = new Date(year, month, 0).getDate();
+
+    return Array.from({ length: totalDays }, (_, index) => {
+      const dayNumber = index + 1;
+      const monthKey = String(month).padStart(2, "0");
+      const dayKey = String(dayNumber).padStart(2, "0");
+
+      return {
+        key: `${year}-${monthKey}-${dayKey}`,
+        label: dayKey,
+        total: totalsByDay.get(dayNumber) ?? 0,
+      };
+    });
+  }
+
+  const rows = await PatentamientoTotalizado.aggregate<{ monthNumber: number; total: number }>([
+    {
+      $match: {
+        anio: year,
+        registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+      },
+    },
+    {
+      $group: {
+        _id: "$mes",
+        total: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        monthNumber: "$_id",
+        total: 1,
+      },
+    },
+    { $sort: { monthNumber: 1 } },
+  ]);
+
+  const totalsByMonth = new Map(rows.map((row) => [row.monthNumber, row.total]));
+
+  return months.map((monthItem) => ({
+    key: monthItem.key,
+    label: monthItem.label,
+    total: totalsByMonth.get(monthItem.monthNumber) ?? 0,
+  }));
+};
+
+const getGeneralZonaNic = async (year: number, month: number | null): Promise<DashboardGeneralResponse> => {
+  const [modelsDataset, summary, months] = await Promise.all([
     getDataset("zona-nic-modelos"),
+    getGeneralSummaryFromTotalizados(year),
+    getGeneralMonthsFromTotalizados(year),
   ]);
 
   const title = "General - Zona NIC";
-  const months = getFilteredMonths(brandsDataset, year);
 
-  if (!brandsDataset || !modelsDataset || !months.length) {
+  if (!modelsDataset || !months.length) {
     return {
       title,
       months,
-      summary: {
-        totalPatentamientos: 0,
-        marketLeader: null,
-      },
+      summary,
       trend: [],
       topBrands: [],
       topModels: [],
     };
   }
 
-  const brandRows = normalizeValidRows(brandsDataset).map((row) => ({
-    ...row,
-    yearTotal: getRowTotalForMonths(row, months),
-  }));
   const modelRows = normalizeValidRows(modelsDataset).map((row) => ({
     ...row,
     yearTotal: getRowTotalForMonths(row, months),
   }));
-
-  const totalPatentamientos = brandRows.reduce((sum, row) => sum + row.yearTotal, 0);
-
-  const topBrands = brandRows
-    .filter((row) => row.yearTotal > 0)
-    .sort((a, b) => b.yearTotal - a.yearTotal || a.primaryValue.localeCompare(b.primaryValue))
-    .slice(0, 5)
-    .map<DashboardGeneralTopBrand>((row) => ({
-      brand: row.primaryValue,
-      total: row.yearTotal,
-      percentage: totalPatentamientos > 0 ? roundPercentage((row.yearTotal / totalPatentamientos) * 100) : 0,
-    }));
-
-  const marketLeader = topBrands[0]
-    ? {
-        brand: topBrands[0].brand,
-        total: topBrands[0].total,
-        percentage: topBrands[0].percentage,
-      }
-    : null;
-
-  const trend = months.map<DashboardGeneralTrendPoint>((month) => ({
-    key: month.key,
-    label: month.label,
-    total: brandRows.reduce((sum, row) => sum + (row.months[month.key] ?? 0), 0),
-  }));
+  const totalPatentamientos = summary.totalPatentamientos;
+  const trend = await getGeneralTrendFromTotalizados(year, month, months);
 
   const topModels = modelRows
     .filter((row) => row.yearTotal > 0)
@@ -936,12 +1048,9 @@ const getGeneralZonaNic = async (year: number): Promise<DashboardGeneralResponse
   return {
     title,
     months,
-    summary: {
-      totalPatentamientos,
-      marketLeader,
-    },
+    summary,
     trend,
-    topBrands,
+    topBrands: [],
     topModels,
   };
 };
@@ -1027,7 +1136,7 @@ export class PatentamientosDashboardService {
     return getToyotaEvolution(year, planFilter);
   }
 
-  static getGeneralZonaNic(year: number) {
-    return getGeneralZonaNic(year);
+  static getGeneralZonaNic(year: number, month: number | null) {
+    return getGeneralZonaNic(year, month);
   }
 }

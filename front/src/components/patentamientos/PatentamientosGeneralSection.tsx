@@ -1,9 +1,10 @@
 import type { PatentamientosDashboardGeneral } from "@/services/patentamientosDashboardService";
 import { ArrowRight, Trophy, TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type PatentamientosGeneralSectionProps = {
   data: PatentamientosDashboardGeneral;
+  selectedMonthLabel?: string | null;
 };
 
 const formatInteger = (value: number) => value.toLocaleString("es-AR");
@@ -30,10 +31,13 @@ function DashboardCard({
 
 export default function PatentamientosGeneralSection({
   data,
+  selectedMonthLabel = null,
 }: PatentamientosGeneralSectionProps) {
   const hasTrend = data.trend.length > 0;
-  const hasTopBrands = data.topBrands.length > 0;
   const hasTopModels = data.topModels.length > 0;
+  const averageTrendValue = hasTrend
+    ? data.trend.reduce((sum, point) => sum + point.total, 0) / data.trend.length
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -83,12 +87,16 @@ export default function PatentamientosGeneralSection({
         </DashboardCard>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <DashboardCard className="overflow-hidden xl:col-span-2">
+      <section className="grid grid-cols-1 gap-4">
+        <DashboardCard className="overflow-hidden">
           <div className="border-b border-slate-200 px-5 py-4">
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-slate-950">Tendencia de patentamientos</h3>
-              <p className="text-sm text-slate-500">Evolucion mensual de patentamientos de Zona NIC.</p>
+              <p className="text-sm text-slate-500">
+                {selectedMonthLabel && selectedMonthLabel !== "Todos"
+                  ? `Inscripciones por dia de ${selectedMonthLabel} en Zona NIC.`
+                  : "Evolucion mensual de patentamientos de Zona NIC."}
+              </p>
             </div>
           </div>
 
@@ -112,7 +120,23 @@ export default function PatentamientosGeneralSection({
                           borderColor: "#cfe7ee",
                           boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
                         }}
-                        formatter={(value) => [formatInteger(Number(value)), "Patentamientos"]}
+                        formatter={(value, name) => [
+                          formatInteger(Math.round(Number(value))),
+                          name === "average" ? "Promedio" : "Patentamientos",
+                        ]}
+                      />
+                      <ReferenceLine
+                        y={averageTrendValue}
+                        stroke="#0f766e"
+                        strokeDasharray="6 6"
+                        strokeWidth={2}
+                        ifOverflow="extendDomain"
+                        label={{
+                          value: `Promedio ${formatInteger(Math.round(averageTrendValue))}`,
+                          position: "insideTopRight",
+                          fill: "#0f766e",
+                          fontSize: 12,
+                        }}
                       />
                       <Line
                         type="monotone"
@@ -126,39 +150,13 @@ export default function PatentamientosGeneralSection({
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white px-6 text-center text-sm text-slate-500">
-                    No hay informacion suficiente para graficar la tendencia mensual de Zona NIC.
+                    {selectedMonthLabel && selectedMonthLabel !== "Todos"
+                      ? `No hay informacion suficiente para graficar las inscripciones diarias de ${selectedMonthLabel}.`
+                      : "No hay informacion suficiente para graficar la tendencia mensual de Zona NIC."}
                   </div>
                 )}
               </div>
             </div>
-          </div>
-        </DashboardCard>
-
-        <DashboardCard className="p-5">
-          <h3 className="text-lg font-semibold tracking-tight text-slate-950">Top 5 marcas</h3>
-          <p className="mt-1 text-sm text-slate-500">Ranking de Zona NIC.</p>
-
-          <div className="mt-6 space-y-5">
-            {hasTopBrands ? (
-              data.topBrands.map((item) => (
-                <div key={item.brand}>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="font-medium text-slate-700">{item.brand}</span>
-                    <span className="font-semibold text-slate-950">{formatInteger(item.total)}</span>
-                  </div>
-                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className="h-full rounded-full bg-[#15aa9a]"
-                      style={{ width: `${Math.max(item.percentage, 2)}%` }}
-                    />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                No hay marcas disponibles para el anio seleccionado.
-              </div>
-            )}
           </div>
         </DashboardCard>
       </section>

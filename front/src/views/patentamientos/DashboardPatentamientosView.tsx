@@ -7,6 +7,7 @@ import {
   getPatentamientosSegmentoCCrossPais,
   getPatentamientosSegmentoCCrossZonaNic,
   getPatentamientosGeneralZonaNic,
+  type PatentamientosMonthFilter,
   type PatentamientosPlanFilter,
   getPatentamientosSegmentoPickupPais,
   getPatentamientosSegmentoPickupZonaNic,
@@ -29,6 +30,22 @@ import { toast } from "sonner";
 
 const dashboardSections = ["general", "marcas", "pickup", "sw4", "c-cross", "y-cross", "yaris"] as const;
 type DashboardSection = (typeof dashboardSections)[number];
+
+const monthOptions = [
+  { value: "", label: "Todos" },
+  { value: "1", label: "Enero" },
+  { value: "2", label: "Febrero" },
+  { value: "3", label: "Marzo" },
+  { value: "4", label: "Abril" },
+  { value: "5", label: "Mayo" },
+  { value: "6", label: "Junio" },
+  { value: "7", label: "Julio" },
+  { value: "8", label: "Agosto" },
+  { value: "9", label: "Septiembre" },
+  { value: "10", label: "Octubre" },
+  { value: "11", label: "Noviembre" },
+  { value: "12", label: "Diciembre" },
+] as const;
 
 const sectionContent = {
   general: {
@@ -64,6 +81,7 @@ const sectionContent = {
 export default function DashboardPatentamientosView() {
   const { section } = useParams<{ section: string }>();
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<PatentamientosMonthFilter>(null);
   const [planFilter, setPlanFilter] = useState<PatentamientosPlanFilter>("with-plan");
 
   const isValidSection = dashboardSections.includes((section ?? "") as DashboardSection);
@@ -85,8 +103,8 @@ export default function DashboardPatentamientosView() {
   const results = useQueries({
     queries: [
       {
-        queryKey: ["patentamientos-dashboard", "general-zona-nic", selectedYear],
-        queryFn: () => getPatentamientosGeneralZonaNic(selectedYear!),
+        queryKey: ["patentamientos-dashboard", "general-zona-nic", selectedYear, selectedMonth],
+        queryFn: () => getPatentamientosGeneralZonaNic(selectedYear!, selectedMonth),
         enabled: selectedYear !== null && isGeneralSection,
       },
       {
@@ -223,6 +241,26 @@ export default function DashboardPatentamientosView() {
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
 
           <div className="flex items-center gap-3">
+            {isGeneralSection ? (
+              <>
+                <label htmlFor="patentamientos-month" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                  Mes
+                </label>
+                <select
+                  id="patentamientos-month"
+                  value={selectedMonth ?? ""}
+                  onChange={(event) => setSelectedMonth(event.target.value ? Number(event.target.value) : null)}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                >
+                  {monthOptions.map((month) => (
+                    <option key={month.value || "all"} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
+
             {isMarcasSection || isPickupSection || isSw4Section || isCCrossSection || isYCrossSection || isYarisSection ? (
               <>
                 <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
@@ -269,7 +307,14 @@ export default function DashboardPatentamientosView() {
         </div>
 
         {isGeneralSection && generalZonaNic.data && selectedYear !== null ? (
-          <PatentamientosGeneralSection data={generalZonaNic.data} />
+          <PatentamientosGeneralSection
+            data={generalZonaNic.data}
+            selectedMonthLabel={
+              selectedMonth === null
+                ? null
+                : monthOptions.find((month) => month.value === String(selectedMonth))?.label ?? null
+            }
+          />
         ) : null}
 
         {isMarcasSection ? (

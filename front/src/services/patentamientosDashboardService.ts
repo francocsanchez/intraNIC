@@ -82,6 +82,7 @@ export type PatentamientosDashboardEvolution = z.infer<typeof dashboardEvolution
 export type PatentamientosDashboardYears = z.infer<typeof dashboardYearsSchema>;
 export type PatentamientosDashboardGeneral = z.infer<typeof dashboardGeneralSchema>;
 export type PatentamientosPlanFilter = "with-plan" | "without-plan";
+export type PatentamientosMonthFilter = number | null;
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
@@ -135,12 +136,12 @@ export const getPatentamientosTopMarcasZonaNic = (year: number, planFilter: Pate
     { year, planFilter },
   );
 
-export const getPatentamientosGeneralZonaNic = (year: number) =>
+export const getPatentamientosGeneralZonaNic = (year: number, month?: PatentamientosMonthFilter) =>
   fetchAndParse(
     "/patentamientos/dashboard/general/zona-nic",
     dashboardGeneralSchema,
     "No se pudo obtener la vista general de Zona NIC",
-    { year },
+    month ? { year, month } : { year },
   );
 
 export const getPatentamientosSegmentoPickupPais = (year: number, planFilter: PatentamientosPlanFilter) =>

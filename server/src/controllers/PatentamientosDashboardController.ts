@@ -12,6 +12,15 @@ const parsePlanFilter = (value: unknown) => {
   return normalized === "without-plan" ? "without-plan" : "with-plan";
 };
 
+const parseMonth = (value: unknown) => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 12 ? parsed : null;
+};
+
 const handleDashboardRequest = async (
   res: Response,
   action: () => Promise<unknown>,
@@ -186,10 +195,14 @@ export class PatentamientosDashboardController {
 
   static getGeneralZonaNic(req: Request, res: Response) {
     const year = parseYear(req.query.year);
+    const month = parseMonth(req.query.month);
     if (!year) return res.status(400).json({ error: "Debes seleccionar un ano valido" });
+    if (req.query.month !== undefined && req.query.month !== "" && month === null) {
+      return res.status(400).json({ error: "Debes seleccionar un mes valido" });
+    }
     return handleDashboardRequest(
       res,
-      () => PatentamientosDashboardService.getGeneralZonaNic(year),
+      () => PatentamientosDashboardService.getGeneralZonaNic(year, month),
       "PatentamientosDashboardController.getGeneralZonaNic",
     );
   }
