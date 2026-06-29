@@ -8,10 +8,19 @@ export interface IImportExecutionErrorDetail {
   message: string;
 }
 
+export interface IJobMonitorSummaryBlock {
+  title: string;
+  lines: string[];
+}
+
+export type JobMonitorMetrics = Record<string, number>;
+
 export interface IImportExecutionLog extends Document {
+  jobKey: string;
   jobName: string;
-  sourceType: "sftp";
+  sourceType: "sftp" | "http" | "database" | "internal";
   trigger: "cron" | "manual";
+  scheduleLabel: string;
   sourcePath: string;
   fileName: string | null;
   status: ImportExecutionStatus;
@@ -26,9 +35,22 @@ export interface IImportExecutionLog extends Document {
   message: string;
   errorSummary: string[];
   errorDetailsSample: IImportExecutionErrorDetail[];
+  metrics: JobMonitorMetrics;
+  sourceSummary: IJobMonitorSummaryBlock | null;
+  resultSummary: IJobMonitorSummaryBlock | null;
+  requestSample: unknown[];
+  responseSample: unknown[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const summaryBlockSchema = new Schema<IJobMonitorSummaryBlock>(
+  {
+    title: { type: String, required: true, trim: true },
+    lines: { type: [String], default: [] },
+  },
+  { _id: false },
+);
 
 const importExecutionErrorDetailSchema = new Schema<IImportExecutionErrorDetail>(
   {
@@ -41,9 +63,11 @@ const importExecutionErrorDetailSchema = new Schema<IImportExecutionErrorDetail>
 
 const importExecutionLogSchema = new Schema<IImportExecutionLog>(
   {
+    jobKey: { type: String, required: true, trim: true, index: true },
     jobName: { type: String, required: true, trim: true, index: true },
-    sourceType: { type: String, required: true, enum: ["sftp"] },
+    sourceType: { type: String, required: true, enum: ["sftp", "http", "database", "internal"] },
     trigger: { type: String, required: true, enum: ["cron", "manual"] },
+    scheduleLabel: { type: String, required: true, trim: true },
     sourcePath: { type: String, required: true, trim: true },
     fileName: { type: String, default: null, trim: true },
     status: {
@@ -64,6 +88,26 @@ const importExecutionLogSchema = new Schema<IImportExecutionLog>(
     errorSummary: { type: [String], default: [] },
     errorDetailsSample: {
       type: [importExecutionErrorDetailSchema],
+      default: [],
+    },
+    metrics: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+    sourceSummary: {
+      type: summaryBlockSchema,
+      default: null,
+    },
+    resultSummary: {
+      type: summaryBlockSchema,
+      default: null,
+    },
+    requestSample: {
+      type: [Object],
+      default: [],
+    },
+    responseSample: {
+      type: [Object],
       default: [],
     },
   },

@@ -161,10 +161,10 @@ function CustomTooltip({
   );
 }
 
-export default function UnidadesDealersTreemap() {
+export default function UnidadesDealersTreemap({ year }: { year: number | null }) {
   const treemapQuery = useQuery({
-    queryKey: ["patentamientos-unidades-dealers", "treemap"],
-    queryFn: getPatentamientosUnidadesDealersTreemap,
+    queryKey: ["patentamientos-unidades-dealers", "treemap", year],
+    queryFn: () => getPatentamientosUnidadesDealersTreemap(year),
   });
 
   useEffect(() => {

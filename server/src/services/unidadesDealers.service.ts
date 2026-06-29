@@ -17,6 +17,18 @@ type UnidadDealerSyncSummary = {
   created: number;
   updated: number;
   errors: number;
+  errorMessages: string[];
+  errorSamples: Array<{
+    vin: string;
+    dealer: string;
+    estado: string;
+    message: string;
+  }>;
+  requestSample: Array<{
+    vin: string;
+    dealer: string;
+    estado: string;
+  }>;
 };
 
 type UnidadDealerSummaryRow = {
@@ -37,6 +49,11 @@ type UnidadDealerTreemapItem = {
 
 type UnidadDealerTreemapResponse = {
   data: UnidadDealerTreemapItem[];
+};
+
+type UnidadDealerAvailableYearsResponse = {
+  years: number[];
+  selectedYear: number | null;
 };
 
 const normalizeText = (value: unknown) =>
@@ -156,7 +173,16 @@ const logSummary = (summary: UnidadDealerSyncSummary) => {
   console.log(`[unidades-dealers-sync] con error: ${summary.errors}`);
 };
 
+const buildFechaCargaRange = (year: number) => ({
+  start: new Date(Date.UTC(year, 0, 1)),
+  end: new Date(Date.UTC(year + 1, 0, 1)),
+});
+
 export class UnidadesDealersService {
+  static getSourceUrl() {
+    return DEALERS_SOURCE_URL;
+  }
+
   static async syncFromSource(): Promise<UnidadDealerSyncSummary> {
     console.log(`[unidades-dealers-sync] inicio ${new Date().toISOString()}`);
 
@@ -171,11 +197,21 @@ export class UnidadesDealersService {
       created: 0,
       updated: 0,
       errors: 0,
+      errorMessages: [],
+      errorSamples: [],
+      requestSample: [],
     };
 
     for (const rawRecord of payload) {
       try {
         const record = validateRecord(rawRecord as UnidadDealerSourceRecord);
+        if (summary.requestSample.length < 5) {
+          summary.requestSample.push({
+            vin: record.vin,
+            dealer: record.dealer,
+            estado: record.estado,
+          });
+        }
         const existing = await UnidadDealer.exists({ vin: record.vin });
 
         await UnidadDealer.findOneAndUpdate(
@@ -204,6 +240,17 @@ export class UnidadesDealersService {
         summary.errors += 1;
         console.error("[unidades-dealers-sync] error al procesar registro", rawRecord);
         console.error(error);
+        const message = error instanceof Error ? error.message : "Error al procesar registro";
+        summary.errorMessages.push(message);
+        if (summary.errorSamples.length < 10) {
+          const raw = rawRecord as Partial<UnidadDealerSourceRecord>;
+          summary.errorSamples.push({
+            vin: normalizeText(raw.vin),
+            dealer: normalizeText(raw.dealer),
+            estado: normalizeText(raw.estado),
+            message,
+          });
+        }
       }
     }
 
@@ -212,15 +259,91 @@ export class UnidadesDealersService {
     return summary;
   }
 
-  static async getResumenPorDealerYEstado(): Promise<UnidadDealerSummaryResponse> {
-    const units = await UnidadDealer.find(
-      {},
+  static async getAvailableYears(): Promise<UnidadDealerAvailableYearsResponse> {
+    const rows = await UnidadDealer.aggregate<{ year: number }>([
       {
-        dealer: 1,
-        estado: 1,
-        _id: 0,
+        $addFields: {
+          fechaCargaNormalizada: {
+            $convert: {
+              input: "$fechaCarga",
+              to: "date",
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
       },
-    ).lean<Array<{ dealer: string; estado: string }>>();
+      {
+        $match: {
+          fechaCargaNormalizada: { $ne: null },
+        },
+      },
+      {
+        $project: {
+          year: { $year: "$fechaCargaNormalizada" },
+        },
+      },
+      {
+        $group: {
+          _id: "$year",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id",
+        },
+      },
+      {
+        $sort: {
+          year: -1,
+        },
+      },
+    ]);
+
+    const years = rows.map((row) => row.year).filter((year) => Number.isInteger(year));
+
+    return {
+      years,
+      selectedYear: years[0] ?? null,
+    };
+  }
+
+  static async getResumenPorDealerYEstado(year: number | null): Promise<UnidadDealerSummaryResponse> {
+    const range = year ? buildFechaCargaRange(year) : null;
+    const units = await UnidadDealer.aggregate<{ dealer: string; estado: string }>([
+      {
+        $addFields: {
+          fechaCargaNormalizada: {
+            $convert: {
+              input: "$fechaCarga",
+              to: "date",
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
+      },
+      ...(range
+        ? [
+            {
+              $match: {
+                fechaCargaNormalizada: {
+                  $gte: range.start,
+                  $lt: range.end,
+                },
+              },
+            },
+          ]
+        : []),
+      {
+        $project: {
+          _id: 0,
+          dealer: 1,
+          estado: 1,
+        },
+      },
+    ]);
 
     const stateSet = new Set<string>();
     const grouped = new Map<string, UnidadDealerSummaryRow>();
@@ -264,14 +387,40 @@ export class UnidadesDealersService {
     };
   }
 
-  static async getTreemapPorDealer(): Promise<UnidadDealerTreemapResponse> {
-    const units = await UnidadDealer.find(
-      {},
+  static async getTreemapPorDealer(year: number | null): Promise<UnidadDealerTreemapResponse> {
+    const range = year ? buildFechaCargaRange(year) : null;
+    const units = await UnidadDealer.aggregate<{ dealer: string }>([
       {
-        dealer: 1,
-        _id: 0,
+        $addFields: {
+          fechaCargaNormalizada: {
+            $convert: {
+              input: "$fechaCarga",
+              to: "date",
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
       },
-    ).lean<Array<{ dealer: string }>>();
+      ...(range
+        ? [
+            {
+              $match: {
+                fechaCargaNormalizada: {
+                  $gte: range.start,
+                  $lt: range.end,
+                },
+              },
+            },
+          ]
+        : []),
+      {
+        $project: {
+          _id: 0,
+          dealer: 1,
+        },
+      },
+    ]);
 
     const grouped = new Map<string, number>();
 

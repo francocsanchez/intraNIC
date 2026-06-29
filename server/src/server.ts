@@ -28,6 +28,7 @@ import planAhorroRoutes from "./routes/planAhorroRoutes";
 import entregasRoutes from "./routes/entregasRoutes";
 import callCenterRoutes from "./routes/callCenterRoutes";
 import segUnidadesFabricaRoutes from "./routes/segUnidadesFabricaRoutes";
+import jobMonitorRoutes from "./routes/jobMonitorRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -63,5 +64,6 @@ app.use("/api/dms/plan-ahorro", planAhorroRoutes);
 app.use("/api/entregas", entregasRoutes);
 app.use("/api/call-center", callCenterRoutes);
 app.use("/api/seg-unidades-fabrica", segUnidadesFabricaRoutes);
+app.use("/api/jobs-monitor", jobMonitorRoutes);
 
 export default app;

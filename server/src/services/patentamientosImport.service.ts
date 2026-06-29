@@ -6,31 +6,17 @@ import ImportedSourceFile from "../models/ImportedSourceFile";
 import ImportedPatentamientoIdentifier from "../models/ImportedPatentamientoIdentifier";
 import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
 import { ImportExecutionLoggerService } from "./imports/importExecutionLogger.service";
+import type { JobExecutionResult, JobMonitorTrigger } from "./jobs/jobMonitor.types";
 import { PatentamientosPrendasCsvService } from "./patentamientosPrendasCsv.service";
 import { ReusableSftpClientService } from "./sftp/sftpClient.service";
 import { SftpFileDiscoveryService } from "./sftp/sftpFileDiscovery.service";
 
 const JOB_NAME = "patentamientos-patent-prendas-import";
+const JOB_KEY = "patentamientos-import";
+const JOB_SCHEDULE_LABEL = "Todos los dias a las 22:00";
 const REMOTE_FILE_PREFIX = "Patent_Prendas";
 const MIN_BATCH_SIZE = 100;
 const MAX_BATCH_SIZE = 5000;
-
-type ImportTrigger = "cron" | "manual";
-
-export type PatentamientosImportExecutionResult = {
-  status: Exclude<ImportExecutionStatus, "running">;
-  fileName: string | null;
-  startedAt: string;
-  finishedAt: string;
-  durationMs: number;
-  totalRead: number;
-  inserted: number;
-  updated: number;
-  discarded: number;
-  errored: number;
-  message: string;
-  errorSummary: string[];
-};
 
 class PatentamientosImportError extends Error {}
 class PatentamientosImportAlreadyRunningError extends PatentamientosImportError {}
@@ -78,11 +64,19 @@ export class PatentamientosImportService {
     return JOB_NAME;
   }
 
+  static getJobKey() {
+    return JOB_KEY;
+  }
+
+  static getScheduleLabel() {
+    return JOB_SCHEDULE_LABEL;
+  }
+
   static isImportRunning() {
     return PatentamientosImportService.isRunning;
   }
 
-  static async importLatestFile(trigger: ImportTrigger): Promise<PatentamientosImportExecutionResult> {
+  static async importLatestFile(trigger: JobMonitorTrigger): Promise<JobExecutionResult> {
     if (PatentamientosImportService.isRunning) {
       throw new PatentamientosImportAlreadyRunningError("Ya hay una importacion de patentamientos en curso");
     }
@@ -110,9 +104,11 @@ export class PatentamientosImportService {
     }
 
     const log = await ImportExecutionLoggerService.startExecution({
+      jobKey: JOB_KEY,
       jobName: JOB_NAME,
       sourceType: "sftp",
       trigger,
+      scheduleLabel: JOB_SCHEDULE_LABEL,
       sourcePath: remotePath,
       message: "Buscando el ultimo archivo Patent_Prendas en el SFTP",
     });
@@ -231,6 +227,40 @@ export class PatentamientosImportService {
         errored: aggregatedSummary.errored,
         errorSummary: aggregatedSummary.errorSummary.slice(0, 20),
         errorDetailsSample: aggregatedSummary.errorDetailsSample.slice(0, 20),
+        metrics: {
+          totalRead: aggregatedSummary.totalRead,
+          inserted: aggregatedSummary.inserted,
+          updated: aggregatedSummary.updated,
+          discarded: aggregatedSummary.discarded,
+          errored: aggregatedSummary.errored,
+          totalizedRows: aggregatedSummary.totalizedRows,
+          filesProcessed: pendingFiles.length,
+        },
+        sourceSummary: {
+          title: "Recibido",
+          lines: [
+            `Origen SFTP: ${remotePath}`,
+            `Archivos acumulados: ${pendingFiles.length}`,
+            `Ultimo archivo: ${lastProcessedFileName}`,
+          ],
+        },
+        resultSummary: {
+          title: "Resultado",
+          lines: [
+            `Grupos acumulados: ${aggregatedSummary.totalizedRows}`,
+            `Insertados: ${aggregatedSummary.inserted}`,
+            `Actualizados: ${aggregatedSummary.updated}`,
+          ],
+        },
+        requestSample: pendingFiles.slice(0, 5).map((pendingFile) => ({
+          fileName: pendingFile.fileName,
+          remotePath: pendingFile.remotePath,
+        })),
+        responseSample: aggregatedSummary.errorDetailsSample.slice(0, 10).map((item) => ({
+          line: item.line ?? null,
+          identificadorUnico: item.identificadorUnico ?? "",
+          message: item.message,
+        })),
       });
 
       console.log(`[patentamientos-import] archivos acumulados: ${pendingFiles.length}`);
@@ -248,13 +278,43 @@ export class PatentamientosImportService {
         startedAt: startedAt.toISOString(),
         finishedAt: finishedAt.toISOString(),
         durationMs: finishedAt.getTime() - startedAt.getTime(),
-        totalRead: aggregatedSummary.totalRead,
-        inserted: aggregatedSummary.inserted,
-        updated: aggregatedSummary.updated,
-        discarded: aggregatedSummary.discarded,
-        errored: aggregatedSummary.errored,
         message,
         errorSummary: aggregatedSummary.errorSummary.slice(0, 20),
+        errorDetailsSample: aggregatedSummary.errorDetailsSample.slice(0, 20),
+        metrics: {
+          totalRead: aggregatedSummary.totalRead,
+          inserted: aggregatedSummary.inserted,
+          updated: aggregatedSummary.updated,
+          discarded: aggregatedSummary.discarded,
+          errored: aggregatedSummary.errored,
+          totalizedRows: aggregatedSummary.totalizedRows,
+          filesProcessed: pendingFiles.length,
+        },
+        sourceSummary: {
+          title: "Recibido",
+          lines: [
+            `Origen SFTP: ${remotePath}`,
+            `Archivos acumulados: ${pendingFiles.length}`,
+            `Ultimo archivo: ${lastProcessedFileName}`,
+          ],
+        },
+        resultSummary: {
+          title: "Resultado",
+          lines: [
+            `Grupos acumulados: ${aggregatedSummary.totalizedRows}`,
+            `Insertados: ${aggregatedSummary.inserted}`,
+            `Actualizados: ${aggregatedSummary.updated}`,
+          ],
+        },
+        requestSample: pendingFiles.slice(0, 5).map((pendingFile) => ({
+          fileName: pendingFile.fileName,
+          remotePath: pendingFile.remotePath,
+        })),
+        responseSample: aggregatedSummary.errorDetailsSample.slice(0, 10).map((item) => ({
+          line: item.line ?? null,
+          identificadorUnico: item.identificadorUnico ?? "",
+          message: item.message,
+        })),
       };
     } catch (error) {
       const finishedAt = new Date();
@@ -266,6 +326,17 @@ export class PatentamientosImportService {
         message,
         errorSummary: [message],
         errorDetailsSample: summarizeFatalError(error),
+        metrics: {},
+        sourceSummary: {
+          title: "Recibido",
+          lines: [`Origen SFTP: ${remotePath}`],
+        },
+        resultSummary: {
+          title: "Resultado",
+          lines: [message],
+        },
+        requestSample: [],
+        responseSample: summarizeFatalError(error).map((item) => ({ message: item.message })),
       });
 
       if (isSkipped) {
@@ -276,13 +347,20 @@ export class PatentamientosImportService {
           startedAt: startedAt.toISOString(),
           finishedAt: finishedAt.toISOString(),
           durationMs: finishedAt.getTime() - startedAt.getTime(),
-          totalRead: 0,
-          inserted: 0,
-          updated: 0,
-          discarded: 0,
-          errored: 0,
           message,
           errorSummary: [message],
+          errorDetailsSample: summarizeFatalError(error),
+          metrics: {},
+          sourceSummary: {
+            title: "Recibido",
+            lines: [`Origen SFTP: ${remotePath}`],
+          },
+          resultSummary: {
+            title: "Resultado",
+            lines: [message],
+          },
+          requestSample: [],
+          responseSample: [],
         };
       }
 

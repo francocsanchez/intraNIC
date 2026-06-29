@@ -2,20 +2,30 @@ import Loading from "@/components/Loading";
 import InscripcionUnidadesTable from "@/components/patentamientos/InscripcionUnidadesTable";
 import UnidadesDealersTreemap from "@/components/patentamientos/UnidadesDealersTreemap";
 import {
+  getPatentamientosUnidadesDealersYears,
   getPatentamientosUnidadesDealersResumen,
   syncPatentamientosUnidadesDealers,
 } from "@/services/patentamientosUnidadesDealersService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutGrid, RefreshCcw, Table2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function InscripcionUnidadesView() {
   const queryClient = useQueryClient();
+  const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
+
+  const yearsQuery = useQuery({
+    queryKey: ["patentamientos-unidades-dealers", "years"],
+    queryFn: getPatentamientosUnidadesDealersYears,
+  });
+
+  const selectedYear = userSelectedYear ?? yearsQuery.data?.selectedYear ?? null;
 
   const resumenQuery = useQuery({
-    queryKey: ["patentamientos-unidades-dealers", "resumen"],
-    queryFn: getPatentamientosUnidadesDealersResumen,
+    queryKey: ["patentamientos-unidades-dealers", "resumen", selectedYear],
+    queryFn: () => getPatentamientosUnidadesDealersResumen(selectedYear),
+    enabled: yearsQuery.isSuccess,
   });
 
   const syncMutation = useMutation({
@@ -38,22 +48,28 @@ export default function InscripcionUnidadesView() {
     }
   }, [resumenQuery.error]);
 
-  if (resumenQuery.isLoading) {
+  useEffect(() => {
+    if (yearsQuery.error instanceof Error) {
+      toast.error(yearsQuery.error.message);
+    }
+  }, [yearsQuery.error]);
+
+  if (yearsQuery.isLoading || resumenQuery.isLoading) {
     return <Loading />;
   }
 
-  if (resumenQuery.error instanceof Error) {
+  if (yearsQuery.error instanceof Error || resumenQuery.error instanceof Error) {
     return (
       <div className="w-full px-1 py-1">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Inscripcion de unidades</h1>
-          <p className="mt-2 text-sm text-red-600">{resumenQuery.error.message}</p>
+          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Traslado Furlong</h1>
+          <p className="mt-2 text-sm text-red-600">{yearsQuery.error instanceof Error ? yearsQuery.error.message : resumenQuery.error instanceof Error ? resumenQuery.error.message : ""}</p>
         </section>
       </div>
     );
   }
 
-  if (!resumenQuery.data) {
+  if (!resumenQuery.data || !yearsQuery.data) {
     return null;
   }
 
@@ -62,21 +78,39 @@ export default function InscripcionUnidadesView() {
       <section className="px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Inscripcion de unidades</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Traslado Furlong</h1>
             <p className="mt-1 max-w-3xl text-sm text-gray-500">
               Analisis de unidades Toyota por concesionario y estado.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => syncMutation.mutate()}
-            disabled={syncMutation.isPending}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <RefreshCcw size={16} className={syncMutation.isPending ? "animate-spin" : ""} />
-            {syncMutation.isPending ? "Actualizando..." : "Actualizar datos"}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <label htmlFor="traslado-furlong-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+              Ano
+            </label>
+            <select
+              id="traslado-furlong-year"
+              value={selectedYear ?? ""}
+              onChange={(event) => setUserSelectedYear(Number(event.target.value))}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+            >
+              {yearsQuery.data.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={() => syncMutation.mutate()}
+              disabled={syncMutation.isPending}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCcw size={16} className={syncMutation.isPending ? "animate-spin" : ""} />
+              {syncMutation.isPending ? "Actualizando..." : "Actualizar datos"}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -86,7 +120,7 @@ export default function InscripcionUnidadesView() {
           <h2 className="text-lg font-semibold tracking-tight text-gray-900">Treemap por dealer</h2>
         </div>
 
-        <UnidadesDealersTreemap />
+        <UnidadesDealersTreemap year={selectedYear} />
       </section>
 
       <section className="space-y-4">

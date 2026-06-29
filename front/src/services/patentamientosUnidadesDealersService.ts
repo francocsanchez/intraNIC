@@ -30,9 +30,15 @@ const treemapSchema = z.object({
   data: z.array(treemapItemSchema),
 });
 
+const yearsSchema = z.object({
+  years: z.array(z.number()),
+  selectedYear: z.number().nullable(),
+});
+
 export type PatentamientosUnidadesDealersSyncSummary = z.infer<typeof syncSummarySchema>;
 export type PatentamientosUnidadesDealersResumen = z.infer<typeof resumenSchema>;
 export type PatentamientosUnidadesDealersTreemap = z.infer<typeof treemapSchema>;
+export type PatentamientosUnidadesDealersYears = z.infer<typeof yearsSchema>;
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (isAxiosError(error)) {
@@ -53,18 +59,31 @@ const parseResponse = <T>(payload: unknown, schema: z.ZodType<T>) => {
   return parsed.data;
 };
 
-export const getPatentamientosUnidadesDealersResumen = async () => {
+export const getPatentamientosUnidadesDealersYears = async () => {
   try {
-    const { data } = await api.get("/patentamientos/unidades-dealers/resumen");
+    const { data } = await api.get("/patentamientos/unidades-dealers/years");
+    return parseResponse(data, yearsSchema);
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "No se pudieron obtener los anos disponibles de Traslado Furlong"));
+  }
+};
+
+export const getPatentamientosUnidadesDealersResumen = async (year?: number | null) => {
+  try {
+    const { data } = await api.get("/patentamientos/unidades-dealers/resumen", {
+      params: year ? { year } : {},
+    });
     return parseResponse(data, resumenSchema);
   } catch (error) {
     throw new Error(getErrorMessage(error, "No se pudo obtener el resumen de unidades por dealer"));
   }
 };
 
-export const getPatentamientosUnidadesDealersTreemap = async () => {
+export const getPatentamientosUnidadesDealersTreemap = async (year?: number | null) => {
   try {
-    const { data } = await api.get("/patentamientos/unidades-dealers/treemap");
+    const { data } = await api.get("/patentamientos/unidades-dealers/treemap", {
+      params: year ? { year } : {},
+    });
     return parseResponse(data, treemapSchema);
   } catch (error) {
     throw new Error(getErrorMessage(error, "No se pudo obtener el treemap de unidades por dealer"));

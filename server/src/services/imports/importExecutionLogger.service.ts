@@ -1,14 +1,18 @@
 import ImportExecutionLog, {
   type IImportExecutionErrorDetail,
   type IImportExecutionLog,
+  type IJobMonitorSummaryBlock,
+  type JobMonitorMetrics,
   type ImportExecutionStatus,
 } from "../../models/ImportExecutionLog";
 import ImportedSourceFile from "../../models/ImportedSourceFile";
 
 type StartExecutionInput = {
+  jobKey: string;
   jobName: string;
-  sourceType: "sftp";
+  sourceType: "sftp" | "http" | "database" | "internal";
   trigger: "cron" | "manual";
+  scheduleLabel: string;
   sourcePath: string;
   fileName?: string | null;
   message?: string;
@@ -25,6 +29,11 @@ type FinishExecutionInput = {
   errored?: number;
   errorSummary?: string[];
   errorDetailsSample?: IImportExecutionErrorDetail[];
+  metrics?: JobMonitorMetrics;
+  sourceSummary?: IJobMonitorSummaryBlock | null;
+  resultSummary?: IJobMonitorSummaryBlock | null;
+  requestSample?: unknown[];
+  responseSample?: unknown[];
 };
 
 export class ImportExecutionLoggerService {
@@ -62,9 +71,11 @@ export class ImportExecutionLoggerService {
 
   static async startExecution(input: StartExecutionInput) {
     return ImportExecutionLog.create({
+      jobKey: input.jobKey,
       jobName: input.jobName,
       sourceType: input.sourceType,
       trigger: input.trigger,
+      scheduleLabel: input.scheduleLabel,
       sourcePath: input.sourcePath,
       fileName: input.fileName ?? null,
       status: "running",
@@ -89,6 +100,11 @@ export class ImportExecutionLoggerService {
       errored: input.errored ?? 0,
       errorSummary: input.errorSummary ?? [],
       errorDetailsSample: input.errorDetailsSample ?? [],
+      metrics: input.metrics ?? {},
+      sourceSummary: input.sourceSummary ?? null,
+      resultSummary: input.resultSummary ?? null,
+      requestSample: input.requestSample ?? [],
+      responseSample: input.responseSample ?? [],
       finishedAt,
       durationMs,
     });

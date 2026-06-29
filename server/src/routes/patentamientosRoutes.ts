@@ -29,6 +29,7 @@ router.get("/dashboard/general/zona-nic", PatentamientosDashboardController.getG
 router.get("/dashboard/localidad/options", PatentamientosDashboardController.getLocationOptions);
 router.get("/dashboard/localidad/analysis", PatentamientosDashboardController.getLocationAnalysis);
 router.post("/unidades-dealers/sincronizar", UnidadesDealersController.sincronizar);
+router.get("/unidades-dealers/years", UnidadesDealersController.getAvailableYears);
 router.get("/unidades-dealers/resumen", UnidadesDealersController.getResumen);
 router.get("/unidades-dealers/treemap", UnidadesDealersController.getTreemap);
 

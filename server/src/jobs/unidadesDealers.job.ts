@@ -1,4 +1,4 @@
-import { UnidadesDealersService } from "../services/unidadesDealers.service";
+import { UnidadesDealersSyncJobService } from "../services/jobs/unidadesDealersSyncJob.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
 const JOB_SCHEDULES = new Set(["07:00", "20:00"]);
@@ -62,7 +62,7 @@ const executeIfNeeded = async () => {
   executedRunKeys.add(runKey);
 
   try {
-    await UnidadesDealersService.syncFromSource();
+    await UnidadesDealersSyncJobService.run("cron");
   } finally {
     isRunning = false;
   }

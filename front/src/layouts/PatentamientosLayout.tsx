@@ -14,7 +14,7 @@ const dashboardSections = [
   { key: "y-cross", label: "Y. Cross", to: paths.analisis.patentamientos.dashboardYCross },
   { key: "yaris", label: "Yaris", to: paths.analisis.patentamientos.dashboardYaris },
   { key: "localidad", label: "Localidad", to: paths.analisis.patentamientos.dashboardLocalidad },
-  { key: "inscripcion-unidades", label: "Traslado de unidades", to: paths.analisis.patentamientos.dashboardInscripcionUnidades },
+  { key: "inscripcion-unidades", label: "Traslado Furlong", to: paths.analisis.patentamientos.dashboardInscripcionUnidades },
 ];
 
 export default function PatentamientosLayout() {
