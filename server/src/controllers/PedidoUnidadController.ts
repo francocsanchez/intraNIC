@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { sequelizeNIC } from "../config/database";
 import { infoInternoQuery } from "./querys/convencional.query";
 import PedidoUnidad from "../models/PedidoUnidad";
+import UnidadDealer from "../models/UnidadDealer";
 import PedidoUnidadPrevia, {
   PEDIDO_UNIDAD_PRIORIDADES,
   type PedidoUnidadPrioridad,
@@ -76,6 +77,15 @@ const normalizeNullableDate = (value: unknown) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const normalizeVinKey = (value: unknown) => {
+  if (typeof value !== "string") return null;
+
+  const normalized = value.trim();
+  if (!normalized || normalized === "-") return null;
+
+  return normalized;
+};
+
 const isValidPrioridad = (value: unknown): value is PedidoUnidadPrioridad =>
   typeof value === "string" && PEDIDO_UNIDAD_PRIORIDADES.includes(value as PedidoUnidadPrioridad);
 
@@ -102,6 +112,7 @@ const normalizePedidoUnidadItem = (item: any) => ({
   ...item,
   chasis: normalizeNullableText(item?.chasis),
   modelo: normalizeText(item?.modelo),
+  estadoUnidad: normalizeNullableText(item?.estadoUnidad),
   prioridad: isValidPrioridad(item?.prioridad) ? item.prioridad : "normal",
   listaPreviaCreatedAt: normalizeNullableDate(item?.listaPreviaCreatedAt),
   listaPreviaUsuario: normalizeNullableText(item?.listaPreviaUsuario),
@@ -113,6 +124,38 @@ const normalizePedidoUnidad = (pedido: any) => ({
     ? pedido.items.map(normalizePedidoUnidadItem).sort(comparePedidoUnidadItem)
     : [],
 });
+
+const enrichPedidoItemsWithEstadoUnidad = async <T extends { chasis?: unknown }>(
+  items: T[],
+) => {
+  const vins = Array.from(
+    new Set(
+      items
+        .map((item) => normalizeVinKey(item.chasis))
+        .filter((vin): vin is string => Boolean(vin)),
+    ),
+  );
+
+  if (!vins.length) {
+    return items.map((item) => ({ ...item, estadoUnidad: null }));
+  }
+
+  const unidadesDealers = await UnidadDealer.find({ vin: { $in: vins } })
+    .select({ _id: 0, vin: 1, estado: 1 })
+    .lean();
+  const estadoByVin = new Map(
+    unidadesDealers.map((unidad) => [normalizeVinKey(unidad.vin), normalizeNullableText(unidad.estado)]),
+  );
+
+  return items.map((item) => {
+    const vin = normalizeVinKey(item.chasis);
+
+    return {
+      ...item,
+      estadoUnidad: vin ? (estadoByVin.get(vin) ?? null) : null,
+    };
+  });
+};
 
 const isValidFecha = (value: unknown) =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -474,11 +517,17 @@ export class PedidoUnidadController {
         PedidoUnidad.countDocuments(),
       ]);
       const fechasPagina = fechasAgrupadas.map((item) => item._id);
-      const data = fechasPagina.length
+      const rawData = fechasPagina.length
         ? await PedidoUnidad.find({ fecha: { $in: fechasPagina } })
             .sort({ fecha: -1, createdAt: -1 })
             .lean()
         : [];
+      const data = await Promise.all(
+        rawData.map(async (pedido) => ({
+          ...pedido,
+          items: await enrichPedidoItemsWithEstadoUnidad(Array.isArray(pedido.items) ? pedido.items : []),
+        })),
+      );
       const total = totalPorFechaResult[0]?.total ?? 0;
 
       return res.status(200).json({
@@ -554,7 +603,8 @@ export class PedidoUnidadController {
         data: Array<Record<string, unknown>>;
         total: Array<{ count: number }>;
       }>(pipeline);
-      const data = result?.data ?? [];
+      const rawData = result?.data ?? [];
+      const data = await enrichPedidoItemsWithEstadoUnidad(rawData);
       const total = result?.total?.[0]?.count ?? 0;
 
       return res.status(200).json({

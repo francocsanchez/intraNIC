@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import type { PedidoUnidad, PedidoUnidadItem, PedidoUnidadPrevia, PedidoUnidadPrioridad, PedidoUnidadRegistro } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Download, List, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, ClipboardList, Clock3, Download, House, List, Plus, Trash2, Truck } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
 };
 
 type ViewMode = "carga" | "registros";
+type RegistroEstadoFilter = "todos" | "entregada" | "en-viaje" | "pendiente";
 
 type PedidoUnidadDateGroupItem = {
   pedido: PedidoUnidad;
@@ -51,6 +52,58 @@ const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
   media: "bg-yellow-100 text-yellow-800",
   urgente: "bg-red-100 text-red-700",
 };
+
+const REGISTRO_ESTADO_FILTERS: Array<{ value: RegistroEstadoFilter; label: string }> = [
+  { value: "todos", label: "Todos" },
+  { value: "entregada", label: "Entregadas" },
+  { value: "en-viaje", label: "En viaje" },
+  { value: "pendiente", label: "Pendientes" },
+];
+
+function normalizeRegistroEstado(value: string | null | undefined) {
+  return (value ?? "").trim().toUpperCase();
+}
+
+function matchesRegistroEstadoFilter(estado: string | null | undefined, filter: RegistroEstadoFilter) {
+  const normalized = normalizeRegistroEstado(estado);
+
+  if (filter === "todos") return true;
+  if (filter === "entregada") return normalized === "ENTREGADA";
+  if (filter === "en-viaje") return normalized === "EN VIAJE";
+  if (filter === "pendiente") return normalized === "PENDIENTE";
+
+  return true;
+}
+
+function getRegistroEstadoBadge(estado: string | null | undefined) {
+  const normalized = normalizeRegistroEstado(estado);
+
+  if (normalized === "ENTREGADA") {
+    return {
+      label: "ENTREGADA",
+      className: "bg-emerald-100 text-emerald-700",
+      Icon: House,
+    };
+  }
+
+  if (normalized === "EN VIAJE") {
+    return {
+      label: "EN VIAJE",
+      className: "bg-amber-100 text-amber-700",
+      Icon: Truck,
+    };
+  }
+
+  if (normalized === "PENDIENTE") {
+    return {
+      label: "PENDIENTE",
+      className: "bg-gray-100 text-gray-600",
+      Icon: Clock3,
+    };
+  }
+
+  return null;
+}
 
 function formatDate(dateString: string) {
   const [year, month, day] = dateString.split("-");
@@ -128,6 +181,7 @@ function mapPreviaToPedidoItem(item: PedidoUnidadPrevia): PedidoUnidadItem {
     vendedor: item.vendedorNombre,
     chasis: item.chasis,
     modelo: item.modelo,
+    estadoUnidad: null,
     prioridad: item.prioridad,
     PDI: false,
     listaPreviaCreatedAt: item.createdAt,
@@ -162,6 +216,7 @@ export default function PedidoUnidadesView() {
   const [expandedFecha, setExpandedFecha] = useState<string | null>(null);
   const [registroInternoInput, setRegistroInternoInput] = useState<string>("");
   const [registroInterno, setRegistroInterno] = useState<string>("");
+  const [registroEstadoFilter, setRegistroEstadoFilter] = useState<RegistroEstadoFilter>("todos");
   const [selectedPrevias, setSelectedPrevias] = useState<number[]>([]);
   const effectiveViewMode: ViewMode = canManagePedidos ? viewMode : "registros";
 
@@ -191,6 +246,19 @@ export default function PedidoUnidadesView() {
   const pagination = canManagePedidos ? pedidosResponse?.pagination : registrosResponse?.pagination;
   const previasOrdenadas = useMemo(() => [...previasData].sort(comparePrevia), [previasData]);
   const itemsOrdenados = useMemo(() => [...items].sort(comparePedidoItem), [items]);
+  const registroEstadoCounts = useMemo(
+    () => ({
+      todos: registros.length,
+      entregada: registros.filter((registro) => matchesRegistroEstadoFilter(registro.estadoUnidad, "entregada")).length,
+      "en-viaje": registros.filter((registro) => matchesRegistroEstadoFilter(registro.estadoUnidad, "en-viaje")).length,
+      pendiente: registros.filter((registro) => matchesRegistroEstadoFilter(registro.estadoUnidad, "pendiente")).length,
+    }),
+    [registros],
+  );
+  const registrosFiltrados = useMemo(
+    () => registros.filter((registro) => matchesRegistroEstadoFilter(registro.estadoUnidad, registroEstadoFilter)),
+    [registros, registroEstadoFilter],
+  );
 
   const pedidosAgrupadosPorFecha = useMemo<PedidoUnidadDateGroup[]>(() => {
     const groups = new Map<string, PedidoUnidad[]>();
@@ -222,6 +290,45 @@ export default function PedidoUnidadesView() {
       };
     });
   }, [pedidos]);
+  const pedidoEstadoCounts = useMemo(
+    () => ({
+      todos: pedidosAgrupadosPorFecha.reduce((acc, grupo) => acc + grupo.detalleItems.length, 0),
+      entregada: pedidosAgrupadosPorFecha.reduce(
+        (acc, grupo) =>
+          acc + grupo.detalleItems.filter(({ item }) => matchesRegistroEstadoFilter(item.estadoUnidad, "entregada")).length,
+        0,
+      ),
+      "en-viaje": pedidosAgrupadosPorFecha.reduce(
+        (acc, grupo) =>
+          acc + grupo.detalleItems.filter(({ item }) => matchesRegistroEstadoFilter(item.estadoUnidad, "en-viaje")).length,
+        0,
+      ),
+      pendiente: pedidosAgrupadosPorFecha.reduce(
+        (acc, grupo) =>
+          acc + grupo.detalleItems.filter(({ item }) => matchesRegistroEstadoFilter(item.estadoUnidad, "pendiente")).length,
+        0,
+      ),
+    }),
+    [pedidosAgrupadosPorFecha],
+  );
+  const pedidosAgrupadosFiltrados = useMemo(
+    () =>
+      pedidosAgrupadosPorFecha
+        .map((grupo) => {
+          const detalleItems = grupo.detalleItems.filter(({ item }) =>
+            matchesRegistroEstadoFilter(item.estadoUnidad, registroEstadoFilter),
+          );
+
+          return {
+            ...grupo,
+            detalleItems,
+            totalUnidades: detalleItems.length,
+            totalConPDI: detalleItems.filter(({ item }) => item.PDI).length,
+          };
+        })
+        .filter((grupo) => grupo.detalleItems.length > 0),
+    [pedidosAgrupadosPorFecha, registroEstadoFilter],
+  );
 
   const internosEnPagina = useMemo(
     () =>
@@ -296,7 +403,7 @@ export default function PedidoUnidadesView() {
   const addInternoMutation = useMutation({
     mutationFn: getPedidoUnidadInfoInterno,
     onSuccess: (data) => {
-      setItems((current) => [...current, { ...data, prioridad: "normal", PDI: false }]);
+      setItems((current) => [...current, { ...data, estadoUnidad: null, prioridad: "normal", PDI: false }]);
       removeInternosFromPreviasCache([data.interno]);
       setSelectedPrevias((current) => current.filter((interno) => interno !== data.interno));
       setInternoInput("");
@@ -812,6 +919,33 @@ export default function PedidoUnidadesView() {
                 </div>
               </div>
 
+              <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Estado de unidad</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Filtra los detalles visibles de esta pagina segun el estado actual informado en dealers.
+                  </p>
+                </div>
+
+                <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+                  {REGISTRO_ESTADO_FILTERS.map((filter) => (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      onClick={() => setRegistroEstadoFilter(filter.value)}
+                      className={[
+                        "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                        registroEstadoFilter === filter.value
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900",
+                      ].join(" ")}
+                    >
+                      {filter.label} ({pedidoEstadoCounts[filter.value]})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="min-w-[980px] w-full text-sm">
                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
@@ -827,7 +961,7 @@ export default function PedidoUnidadesView() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {pedidosAgrupadosPorFecha.map((grupo) => {
+                    {pedidosAgrupadosFiltrados.map((grupo) => {
                       const expanded = expandedFecha === grupo.fecha;
                       const registrosLabel = grupo.pedidos.length === 1 ? "registro" : "registros";
 
@@ -870,19 +1004,18 @@ export default function PedidoUnidadesView() {
                               <td colSpan={7} className="px-4 py-4">
                                 <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                                   <div className="overflow-x-auto">
-                                    <table className="min-w-[1360px] w-full text-sm">
+                                    <table className="min-w-[1320px] w-full text-sm">
                                       <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                                         <tr>
                                           <th className="px-4 py-3 text-left">Interno</th>
                                           <th className="px-4 py-3 text-left">Version</th>
                                           <th className="px-4 py-3 text-left">Order</th>
-                                          <th className="px-4 py-3 text-left">Modelo</th>
                                           <th className="px-4 py-3 text-left">Cliente</th>
                                           <th className="px-4 py-3 text-left">Vendedor</th>
                                           <th className="px-4 py-3 text-left">Chasis</th>
+                                          <th className="px-4 py-3 text-left">Estado</th>
                                           <th className="px-4 py-3 text-left">Prioridad</th>
                                           <th className="px-4 py-3 text-left">F. Sol</th>
-                                          <th className="px-4 py-3 text-center">PDI</th>
                                           <th className="px-4 py-3 text-center">Llegó</th>
                                           <th className="px-4 py-3 text-left">Consolidado</th>
                                           <th className="px-4 py-3 text-left">ADM</th>
@@ -891,6 +1024,7 @@ export default function PedidoUnidadesView() {
                                       <tbody className="divide-y divide-gray-100">
                                         {grupo.detalleItems.map(({ pedido, item }) => {
                                           const unidadArribada = Boolean(estadoPedidos[String(item.interno)]);
+                                          const estadoBadge = getRegistroEstadoBadge(item.estadoUnidad);
 
                                           return (
                                           <tr
@@ -911,10 +1045,19 @@ export default function PedidoUnidadesView() {
                                             </td>
                                             <td className="px-4 py-3 text-gray-700">{item.version}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.order}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                                            <td className="px-4 py-3">
+                                              {estadoBadge ? (
+                                                <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", estadoBadge.className].join(" ")}>
+                                                  <estadoBadge.Icon size={14} strokeWidth={2} />
+                                                  {estadoBadge.label}
+                                                </span>
+                                              ) : (
+                                                <span className="text-gray-500">-</span>
+                                              )}
+                                            </td>
                                             <td className="px-4 py-3">
                                               <span
                                                 className={[
@@ -927,16 +1070,6 @@ export default function PedidoUnidadesView() {
                                             </td>
                                             <td className="px-4 py-3 text-gray-700">
                                               {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                              <span
-                                                className={[
-                                                  "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                                  item.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
-                                                ].join(" ")}
-                                              >
-                                                {item.PDI ? "Si" : "No"}
-                                              </span>
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                               <span
@@ -963,10 +1096,12 @@ export default function PedidoUnidadesView() {
                       );
                     })}
 
-                    {!pedidos.length ? (
+                    {!pedidosAgrupadosFiltrados.length ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                          Todavia no hay pedidos de unidades registrados.
+                          {pedidos.length
+                            ? "No hay registros en esta pagina para el filtro seleccionado."
+                            : "Todavia no hay pedidos de unidades registrados."}
                         </td>
                       </tr>
                     ) : null}
@@ -1019,8 +1154,35 @@ export default function PedidoUnidadesView() {
                 </div>
               </div>
 
+              <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Estado de unidad</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Filtra los registros visibles de esta pagina segun el estado actual informado en dealers.
+                  </p>
+                </div>
+
+                <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+                  {REGISTRO_ESTADO_FILTERS.map((filter) => (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      onClick={() => setRegistroEstadoFilter(filter.value)}
+                      className={[
+                        "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                        registroEstadoFilter === filter.value
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900",
+                      ].join(" ")}
+                    >
+                      {filter.label} ({registroEstadoCounts[filter.value]})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
-                <table className="min-w-[1320px] w-full text-sm">
+                <table className="min-w-[1240px] w-full text-sm">
                   <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
                     <tr>
                       <th className="px-4 py-3 text-left">Interno</th>
@@ -1029,18 +1191,18 @@ export default function PedidoUnidadesView() {
                       <th className="px-4 py-3 text-left">Consolidado</th>
                       <th className="px-4 py-3 text-left">Cliente</th>
                       <th className="px-4 py-3 text-left">Vendedor</th>
-                      <th className="px-4 py-3 text-left">Modelo</th>
                       <th className="px-4 py-3 text-left">Version</th>
                       <th className="px-4 py-3 text-left">Chasis</th>
+                      <th className="px-4 py-3 text-left">Estado</th>
                       <th className="px-4 py-3 text-left">Prioridad</th>
-                      <th className="px-4 py-3 text-center">PDI</th>
                       <th className="px-4 py-3 text-left">Usuario lista previa</th>
                     </tr>
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {registros.map((registro) => {
+                    {registrosFiltrados.map((registro) => {
                       const unidadArribada = Boolean(estadoRegistros[String(registro.interno)]);
+                      const estadoBadge = getRegistroEstadoBadge(registro.estadoUnidad);
 
                       return (
                       <tr
@@ -1063,9 +1225,18 @@ export default function PedidoUnidadesView() {
                         <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.version}</td>
                         <td className="px-4 py-3 text-gray-700">{registro.chasis ?? "-"}</td>
+                        <td className="px-4 py-3">
+                          {estadoBadge ? (
+                            <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", estadoBadge.className].join(" ")}>
+                              <estadoBadge.Icon size={14} strokeWidth={2} />
+                              {estadoBadge.label}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">-</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <span
                             className={[
@@ -1076,26 +1247,18 @@ export default function PedidoUnidadesView() {
                             {registro.prioridad}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span
-                            className={[
-                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                              registro.PDI ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
-                            ].join(" ")}
-                          >
-                            {registro.PDI ? "Si" : "No"}
-                          </span>
-                        </td>
                         <td className="px-4 py-3 text-gray-700">{registro.listaPreviaUsuario ?? "-"}</td>
                       </tr>
                     )})}
 
-                    {!registros.length ? (
+                    {!registrosFiltrados.length ? (
                       <tr>
-                        <td colSpan={12} className="px-6 py-12 text-center text-sm text-gray-500">
-                          {registroInterno
-                            ? "No se encontraron unidades para ese interno."
-                            : "Todavia no hay unidades pedidas registradas."}
+                        <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                          {registros.length
+                            ? "No hay unidades en esta pagina para el filtro seleccionado."
+                            : registroInterno
+                              ? "No se encontraron unidades para ese interno."
+                              : "Todavia no hay unidades pedidas registradas."}
                         </td>
                       </tr>
                     ) : null}

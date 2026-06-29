@@ -711,6 +711,7 @@ export const pedidoUnidadInfoInternoSchema = z.object({
 });
 
 export const pedidoUnidadItemSchema = pedidoUnidadInfoInternoSchema.extend({
+  estadoUnidad: z.string().nullable().default(null),
   prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
   PDI: z.boolean(),
   listaPreviaCreatedAt: z.string().nullable().optional(),
@@ -754,7 +755,7 @@ export const pedidoUnidadRegistroSchema = z.object({
   cliente: z.string().default("-"),
   vendedor: z.string().default("-"),
   chasis: z.string().nullable().default(null),
-  modelo: z.string().default("-"),
+  estadoUnidad: z.string().nullable().default(null),
   prioridad: z.enum(["normal", "media", "urgente"]).default("normal"),
   PDI: z.boolean(),
   listaPreviaCreatedAt: z.string().nullable().optional(),
