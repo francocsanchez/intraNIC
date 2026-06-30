@@ -156,6 +156,7 @@ const SW4_MODELS: readonly SegmentModelDefinition[] = [
   { label: "BAIC BJ60", aliases: ["BJ60", "BAIC BJ60"] },
   { label: "Jeep Grand Cherokee", aliases: ["GRAND CHEROKEE", "JEEP GRAND CHEROKEE"] },
   { label: "GAC GS8", aliases: ["GS8", "GAC GS8"] },
+  { label: "Chevrolet Trailblazer", aliases: ["TRAILBLAZER", "CHEVROLET TRAILBLAZER"] },
 ] as const;
 
 const C_CROSS_MODELS: readonly SegmentModelDefinition[] = [
@@ -169,7 +170,6 @@ const C_CROSS_MODELS: readonly SegmentModelDefinition[] = [
   { label: "Chery Tiggo 7", aliases: ["TIGGO 7", "CHERY TIGGO 7"] },
   { label: "Ford Bronco Sport", aliases: ["BRONCO SPORT", "FORD BRONCO SPORT"] },
   { label: "Jaecoo J7", aliases: ["J7", "JAECOO J7"] },
-  { label: "Chevrolet Trailblazer", aliases: ["TRAILBLAZER", "CHEVROLET TRAILBLAZER"] },
 ] as const;
 
 const YARIS_MODELS: readonly SegmentModelDefinition[] = [
