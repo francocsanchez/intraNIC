@@ -27,7 +27,7 @@ export default function PatentamientosToyotaEvolutionChart({
     <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-gray-900">{data.title}</h2>
-        <p className="mt-1 text-sm text-gray-500">Comparacion mensual exclusiva de la participacion de Toyota entre PAIS y Zona NIC.</p>
+        <p className="mt-1 text-sm text-gray-500">Comparacion mensual del porcentaje de participacion de Toyota entre PAIS y Zona NIC.</p>
       </div>
 
       <div className="mt-5 h-[360px] w-full">
