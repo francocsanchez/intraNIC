@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getStockDisponibleConvencional } from "@/api/convencional/stockAPI";
 import { useQuery } from "@tanstack/react-query";
 import { textToColor } from "@/helpers/colores";
@@ -10,13 +10,26 @@ import { useAuth } from "@/hooks/useAuthe";
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const UBICACIONES_PRIORITARIAS = ["TODAS", "EN PRODUCCION", "PLAYA TASA", "FURLONG", "STOCK CONCESIONARIO"] as const;
+type UbicacionFiltro = (typeof UBICACIONES_PRIORITARIAS)[number];
 const EMPTY_STOCK_CONVENCIONAL: Awaited<
   ReturnType<typeof getStockDisponibleConvencional>
 >["data"] = [];
 
+function normalizarUbicacion(ubicacion: string | null | undefined) {
+  const value = ubicacion?.trim().toUpperCase();
+
+  if (!value) return "EN PRODUCCION";
+  if (["PLAYA EXTERNA", "PLAYA TASA", "PLAYA NACIONAL ATZ"].includes(value)) return "PLAYA TASA";
+  if (value.includes("FURLONG")) return "FURLONG";
+
+  return "STOCK CONCESIONARIO";
+}
+
 export default function StockDisponibleConvencional() {
   const { user, isLoading: authLoading } = useAuth();
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const [ubicacionActiva, setUbicacionActiva] = useState<UbicacionFiltro>("TODAS");
 
   const {
     data: configResponse,
@@ -69,6 +82,22 @@ export default function StockDisponibleConvencional() {
     if (modeloActivo === "TODOS") return items;
     return items.filter((item) => item.modelo === modeloActivo);
   }, [items, modeloActivo]);
+
+  const ubicacionesDisponibles = useMemo(() => {
+    const existentes = new Set(itemsFiltrados.map((item) => normalizarUbicacion(item.ubicacion)));
+    return UBICACIONES_PRIORITARIAS.filter((ubicacion) => ubicacion === "TODAS" || existentes.has(ubicacion));
+  }, [itemsFiltrados]);
+
+  useEffect(() => {
+    if (!ubicacionesDisponibles.includes(ubicacionActiva)) {
+      setUbicacionActiva("TODAS");
+    }
+  }, [ubicacionActiva, ubicacionesDisponibles]);
+
+  const itemsVisibles = useMemo(() => {
+    if (ubicacionActiva === "TODAS") return itemsFiltrados;
+    return itemsFiltrados.filter((item) => normalizarUbicacion(item.ubicacion) === ubicacionActiva);
+  }, [itemsFiltrados, ubicacionActiva]);
 
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("es-AR", {
@@ -200,7 +229,23 @@ export default function StockDisponibleConvencional() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsFiltrados.length} registros</div>
+          <div className="flex flex-col items-stretch gap-3 md:items-end">
+            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+              {ubicacionesDisponibles.map((ubicacion) => (
+                <button
+                  key={ubicacion}
+                  type="button"
+                  onClick={() => setUbicacionActiva(ubicacion)}
+                  className={[
+                    "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                    ubicacionActiva === ubicacion ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
+                >
+                  {ubicacion}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -209,17 +254,16 @@ export default function StockDisponibleConvencional() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelo</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Version</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicación</th>
-
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepción</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepcion</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Observaciones</th>
               </tr>
             </thead>
 
             <tbody>
-              {itemsFiltrados.map((item) => (
+              {itemsVisibles.map((item) => (
                 <tr
                   key={`${item.interno}-${item.chasis}-${item.fechaRecepcion}`}
                   className={[
@@ -231,7 +275,6 @@ export default function StockDisponibleConvencional() {
                   <td className="px-4 py-2 text-gray-700">
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.modelo}</span>
                   </td>
-
                   <td className="min-w-[240px] px-4 py-2 text-center">
                     <div className="font-medium text-gray-900">{item.version}</div>
                     <div className="text-xs text-gray-400">{item.chasis}</div>
@@ -241,15 +284,13 @@ export default function StockDisponibleConvencional() {
                       {item.color}
                     </span>
                   </td>
-                  {item.ubicacion ? ( <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>) : (<td className="px-4 py-2 text-gray-700">EN PRODUCCIÓN</td>)}
-                 
-
+                  <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
                   <td className="px-4 py-2 text-gray-700">{formatDate(item.fechaRecepcion)}</td>
                   <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
                 </tr>
               ))}
 
-              {itemsFiltrados.length === 0 && (
+              {itemsVisibles.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay unidades para el filtro seleccionado.
@@ -261,8 +302,9 @@ export default function StockDisponibleConvencional() {
         </div>
 
         <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm text-gray-500">
-          Mostrando {itemsFiltrados.length} unidades
-          {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}.
+          Mostrando {itemsVisibles.length} unidades
+          {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}
+          {ubicacionActiva !== "TODAS" ? ` en ${ubicacionActiva}` : ""}.
         </div>
       </section>
     </div>
