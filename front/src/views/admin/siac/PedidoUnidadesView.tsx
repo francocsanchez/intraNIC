@@ -1036,12 +1036,7 @@ export default function PedidoUnidadesView() {
                                             ].join(" ")}
                                           >
                                             <td className="px-4 py-3 font-medium text-gray-900">
-                                              <div className="flex flex-col">
-                                                <span>{item.interno}</span>
-                                                {unidadArribada ? (
-                                                  <span className="text-xs font-semibold text-emerald-700">Arribada</span>
-                                                ) : null}
-                                              </div>
+                                              <span>{item.interno}</span>
                                             </td>
                                             <td className="px-4 py-3 text-gray-700">{item.version}</td>
                                             <td className="px-4 py-3 text-gray-700">{item.order}</td>
