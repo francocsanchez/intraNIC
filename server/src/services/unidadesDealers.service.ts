@@ -178,6 +178,20 @@ const buildFechaCargaRange = (year: number) => ({
   end: new Date(Date.UTC(year + 1, 0, 1)),
 });
 
+const buildYearMatchStage = (range: { start: Date; end: Date }, includeNullFechaCarga: boolean) => ({
+  $match: {
+    $or: [
+      {
+        fechaCargaNormalizada: {
+          $gte: range.start,
+          $lt: range.end,
+        },
+      },
+      ...(includeNullFechaCarga ? [{ fechaCargaNormalizada: null }] : []),
+    ],
+  },
+});
+
 export class UnidadesDealersService {
   static getSourceUrl() {
     return DEALERS_SOURCE_URL;
@@ -309,8 +323,15 @@ export class UnidadesDealersService {
     };
   }
 
+  static async getLatestAvailableYear(): Promise<number | null> {
+    const { selectedYear } = await UnidadesDealersService.getAvailableYears();
+    return selectedYear;
+  }
+
   static async getResumenPorDealerYEstado(year: number | null): Promise<UnidadDealerSummaryResponse> {
     const range = year ? buildFechaCargaRange(year) : null;
+    const latestAvailableYear = year ? await UnidadesDealersService.getLatestAvailableYear() : null;
+    const includeNullFechaCarga = year !== null && latestAvailableYear !== null && year === latestAvailableYear;
     const units = await UnidadDealer.aggregate<{ dealer: string; estado: string }>([
       {
         $addFields: {
@@ -326,14 +347,7 @@ export class UnidadesDealersService {
       },
       ...(range
         ? [
-            {
-              $match: {
-                fechaCargaNormalizada: {
-                  $gte: range.start,
-                  $lt: range.end,
-                },
-              },
-            },
+            buildYearMatchStage(range, includeNullFechaCarga),
           ]
         : []),
       {
@@ -389,6 +403,8 @@ export class UnidadesDealersService {
 
   static async getTreemapPorDealer(year: number | null): Promise<UnidadDealerTreemapResponse> {
     const range = year ? buildFechaCargaRange(year) : null;
+    const latestAvailableYear = year ? await UnidadesDealersService.getLatestAvailableYear() : null;
+    const includeNullFechaCarga = year !== null && latestAvailableYear !== null && year === latestAvailableYear;
     const units = await UnidadDealer.aggregate<{ dealer: string }>([
       {
         $addFields: {
@@ -404,14 +420,7 @@ export class UnidadesDealersService {
       },
       ...(range
         ? [
-            {
-              $match: {
-                fechaCargaNormalizada: {
-                  $gte: range.start,
-                  $lt: range.end,
-                },
-              },
-            },
+            buildYearMatchStage(range, includeNullFechaCarga),
           ]
         : []),
       {
