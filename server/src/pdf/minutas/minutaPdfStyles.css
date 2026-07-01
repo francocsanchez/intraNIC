@@ -211,6 +211,22 @@ body {
   background: #fcfcfd;
 }
 
+.participants-table th {
+  padding: 4px 5px;
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+.participants-table td {
+  padding: 3px 5px;
+  font-size: 9px;
+  line-height: 1.15;
+}
+
+.participants-table .w-order {
+  width: 34px;
+}
+
 .development-text {
   color: var(--ink);
   font-size: 12px;

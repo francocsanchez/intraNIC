@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-runtime-assets.js",
     "start": "node dist/index.js",
     "pdf:install-browsers": "playwright install chromium"
   },

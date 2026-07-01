@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
 import { generatePdfFromHtml } from "../pdf/playwrightPdf";
 import {
@@ -30,17 +31,30 @@ export type MinutaPdfPayload = {
   temario: MinutaPdfTemario[];
 };
 
-const minutaPdfCssPath = path.resolve(
-  path.basename(process.cwd()).toLowerCase() === "server" ? process.cwd() : path.resolve(process.cwd(), "server"),
-  "src",
-  "pdf",
-  "minutas",
-  "minutaPdfStyles.css",
-);
+const resolveMinutaPdfCssPath = () => {
+  const runtimePath = path.resolve(__dirname, "..", "pdf", "minutas", "minutaPdfStyles.css");
+
+  if (fsSync.existsSync(runtimePath)) {
+    return runtimePath;
+  }
+
+  const serverRoot =
+    path.basename(process.cwd()).toLowerCase() === "server"
+      ? process.cwd()
+      : path.resolve(process.cwd(), "server");
+
+  const sourcePath = path.resolve(serverRoot, "src", "pdf", "minutas", "minutaPdfStyles.css");
+
+  if (fsSync.existsSync(sourcePath)) {
+    return sourcePath;
+  }
+
+  return runtimePath;
+};
 
 export const generateMinutaPdfBuffer = async (payload: MinutaPdfPayload) => {
   const [css, viewModel] = await Promise.all([
-    fs.readFile(minutaPdfCssPath, "utf8"),
+    fs.readFile(resolveMinutaPdfCssPath(), "utf8"),
     buildMinutaPdfViewModel(payload),
   ]);
 

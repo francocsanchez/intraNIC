@@ -1,20 +1,31 @@
-import { MinutaPdfViewModel } from "./minutaPdfViewModel";
 import { sanitizeRichTextHtml } from "../../utils/sanitizeHtml";
+import { MinutaPdfViewModel } from "./minutaPdfViewModel";
 
 const escapeHtml = (value: string) =>
-  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 export const renderMinutaPdfHtml = (viewModel: MinutaPdfViewModel, css: string) => {
-  const participantsRows = viewModel.participantes
-    .map(
-      (participant) => `
+  const participantsRows = Array.from(
+    { length: Math.ceil(viewModel.participantes.length / 2) },
+    (_, index) => {
+      const left = viewModel.participantes[index * 2];
+      const right = viewModel.participantes[index * 2 + 1];
+
+      return `
         <tr>
-          <td class="text-center">${participant.order}</td>
-          <td>${escapeHtml(participant.fullName)}</td>
+          <td class="text-center w-order">${left ? left.order : ""}</td>
+          <td>${left ? escapeHtml(left.fullName) : ""}</td>
+          <td class="text-center w-order">${right ? right.order : ""}</td>
+          <td>${right ? escapeHtml(right.fullName) : ""}</td>
         </tr>
-      `,
-    )
-    .join("");
+      `;
+    },
+  ).join("");
 
   const temarioRows = viewModel.temario
     .map(
@@ -77,31 +88,32 @@ export const renderMinutaPdfHtml = (viewModel: MinutaPdfViewModel, css: string) 
         </section>
 
         <section class="section">
-  <div class="section-title">Moderador</div>
+          <div class="section-title">Moderador</div>
 
-  <table class="signature-table">
-    <thead>
-      <tr>
-        <th colspan="2">Moderador</th>
-      
-      </tr>
-    </thead>
+          <table class="signature-table">
+            <thead>
+              <tr>
+                <th colspan="2">Moderador</th>
+              </tr>
+            </thead>
 
-    <tbody>
-      <tr>
-        <td colspan="2" class="moderador-name uppercase">
-          ${escapeHtml(viewModel.moderador)}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</section>
+            <tbody>
+              <tr>
+                <td colspan="2" class="moderador-name uppercase">
+                  ${escapeHtml(viewModel.moderador)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
 
         <section class="section">
           <div class="section-title">Participantes</div>
-          <table class="data-table">
+          <table class="data-table participants-table">
             <thead>
               <tr>
+                <th class="w-order">N°</th>
+                <th>Nombre y apellido</th>
                 <th class="w-order">N°</th>
                 <th>Nombre y apellido</th>
               </tr>
