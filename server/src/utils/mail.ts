@@ -38,6 +38,11 @@ export type MailOptions = {
   to: string;
   subject: string;
   html: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }>;
 };
 
 const buildPasswordResetTemplate = ({ name, temporaryPassword }: PasswordResetEmailData) => {
@@ -109,5 +114,6 @@ export async function sendMail(data: MailOptions) {
     to: data.to,
     subject: data.subject,
     html: data.html,
+    attachments: data.attachments,
   });
 }

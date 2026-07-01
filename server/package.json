@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "pdf:install-browsers": "playwright install chromium"
   },
   "keywords": [],
   "author": "",
@@ -19,10 +20,12 @@
     "csv-parser": "^3.2.1",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "isomorphic-dompurify": "^3.18.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
+    "playwright": "^1.61.1",
     "sequelize": "^6.37.7",
     "ssh2-sftp-client": "^12.1.1",
     "tedious": "^19.2.1",

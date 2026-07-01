@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { JOB_KEYS, getJobMonitorDetail, getJobsMonitor, runJobMonitor, type JobMonitorDetail } from "@/services/jobsMonitorService";
+import { getJobMonitorDetail, getJobsMonitor, runJobMonitor, type JobMonitorDetail } from "@/services/jobsMonitorService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Play, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -92,6 +92,7 @@ type ControlRow = {
   jobKey: string;
   title: string;
   scheduleLabel: string;
+  canRun: boolean;
   lastExecutionAt: string | null;
   isRunning: boolean;
   lastStatus: string | null;
@@ -145,15 +146,21 @@ const JobsControlTable = ({
                 </span>
               </td>
               <td className="border border-gray-200 px-2 py-2 align-top">
-                <button
-                  type="button"
-                  onClick={() => onRun(row.jobKey)}
-                  disabled={row.isRunning || isMutating}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Play size={14} />
-                  {row.isRunning || isMutating ? "Ejecutando..." : "Ejecutar"}
-                </button>
+                {row.canRun ? (
+                  <button
+                    type="button"
+                    onClick={() => onRun(row.jobKey)}
+                    disabled={row.isRunning || isMutating}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Play size={14} />
+                    {row.isRunning || isMutating ? "Ejecutando..." : "Ejecutar"}
+                  </button>
+                ) : (
+                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-600">
+                    Evento
+                  </span>
+                )}
               </td>
             </tr>
           );
@@ -257,7 +264,7 @@ export default function PatentamientosRegistrosView() {
 
   const detailsQuery = useQuery({
     queryKey: ["jobs-monitor", "details"],
-    queryFn: async () => Promise.all(JOB_KEYS.map((jobKey) => getJobMonitorDetail(jobKey))),
+    queryFn: async () => Promise.all((jobsQuery.data ?? []).map((job) => getJobMonitorDetail(job.jobKey))),
     enabled: Boolean(jobsQuery.data),
     refetchInterval: () => (jobsQuery.data?.some((job) => job.isRunning) ? 5000 : false),
   });
@@ -302,6 +309,7 @@ export default function PatentamientosRegistrosView() {
         jobKey: detail.jobKey,
         title: detail.title,
         scheduleLabel: detail.scheduleLabel,
+        canRun: detail.canRun,
         lastExecutionAt: detail.lastExecutionAt,
         isRunning: detail.isRunning,
         lastStatus: detail.lastStatus,

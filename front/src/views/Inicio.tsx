@@ -100,6 +100,7 @@ export default function Inicio() {
       icon: ShoppingCart,
       items: [
         { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
+        { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
         { label: "Registro TestDrive", to: paths.convencional.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive), icon: CarFront },
       ],
     },

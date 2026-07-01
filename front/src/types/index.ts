@@ -1252,6 +1252,54 @@ export type Proforma = z.infer<typeof proformaSchema>;
 export type ProformaListResponse = z.infer<typeof proformaListResponseSchema>;
 export type ProformaResponse = z.infer<typeof proformaResponseSchema>;
 
+export const minutaUserSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  lastName: z.string(),
+  email: z.string().optional().default(""),
+});
+
+export const minutaTemarioSchema = z.object({
+  orden: z.number(),
+  nombre: z.string(),
+  desarrollo: z.string(),
+});
+
+export const minutaSchema = z.object({
+  _id: z.string(),
+  fecha: z.string(),
+  fechaLabel: z.string(),
+  tema: z.string(),
+  moderador: minutaUserSchema,
+  participantes: z.array(minutaUserSchema),
+  participantesCount: z.number(),
+  temasCount: z.number(),
+  temario: z.array(minutaTemarioSchema),
+  createdBy: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const minutaListResponseSchema = z.object({
+  data: z.array(minutaSchema),
+});
+
+export const minutaResponseSchema = z.object({
+  data: minutaSchema.nullable().optional(),
+  message: z.string().optional().default(""),
+});
+
+export const minutaParticipantsResponseSchema = z.object({
+  data: z.array(minutaUserSchema),
+});
+
+export type Minuta = z.infer<typeof minutaSchema>;
+export type MinutaTemario = z.infer<typeof minutaTemarioSchema>;
+export type MinutaUser = z.infer<typeof minutaUserSchema>;
+export type MinutaListResponse = z.infer<typeof minutaListResponseSchema>;
+export type MinutaResponse = z.infer<typeof minutaResponseSchema>;
+export type MinutaParticipantsResponse = z.infer<typeof minutaParticipantsResponseSchema>;
+
 //**************************** */
 // ENTREGAS
 //**************************** */

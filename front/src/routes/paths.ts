@@ -73,6 +73,8 @@ export const paths = {
     proformasNueva: "/convencional/proformas/nueva",
     proformasDetalleRoute: "/convencional/proformas/:id",
     proformasDetalle: (id: string) => `/convencional/proformas/${id}`,
+    minutas: "/convencional/minutas",
+    minutasNueva: "/convencional/minutas/nueva",
     pedidoMensual: "/gestion/convencional/pedido-mensual",
     pedidoUnidades: "/gestion/convencional/pedido-unidades",
     preventasColores: "/convencional/preventas/colores",

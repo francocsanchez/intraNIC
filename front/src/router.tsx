@@ -65,6 +65,8 @@ const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualVie
 const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
 const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
 const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailView"));
+const MinutasView = lazy(() => import("./views/comercial/MinutasView"));
+const MinutaCreateView = lazy(() => import("./views/comercial/MinutaCreateView"));
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
@@ -183,6 +185,13 @@ export default function Router() {
               <Route path={paths.convencional.proformas} element={<ProformasView />} />
               <Route path={paths.convencional.proformasNueva} element={<ProformaFormView />} />
               <Route path={paths.convencional.proformasDetalleRoute} element={<ProformaDetailView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["minutas"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.minutas} element={<MinutasView />} />
+              <Route path={paths.convencional.minutasNueva} element={<MinutaCreateView />} />
             </Route>
           </Route>
 

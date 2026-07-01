@@ -14,6 +14,7 @@ const jobMonitorSummarySchema = z.object({
   jobKey: z.string(),
   title: z.string(),
   scheduleLabel: z.string(),
+  canRun: z.boolean().default(true),
   isRunning: z.boolean(),
   lastStatus: z.enum(["success", "partial", "failed", "skipped"]).nullable(),
   lastExecutionAt: z.string().nullable(),
@@ -39,6 +40,7 @@ const jobMonitorDetailSchema = z.object({
   jobKey: z.string(),
   title: z.string(),
   scheduleLabel: z.string(),
+  canRun: z.boolean().default(true),
   isRunning: z.boolean(),
   lastStatus: z.enum(["success", "partial", "failed", "skipped"]).nullable(),
   lastExecutionAt: z.string().nullable(),
@@ -105,12 +107,6 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 export type JobMonitorSummary = z.infer<typeof jobMonitorSummarySchema>;
 export type JobExecutionDetail = z.infer<typeof jobExecutionDetailSchema>;
 export type JobMonitorDetail = z.infer<typeof jobMonitorDetailSchema>;
-
-export const JOB_KEYS = [
-  "patentamientos-import",
-  "unidades-dealers-sync",
-  "facturas-anticipo",
-] as const;
 
 export const getJobsMonitor = async () => {
   try {

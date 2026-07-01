@@ -46,6 +46,11 @@ export type RoleAccessKey =
   | "comercial.testDriveRegistro.updateOwn"
   | "comercial.testDriveRegistro.deleteOwn"
   | "comercial.testDriveRegistro.deleteManaged"
+  | "comercial.minutas.read"
+  | "comercial.minutas.create"
+  | "comercial.minutas.update"
+  | "comercial.minutas.delete"
+  | "comercial.minutas.pdf"
   | "planAhorro.testDriveRegistro.read"
   | "planAhorro.testDriveRegistro.create"
   | "planAhorro.testDriveRegistro.updateOwn"
@@ -112,6 +117,11 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.create",
     "comercial.testDriveRegistro.updateOwn",
     "comercial.testDriveRegistro.deleteOwn",
+    "comercial.minutas.read",
+    "comercial.minutas.create",
+    "comercial.minutas.update",
+    "comercial.minutas.delete",
+    "comercial.minutas.pdf",
     "usados.stockDisponible",
     "usados.misOperaciones",
     "liess.stockDisponible",
@@ -147,6 +157,11 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.updateOwn",
     "comercial.testDriveRegistro.deleteOwn",
     "comercial.testDriveRegistro.deleteManaged",
+    "comercial.minutas.read",
+    "comercial.minutas.create",
+    "comercial.minutas.update",
+    "comercial.minutas.delete",
+    "comercial.minutas.pdf",
     "usados.stockDisponible",
     "usados.stockReservado",
     "usados.misOperaciones",
@@ -187,6 +202,11 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.testDriveRegistro.updateOwn",
     "comercial.testDriveRegistro.deleteOwn",
     "comercial.testDriveRegistro.deleteManaged",
+    "comercial.minutas.read",
+    "comercial.minutas.create",
+    "comercial.minutas.update",
+    "comercial.minutas.delete",
+    "comercial.minutas.pdf",
     "usados.stockDisponible",
     "usados.stockReservado",
     "usados.misOperaciones",
