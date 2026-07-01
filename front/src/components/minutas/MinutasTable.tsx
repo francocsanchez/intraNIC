@@ -1,6 +1,6 @@
 import MinutaPdfButton from "@/components/minutas/MinutaPdfButton";
 import type { Minuta } from "@/types/index";
-import { Eye, Mail, Trash2 } from "lucide-react";
+import { Mail, Pencil, Trash2 } from "lucide-react";
 
 type MinutasTableProps = {
   deletingId?: string | null;
@@ -8,21 +8,25 @@ type MinutasTableProps = {
   sendingId?: string | null;
   items: Minuta[];
   canDelete: (item: Minuta) => boolean;
+  canEdit: (item: Minuta) => boolean;
+  canSend: (item: Minuta) => boolean;
   onDelete: (item: Minuta) => void;
   onDownloadPdf: (item: Minuta) => void;
+  onEdit: (item: Minuta) => void;
   onSend: (item: Minuta) => void;
-  onView: (item: Minuta) => void;
 };
 
 export default function MinutasTable({
+  canEdit,
   canDelete,
+  canSend,
   deletingId,
   downloadingId,
   items,
   onDelete,
   onDownloadPdf,
+  onEdit,
   onSend,
-  onView,
   sendingId,
 }: MinutasTableProps) {
   return (
@@ -58,27 +62,31 @@ export default function MinutasTable({
                 <td className="px-4 py-3 text-center text-gray-700">{item.temasCount}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onView(item)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
-                    >
-                      <Eye size={14} />
-                      Ver
-                    </button>
                     <MinutaPdfButton
                       loading={downloadingId === item._id}
                       onClick={() => onDownloadPdf(item)}
                     />
-                    <button
-                      type="button"
-                      onClick={() => onSend(item)}
-                      disabled={sendingId === item._id}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Mail size={14} />
-                      {sendingId === item._id ? "Enviando..." : "Enviar"}
-                    </button>
+                    {canEdit(item) ? (
+                      <button
+                        type="button"
+                        onClick={() => onEdit(item)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                      >
+                        <Pencil size={14} />
+                        Editar
+                      </button>
+                    ) : null}
+                    {canSend(item) ? (
+                      <button
+                        type="button"
+                        onClick={() => onSend(item)}
+                        disabled={sendingId === item._id}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Mail size={14} />
+                        {sendingId === item._id ? "Enviando..." : "Enviar"}
+                      </button>
+                    ) : null}
                     {canDelete(item) ? (
                       <button
                         type="button"

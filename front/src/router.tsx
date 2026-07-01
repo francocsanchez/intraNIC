@@ -67,6 +67,7 @@ const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"
 const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailView"));
 const MinutasView = lazy(() => import("./views/comercial/MinutasView"));
 const MinutaCreateView = lazy(() => import("./views/comercial/MinutaCreateView"));
+const MinutaEditView = lazy(() => import("./views/comercial/MinutaEditView"));
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
@@ -192,6 +193,7 @@ export default function Router() {
             <Route element={<NICLayout />}>
               <Route path={paths.convencional.minutas} element={<MinutasView />} />
               <Route path={paths.convencional.minutasNueva} element={<MinutaCreateView />} />
+              <Route path={paths.convencional.minutasEditarRoute} element={<MinutaEditView />} />
             </Route>
           </Route>
 

@@ -14,6 +14,7 @@ export interface IMinuta extends Document {
   temario: IMinutaTemario[];
   createdBy: Types.ObjectId;
   updatedBy?: Types.ObjectId | null;
+  sentAt?: Date | null;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -90,6 +91,11 @@ const minutaSchema = new Schema<IMinuta>(
       type: Schema.Types.ObjectId,
       ref: "users",
       default: null,
+    },
+    sentAt: {
+      type: Date,
+      default: null,
+      index: true,
     },
     deletedAt: {
       type: Date,

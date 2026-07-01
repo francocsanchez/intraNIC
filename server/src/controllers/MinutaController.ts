@@ -31,6 +31,8 @@ const buildUserSummary = (value: any) => ({
 const buildFullName = (value: { name?: string; lastName?: string } | null | undefined) =>
   [value?.lastName ?? "", value?.name ?? ""].filter(Boolean).join(", ");
 
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
 const buildMinutaResponse = (item: any) => ({
   _id: String(item._id),
   fecha: new Date(item.fecha).toISOString(),
@@ -50,6 +52,7 @@ const buildMinutaResponse = (item: any) => ({
       }))
     : [],
   createdBy: String(item.createdBy ?? ""),
+  sentAt: item.sentAt ? new Date(item.sentAt).toISOString() : null,
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
 });
@@ -167,7 +170,7 @@ const getMinutaEmailRecipients = (item: any) => {
       email: typeof user?.email === "string" ? user.email.trim().toLowerCase() : "",
       name: buildFullName(user),
     }))
-    .filter((user) => user.email);
+    .filter((user) => user.email && isValidEmail(user.email));
 
   const uniqueRecipients = new Map<string, { email: string; name: string }>();
 
@@ -273,14 +276,42 @@ export class MinutaController {
         return res.status(401).json({ error: "Usuario no autenticado" });
       }
 
-      const minuta = await Minuta.findOne({ _id: String(req.params.id), deletedAt: null }).select("_id");
+      const minuta = await Minuta.findOne({ _id: String(req.params.id), deletedAt: null });
 
       if (!minuta) {
         return res.status(404).json({ error: "Minuta no encontrada" });
       }
 
-      return res.status(403).json({
-        error: "La minuta no puede editarse una vez creada",
+      if (String(minuta.createdBy) !== String(req.user._id)) {
+        return res.status(403).json({
+          error: "Solo el usuario creador puede editar esta minuta",
+        });
+      }
+
+      if (minuta.sentAt) {
+        return res.status(403).json({
+          error: "La minuta no puede editarse porque ya fue enviada por email",
+        });
+      }
+
+      const validated = await validatePayload(req.body ?? {});
+      if ("error" in validated) {
+        return res.status(400).json({ error: validated.error });
+      }
+
+      minuta.fecha = validated.data.fecha;
+      minuta.tema = validated.data.tema;
+      minuta.participantes = validated.data.participantes;
+      minuta.temario = validated.data.temario;
+      minuta.updatedBy = new mongoose.Types.ObjectId(req.user._id);
+
+      await minuta.save();
+
+      const populated = await findActiveMinutaById(String(minuta._id));
+
+      return res.status(200).json({
+        message: "Minuta actualizada correctamente",
+        data: populated ? buildMinutaResponse(populated) : null,
       });
     } catch (error) {
       logError("MinutaController.update");
@@ -307,9 +338,13 @@ export class MinutaController {
         });
       }
 
-      minuta.deletedAt = new Date();
-      minuta.updatedBy = new mongoose.Types.ObjectId(req.user._id);
-      await minuta.save();
+      if (minuta.sentAt) {
+        return res.status(403).json({
+          error: "La minuta no puede eliminarse porque ya fue enviada por email",
+        });
+      }
+
+      await Minuta.deleteOne({ _id: minuta._id });
 
       return res.status(200).json({
         message: "Minuta eliminada correctamente",
@@ -367,6 +402,18 @@ export class MinutaController {
         return res.status(404).json({ error: "Minuta no encontrada" });
       }
 
+      if (String(data.createdBy) !== String(req.user._id)) {
+        return res.status(403).json({
+          error: "Solo el usuario creador puede enviar esta minuta por email",
+        });
+      }
+
+      if (data.sentAt) {
+        return res.status(403).json({
+          error: "La minuta ya fue enviada por email",
+        });
+      }
+
       const response = buildMinutaResponse(data);
       const pdfBuffer = await generateMinutaPdfBuffer({
         _id: response._id,
@@ -386,34 +433,58 @@ export class MinutaController {
         });
       }
 
-      await Promise.all(
-        recipients.map((recipient) =>
-          sendMail({
-            to: recipient.email,
-            subject: `Minuta interna - ${response.fechaLabel}`,
-            html: buildMinutaMailTemplate({
-              fechaLabel: response.fechaLabel,
-              moderador: buildFullName(response.moderador),
-              tema: response.tema,
-              toName: recipient.name || "equipo",
-            }),
-            attachments: [
-              {
-                filename: `minuta-${response.fechaLabel.replace(/\//g, "-")}.pdf`,
-                content: pdfBuffer,
-                contentType: "application/pdf",
-              },
-            ],
+      const recipientEmails = recipients.map((recipient) => recipient.email);
+      const primaryRecipient = recipientEmails[0];
+      const hiddenRecipients = recipientEmails.slice(1);
+
+      try {
+        await sendMail({
+          to: primaryRecipient,
+          bcc: hiddenRecipients.length ? hiddenRecipients : undefined,
+          subject: `Minuta interna - ${response.fechaLabel}`,
+          html: buildMinutaMailTemplate({
+            fechaLabel: response.fechaLabel,
+            moderador: buildFullName(response.moderador),
+            tema: response.tema,
+            toName: "equipo",
           }),
-        ),
+          attachments: [
+            {
+              filename: `minuta-${response.fechaLabel.replace(/\//g, "-")}.pdf`,
+              content: pdfBuffer,
+              contentType: "application/pdf",
+            },
+          ],
+        });
+      } catch (mailError) {
+        console.error(
+          `[minutas-email] error enviando minuta ${response._id} a: ${recipientEmails.join(", ")}`,
+        );
+        console.error(mailError);
+
+        return res.status(500).json({
+          message: `No se pudo enviar la minuta a los destinatarios configurados`,
+        });
+      }
+
+      await Minuta.updateOne(
+        { _id: response._id, sentAt: null },
+        {
+          $set: {
+            sentAt: new Date(),
+            updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          },
+        },
       );
+
+      const updatedMinuta = await findActiveMinutaById(response._id);
 
       console.log(
         `[minutas-email] minuta ${response._id} enviada a ${recipients.length} destinatario(s): ${recipients.map((recipient) => recipient.email).join(", ")}`,
       );
 
       return res.status(200).json({
-        data: null,
+        data: updatedMinuta ? buildMinutaResponse(updatedMinuta) : null,
         message: `Minuta enviada correctamente a ${recipients.length} destinatario(s)`,
       });
     } catch (error) {

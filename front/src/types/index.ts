@@ -1276,6 +1276,7 @@ export const minutaSchema = z.object({
   temasCount: z.number(),
   temario: z.array(minutaTemarioSchema),
   createdBy: z.string(),
+  sentAt: z.string().nullable().optional().default(null),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

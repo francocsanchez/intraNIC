@@ -4,7 +4,6 @@ import {
   getMinutas,
   sendMinutaByEmail,
 } from "@/api/dms/minutasAPI";
-import MinutaDetailModal from "@/components/minutas/MinutaDetailModal";
 import MinutasTable from "@/components/minutas/MinutasTable";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -28,7 +27,6 @@ export default function MinutasView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [detailItem, setDetailItem] = useState<Minuta | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
 
@@ -47,7 +45,10 @@ export default function MinutasView() {
   });
 
   const items = useMemo(() => data?.data ?? [], [data]);
-  const canDelete = (item: Minuta) => item.createdBy === user?._id;
+  const isOwner = (item: Minuta) => item.createdBy === user?._id;
+  const canEdit = (item: Minuta) => isOwner(item) && !item.sentAt;
+  const canDelete = (item: Minuta) => isOwner(item) && !item.sentAt;
+  const canSend = (item: Minuta) => isOwner(item);
 
   const handleDelete = (item: Minuta) => {
     const confirmed = window.confirm(`¿Eliminar la minuta "${item.tema}"?`);
@@ -73,6 +74,7 @@ export default function MinutasView() {
       setSendingId(item._id);
       const response = await sendMinutaByEmail(item._id);
       toast.success(response.message || "Minuta enviada correctamente");
+      queryClient.invalidateQueries({ queryKey: ["minutas"] });
     } catch (sendError) {
       toast.error(sendError instanceof Error ? sendError.message : "Error al enviar la minuta por email");
     } finally {
@@ -122,14 +124,16 @@ export default function MinutasView() {
       </section>
 
       <MinutasTable
+        canEdit={canEdit}
         canDelete={canDelete}
+        canSend={canSend}
         deletingId={deleteMutation.variables ?? null}
         downloadingId={downloadingId}
         items={items}
         onDelete={handleDelete}
         onDownloadPdf={handleDownloadPdf}
+        onEdit={(item) => navigate(paths.convencional.minutasEditar(item._id))}
         onSend={handleSend}
-        onView={setDetailItem}
         sendingId={sendingId}
       />
 
@@ -155,12 +159,6 @@ export default function MinutasView() {
           </article>
         </section>
       ) : null}
-
-      <MinutaDetailModal
-        item={detailItem}
-        onClose={() => setDetailItem(null)}
-        open={Boolean(detailItem)}
-      />
     </div>
   );
 }

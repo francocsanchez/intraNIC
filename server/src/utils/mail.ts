@@ -35,7 +35,9 @@ const getTransporter = () => {
 };
 
 export type MailOptions = {
-  to: string;
+  bcc?: string | string[];
+  cc?: string | string[];
+  to: string | string[];
   subject: string;
   html: string;
   attachments?: Array<{
@@ -111,6 +113,8 @@ export async function sendMail(data: MailOptions) {
 
   await transporter.sendMail({
     from: `"${fromName}" <${fromEmail}>`,
+    bcc: data.bcc,
+    cc: data.cc,
     to: data.to,
     subject: data.subject,
     html: data.html,
