@@ -213,6 +213,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "liess.stockDisponible",
     "analisis.operaciones",
     "analisis.patentamientos",
+    "sistema.configuracion",
     "sistema.testDrive",
   ]),
   administracion: new Set<RoleAccessKey>([

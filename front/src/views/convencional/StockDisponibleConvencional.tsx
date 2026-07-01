@@ -99,6 +99,17 @@ export default function StockDisponibleConvencional() {
     return itemsFiltrados.filter((item) => normalizarUbicacion(item.ubicacion) === ubicacionActiva);
   }, [itemsFiltrados, ubicacionActiva]);
 
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    date.setDate(date.getDate() + 10);
+
+    return new Intl.DateTimeFormat("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  };
+
   if (isLoading || configLoading || authLoading) {
     return (
       <div className="w-full px-4 py-6 space-y-6">
@@ -250,6 +261,7 @@ export default function StockDisponibleConvencional() {
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Version</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepcion</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Observaciones</th>
               </tr>
             </thead>
@@ -277,13 +289,14 @@ export default function StockDisponibleConvencional() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
+                  <td className="px-4 py-2 text-gray-700">{formatDate(item.fechaRecepcion)}</td>
                   <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
                 </tr>
               ))}
 
               {itemsVisibles.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>

@@ -133,6 +133,9 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.analisis.registros,
     /^\/analisis\/patentamientos(?:\/.*)?$/,
     paths.admin.testDrive,
+    paths.admin.configuracion,
+    paths.admin.configuracionConvencionalEditar,
+    paths.admin.configuracionUsadosEditar,
     paths.entregas.registros,
   ],
   administracion: [
@@ -320,4 +323,13 @@ export function hasEntregaAgendaToggleAccess(user: AuthUser) {
   }
 
   return getNormalizedRoles(user).includes("entrega");
+}
+
+export function hasSystemConfigToggleAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
 }

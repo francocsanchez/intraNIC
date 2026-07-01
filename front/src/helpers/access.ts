@@ -6,6 +6,7 @@ import {
   hasPathAccess,
   hasPreventaActionAccess,
   hasRegistroTestDriveActionAccess,
+  hasSystemConfigToggleAccess,
   hasSuperAdminRole,
 } from "@/constants/roleAccess";
 
@@ -75,5 +76,6 @@ export {
   hasPathAccess,
   hasPreventaActionAccess,
   hasRegistroTestDriveActionAccess,
+  hasSystemConfigToggleAccess,
   hasSuperAdminRole,
 };
