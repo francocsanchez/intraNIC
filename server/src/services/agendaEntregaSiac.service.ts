@@ -13,6 +13,7 @@ type LookupConvencionalRow = {
   operacion?: number | null;
   vendedor: string;
   cliente: string;
+  telefono?: string | null;
   version?: string | null;
   modelo?: string | null;
   chasis?: string | null;
@@ -25,6 +26,7 @@ type LookupPlanAhorroRow = {
   interno: number;
   estado: number;
   cliente: string;
+  telefono?: string | null;
   vendedor: string;
   version?: string | null;
   modelo?: string | null;
@@ -44,6 +46,7 @@ export type AgendaEntregaLookup = {
   grupo?: number;
   orden?: number;
   cliente: string;
+  telefono?: string;
   vendedor: string;
   version?: string;
   modelo?: string;
@@ -80,6 +83,7 @@ const mapConvencionalRow = (row: LookupConvencionalRow): AgendaEntregaLookup => 
   version: normalizeOptionalText(row.version),
   modelo: normalizeOptionalText(row.modelo),
   cliente: normalizeText(row.cliente),
+  telefono: normalizeOptionalText(row.telefono),
   vendedor: normalizeText(row.vendedor),
   chasis: normalizeOptionalText(row.chasis),
   nroFabricacion: normalizeOptionalText(row.nroFabricacion),
@@ -99,6 +103,7 @@ const mapPlanAhorroRow = (row: LookupPlanAhorroRow): AgendaEntregaLookup => ({
       ? Number(row.orden)
       : undefined,
   cliente: normalizeText(row.cliente),
+  telefono: normalizeOptionalText(row.telefono),
   vendedor: normalizeText(row.vendedor),
   version: normalizeOptionalText(row.version),
   modelo: normalizeOptionalText(row.modelo),

@@ -13,6 +13,7 @@ const detailRows = (data: AgendaEntregaLookup) => [
     value: data.operacion ?? (data.grupo && data.orden ? `[${data.grupo} | ${data.orden}]` : "-"),
   },
   { label: "Cliente", value: data.cliente },
+  { label: "Telefono", value: data.telefono ?? "-" },
   { label: "Vendedor", value: data.vendedor },
   { label: "Modelo", value: data.modelo ?? "-" },
   { label: "Version", value: data.version ?? "-" },

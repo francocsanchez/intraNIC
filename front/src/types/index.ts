@@ -1313,6 +1313,7 @@ export const agendaEntregaLookupSchema = z.object({
   grupo: z.number().nullable().optional(),
   orden: z.number().nullable().optional(),
   cliente: z.string(),
+  telefono: z.string().nullable().optional(),
   vendedor: z.string(),
   version: z.string().nullable().optional(),
   modelo: z.string().nullable().optional(),
@@ -1354,6 +1355,7 @@ export const agendaEntregaSiacSchema = z.object({
   grupo: z.number().nullable().optional(),
   orden: z.number().nullable().optional(),
   cliente: z.string(),
+  telefono: z.string().nullable().optional(),
   vendedor: z.string(),
   version: z.string().nullable().optional(),
   modelo: z.string().nullable().optional(),
@@ -1378,6 +1380,7 @@ export const agendaEntregaSchema = z.object({
   horaAgenda: z.string(),
   equipado: z.boolean(),
   entregaUsado: z.boolean(),
+  siniestro: z.boolean(),
   entregadaPorMarcada: z.boolean(),
   entregadaPorUser: z.string().nullable().optional(),
   entregadaPorNombre: z.string().optional().default(""),
@@ -1438,6 +1441,40 @@ export const agendaEntregaLogListResponseSchema = z.object({
   pagination: paginationSchema,
 });
 
+export const pendienteTurnarSchema = z.object({
+  _id: z.string(),
+  interno: z.number(),
+  tipoOperacion: z.string().default(""),
+  sucursal: z.object({
+    _id: z.string(),
+    nombre: z.string(),
+    direccion: z.string().optional().default(""),
+    activa: z.boolean(),
+  }).nullable(),
+  equipado: z.boolean(),
+  entregaUsado: z.boolean(),
+  siniestro: z.boolean(),
+  observaciones: z.string().optional().default(""),
+  createdBy: z.string(),
+  createdByName: z.string(),
+  updatedBy: z.string().nullable().optional(),
+  updatedByName: z.string().optional().default(""),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  siac: agendaEntregaSiacSchema.nullable().optional(),
+  siacSyncError: z.boolean(),
+  siacSyncMessage: z.string().optional().default(""),
+});
+
+export const pendienteTurnarListResponseSchema = z.object({
+  data: z.array(pendienteTurnarSchema),
+});
+
+export const pendienteTurnarResponseSchema = z.object({
+  data: pendienteTurnarSchema.nullable().optional(),
+  message: z.string(),
+});
+
 export type AgendaEntregaLookup = z.infer<typeof agendaEntregaLookupSchema>;
 export type AgendaEntrega = z.infer<typeof agendaEntregaSchema>;
 export type AgendaEntregaResponse = z.infer<typeof agendaEntregaResponseSchema>;
@@ -1447,6 +1484,9 @@ export type SucursalEntregaResponse = z.infer<typeof sucursalEntregaResponseSche
 export type AgendaEntregaListResponse = z.infer<typeof agendaEntregaListResponseSchema>;
 export type AgendaEntregaLog = z.infer<typeof agendaEntregaLogSchema>;
 export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListResponseSchema>;
+export type PendienteTurnar = z.infer<typeof pendienteTurnarSchema>;
+export type PendienteTurnarListResponse = z.infer<typeof pendienteTurnarListResponseSchema>;
+export type PendienteTurnarResponse = z.infer<typeof pendienteTurnarResponseSchema>;
 
 //**************************** */
 // CALL CENTER

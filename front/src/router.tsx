@@ -76,6 +76,7 @@ const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/Inscri
 const PatentamientosRegistrosView = lazy(() => import("./views/patentamientos/PatentamientosRegistrosView"));
 const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosPlanAhorroView"));
 const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"));
+const PendientesTurnarView = lazy(() => import("./views/entregas/PendientesTurnarView"));
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 const CallCenterImportView = lazy(() => import("./views/callCenter/CallCenterImportView"));
@@ -108,6 +109,7 @@ export default function Router() {
             <Route element={<ModuleProtectedRoute allowedModules={["agendaEntrega"]} />}>
               <Route element={<EntregasLayout />}>
                 <Route path={paths.entregas.agenda} element={<AgendaEntregaView />} />
+                <Route path={paths.entregas.pendientesTurnar} element={<PendientesTurnarView />} />
                 <Route path={paths.entregas.sucursales} element={<SucursalesEntregaView />} />
                 <Route path={paths.entregas.registros} element={<AgendaEntregaRegistrosView />} />
               </Route>

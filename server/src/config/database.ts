@@ -2,6 +2,8 @@ import colors from "colors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
+import { syncAgendaEntregaIndexes } from "../models/AgendaEntrega";
+import { syncPendienteTurnarIndexes } from "../models/PendienteTurnar";
 
 dotenv.config();
 const separator = colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -61,6 +63,8 @@ export const authenticateSQL = async (sequelize: Sequelize, name: string) => {
 export const connectMongo = async () => {
   try {
     const connection = await mongoose.connect(process.env.DATABASE_MONGO!);
+    await syncAgendaEntregaIndexes();
+    await syncPendienteTurnarIndexes();
     console.log("\n" + colors.bgGreen.white.bold(" 🍃 MONGODB "));
     console.log(separator);
     console.log(`${colors.yellow("🌐 Host:")} ${colors.white(`${connection.connection.host}:${connection.connection.port}`)}`);

@@ -1,6 +1,6 @@
 import type { AgendaEntrega } from "@/types/index";
 import { textToColor } from "@/helpers/colores";
-import { Pencil, Trash2, AlertTriangle, Package, CarFront, CalendarPlus } from "lucide-react";
+import { Pencil, Trash2, AlertTriangle, Package, CarFront, CalendarPlus, ShieldAlert } from "lucide-react";
 
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
@@ -242,6 +242,12 @@ export default function AgendaEntregaTable({
                             <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
                               <CarFront size={12} />
                               Entrega usado
+                            </div>
+                          ) : null}
+                          {item.siniestro ? (
+                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-red-700">
+                              <ShieldAlert size={12} />
+                              Siniestro
                             </div>
                           ) : null}
                         </>

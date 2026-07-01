@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import AgendaEntrega from "../models/AgendaEntrega";
+import PendienteTurnar from "../models/PendienteTurnar";
 import SucursalEntrega from "../models/SucursalEntrega";
 import { hasSuperAdminRole } from "../constants/roleAccess";
 import { logError } from "../utils/logError";
@@ -201,6 +202,13 @@ export class SucursalEntregaController {
       if (agendaExists) {
         return res.status(409).json({
           error: "No se puede eliminar una sucursal que ya tiene agendas asociadas",
+        });
+      }
+
+      const pendientesExists = await PendienteTurnar.exists({ sucursal: sucursal._id });
+      if (pendientesExists) {
+        return res.status(409).json({
+          error: "No se puede eliminar una sucursal que ya tiene pendientes de turnar asociados",
         });
       }
 

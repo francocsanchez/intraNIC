@@ -93,6 +93,12 @@ export default function Inicio() {
           enabled: hasModulePathAccess(user, "agendaEntrega", paths.entregas.agenda),
           icon: CalendarDays,
         },
+        {
+          label: "Pendientes de turnar",
+          to: paths.entregas.pendientesTurnar,
+          enabled: hasModulePathAccess(user, "agendaEntrega", paths.entregas.pendientesTurnar),
+          icon: CalendarDays,
+        },
       ],
     },
     {

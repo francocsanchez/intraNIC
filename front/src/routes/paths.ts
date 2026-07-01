@@ -11,6 +11,7 @@ export const paths = {
   },
   entregas: {
     agenda: "/entregas/agenda",
+    pendientesTurnar: "/entregas/pendientes-turnar",
     sucursales: "/entregas/sucursales",
     registros: "/entregas/registros",
   },

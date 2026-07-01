@@ -3,13 +3,18 @@ import { hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { Link, useLocation } from "react-router-dom";
 import { paths } from "@/routes/paths";
-import { CalendarDays, Building2, History } from "lucide-react";
+import { CalendarDays, Building2, History, ListTodo } from "lucide-react";
 
 const navItems = [
   {
     label: "Agenda de entrega",
     to: paths.entregas.agenda,
     icon: CalendarDays,
+  },
+  {
+    label: "Pendientes de turnar",
+    to: paths.entregas.pendientesTurnar,
+    icon: ListTodo,
   },
   {
     label: "Sucursales de entrega",

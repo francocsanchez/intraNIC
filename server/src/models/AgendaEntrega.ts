@@ -12,6 +12,7 @@ export interface IAgendaEntrega extends Document {
   horaAgenda: string;
   equipado: boolean;
   entregaUsado: boolean;
+  siniestro: boolean;
   entregadaPorMarcada: boolean;
   entregadaPorUser?: Types.ObjectId | null;
   entregadaPorNombre?: string;
@@ -63,6 +64,10 @@ const agendaEntregaSchema = new Schema<IAgendaEntrega>(
       default: false,
     },
     entregaUsado: {
+      type: Boolean,
+      default: false,
+    },
+    siniestro: {
       type: Boolean,
       default: false,
     },
@@ -120,15 +125,32 @@ agendaEntregaSchema.index(
     partialFilterExpression: { tipoRegistro: "turno" },
   },
 );
-agendaEntregaSchema.index(
-  { sucursal: 1, fechaAgenda: 1, horaAgenda: 1 },
-  { unique: true },
-);
 agendaEntregaSchema.index({ fechaAgenda: 1, sucursal: 1 });
 
 const AgendaEntrega = mongoose.model<IAgendaEntrega>(
   "agendas_entrega",
   agendaEntregaSchema,
 );
+
+const LEGACY_SLOT_UNIQUE_INDEX = "sucursal_1_fechaAgenda_1_horaAgenda_1";
+
+export const syncAgendaEntregaIndexes = async () => {
+  try {
+    await AgendaEntrega.collection.dropIndex(LEGACY_SLOT_UNIQUE_INDEX);
+  } catch (error: any) {
+    const codeName = typeof error?.codeName === "string" ? error.codeName : "";
+    const message = typeof error?.message === "string" ? error.message : "";
+    const indexMissing =
+      codeName === "IndexNotFound" ||
+      message.includes("index not found") ||
+      message.includes("ns not found");
+
+    if (!indexMissing) {
+      throw error;
+    }
+  }
+
+  await AgendaEntrega.syncIndexes();
+};
 
 export default AgendaEntrega;

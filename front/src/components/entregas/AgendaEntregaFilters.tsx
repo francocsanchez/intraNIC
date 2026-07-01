@@ -1,4 +1,5 @@
 import type { SucursalEntrega } from "@/types/index";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type AgendaEntregaFiltersProps = {
   fecha: string;
@@ -13,9 +14,18 @@ export default function AgendaEntregaFilters({
   sucursales,
   onChange,
 }: AgendaEntregaFiltersProps) {
+  const shiftDate = (direction: -1 | 1) => {
+    const baseDate = fecha ? new Date(`${fecha}T00:00:00`) : new Date();
+    baseDate.setDate(baseDate.getDate() + direction);
+    const year = baseDate.getFullYear();
+    const month = String(baseDate.getMonth() + 1).padStart(2, "0");
+    const day = String(baseDate.getDate()).padStart(2, "0");
+    onChange({ fecha: `${year}-${month}-${day}`, sucursalId });
+  };
+
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,320px)_180px_160px]">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,320px)_minmax(220px,280px)]">
         <div className="space-y-1">
           <label htmlFor="agenda-sucursal" className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
             Sucursal
@@ -39,23 +49,31 @@ export default function AgendaEntregaFilters({
           <label htmlFor="agenda-fecha" className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
             Fecha
           </label>
-          <input
-            id="agenda-fecha"
-            type="date"
-            value={fecha}
-            onChange={(event) => onChange({ fecha: event.target.value, sucursalId })}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-900 outline-none focus:border-gray-500"
-          />
-        </div>
-
-        <div className="flex items-end">
-          <button
-            type="button"
-            onClick={() => onChange({ fecha: "", sucursalId })}
-            className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
-          >
-            Limpiar fecha
-          </button>
+          <div className="grid grid-cols-[40px_1fr_40px] gap-2">
+            <button
+              type="button"
+              onClick={() => shiftDate(-1)}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+              aria-label="Dia anterior"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <input
+              id="agenda-fecha"
+              type="date"
+              value={fecha}
+              onChange={(event) => onChange({ fecha: event.target.value, sucursalId })}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-900 outline-none focus:border-gray-500"
+            />
+            <button
+              type="button"
+              onClick={() => shiftDate(1)}
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+              aria-label="Dia siguiente"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </section>

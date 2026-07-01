@@ -1,39 +1,32 @@
 import {
-  convertReservaEntrega,
-  createAgendaEntrega,
+  createPendienteTurnar,
   getAgendaEntregaLookup,
-  turnarPendienteTurnar,
-  updateAgendaEntrega,
-  type AgendaEntregaPayload,
-  type ReservaEntregaConvertPayload,
+  updatePendienteTurnar,
+  type PendienteTurnarPayload,
 } from "@/api/entregasAPI";
 import InternoLookupCard from "@/components/entregas/InternoLookupCard";
 import { hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
-import type { AgendaEntrega, AgendaEntregaLookup, PendienteTurnar, SucursalEntrega } from "@/types/index";
+import type { AgendaEntregaLookup, PendienteTurnar, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-type AgendaEntregaFormValues = {
+type PendienteTurnarFormValues = {
   interno?: number;
   sucursal: string;
-  fechaAgenda: string;
-  horaAgenda: string;
   equipado: boolean;
   entregaUsado: boolean;
   siniestro: boolean;
   observaciones: string;
 };
 
-type AgendaEntregaFormProps = {
+type PendienteTurnarFormProps = {
   open: boolean;
-  item: AgendaEntrega | null;
-  reservationToConvert?: AgendaEntrega | null;
-  pendingToSchedule?: PendienteTurnar | null;
+  item: PendienteTurnar | null;
   sucursales: SucursalEntrega[];
   onClose: () => void;
 };
@@ -43,48 +36,31 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-red-600">{message}</p>;
 }
 
-const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
-  const totalMinutes = 8 * 60 + index * 30;
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-  const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${hours}:${minutes}`;
-});
-
-export default function AgendaEntregaForm({
+export default function PendienteTurnarForm({
   open,
   item,
-  reservationToConvert = null,
-  pendingToSchedule = null,
   sucursales,
   onClose,
-}: AgendaEntregaFormProps) {
+}: PendienteTurnarFormProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(
-    item?.tipoRegistro === "turno" ? (item.siac ?? null) : null,
-  );
+  const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(item?.siac ?? null);
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const isSuperAdmin = hasSuperAdminRole(user);
   const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
-  const isEditing = Boolean(item && item.tipoRegistro === "turno");
-  const isConvertingReservation = Boolean(reservationToConvert);
-  const isSchedulingPending = Boolean(pendingToSchedule);
+  const isEditing = Boolean(item);
 
   const {
     register,
     handleSubmit,
     reset,
     getValues,
-    setValue,
-    watch,
     formState: { errors },
-  } = useForm<AgendaEntregaFormValues>({
+  } = useForm<PendienteTurnarFormValues>({
     defaultValues: {
       interno: undefined,
       sucursal: "",
-      fechaAgenda: "",
-      horaAgenda: "",
       equipado: false,
       entregaUsado: false,
       siniestro: false,
@@ -92,46 +68,29 @@ export default function AgendaEntregaForm({
     },
   });
 
-  const selectedSucursalId = watch("sucursal");
-  const selectedHour = watch("horaAgenda");
-
   useEffect(() => {
     if (!open) return;
 
-    const defaultSucursal = !item && !reservationToConvert && !pendingToSchedule && !isSuperAdmin ? assignedSucursalId : "";
-    const source = reservationToConvert ?? pendingToSchedule ?? item;
-    const sourceFechaAgenda = reservationToConvert?.fechaAgenda ?? item?.fechaAgenda ?? "";
-    const sourceHoraAgenda = reservationToConvert?.horaAgenda ?? item?.horaAgenda ?? "";
+    const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
 
     reset({
-      interno: pendingToSchedule?.interno ?? (item?.tipoRegistro === "turno" ? item.interno ?? undefined : undefined),
-      sucursal: source?.sucursal?._id ?? defaultSucursal,
-      fechaAgenda: sourceFechaAgenda,
-      horaAgenda: sourceHoraAgenda,
-      equipado:
-        pendingToSchedule?.equipado ??
-        (item?.tipoRegistro === "turno" ? item.equipado : false),
-      entregaUsado:
-        pendingToSchedule?.entregaUsado ??
-        (item?.tipoRegistro === "turno" ? item.entregaUsado : false),
-      siniestro:
-        pendingToSchedule?.siniestro ??
-        (item?.tipoRegistro === "turno" ? item.siniestro : false),
-      observaciones: source?.observaciones ?? "",
+      interno: item?.interno ?? undefined,
+      sucursal: item?.sucursal?._id ?? defaultSucursal,
+      equipado: item?.equipado ?? false,
+      entregaUsado: item?.entregaUsado ?? false,
+      siniestro: item?.siniestro ?? false,
+      observaciones: item?.observaciones ?? "",
     });
-    setLookup(
-      pendingToSchedule?.siac ?? (item?.tipoRegistro === "turno" ? (item.siac ?? null) : null),
-    );
+    setLookup(item?.siac ?? null);
     setLookupError("");
-  }, [assignedSucursalId, isSuperAdmin, item, open, pendingToSchedule, reset, reservationToConvert]);
+  }, [assignedSucursalId, isSuperAdmin, item, open, reset]);
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
-    queryClient.invalidateQueries({ queryKey: ["entregas", "logs"] });
+    queryClient.invalidateQueries({ queryKey: ["entregas", "pendientes-turnar"] });
   };
 
   const createMutation = useMutation({
-    mutationFn: createAgendaEntrega,
+    mutationFn: createPendienteTurnar,
     onSuccess: (response) => {
       toast.success(response.message);
       invalidate();
@@ -141,34 +100,11 @@ export default function AgendaEntregaForm({
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: AgendaEntregaPayload }) =>
-      updateAgendaEntrega(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: PendienteTurnarPayload }) =>
+      updatePendienteTurnar(id, payload),
     onSuccess: (response) => {
       toast.success(response.message);
       invalidate();
-      onClose();
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const convertMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: ReservaEntregaConvertPayload }) =>
-      convertReservaEntrega(id, payload),
-    onSuccess: (response) => {
-      toast.success(response.message);
-      invalidate();
-      onClose();
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const schedulePendingMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: AgendaEntregaPayload }) =>
-      turnarPendienteTurnar(id, payload),
-    onSuccess: (response) => {
-      toast.success(response.message);
-      invalidate();
-      queryClient.invalidateQueries({ queryKey: ["entregas", "pendientes-turnar"] });
       onClose();
     },
     onError: (error: Error) => toast.error(error.message),
@@ -197,116 +133,36 @@ export default function AgendaEntregaForm({
     }
   };
 
-  const onSubmit = (values: AgendaEntregaFormValues) => {
+  const onSubmit = (values: PendienteTurnarFormValues) => {
     if (!lookup || lookup.interno !== Number(values.interno)) {
       toast.error("Debes buscar y validar el interno antes de guardar");
       return;
     }
 
-    const agendaPayload: AgendaEntregaPayload = {
+    const payload: PendienteTurnarPayload = {
       interno: Number(values.interno),
       sucursal: values.sucursal,
-      fechaAgenda: values.fechaAgenda,
-      horaAgenda: values.horaAgenda,
       equipado: Boolean(values.equipado),
       entregaUsado: Boolean(values.entregaUsado),
       siniestro: Boolean(values.siniestro),
       observaciones: values.observaciones?.trim() ?? "",
     };
 
-    if (isConvertingReservation && reservationToConvert) {
-      const convertPayload: ReservaEntregaConvertPayload = {
-        interno: agendaPayload.interno,
-        equipado: agendaPayload.equipado,
-        entregaUsado: agendaPayload.entregaUsado,
-        siniestro: agendaPayload.siniestro,
-        observaciones: agendaPayload.observaciones,
-      };
-
-      convertMutation.mutate({ id: reservationToConvert._id, payload: convertPayload });
-      return;
-    }
-
-    if (isSchedulingPending && pendingToSchedule) {
-      schedulePendingMutation.mutate({ id: pendingToSchedule._id, payload: agendaPayload });
-      return;
-    }
-
     if (isEditing && item) {
-      updateMutation.mutate({ id: item._id, payload: agendaPayload });
+      updateMutation.mutate({ id: item._id, payload });
       return;
     }
 
-    createMutation.mutate(agendaPayload);
+    createMutation.mutate(payload);
   };
 
-  const pending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    convertMutation.isPending ||
-    schedulePendingMutation.isPending;
+  const pending = createMutation.isPending || updateMutation.isPending;
   const activeSucursales = sucursales.filter(
-    (sucursal) =>
-      sucursal.activa ||
-      sucursal._id === item?.sucursal?._id ||
-      sucursal._id === reservationToConvert?.sucursal?._id ||
-      sucursal._id === pendingToSchedule?.sucursal?._id,
+    (sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id,
   );
   const availableSucursales = isSuperAdmin
     ? activeSucursales
     : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
-  const selectedSucursal = useMemo(
-    () => availableSucursales.find((sucursal) => sucursal._id === selectedSucursalId) ?? null,
-    [availableSucursales, selectedSucursalId],
-  );
-  const availableTimeSlots = useMemo(() => {
-    if (!selectedSucursal) {
-      return [];
-    }
-
-    const slots = selectedSucursal.horariosHabilitados.length
-      ? selectedSucursal.horariosHabilitados
-      : TIME_SLOT_OPTIONS;
-
-    const currentSource = reservationToConvert ?? item;
-    if (
-      currentSource?.horaAgenda &&
-      selectedSucursal._id === currentSource.sucursal?._id &&
-      !slots.includes(currentSource.horaAgenda)
-    ) {
-      return [...slots, currentSource.horaAgenda].sort((left, right) => left.localeCompare(right));
-    }
-
-    return slots;
-  }, [item, reservationToConvert, selectedSucursal]);
-
-  useEffect(() => {
-    if (!selectedHour) {
-      return;
-    }
-
-    if (!availableTimeSlots.includes(selectedHour)) {
-      setValue("horaAgenda", "");
-    }
-  }, [availableTimeSlots, selectedHour, setValue]);
-
-  const title = isConvertingReservation
-    ? "Agendar turno desde reserva"
-    : isSchedulingPending
-      ? "Agendar turno desde pendiente"
-    : isEditing
-      ? "Editar agenda de entrega"
-      : "Nuevo turno de entrega";
-
-  const submitLabel = pending
-    ? "Guardando..."
-    : isConvertingReservation
-      ? "Agendar turno"
-      : isSchedulingPending
-        ? "Turnar unidad"
-      : isEditing
-        ? "Guardar cambios"
-        : "Crear agenda";
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -323,7 +179,7 @@ export default function AgendaEntregaForm({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
                     <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
-                      {title}
+                      {isEditing ? "Editar pendiente de turnar" : "Nuevo pendiente de turnar"}
                     </Dialog.Title>
                   </div>
 
@@ -341,14 +197,13 @@ export default function AgendaEntregaForm({
                   <div className="grid grid-cols-1 gap-6 p-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
                       <div className="space-y-2">
-                        <label htmlFor="agenda-interno" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        <label htmlFor="pendiente-interno" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                           Interno
                         </label>
                         <input
-                          id="agenda-interno"
+                          id="pendiente-interno"
                           type="number"
                           inputMode="numeric"
-                          disabled={isSchedulingPending}
                           className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
                           {...register("interno", {
                             required: "El interno es obligatorio",
@@ -378,14 +233,13 @@ export default function AgendaEntregaForm({
                     <InternoLookupCard data={lookup} error={lookupError} loading={lookupLoading} />
 
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <label htmlFor="agenda-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                      <div className="space-y-2 md:col-span-2">
+                        <label htmlFor="pendiente-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                           Sucursal
                         </label>
                         <select
-                          id="agenda-sucursal"
-                          disabled={isConvertingReservation}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
+                          id="pendiente-sucursal"
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
                         >
                           <option value="">-- Selecciona una sucursal --</option>
@@ -396,45 +250,6 @@ export default function AgendaEntregaForm({
                           ))}
                         </select>
                         <FieldError message={errors.sucursal?.message} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label htmlFor="agenda-fecha-agenda" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                          Fecha
-                        </label>
-                        <input
-                          id="agenda-fecha-agenda"
-                          type="date"
-                          disabled={isConvertingReservation}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
-                          {...register("fechaAgenda", { required: "La fecha es obligatoria" })}
-                        />
-                        <FieldError message={errors.fechaAgenda?.message} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label htmlFor="agenda-hora-agenda" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                          Hora
-                        </label>
-                        <select
-                          id="agenda-hora-agenda"
-                          disabled={isConvertingReservation}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500 disabled:bg-gray-100"
-                          {...register("horaAgenda", { required: "La hora es obligatoria" })}
-                        >
-                          <option value="">
-                            {selectedSucursal ? "-- Selecciona un horario --" : "-- Selecciona una sucursal primero --"}
-                          </option>
-                          {availableTimeSlots.map((timeSlot) => (
-                            <option key={timeSlot} value={timeSlot}>
-                              {timeSlot}
-                            </option>
-                          ))}
-                        </select>
-                        <p className="text-xs text-gray-500">
-                          Turnos cada 30 minutos desde las 08:00 hasta las 18:00 segun configuracion de la sucursal.
-                        </p>
-                        <FieldError message={errors.horaAgenda?.message} />
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
@@ -471,11 +286,11 @@ export default function AgendaEntregaForm({
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <label htmlFor="agenda-observaciones" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        <label htmlFor="pendiente-observaciones" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                           Observaciones
                         </label>
                         <textarea
-                          id="agenda-observaciones"
+                          id="pendiente-observaciones"
                           rows={4}
                           className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none focus:border-gray-500"
                           {...register("observaciones")}
@@ -498,7 +313,7 @@ export default function AgendaEntregaForm({
                       disabled={pending}
                       className="rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:opacity-60"
                     >
-                      {submitLabel}
+                      {pending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear pendiente"}
                     </button>
                   </div>
                 </form>

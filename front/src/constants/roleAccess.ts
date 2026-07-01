@@ -193,6 +193,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.callCenter.origenesDatos,
     paths.analisis.registros,
     paths.entregas.agenda,
+    paths.entregas.pendientesTurnar,
     paths.entregas.registros,
   ],
   entrega: [
@@ -201,6 +202,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.noAutorizado,
     paths.analisis.registros,
     paths.entregas.agenda,
+    paths.entregas.pendientesTurnar,
     paths.entregas.registros,
   ],
 };
@@ -243,7 +245,8 @@ export function hasPathAccess(user: AuthUser, path: string) {
   if (
     normalizedPath === paths.convencional.minutas ||
     normalizedPath === paths.convencional.minutasNueva ||
-    /^\/convencional\/minutas\/[^/]+\/editar$/.test(normalizedPath)
+    /^\/convencional\/minutas\/[^/]+\/editar$/.test(normalizedPath) ||
+    normalizedPath === paths.entregas.pendientesTurnar
   ) {
     return true;
   }

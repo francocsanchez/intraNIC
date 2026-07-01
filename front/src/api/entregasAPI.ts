@@ -4,12 +4,16 @@ import {
   agendaEntregaLogListResponseSchema,
   agendaEntregaLookupResponseSchema,
   agendaEntregaResponseSchema,
+  pendienteTurnarListResponseSchema,
+  pendienteTurnarResponseSchema,
   sucursalEntregaListResponseSchema,
   sucursalEntregaResponseSchema,
   type AgendaEntregaListResponse,
   type AgendaEntregaLogListResponse,
   type AgendaEntregaLookup,
   type AgendaEntregaResponse,
+  type PendienteTurnarListResponse,
+  type PendienteTurnarResponse,
   type SucursalEntregaListResponse,
   type SucursalEntregaResponse,
 } from "@/types/index";
@@ -22,6 +26,7 @@ export type AgendaEntregaPayload = {
   horaAgenda: string;
   equipado: boolean;
   entregaUsado: boolean;
+  siniestro: boolean;
   observaciones?: string;
 };
 
@@ -36,6 +41,16 @@ export type ReservaEntregaConvertPayload = {
   interno: number;
   equipado: boolean;
   entregaUsado: boolean;
+  siniestro: boolean;
+  observaciones?: string;
+};
+
+export type PendienteTurnarPayload = {
+  interno: number;
+  sucursal: string;
+  equipado: boolean;
+  entregaUsado: boolean;
+  siniestro: boolean;
   observaciones?: string;
 };
 
@@ -186,6 +201,55 @@ export function getSucursalesEntrega(): Promise<SucursalEntregaListResponse> {
 
     throw error;
   });
+}
+
+export function getPendientesTurnar(params?: {
+  sucursalId?: string;
+}): Promise<PendienteTurnarListResponse> {
+  return parseResponse(
+    api.get("/entregas/pendientes-turnar", { params }),
+    pendienteTurnarListResponseSchema,
+    "Error al obtener pendientes de turnar",
+  ).catch((error) => {
+    if (isEmptyDataError(error)) {
+      return { data: [] };
+    }
+
+    throw error;
+  });
+}
+
+export function createPendienteTurnar(payload: PendienteTurnarPayload): Promise<PendienteTurnarResponse> {
+  return parseResponse(
+    api.post("/entregas/pendientes-turnar", payload),
+    pendienteTurnarResponseSchema,
+    "Error al crear el pendiente de turnar",
+  );
+}
+
+export function updatePendienteTurnar(id: string, payload: PendienteTurnarPayload): Promise<PendienteTurnarResponse> {
+  return parseResponse(
+    api.put(`/entregas/pendientes-turnar/${id}`, payload),
+    pendienteTurnarResponseSchema,
+    "Error al actualizar el pendiente de turnar",
+  );
+}
+
+export function turnarPendienteTurnar(id: string, payload: AgendaEntregaPayload): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.post(`/entregas/pendientes-turnar/${id}/turnar`, payload),
+    agendaEntregaResponseSchema,
+    "Error al turnar la unidad pendiente",
+  );
+}
+
+export async function deletePendienteTurnar(id: string): Promise<{ message: string }> {
+  try {
+    const { data } = await api.delete(`/entregas/pendientes-turnar/${id}`);
+    return data as { message: string };
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al eliminar el pendiente de turnar"));
+  }
 }
 
 export function createSucursalEntrega(payload: SucursalEntregaPayload): Promise<SucursalEntregaResponse> {

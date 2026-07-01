@@ -18,6 +18,7 @@ type AgendaPayload = {
   horaAgenda?: unknown;
   equipado?: unknown;
   entregaUsado?: unknown;
+  siniestro?: unknown;
   observaciones?: unknown;
 };
 
@@ -32,6 +33,7 @@ type ConvertReservaPayload = {
   interno?: unknown;
   equipado?: unknown;
   entregaUsado?: unknown;
+  siniestro?: unknown;
   observaciones?: unknown;
 };
 
@@ -63,6 +65,7 @@ type AgendaValidationResult =
         horaAgenda: string;
         equipado: boolean;
         entregaUsado: boolean;
+        siniestro: boolean;
         observaciones: string;
         lookup: AgendaEntregaLookup;
       };
@@ -90,6 +93,7 @@ type AgendaLean = {
   horaAgenda: string;
   equipado?: boolean;
   entregaUsado?: boolean;
+  siniestro?: boolean;
   entregadaPorMarcada?: boolean;
   entregadaPorUser?: mongoose.Types.ObjectId | string | null;
   entregadaPorNombre?: string;
@@ -250,6 +254,7 @@ const formatAgendaRow = (item: AgendaLean, lookup?: AgendaEntregaLookup | null, 
     horaAgenda: item.horaAgenda,
     equipado: tipoRegistro === "turno" ? Boolean(item.equipado) : false,
     entregaUsado: tipoRegistro === "turno" ? Boolean(item.entregaUsado) : false,
+    siniestro: tipoRegistro === "turno" ? Boolean(item.siniestro) : false,
     entregadaPorMarcada: tipoRegistro === "turno" ? Boolean(item.entregadaPorMarcada) : false,
     entregadaPorUser:
       tipoRegistro === "turno" && item.entregadaPorUser ? String(item.entregadaPorUser) : null,
@@ -271,6 +276,7 @@ const formatAgendaRow = (item: AgendaLean, lookup?: AgendaEntregaLookup | null, 
           grupo: lookup!.grupo ?? null,
           orden: lookup!.orden ?? null,
           cliente: lookup!.cliente,
+          telefono: lookup!.telefono ?? null,
           vendedor: lookup!.vendedor,
           version: lookup!.version ?? null,
           modelo: lookup!.modelo ?? null,
@@ -294,6 +300,7 @@ const buildAgendaDetailLabel = (
   horaAgenda: string,
   equipado: boolean,
   entregaUsado: boolean,
+  siniestro: boolean,
   observaciones: string,
 ) => {
   const details = [
@@ -302,6 +309,7 @@ const buildAgendaDetailLabel = (
     `Hora: ${horaAgenda}`,
     `Equipado: ${equipado ? "SI" : "NO"}`,
     `Entrega usado: ${entregaUsado ? "SI" : "NO"}`,
+    `Siniestro: ${siniestro ? "SI" : "NO"}`,
   ];
 
   if (observaciones.trim()) {
@@ -342,27 +350,6 @@ const createAgendaLog = async (params: {
     detalle: params.detalle,
   });
 };
-
-const getSlotConflict = async (params: {
-  sucursalId: string;
-  fechaAgenda: string;
-  horaAgenda: string;
-  currentId?: string;
-}) =>
-  AgendaEntrega.findOne(
-    params.currentId
-      ? {
-          sucursal: params.sucursalId,
-          fechaAgenda: params.fechaAgenda,
-          horaAgenda: params.horaAgenda,
-          _id: { $ne: params.currentId },
-        }
-      : {
-          sucursal: params.sucursalId,
-          fechaAgenda: params.fechaAgenda,
-          horaAgenda: params.horaAgenda,
-        },
-  ).lean();
 
 const validateSlot = async (params: {
   sucursal: unknown;
@@ -415,19 +402,6 @@ const validateSlot = async (params: {
     };
   }
 
-  const conflict = await getSlotConflict({
-    sucursalId,
-    fechaAgenda,
-    horaAgenda,
-    currentId: params.currentId,
-  });
-
-  if (conflict) {
-    return {
-      error: `Ya existe un ${isReservaAgenda(conflict) ? "reserva" : "turno"} para ${fechaAgenda} a las ${horaAgenda} en la sucursal seleccionada`,
-    };
-  }
-
   return {
     data: {
       sucursalId,
@@ -446,6 +420,7 @@ const validateAgendaPayload = async (
   const interno = Number(payload.interno);
   const equipado = Boolean(payload.equipado);
   const entregaUsado = Boolean(payload.entregaUsado);
+  const siniestro = Boolean(payload.siniestro);
   const observaciones = normalizeText(payload.observaciones);
 
   if (!Number.isInteger(interno) || interno <= 0) {
@@ -503,6 +478,7 @@ const validateAgendaPayload = async (
       horaAgenda: slotValidation.data.horaAgenda,
       equipado,
       entregaUsado,
+      siniestro,
       observaciones,
       lookup,
     },
@@ -696,6 +672,7 @@ export class AgendaEntregaController {
         horaAgenda: validation.data.horaAgenda,
         equipado: validation.data.equipado,
         entregaUsado: validation.data.entregaUsado,
+        siniestro: validation.data.siniestro,
         observaciones: validation.data.observaciones,
         createdBy: new mongoose.Types.ObjectId(req.user._id),
         createdByName: usuarioNombre,
@@ -713,6 +690,7 @@ export class AgendaEntregaController {
           validation.data.horaAgenda,
           validation.data.equipado,
           validation.data.entregaUsado,
+          validation.data.siniestro,
           validation.data.observaciones,
         ),
       });
@@ -732,10 +710,6 @@ export class AgendaEntregaController {
       if (error?.code === 11000) {
         if (error?.keyPattern?.interno) {
           return res.status(409).json({ error: "Ese interno ya esta agendado" });
-        }
-
-        if (error?.keyPattern?.sucursal && error?.keyPattern?.fechaAgenda && error?.keyPattern?.horaAgenda) {
-          return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
         }
       }
 
@@ -799,10 +773,6 @@ export class AgendaEntregaController {
       logError("AgendaEntregaController.createReserva");
       console.error(error);
 
-      if (error?.code === 11000) {
-        return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
-      }
-
       return res.status(500).json({ message: "Error al crear la reserva de entrega" });
     }
   };
@@ -864,6 +834,9 @@ export class AgendaEntregaController {
       if (Boolean(agenda.entregaUsado) !== validation.data.entregaUsado) {
         changes.push(`Entrega usado: ${agenda.entregaUsado ? "SI" : "NO"} -> ${validation.data.entregaUsado ? "SI" : "NO"}`);
       }
+      if (Boolean(agenda.siniestro) !== validation.data.siniestro) {
+        changes.push(`Siniestro: ${agenda.siniestro ? "SI" : "NO"} -> ${validation.data.siniestro ? "SI" : "NO"}`);
+      }
       if ((agenda.observaciones ?? "") !== validation.data.observaciones) {
         changes.push("Observaciones actualizadas");
       }
@@ -879,6 +852,7 @@ export class AgendaEntregaController {
           horaAgenda: validation.data.horaAgenda,
           equipado: validation.data.equipado,
           entregaUsado: validation.data.entregaUsado,
+          siniestro: validation.data.siniestro,
           observaciones: validation.data.observaciones,
           updatedBy: new mongoose.Types.ObjectId(req.user._id),
           updatedByName: usuarioNombre,
@@ -908,10 +882,6 @@ export class AgendaEntregaController {
       if (error?.code === 11000) {
         if (error?.keyPattern?.interno) {
           return res.status(409).json({ error: "Ese interno ya esta agendado" });
-        }
-
-        if (error?.keyPattern?.sucursal && error?.keyPattern?.fechaAgenda && error?.keyPattern?.horaAgenda) {
-          return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
         }
       }
 
@@ -982,6 +952,7 @@ export class AgendaEntregaController {
           horaAgenda: validation.data.horaAgenda,
           equipado: false,
           entregaUsado: false,
+          siniestro: false,
           observaciones: validation.data.observaciones,
           updatedBy: new mongoose.Types.ObjectId(req.user._id),
           updatedByName: usuarioNombre,
@@ -1006,10 +977,6 @@ export class AgendaEntregaController {
     } catch (error: any) {
       logError("AgendaEntregaController.updateReserva");
       console.error(error);
-
-      if (error?.code === 11000) {
-        return res.status(409).json({ error: "Ese horario ya se encuentra ocupado en la sucursal seleccionada" });
-      }
 
       return res.status(500).json({ message: "Error al actualizar la reserva de entrega" });
     }
@@ -1049,6 +1016,7 @@ export class AgendaEntregaController {
           horaAgenda: reserva.horaAgenda,
           equipado: req.body?.equipado,
           entregaUsado: req.body?.entregaUsado,
+          siniestro: req.body?.siniestro,
           observaciones:
             typeof req.body?.observaciones === "string" ? req.body.observaciones : reserva.observaciones ?? "",
         },
@@ -1069,6 +1037,7 @@ export class AgendaEntregaController {
           tipoOperacion: validation.data.lookup.tipoOperacion,
           equipado: validation.data.equipado,
           entregaUsado: validation.data.entregaUsado,
+          siniestro: validation.data.siniestro,
           observaciones: validation.data.observaciones,
           entregadaPorMarcada: false,
           entregadaPorUser: null,
@@ -1107,6 +1076,7 @@ export class AgendaEntregaController {
           validation.data.horaAgenda,
           validation.data.equipado,
           validation.data.entregaUsado,
+          validation.data.siniestro,
           validation.data.observaciones,
         ),
       });
@@ -1275,6 +1245,7 @@ export class AgendaEntregaController {
               agenda.horaAgenda,
               Boolean(agenda.equipado),
               Boolean(agenda.entregaUsado),
+              Boolean(agenda.siniestro),
               agenda.observaciones ?? "",
             ),
       });
