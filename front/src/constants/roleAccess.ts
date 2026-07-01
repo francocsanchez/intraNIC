@@ -240,6 +240,14 @@ export function hasPathAccess(user: AuthUser, path: string) {
 
   const normalizedPath = normalizePath(path);
 
+  if (
+    normalizedPath === paths.convencional.minutas ||
+    normalizedPath === paths.convencional.minutasNueva ||
+    /^\/convencional\/minutas\/[^/]+\/editar$/.test(normalizedPath)
+  ) {
+    return true;
+  }
+
   const isAllowed = activeRoles.some((role) =>
     roleAllowedPaths[role].some((matcher) => pathMatches(normalizedPath, matcher)),
   );
