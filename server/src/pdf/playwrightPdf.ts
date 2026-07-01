@@ -80,7 +80,7 @@ export const generatePdfFromHtml = async (html: string, options?: GeneratePdfFro
       margin: {
         top: options?.margin?.top ?? "8mm",
         right: options?.margin?.right ?? "14mm",
-        bottom: options?.margin?.bottom ?? "18mm",
+        bottom: options?.margin?.bottom ?? "8mm",
         left: options?.margin?.left ?? "14mm",
       },
       printBackground: true,
