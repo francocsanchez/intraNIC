@@ -1,3 +1,4 @@
+import fs from "fs";
 import { Browser, chromium } from "playwright";
 
 type GeneratePdfFromHtmlOptions = {
@@ -14,9 +15,26 @@ type GeneratePdfFromHtmlOptions = {
 
 let browserPromise: Promise<Browser> | null = null;
 
+const getChromiumExecutablePath = () => {
+  const configuredPath = process.env.PLAYWRIGHT_CHROMIUM_PATH;
+
+  if (configuredPath && fs.existsSync(configuredPath)) {
+    return configuredPath;
+  }
+
+  const knownPaths = [
+    "/usr/bin/chromium-browser",
+    "/usr/bin/chromium",
+  ];
+
+  return knownPaths.find((candidate) => fs.existsSync(candidate));
+};
+
 const getBrowser = () => {
   if (!browserPromise) {
     browserPromise = chromium.launch({
+      args: process.platform === "linux" ? ["--no-sandbox", "--disable-setuid-sandbox"] : [],
+      executablePath: getChromiumExecutablePath(),
       headless: true,
     });
   }
