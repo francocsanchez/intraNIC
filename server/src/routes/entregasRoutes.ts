@@ -4,6 +4,7 @@ import { AgendaEntregaLogController } from "../controllers/AgendaEntregaLogContr
 import { PendienteTurnarController } from "../controllers/PendienteTurnarController";
 import { SucursalEntregaController } from "../controllers/SucursalEntregaController";
 import { authenticate } from "../middleware/authenticate";
+import { authorizeModules } from "../middleware/authorizeModules";
 
 const router = Router();
 
@@ -22,11 +23,11 @@ router.put("/agendas/:id", AgendaEntregaController.update);
 router.patch("/agendas/:id/entregada-por", AgendaEntregaController.toggleEntregadaPor);
 router.delete("/agendas/:id", AgendaEntregaController.remove);
 
-router.get("/pendientes-turnar", PendienteTurnarController.list);
-router.post("/pendientes-turnar", PendienteTurnarController.create);
-router.put("/pendientes-turnar/:id", PendienteTurnarController.update);
-router.delete("/pendientes-turnar/:id", PendienteTurnarController.remove);
-router.post("/pendientes-turnar/:id/turnar", PendienteTurnarController.turnar);
+router.get("/pendientes-turnar", authorizeModules("pendientesTurnar"), PendienteTurnarController.list);
+router.post("/pendientes-turnar", authorizeModules("pendientesTurnar"), PendienteTurnarController.create);
+router.put("/pendientes-turnar/:id", authorizeModules("pendientesTurnar"), PendienteTurnarController.update);
+router.delete("/pendientes-turnar/:id", authorizeModules("pendientesTurnar"), PendienteTurnarController.remove);
+router.post("/pendientes-turnar/:id/turnar", authorizeModules("pendientesTurnar"), PendienteTurnarController.turnar);
 
 router.get("/sucursales", SucursalEntregaController.list);
 router.post("/sucursales", SucursalEntregaController.create);

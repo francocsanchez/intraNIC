@@ -106,12 +106,15 @@ export default function Router() {
               </Route>
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["agendaEntrega"]} />}>
-              <Route element={<EntregasLayout />}>
+            <Route element={<EntregasLayout />}>
+              <Route element={<ModuleProtectedRoute allowedModules={["agendaEntrega"]} />}>
                 <Route path={paths.entregas.agenda} element={<AgendaEntregaView />} />
-                <Route path={paths.entregas.pendientesTurnar} element={<PendientesTurnarView />} />
                 <Route path={paths.entregas.sucursales} element={<SucursalesEntregaView />} />
                 <Route path={paths.entregas.registros} element={<AgendaEntregaRegistrosView />} />
+              </Route>
+
+              <Route element={<ModuleProtectedRoute allowedModules={["pendientesTurnar"]} />}>
+                <Route path={paths.entregas.pendientesTurnar} element={<PendientesTurnarView />} />
               </Route>
             </Route>
 

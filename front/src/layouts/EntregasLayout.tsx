@@ -31,10 +31,17 @@ const navItems = [
 export default function EntregasLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
+  const moduleByPath = {
+    [paths.entregas.agenda]: "agendaEntrega",
+    [paths.entregas.pendientesTurnar]: "pendientesTurnar",
+    [paths.entregas.sucursales]: "agendaEntrega",
+    [paths.entregas.registros]: "agendaEntrega",
+  } as const;
+
   const visibleNavItems = navItems.filter((item) =>
     item.to === paths.entregas.sucursales
-      ? hasSuperAdminRole(user) && hasModulePathAccess(user, "agendaEntrega", item.to)
-      : hasModulePathAccess(user, "agendaEntrega", item.to),
+      ? hasSuperAdminRole(user) && hasModulePathAccess(user, moduleByPath[item.to], item.to)
+      : hasModulePathAccess(user, moduleByPath[item.to], item.to),
   );
 
   return (

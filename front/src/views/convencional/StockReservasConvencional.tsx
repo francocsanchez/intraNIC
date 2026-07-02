@@ -7,9 +7,30 @@ import type { ReservasResponse } from "@/types/index";
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const UBICACIONES_PRIORITARIAS = ["TODAS", "EN PRODUCCION", "BUQUE", "PLAYA TASA", "FURLONG", "STOCK CONCESIONARIO"] as const;
+type UbicacionFiltro = (typeof UBICACIONES_PRIORITARIAS)[number];
+
+function normalizarUbicacion(ubicacion: string | null | undefined) {
+  const value = ubicacion
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ");
+
+  if (!value) return "EN PRODUCCION";
+  if (["EN PRODUCCION", "PRODUCCION TASA"].includes(value)) return "EN PRODUCCION";
+  if (value === "BUQUE") return "BUQUE";
+  if (["PLAYA EXTERNA", "PLAYA TASA", "PLAYA NACIONAL ATZ"].includes(value)) return "PLAYA TASA";
+  if (value.includes("FURLONG")) return "FURLONG";
+  if (value === "STOCK CONCESIONARIO") return "STOCK CONCESIONARIO";
+
+  return "EN PRODUCCION";
+}
 
 export default function StockReservasConvencional() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const [ubicacionActiva, setUbicacionActiva] = useState<UbicacionFiltro>("TODAS");
   const [currentTime] = useState(() => Date.now());
 
   const { data, isLoading, isError, error } = useQuery<ReservasResponse>({
@@ -32,15 +53,25 @@ export default function StockReservasConvencional() {
     return FILTROS_PRIORITARIOS.filter((filtro) => filtro === "TODOS" || existentes.has(filtro));
   }, [todosLosItems]);
 
+  const ubicacionesDisponibles = useMemo(() => {
+    const base = modeloActivo === "TODOS" ? todosLosItems : todosLosItems.filter((item) => item.modelo === modeloActivo);
+    const existentes = new Set(base.map((item) => normalizarUbicacion(item.ubicacion)));
+    return UBICACIONES_PRIORITARIAS.filter((ubicacion) => ubicacion === "TODAS" || existentes.has(ubicacion));
+  }, [todosLosItems, modeloActivo]);
+
   const sucursalesFiltradas = useMemo(() => {
     return reservasPorSucursal
       .map(([sucursal, reservas]) => {
-        const filtradas = modeloActivo === "TODOS" ? reservas : reservas.filter((item) => item.modelo === modeloActivo);
+        const filtradasPorModelo = modeloActivo === "TODOS" ? reservas : reservas.filter((item) => item.modelo === modeloActivo);
+        const filtradas =
+          ubicacionActiva === "TODAS"
+            ? filtradasPorModelo
+            : filtradasPorModelo.filter((item) => normalizarUbicacion(item.ubicacion) === ubicacionActiva);
 
         return [sucursal, filtradas] as const;
       })
       .filter(([, reservas]) => reservas.length > 0);
-  }, [reservasPorSucursal, modeloActivo]);
+  }, [reservasPorSucursal, modeloActivo, ubicacionActiva]);
 
   const totalFiltrado = useMemo(() => {
     return sucursalesFiltradas.reduce((acc, [, reservas]) => acc + reservas.length, 0);
@@ -86,7 +117,7 @@ export default function StockReservasConvencional() {
 
         <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-6xl font-semibold text-gray-900">{modeloActivo === "TODOS" ? (data?.resumen.total ?? 0) : totalFiltrado}</p>
+            <p className="text-6xl font-semibold text-gray-900">{modeloActivo === "TODOS" && ubicacionActiva === "TODAS" ? (data?.resumen.total ?? 0) : totalFiltrado}</p>
             <p className="text-sm text-gray-500">Totales</p>
           </div>
         </article>
@@ -112,6 +143,24 @@ export default function StockReservasConvencional() {
         })}
       </section>
 
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+          {ubicacionesDisponibles.map((ubicacion) => (
+            <button
+              key={ubicacion}
+              type="button"
+              onClick={() => setUbicacionActiva(ubicacion)}
+              className={[
+                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                ubicacionActiva === ubicacion ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              {ubicacion}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {sucursalesFiltradas.map(([sucursal, reservas]) => (
         <section key={sucursal} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 px-6 py-4">
@@ -124,13 +173,12 @@ export default function StockReservasConvencional() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Interno</th>
                   <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Modelo</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Versión</th>
+                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Version</th>
                   <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Color</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Ubicación</th>
+                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Ubicacion</th>
                   <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Chasis</th>
                   <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Vendedor</th>
-
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Días</th>
+                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Dias</th>
                 </tr>
               </thead>
 
@@ -144,25 +192,18 @@ export default function StockReservasConvencional() {
                     ].join(" ")}
                   >
                     <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-
                     <td className="px-4 py-2 text-gray-700">{item.modelo}</td>
-
                     <td className="px-4 py-2 text-gray-700">
                       <div className="font-medium">{item.version}</div>
                     </td>
-
                     <td className="px-4 py-2 text-gray-700">
                       <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(item.color)}`}>
                         {item.color}
                       </span>
                     </td>
-
-                      {item.ubicacion ? ( <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>) : (<td className="px-4 py-2 text-gray-700">EN PRODUCCIÓN</td>)}
-
+                    <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
                     <td className="px-4 py-2 text-gray-700">{item.chasis}</td>
-
                     <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
-
                     <td className="px-4 py-2 text-gray-700">{diasReserva(item.fechaReserva)}</td>
                   </tr>
                 ))}
@@ -182,7 +223,7 @@ export default function StockReservasConvencional() {
 
       {sucursalesFiltradas.length === 0 && (
         <section className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500 shadow-sm">
-          No hay unidades reservadas para el modelo seleccionado.
+          No hay unidades reservadas para el filtro seleccionado.
         </section>
       )}
     </div>

@@ -6,12 +6,34 @@ import { useMemo, useState } from "react";
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+const UBICACIONES_PRIORITARIAS = ["TODAS", "EN PRODUCCION", "BUQUE", "PLAYA TASA", "FURLONG", "STOCK CONCESIONARIO"] as const;
+type UbicacionFiltro = (typeof UBICACIONES_PRIORITARIAS)[number];
+
 const EMPTY_STOCK_GUARDADO_CONVENCIONAL: Awaited<
   ReturnType<typeof getStockGuardadoConvencional>
 >["data"] = [];
 
+function normalizarUbicacion(ubicacion: string | null | undefined) {
+  const value = ubicacion
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ");
+
+  if (!value) return "EN PRODUCCION";
+  if (["EN PRODUCCION", "PRODUCCION TASA"].includes(value)) return "EN PRODUCCION";
+  if (value === "BUQUE") return "BUQUE";
+  if (["PLAYA EXTERNA", "PLAYA TASA", "PLAYA NACIONAL ATZ"].includes(value)) return "PLAYA TASA";
+  if (value.includes("FURLONG")) return "FURLONG";
+  if (value === "STOCK CONCESIONARIO") return "STOCK CONCESIONARIO";
+
+  return "EN PRODUCCION";
+}
+
 export default function StockGuardadoConvencioanl() {
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
+  const [ubicacionActiva, setUbicacionActiva] = useState<UbicacionFiltro>("TODAS");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["stockGuardado", "convencional"],
@@ -54,6 +76,16 @@ export default function StockGuardadoConvencioanl() {
     if (modeloActivo === "TODOS") return items;
     return items.filter((item) => item.modelo === modeloActivo);
   }, [items, modeloActivo]);
+
+  const ubicacionesDisponibles = useMemo(() => {
+    const existentes = new Set(itemsFiltrados.map((item) => normalizarUbicacion(item.ubicacion)));
+    return UBICACIONES_PRIORITARIAS.filter((ubicacion) => ubicacion === "TODAS" || existentes.has(ubicacion));
+  }, [itemsFiltrados]);
+
+  const itemsVisibles = useMemo(() => {
+    if (ubicacionActiva === "TODAS") return itemsFiltrados;
+    return itemsFiltrados.filter((item) => normalizarUbicacion(item.ubicacion) === ubicacionActiva);
+  }, [itemsFiltrados, ubicacionActiva]);
 
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("es-AR", {
@@ -181,7 +213,25 @@ export default function StockGuardadoConvencioanl() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsFiltrados.length} registros</div>
+          <div className="flex flex-col items-stretch gap-3 md:items-end">
+            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+              {ubicacionesDisponibles.map((ubicacion) => (
+                <button
+                  key={ubicacion}
+                  type="button"
+                  onClick={() => setUbicacionActiva(ubicacion)}
+                  className={[
+                    "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                    ubicacionActiva === ubicacion ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
+                >
+                  {ubicacion}
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsVisibles.length} registros</div>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -190,16 +240,15 @@ export default function StockGuardadoConvencioanl() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelo</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Version</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicación</th>
-
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepción</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepcion</th>
               </tr>
             </thead>
 
             <tbody>
-              {itemsFiltrados.map((item) => (
+              {itemsVisibles.map((item) => (
                 <tr
                   key={`${item.interno}-${item.chasis}-${item.fechaRecepcion}`}
                   className={[
@@ -221,13 +270,13 @@ export default function StockGuardadoConvencioanl() {
                       {item.color}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{item.ubicacion}</td>
+                  <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
 
                   <td className="px-4 py-2 text-gray-700">{formatDate(item.fechaRecepcion)}</td>
                 </tr>
               ))}
 
-              {itemsFiltrados.length === 0 && (
+              {itemsVisibles.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay unidades para el filtro seleccionado.
@@ -239,8 +288,9 @@ export default function StockGuardadoConvencioanl() {
         </div>
 
         <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm text-gray-500">
-          Mostrando {itemsFiltrados.length} unidades
-          {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}.
+          Mostrando {itemsVisibles.length} unidades
+          {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}
+          {ubicacionActiva !== "TODAS" ? ` en ${ubicacionActiva}` : ""}.
         </div>
       </section>
     </div>

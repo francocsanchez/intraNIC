@@ -22,6 +22,7 @@ export const moduleKeys = [
   "patentamientos",
   "actualizacionRegistros",
   "agendaEntrega",
+  "pendientesTurnar",
   "usuarios",
   "configuracion",
   "testDrive",
@@ -58,6 +59,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   patentamientos: "Patentamientos",
   actualizacionRegistros: "Act. Registros",
   agendaEntrega: "Agenda de entrega",
+  pendientesTurnar: "Pendientes de turnar",
   usuarios: "Usuarios",
   configuracion: "Configuracion",
   testDrive: "TestDrive",
@@ -105,7 +107,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Entregas",
-    modules: ["agendaEntrega"],
+    modules: ["agendaEntrega", "pendientesTurnar"],
   },
   {
     title: "Sistema",

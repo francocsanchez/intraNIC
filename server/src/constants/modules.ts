@@ -22,6 +22,7 @@ export const moduleKeys = [
   "patentamientos",
   "actualizacionRegistros",
   "agendaEntrega",
+  "pendientesTurnar",
   "usuarios",
   "configuracion",
   "testDrive",
