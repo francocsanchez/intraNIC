@@ -10,20 +10,28 @@ import { useAuth } from "@/hooks/useAuthe";
 type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
 
 const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
-const UBICACIONES_PRIORITARIAS = ["TODAS", "EN PRODUCCION", "PLAYA TASA", "FURLONG", "STOCK CONCESIONARIO"] as const;
+const UBICACIONES_PRIORITARIAS = ["TODAS", "EN PRODUCCION", "BUQUE", "PLAYA TASA", "FURLONG", "STOCK CONCESIONARIO"] as const;
 type UbicacionFiltro = (typeof UBICACIONES_PRIORITARIAS)[number];
 const EMPTY_STOCK_CONVENCIONAL: Awaited<
   ReturnType<typeof getStockDisponibleConvencional>
 >["data"] = [];
 
 function normalizarUbicacion(ubicacion: string | null | undefined) {
-  const value = ubicacion?.trim().toUpperCase();
+  const value = ubicacion
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ");
 
   if (!value) return "EN PRODUCCION";
+  if (["EN PRODUCCION", "PRODUCCION TASA"].includes(value)) return "EN PRODUCCION";
+  if (value === "BUQUE") return "BUQUE";
   if (["PLAYA EXTERNA", "PLAYA TASA", "PLAYA NACIONAL ATZ"].includes(value)) return "PLAYA TASA";
   if (value.includes("FURLONG")) return "FURLONG";
+  if (value === "STOCK CONCESIONARIO") return "STOCK CONCESIONARIO";
 
-  return "STOCK CONCESIONARIO";
+  return "EN PRODUCCION";
 }
 
 export default function StockDisponibleConvencional() {
