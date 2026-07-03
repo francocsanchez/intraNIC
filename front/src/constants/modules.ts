@@ -14,6 +14,7 @@ export const moduleKeys = [
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",
+  "analisisStock",
   "noReparado",
   "pendienteDocumentacion",
   "ingresos",
@@ -52,6 +53,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   registroAsignaciones: "Registro asignaciones",
   pedidoMensual: "Pedido mensual",
   pedidoUnidades: "Pedido unidades",
+  analisisStock: "Analisis de stock",
   noReparado: "No reparado",
   pendienteDocumentacion: "Pendiente documentacion",
   ingresos: "Ingresos",
@@ -97,7 +99,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Gestion de stock convencional",
-    modules: ["asignaciones", "planNegocio", "registroAsignaciones", "pedidoMensual", "pedidoUnidades"],
+    modules: ["asignaciones", "planNegocio", "registroAsignaciones", "pedidoMensual", "pedidoUnidades", "analisisStock"],
   },
   {
     title: "Gestion de stock usados",

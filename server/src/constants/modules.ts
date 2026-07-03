@@ -14,6 +14,7 @@ export const moduleKeys = [
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",
+  "analisisStock",
   "noReparado",
   "pendienteDocumentacion",
   "ingresos",

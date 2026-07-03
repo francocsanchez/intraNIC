@@ -1228,6 +1228,61 @@ export const resumenPedidoMensualResponseSchema = z.object({
   data: z.array(resumenPedidoMensualItemSchema),
 });
 
+export const analisisStockMonthSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  month: z.number(),
+  year: z.number(),
+});
+
+export const analisisStockRowSchema = z.object({
+  version: z.string(),
+  countsByMonth: z.record(z.string(), z.number()),
+  unitsByMonth: z.record(
+    z.string(),
+    z.array(
+      z.object({
+        interno: z.number(),
+        nrofab: z.string(),
+        color: z.string(),
+        fechaRecepcion: z.string(),
+      }),
+    ),
+  ),
+  unitsTotal: z.array(
+    z.object({
+      interno: z.number(),
+      nrofab: z.string(),
+      color: z.string(),
+      fechaRecepcion: z.string(),
+    }),
+  ),
+  total: z.number(),
+});
+
+export const analisisStockGroupSchema = z.object({
+  modelo: z.string(),
+  rows: z.array(analisisStockRowSchema),
+  total: z.number(),
+});
+
+export const analisisStockDataSchema = z.object({
+  months: z.array(analisisStockMonthSchema),
+  groups: z.array(analisisStockGroupSchema),
+  totals: z.object({
+    modelo: z.string(),
+    countsByMonth: z.record(z.string(), z.number()),
+    total: z.number(),
+  }),
+  meta: z.object({
+    totalUnidades: z.number(),
+  }),
+});
+
+export const analisisStockResponseSchema = z.object({
+  data: analisisStockDataSchema,
+});
+
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
@@ -1255,6 +1310,11 @@ export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponse
 export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
+export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;
+export type AnalisisStockRow = z.infer<typeof analisisStockRowSchema>;
+export type AnalisisStockGroup = z.infer<typeof analisisStockGroupSchema>;
+export type AnalisisStockData = z.infer<typeof analisisStockDataSchema>;
+export type AnalisisStockResponse = z.infer<typeof analisisStockResponseSchema>;
 
 //**************************** */
 // PROFORMAS

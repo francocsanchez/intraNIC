@@ -56,6 +56,7 @@ const FacturasAnticipoView = lazy(() => import("./views/admin/siac/FacturasAntic
 const SegUnidadesFabricaView = lazy(() => import("./views/admin/siac/SegUnidadesFabricaView"));
 const RegistroAsignacionesView = lazy(() => import("./views/admin/siac/RegistroAsignacionesView"));
 const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/RegistroAsignacionesResumenView"));
+const AnalisisStockView = lazy(() => import("./views/admin/siac/AnalisisStockView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
 const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
@@ -356,6 +357,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["pedidoUnidades", "listaPrevia"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.pedidoUnidades} element={<PedidoUnidadesView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["analisisStock"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.analisisStock} element={<AnalisisStockView />} />
             </Route>
           </Route>
 

@@ -221,3 +221,31 @@ ORDER BY
 	mes
 `;
 
+export const getAnalisisStockConvencional = () => `
+SELECT
+	stoauto.sa_codigo AS interno,
+	LTRIM(RTRIM(auto.au_nombre)) AS version,
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
+	DATEADD(DAY, 5, movnped.mnp_fecrec) AS fechaRecepcion,
+	stoauto.sa_nrofab AS sa_nrofab,
+	color.col_nombre
+FROM stoauto
+INNER JOIN auto
+	ON auto.au_codigo = stoauto.sa_auto
+	AND auto.au_marca = stoauto.sa_marca
+INNER JOIN movnped
+	ON movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN famiauto
+	ON auto.au_familia = famiauto.fam_codigo
+INNER JOIN color
+	ON movnped.mnp_col1 = color.col_codigo
+WHERE
+	stoauto.sa_tipo = 5
+	AND stoauto.sa_estado IN (5, 10, 20, 25)
+	AND stoauto.sa_bienuso = 0
+	AND stoauto.sa_nrofab LIKE 'NIC%'
+ORDER BY
+	famiauto.fam_nombre,
+	auto.au_nombre
+`;
+
