@@ -245,7 +245,49 @@ WHERE
 	AND stoauto.sa_bienuso = 0
 	AND stoauto.sa_nrofab LIKE 'NIC%'
 ORDER BY
-	famiauto.fam_nombre,
-	auto.au_nombre
+	modelo,
+	version
+`;
+
+export const getAnalisisStockPromedioVenta = () => `
+SELECT
+	LTRIM(RTRIM(auto.au_nombre)) AS version,
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
+	COUNT(*) AS ventas
+FROM opera ope
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN stoauto ON
+	stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN movnped ON
+	movnped.mnp_stoauto = stoauto.sa_codigo
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND ope.ope_fecasig >= DATEFROMPARTS(:anioDesde, :mesDesde, 1)
+	AND ope.ope_fecasig < DATEFROMPARTS(:anioHasta, :mesHasta, 1)
+	AND stoauto.sa_nrofab LIKE 'NIC%'
+GROUP BY
+	LTRIM(RTRIM(auto.au_nombre)),
+	LTRIM(RTRIM(famiauto.fam_nombre))
+`;
+
+export const getAnalisisStockVersionesDisponibles = () => `
+SELECT DISTINCT
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
+	mar.mar_nombre AS marca,
+	LTRIM(RTRIM(auto.au_nombre)) AS version
+FROM auto
+INNER JOIN marca mar ON
+	mar.mar_codigo = auto.au_marca
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	auto.au_dispo = 1
+	AND ISNULL(LTRIM(RTRIM(famiauto.fam_nombre)), '') <> ''
+	AND ISNULL(LTRIM(RTRIM(auto.au_nombre)), '') <> ''
 `;
 

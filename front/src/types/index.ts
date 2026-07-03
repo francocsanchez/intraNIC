@@ -1235,8 +1235,29 @@ export const analisisStockMonthSchema = z.object({
   year: z.number(),
 });
 
+export const analisisStockDictionaryItemSchema = z.object({
+  _id: z.string(),
+  modelo: z.string(),
+  modeloKey: z.string(),
+  versionRaw: z.string(),
+  versionRawKey: z.string(),
+  versionCanonica: z.string(),
+  versionCanonicaKey: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const analisisStockVersionesDisponiblesItemSchema = z.object({
+  modelo: z.string(),
+  marca: z.string(),
+  versions: z.array(z.string()),
+});
+
 export const analisisStockRowSchema = z.object({
   version: z.string(),
+  versionKey: z.string(),
+  versionCanonica: z.string(),
+  versionOriginales: z.array(z.string()),
   countsByMonth: z.record(z.string(), z.number()),
   unitsByMonth: z.record(
     z.string(),
@@ -1257,6 +1278,9 @@ export const analisisStockRowSchema = z.object({
       fechaRecepcion: z.string(),
     }),
   ),
+  stockTotal: z.number(),
+  ped: z.number(),
+  promedioVenta: z.number(),
   total: z.number(),
 });
 
@@ -1269,9 +1293,12 @@ export const analisisStockGroupSchema = z.object({
 export const analisisStockDataSchema = z.object({
   months: z.array(analisisStockMonthSchema),
   groups: z.array(analisisStockGroupSchema),
+  dictionary: z.array(analisisStockDictionaryItemSchema),
   totals: z.object({
     modelo: z.string(),
     countsByMonth: z.record(z.string(), z.number()),
+    ped: z.number(),
+    promedioVenta: z.number(),
     total: z.number(),
   }),
   meta: z.object({
@@ -1281,6 +1308,28 @@ export const analisisStockDataSchema = z.object({
 
 export const analisisStockResponseSchema = z.object({
   data: analisisStockDataSchema,
+});
+
+export const analisisStockPedResponseSchema = z.object({
+  data: z.object({
+    modelo: z.string(),
+    version: z.string(),
+    cantidad: z.number(),
+  }),
+  message: z.string(),
+});
+
+export const analisisStockDictionaryListResponseSchema = z.object({
+  data: z.array(analisisStockDictionaryItemSchema),
+});
+
+export const analisisStockDictionaryResponseSchema = z.object({
+  data: analisisStockDictionaryItemSchema,
+  message: z.string(),
+});
+
+export const analisisStockVersionesDisponiblesResponseSchema = z.object({
+  data: z.array(analisisStockVersionesDisponiblesItemSchema),
 });
 
 export type Catalogo = z.infer<typeof catalogoSchema>;
@@ -1311,10 +1360,16 @@ export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
 export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;
+export type AnalisisStockDictionaryItem = z.infer<typeof analisisStockDictionaryItemSchema>;
+export type AnalisisStockVersionesDisponiblesItem = z.infer<typeof analisisStockVersionesDisponiblesItemSchema>;
 export type AnalisisStockRow = z.infer<typeof analisisStockRowSchema>;
 export type AnalisisStockGroup = z.infer<typeof analisisStockGroupSchema>;
 export type AnalisisStockData = z.infer<typeof analisisStockDataSchema>;
 export type AnalisisStockResponse = z.infer<typeof analisisStockResponseSchema>;
+export type AnalisisStockPedResponse = z.infer<typeof analisisStockPedResponseSchema>;
+export type AnalisisStockDictionaryListResponse = z.infer<typeof analisisStockDictionaryListResponseSchema>;
+export type AnalisisStockDictionaryResponse = z.infer<typeof analisisStockDictionaryResponseSchema>;
+export type AnalisisStockVersionesDisponiblesResponse = z.infer<typeof analisisStockVersionesDisponiblesResponseSchema>;
 
 //**************************** */
 // PROFORMAS

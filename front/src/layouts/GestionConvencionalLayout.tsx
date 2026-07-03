@@ -13,6 +13,11 @@ export default function GestionConvencionalLayout() {
   const canViewPedidoMensual = hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual);
   const canViewPedidoUnidades = hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades);
   const canViewAnalisisStock = hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock);
+  const canViewAnalisisStockDictionary = hasModulePathAccess(
+    user,
+    "analisisStock",
+    paths.convencional.analisisStockDiccionarioVersiones,
+  );
 
   return (
     <BaseAppLayout
@@ -53,6 +58,12 @@ export default function GestionConvencionalLayout() {
           {canViewAnalisisStock ? (
             <Link to={paths.convencional.analisisStock} className="hover:text-gray-900 transition">
               Analisis de stock
+            </Link>
+          ) : null}
+
+          {canViewAnalisisStockDictionary ? (
+            <Link to={paths.convencional.analisisStockDiccionarioVersiones} className="hover:text-gray-900 transition">
+              Diccionario versiones
             </Link>
           ) : null}
         </>

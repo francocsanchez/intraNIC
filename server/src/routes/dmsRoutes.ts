@@ -36,6 +36,42 @@ router.get(
   authorizeRoleAccess("convencional.analisisStock"),
   DmsController.getAnalisisStock,
 );
+router.get(
+  "/analisis-stock/versiones-disponibles",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.getAnalisisStockVersionesDisponibles,
+);
+router.post(
+  "/analisis-stock/ped",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.saveAnalisisStockPed,
+);
+router.get(
+  "/analisis-stock/diccionario-versiones",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.listAnalisisStockVersionDictionary,
+);
+router.post(
+  "/analisis-stock/diccionario-versiones",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.createAnalisisStockVersionDictionary,
+);
+router.put(
+  "/analisis-stock/diccionario-versiones/:id",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.updateAnalisisStockVersionDictionary,
+);
+router.delete(
+  "/analisis-stock/diccionario-versiones/:id",
+  authorizeModules("analisisStock"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.deleteAnalisisStockVersionDictionary,
+);
 
 /**
  *

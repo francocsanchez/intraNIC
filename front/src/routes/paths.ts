@@ -67,6 +67,7 @@ export const paths = {
     registroAsignaciones: "/gestion/convencional/registro-asignaciones",
     registroAsignacionesResumen: "/gestion/convencional/registro-asignaciones/resumen",
     analisisStock: "/gestion/convencional/analisis-stock",
+    analisisStockDiccionarioVersiones: "/gestion/convencional/analisis-stock/diccionario-versiones",
     preventas: "/gestion/convencional/preventas",
     preventasResumen: "/gestion/convencional/preventas/resumen",
     preventasAsignadas: "/gestion/convencional/preventas/asignadas",

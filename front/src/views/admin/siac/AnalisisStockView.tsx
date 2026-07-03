@@ -1,11 +1,14 @@
-import { getAnalisisStock } from "@/api/dms/analisisStockAPI";
+import { getAnalisisStock, saveAnalisisStockPed } from "@/api/dms/analisisStockAPI";
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
+import { paths } from "@/routes/paths";
 import type { AnalisisStockRow as AnalisisStockRowType } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
-import { X } from "lucide-react";
+import { GitMerge, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 type StockCellDetail = {
   modelo: string;
@@ -13,6 +16,10 @@ type StockCellDetail = {
   monthLabel: string;
   units: AnalisisStockRowType["unitsTotal"];
 };
+
+const formatPromedioVenta = (value: number) => value.toFixed(1);
+const formatMesesStock = (total: number, promedioVenta: number) =>
+  promedioVenta > 0 ? (total / promedioVenta).toFixed(1) : "0.0";
 
 function AnalisisStockDetailModal({
   open,
@@ -104,10 +111,21 @@ function AnalisisStockDetailModal({
 }
 
 export default function AnalisisStockView() {
+  const queryClient = useQueryClient();
   const [detail, setDetail] = useState<StockCellDetail | null>(null);
+  const [pedDrafts, setPedDrafts] = useState<Record<string, string>>({});
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["analisis-stock"],
     queryFn: getAnalisisStock,
+  });
+
+  const savePedMutation = useMutation({
+    mutationFn: saveAnalisisStockPed,
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["analisis-stock"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
   if (isLoading) return <Loading />;
@@ -129,6 +147,12 @@ export default function AnalisisStockView() {
   const totalUnidades = data?.data.meta.totalUnidades ?? 0;
   const totalRows = groups.reduce((acc, group) => acc + group.rows.length, 0);
   const isModalOpen = Boolean(detail);
+  const pedByRowKey = groups.reduce<Record<string, number>>((acc, group) => {
+    group.rows.forEach((row) => {
+      acc[`${group.modelo}::${row.versionKey}`] = row.ped;
+    });
+    return acc;
+  }, {});
 
   const openDetail = (payload: StockCellDetail) => {
     if (!payload.units.length) {
@@ -140,15 +164,67 @@ export default function AnalisisStockView() {
 
   const closeDetail = () => setDetail(null);
   const summaryLabel = detail?.units.length ? `${detail.units.length} unidades encontradas` : "";
+  const getRowPedValue = (modelo: string, versionKey: string) => {
+    const rowKey = `${modelo}::${versionKey}`;
+    if (pedDrafts[rowKey] !== undefined) {
+      const parsedDraft = Number(pedDrafts[rowKey]);
+      return Number.isFinite(parsedDraft) && parsedDraft >= 0 ? parsedDraft : 0;
+    }
+
+    return pedByRowKey[rowKey] ?? 0;
+  };
+
+  const groupsWithPed = groups.map((group) => ({
+    ...group,
+    rows: group.rows.map((row) => {
+      const ped = getRowPedValue(group.modelo, row.versionKey);
+      return {
+        ...row,
+        ped,
+        total: row.stockTotal + ped,
+      };
+    }),
+  }));
+
+  const totalsWithPed = totals
+    ? {
+        ...totals,
+        ped: groupsWithPed.reduce(
+          (groupTotal, group) => groupTotal + group.rows.reduce((rowTotal, row) => rowTotal + row.ped, 0),
+          0,
+        ),
+        total: groupsWithPed.reduce(
+          (groupTotal, group) => groupTotal + group.rows.reduce((rowTotal, row) => rowTotal + row.total, 0),
+          0,
+        ),
+      }
+    : null;
+
+  const groupsWithTotals = groupsWithPed.map((group) => ({
+    ...group,
+    total: group.rows.reduce((acc, row) => acc + row.total, 0),
+  }));
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
       <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Gestion</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Analisis de stock</h1>
-        <p className="mt-2 max-w-3xl text-sm text-gray-600">
-          Matriz de unidades agrupadas por modelo y version, distribuidas por mes de recepcion calculado desde SIAC.
-        </p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Gestion</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Analisis de stock</h1>
+            <p className="mt-2 max-w-3xl text-sm text-gray-600">
+              Matriz de unidades agrupadas por modelo y version, distribuidas por mes de recepcion calculado desde SIAC.
+            </p>
+          </div>
+
+          <Link
+            to={paths.convencional.analisisStockDiccionarioVersiones}
+            className="inline-flex items-center gap-2 rounded-xl border border-[#15aa9a]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0f766e] transition hover:bg-[#f3fbfa]"
+          >
+            <GitMerge size={16} />
+            Diccionario de versiones
+          </Link>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -182,12 +258,15 @@ export default function AnalisisStockView() {
                     {month.label}
                   </th>
                 ))}
+                <th className="px-4 py-3 text-center">PED</th>
                 <th className="px-4 py-3 text-center">Total</th>
+                <th className="px-4 py-3 text-center">P. VTA</th>
+                <th className="px-4 py-3 text-center">M. STOCK</th>
                 <th className="px-4 py-3 text-center">Total modelo</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {groups.map((group) =>
+              {groupsWithTotals.map((group) =>
                 group.rows.map((row, rowIndex) => (
                   <tr key={`${group.modelo}-${row.version}`} className="hover:bg-gray-50">
                     {rowIndex === 0 ? (
@@ -243,28 +322,63 @@ export default function AnalisisStockView() {
                     ))}
                     <td
                       className={[
+                        "px-4 py-3 text-center text-gray-700",
+                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                      ].join(" ")}
+                    >
+                      <div className="flex min-w-[132px] items-center justify-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={pedDrafts[`${group.modelo}::${row.versionKey}`] ?? String(row.ped)}
+                          onChange={(event) =>
+                            setPedDrafts((current) => ({
+                              ...current,
+                              [`${group.modelo}::${row.versionKey}`]: event.target.value,
+                            }))
+                          }
+                          className="w-16 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm outline-none transition-colors focus:border-[#15aa9a]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            savePedMutation.mutate({
+                              modelo: group.modelo,
+                              version: row.version,
+                              cantidad: getRowPedValue(group.modelo, row.versionKey),
+                            })
+                          }
+                          disabled={savePedMutation.isPending}
+                          className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Guardar
+                        </button>
+                      </div>
+                    </td>
+                    <td
+                      className={[
                         "px-4 py-3 text-center font-semibold text-gray-900",
                         rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
                       ].join(" ")}
                     >
-                      {row.total > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openDetail({
-                              modelo: group.modelo,
-                              version: row.version,
-                              monthLabel: "TOTAL",
-                              units: row.unitsTotal,
-                            })
-                          }
-                          className="inline-flex min-w-[2.5rem] items-center justify-center rounded-lg bg-gray-900 px-2 py-1 text-white transition hover:bg-gray-700"
-                        >
-                          {row.total}
-                        </button>
-                      ) : (
-                        0
-                      )}
+                      {row.total}
+                    </td>
+                    <td
+                      className={[
+                        "px-4 py-3 text-center font-semibold text-gray-900",
+                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                      ].join(" ")}
+                    >
+                      {formatPromedioVenta(row.promedioVenta)}
+                    </td>
+                    <td
+                      className={[
+                        "px-4 py-3 text-center font-semibold text-gray-900",
+                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                      ].join(" ")}
+                    >
+                      {formatMesesStock(row.total, row.promedioVenta)}
                     </td>
                     {rowIndex === 0 ? (
                       <td
@@ -280,27 +394,34 @@ export default function AnalisisStockView() {
 
               {!groups.length ? (
                 <tr>
-                  <td colSpan={months.length + 4} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={months.length + 7} className="px-6 py-12 text-center text-sm text-gray-500">
                     No hay unidades para analizar en este momento.
                   </td>
                 </tr>
               ) : null}
 
-              {groups.length && totals ? (
+              {groups.length && totalsWithPed ? (
                 <tr className="bg-gray-100">
                   <td className="sticky left-0 z-10 min-w-[180px] border-r border-gray-200 bg-gray-100 px-4 py-3 font-bold text-gray-900">
-                    {totals.modelo}
+                    {totalsWithPed.modelo}
                   </td>
                   <td className="sticky left-[180px] z-10 min-w-[320px] border-r border-gray-200 bg-gray-100 px-4 py-3 font-bold text-gray-900">
                     Total general
                   </td>
                   {months.map((month) => (
                     <td key={`total-${month.key}`} className="px-4 py-3 text-center font-bold text-gray-900">
-                      {totals.countsByMonth[month.key] ?? 0}
+                      {totalsWithPed.countsByMonth[month.key] ?? 0}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totals.total}</td>
-                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totals.total}</td>
+                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.ped}</td>
+                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.total}</td>
+                  <td className="px-4 py-3 text-center font-bold text-gray-900">
+                    {formatPromedioVenta(totalsWithPed.promedioVenta)}
+                  </td>
+                  <td className="px-4 py-3 text-center font-bold text-gray-900">
+                    {formatMesesStock(totalsWithPed.total, totalsWithPed.promedioVenta)}
+                  </td>
+                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.total}</td>
                 </tr>
               ) : null}
             </tbody>
