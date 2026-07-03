@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import AgendaEntrega from "../models/AgendaEntrega";
-import AgendaEntregaLog from "../models/AgendaEntregaLog";
+import AgendaEntregaLog, { type AgendaEntregaLogAction } from "../models/AgendaEntregaLog";
 import PendienteTurnar from "../models/PendienteTurnar";
 import SucursalEntrega from "../models/SucursalEntrega";
 import {
@@ -183,6 +183,28 @@ const buildAgendaDetailLabel = (
     `Sucursal: ${sucursalNombre}`,
     `Fecha: ${fechaAgenda}`,
     `Hora: ${horaAgenda}`,
+    `Equipado: ${equipado ? "SI" : "NO"}`,
+    `Entrega usado: ${entregaUsado ? "SI" : "NO"}`,
+    `Siniestro: ${siniestro ? "SI" : "NO"}`,
+  ];
+
+  if (observaciones.trim()) {
+    details.push(`Observaciones: ${observaciones.trim()}`);
+  }
+
+  return details.join(" | ");
+};
+
+const buildPendienteDetailLabel = (
+  sucursalNombre: string,
+  equipado: boolean,
+  entregaUsado: boolean,
+  siniestro: boolean,
+  observaciones: string,
+) => {
+  const details = [
+    "Tipo: Pendiente de turnar",
+    `Sucursal: ${sucursalNombre}`,
     `Equipado: ${equipado ? "SI" : "NO"}`,
     `Entrega usado: ${entregaUsado ? "SI" : "NO"}`,
     `Siniestro: ${siniestro ? "SI" : "NO"}`,
@@ -418,16 +440,17 @@ const validateTurnarPayload = async (
 };
 
 const createAgendaLog = async (params: {
-  agendaEntrega: mongoose.Types.ObjectId | string;
+  agendaEntrega: mongoose.Types.ObjectId | string | null;
   interno: number;
   usuario: string;
   usuarioNombre: string;
+  accion: AgendaEntregaLogAction;
   detalle: string;
 }) => {
   await AgendaEntregaLog.create({
     agendaEntrega: params.agendaEntrega,
     interno: params.interno,
-    accion: "CREADA",
+    accion: params.accion,
     usuario: new mongoose.Types.ObjectId(params.usuario),
     usuarioNombre: params.usuarioNombre,
     fecha: new Date(),
@@ -517,6 +540,21 @@ export class PendienteTurnarController {
         .populate("sucursal", "nombre direccion activa")
         .lean();
 
+      await createAgendaLog({
+        agendaEntrega: null,
+        interno: validation.data.interno,
+        usuario: req.user._id,
+        usuarioNombre,
+        accion: "PENDIENTE_CREADA",
+        detalle: buildPendienteDetailLabel(
+          validation.data.sucursalNombre,
+          validation.data.equipado,
+          validation.data.entregaUsado,
+          validation.data.siniestro,
+          validation.data.observaciones,
+        ),
+      });
+
       return res.status(201).json({
         message: "Pendiente de turnar creado correctamente",
         data: populated ? formatPendienteRow(populated as PendienteLean, validation.data.lookup) : null,
@@ -583,6 +621,21 @@ export class PendienteTurnarController {
         .populate("sucursal", "nombre direccion activa")
         .lean();
 
+      await createAgendaLog({
+        agendaEntrega: null,
+        interno: validation.data.interno,
+        usuario: req.user._id,
+        usuarioNombre: buildUserName(req),
+        accion: "PENDIENTE_MODIFICADA",
+        detalle: buildPendienteDetailLabel(
+          validation.data.sucursalNombre,
+          validation.data.equipado,
+          validation.data.entregaUsado,
+          validation.data.siniestro,
+          validation.data.observaciones,
+        ),
+      });
+
       return res.status(200).json({
         message: "Pendiente de turnar actualizado correctamente",
         data: updated ? formatPendienteRow(updated as PendienteLean, validation.data.lookup) : null,
@@ -622,6 +675,21 @@ export class PendienteTurnarController {
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
+
+      await createAgendaLog({
+        agendaEntrega: null,
+        interno: Number(pendiente.interno),
+        usuario: req.user._id,
+        usuarioNombre: buildUserName(req),
+        accion: "PENDIENTE_ELIMINADA",
+        detalle: buildPendienteDetailLabel(
+          String((pendiente.sucursal as any)?.nombre ?? ""),
+          Boolean((pendiente as any).equipado),
+          Boolean((pendiente as any).entregaUsado),
+          Boolean((pendiente as any).siniestro),
+          String((pendiente as any).observaciones ?? ""),
+        ),
+      });
 
       await PendienteTurnar.findByIdAndDelete(pendienteId);
 
@@ -690,6 +758,7 @@ export class PendienteTurnarController {
         interno: validation.data.interno,
         usuario: req.user._id,
         usuarioNombre,
+        accion: "PENDIENTE_TURNADA",
         detalle: `${buildAgendaDetailLabel(
           validation.data.sucursalNombre,
           validation.data.fechaAgenda,
