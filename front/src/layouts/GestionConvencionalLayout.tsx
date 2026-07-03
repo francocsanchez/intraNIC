@@ -8,6 +8,7 @@ export default function GestionConvencionalLayout() {
   const { user } = useAuth();
 
   const canViewAsignaciones = hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones);
+  const canViewPlanNegocio = hasModulePathAccess(user, "planNegocio", paths.convencional.planNegocio);
   const canViewRegistroAsignaciones = hasModulePathAccess(user, "registroAsignaciones", paths.convencional.registroAsignaciones);
   const canViewPedidoMensual = hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual);
   const canViewPedidoUnidades = hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades);
@@ -21,6 +22,12 @@ export default function GestionConvencionalLayout() {
           {canViewAsignaciones ? (
             <Link to={paths.convencional.asignaciones} className="hover:text-gray-900 transition">
               Asignaciones
+            </Link>
+          ) : null}
+
+          {canViewPlanNegocio ? (
+            <Link to={paths.convencional.planNegocio} className="hover:text-gray-900 transition">
+              Plan de negocio
             </Link>
           ) : null}
 

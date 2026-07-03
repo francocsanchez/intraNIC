@@ -30,6 +30,7 @@ import callCenterRoutes from "./routes/callCenterRoutes";
 import segUnidadesFabricaRoutes from "./routes/segUnidadesFabricaRoutes";
 import jobMonitorRoutes from "./routes/jobMonitorRoutes";
 import minutaRoutes from "./routes/minutaRoutes";
+import planNegocioRoutes from "./routes/planNegocioRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -56,6 +57,7 @@ app.use("/api/dms/preventas", preventaRoutes);
 app.use("/api/dms/pedido-mensual", pedidoMensualRoutes);
 app.use("/api/dms/proformas", proformaRoutes);
 app.use("/api/dms/minutas", minutaRoutes);
+app.use("/api/dms/plan-negocio", planNegocioRoutes);
 app.use("/api/facturas-anticipo", facturaAnticipoRoutes);
 app.use("/api/operaciones", operacionesRoutes);
 app.use("/api/patentamientos", patentamientosRoutes);

@@ -43,6 +43,7 @@ SELECT
 	stoauto.sa_codigo AS interno,
 	stoauto.sa_nrofab AS nrofab,
 	auto.au_nombre AS version,
+	famiauto.fam_nombre AS modelo,
 	movnped.mnp_chasis AS chasis,
 	movnped.mnp_fecrec AS fechaProblableRecep,
 	li.li_fecha AS fechaRecepcionRemito,
@@ -175,4 +176,48 @@ WHERE
 ORDER BY
 	cli.cli_nombre
 `
+
+export const getModelosPlanNegocio = () => `
+SELECT DISTINCT
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo
+FROM
+	stoauto
+INNER JOIN auto
+	ON stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+INNER JOIN famiauto
+	ON auto.au_familia = famiauto.fam_codigo
+WHERE
+	stoauto.sa_nrofab LIKE 'NIC%'
+	AND ISNULL(famiauto.fam_nombre, '') <> ''
+ORDER BY
+	modelo
+`;
+
+export const getAsignacionesPlanNegocio = () => `
+SELECT
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
+	CAST(SUBSTRING(stoauto.sa_nrofab, 7, 2) AS INT) AS mes,
+	COUNT(*) AS cantidad
+FROM
+	stoauto
+INNER JOIN movnped
+	ON stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto
+	ON stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+INNER JOIN famiauto
+	ON auto.au_familia = famiauto.fam_codigo
+WHERE
+	stoauto.sa_nrofab LIKE 'NIC%'
+	AND movnped.mnp_fecbaj IS NULL
+	AND SUBSTRING(stoauto.sa_nrofab, 5, 2) = :anio
+	AND ISNULL(famiauto.fam_nombre, '') <> ''
+GROUP BY
+	LTRIM(RTRIM(famiauto.fam_nombre)),
+	CAST(SUBSTRING(stoauto.sa_nrofab, 7, 2) AS INT)
+ORDER BY
+	modelo,
+	mes
+`;
 

@@ -61,6 +61,8 @@ const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAs
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
 const ColoresView = lazy(() => import("./views/admin/siac/ColoresView"));
 const VersionesView = lazy(() => import("./views/admin/siac/VersionesView"));
+const PlanNegocioCrudView = lazy(() => import("./views/admin/siac/PlanNegocioCrudView"));
+const PlanNegocioView = lazy(() => import("./views/admin/siac/PlanNegocioView"));
 const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualView"));
 const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
 const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
@@ -152,6 +154,7 @@ export default function Router() {
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
               <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
+              <Route path={paths.admin.planNegocio} element={<PlanNegocioCrudView />} />
             </Route>
           </Route>
 
@@ -322,6 +325,12 @@ export default function Router() {
               <Route path={paths.convencional.preventasAsignadas} element={<PreventasAsignadasView />} />
               <Route path={paths.convencional.preventasNueva} element={<PreventasView />} />
               <Route path={paths.convencional.preventasEditarRoute} element={<PreventasView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["planNegocio"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.planNegocio} element={<PlanNegocioView />} />
             </Route>
           </Route>
 

@@ -123,6 +123,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.planAhorro.promedios,
     paths.convencional.ranking,
     paths.convencional.promedio,
+    paths.convencional.planNegocio,
     paths.convencional.asignaciones,
     paths.usados.stockDisponible,
     paths.usados.stockReservado,
@@ -136,6 +137,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.admin.configuracion,
     paths.admin.configuracionConvencionalEditar,
     paths.admin.configuracionUsadosEditar,
+    paths.admin.planNegocio,
     paths.entregas.registros,
   ],
   administracion: [
@@ -174,6 +176,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.usados.stockPendienteDocumentacion,
     paths.usados.stockIngresos,
     paths.convencional.asignaciones,
+    paths.convencional.planNegocio,
     paths.convencional.pedidoMensual,
     paths.convencional.pedidoUnidades,
     paths.convencional.registroAsignaciones,
@@ -185,6 +188,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.admin.configuracion,
     paths.admin.configuracionConvencionalEditar,
     paths.admin.configuracionUsadosEditar,
+    paths.admin.planNegocio,
     paths.entregas.registros,
   ],
   coordinador: [

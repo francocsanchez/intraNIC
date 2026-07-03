@@ -153,6 +153,7 @@ export default function Inicio() {
       icon: Settings2,
       items: [
         { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones), icon: Wrench },
+        { label: "Plan de negocio", to: paths.convencional.planNegocio, enabled: hasModulePathAccess(user, "planNegocio", paths.convencional.planNegocio), icon: BarChart3 },
         {
           label: "Registro asignaciones",
           to: paths.convencional.registroAsignaciones,
@@ -199,6 +200,7 @@ export default function Inicio() {
       items: [
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
+        { label: "PN", to: paths.admin.planNegocio, enabled: hasModulePathAccess(user, "configuracion", paths.admin.planNegocio), icon: BarChart3 },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
         {
           label: "Act. Registros",

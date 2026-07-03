@@ -49,6 +49,9 @@ export default function ConfiguracionView() {
     hasModuleAccess(user, "configuracion") &&
     (hasPathAccess(user, paths.convencional.preventasColores) ||
       hasPathAccess(user, paths.convencional.preventasVersiones));
+  const canManagePlanNegocio =
+    hasModuleAccess(user, "configuracion") &&
+    hasPathAccess(user, paths.admin.planNegocio);
   const canViewCallCenterOrigins =
     hasModuleAccess(user, "callCenter") && hasPathAccess(user, paths.callCenter.origenesDatos);
 
@@ -80,8 +83,11 @@ export default function ConfiguracionView() {
         ? [
             { label: "Colores", to: paths.convencional.preventasColores },
             { label: "Versiones", to: paths.convencional.preventasVersiones },
+            ...(canManagePlanNegocio ? [{ label: "PN", to: paths.admin.planNegocio }] : []),
           ]
-        : [],
+        : canManagePlanNegocio
+          ? [{ label: "PN", to: paths.admin.planNegocio }]
+          : [],
     },
     {
       title: "Usados",

@@ -303,6 +303,7 @@ export const asignacionRecepcionItemSchema = z.object({
   interno: z.number(),
   nrofab: z.string(),
   version: z.string(),
+  modelo: z.string(),
   chasis: z.string().nullable(),
   fechaProblableRecep: z.string().nullable(),
   fechaRecepcionRemito: z.string().nullable(),
@@ -1034,6 +1035,62 @@ export const catalogoResponseSchema = z.object({
   message: z.string(),
 });
 
+export const planNegocioSchema = z.object({
+  _id: z.string(),
+  modelo: z.string(),
+  anio: z.number(),
+  objetivo: z.number(),
+  activo: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const planNegocioListResponseSchema = z.object({
+  data: z.array(planNegocioSchema),
+});
+
+export const planNegocioResponseSchema = z.object({
+  data: planNegocioSchema,
+  message: z.string(),
+});
+
+const planNegocioMesesSchema = z.object({
+  ene: z.number(),
+  feb: z.number(),
+  mar: z.number(),
+  abr: z.number(),
+  may: z.number(),
+  jun: z.number(),
+  jul: z.number(),
+  ago: z.number(),
+  sep: z.number(),
+  oct: z.number(),
+  nov: z.number(),
+  dic: z.number(),
+});
+
+export const planNegocioResumenRowSchema = z.object({
+  modelo: z.string(),
+  objetivo: z.number(),
+  totalAsignado: z.number(),
+  avance: z.number(),
+  restante: z.number(),
+  xMes: z.number(),
+}).extend(planNegocioMesesSchema.shape);
+
+export const planNegocioResumenResponseSchema = z.object({
+  data: z.array(planNegocioResumenRowSchema),
+  total: planNegocioResumenRowSchema,
+  meta: z.object({
+    anio: z.number(),
+    mesesRestantes: z.number(),
+  }),
+});
+
+export const planNegocioModelosResponseSchema = z.object({
+  data: z.array(z.string()),
+});
+
 export const testDriveSchema = z.object({
   _id: z.string(),
   dominio: z.string(),
@@ -1174,6 +1231,12 @@ export const resumenPedidoMensualResponseSchema = z.object({
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
+export type PlanNegocioItem = z.infer<typeof planNegocioSchema>;
+export type PlanNegocioListResponse = z.infer<typeof planNegocioListResponseSchema>;
+export type PlanNegocioResponse = z.infer<typeof planNegocioResponseSchema>;
+export type PlanNegocioResumenRow = z.infer<typeof planNegocioResumenRowSchema>;
+export type PlanNegocioResumenResponse = z.infer<typeof planNegocioResumenResponseSchema>;
+export type PlanNegocioModelosResponse = z.infer<typeof planNegocioModelosResponseSchema>;
 export type TestDrive = z.infer<typeof testDriveSchema>;
 export type TestDriveListResponse = z.infer<typeof testDriveListResponseSchema>;
 export type TestDriveResponse = z.infer<typeof testDriveResponseSchema>;

@@ -10,6 +10,7 @@ export const moduleKeys = [
   "facturasAnticipo",
   "segUnidadesFabrica",
   "asignaciones",
+  "planNegocio",
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",
@@ -47,6 +48,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   facturasAnticipo: "Facturas anticipo",
   segUnidadesFabrica: "Seg. unidades fabrica",
   asignaciones: "Asignaciones",
+  planNegocio: "Plan de negocio",
   registroAsignaciones: "Registro asignaciones",
   pedidoMensual: "Pedido mensual",
   pedidoUnidades: "Pedido unidades",
@@ -95,7 +97,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Gestion de stock convencional",
-    modules: ["asignaciones", "registroAsignaciones", "pedidoMensual", "pedidoUnidades"],
+    modules: ["asignaciones", "planNegocio", "registroAsignaciones", "pedidoMensual", "pedidoUnidades"],
   },
   {
     title: "Gestion de stock usados",

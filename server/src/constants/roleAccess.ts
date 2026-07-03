@@ -10,6 +10,7 @@ export type RoleAccessKey =
   | "convencional.ranking"
   | "convencional.promedio"
   | "convencional.asignaciones"
+  | "convencional.planNegocio"
   | "convencional.registroAsignaciones"
   | "convencional.pedidoMensual"
   | "convencional.pedidoUnidades"
@@ -179,6 +180,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "convencional.miListaEspera",
     "convencional.ranking",
     "convencional.promedio",
+    "convencional.planNegocio",
     "convencional.asignaciones",
     "preventas.read",
     "preventas.resumen",
@@ -238,6 +240,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "usados.pendienteDocumentacion",
     "usados.ingresos",
     "convencional.asignaciones",
+    "convencional.planNegocio",
     "convencional.pedidoMensual",
     "convencional.pedidoUnidades",
     "convencional.registroAsignaciones",
