@@ -13,11 +13,7 @@ export default function GestionConvencionalLayout() {
   const canViewPedidoMensual = hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual);
   const canViewPedidoUnidades = hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades);
   const canViewAnalisisStock = hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock);
-  const canViewAnalisisStockDictionary = hasModulePathAccess(
-    user,
-    "analisisStock",
-    paths.convencional.analisisStockDiccionarioVersiones,
-  );
+  const canViewAnalisisStockDictionary = canViewAnalisisStock;
 
   return (
     <BaseAppLayout
