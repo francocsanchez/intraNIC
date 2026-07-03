@@ -43,7 +43,6 @@ export default function PlanNegocioView() {
 
   const rows = data?.data ?? [];
   const total = data?.total;
-  const mesesRestantes = data?.meta.mesesRestantes ?? 0;
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
