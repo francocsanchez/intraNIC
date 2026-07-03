@@ -549,9 +549,8 @@ export class DmsController {
 
       const groups = Array.from(groupsMap.entries())
         .sort(([modeloA], [modeloB]) => compareAnalisisStockModel(modeloA, modeloB))
-        .map(([modelo, rowsByVersion]) => ({
-          modelo,
-          rows: Array.from(rowsByVersion.values())
+        .map(([modelo, rowsByVersion]) => {
+          const rows = Array.from(rowsByVersion.values())
             .sort((a, b) => a.version.localeCompare(b.version, "es"))
             .map((item) => ({
               version: item.version,
@@ -571,9 +570,19 @@ export class DmsController {
               ped: item.ped,
               promedioVenta: Number((item.ventasUltimos3Meses / 3).toFixed(1)),
               total: item.stockTotal + item.ped,
-            })),
-          total: Array.from(rowsByVersion.values()).reduce((acc, item) => acc + item.stockTotal + item.ped, 0),
-        }));
+            }));
+          const total = rows.reduce((acc, item) => acc + item.total, 0);
+          const promedioVenta = Number(rows.reduce((acc, item) => acc + item.promedioVenta, 0).toFixed(1));
+          const mesesStock = Number((promedioVenta > 0 ? total / promedioVenta : 0).toFixed(1));
+
+          return {
+            modelo,
+            rows,
+            total,
+            promedioVenta,
+            mesesStock,
+          };
+        });
 
       const totals = {
         modelo: "TOTALES",
@@ -600,12 +609,16 @@ export class DmsController {
           0,
         ),
       };
+      const totalsWithMesesStock = {
+        ...totals,
+        mesesStock: Number((totals.promedioVenta > 0 ? totals.total / totals.promedioVenta : 0).toFixed(1)),
+      };
 
       return res.status(200).json({
         data: {
           months,
           groups,
-          totals,
+          totals: totalsWithMesesStock,
           dictionary: dictionaryResponse,
           meta: {
             totalUnidades,

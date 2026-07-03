@@ -145,7 +145,6 @@ export default function AnalisisStockView() {
   const groups = data?.data.groups ?? [];
   const totals = data?.data.totals;
   const totalUnidades = data?.data.meta.totalUnidades ?? 0;
-  const totalRows = groups.reduce((acc, group) => acc + group.rows.length, 0);
   const isModalOpen = Boolean(detail);
   const pedByRowKey = groups.reduce<Record<string, number>>((acc, group) => {
     group.rows.forEach((row) => {
@@ -203,7 +202,20 @@ export default function AnalisisStockView() {
   const groupsWithTotals = groupsWithPed.map((group) => ({
     ...group,
     total: group.rows.reduce((acc, row) => acc + row.total, 0),
+    promedioVenta: Number(group.rows.reduce((acc, row) => acc + row.promedioVenta, 0).toFixed(1)),
+    mesesStock: Number(
+      (
+        (() => {
+          const total = group.rows.reduce((acc, row) => acc + row.total, 0);
+          const promedioVenta = group.rows.reduce((acc, row) => acc + row.promedioVenta, 0);
+          return promedioVenta > 0 ? total / promedioVenta : 0;
+        })()
+      ).toFixed(1),
+    ),
   }));
+  const totalMesesStockNegocio = totalsWithPed
+    ? Number((totalsWithPed.promedioVenta > 0 ? totalsWithPed.total / totalsWithPed.promedioVenta : 0).toFixed(1))
+    : 0;
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
@@ -227,18 +239,38 @@ export default function AnalisisStockView() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelos</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{groups.length}</p>
+      <section className="overflow-hidden rounded-[1.6rem] border border-gray-200 bg-white shadow-sm">
+        <div className="px-6 pt-5 text-xs font-semibold uppercase tracking-[0.28em] text-[#5b7197]">
+          Meses de stock
+        </div>
+        <div className="grid grid-cols-2 px-6 py-4 md:grid-cols-4 xl:grid-cols-8">
+          {groupsWithTotals.map((group, index) => (
+            <div
+              key={group.modelo}
+              className={[
+                "min-w-0 px-3 py-1",
+                index > 0 ? "border-l border-gray-200" : "",
+              ].join(" ")}
+            >
+              <p className="truncate text-[11px] uppercase text-[#5b7197]">{group.modelo}</p>
+              <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">
+                {formatMesesStock(group.total, group.promedioVenta)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">Unidades</p>
+          <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">{totalUnidades}</p>
         </article>
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versiones</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalRows}</p>
-        </article>
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Unidades</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">{totalUnidades}</p>
+        <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">M. stock negocio</p>
+          <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">
+            {formatPromedioVenta(totalMesesStockNegocio)}
+          </p>
         </article>
       </section>
 
@@ -258,7 +290,7 @@ export default function AnalisisStockView() {
                     {month.label}
                   </th>
                 ))}
-                <th className="px-4 py-3 text-center">PED</th>
+                <th className="bg-gray-100 px-4 py-3 text-center">PED</th>
                 <th className="px-4 py-3 text-center">Total</th>
                 <th className="px-4 py-3 text-center">P. VTA</th>
                 <th className="px-4 py-3 text-center">M. STOCK</th>
@@ -322,7 +354,7 @@ export default function AnalisisStockView() {
                     ))}
                     <td
                       className={[
-                        "px-4 py-3 text-center text-gray-700",
+                        "bg-gray-50 px-4 py-3 text-center text-gray-700",
                         rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
                       ].join(" ")}
                     >
@@ -413,7 +445,7 @@ export default function AnalisisStockView() {
                       {totalsWithPed.countsByMonth[month.key] ?? 0}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.ped}</td>
+                  <td className="bg-gray-200 px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.ped}</td>
                   <td className="px-4 py-3 text-center font-bold text-gray-900">{totalsWithPed.total}</td>
                   <td className="px-4 py-3 text-center font-bold text-gray-900">
                     {formatPromedioVenta(totalsWithPed.promedioVenta)}

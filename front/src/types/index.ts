@@ -1288,6 +1288,8 @@ export const analisisStockGroupSchema = z.object({
   modelo: z.string(),
   rows: z.array(analisisStockRowSchema),
   total: z.number(),
+  promedioVenta: z.number(),
+  mesesStock: z.number(),
 });
 
 export const analisisStockDataSchema = z.object({
@@ -1299,6 +1301,7 @@ export const analisisStockDataSchema = z.object({
     countsByMonth: z.record(z.string(), z.number()),
     ped: z.number(),
     promedioVenta: z.number(),
+    mesesStock: z.number(),
     total: z.number(),
   }),
   meta: z.object({
