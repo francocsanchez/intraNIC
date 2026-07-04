@@ -33,6 +33,7 @@ function DictionaryModal({
   const [modelo, setModelo] = useState("");
   const [versionRaw, setVersionRaw] = useState("");
   const [versionCanonica, setVersionCanonica] = useState("");
+  const [activa, setActiva] = useState(true);
   const selectedModelOption = options.find((option) => option.modelo === modelo) ?? null;
   const availableVersions = selectedModelOption?.versions ?? [];
 
@@ -42,6 +43,7 @@ function DictionaryModal({
     setModelo(item?.modelo ?? "");
     setVersionRaw(item?.versionRaw ?? "");
     setVersionCanonica(item?.versionCanonica ?? "");
+    setActiva(item?.activa ?? true);
   }, [item, open]);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ function DictionaryModal({
         modelo: modelo.trim(),
         versionRaw: versionRaw.trim(),
         versionCanonica: versionCanonica.trim(),
+        activa,
       };
 
       if (!payload.modelo) throw new Error("El modelo es obligatorio");
@@ -182,6 +185,19 @@ function DictionaryModal({
                       </datalist>
                     ) : null}
                   </label>
+
+                  <label className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={activa}
+                      onChange={(event) => setActiva(event.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                    />
+                    <div>
+                      <span className="text-sm font-semibold text-gray-900">Version unificada activa</span>
+                      <p className="text-xs text-gray-500">Si esta activa se muestra en Analisis de stock aunque no tenga stock.</p>
+                    </div>
+                  </label>
                 </div>
 
                 <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -226,6 +242,22 @@ export default function AnalisisStockVersionesView() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteAnalisisStockVersionDictionary,
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["analisis-stock", "dictionary"] });
+      queryClient.invalidateQueries({ queryKey: ["analisis-stock"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: ({ item, activa }: { item: AnalisisStockDictionaryItem; activa: boolean }) =>
+      updateAnalisisStockVersionDictionary(item._id, {
+        modelo: item.modelo,
+        versionRaw: item.versionRaw,
+        versionCanonica: item.versionCanonica,
+        activa,
+      }),
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["analisis-stock", "dictionary"] });
@@ -369,6 +401,7 @@ export default function AnalisisStockVersionesView() {
                 <th className="px-4 py-2.5 text-left">Modelo</th>
                 <th className="px-4 py-2.5 text-left">Version cruda</th>
                 <th className="px-4 py-2.5 text-left">Version unificada</th>
+                <th className="px-4 py-2.5 text-center">Activa</th>
                 <th className="px-4 py-2.5 text-center">Acciones</th>
               </tr>
             </thead>
@@ -382,6 +415,17 @@ export default function AnalisisStockVersionesView() {
                       <GitMerge size={14} />
                       {item.versionCanonica}
                     </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-center">
+                    <label className="inline-flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={item.activa}
+                        onChange={(event) => toggleActiveMutation.mutate({ item, activa: event.target.checked })}
+                        disabled={toggleActiveMutation.isPending}
+                        className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a] disabled:cursor-not-allowed"
+                      />
+                    </label>
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex justify-center gap-2">
@@ -409,7 +453,7 @@ export default function AnalisisStockVersionesView() {
 
               {!items.length ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-500">
                     No hay equivalencias cargadas todavia.
                   </td>
                 </tr>

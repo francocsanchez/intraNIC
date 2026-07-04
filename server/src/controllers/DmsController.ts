@@ -51,11 +51,13 @@ type AnalisisStockDictionaryPayload = {
   modelo?: unknown;
   versionRaw?: unknown;
   versionCanonica?: unknown;
+  activa?: unknown;
 };
 
 type AnalisisStockCanonicalVersion = {
   versionCanonica: string;
   versionCanonicaKey: string;
+  activa: boolean;
 };
 
 const MONTH_LABELS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -158,6 +160,7 @@ const getAnalisisCanonicalVersion = (
   return {
     versionCanonica: version,
     versionCanonicaKey: versionRawKey,
+    activa: true,
   };
 };
 
@@ -173,6 +176,7 @@ const buildAnalisisStockDictionaryPayload = (payload: AnalisisStockDictionaryPay
     versionRawKey: normalizeAnalisisVersionKey(payload.versionRaw),
     versionCanonica,
     versionCanonicaKey: normalizeAnalisisVersionKey(payload.versionCanonica),
+    activa: payload.activa === undefined ? true : Boolean(payload.activa),
   };
 };
 
@@ -188,12 +192,26 @@ const getAnalisisClosedQuarterRange = (referenceDate = new Date()) => {
   };
 };
 
+const serializeAnalisisStockDictionaryItem = (item: any) => ({
+  _id: String(item._id),
+  modelo: item.modelo,
+  modeloKey: item.modeloKey,
+  versionRaw: item.versionRaw,
+  versionRawKey: item.versionRawKey,
+  versionCanonica: item.versionCanonica,
+  versionCanonicaKey: item.versionCanonicaKey,
+  activa: item.activa !== false,
+  createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
+  updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
+});
+
 export class DmsController {
   static listAnalisisStockVersionDictionary = async (_req: Request, res: Response) => {
     try {
-      const data = await AnalisisStockVersionDictionary.find()
+      const rows = await AnalisisStockVersionDictionary.find()
         .sort({ modelo: 1, versionRaw: 1 })
         .lean();
+      const data = rows.map(serializeAnalisisStockDictionaryItem);
 
       return res.status(200).json({ data });
     } catch (error) {
@@ -228,7 +246,8 @@ export class DmsController {
         return res.status(400).json({ error: "Ya existe un diccionario para esa version cruda" });
       }
 
-      const data = await AnalisisStockVersionDictionary.create(payload);
+      const created = await AnalisisStockVersionDictionary.create(payload);
+      const data = serializeAnalisisStockDictionaryItem(created.toObject());
       return res.status(201).json({ message: "Version unificada creada correctamente", data });
     } catch (error) {
       logError("DmsController.createAnalisisStockVersionDictionary");
@@ -275,9 +294,13 @@ export class DmsController {
       item.versionRawKey = payload.versionRawKey;
       item.versionCanonica = payload.versionCanonica;
       item.versionCanonicaKey = payload.versionCanonicaKey;
+      item.activa = payload.activa;
       await item.save();
 
-      return res.status(200).json({ message: "Version unificada actualizada correctamente", data: item });
+      return res.status(200).json({
+        message: "Version unificada actualizada correctamente",
+        data: serializeAnalisisStockDictionaryItem(item.toObject()),
+      });
     } catch (error) {
       logError("DmsController.updateAnalisisStockVersionDictionary");
       console.error(error);
@@ -448,17 +471,48 @@ export class DmsController {
           }
         >
       >();
+      const canonicalDictionaryGroups = new Map<
+        string,
+        {
+          modelo: string;
+          versionCanonica: string;
+          versionCanonicaKey: string;
+          activa: boolean;
+          versionOriginales: Set<string>;
+        }
+      >();
       const dictionaryByKey = new Map(
         dictionaryItems.map((item) => [
           buildAnalisisCompositeKey(item.modeloKey, item.versionRawKey),
           {
             versionCanonica: item.versionCanonica,
             versionCanonicaKey: item.versionCanonicaKey,
+            activa: item.activa !== false,
           },
         ]),
       );
+
+      for (const item of dictionaryItems) {
+        const key = buildAnalisisCompositeKey(item.modeloKey, item.versionCanonicaKey);
+        const current = canonicalDictionaryGroups.get(key) ?? {
+          modelo: item.modelo,
+          versionCanonica: item.versionCanonica,
+          versionCanonicaKey: item.versionCanonicaKey,
+          activa: false,
+          versionOriginales: new Set<string>(),
+        };
+
+        current.activa = current.activa || item.activa !== false;
+        current.versionOriginales.add(item.versionRaw);
+        canonicalDictionaryGroups.set(key, current);
+      }
+
       const pedByKey = pedidosPed.reduce<Map<string, number>>((acc, item) => {
         const canonicalVersion = getAnalisisCanonicalVersion(item.modeloKey, item.version, dictionaryByKey);
+        if (!canonicalVersion.activa) {
+          return acc;
+        }
+
         const rowKey = buildAnalisisCompositeKey(item.modeloKey, canonicalVersion.versionCanonicaKey);
 
         acc.set(rowKey, (acc.get(rowKey) ?? 0) + Number(item.cantidad ?? 0));
@@ -468,23 +522,17 @@ export class DmsController {
         const modelo = normalizeAnalisisModel(row.modelo);
         const version = normalizeAnalisisText(row.version, "Sin version");
         const canonicalVersion = getAnalisisCanonicalVersion(modelo, version, dictionaryByKey);
+        if (!canonicalVersion.activa) {
+          return acc;
+        }
+
         const ventas = Number(row.ventas ?? 0);
         const rowKey = buildAnalisisCompositeKey(modelo, canonicalVersion.versionCanonicaKey);
 
         acc.set(rowKey, (acc.get(rowKey) ?? 0) + (Number.isFinite(ventas) ? ventas : 0));
         return acc;
       }, new Map<string, number>());
-      const dictionaryResponse = dictionaryItems.map((item) => ({
-        _id: String(item._id),
-        modelo: item.modelo,
-        modeloKey: item.modeloKey,
-        versionRaw: item.versionRaw,
-        versionRawKey: item.versionRawKey,
-        versionCanonica: item.versionCanonica,
-        versionCanonicaKey: item.versionCanonicaKey,
-        createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
-        updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
-      }));
+      const dictionaryResponse = dictionaryItems.map(serializeAnalisisStockDictionaryItem);
       let totalUnidades = 0;
 
       const groupVersionKey = (modelo: string, versionKey: string) => buildAnalisisCompositeKey(modelo, versionKey);
@@ -499,7 +547,11 @@ export class DmsController {
 
         const modelo = normalizeAnalisisModel(row.modelo);
         const version = normalizeAnalisisText(row.version, "Sin version");
-        const { versionCanonica, versionCanonicaKey } = getAnalisisCanonicalVersion(modelo, version, dictionaryByKey);
+        const { versionCanonica, versionCanonicaKey, activa } = getAnalisisCanonicalVersion(modelo, version, dictionaryByKey);
+        if (!activa) {
+          continue;
+        }
+
         const month = fechaRecepcion.getMonth() + 1;
         const year = fechaRecepcion.getFullYear();
         const monthKey = buildMonthKey(year, month);
@@ -541,6 +593,31 @@ export class DmsController {
         rowsByVersion.set(versionCanonicaKey, currentVersion);
         groupsMap.set(modelo, rowsByVersion);
         totalUnidades += 1;
+      }
+
+      for (const dictionaryGroup of canonicalDictionaryGroups.values()) {
+        if (!dictionaryGroup.activa) {
+          continue;
+        }
+
+        const rowsByVersion = groupsMap.get(dictionaryGroup.modelo) ?? new Map();
+
+        if (!rowsByVersion.has(dictionaryGroup.versionCanonicaKey)) {
+          rowsByVersion.set(dictionaryGroup.versionCanonicaKey, {
+            version: dictionaryGroup.versionCanonica,
+            versionKey: dictionaryGroup.versionCanonicaKey,
+            versionCanonica: dictionaryGroup.versionCanonica,
+            versionOriginales: new Set(dictionaryGroup.versionOriginales),
+            countsByMonth: {},
+            unitsByMonth: {},
+            unitsTotal: [],
+            stockTotal: 0,
+            ped: pedByKey.get(groupVersionKey(dictionaryGroup.modelo, dictionaryGroup.versionCanonicaKey)) ?? 0,
+            ventasUltimos3Meses: ventasByKey.get(groupVersionKey(dictionaryGroup.modelo, dictionaryGroup.versionCanonicaKey)) ?? 0,
+          });
+        }
+
+        groupsMap.set(dictionaryGroup.modelo, rowsByVersion);
       }
 
       const months = Array.from(monthsMap.values()).sort((a, b) =>

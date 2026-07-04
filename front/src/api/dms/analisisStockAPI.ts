@@ -77,6 +77,7 @@ export async function createAnalisisStockVersionDictionary(payload: {
   modelo: string;
   versionRaw: string;
   versionCanonica: string;
+  activa: boolean;
 }): Promise<AnalisisStockDictionaryResponse> {
   try {
     const { data } = await api.post("/dms/analisis-stock/diccionario-versiones", payload);
@@ -99,6 +100,7 @@ export async function updateAnalisisStockVersionDictionary(
     modelo: string;
     versionRaw: string;
     versionCanonica: string;
+    activa: boolean;
   },
 ): Promise<AnalisisStockDictionaryResponse> {
   try {

@@ -7,6 +7,7 @@ export interface IAnalisisStockVersionDictionary extends Document {
   versionRawKey: string;
   versionCanonica: string;
   versionCanonicaKey: string;
+  activa: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +43,10 @@ const analisisStockVersionDictionarySchema = new Schema<IAnalisisStockVersionDic
       type: String,
       required: true,
       trim: true,
+    },
+    activa: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },

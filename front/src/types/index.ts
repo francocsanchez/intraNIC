@@ -1243,6 +1243,7 @@ export const analisisStockDictionaryItemSchema = z.object({
   versionRawKey: z.string(),
   versionCanonica: z.string(),
   versionCanonicaKey: z.string(),
+  activa: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
