@@ -161,6 +161,7 @@ export default function Inicio() {
           icon: ClipboardList,
         },
         { label: "Analisis de stock", to: paths.convencional.analisisStock, enabled: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock), icon: BarChart3 },
+        { label: "Pend Fac", to: paths.convencional.pendFac, enabled: hasModulePathAccess(user, "pendFac", paths.convencional.pendFac), icon: ClipboardList },
         { label: "Preventas", to: preventasHomePath, enabled: hasModulePathAccess(user, "preventas", preventasHomePath), icon: ClipboardList },
         { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual), icon: Package },
         { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades), icon: Package },

@@ -42,6 +42,12 @@ router.get(
   authorizeRoleAccess("convencional.analisisStock"),
   DmsController.getAnalisisStockVersionesDisponibles,
 );
+router.get(
+  "/pend-fac",
+  authorizeModules("pendFac"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.getPendFac,
+);
 router.post(
   "/analisis-stock/ped",
   authorizeModules("analisisStock"),

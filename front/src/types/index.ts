@@ -1336,6 +1336,55 @@ export const analisisStockVersionesDisponiblesResponseSchema = z.object({
   data: z.array(analisisStockVersionesDisponiblesItemSchema),
 });
 
+export const pendFacLocationSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+export const pendFacUnitSchema = z.object({
+  interno: z.string(),
+  nrofab: z.string(),
+  version: z.string(),
+  modelo: z.string(),
+  chasis: z.string(),
+  color: z.string(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  ubicacion: z.string(),
+  opera: z.string(),
+});
+
+export const pendFacRowSchema = z.object({
+  version: z.string(),
+  versionKey: z.string(),
+  countsByLocation: z.record(z.string(), z.number()),
+  unitsByLocation: z.record(z.string(), z.array(pendFacUnitSchema)),
+  unitsTotal: z.array(pendFacUnitSchema),
+  total: z.number(),
+});
+
+export const pendFacGroupSchema = z.object({
+  modelo: z.string(),
+  rows: z.array(pendFacRowSchema),
+});
+
+export const pendFacDataSchema = z.object({
+  locations: z.array(pendFacLocationSchema),
+  groups: z.array(pendFacGroupSchema),
+  totals: z.object({
+    modelo: z.string(),
+    countsByLocation: z.record(z.string(), z.number()),
+    total: z.number(),
+  }),
+  meta: z.object({
+    totalUnidades: z.number(),
+  }),
+});
+
+export const pendFacResponseSchema = z.object({
+  data: pendFacDataSchema,
+});
+
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
@@ -1374,6 +1423,12 @@ export type AnalisisStockPedResponse = z.infer<typeof analisisStockPedResponseSc
 export type AnalisisStockDictionaryListResponse = z.infer<typeof analisisStockDictionaryListResponseSchema>;
 export type AnalisisStockDictionaryResponse = z.infer<typeof analisisStockDictionaryResponseSchema>;
 export type AnalisisStockVersionesDisponiblesResponse = z.infer<typeof analisisStockVersionesDisponiblesResponseSchema>;
+export type PendFacLocation = z.infer<typeof pendFacLocationSchema>;
+export type PendFacUnit = z.infer<typeof pendFacUnitSchema>;
+export type PendFacRow = z.infer<typeof pendFacRowSchema>;
+export type PendFacGroup = z.infer<typeof pendFacGroupSchema>;
+export type PendFacData = z.infer<typeof pendFacDataSchema>;
+export type PendFacResponse = z.infer<typeof pendFacResponseSchema>;
 
 //**************************** */
 // PROFORMAS

@@ -6,6 +6,7 @@ import {
   getAnalisisStockVersionesDisponibles,
   getAsignacionRecepcion,
   getFacturaReventasNic,
+  getPendFacConvencional,
   getStockConsolidadoNic,
   getVendedoresActivosNic,
   getVendedoresNic,
@@ -45,6 +46,32 @@ type AnalisisStockVersionDisponibleRow = {
   modelo: string | null;
   marca: string | null;
   version: string | null;
+};
+
+type PendFacRow = {
+  interno: number | string | null;
+  nrofab: string | null;
+  version: string | null;
+  modelo: string | null;
+  chasis: string | null;
+  color: string | null;
+  cliente: string | null;
+  vendedor: string | null;
+  ubicacion: string | null;
+  opera: number | string | null;
+};
+
+type PendFacUnit = {
+  interno: string;
+  nrofab: string;
+  version: string;
+  modelo: string;
+  chasis: string;
+  color: string;
+  cliente: string;
+  vendedor: string;
+  ubicacion: string;
+  opera: string;
 };
 
 type AnalisisStockDictionaryPayload = {
@@ -89,6 +116,11 @@ const normalizeAnalisisText = (value: unknown, fallback: string) => {
   if (typeof value !== "string") return fallback;
 
   const normalized = value.trim();
+  return normalized || fallback;
+};
+
+const normalizePendFacText = (value: unknown, fallback: string) => {
+  const normalized = String(value ?? "").trim();
   return normalized || fallback;
 };
 
@@ -761,6 +793,127 @@ export class DmsController {
       logError("DmsController.getAnalisisStockVersionesDisponibles");
       console.error(error);
       return res.status(500).json({ message: "Error al listar las versiones disponibles" });
+    }
+  };
+
+  static getPendFac = async (_req: Request, res: Response) => {
+    try {
+      const rows = await sequelizeNIC.query<PendFacRow>(getPendFacConvencional(), {
+        type: QueryTypes.SELECT,
+      });
+
+      const locationsMap = new Map<string, { key: string; label: string }>();
+      const groupsMap = new Map<
+        string,
+        Map<
+          string,
+          {
+            version: string;
+            versionKey: string;
+            countsByLocation: Record<string, number>;
+            unitsByLocation: Record<string, PendFacUnit[]>;
+            unitsTotal: PendFacUnit[];
+            total: number;
+          }
+        >
+      >();
+
+      for (const row of rows) {
+        const modelo = normalizeAnalisisModel(row.modelo);
+        const version = normalizeAnalisisText(row.version, "Sin version");
+        const versionKey = normalizeAnalisisVersionKey(version);
+        const ubicacion = normalizeAnalisisText(row.ubicacion, "Sin ubicacion");
+        const ubicacionKey = normalizeAnalisisVersionKey(ubicacion);
+
+        const unit: PendFacUnit = {
+          interno: normalizePendFacText(row.interno, "-"),
+          nrofab: normalizePendFacText(row.nrofab, "-"),
+          version,
+          modelo,
+          chasis: normalizePendFacText(row.chasis, "-"),
+          color: normalizePendFacText(row.color, "-"),
+          cliente: normalizePendFacText(row.cliente, "-"),
+          vendedor: normalizePendFacText(row.vendedor, "-"),
+          ubicacion,
+          opera: normalizePendFacText(row.opera, "-"),
+        };
+
+        if (!locationsMap.has(ubicacionKey)) {
+          locationsMap.set(ubicacionKey, { key: ubicacionKey, label: ubicacion });
+        }
+
+        const rowsByVersion = groupsMap.get(modelo) ?? new Map();
+        const currentVersion = rowsByVersion.get(versionKey) ?? {
+          version,
+          versionKey,
+          countsByLocation: {},
+          unitsByLocation: {},
+          unitsTotal: [],
+          total: 0,
+        };
+
+        currentVersion.countsByLocation[ubicacionKey] = (currentVersion.countsByLocation[ubicacionKey] ?? 0) + 1;
+        currentVersion.unitsByLocation[ubicacionKey] = [...(currentVersion.unitsByLocation[ubicacionKey] ?? []), unit];
+        currentVersion.unitsTotal = [...currentVersion.unitsTotal, unit];
+        currentVersion.total += 1;
+
+        rowsByVersion.set(versionKey, currentVersion);
+        groupsMap.set(modelo, rowsByVersion);
+      }
+
+      const locations = Array.from(locationsMap.values()).sort((a, b) => a.label.localeCompare(b.label, "es"));
+      const groups = Array.from(groupsMap.entries())
+        .sort(([modeloA], [modeloB]) => compareAnalisisStockModel(modeloA, modeloB))
+        .map(([modelo, rowsByVersion]) => ({
+          modelo,
+          rows: Array.from(rowsByVersion.values())
+            .sort((a, b) => a.version.localeCompare(b.version, "es"))
+            .map((item) => ({
+              version: item.version,
+              versionKey: item.versionKey,
+              countsByLocation: locations.reduce<Record<string, number>>((acc, location) => {
+                acc[location.key] = item.countsByLocation[location.key] ?? 0;
+                return acc;
+              }, {}),
+              unitsByLocation: locations.reduce<Record<string, PendFacUnit[]>>((acc, location) => {
+                acc[location.key] = item.unitsByLocation[location.key] ?? [];
+                return acc;
+              }, {}),
+              unitsTotal: item.unitsTotal,
+              total: item.total,
+            })),
+        }));
+
+      const totals = {
+        modelo: "TOTALES",
+        countsByLocation: locations.reduce<Record<string, number>>((acc, location) => {
+          acc[location.key] = groups.reduce(
+            (groupTotal, group) =>
+              groupTotal + group.rows.reduce((rowTotal, row) => rowTotal + (row.countsByLocation[location.key] ?? 0), 0),
+            0,
+          );
+          return acc;
+        }, {}),
+        total: groups.reduce(
+          (groupTotal, group) => groupTotal + group.rows.reduce((rowTotal, row) => rowTotal + row.total, 0),
+          0,
+        ),
+      };
+
+      return res.status(200).json({
+        data: {
+          locations,
+          groups,
+          totals,
+          meta: {
+            totalUnidades: totals.total,
+          },
+        },
+      });
+    } catch (error) {
+      logError("DmsController.getPendFac");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
     }
   };
 

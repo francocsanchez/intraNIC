@@ -275,6 +275,51 @@ GROUP BY
 	LTRIM(RTRIM(famiauto.fam_nombre))
 `;
 
+export const getPendFacConvencional = () => `
+SELECT
+	stoauto.sa_codigo AS interno,
+	stoauto.sa_nrofab AS nrofab,
+	LTRIM(RTRIM(auto.au_nombre)) AS version,
+	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
+	movnped.mnp_chasis AS chasis,
+	color.col_nombre AS color,
+	cliente.cli_nombre AS cliente,
+	vendedor.ven_nombre AS vendedor,
+	CASE
+		WHEN stoauto.sa_estado IN (5, 10, 15) THEN 'STOCK CONCESIONARIO'
+		WHEN movnped.mnp_status IN ('STOCK CONCESIONARIO', 'TRANSITO TASA-CONCESIONARIO') THEN 'FURLONG'
+		ELSE movnped.mnp_status
+	END AS ubicacion,
+	stoauto.sa_opera AS opera
+FROM stoauto
+INNER JOIN movnped
+	ON stoauto.sa_codigo = movnped.mnp_stoauto
+INNER JOIN auto
+	ON stoauto.sa_auto = auto.au_codigo
+	AND stoauto.sa_marca = auto.au_marca
+INNER JOIN famiauto
+	ON auto.au_familia = famiauto.fam_codigo
+INNER JOIN color
+	ON movnped.mnp_col1 = color.col_codigo
+INNER JOIN opera
+	ON stoauto.sa_opera = opera.ope_codigo
+	AND stoauto.sa_tipo = opera.ope_tipo
+INNER JOIN cliente
+	ON opera.ope_cliente = cliente.cli_codigo
+INNER JOIN vendedor
+	ON opera.ope_vende = vendedor.ven_codigo
+WHERE
+	stoauto.sa_nrofab LIKE 'NIC%'
+	AND opera.ope_fecfac IS NULL
+	AND opera.ope_fecent IS NULL
+	AND opera.ope_fecbaj IS NULL
+ORDER BY
+	modelo,
+	version,
+	ubicacion,
+	nrofab
+`;
+
 export const getAnalisisStockVersionesDisponibles = () => `
 SELECT DISTINCT
 	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
