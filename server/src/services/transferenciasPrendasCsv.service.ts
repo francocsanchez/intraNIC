@@ -174,7 +174,15 @@ const buildTotalizadoPayload = (
     dia: fechaTransferencia.getUTCDate(),
     marca,
     modelo: modelo || "SIN MODELO",
-    anioModelo: parseRequiredYear(row.AnioModelo, "AnioModelo"),
+    anioModelo: (() => {
+      const anioModelo = parseRequiredYear(row.AnioModelo, "AnioModelo");
+
+      if (anioModelo < 2000) {
+        throw new Error('El campo "AnioModelo" debe ser mayor o igual a 2000');
+      }
+
+      return anioModelo;
+    })(),
     registroProvincia: normalizeDimensionValue(row.RegistroProvincia, EMPTY_PROVINCE_LABEL),
     registroLocalidad: normalizeDimensionValue(row.RegistroLocalidad, EMPTY_LOCALITY_LABEL),
   };
