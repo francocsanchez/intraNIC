@@ -3,6 +3,7 @@ import { FacturasAnticipoAlreadyRunningError } from "../services/facturasAnticip
 import { JobMonitorNotFoundError, JobMonitorService } from "../services/jobs/jobMonitor.service";
 import { UnidadesDealersSyncAlreadyRunningError } from "../services/jobs/unidadesDealersSyncJob.service";
 import { PatentamientosImportAlreadyRunningError } from "../services/patentamientosImport.service";
+import { TransferenciasImportAlreadyRunningError } from "../services/transferenciasImport.service";
 import { logError } from "../utils/logError";
 
 const handleError = (res: Response, context: string, error: unknown, fallback: string) => {
@@ -11,6 +12,7 @@ const handleError = (res: Response, context: string, error: unknown, fallback: s
 
   if (
     error instanceof PatentamientosImportAlreadyRunningError
+    || error instanceof TransferenciasImportAlreadyRunningError
     || error instanceof UnidadesDealersSyncAlreadyRunningError
     || error instanceof FacturasAnticipoAlreadyRunningError
   ) {

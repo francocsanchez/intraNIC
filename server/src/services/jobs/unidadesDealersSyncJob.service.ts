@@ -4,7 +4,7 @@ import type { JobExecutionResult, JobMonitorTrigger } from "./jobMonitor.types";
 
 const JOB_KEY = "unidades-dealers-sync";
 const JOB_NAME = "unidades-dealers-sync";
-const JOB_SCHEDULE_LABEL = "Todos los dias a las 07:00 y 20:00";
+const JOB_SCHEDULE_LABEL = "Todos los dias a las 01:00";
 
 export class UnidadesDealersSyncAlreadyRunningError extends Error {}
 

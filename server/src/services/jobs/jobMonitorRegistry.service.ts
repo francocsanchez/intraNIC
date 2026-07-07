@@ -6,6 +6,7 @@ import {
   isFacturasAnticipoJobRunning,
   runFacturasAnticipoJob,
 } from "../facturasAnticipoCron.service";
+import { TransferenciasImportService } from "../transferenciasImport.service";
 import { UnidadesDealersService } from "../unidadesDealers.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
@@ -20,6 +21,16 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     sourcePath: String(process.env.SFTP_REMOTE_PATH ?? "").trim(),
     isRunning: () => PatentamientosImportService.isImportRunning(),
     run: (trigger) => PatentamientosImportService.importLatestFile(trigger),
+  },
+  {
+    jobKey: TransferenciasImportService.getJobKey(),
+    title: "Importacion de transferencias",
+    scheduleLabel: TransferenciasImportService.getScheduleLabel(),
+    jobName: TransferenciasImportService.getJobName(),
+    sourceType: "sftp",
+    sourcePath: String(process.env.SFTP_REMOTE_PATH ?? "").trim(),
+    isRunning: () => TransferenciasImportService.isImportRunning(),
+    run: (trigger) => TransferenciasImportService.importLatestFile(trigger),
   },
   {
     jobKey: UnidadesDealersSyncJobService.getJobKey(),

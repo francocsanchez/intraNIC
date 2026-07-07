@@ -6,6 +6,32 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const LOGS_PAGE_SIZE = 30;
+const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "scheduleLabel" | "canRun">> = [
+  {
+    jobKey: "patentamientos-import",
+    title: "Importacion de patentamientos",
+    scheduleLabel: "Todos los dias a las 02:00",
+    canRun: true,
+  },
+  {
+    jobKey: "transferencias-import",
+    title: "Importacion de transferencias",
+    scheduleLabel: "Todos los dias a las 03:00",
+    canRun: true,
+  },
+  {
+    jobKey: "unidades-dealers-sync",
+    title: "Sincronizacion unidades dealers",
+    scheduleLabel: "Todos los dias a las 01:00",
+    canRun: true,
+  },
+  {
+    jobKey: "facturas-anticipo",
+    title: "Facturas anticipo",
+    scheduleLabel: "Todos los dias a las 21:00",
+    canRun: true,
+  },
+];
 
 const STATUS_LABELS: Record<string, string> = {
   success: "Exitosa",
@@ -304,16 +330,32 @@ export default function PatentamientosRegistrosView() {
   const details = detailsQuery.data ?? [];
 
   const controlRows = useMemo<ControlRow[]>(
-    () =>
-      details.map((detail) => ({
+    () => {
+      const rowsFromDetails = details.map((detail) => ({
         jobKey: detail.jobKey,
         title: detail.title,
         scheduleLabel: detail.scheduleLabel,
-        canRun: detail.canRun,
+        canRun: detail.canRun ?? true,
         lastExecutionAt: detail.lastExecutionAt,
         isRunning: detail.isRunning,
         lastStatus: detail.lastStatus,
-      })),
+      }));
+
+      const existingKeys = new Set(rowsFromDetails.map((row) => row.jobKey));
+      const missingExpectedRows = EXPECTED_CONTROL_JOBS
+        .filter((job) => !existingKeys.has(job.jobKey))
+        .map((job) => ({
+          jobKey: job.jobKey,
+          title: job.title,
+          scheduleLabel: job.scheduleLabel,
+          canRun: job.canRun,
+          lastExecutionAt: null,
+          isRunning: false,
+          lastStatus: null,
+        }));
+
+      return [...rowsFromDetails, ...missingExpectedRows];
+    },
     [details],
   );
 

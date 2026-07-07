@@ -1,7 +1,7 @@
 import { runFacturasAnticipoCron } from "../services/facturasAnticipoCron.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
-const JOB_HOUR = 20;
+const JOB_HOUR = 21;
 const JOB_MINUTE = 0;
 const CHECK_INTERVAL_MS = 60 * 1000;
 

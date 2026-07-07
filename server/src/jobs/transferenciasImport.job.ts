@@ -1,7 +1,7 @@
-import { PatentamientosImportService } from "../services/patentamientosImport.service";
+import { TransferenciasImportService } from "../services/transferenciasImport.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
-const JOB_SCHEDULES = new Set(["02:00"]);
+const JOB_SCHEDULES = new Set(["03:00"]);
 const CHECK_INTERVAL_MS = 60 * 1000;
 
 let isRunning = false;
@@ -54,7 +54,7 @@ const executeIfNeeded = async () => {
   }
 
   if (isRunning) {
-    console.warn("[patentamientos-import-cron] la ejecucion anterior sigue en curso, se omite este ciclo");
+    console.warn("[transferencias-import-cron] la ejecucion anterior sigue en curso, se omite este ciclo");
     return;
   }
 
@@ -62,17 +62,17 @@ const executeIfNeeded = async () => {
   executedRunKeys.add(runKey);
 
   try {
-    await PatentamientosImportService.importLatestFile("cron");
+    await TransferenciasImportService.importLatestFile("cron");
   } catch (error) {
-    console.error("[patentamientos-import-cron] la ejecucion termino con error");
+    console.error("[transferencias-import-cron] la ejecucion termino con error");
     console.error(error);
   } finally {
     isRunning = false;
   }
 };
 
-export const startPatentamientosImportJob = () => {
-  console.log("[patentamientos-import-cron] programado todos los dias a las 02:00 (America/Argentina/Buenos_Aires)");
+export const startTransferenciasImportJob = () => {
+  console.log("[transferencias-import-cron] programado todos los dias a las 03:00 (America/Argentina/Buenos_Aires)");
 
   void executeIfNeeded();
   setInterval(() => {

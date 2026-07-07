@@ -7,10 +7,10 @@ export type LatestSftpFileSelection = {
   size: number;
 };
 
-const DATE_IN_FILENAME_REGEX = /^Patent_Prendas(\d{8})(?:\D.*)?\.csv$/i;
-
-const parseDateFromFileName = (fileName: string) => {
-  const match = fileName.match(DATE_IN_FILENAME_REGEX);
+const parseDateFromFileName = (fileName: string, prefix: string) => {
+  const safePrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`^${safePrefix}(\\d{8})(?:\\D.*)?\\.csv$`, "i");
+  const match = fileName.match(regex);
 
   if (!match) {
     return null;
@@ -44,8 +44,8 @@ export class SftpFileDiscoveryService {
     return files
       .filter((file) => file.type !== "d" && file.name.toLowerCase().startsWith(prefix.toLowerCase()))
       .sort((left, right) => {
-        const leftDate = parseDateFromFileName(left.name);
-        const rightDate = parseDateFromFileName(right.name);
+        const leftDate = parseDateFromFileName(left.name, prefix);
+        const rightDate = parseDateFromFileName(right.name, prefix);
 
         if (leftDate !== null && rightDate !== null && leftDate !== rightDate) {
           return leftDate - rightDate;
