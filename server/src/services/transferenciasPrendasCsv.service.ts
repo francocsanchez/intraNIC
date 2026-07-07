@@ -20,7 +20,6 @@ type CsvRow = Record<CsvHeader, string>;
 type TransferenciaTotalizadaWritePayload = {
   anio: number;
   mes: number;
-  dia: number;
   marca: string;
   modelo: string;
   anioModelo: number;
@@ -143,7 +142,6 @@ const buildAggregationKey = (
   [
     payload.anio,
     payload.mes,
-    payload.dia,
     payload.marca,
     payload.modelo,
     payload.anioModelo,
@@ -171,7 +169,6 @@ const buildTotalizadoPayload = (
   return {
     anio: fechaTransferencia.getUTCFullYear(),
     mes: fechaTransferencia.getUTCMonth() + 1,
-    dia: fechaTransferencia.getUTCDate(),
     marca,
     modelo: modelo || "SIN MODELO",
     anioModelo: (() => {
@@ -410,7 +407,6 @@ export class TransferenciasPrendasCsvService {
           filter: {
             anio: row.anio,
             mes: row.mes,
-            dia: row.dia,
             marca: row.marca,
             modelo: row.modelo,
             anioModelo: row.anioModelo,
@@ -423,7 +419,6 @@ export class TransferenciasPrendasCsvService {
             $setOnInsert: {
               anio: row.anio,
               mes: row.mes,
-              dia: row.dia,
               marca: row.marca,
               modelo: row.modelo,
               anioModelo: row.anioModelo,
