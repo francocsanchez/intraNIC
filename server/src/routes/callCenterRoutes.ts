@@ -3,7 +3,6 @@ import multer from "multer";
 import { CallCenterController } from "../controllers/CallCenterController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
@@ -33,7 +32,6 @@ const singleFileUpload = (req: Request, res: Response, next: NextFunction) => {
 
 router.use(authenticate);
 router.use(authorizeModules("callCenter"));
-router.use(authorizeRoleAccess("callCenter"));
 
 router.post("/importar", singleFileUpload, CallCenterController.importData);
 router.get("/origenes", CallCenterController.listDataOrigins);

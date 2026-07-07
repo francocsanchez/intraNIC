@@ -231,6 +231,22 @@ const restrictedPrefixes = [
   "/liess",
 ];
 
+const moduleOnlyPathMatchers: Array<string | RegExp> = [
+  paths.callCenter.home,
+  paths.callCenter.importar,
+  paths.callCenter.origenesDatos,
+  paths.planAhorro.registroTestDrive,
+  paths.planAhorro.registroTestDriveCalendario,
+  paths.planAhorro.promedios,
+  paths.usados.stockNoReparado,
+  paths.usados.stockPendienteDocumentacion,
+  paths.usados.stockIngresos,
+  paths.analisis.operaciones,
+  paths.convencional.ranking,
+  paths.convencional.promedio,
+  /^\/analisis\/patentamientos(?:\/.*)?$/,
+];
+
 const getNormalizedRoles = (user: AuthUser) =>
   (user?.role ?? []).map(normalizeRole).filter(Boolean);
 
@@ -261,6 +277,10 @@ export function hasPathAccess(user: AuthUser, path: string) {
     /^\/convencional\/minutas\/[^/]+\/editar$/.test(normalizedPath) ||
     normalizedPath === paths.entregas.pendientesTurnar
   ) {
+    return true;
+  }
+
+  if (moduleOnlyPathMatchers.some((matcher) => pathMatches(normalizedPath, matcher))) {
     return true;
   }
 

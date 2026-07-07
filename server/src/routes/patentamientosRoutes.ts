@@ -3,13 +3,11 @@ import { PatentamientosDashboardController } from "../controllers/Patentamientos
 import { UnidadesDealersController } from "../controllers/UnidadesDealersController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
 router.use(authenticate);
 router.use(authorizeModules("patentamientos"));
-router.use(authorizeRoleAccess("analisis.patentamientos"));
 
 router.get("/dashboard/years", PatentamientosDashboardController.getAvailableYears);
 router.get("/dashboard/top-marcas/pais", PatentamientosDashboardController.getTopMarcasPais);

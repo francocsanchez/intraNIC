@@ -53,6 +53,12 @@ function formatDateTime(value: string) {
   });
 }
 
+function hasStarted(value: string) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getTime() <= Date.now();
+}
+
 function RegistroModal({
   negocio,
   sectionLabel,
@@ -504,8 +510,20 @@ export default function TestDriveRegistroView({
             <tbody className="divide-y divide-gray-100">
               {items.map((item) => {
                 const isOwnRecord = item.solicitadoPorId === user?._id;
-                const canEdit = isOwnRecord;
-                const canDelete = isOwnRecord || hasRegistroTestDriveActionAccess(user, "deleteManaged") || hasSuperAdminRole(user);
+                const isPastRecord = hasStarted(item.retiroAt);
+                const isSuperAdmin = hasSuperAdminRole(user);
+                const canDeleteManaged = negocio === "planAhorro"
+                  ? false
+                  : hasRegistroTestDriveActionAccess(user, "deleteManaged");
+                const canEdit = isSuperAdmin || (isOwnRecord && (!isPastRecord || negocio !== "planAhorro"));
+                const canDelete = isSuperAdmin || (
+                  !isPastRecord || negocio !== "planAhorro"
+                    ? isOwnRecord || canDeleteManaged
+                    : false
+                );
+                const actionMessage = negocio === "planAhorro" && isPastRecord
+                  ? "Historial bloqueado"
+                  : "Solo lectura";
 
                 return (
                   <tr key={item._id} className="hover:bg-gray-50">
@@ -562,7 +580,7 @@ export default function TestDriveRegistroView({
                           ) : null}
                         </div>
                       ) : (
-                        <div className="text-center text-xs font-semibold text-gray-400">Solo lectura</div>
+                        <div className="text-center text-xs font-semibold text-gray-400">{actionMessage}</div>
                       )}
                     </td>
                   </tr>

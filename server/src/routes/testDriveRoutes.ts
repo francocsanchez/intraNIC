@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { TestDriveController } from "../controllers/TestDriveController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
@@ -6,18 +7,28 @@ import { authorizeAnyRoleAccess, authorizeRoleAccess } from "../middleware/autho
 
 const router = Router();
 
-router.use(authenticate);
+const authorizeTestDriveOptions = (req: Request, res: Response, next: NextFunction) => {
+  const negocio = typeof req.query.negocio === "string" ? req.query.negocio.trim() : "";
 
-router.get(
-  "/opciones",
-  authorizeModules("testDrive", "registroTestDrive", "registroTestDriveConvencional"),
-  authorizeAnyRoleAccess(
+  if (negocio === "planAhorro") {
+    return next();
+  }
+
+  return authorizeAnyRoleAccess(
     "sistema.testDrive",
     "comercial.testDriveRegistroConvencional.read",
     "comercial.testDriveRegistroConvencional.create",
     "planAhorro.testDriveRegistro.read",
     "planAhorro.testDriveRegistro.create",
-  ),
+  )(req, res, next);
+};
+
+router.use(authenticate);
+
+router.get(
+  "/opciones",
+  authorizeModules("testDrive", "registroTestDrive", "registroTestDriveConvencional"),
+  authorizeTestDriveOptions,
   TestDriveController.listActiveOptions,
 );
 
