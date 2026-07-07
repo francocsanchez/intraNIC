@@ -177,8 +177,8 @@ const buildTotalizadoPayload = (
     anioModelo: (() => {
       const anioModelo = parseRequiredYear(row.AnioModelo, "AnioModelo");
 
-      if (anioModelo < 2000) {
-        throw new Error('El campo "AnioModelo" debe ser mayor o igual a 2000');
+      if (anioModelo < 2010) {
+        throw new Error('El campo "AnioModelo" debe ser mayor o igual a 2010');
       }
 
       return anioModelo;
