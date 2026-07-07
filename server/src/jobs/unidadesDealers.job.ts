@@ -1,7 +1,7 @@
 import { UnidadesDealersSyncJobService } from "../services/jobs/unidadesDealersSyncJob.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
-const JOB_SCHEDULES = new Set(["07:00", "20:00"]);
+const JOB_SCHEDULES = new Set(["01:00"]);
 const CHECK_INTERVAL_MS = 60 * 1000;
 
 let isRunning = false;
@@ -69,7 +69,7 @@ const executeIfNeeded = async () => {
 };
 
 export const startUnidadesDealersJob = () => {
-  console.log("[unidades-dealers-cron] programado todos los dias a las 07:00 y 20:00 (America/Argentina/Buenos_Aires)");
+  console.log("[unidades-dealers-cron] programado todos los dias a las 01:00 (America/Argentina/Buenos_Aires)");
 
   void executeIfNeeded();
   setInterval(() => {

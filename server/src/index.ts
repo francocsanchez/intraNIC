@@ -2,6 +2,7 @@ import colors from "colors";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
+import { startTransferenciasImportJob } from "./jobs/transferenciasImport.job";
 import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
 
 const port = process.env.PORT || 4002;
@@ -16,5 +17,6 @@ server.listen(Number(port), "0.0.0.0", () => {
 
   startFacturasAnticipoJob();
   startPatentamientosImportJob();
+  startTransferenciasImportJob();
   startUnidadesDealersJob();
 });
