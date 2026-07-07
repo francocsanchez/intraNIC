@@ -30,16 +30,20 @@ La logica vigente es:
 - `convencional`
 - `usados`
 - `liess`
+- `callCenter`
 - `preventas`
 - `proformas`
-- `registroTestDrive`
 - `reventaPendientes`
 - `listaPrevia`
 - `facturasAnticipo`
+- `segUnidadesFabrica`
 - `asignaciones`
+- `planNegocio`
 - `registroAsignaciones`
 - `pedidoMensual`
 - `pedidoUnidades`
+- `analisisStock`
+- `pendFac`
 - `noReparado`
 - `pendienteDocumentacion`
 - `ingresos`
@@ -47,10 +51,16 @@ La logica vigente es:
 - `ranking`
 - `promedio`
 - `patentamientos`
+- `actualizacionRegistros`
+- `agendaEntrega`
+- `pendientesTurnar`
 - `usuarios`
 - `configuracion`
 - `testDrive`
 - `registroTestDriveConvencional`
+- `registroTestDrive`
+- `promediosPlanAhorro`
+- `minutas`
 
 ## Regla general vigente
 Para cualquier pantalla, menu, accion o endpoint:
@@ -62,12 +72,12 @@ Para cualquier pantalla, menu, accion o endpoint:
 
 Esto implica:
 
-- `superAdmin` debe ver todos los accesos y entrar a cualquier URL sin depender de `modules`
-- combinar roles nunca debe abrir acceso global; solo debe sumar los accesos explicitamente definidos para cada rol
-- no mostrar accesos habilitables en `Inicio` cuando el modulo no esta activo
-- no mostrar links o acciones internas cuando el modulo no esta activo
-- bloquear ingreso por URL directa cuando el modulo no esta activo
-- responder `403` desde backend cuando el modulo no esta activo
+- `superAdmin` debe ver todos los accesos y entrar a cualquier URL sin depender de `modules`.
+- Combinar roles nunca debe abrir acceso global; solo debe sumar los accesos explicitamente definidos para cada rol.
+- No mostrar accesos habilitables en `Inicio` cuando el modulo no esta activo.
+- No mostrar links o acciones internas cuando el modulo no esta activo.
+- Bloquear ingreso por URL directa cuando el modulo no esta activo.
+- Responder `403` desde backend cuando el modulo no esta activo.
 
 ## Regla de combinacion de roles
 Cuando un usuario tenga mas de un rol definido:
@@ -82,21 +92,72 @@ Ejemplo:
 - `vendedor` + `supervisor` = accesos de `vendedor` + accesos extra de `supervisor`
 - cualquier combinacion con `superAdmin` = acceso total
 
+## Etapa actual: pantallas controladas solo por modulo
+En esta etapa se definio que algunas pantallas dependen solo de los modulos habilitados en el usuario, sin bloquearse por rol.
+
+Aplica a estas areas:
+
+- `Call Center`
+- `Plan de ahorro`
+- `Gestion de stock usados`
+- `Analisis`
+
+### Call Center
+
+- La seccion completa depende de `modules.callCenter = 1`.
+- Si el modulo no esta habilitado, la seccion no debe mostrarse ni permitir acceso por URL.
+- Si el modulo esta habilitado, el rol no debe bloquear:
+  - `Importador de datos`
+  - `Origenes de datos`
+
+### Plan de ahorro
+
+- `Registro TestDrive` depende de `modules.registroTestDrive = 1`.
+- `Promedios` depende de `modules.promediosPlanAhorro = 1`.
+- Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
+- No se agregan modulos padres ni checks de seccion: la fuente de verdad sigue siendo el formulario de usuario por modulo.
+- Regla especifica para `/gestion/plan-ahorro/test-drive`:
+  - cualquier usuario con `modules.registroTestDrive = 1` puede crear registros;
+  - solo el usuario creador puede editar o eliminar su propio registro;
+  - una vez llegada la fecha y hora de retiro, el registro ya no puede editarse ni eliminarse;
+  - `superAdmin` mantiene acceso total sobre las acciones del modulo.
+
+### Gestion de stock usados
+
+- `No reparado` depende de `modules.noReparado = 1`.
+- `Pendiente documentacion` depende de `modules.pendienteDocumentacion = 1`.
+- `Ingresos` depende de `modules.ingresos = 1`.
+- Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
+
+### Analisis
+
+- `Operaciones` depende de `modules.operaciones = 1`.
+- `Ranking` depende de `modules.ranking = 1`.
+- `Promedio` depende de `modules.promedio = 1`.
+- `Patentamientos` depende de `modules.patentamientos = 1`.
+- Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
+
 ## Relacion actual modulo -> acceso funcional
 - `convencional`: stock y vistas generales de convencional
 - `usados`: stock y vistas generales de usados
 - `liess`: vistas de Liess
+- `callCenter`: seccion de importacion y administracion de origenes
 - `preventas`: modulo de preventas
 - `proformas`: modulo de proformas
 - `registroTestDriveConvencional`: registro de solicitudes de test drive para `Comercial / Convencional`
 - `registroTestDrive`: registro de solicitudes de test drive en la seccion `Plan de ahorro`
+- `promediosPlanAhorro`: promedios de plan de ahorro
 - `reventaPendientes`: pendientes de reventa
 - `listaPrevia`: lista previa de pedido de unidades
 - `facturasAnticipo`: facturas de anticipo
+- `segUnidadesFabrica`: seguimiento de unidades de fabrica
 - `asignaciones`: asignaciones
+- `planNegocio`: plan de negocio
 - `registroAsignaciones`: registro y resumen de asignaciones
 - `pedidoMensual`: pedido mensual
 - `pedidoUnidades`: pedido de unidades
+- `analisisStock`: analisis de stock
+- `pendFac`: pendientes de factura
 - `noReparado`: usados no reparado
 - `pendienteDocumentacion`: usados pendiente documentacion
 - `ingresos`: usados ingresos
@@ -104,9 +165,13 @@ Ejemplo:
 - `ranking`: ranking convencional
 - `promedio`: promedio convencional
 - `patentamientos`: analisis de patentamientos
+- `actualizacionRegistros`: actualizacion/importacion de registros
+- `agendaEntrega`: agenda de entrega
+- `pendientesTurnar`: pendientes de turnar
 - `usuarios`: ABM de usuarios
 - `configuracion`: configuracion del sistema
 - `testDrive`: ABM de unidades para test drive
+- `minutas`: modulo de minutas
 
 ## Roles
 Estado actual de definicion funcional:
@@ -178,19 +243,6 @@ Estado: definido
   - no puede eliminar preventas
   - no puede marcar preventas como asignadas
   - no accede a la vista de preventas asignadas en esta etapa
-- Observaciones:
-  - para este rol, el acceso a preventas incluye:
-    - `/gestion/convencional/preventas` en solo lectura
-    - `/convencional/preventas/resumen`
-  - dentro de `/gestion/convencional/preventas` no deben mostrarse acciones de `Nueva preventa`, `Editar`, `Eliminar` ni `Asignado`
-  - esto implica que el rol `vendedor` puede recibir el modulo `preventas`, pero las restricciones finas siguen definidas por rol
-  - en `proformas`, el rol `vendedor` puede consultar el listado, ingresar al formulario `/convencional/proformas/nueva` y crear nuevas proformas
-  - para crear proformas, el rol `vendedor` tambien puede leer el catalogo de `versiones` utilizado por ese formulario
-  - cuando se implemente la etapa de roles, habra que distinguir permisos internos dentro del dominio `preventas`
-  - el dropdown `Mi Gestion` debe estar visible cuando el usuario tenga acceso a cualquiera de estas rutas:
-    - `/convencional/mis-operaciones`
-    - `/convencional/mis-reservas`
-    - `/convencional/mi-lista-espera`
 
 ### Rol `administracion`
 Estado: definido
@@ -205,26 +257,6 @@ Estado: definido
   - `reventaPendientes`
   - `listaPrevia`
   - `facturasAnticipo`
-- Accesos permitidos:
-  - `/administracion/reventa-pendientes`
-  - `/administracion/pedido-unidades/lista-previa`
-  - `/administracion/facturas-anticipo`
-- Acciones restringidas:
-  - no accede a convencional
-  - no accede a usados
-  - no accede a liess
-  - no accede a preventas
-  - no accede a proformas
-  - no accede a operaciones
-  - no accede a ranking
-  - no accede a promedio
-  - no accede a patentamientos
-  - no administra usuarios
-  - no administra configuracion
-  - no administra TestDrive
-- Observaciones:
-  - este rol queda limitado exclusivamente al dominio administrativo definido en esos tres links
-  - cualquier acceso fuera de esos tres modulos debe devolver bloqueo por rol aunque el usuario tenga modulos en `1`
 
 ### Rol `stock`
 Estado: definido
@@ -251,158 +283,18 @@ Estado: definido
   - `pedidoUnidades`
   - `registroAsignaciones`
   - `preventas` con permisos parciales
-- Accesos permitidos:
-  - `/administracion/pedido-unidades/lista-previa`
-  - `/liess/stock/nuevos`
-  - `/liess/stock/usados`
-  - `/convencional/stock/disponible`
-  - `/convencional/stock/reservado`
-  - `/convencional/stock/guardado`
-  - `/usados/stock/disponible`
-  - `/usados/stock/reservado`
-  - `/usados/stock/guardado`
-  - `/gestion/usados/stock/no-reparado`
-  - `/gestion/usados/stock/pendiente-documentacion`
-  - `/gestion/usados/stock/ingresos`
-  - `/gestion/convencional/asignaciones`
-  - `/gestion/convencional/pedido-mensual`
-  - `/gestion/convencional/pedido-unidades`
-  - `/gestion/convencional/registro-asignaciones`
-  - `/gestion/convencional/registro-asignaciones/resumen`
-  - `/gestion/convencional/preventas`
-  - `/gestion/convencional/preventas/nueva`
-  - `/gestion/convencional/preventas/resumen`
-  - `/admin/configuracion`
-  - `/admin/configuracion/convencional/editar`
-  - `/admin/configuracion/usados/editar`
-- Acciones restringidas:
-  - no administra usuarios
-  - no administra configuracion
-  - no administra TestDrive
-  - no accede a proformas
-  - no accede a ranking
-  - no accede a promedio
-  - no accede a operaciones
-  - no accede a patentamientos
-  - no accede a reventa pendientes
-  - no accede a facturas de anticipo
-  - no accede a `/admin/configuracion/reventa/editar`
-  - no puede editar preventas
-  - no puede eliminar preventas
-- Observaciones:
-  - en preventas puede:
-    - ver el listado principal
-    - crear nuevas preventas
-    - marcar preventas como asignadas
-  - en preventas no puede:
-    - editar preventas
-    - eliminar preventas
-  - en configuracion puede entrar al panel general y editar solo convencional y usados
-  - tambien puede acceder a `/administracion/pedido-unidades/lista-previa`
-  - en la tabla principal de preventas debe ver la columna `Asignado`
-  - en la tabla principal de preventas no debe ver la columna `Acciones` salvo que combine este rol con otro que la habilite
 
 ### Rol `supervisor`
 Estado: definido
 
 - Objetivo del rol:
   Usuario comercial con mas capacidad operativa que `vendedor`, incluyendo seguimiento de reservados, analisis de operaciones y gestion parcial de preventas.
-- Modulos que puede ver:
-  - todos los modulos habilitados para `vendedor`
-  - `operaciones`
-  - `testDrive`
-  - `registroTestDrive`
-- Modulos que puede operar:
-  - todos los modulos habilitados para `vendedor`
-  - `operaciones`
-  - preventas con permisos parciales de alta y baja
-  - `testDrive`
-  - `registroTestDrive`
-- Accesos permitidos:
-  - todos los accesos permitidos para `vendedor`
-  - `/analisis/operaciones`
-  - `/convencional/stock/reservado`
-  - `/usados/stock/reservado`
-  - `/gestion/convencional/preventas`
-  - `/gestion/convencional/preventas/nueva`
-  - `/admin/test-drive`
-  - `/gestion/convencional/test-drive`
-- Acciones restringidas:
-  - no administra usuarios
-  - no administra configuracion
-  - no accede a pendientes de reventa
-  - no accede a lista previa
-  - no accede a facturas de anticipo
-  - no accede a asignaciones
-  - no accede a registro de asignaciones
-  - no accede a pedido mensual
-  - no accede a pedido de unidades
-  - no accede a usados `no reparado`
-  - no accede a usados `pendiente documentacion`
-  - no accede a usados `ingresos`
-  - no accede a `patentamientos`
-  - no puede marcar preventas como asignadas
-  - no debe ver la columna `Asignado` en la pantalla principal de preventas
-- Observaciones:
-  - `supervisor` hereda todos los accesos de `vendedor`
-  - en preventas puede:
-    - ver el listado principal
-    - crear nuevas preventas
-    - editar preventas
-    - eliminar preventas
-  - en preventas no puede:
-    - asignarlas
-  - en la tabla principal de preventas debe ver la columna `Acciones`, pero no la columna `Asignado`
 
 ### Rol `gerente`
 Estado: definido
 
 - Objetivo del rol:
   Usuario comercial con acceso ampliado equivalente a `vendedor` + `supervisor`, sumando acceso a asignaciones para consulta.
-- Modulos que puede ver:
-  - todos los modulos habilitados para `vendedor`
-  - todos los modulos habilitados para `supervisor`
-  - `asignaciones`
-  - `testDrive`
-  - `registroTestDrive`
-- Modulos que puede operar:
-  - todos los modulos habilitados para `vendedor`
-  - todos los modulos habilitados para `supervisor`
-  - `asignaciones` en modo consulta
-  - `testDrive`
-  - `registroTestDrive`
-- Accesos permitidos:
-  - todos los accesos permitidos para `vendedor`
-  - todos los accesos permitidos para `supervisor`
-  - `/gestion/convencional/asignaciones`
-  - `/admin/test-drive`
-  - `/gestion/convencional/test-drive`
-- Acciones restringidas:
-  - no administra usuarios
-  - no administra configuracion
-  - no accede a pendientes de reventa
-  - no accede a lista previa
-  - no accede a facturas de anticipo
-  - no accede a registro de asignaciones
-  - no accede a pedido mensual
-  - no accede a pedido de unidades
-  - no accede a usados `no reparado`
-  - no accede a usados `pendiente documentacion`
-  - no accede a usados `ingresos`
-  - no accede a `patentamientos`
-  - no puede marcar preventas como asignadas
-  - no debe ver el boton `Solicitar unidades` dentro de `/gestion/convencional/asignaciones`
-- Observaciones:
-  - `gerente` hereda la suma funcional de `vendedor` + `supervisor`
-  - en preventas puede:
-    - ver el listado principal
-    - crear nuevas preventas
-    - editar preventas
-    - eliminar preventas
-  - en preventas no puede:
-    - asignarlas
-  - en `/gestion/convencional/asignaciones` puede acceder y consultar el tablero, pero no debe disparar el flujo hacia pedido de unidades desde esa pantalla
-  - desde backend, puede consultar el estado de pedido de una unidad para ver si fue pedida o no dentro de `Asignaciones`, sin que eso le habilite el acceso completo a `/gestion/convencional/pedido-unidades`
 
 ### Rol `superAdmin`
 Estado: definido
@@ -413,18 +305,6 @@ Estado: definido
   - todos
 - Modulos que puede operar:
   - todos
-- Accesos permitidos:
-  - todas las pantallas
-  - todos los menus
-  - todas las rutas directas
-  - todos los endpoints
-  - todas las acciones administrativas
-- Acciones restringidas:
-  - ninguna
-- Observaciones:
-  - `superAdmin` es la unica excepcion activa a la regla general basada en `modules`
-  - si el usuario tiene `role: ["superAdmin"]` o comparte ese rol junto con otros, siempre debe prevalecer `superAdmin`
-  - no debe requerirse que tenga modulos en `1` para ver o usar funcionalidades
 
 ## Acceso especifico del modulo `testDrive`
 - Modulo asociado: `testDrive`
@@ -435,51 +315,22 @@ Estado: definido
   - `supervisor`
   - `gerente`
   - `superAdmin`
-- Reglas:
-  - `supervisor` y `gerente` deben tener `modules.testDrive = 1` para acceder
-  - `stock`, `administracion` y `vendedor` no deben acceder aunque tengan `modules.testDrive = 1`
-  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
 
 ## Acceso especifico del modulo `registroTestDrive`
 - Modulo asociado: `registroTestDrive`
 - Seccion visible en UI: `Plan de ahorro`
-- Accesos funcionales asociados:
-  - `comercial.testDriveRegistro.read`
-  - `comercial.testDriveRegistro.create`
-  - `comercial.testDriveRegistro.updateOwn`
-  - `comercial.testDriveRegistro.deleteOwn`
-  - `comercial.testDriveRegistro.deleteManaged`
-- Ruta principal: `/gestion/convencional/test-drive`
-- Accion habilitada: registro comercial de solicitudes de test drive
-- Roles permitidos:
-  - `vendedor`
-  - `supervisor`
-  - `gerente`
-  - `superAdmin`
-- Reglas:
-  - `vendedor`, `supervisor` y `gerente` deben tener `modules.registroTestDrive = 1` para acceder
-  - `vendedor` puede crear, editar solo sus propios registros y eliminar solo sus propios registros
-  - `supervisor` y `gerente` pueden crear, editar solo sus propios registros y eliminar registros propios o ajenos
-  - `stock` y `administracion` no deben acceder aunque tengan `modules.registroTestDrive = 1`
-  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
+- Ruta principal: `/gestion/plan-ahorro/test-drive`
+- Reglas vigentes:
+  - cualquier usuario con `modules.registroTestDrive = 1` puede crear registros
+  - solo el usuario creador puede editar o eliminar su propio registro
+  - una vez iniciada la fecha y hora de retiro, el registro no puede editarse ni eliminarse
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo y mantiene acceso total
   - una unidad no puede tener dos registros superpuestos en el tiempo
 
 ## Acceso especifico del modulo `registroTestDriveConvencional`
 - Modulo asociado: `registroTestDriveConvencional`
 - Seccion visible en UI: `Comercial`
-- Accesos funcionales asociados:
-  - `comercial.testDriveRegistroConvencional.read`
-  - `comercial.testDriveRegistroConvencional.create`
-  - `comercial.testDriveRegistroConvencional.updateOwn`
-  - `comercial.testDriveRegistroConvencional.deleteOwn`
-  - `comercial.testDriveRegistroConvencional.deleteManaged`
 - Ruta principal: `/gestion/convencional/test-drive`
-- Accion habilitada: registro comercial de solicitudes de test drive para unidades `convencional`
-- Roles permitidos:
-  - `vendedor`
-  - `supervisor`
-  - `gerente`
-  - `superAdmin`
 - Reglas:
   - `vendedor`, `supervisor` y `gerente` deben tener `modules.registroTestDriveConvencional = 1` para acceder
   - `vendedor` puede crear, editar solo sus propios registros y eliminar solo sus propios registros
@@ -487,6 +338,19 @@ Estado: definido
   - `stock` y `administracion` no deben acceder aunque tengan `modules.registroTestDriveConvencional = 1`
   - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
   - una unidad no puede tener dos registros superpuestos en el tiempo
+
+## Alcance y limites
+
+- Esta etapa solo cambia acceso a pantallas y navegacion para las areas listadas arriba.
+- El resto de permisos por rol del sistema se mantiene sin cambios.
+- No se modifica la estructura de `User.modules`.
+- No se agregan modulos nuevos.
+
+## Carga de permisos en usuarios
+
+- La habilitacion se administra desde el formulario de alta y edicion de usuario.
+- Los checks siguen siendo por modulo individual.
+- Una seccion se muestra cuando el usuario tiene al menos uno de sus modulos hijos habilitado.
 
 ## Regla para futuras definiciones
 Cuando se agreguen permisos por rol, cada definicion debe indicar:

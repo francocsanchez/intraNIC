@@ -61,6 +61,10 @@ const canAccessNegocioOptions = (req: Request, negocio: RegistroNegocio) => {
   const modules = sanitizeUserModules(req.user.modules);
   const config = registroAccessByNegocio[negocio];
 
+  if (negocio === "planAhorro") {
+    return hasEnabledModule(modules, [config.module]);
+  }
+
   if (hasEnabledModule(modules, ["testDrive"]) && canAccessByRole(req.user.role, "sistema.testDrive")) {
     return true;
   }

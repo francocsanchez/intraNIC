@@ -59,6 +59,11 @@ const normalizeNegocio = (value: unknown): RegistroNegocio | null => {
   return VALID_NEGOCIOS.includes(negocio) ? negocio : null;
 };
 
+const hasStarted = (retiroAt: Date | string) => {
+  const parsed = new Date(retiroAt);
+  return !Number.isNaN(parsed.getTime()) && parsed.getTime() <= Date.now();
+};
+
 const userHasNegocioModule = (user: Request["user"], negocio: RegistroNegocio) => {
   if (!user) {
     return false;
@@ -87,6 +92,14 @@ const userCanAccessNegocio = (
 
   if (!userHasNegocioModule(user, negocio)) {
     return false;
+  }
+
+  if (negocio === "planAhorro") {
+    if (action === "deleteManaged") {
+      return false;
+    }
+
+    return true;
   }
 
   return canAccessByRole(user.role, registroAccessByNegocio[negocio][action]);
@@ -380,7 +393,13 @@ export class TestDriveRegistroController {
         });
       }
 
-      if (registro.solicitadoPorId !== req.user._id) {
+      if (!hasSuperAdminRole(req.user.role) && negocio === "planAhorro" && hasStarted(registro.retiroAt)) {
+        return res.status(403).json({
+          error: "No puedes editar un registro de TestDrive una vez iniciada la fecha y hora del turno",
+        });
+      }
+
+      if (!hasSuperAdminRole(req.user.role) && registro.solicitadoPorId !== req.user._id) {
         return res.status(403).json({ error: "Solo puedes editar registros cargados por tu usuario" });
       }
 
@@ -430,6 +449,12 @@ export class TestDriveRegistroController {
 
       if (!unidad || !negocio || !VALID_NEGOCIOS.includes(negocio)) {
         return res.status(400).json({ error: "No se pudo determinar el negocio del registro" });
+      }
+
+      if (!hasSuperAdminRole(req.user.role) && negocio === "planAhorro" && hasStarted(registro.retiroAt)) {
+        return res.status(403).json({
+          error: "No puedes eliminar un registro de TestDrive una vez iniciada la fecha y hora del turno",
+        });
       }
 
       const isOwnRecord = registro.solicitadoPorId === req.user._id;
