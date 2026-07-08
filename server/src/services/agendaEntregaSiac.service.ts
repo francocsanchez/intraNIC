@@ -18,6 +18,8 @@ type LookupConvencionalRow = {
   modelo?: string | null;
   chasis?: string | null;
   nroFabricacion?: string | null;
+  dominio?: string | null;
+  fechaPatente?: string | null;
   color?: string | null;
   tipoOperacion: string;
 };
@@ -34,6 +36,8 @@ type LookupPlanAhorroRow = {
   orden?: number | null;
   serie?: string | null;
   nroFabricacion?: string | null;
+  dominio?: string | null;
+  fechaPatente?: string | null;
   color?: string | null;
   tipoOperacion: string;
 };
@@ -53,6 +57,8 @@ export type AgendaEntregaLookup = {
   chasis?: string;
   serie?: string;
   nroFabricacion?: string;
+  dominio?: string;
+  fechaPatente?: string;
   color: string;
 };
 
@@ -87,6 +93,8 @@ const mapConvencionalRow = (row: LookupConvencionalRow): AgendaEntregaLookup => 
   vendedor: normalizeText(row.vendedor),
   chasis: normalizeOptionalText(row.chasis),
   nroFabricacion: normalizeOptionalText(row.nroFabricacion),
+  dominio: normalizeOptionalText(row.dominio),
+  fechaPatente: normalizeOptionalText(row.fechaPatente),
   color: normalizeText(row.color),
 });
 
@@ -109,6 +117,8 @@ const mapPlanAhorroRow = (row: LookupPlanAhorroRow): AgendaEntregaLookup => ({
   modelo: normalizeOptionalText(row.modelo),
   serie: normalizeOptionalText(row.serie),
   nroFabricacion: normalizeOptionalText(row.nroFabricacion),
+  dominio: normalizeOptionalText(row.dominio),
+  fechaPatente: normalizeOptionalText(row.fechaPatente),
   color: normalizeText(row.color),
 });
 

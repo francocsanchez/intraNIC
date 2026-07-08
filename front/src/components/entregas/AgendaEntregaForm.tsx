@@ -1,6 +1,7 @@
 import {
   convertReservaEntrega,
   createAgendaEntrega,
+  getAgendasEntrega,
   getAgendaEntregaLookup,
   turnarPendienteTurnar,
   updateAgendaEntrega,
@@ -12,7 +13,7 @@ import { hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega, AgendaEntregaLookup, PendienteTurnar, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -93,6 +94,7 @@ export default function AgendaEntregaForm({
   });
 
   const selectedSucursalId = watch("sucursal");
+  const selectedDate = watch("fechaAgenda");
   const selectedHour = watch("horaAgenda");
 
   useEffect(() => {
@@ -259,6 +261,29 @@ export default function AgendaEntregaForm({
     () => availableSucursales.find((sucursal) => sucursal._id === selectedSucursalId) ?? null,
     [availableSucursales, selectedSucursalId],
   );
+  const { data: agendaByDateResponse } = useQuery({
+    queryKey: ["entregas", "agendas", "slot-summary", selectedSucursalId, selectedDate],
+    queryFn: () =>
+      getAgendasEntrega({
+        fecha: selectedDate || undefined,
+        sucursalId: selectedSucursalId || undefined,
+      }),
+    enabled: open && Boolean(selectedSucursalId) && Boolean(selectedDate),
+  });
+  const scheduledUnitsByTime = useMemo(() => {
+    const items = agendaByDateResponse?.data ?? [];
+    const counts = new Map<string, number>();
+
+    items.forEach((agendaItem) => {
+      if (agendaItem.tipoRegistro !== "turno" || !agendaItem.horaAgenda) {
+        return;
+      }
+
+      counts.set(agendaItem.horaAgenda, (counts.get(agendaItem.horaAgenda) ?? 0) + 1);
+    });
+
+    return counts;
+  }, [agendaByDateResponse]);
   const availableTimeSlots = useMemo(() => {
     if (!selectedSucursal) {
       return [];
@@ -279,6 +304,15 @@ export default function AgendaEntregaForm({
 
     return slots;
   }, [item, reservationToConvert, selectedSucursal]);
+  const formatTimeSlotLabel = (timeSlot: string) => {
+    const scheduledUnits = scheduledUnitsByTime.get(timeSlot) ?? 0;
+
+    if (!scheduledUnits) {
+      return timeSlot;
+    }
+
+    return `${timeSlot} - ${scheduledUnits} ${scheduledUnits === 1 ? "Unidad" : "Unidades"}`;
+  };
 
   useEffect(() => {
     if (!selectedHour) {
@@ -427,7 +461,7 @@ export default function AgendaEntregaForm({
                           </option>
                           {availableTimeSlots.map((timeSlot) => (
                             <option key={timeSlot} value={timeSlot}>
-                              {timeSlot}
+                              {formatTimeSlotLabel(timeSlot)}
                             </option>
                           ))}
                         </select>

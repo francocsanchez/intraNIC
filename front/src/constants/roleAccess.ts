@@ -348,6 +348,14 @@ export function hasEntregaAgendaManageAccess(user: AuthUser) {
   return getNormalizedRoles(user).includes("coordinador");
 }
 
+export function hasPendienteTurnarImportAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("coordinador");
+}
+
 export function hasEntregaAgendaToggleAccess(user: AuthUser) {
   if (hasSuperAdminRole(user)) {
     return true;

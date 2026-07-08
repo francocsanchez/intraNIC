@@ -18,6 +18,8 @@ const detailRows = (data: AgendaEntregaLookup) => [
   { label: "Modelo", value: data.modelo ?? "-" },
   { label: "Version", value: data.version ?? "-" },
   { label: "Color", value: data.color },
+  { label: "Dominio", value: data.dominio ?? "-" },
+  { label: "Fecha patente", value: data.fechaPatente ?? "-" },
   { label: "Nro. fabricacion", value: data.nroFabricacion ?? "-" },
   { label: "Chasis", value: data.chasis ?? "-" },
   { label: "Serie", value: data.serie ?? "-" },

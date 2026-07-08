@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
+import * as XLSX from "xlsx";
 import AgendaEntrega from "../models/AgendaEntrega";
 import AgendaEntregaLog, { type AgendaEntregaLogAction } from "../models/AgendaEntregaLog";
 import PendienteTurnar from "../models/PendienteTurnar";
@@ -89,6 +90,11 @@ type PendienteLean = {
 
 const OBSERVACIONES_MAX_LENGTH = 1000;
 const ENTREGADO_STATES = new Set([35, 40]);
+const EXCEL_MIME_TYPES = new Set([
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/octet-stream",
+]);
 const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
@@ -99,6 +105,14 @@ const ALLOWED_TIME_SLOTS = new Set(TIME_SLOT_OPTIONS);
 
 const normalizeText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
+
+const normalizeSpreadsheetText = (value: unknown) =>
+  String(value ?? "").trim();
+
+const hasValidExcelExtension = (filename: string) => /\.(xls|xlsx)$/i.test(filename);
+
+const isExcelCompatibleFile = (file: Express.Multer.File) =>
+  hasValidExcelExtension(file.originalname) || EXCEL_MIME_TYPES.has(file.mimetype);
 
 const isValidObjectId = (value: unknown) =>
   typeof value === "string" && mongoose.Types.ObjectId.isValid(value);
@@ -134,6 +148,11 @@ const userHasAgendaWriteAccess = (req: Request) => {
   return roles.includes("superadmin") || roles.includes("coordinador");
 };
 
+const userHasPendienteImportAccess = (req: Request) => {
+  const roles = normalizeRoles(req.user?.role);
+  return roles.includes("superadmin") || roles.includes("coordinador");
+};
+
 const ensureAgendaWriteAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
@@ -141,6 +160,18 @@ const ensureAgendaWriteAccess = (req: Request) => {
 
   if (!userHasAgendaWriteAccess(req)) {
     return "No tienes permisos para crear, editar o eliminar pendientes o turnos de entrega";
+  }
+
+  return null;
+};
+
+const ensurePendienteImportAccess = (req: Request) => {
+  if (!req.user?._id) {
+    return "Usuario no autenticado";
+  }
+
+  if (!userHasPendienteImportAccess(req)) {
+    return "No tienes permisos para importar pendientes de turnar";
   }
 
   return null;
@@ -458,6 +489,42 @@ const createAgendaLog = async (params: {
   });
 };
 
+const getWorkbookRows = (file: Express.Multer.File) => {
+  const workbook = XLSX.read(file.buffer, {
+    type: "buffer",
+    cellDates: false,
+    raw: false,
+  });
+  const firstSheetName = workbook.SheetNames[0];
+
+  if (!firstSheetName) {
+    throw new Error("El archivo Excel no contiene hojas para procesar");
+  }
+
+  const worksheet = workbook.Sheets[firstSheetName];
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+    header: 1,
+    defval: "",
+    blankrows: false,
+    raw: false,
+  });
+
+  return { rows, worksheetName: firstSheetName };
+};
+
+const findRequiredColumnIndexes = (headerRow: unknown[]) => {
+  const headers = headerRow.map((cell) => normalizeSpreadsheetText(cell));
+  const internoIndex = headers.findIndex((header) => header === "INT.");
+  const dominioIndex = headers.findIndex((header) => header === "Dominio");
+  const speIndex = headers.findIndex((header) => header === "SPE");
+
+  if (internoIndex === -1 || dominioIndex === -1 || speIndex === -1) {
+    throw new Error('El archivo debe contener las columnas "INT.", "Dominio" y "SPE"');
+  }
+
+  return { internoIndex, dominioIndex, speIndex };
+};
+
 export class PendienteTurnarController {
   static list = async (req: Request, res: Response) => {
     try {
@@ -503,6 +570,182 @@ export class PendienteTurnarController {
       logError("PendienteTurnarController.list");
       console.error(error);
       return res.status(500).json({ message: "Error al listar pendientes de turnar" });
+    }
+  };
+
+  static importData = async (req: Request, res: Response) => {
+    const accessError = ensurePendienteImportAccess(req);
+    if (accessError) {
+      return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Debes seleccionar un archivo para importar" });
+    }
+
+    if (!isExcelCompatibleFile(req.file)) {
+      return res.status(400).json({ error: "El archivo debe ser .xls o .xlsx" });
+    }
+
+    try {
+      const sucursalValidation = await validateSucursal(req.body?.sucursalId);
+      if ("error" in sucursalValidation) {
+        return res.status(400).json({ error: sucursalValidation.error });
+      }
+
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req, sucursalValidation.data.sucursalId);
+      if (sucursalAccessError) {
+        return res.status(403).json({ error: sucursalAccessError });
+      }
+
+      const { rows } = getWorkbookRows(req.file);
+      if (!rows.length) {
+        return res.status(400).json({ error: "El archivo Excel no contiene filas para procesar" });
+      }
+
+      const { internoIndex, dominioIndex, speIndex } = findRequiredColumnIndexes(rows[0] ?? []);
+      const seenInternos = new Set<number>();
+      const candidateInternos: number[] = [];
+      let skippedInvalidRows = 0;
+
+      for (const row of rows.slice(1)) {
+        const cells = Array.isArray(row) ? row : [];
+        const dominio = normalizeSpreadsheetText(cells[dominioIndex]);
+        const spe = normalizeSpreadsheetText(cells[speIndex]);
+
+        if (!dominio || spe !== "Finalizada") {
+          continue;
+        }
+
+        const internoRaw = normalizeSpreadsheetText(cells[internoIndex]);
+        const interno = Number(internoRaw);
+
+        if (!Number.isInteger(interno) || interno <= 0 || seenInternos.has(interno)) {
+          skippedInvalidRows += 1;
+          continue;
+        }
+
+        seenInternos.add(interno);
+        candidateInternos.push(interno);
+      }
+
+      if (!candidateInternos.length) {
+        return res.status(200).json({
+          data: {
+            processedRows: 0,
+            createdCount: 0,
+            skippedCount: skippedInvalidRows,
+            skippedAlreadyPending: 0,
+            skippedAlreadyScheduled: 0,
+            skippedInvalidRows,
+          },
+          message: "No se encontraron internos validos para importar",
+        });
+      }
+
+      const [existingPendientes, existingAgendas] = await Promise.all([
+        PendienteTurnar.find({ interno: { $in: candidateInternos } }).select("interno").lean(),
+        AgendaEntrega.find({
+          tipoRegistro: "turno",
+          interno: { $in: candidateInternos },
+        })
+          .select("interno")
+          .lean(),
+      ]);
+
+      const existingPendientesSet = new Set(
+        existingPendientes.map((item) => Number(item.interno)).filter((interno) => Number.isInteger(interno)),
+      );
+      const existingAgendasSet = new Set(
+        existingAgendas.map((item) => Number(item.interno)).filter((interno) => Number.isInteger(interno)),
+      );
+
+      let createdCount = 0;
+      let skippedAlreadyPending = 0;
+      let skippedAlreadyScheduled = 0;
+      const usuarioNombre = buildUserName(req);
+
+      for (const interno of candidateInternos) {
+        if (existingPendientesSet.has(interno)) {
+          skippedAlreadyPending += 1;
+          continue;
+        }
+
+        if (existingAgendasSet.has(interno)) {
+          skippedAlreadyScheduled += 1;
+          continue;
+        }
+
+        const lookup = await lookupAgendaEntregaInterno(interno);
+
+        if (!lookup || ENTREGADO_STATES.has(Number(lookup.estado))) {
+          skippedInvalidRows += 1;
+          continue;
+        }
+
+        try {
+          await PendienteTurnar.create({
+            interno,
+            tipoOperacion: lookup.tipoOperacion,
+            sucursal: new mongoose.Types.ObjectId(sucursalValidation.data.sucursalId),
+            equipado: false,
+            entregaUsado: false,
+            siniestro: false,
+            observaciones: "",
+            createdBy: new mongoose.Types.ObjectId(req.user._id),
+            createdByName: usuarioNombre,
+          });
+
+          await createAgendaLog({
+            agendaEntrega: null,
+            interno,
+            usuario: req.user._id,
+            usuarioNombre,
+            accion: "PENDIENTE_CREADA",
+            detalle: buildPendienteDetailLabel(
+              sucursalValidation.data.sucursalNombre,
+              false,
+              false,
+              false,
+              "",
+            ),
+          });
+
+          createdCount += 1;
+        } catch (error: any) {
+          if (error?.code === 11000) {
+            skippedAlreadyPending += 1;
+            continue;
+          }
+
+          throw error;
+        }
+      }
+
+      const processedRows = candidateInternos.length;
+      const skippedCount =
+        skippedAlreadyPending + skippedAlreadyScheduled + skippedInvalidRows;
+
+      return res.status(200).json({
+        data: {
+          processedRows,
+          createdCount,
+          skippedCount,
+          skippedAlreadyPending,
+          skippedAlreadyScheduled,
+          skippedInvalidRows,
+        },
+        message: `Importacion completada: ${createdCount} pendientes creados, ${skippedCount} omitidos`,
+      });
+    } catch (error) {
+      logError("PendienteTurnarController.importData");
+      console.error(error);
+
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(500).json({ message: "Error al importar pendientes de turnar" });
     }
   };
 

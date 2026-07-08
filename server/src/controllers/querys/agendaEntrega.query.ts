@@ -10,6 +10,8 @@ SELECT
     ISNULL(famiauto.fam_nombre, '-') AS "modelo",
     ISNULL(m.mnp_chasis, '-') AS "chasis",
     ISNULL(m.mnp_nrofab, '-') AS "nroFabricacion",
+    ISNULL(an.an_dominio, '-') AS "dominio",
+    ISNULL(CONVERT(VARCHAR(10), an.an_fecpaten, 103), '-') AS "fechaPatente",
     c.col_nombre AS "color",
     CASE
         WHEN m.mnp_nrofab LIKE 'TPA%' THEN 'PLAN DE AHORRO'
@@ -32,6 +34,9 @@ LEFT JOIN famiauto
     ON auto.au_familia = famiauto.fam_codigo
 LEFT JOIN color c
     ON c.col_codigo = m.mnp_col1
+LEFT JOIN anexnvo an
+    ON an.an_stoauto = s.sa_codigo
+    AND an.an_tipo = s.sa_tipo
 WHERE s.sa_codigo = :interno
 `;
 
@@ -48,6 +53,8 @@ SELECT
     sa.sa_orden AS "orden",
     sol.sol_serie AS "serie",
     ISNULL(sa.sa_nrofab, '-') AS "nroFabricacion",
+    ISNULL(an.an_dominio, '-') AS "dominio",
+    ISNULL(CONVERT(VARCHAR(10), an.an_fecpaten, 103), '-') AS "fechaPatente",
     col.col_nombre AS "color",
     'PLAN DE AHORRO' AS "tipoOperacion"
 FROM stoauto sa
@@ -65,6 +72,9 @@ LEFT JOIN famiauto
     ON auto.au_familia = famiauto.fam_codigo
 LEFT JOIN color col
     ON col.col_codigo = sol.sol_accolor
+LEFT JOIN anexnvo an
+    ON an.an_stoauto = sa.sa_codigo
+    AND an.an_tipo = sa.sa_tipo
 WHERE sa.sa_codigo = :interno
 `;
 
@@ -80,6 +90,8 @@ SELECT
     ISNULL(famiauto.fam_nombre, '-') AS "modelo",
     ISNULL(m.mnp_chasis, '-') AS "chasis",
     ISNULL(m.mnp_nrofab, '-') AS "nroFabricacion",
+    ISNULL(an.an_dominio, '-') AS "dominio",
+    ISNULL(CONVERT(VARCHAR(10), an.an_fecpaten, 103), '-') AS "fechaPatente",
     c.col_nombre AS "color",
     CASE
         WHEN m.mnp_nrofab LIKE 'TPA%' THEN 'PLAN DE AHORRO'
@@ -102,6 +114,9 @@ LEFT JOIN famiauto
     ON auto.au_familia = famiauto.fam_codigo
 LEFT JOIN color c
     ON c.col_codigo = m.mnp_col1
+LEFT JOIN anexnvo an
+    ON an.an_stoauto = s.sa_codigo
+    AND an.an_tipo = s.sa_tipo
 WHERE s.sa_codigo IN (:internos)
 `;
 
@@ -118,6 +133,8 @@ SELECT
     sa.sa_orden AS "orden",
     sol.sol_serie AS "serie",
     ISNULL(sa.sa_nrofab, '-') AS "nroFabricacion",
+    ISNULL(an.an_dominio, '-') AS "dominio",
+    ISNULL(CONVERT(VARCHAR(10), an.an_fecpaten, 103), '-') AS "fechaPatente",
     col.col_nombre AS "color",
     'PLAN DE AHORRO' AS "tipoOperacion"
 FROM stoauto sa
@@ -135,5 +152,8 @@ LEFT JOIN famiauto
     ON auto.au_familia = famiauto.fam_codigo
 LEFT JOIN color col
     ON col.col_codigo = sol.sol_accolor
+LEFT JOIN anexnvo an
+    ON an.an_stoauto = sa.sa_codigo
+    AND an.an_tipo = sa.sa_tipo
 WHERE sa.sa_codigo IN (:internos)
 `;

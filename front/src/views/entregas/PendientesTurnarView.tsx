@@ -2,22 +2,27 @@ import {
   deletePendienteTurnar,
   getPendientesTurnar,
   getSucursalesEntrega,
+  importPendientesTurnarFile,
 } from "@/api/entregasAPI";
 import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import PendienteTurnarForm from "@/components/entregas/PendienteTurnarForm";
 import PendientesTurnarFilters from "@/components/entregas/PendientesTurnarFilters";
 import PendientesTurnarTable from "@/components/entregas/PendientesTurnarTable";
-import { hasEntregaAgendaManageAccess, hasSuperAdminRole } from "@/helpers/access";
+import { hasEntregaAgendaManageAccess, hasPendienteTurnarImportAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { PendienteTurnar } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListTodo, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { FileSpreadsheet, ListTodo, LoaderCircle, Plus, UploadCloud } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
+
+const ACCEPTED_EXCEL_TYPES =
+  ".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 export default function PendientesTurnarView() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [filters, setFilters] = useState({ sucursalId: "" });
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
   const [turnoModalOpen, setTurnoModalOpen] = useState(false);
@@ -42,10 +47,25 @@ export default function PendientesTurnarView() {
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
+  const importMutation = useMutation({
+    mutationFn: ({ file, sucursalId }: { file: File; sucursalId: string }) =>
+      importPendientesTurnarFile(file, sucursalId),
+    onSuccess: (response) => {
+      const { createdCount, skippedCount, skippedAlreadyPending, skippedAlreadyScheduled, skippedInvalidRows } =
+        response.data;
+
+      toast.success(
+        `${response.message}. Creados: ${createdCount}. Omitidos: ${skippedCount} (ya pendientes: ${skippedAlreadyPending}, ya agendados: ${skippedAlreadyScheduled}, invalidos: ${skippedInvalidRows}).`,
+      );
+      queryClient.invalidateQueries({ queryKey: ["entregas", "pendientes-turnar"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
 
   const items = data?.data ?? [];
   const sucursales = useMemo(() => sucursalesResponse?.data ?? [], [sucursalesResponse]);
   const canManageAgenda = hasEntregaAgendaManageAccess(user);
+  const canImportPendientes = hasPendienteTurnarImportAccess(user);
   const isSuperAdmin = hasSuperAdminRole(user);
   const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
   const activeSucursales = useMemo(
@@ -95,6 +115,29 @@ export default function PendientesTurnarView() {
     setTurnoModalOpen(true);
   };
 
+  const handleImportSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+
+    if (!selectedFile) {
+      return;
+    }
+
+    if (!filters.sucursalId) {
+      toast.error("Selecciona una sucursal antes de importar");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      await importMutation.mutateAsync({
+        file: selectedFile,
+        sucursalId: filters.sucursalId,
+      });
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -121,16 +164,51 @@ export default function PendientesTurnarView() {
           </div>
 
           {canManageAgenda ? (
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
-            >
-              <Plus size={16} />
-              Nuevo pendiente
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                ref={inputRef}
+                type="file"
+                accept={ACCEPTED_EXCEL_TYPES}
+                className="hidden"
+                onChange={(event) => void handleImportSelected(event)}
+              />
+              {canImportPendientes ? (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={!filters.sucursalId || importMutation.isPending}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {importMutation.isPending ? (
+                    <>
+                      <LoaderCircle size={16} className="animate-spin" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={16} />
+                      Importar Datos
+                    </>
+                  )}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleCreate}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+              >
+                <Plus size={16} />
+                Nuevo pendiente
+              </button>
+            </div>
           ) : null}
         </div>
+        {canImportPendientes ? (
+          <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+            <FileSpreadsheet size={16} />
+            <span>Importa archivos `.xls` o `.xlsx` usando la sucursal actualmente seleccionada.</span>
+          </div>
+        ) : null}
       </section>
 
       <PendientesTurnarFilters

@@ -5,6 +5,7 @@ import {
   agendaEntregaLookupResponseSchema,
   agendaEntregaResponseSchema,
   pendienteTurnarListResponseSchema,
+  pendienteTurnarImportResponseSchema,
   pendienteTurnarResponseSchema,
   sucursalEntregaListResponseSchema,
   sucursalEntregaResponseSchema,
@@ -12,6 +13,7 @@ import {
   type AgendaEntregaLogListResponse,
   type AgendaEntregaLookup,
   type AgendaEntregaResponse,
+  type PendienteTurnarImportResponse,
   type PendienteTurnarListResponse,
   type PendienteTurnarResponse,
   type SucursalEntregaListResponse,
@@ -224,6 +226,25 @@ export function createPendienteTurnar(payload: PendienteTurnarPayload): Promise<
     api.post("/entregas/pendientes-turnar", payload),
     pendienteTurnarResponseSchema,
     "Error al crear el pendiente de turnar",
+  );
+}
+
+export function importPendientesTurnarFile(
+  file: File,
+  sucursalId: string,
+): Promise<PendienteTurnarImportResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("sucursalId", sucursalId);
+
+  return parseResponse(
+    api.post("/entregas/pendientes-turnar/importar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+    pendienteTurnarImportResponseSchema,
+    "Error al importar pendientes de turnar",
   );
 }
 

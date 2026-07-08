@@ -1557,6 +1557,8 @@ export const agendaEntregaLookupSchema = z.object({
   chasis: z.string().nullable().optional(),
   serie: z.string().nullable().optional(),
   nroFabricacion: z.string().nullable().optional(),
+  dominio: z.string().nullable().optional(),
+  fechaPatente: z.string().nullable().optional(),
   color: z.string(),
 });
 
@@ -1599,6 +1601,8 @@ export const agendaEntregaSiacSchema = z.object({
   chasis: z.string().nullable().optional(),
   serie: z.string().nullable().optional(),
   nroFabricacion: z.string().nullable().optional(),
+  dominio: z.string().nullable().optional(),
+  fechaPatente: z.string().nullable().optional(),
   color: z.string(),
 });
 
@@ -1716,6 +1720,20 @@ export const pendienteTurnarResponseSchema = z.object({
   message: z.string(),
 });
 
+export const pendienteTurnarImportSummarySchema = z.object({
+  processedRows: z.number(),
+  createdCount: z.number(),
+  skippedCount: z.number(),
+  skippedAlreadyPending: z.number(),
+  skippedAlreadyScheduled: z.number(),
+  skippedInvalidRows: z.number(),
+});
+
+export const pendienteTurnarImportResponseSchema = z.object({
+  data: pendienteTurnarImportSummarySchema,
+  message: z.string(),
+});
+
 export type AgendaEntregaLookup = z.infer<typeof agendaEntregaLookupSchema>;
 export type AgendaEntrega = z.infer<typeof agendaEntregaSchema>;
 export type AgendaEntregaResponse = z.infer<typeof agendaEntregaResponseSchema>;
@@ -1728,6 +1746,8 @@ export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListRe
 export type PendienteTurnar = z.infer<typeof pendienteTurnarSchema>;
 export type PendienteTurnarListResponse = z.infer<typeof pendienteTurnarListResponseSchema>;
 export type PendienteTurnarResponse = z.infer<typeof pendienteTurnarResponseSchema>;
+export type PendienteTurnarImportSummary = z.infer<typeof pendienteTurnarImportSummarySchema>;
+export type PendienteTurnarImportResponse = z.infer<typeof pendienteTurnarImportResponseSchema>;
 
 //**************************** */
 // CALL CENTER

@@ -62,12 +62,8 @@ const getInlineBadgeStyle = (colorName: string | null | undefined) => {
   ].join("");
 };
 
-const formatOperacion = (item: AgendaEntrega) => {
-  if (item.tipoRegistro === "reserva" || !item.siac) return "-";
-  if (item.siac.operacion) return String(item.siac.operacion);
-  if (item.siac.grupo && item.siac.orden) return `[${item.siac.grupo} | ${item.siac.orden}]`;
-  return "-";
-};
+const escapeSvgText = (value: string) =>
+  escapeHtml(value).replace(/\n/g, " ").replace(/\r/g, " ");
 
 const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
@@ -76,90 +72,184 @@ const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
   return `${hours}:${minutes}`;
 });
 
-const buildRows = (items: AgendaEntrega[], horariosHabilitados: string[]) => {
-  const enabledTimeSlots = new Set(horariosHabilitados);
+type EmptyPrintRow = {
+  tipo: "vacio";
+  horaAgenda: string;
+};
 
-  return TIME_SLOT_OPTIONS.flatMap((timeSlot) => {
-    const matchingItems = items.filter((item) => item.horaAgenda === timeSlot);
+type BlockedPrintRow = {
+  tipo: "bloqueado";
+  horaAgenda: string;
+};
 
-    if (!matchingItems.length && !enabledTimeSlots.has(timeSlot)) {
-      return `
-        <tr class="bloqueado">
-          <td class="hora">${escapeHtml(timeSlot)}</td>
-          <td class="interno">BLOQUEADO</td>
-          <td class="datos">
-            <div class="cliente">Horario bloqueado</div>
-            <div class="modelo">&nbsp;</div>
-            <div class="detalle">No disponible para agendar</div>
-          </td>
-          <td class="vendedor">-</td>
-          <td class="operacion">-</td>
-        </tr>
-      `;
+type AgendaPrintRow = AgendaEntrega | EmptyPrintRow | BlockedPrintRow;
+
+const stripCssStyle = (style: string, property: string, fallback: string) => {
+  const match = style.match(new RegExp(`${property}:([^;]+);?`, "i"));
+  return match?.[1]?.trim() || fallback;
+};
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+};
+
+const buildAgendaSvg = (params: {
+  items: AgendaEntrega[];
+  fecha: string;
+  sucursal: string;
+  horariosHabilitados: string[];
+}) => {
+  const pageWidth = 794;
+  const pageHeight = 1123;
+  const marginX = 18;
+  const tableTop = 66;
+  const rowHeight = 33;
+  const headerHeight = 22;
+  const tableWidth = pageWidth - marginX * 2;
+  const colWidths = [88, 120, 550];
+  const xPositions = colWidths.reduce<number[]>((acc, _width, index) => {
+    const currentX = index === 0 ? marginX : acc[index - 1] + colWidths[index - 1];
+    acc.push(currentX);
+    return acc;
+  }, []);
+  const totalTableHeight = headerHeight + TIME_SLOT_OPTIONS.length * rowHeight;
+  const borderColor = "#9ca3af";
+  const tableHeaderBg = "#b7b7b7";
+
+  const enabledTimeSlots = new Set(params.horariosHabilitados);
+  const displayRows: AgendaPrintRow[] = TIME_SLOT_OPTIONS.flatMap((timeSlot): AgendaPrintRow[] => {
+    const matchingItems = params.items.filter((item) => item.horaAgenda === timeSlot);
+    if (matchingItems.length) {
+      return matchingItems;
     }
 
-    if (!matchingItems.length) {
-      return `
-        <tr>
-          <td class="hora">${escapeHtml(timeSlot)}</td>
-          <td class="interno"></td>
-          <td class="datos">
-            <div class="cliente">&nbsp;</div>
-            <div class="modelo">&nbsp;</div>
-            <div class="detalle">&nbsp;</div>
-          </td>
-          <td class="vendedor"></td>
-          <td class="operacion"></td>
-        </tr>
-      `;
+    if (!enabledTimeSlots.has(timeSlot)) {
+      return [{ tipo: "bloqueado", horaAgenda: timeSlot }];
     }
 
-    return matchingItems.map((item) => {
-      if (item.tipoRegistro === "reserva") {
-        return `
-          <tr class="reserva">
-            <td class="hora">${escapeHtml(item.horaAgenda)}</td>
-            <td class="interno">RESERVA</td>
-            <td class="datos">
-              <div class="cliente">Reserva</div>
-              <div class="modelo">&nbsp;</div>
-              <div class="detalle">${escapeHtml(item.observaciones?.trim() || "-")}</div>
-            </td>
-            <td class="vendedor">-</td>
-            <td class="operacion">-</td>
-          </tr>
-        `;
+    return [{ tipo: "vacio", horaAgenda: timeSlot }];
+  });
+
+  const line = (x1: number, y1: number, x2: number, y2: number) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${borderColor}" stroke-width="1" />`;
+
+  const rect = (x: number, y: number, width: number, height: number, fill: string) =>
+    `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${fill}" />`;
+
+  const text = (
+    x: number,
+    y: number,
+    value: string,
+    options?: {
+      size?: number;
+      weight?: string;
+      anchor?: "start" | "middle" | "end";
+      fill?: string;
+    },
+  ) =>
+    `<text x="${x}" y="${y}" font-family="Arial, Helvetica, sans-serif" font-size="${options?.size ?? 8}" font-weight="${options?.weight ?? "400"}" text-anchor="${options?.anchor ?? "start"}" fill="${options?.fill ?? "#111827"}">${escapeSvgText(value)}</text>`;
+
+  const svgParts: string[] = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidth}" height="${pageHeight}" viewBox="0 0 ${pageWidth} ${pageHeight}">`,
+    rect(0, 0, pageWidth, pageHeight, "#ffffff"),
+    text(marginX, 30, "Agenda de entrega", { size: 18, weight: "700" }),
+    text(marginX, 45, "Vista diaria lista para impresion", { size: 10, fill: "#4b5563" }),
+    text(pageWidth - marginX, 24, `Fecha: ${params.fecha || "-"}`, { size: 10, weight: "700", anchor: "end" }),
+    text(pageWidth - marginX, 38, `Sucursal: ${params.sucursal}`, { size: 10, weight: "700", anchor: "end" }),
+    text(pageWidth - marginX, 52, `Turnos: ${params.items.length}`, { size: 10, weight: "700", anchor: "end" }),
+    rect(marginX, tableTop, tableWidth, headerHeight, tableHeaderBg),
+  ];
+
+  ["Hora", "Interno", "Datos"].forEach((label, index) => {
+    const x = xPositions[index];
+    svgParts.push(text(x + colWidths[index] / 2, tableTop + 14, label.toUpperCase(), { size: 8, weight: "700", anchor: "middle" }));
+  });
+
+  displayRows.forEach((row, rowIndex) => {
+    const y = tableTop + headerHeight + rowIndex * rowHeight;
+
+    if ("tipo" in row && row.tipo === "vacio") {
+      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#ffffff"));
+      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#f3f4f6"));
+      svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
+      return;
+    }
+
+    if ("tipo" in row && row.tipo === "bloqueado") {
+      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#e5e7eb"));
+      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#d1d5db"));
+      svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
+      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 18, "BLOQUEADO", { size: 9, weight: "700", anchor: "middle", fill: "#4b5563" }));
+      svgParts.push(text(xPositions[2] + 8, y + 13, "HORARIO BLOQUEADO", { size: 8, weight: "700", fill: "#4b5563" }));
+      svgParts.push(text(xPositions[2] + 8, y + 25, "NO DISPONIBLE PARA AGENDAR", { size: 7, weight: "700", fill: "#4b5563" }));
+      return;
+    }
+
+    const item = row as AgendaEntrega;
+    const reserva = item.tipoRegistro === "reserva";
+    const entregada = item.siac?.estado === 35 || item.siac?.estado === 40;
+    const rowBg = reserva ? "#fef3c7" : entregada ? "#dcfce7" : "#ffffff";
+    const internoBg = reserva ? "#fde68a" : entregada ? "#bbf7d0" : "#f3f4f6";
+    const cliente = truncateText(item.siac?.cliente || (reserva ? "Reserva" : "-"), 62);
+    const modelo = truncateText([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || (reserva ? "" : "-"), 70);
+    const identificado = truncateText((item.siac?.chasis ?? item.siac?.serie ?? item.siac?.nroFabricacion ?? "-").trim(), 28);
+    const color = truncateText(item.siac?.color || "-", 18);
+    const observacion = truncateText(item.observaciones?.trim() || "", 54);
+    const colorStyle = getInlineBadgeStyle(item.siac?.color);
+    const badgeFill = stripCssStyle(colorStyle, "background", "#f3f4f6");
+    const badgeText = stripCssStyle(colorStyle, "color", "#374151");
+
+    svgParts.push(rect(marginX, y, tableWidth, rowHeight, rowBg));
+    svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, internoBg));
+    svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, item.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
+    svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 13, reserva ? "RESERVA" : String(item.interno), { size: 9, weight: "700", anchor: "middle", fill: "#111827" }));
+
+    if (reserva) {
+      svgParts.push(text(xPositions[2] + 8, y + 12, "RESERVA", { size: 9, weight: "700", fill: "#92400e" }));
+      svgParts.push(text(xPositions[2] + 8, y + 25, truncateText(item.observaciones?.trim() || "-", 68), { size: 8, weight: "400", fill: "#92400e" }));
+    } else {
+      svgParts.push(text(xPositions[2] + 8, y + 9, cliente, { size: 7, weight: "700" }));
+      svgParts.push(text(xPositions[2] + 8, y + 20, modelo || "-", { size: 9.5, weight: "700", fill: "#374151" }));
+      svgParts.push(text(xPositions[2] + 8, y + 31, `${identificado} / COLOR:`, { size: 9, weight: "700" }));
+
+      const badgeX = xPositions[2] + 144;
+      svgParts.push(`<rect x="${badgeX}" y="${y + 19}" width="74" height="14" rx="3" ry="3" fill="${badgeFill}" stroke="#cbd5e1" stroke-width="1" />`);
+      svgParts.push(text(badgeX + 37, y + 29.5, color, { size: 8.5, weight: "700", anchor: "middle", fill: badgeText }));
+
+      if (observacion) {
+        svgParts.push(text(xPositions[2] + 240, y + 30, `Obs: ${observacion}`, { size: 6.5, fill: "#4b5563" }));
       }
+    }
 
-      const identificado = (item.siac?.chasis ?? item.siac?.serie ?? item.siac?.nroFabricacion ?? "-").trim();
-      const entregada = item.siac?.estado === 35 || item.siac?.estado === 40;
-      const colorStyle = getInlineBadgeStyle(item.siac?.color);
-
-      return `
-        <tr class="${entregada ? "entregada" : ""}">
-          <td class="hora">${escapeHtml(item.horaAgenda)}</td>
-          <td class="interno">
-            <div>${escapeHtml(String(item.interno))}</div>
-            ${item.equipado ? '<div class="equipado">EQUIPADO</div>' : ""}
-            ${item.entregaUsado ? '<div class="equipado">ENTREGA USADO</div>' : ""}
-          </td>
-          <td class="datos">
-            <div class="cliente">${escapeHtml(item.siac?.cliente || "-")}</div>
-            <div class="modelo">${escapeHtml([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || "-")}</div>
-            <div class="detalle">
-              <span>${escapeHtml(identificado)}</span>
-              <span>/</span>
-              <span>COLOR:</span>
-              <span class="badge-color" style="${colorStyle}">${escapeHtml(item.siac?.color || "-")}</span>
-            </div>
-            ${item.observaciones?.trim() ? `<div class="obs">Obs: ${escapeHtml(item.observaciones.trim())}</div>` : ""}
-          </td>
-          <td class="vendedor">${escapeHtml(item.siac?.vendedor || "-")}</td>
-          <td class="operacion">${escapeHtml(formatOperacion(item))}</td>
-        </tr>
-      `;
+    const flags: string[] = [];
+    if (!reserva && item.equipado) flags.push("EQUIPADO");
+    if (!reserva && item.entregaUsado) flags.push("ENTREGA USADO");
+    flags.forEach((flag, flagIndex) => {
+      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 24 + flagIndex * 8, flag, { size: 7.5, weight: "700", anchor: "middle", fill: "#374151" }));
     });
-  }).join("");
+  });
+
+  svgParts.push(rect(marginX, tableTop, tableWidth, totalTableHeight, "none"));
+  svgParts.push(line(marginX, tableTop, marginX + tableWidth, tableTop));
+  svgParts.push(line(marginX, tableTop + totalTableHeight, marginX + tableWidth, tableTop + totalTableHeight));
+
+  xPositions.forEach((x, index) => {
+    svgParts.push(line(x, tableTop, x, tableTop + totalTableHeight));
+    svgParts.push(line(x + colWidths[index], tableTop, x + colWidths[index], tableTop + totalTableHeight));
+  });
+
+  for (let rowIndex = 0; rowIndex <= displayRows.length; rowIndex += 1) {
+    const y = tableTop + headerHeight + rowIndex * rowHeight;
+    svgParts.push(line(marginX, y, marginX + tableWidth, y));
+  }
+
+  svgParts.push("</svg>");
+
+  return svgParts.join("");
 };
 
 export function openAgendaEntregaPrintView(params: {
@@ -190,6 +280,13 @@ export function openAgendaEntregaPrintView(params: {
   }
 
   printDocument.open();
+  const svgMarkup = buildAgendaSvg({
+    items: params.items,
+    fecha: params.fecha,
+    sucursal,
+    horariosHabilitados,
+  });
+  const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
   printDocument.write(`
     <!DOCTYPE html>
     <html lang="es">
@@ -199,205 +296,37 @@ export function openAgendaEntregaPrintView(params: {
         <style>
           @page {
             size: A4 portrait;
-            margin: 7mm;
+            margin: 0;
           }
 
           * {
             box-sizing: border-box;
           }
 
-          body {
+          html, body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #111827;
+            width: 210mm;
+            min-height: 297mm;
             background: #ffffff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
 
           .page {
-            width: 100%;
+            width: 210mm;
+            min-height: 297mm;
           }
 
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-            gap: 8px;
-          }
-
-          .header h1 {
-            margin: 0;
-            font-size: 16px;
-          }
-
-          .header p {
-            margin: 3px 0 0;
-            font-size: 10px;
-            color: #4b5563;
-          }
-
-          .meta {
-            text-align: right;
-            font-size: 10px;
-          }
-
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-          }
-
-          thead th {
-            background: #b7b7b7;
-            color: #000;
-            font-size: 9px;
-            padding: 5px 5px;
-            text-transform: uppercase;
-            border: 1px solid #9ca3af;
-          }
-
-          tbody td {
-            border: 1px solid #9ca3af;
-            padding: 4px 5px;
-            vertical-align: middle;
-            font-size: 8px;
-          }
-
-          tbody tr.entregada td {
-            background: #dcfce7;
-          }
-
-          tbody tr.reserva td {
-            background: #fef3c7;
-          }
-
-          tbody tr.reserva .interno {
-            background: #fde68a;
-          }
-
-          tbody tr.bloqueado td {
-            background: #e5e7eb;
-            color: #4b5563;
-          }
-
-          tbody tr.bloqueado .interno {
-            background: #d1d5db;
-          }
-
-          .hora, .interno, .vendedor, .operacion {
-            text-align: center;
-            font-weight: 700;
-          }
-
-          .hora {
-            width: 11%;
-            font-size: 12px;
-          }
-
-          .interno {
-            width: 14%;
-            font-size: 12px;
-            background: #f3f4f6;
-          }
-
-          tr.entregada .interno {
-            background: #bbf7d0;
-          }
-
-          .vendedor {
-            width: 18%;
-            font-size: 9px;
-          }
-
-          .operacion {
-            width: 12%;
-            font-size: 11px;
-          }
-
-          .datos {
-            width: 45%;
-            vertical-align: top;
-          }
-
-          .cliente {
-            border-bottom: 1px dotted #9ca3af;
-            padding-bottom: 2px;
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-          }
-
-          .modelo {
-            margin-top: 2px;
-            font-size: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #374151;
-          }
-
-          .detalle {
-            margin-top: 2px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            align-items: center;
-            font-size: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
-          }
-
-          .badge-color {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 6px;
-            padding: 2px 4px;
-            font-size: 8px;
-            line-height: 1;
-            font-weight: 700;
-          }
-
-          .obs {
-            margin-top: 3px;
-            font-size: 8px;
-            color: #4b5563;
-          }
-
-          .equipado {
-            margin-top: 3px;
-            font-size: 8px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
+          .page img {
+            display: block;
+            width: 210mm;
+            height: 297mm;
           }
         </style>
       </head>
       <body>
         <div class="page">
-          <div class="header">
-            <div>
-              <h1>Agenda de entrega</h1>
-              <p>Vista diaria lista para impresion</p>
-            </div>
-            <div class="meta">
-              <div><strong>Fecha:</strong> ${escapeHtml(params.fecha || "-")}</div>
-              <div><strong>Sucursal:</strong> ${escapeHtml(sucursal)}</div>
-              <div><strong>Turnos:</strong> ${params.items.length}</div>
-            </div>
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Interno</th>
-                <th>Datos</th>
-                <th>Vendedor</th>
-                <th>Operacion</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${buildRows(params.items, horariosHabilitados)}
-            </tbody>
-          </table>
+          <img src="${svgDataUrl}" alt="${escapeHtml(title)}" />
         </div>
       </body>
     </html>
