@@ -206,7 +206,7 @@ export default function PendientesTurnarView() {
         {canImportPendientes ? (
           <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
             <FileSpreadsheet size={16} />
-            <span>Importa archivos `.xls` o `.xlsx` usando la sucursal actualmente seleccionada.</span>
+            <span>Importa archivos `.xls` o `.xlsx` con `F.Patenta`, `Dominio` y `SPE = Finalizada`, usando la sucursal actualmente seleccionada.</span>
           </div>
         ) : null}
       </section>

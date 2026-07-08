@@ -515,14 +515,15 @@ const getWorkbookRows = (file: Express.Multer.File) => {
 const findRequiredColumnIndexes = (headerRow: unknown[]) => {
   const headers = headerRow.map((cell) => normalizeSpreadsheetText(cell));
   const internoIndex = headers.findIndex((header) => header === "INT.");
+  const fechaPatentaIndex = headers.findIndex((header) => header === "F.Patenta");
   const dominioIndex = headers.findIndex((header) => header === "Dominio");
   const speIndex = headers.findIndex((header) => header === "SPE");
 
-  if (internoIndex === -1 || dominioIndex === -1 || speIndex === -1) {
-    throw new Error('El archivo debe contener las columnas "INT.", "Dominio" y "SPE"');
+  if (internoIndex === -1 || fechaPatentaIndex === -1 || dominioIndex === -1 || speIndex === -1) {
+    throw new Error('El archivo debe contener las columnas "INT.", "F.Patenta", "Dominio" y "SPE"');
   }
 
-  return { internoIndex, dominioIndex, speIndex };
+  return { internoIndex, fechaPatentaIndex, dominioIndex, speIndex };
 };
 
 export class PendienteTurnarController {
@@ -603,17 +604,18 @@ export class PendienteTurnarController {
         return res.status(400).json({ error: "El archivo Excel no contiene filas para procesar" });
       }
 
-      const { internoIndex, dominioIndex, speIndex } = findRequiredColumnIndexes(rows[0] ?? []);
+      const { internoIndex, fechaPatentaIndex, dominioIndex, speIndex } = findRequiredColumnIndexes(rows[0] ?? []);
       const seenInternos = new Set<number>();
       const candidateInternos: number[] = [];
       let skippedInvalidRows = 0;
 
       for (const row of rows.slice(1)) {
         const cells = Array.isArray(row) ? row : [];
+        const fechaPatenta = normalizeSpreadsheetText(cells[fechaPatentaIndex]);
         const dominio = normalizeSpreadsheetText(cells[dominioIndex]);
         const spe = normalizeSpreadsheetText(cells[speIndex]);
 
-        if (!dominio || spe !== "Finalizada") {
+        if (!fechaPatenta || !dominio || spe !== "Finalizada") {
           continue;
         }
 
