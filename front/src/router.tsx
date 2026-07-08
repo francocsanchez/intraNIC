@@ -7,6 +7,7 @@ const NICLayout = lazy(() => import("./layouts/NICLayout"));
 const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const PatentamientosLayout = lazy(() => import("./layouts/PatentamientosLayout"));
+const TransferenciasLayout = lazy(() => import("./layouts/TransferenciasLayout"));
 const CallCenterLayout = lazy(() => import("./layouts/CallCenterLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
@@ -77,6 +78,7 @@ const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegi
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
+const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
 const PatentamientosRegistrosView = lazy(() => import("./views/patentamientos/PatentamientosRegistrosView"));
 const PromediosPlanAhorroView = lazy(() => import("./views/admin/siac/PromediosPlanAhorroView"));
@@ -295,6 +297,14 @@ export default function Router() {
               <Route path={paths.analisis.patentamientos.dashboard} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboardInscripcionUnidades} element={<InscripcionUnidadesView />} />
               <Route path={paths.analisis.patentamientos.dashboardSectionRoute} element={<DashboardPatentamientosView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["transferencias"]} />}>
+            <Route element={<TransferenciasLayout />}>
+              <Route path={paths.analisis.transferencias.home} element={<Navigate to={paths.analisis.transferencias.dashboardGeneral} replace />} />
+              <Route path={paths.analisis.transferencias.dashboard} element={<Navigate to={paths.analisis.transferencias.dashboardGeneral} replace />} />
+              <Route path={paths.analisis.transferencias.dashboardSectionRoute} element={<DashboardTransferenciasView />} />
             </Route>
           </Route>
 

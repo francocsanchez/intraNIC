@@ -51,6 +51,7 @@ La logica vigente es:
 - `ranking`
 - `promedio`
 - `patentamientos`
+- `transferencias`
 - `actualizacionRegistros`
 - `agendaEntrega`
 - `pendientesTurnar`
@@ -135,6 +136,7 @@ Aplica a estas areas:
 - `Ranking` depende de `modules.ranking = 1`.
 - `Promedio` depende de `modules.promedio = 1`.
 - `Patentamientos` depende de `modules.patentamientos = 1`.
+- `Transferencias` depende de `modules.transferencias = 1`.
 - Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
 
 ## Relacion actual modulo -> acceso funcional
@@ -165,6 +167,7 @@ Aplica a estas areas:
 - `ranking`: ranking convencional
 - `promedio`: promedio convencional
 - `patentamientos`: analisis de patentamientos
+- `transferencias`: analisis de transferencias
 - `actualizacionRegistros`: actualizacion/importacion de registros
 - `agendaEntrega`: agenda de entrega
 - `pendientesTurnar`: pendientes de turnar

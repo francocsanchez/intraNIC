@@ -23,6 +23,7 @@ export const moduleKeys = [
   "ranking",
   "promedio",
   "patentamientos",
+  "transferencias",
   "actualizacionRegistros",
   "agendaEntrega",
   "pendientesTurnar",
@@ -63,6 +64,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   ranking: "Ranking",
   promedio: "Promedio",
   patentamientos: "Patentamientos",
+  transferencias: "Transferencias",
   actualizacionRegistros: "Act. Registros",
   agendaEntrega: "Agenda de entrega",
   pendientesTurnar: "Pendientes de turnar",
@@ -109,7 +111,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Analisis",
-    modules: ["operaciones", "ranking", "promedio", "patentamientos"],
+    modules: ["operaciones", "ranking", "promedio", "patentamientos", "transferencias"],
   },
   {
     title: "Entregas",

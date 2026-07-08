@@ -10,6 +10,11 @@ export default function AnalisisLayout() {
   const canViewOperaciones = hasModulePathAccess(user, "operaciones", paths.analisis.operaciones);
   const canViewRanking = hasModulePathAccess(user, "ranking", paths.convencional.ranking);
   const canViewPromedio = hasModulePathAccess(user, "promedio", paths.convencional.promedio);
+  const canViewTransferencias = hasModulePathAccess(
+    user,
+    "transferencias",
+    paths.analisis.transferencias.dashboardGeneral,
+  );
 
   return (
     <BaseAppLayout
@@ -32,6 +37,12 @@ export default function AnalisisLayout() {
           {canViewPromedio ? (
             <Link to={paths.convencional.promedio} className="hover:text-gray-900 transition">
               Promedio
+            </Link>
+          ) : null}
+
+          {canViewTransferencias ? (
+            <Link to={paths.analisis.transferencias.dashboardGeneral} className="hover:text-gray-900 transition">
+              Transferencias
             </Link>
           ) : null}
         </>

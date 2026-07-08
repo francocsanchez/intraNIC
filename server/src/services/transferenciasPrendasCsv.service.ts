@@ -416,6 +416,7 @@ export class TransferenciasPrendasCsvService {
           update: {
             $inc: { total: row.total },
             $set: { sourceUpdatedAt, updatedAt: sourceUpdatedAt },
+            $unset: { dia: "" },
             $setOnInsert: {
               anio: row.anio,
               mes: row.mes,

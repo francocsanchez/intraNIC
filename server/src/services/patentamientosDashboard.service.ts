@@ -3,6 +3,7 @@ import PatentamientoDataset, {
   type PatentamientoDatasetType,
 } from "../models/PatentamientoDataset";
 import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
+import { ZONA_NIC_LOCALITIES } from "../constants/zonaNic";
 
 type PatentamientoDatasetLean = Pick<
   IPatentamientoDataset,
@@ -235,27 +236,6 @@ const MONTH_LABELS_SHORT: Record<number, string> = {
   11: "nov",
   12: "dic",
 };
-
-const ZONA_NIC_LOCALITIES = new Set([
-  "ALLEN",
-  "BARILOCHE",
-  "CENTENARIO",
-  "CHOELE CHOEL",
-  "CINCO SALTOS",
-  "CIPOLLETTI",
-  "CUTRAL CO",
-  "GENERAL ROCA",
-  "MAQUINCHAO",
-  "NEUQUEN",
-  "PLAZA HUINCUL",
-  "PLOTTIER",
-  "SAN MARTIN DE LOS ANDES",
-  "SAN MARTIN DE ANDES",
-  "VILLA REGINA",
-  "VILLA LA ANGOSTURA",
-  "VILLA LANGOSTURA",
-  "ZAPALA",
-]);
 
 const normalizeText = (value: string) =>
   value
@@ -558,7 +538,7 @@ const getBrandRowsFromTotalizados = async (
   };
 
   if (scope === "zona-nic") {
-    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+    matchStage.registroLocalidad = { $in: ZONA_NIC_LOCALITIES };
   }
 
   const monthlyCounts = await PatentamientoTotalizado.aggregate<{
@@ -678,7 +658,7 @@ const getSegmentRowsFromTotalizados = async (
   };
 
   if (scope === "zona-nic") {
-    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+    matchStage.registroLocalidad = { $in: ZONA_NIC_LOCALITIES };
   }
 
   const monthlyCounts = await PatentamientoTotalizado.aggregate<{
@@ -931,7 +911,7 @@ const getToyotaMonthlyShareFromTotalizados = async (
   };
 
   if (scope === "zona-nic") {
-    matchStage.registroLocalidad = { $in: Array.from(ZONA_NIC_LOCALITIES) };
+    matchStage.registroLocalidad = { $in: ZONA_NIC_LOCALITIES };
   }
 
   const monthlyTotals = await PatentamientoTotalizado.aggregate<{
@@ -1030,7 +1010,7 @@ const getGeneralSummaryFromTotalizados = async (year: number): Promise<Dashboard
     {
       $match: {
         anio: year,
-        registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+        registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
         marca: { $exists: true, $ne: "" },
       },
     },
@@ -1073,7 +1053,7 @@ const getGeneralSummaryFromTotalizados = async (year: number): Promise<Dashboard
 const getGeneralMonthsFromTotalizados = async (year: number): Promise<DashboardMonthColumn[]> => {
   const monthNumbers = await PatentamientoTotalizado.distinct("mes", {
     anio: year,
-    registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+    registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
   });
 
   return monthNumbers
@@ -1098,7 +1078,7 @@ const getGeneralTrendFromTotalizados = async (
         $match: {
           anio: year,
           mes: month,
-          registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+          registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
         },
       },
       {
@@ -1136,7 +1116,7 @@ const getGeneralTrendFromTotalizados = async (
     {
       $match: {
         anio: year,
-        registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+        registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
       },
     },
     {
@@ -1172,7 +1152,7 @@ const getGeneralTopModelsFromTotalizados = async (
 ): Promise<Pick<DashboardGeneralResponse, "topModels" | "topModelsPagination">> => {
   const matchStage: Record<string, unknown> = {
     anio: year,
-    registroLocalidad: { $in: Array.from(ZONA_NIC_LOCALITIES) },
+    registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
     modelo: { $exists: true, $ne: "" },
     marca: { $exists: true, $ne: "" },
   };

@@ -245,6 +245,7 @@ const moduleOnlyPathMatchers: Array<string | RegExp> = [
   paths.convencional.ranking,
   paths.convencional.promedio,
   /^\/analisis\/patentamientos(?:\/.*)?$/,
+  /^\/analisis\/transferencias(?:\/.*)?$/,
 ];
 
 const getNormalizedRoles = (user: AuthUser) =>

@@ -55,6 +55,13 @@ export const paths = {
       dashboardSectionRoute: "/analisis/patentamientos/dashboard/:section",
       dashboardSection: (section: string) => `/analisis/patentamientos/dashboard/${section}`,
     },
+    transferencias: {
+      home: "/analisis/transferencias",
+      dashboard: "/analisis/transferencias/dashboard",
+      dashboardGeneral: "/analisis/transferencias/dashboard/general",
+      dashboardSectionRoute: "/analisis/transferencias/dashboard/:section",
+      dashboardSection: (section: string) => `/analisis/transferencias/dashboard/${section}`,
+    },
   },
   convencional: {
     stockDisponible: "/convencional/stock/disponible",

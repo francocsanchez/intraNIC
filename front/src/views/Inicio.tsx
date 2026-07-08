@@ -194,6 +194,12 @@ export default function Inicio() {
           enabled: hasModulePathAccess(user, "patentamientos", paths.analisis.patentamientos.dashboardMarcas),
           icon: BarChart3,
         },
+        {
+          label: "Transferencias",
+          to: paths.analisis.transferencias.dashboardGeneral,
+          enabled: hasModulePathAccess(user, "transferencias", paths.analisis.transferencias.dashboardGeneral),
+          icon: BarChart3,
+        },
       ],
     },
     {

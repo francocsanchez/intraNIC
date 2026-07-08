@@ -23,6 +23,7 @@ export const moduleKeys = [
   "ranking",
   "promedio",
   "patentamientos",
+  "transferencias",
   "actualizacionRegistros",
   "agendaEntrega",
   "pendientesTurnar",

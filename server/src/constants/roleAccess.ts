@@ -33,6 +33,7 @@ export type RoleAccessKey =
   | "liess.stockDisponible"
   | "analisis.operaciones"
   | "analisis.patentamientos"
+  | "analisis.transferencias"
   | "administracion.reventaPendientes"
   | "administracion.listaPrevia"
   | "administracion.pedidoUnidadesRegistros"
@@ -170,6 +171,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "liess.stockDisponible",
     "analisis.operaciones",
     "analisis.patentamientos",
+    "analisis.transferencias",
     "sistema.testDrive",
   ]),
   gerente: new Set<RoleAccessKey>([
@@ -217,6 +219,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "liess.stockDisponible",
     "analisis.operaciones",
     "analisis.patentamientos",
+    "analisis.transferencias",
     "sistema.configuracion",
     "sistema.testDrive",
   ]),
