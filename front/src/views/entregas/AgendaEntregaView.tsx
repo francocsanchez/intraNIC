@@ -131,12 +131,8 @@ export default function AgendaEntregaView() {
       return false;
     }
 
-    if (isSuperAdmin) {
-      return canToggleEquipado;
-    }
-
-    return canToggleEquipado && assignedSucursalId === filters.sucursalId;
-  }, [assignedSucursalId, canToggleEquipado, filters.sucursalId, isSuperAdmin]);
+    return canToggleEquipado;
+  }, [canToggleEquipado, filters.sucursalId]);
 
   useEffect(() => {
     if (!filters.sucursalId && activeSucursales[0]?._id) {

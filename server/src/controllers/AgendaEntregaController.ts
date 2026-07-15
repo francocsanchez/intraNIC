@@ -212,7 +212,7 @@ const ensureEntregadaPorToggleAccess = (req: Request, sucursalId: string) => {
   return null;
 };
 
-const ensureEquipadoToggleAccess = (req: Request, sucursalId: string) => {
+const ensureEquipadoToggleAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
   }
@@ -229,18 +229,6 @@ const ensureEquipadoToggleAccess = (req: Request, sucursalId: string) => {
 
   if (!roles.includes("coordinador") && !roles.includes("accesorios")) {
     return "No tienes permisos para marcar accesorios en la agenda";
-  }
-
-  const assignedSucursalId = getAssignedSucursalEntregaId(req);
-
-  if (!assignedSucursalId) {
-    return roles.includes("accesorios")
-      ? "El usuario accesorios no tiene una sucursal de entrega asignada"
-      : "El usuario coordinador no tiene una sucursal de entrega asignada";
-  }
-
-  if (assignedSucursalId !== sucursalId) {
-    return "Solo puedes operar registros de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -1259,8 +1247,7 @@ export class AgendaEntregaController {
         return res.status(400).json({ error: "Las reservas no pueden marcarse con accesorios" });
       }
 
-      const sucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
-      const accessError = ensureEquipadoToggleAccess(req, sucursalId);
+      const accessError = ensureEquipadoToggleAccess(req);
       if (accessError) {
         return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
       }
