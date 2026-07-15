@@ -11,6 +11,7 @@ let lastRunKey = "";
 const getZonedParts = (date: Date) => {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: JOB_TIMEZONE,
+    weekday: "short",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -24,6 +25,7 @@ const getZonedParts = (date: Date) => {
     parts.find((part) => part.type === type)?.value ?? "";
 
   return {
+    weekday: getValue("weekday"),
     year: Number(getValue("year")),
     month: Number(getValue("month")),
     day: Number(getValue("day")),
@@ -38,8 +40,9 @@ const buildRunKey = (date: Date) => {
 };
 
 const shouldRunNow = (date: Date) => {
-  const { hour, minute } = getZonedParts(date);
-  return hour === JOB_HOUR && minute === JOB_MINUTE;
+  const { weekday, hour, minute } = getZonedParts(date);
+  const isWeekend = weekday === "Sat" || weekday === "Sun";
+  return !isWeekend && hour === JOB_HOUR && minute === JOB_MINUTE;
 };
 
 const executeIfNeeded = async () => {
@@ -71,7 +74,7 @@ const executeIfNeeded = async () => {
 
 export const startFacturasAnticipoJob = () => {
   console.log(
-    `[facturas-anticipo-cron] programado todos los dias a las ${String(JOB_HOUR).padStart(2, "0")}:${String(JOB_MINUTE).padStart(2, "0")} (${JOB_TIMEZONE})`,
+    `[facturas-anticipo-cron] programado de lunes a viernes a las ${String(JOB_HOUR).padStart(2, "0")}:${String(JOB_MINUTE).padStart(2, "0")} (${JOB_TIMEZONE})`,
   );
 
   void executeIfNeeded();

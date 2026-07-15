@@ -27,7 +27,7 @@ type OperacionesPorUsuario = {
 const SUBJECT = "Anulacion pendiente de facturas de anticipo";
 const JOB_KEY = "facturas-anticipo";
 const JOB_NAME = "facturas-anticipo";
-const JOB_SCHEDULE_LABEL = "Todos los dias a las 21:00";
+const JOB_SCHEDULE_LABEL = "Lunes a viernes a las 21:00";
 
 const normalizeText = (value: unknown) =>
   String(value ?? "")

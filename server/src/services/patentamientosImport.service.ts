@@ -13,7 +13,7 @@ import { SftpFileDiscoveryService } from "./sftp/sftpFileDiscovery.service";
 
 const JOB_NAME = "patentamientos-patent-prendas-import";
 const JOB_KEY = "patentamientos-import";
-const JOB_SCHEDULE_LABEL = "Todos los dias a las 02:00";
+const JOB_SCHEDULE_LABEL = "Lunes a viernes a las 02:00";
 const REMOTE_FILE_PREFIX = "Patent_Prendas";
 const MIN_BATCH_SIZE = 100;
 const MAX_BATCH_SIZE = 5000;

@@ -10,25 +10,25 @@ const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "schedu
   {
     jobKey: "patentamientos-import",
     title: "Importacion de patentamientos",
-    scheduleLabel: "Todos los dias a las 02:00",
+    scheduleLabel: "Lunes a viernes a las 02:00",
     canRun: true,
   },
   {
     jobKey: "transferencias-import",
     title: "Importacion de transferencias",
-    scheduleLabel: "Todos los dias a las 03:00",
+    scheduleLabel: "Lunes a viernes a las 03:00",
     canRun: true,
   },
   {
     jobKey: "unidades-dealers-sync",
     title: "Sincronizacion unidades dealers",
-    scheduleLabel: "Todos los dias a las 01:00",
+    scheduleLabel: "Lunes a viernes a las 01:00",
     canRun: true,
   },
   {
     jobKey: "facturas-anticipo",
     title: "Facturas anticipo",
-    scheduleLabel: "Todos los dias a las 21:00",
+    scheduleLabel: "Lunes a viernes a las 21:00",
     canRun: true,
   },
 ];

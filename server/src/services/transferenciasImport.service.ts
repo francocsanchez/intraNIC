@@ -13,7 +13,7 @@ import { TransferenciasPrendasCsvService } from "./transferenciasPrendasCsv.serv
 
 const JOB_NAME = "transferencias-transf-prendas-import";
 const JOB_KEY = "transferencias-import";
-const JOB_SCHEDULE_LABEL = "Todos los dias a las 03:00";
+const JOB_SCHEDULE_LABEL = "Lunes a viernes a las 03:00";
 const REMOTE_FILE_PREFIX = "Transf_Prendas";
 const MIN_BATCH_SIZE = 100;
 const MAX_BATCH_SIZE = 5000;

@@ -10,6 +10,7 @@ const executedRunKeys = new Set<string>();
 const getZonedParts = (date: Date) => {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: JOB_TIMEZONE,
+    weekday: "short",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -23,6 +24,7 @@ const getZonedParts = (date: Date) => {
     parts.find((part) => part.type === type)?.value ?? "";
 
   return {
+    weekday: getValue("weekday"),
     year: Number(getValue("year")),
     month: Number(getValue("month")),
     day: Number(getValue("day")),
@@ -37,8 +39,9 @@ const buildRunKey = (date: Date) => {
 };
 
 const shouldRunNow = (date: Date) => {
-  const { hour, minute } = getZonedParts(date);
-  return JOB_SCHEDULES.has(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+  const { weekday, hour, minute } = getZonedParts(date);
+  const isWeekend = weekday === "Sat" || weekday === "Sun";
+  return !isWeekend && JOB_SCHEDULES.has(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
 };
 
 const executeIfNeeded = async () => {
@@ -72,7 +75,7 @@ const executeIfNeeded = async () => {
 };
 
 export const startPatentamientosImportJob = () => {
-  console.log("[patentamientos-import-cron] programado todos los dias a las 02:00 (America/Argentina/Buenos_Aires)");
+  console.log("[patentamientos-import-cron] programado de lunes a viernes a las 02:00 (America/Argentina/Buenos_Aires)");
 
   void executeIfNeeded();
   setInterval(() => {
