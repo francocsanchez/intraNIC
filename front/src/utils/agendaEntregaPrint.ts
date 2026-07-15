@@ -110,7 +110,7 @@ const buildAgendaSvg = (params: {
   const rowHeight = 33;
   const headerHeight = 22;
   const tableWidth = pageWidth - marginX * 2;
-  const colWidths = [88, 120, 550];
+  const colWidths = [72, 92, 126, 468];
   const xPositions = colWidths.reduce<number[]>((acc, _width, index) => {
     const currentX = index === 0 ? marginX : acc[index - 1] + colWidths[index - 1];
     acc.push(currentX);
@@ -164,7 +164,7 @@ const buildAgendaSvg = (params: {
     rect(marginX, tableTop, tableWidth, headerHeight, tableHeaderBg),
   ];
 
-  ["Hora", "Interno", "Datos"].forEach((label, index) => {
+  ["Hora", "Interno", "Vendedor", "Datos"].forEach((label, index) => {
     const x = xPositions[index];
     svgParts.push(text(x + colWidths[index] / 2, tableTop + 14, label.toUpperCase(), { size: 8, weight: "700", anchor: "middle" }));
   });
@@ -175,6 +175,7 @@ const buildAgendaSvg = (params: {
     if ("tipo" in row && row.tipo === "vacio") {
       svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#ffffff"));
       svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#f3f4f6"));
+      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#f9fafb"));
       svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
       return;
     }
@@ -182,10 +183,11 @@ const buildAgendaSvg = (params: {
     if ("tipo" in row && row.tipo === "bloqueado") {
       svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#e5e7eb"));
       svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#d1d5db"));
+      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#d1d5db"));
       svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
       svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 18, "BLOQUEADO", { size: 9, weight: "700", anchor: "middle", fill: "#4b5563" }));
-      svgParts.push(text(xPositions[2] + 8, y + 13, "HORARIO BLOQUEADO", { size: 8, weight: "700", fill: "#4b5563" }));
-      svgParts.push(text(xPositions[2] + 8, y + 25, "NO DISPONIBLE PARA AGENDAR", { size: 7, weight: "700", fill: "#4b5563" }));
+      svgParts.push(text(xPositions[3] + 8, y + 13, "HORARIO BLOQUEADO", { size: 8, weight: "700", fill: "#4b5563" }));
+      svgParts.push(text(xPositions[3] + 8, y + 25, "NO DISPONIBLE PARA AGENDAR", { size: 7, weight: "700", fill: "#4b5563" }));
       return;
     }
 
@@ -195,33 +197,36 @@ const buildAgendaSvg = (params: {
     const rowBg = reserva ? "#fef3c7" : entregada ? "#dcfce7" : "#ffffff";
     const internoBg = reserva ? "#fde68a" : entregada ? "#bbf7d0" : "#f3f4f6";
     const cliente = truncateText(item.siac?.cliente || (reserva ? "Reserva" : "-"), 62);
-    const modelo = truncateText([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || (reserva ? "" : "-"), 70);
+    const modelo = truncateText([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || (reserva ? "" : "-"), 56);
     const identificado = truncateText((item.siac?.chasis ?? item.siac?.serie ?? item.siac?.nroFabricacion ?? "-").trim(), 28);
     const color = truncateText(item.siac?.color || "-", 18);
-    const observacion = truncateText(item.observaciones?.trim() || "", 54);
+    const observacion = truncateText(item.observaciones?.trim() || "", 28);
+    const vendedor = truncateText(item.siac?.vendedor || "-", 20);
     const colorStyle = getInlineBadgeStyle(item.siac?.color);
     const badgeFill = stripCssStyle(colorStyle, "background", "#f3f4f6");
     const badgeText = stripCssStyle(colorStyle, "color", "#374151");
 
     svgParts.push(rect(marginX, y, tableWidth, rowHeight, rowBg));
     svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, internoBg));
+    svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#ffffff"));
     svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, item.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
     svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 13, reserva ? "RESERVA" : String(item.interno), { size: 9, weight: "700", anchor: "middle", fill: "#111827" }));
+    svgParts.push(text(xPositions[2] + colWidths[2] / 2, y + 18, reserva ? "-" : vendedor, { size: 8, weight: "700", anchor: "middle", fill: "#374151" }));
 
     if (reserva) {
-      svgParts.push(text(xPositions[2] + 8, y + 12, "RESERVA", { size: 9, weight: "700", fill: "#92400e" }));
-      svgParts.push(text(xPositions[2] + 8, y + 25, truncateText(item.observaciones?.trim() || "-", 68), { size: 8, weight: "400", fill: "#92400e" }));
+      svgParts.push(text(xPositions[3] + 8, y + 12, "RESERVA", { size: 9, weight: "700", fill: "#92400e" }));
+      svgParts.push(text(xPositions[3] + 8, y + 25, truncateText(item.observaciones?.trim() || "-", 56), { size: 8, weight: "400", fill: "#92400e" }));
     } else {
-      svgParts.push(text(xPositions[2] + 8, y + 9, cliente, { size: 7, weight: "700" }));
-      svgParts.push(text(xPositions[2] + 8, y + 20, modelo || "-", { size: 9.5, weight: "700", fill: "#374151" }));
-      svgParts.push(text(xPositions[2] + 8, y + 31, `${identificado} / COLOR:`, { size: 9, weight: "700" }));
+      svgParts.push(text(xPositions[3] + 8, y + 9, cliente, { size: 7, weight: "700" }));
+      svgParts.push(text(xPositions[3] + 8, y + 20, modelo || "-", { size: 9.5, weight: "700", fill: "#374151" }));
+      svgParts.push(text(xPositions[3] + 8, y + 31, `${identificado} / COLOR:`, { size: 9, weight: "700" }));
 
-      const badgeX = xPositions[2] + 144;
+      const badgeX = xPositions[3] + 144;
       svgParts.push(`<rect x="${badgeX}" y="${y + 19}" width="74" height="14" rx="3" ry="3" fill="${badgeFill}" stroke="#cbd5e1" stroke-width="1" />`);
       svgParts.push(text(badgeX + 37, y + 29.5, color, { size: 8.5, weight: "700", anchor: "middle", fill: badgeText }));
 
       if (observacion) {
-        svgParts.push(text(xPositions[2] + 240, y + 30, `Obs: ${observacion}`, { size: 6.5, fill: "#4b5563" }));
+        svgParts.push(text(xPositions[3] + 226, y + 30, `Obs: ${observacion}`, { size: 6.5, fill: "#4b5563" }));
       }
     }
 
