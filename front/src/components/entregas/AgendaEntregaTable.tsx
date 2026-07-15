@@ -244,7 +244,7 @@ export default function AgendaEntregaTable({
                               <input
                                 type="checkbox"
                                 checked={item.equipado}
-                                disabled={equipadoPending}
+                                disabled={equipadoPending || entregada}
                                 onChange={(event) => onToggleEquipado(item, event.target.checked)}
                                 className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:opacity-50"
                               />

@@ -1269,6 +1269,12 @@ export class AgendaEntregaController {
       const lookup = await lookupAgendaEntregaInterno(Number(agenda.interno));
       const lookupError = lookup ? "" : "No se pudo obtener informacion actualizada desde SIAC";
 
+      if (lookup && ENTREGADO_STATES.has(Number(lookup.estado))) {
+        return res.status(400).json({
+          error: `El interno ${agenda.interno} ya figura entregado en SIAC y no se puede modificar el campo equipado`,
+        });
+      }
+
       if (alreadyChecked === checked) {
         return res.status(200).json({
           message: checked ? "Los accesorios ya estaban marcados" : "Los accesorios ya estaban desmarcados",
