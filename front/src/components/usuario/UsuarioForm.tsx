@@ -21,6 +21,7 @@ type UsuarioFormProps = {
 const roleOptions = [
   { value: "vendedor", label: "Vendedor" },
   { value: "coordinador", label: "Coordinador" },
+  { value: "accesorios", label: "Accesorios" },
   { value: "entrega", label: "Entrega" },
   { value: "gerente", label: "Gerente" },
   { value: "supervisor", label: "Supervisor" },

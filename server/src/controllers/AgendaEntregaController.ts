@@ -41,6 +41,10 @@ type ToggleEntregadaPorPayload = {
   checked?: unknown;
 };
 
+type ToggleEquipadoPayload = {
+  checked?: unknown;
+};
+
 type SlotValidationResult =
   | { error: string }
   | {
@@ -159,6 +163,11 @@ const userHasEntregadaPorToggleAccess = (req: Request) => {
   return roles.includes("superadmin") || roles.includes("entrega");
 };
 
+const userHasEquipadoToggleAccess = (req: Request) => {
+  const roles = normalizeRoles(req.user?.role);
+  return roles.includes("superadmin") || roles.includes("coordinador") || roles.includes("accesorios");
+};
+
 const ensureAgendaWriteAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
@@ -198,6 +207,40 @@ const ensureEntregadaPorToggleAccess = (req: Request, sucursalId: string) => {
 
   if (assignedSucursalId !== sucursalId) {
     return "Solo puedes marcar entregas de tu sucursal de entrega asignada";
+  }
+
+  return null;
+};
+
+const ensureEquipadoToggleAccess = (req: Request, sucursalId: string) => {
+  if (!req.user?._id) {
+    return "Usuario no autenticado";
+  }
+
+  if (!userHasEquipadoToggleAccess(req)) {
+    return "No tienes permisos para marcar accesorios en la agenda";
+  }
+
+  const roles = normalizeRoles(req.user?.role);
+
+  if (roles.includes("superadmin")) {
+    return null;
+  }
+
+  if (!roles.includes("coordinador") && !roles.includes("accesorios")) {
+    return "No tienes permisos para marcar accesorios en la agenda";
+  }
+
+  const assignedSucursalId = getAssignedSucursalEntregaId(req);
+
+  if (!assignedSucursalId) {
+    return roles.includes("accesorios")
+      ? "El usuario accesorios no tiene una sucursal de entrega asignada"
+      : "El usuario coordinador no tiene una sucursal de entrega asignada";
+  }
+
+  if (assignedSucursalId !== sucursalId) {
+    return "Solo puedes operar registros de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -1188,6 +1231,81 @@ export class AgendaEntregaController {
       logError("AgendaEntregaController.toggleEntregadaPor");
       console.error(error);
       return res.status(500).json({ message: "Error al actualizar la marca de entrega" });
+    }
+  };
+
+  static toggleEquipado = async (req: Request, res: Response) => {
+    if (!req.user?._id) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+
+    const agendaId = String(req.params.id);
+    const { checked } = (req.body ?? {}) as ToggleEquipadoPayload;
+
+    if (typeof checked !== "boolean") {
+      return res.status(400).json({ error: "El campo checked es obligatorio" });
+    }
+
+    try {
+      const agenda = await AgendaEntrega.findById(agendaId)
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      if (!agenda) {
+        return res.status(404).json({ error: "Agenda no encontrada" });
+      }
+
+      if (isReservaAgenda(agenda)) {
+        return res.status(400).json({ error: "Las reservas no pueden marcarse con accesorios" });
+      }
+
+      const sucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
+      const accessError = ensureEquipadoToggleAccess(req, sucursalId);
+      if (accessError) {
+        return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
+      }
+
+      const alreadyChecked = Boolean(agenda.equipado);
+      const lookup = await lookupAgendaEntregaInterno(Number(agenda.interno));
+      const lookupError = lookup ? "" : "No se pudo obtener informacion actualizada desde SIAC";
+
+      if (alreadyChecked === checked) {
+        return res.status(200).json({
+          message: checked ? "Los accesorios ya estaban marcados" : "Los accesorios ya estaban desmarcados",
+          data: formatAgendaRow(agenda, lookup, lookupError),
+        });
+      }
+
+      const usuarioNombre = buildUserName(req);
+      const updated = await AgendaEntrega.findByIdAndUpdate(
+        agendaId,
+        {
+          equipado: checked,
+          updatedBy: new mongoose.Types.ObjectId(req.user._id),
+          updatedByName: usuarioNombre,
+        },
+        { new: true },
+      )
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      await createAgendaLog({
+        agendaEntrega: agendaId,
+        interno: Number(agenda.interno),
+        accion: checked ? "EQUIPADO_MARCADO" : "EQUIPADO_DESMARCADO",
+        usuario: req.user._id,
+        usuarioNombre,
+        detalle: `Equipado/Accesorios: ${alreadyChecked ? "SI" : "NO"} -> ${checked ? "SI" : "NO"}`,
+      });
+
+      return res.status(200).json({
+        message: checked ? "Accesorios marcados correctamente" : "Accesorios desmarcados correctamente",
+        data: updated ? formatAgendaRow(updated, lookup, lookupError) : null,
+      });
+    } catch (error) {
+      logError("AgendaEntregaController.toggleEquipado");
+      console.error(error);
+      return res.status(500).json({ message: "Error al actualizar la marca de accesorios" });
     }
   };
 

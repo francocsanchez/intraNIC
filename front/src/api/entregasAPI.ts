@@ -173,6 +173,14 @@ export function toggleAgendaEntregaEntregadaPor(id: string, checked: boolean): P
   );
 }
 
+export function toggleAgendaEntregaEquipado(id: string, checked: boolean): Promise<AgendaEntregaResponse> {
+  return parseResponse(
+    api.patch(`/entregas/agendas/${id}/equipado`, { checked }),
+    agendaEntregaResponseSchema,
+    "Error al actualizar la marca de accesorios",
+  );
+}
+
 export async function deleteAgendaEntrega(id: string): Promise<{ message: string }> {
   try {
     const { data } = await api.delete(`/entregas/agendas/${id}`);

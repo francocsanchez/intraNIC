@@ -14,6 +14,8 @@ export const AGENDA_ENTREGA_LOG_ACTIONS = [
   "RESERVA_CONVERTIDA",
   "ENTREGA_MARCADA",
   "ENTREGA_DESMARCADA",
+  "EQUIPADO_MARCADO",
+  "EQUIPADO_DESMARCADO",
 ] as const;
 export type AgendaEntregaLogAction = (typeof AGENDA_ENTREGA_LOG_ACTIONS)[number];
 

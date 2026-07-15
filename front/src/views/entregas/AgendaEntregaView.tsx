@@ -3,13 +3,19 @@ import {
   deleteReservaEntrega,
   getAgendasEntrega,
   getSucursalesEntrega,
+  toggleAgendaEntregaEquipado,
   toggleAgendaEntregaEntregadaPor,
 } from "@/api/entregasAPI";
 import AgendaEntregaFilters from "@/components/entregas/AgendaEntregaFilters";
 import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import AgendaEntregaTable from "@/components/entregas/AgendaEntregaTable";
 import ReservaEntregaForm from "@/components/entregas/ReservaEntregaForm";
-import { hasEntregaAgendaManageAccess, hasEntregaAgendaToggleAccess, hasSuperAdminRole } from "@/helpers/access";
+import {
+  hasEntregaAgendaEquipadoToggleAccess,
+  hasEntregaAgendaManageAccess,
+  hasEntregaAgendaToggleAccess,
+  hasSuperAdminRole,
+} from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega } from "@/types/index";
 import { openAgendaEntregaPrintView } from "@/utils/agendaEntregaPrint";
@@ -76,10 +82,21 @@ export default function AgendaEntregaView() {
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
+  const toggleEquipadoMutation = useMutation({
+    mutationFn: ({ id, checked }: { id: string; checked: boolean }) =>
+      toggleAgendaEntregaEquipado(id, checked),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
+      queryClient.invalidateQueries({ queryKey: ["entregas", "logs"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
 
   const items = data?.data ?? [];
   const sucursales = useMemo(() => sucursalesResponse?.data ?? [], [sucursalesResponse]);
   const canManageAgenda = hasEntregaAgendaManageAccess(user);
+  const canToggleEquipado = hasEntregaAgendaEquipadoToggleAccess(user);
   const canToggleEntregadaPor = hasEntregaAgendaToggleAccess(user);
   const isSuperAdmin = hasSuperAdminRole(user);
   const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
@@ -109,6 +126,17 @@ export default function AgendaEntregaView() {
 
     return canToggleEntregadaPor && assignedSucursalId === filters.sucursalId;
   }, [assignedSucursalId, canToggleEntregadaPor, filters.sucursalId, isSuperAdmin]);
+  const canToggleEquipadoInSelectedSucursal = useMemo(() => {
+    if (!filters.sucursalId) {
+      return false;
+    }
+
+    if (isSuperAdmin) {
+      return canToggleEquipado;
+    }
+
+    return canToggleEquipado && assignedSucursalId === filters.sucursalId;
+  }, [assignedSucursalId, canToggleEquipado, filters.sucursalId, isSuperAdmin]);
 
   useEffect(() => {
     if (!filters.sucursalId && activeSucursales[0]?._id) {
@@ -170,6 +198,10 @@ export default function AgendaEntregaView() {
 
   const handleToggleEntregadaPor = (item: AgendaEntrega, checked: boolean) => {
     toggleEntregadaPorMutation.mutate({ id: item._id, checked });
+  };
+
+  const handleToggleEquipado = (item: AgendaEntrega, checked: boolean) => {
+    toggleEquipadoMutation.mutate({ id: item._id, checked });
   };
 
   const handlePrint = () => {
@@ -265,11 +297,14 @@ export default function AgendaEntregaView() {
         <AgendaEntregaTable
           items={items}
           horariosHabilitados={selectedSucursal?.horariosHabilitados ?? []}
+          canToggleEquipado={canToggleEquipadoInSelectedSucursal}
+          toggleEquipadoPendingId={toggleEquipadoMutation.isPending ? (toggleEquipadoMutation.variables?.id ?? null) : null}
           canToggleEntregadaPor={canToggleInSelectedSucursal}
           togglePendingId={toggleEntregadaPorMutation.isPending ? (toggleEntregadaPorMutation.variables?.id ?? null) : null}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onConvertReservation={handleConvertReservation}
+          onToggleEquipado={handleToggleEquipado}
           onToggleEntregadaPor={handleToggleEntregadaPor}
           canManage={canManageAgenda}
         />

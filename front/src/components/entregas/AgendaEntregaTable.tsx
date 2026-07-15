@@ -5,11 +5,14 @@ import { Pencil, Trash2, AlertTriangle, Package, CarFront, CalendarPlus } from "
 type AgendaEntregaTableProps = {
   items: AgendaEntrega[];
   horariosHabilitados: string[];
+  canToggleEquipado: boolean;
+  toggleEquipadoPendingId: string | null;
   canToggleEntregadaPor: boolean;
   togglePendingId: string | null;
   onEdit: (item: AgendaEntrega) => void;
   onDelete: (item: AgendaEntrega) => void;
   onConvertReservation: (item: AgendaEntrega) => void;
+  onToggleEquipado: (item: AgendaEntrega, checked: boolean) => void;
   onToggleEntregadaPor: (item: AgendaEntrega, checked: boolean) => void;
   canManage: boolean;
 };
@@ -36,11 +39,14 @@ const TIME_SLOT_OPTIONS = Array.from({ length: 21 }, (_, index) => {
 export default function AgendaEntregaTable({
   items,
   horariosHabilitados,
+  canToggleEquipado,
+  toggleEquipadoPendingId,
   canToggleEntregadaPor,
   togglePendingId,
   onEdit,
   onDelete,
   onConvertReservation,
+  onToggleEquipado,
   onToggleEntregadaPor,
   canManage,
 }: AgendaEntregaTableProps) {
@@ -203,6 +209,7 @@ export default function AgendaEntregaTable({
               const datos = formatDatos(item);
               const entregada = isEntregada(item);
               const reserva = isReserva(item);
+              const equipadoPending = toggleEquipadoPendingId === item._id;
               const togglePending = togglePendingId === item._id;
 
               return (
@@ -232,7 +239,18 @@ export default function AgendaEntregaTable({
                         </div>
                       ) : (
                         <>
-                          {item.equipado ? (
+                          {canToggleEquipado ? (
+                            <label className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                              <input
+                                type="checkbox"
+                                checked={item.equipado}
+                                disabled={equipadoPending}
+                                onChange={(event) => onToggleEquipado(item, event.target.checked)}
+                                className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:opacity-50"
+                              />
+                              <span>Equipado</span>
+                            </label>
+                          ) : item.equipado ? (
                             <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
                               <Package size={12} />
                               Equipado
@@ -246,8 +264,8 @@ export default function AgendaEntregaTable({
                           ) : null}
                         </>
                       )}
-                    </div>
-                  </td>
+                      </div>
+                    </td>
                   <td className="px-4 py-3 text-black">
                     {reserva ? (
                       <div className="space-y-1">

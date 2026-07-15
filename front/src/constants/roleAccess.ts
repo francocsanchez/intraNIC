@@ -6,7 +6,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega", "accesorios"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -209,6 +209,13 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.entregas.pendientesTurnar,
     paths.entregas.registros,
   ],
+  accesorios: [
+    paths.home,
+    paths.miPerfil,
+    paths.noAutorizado,
+    paths.entregas.agenda,
+    paths.entregas.pendientesTurnar,
+  ],
   entrega: [
     paths.home,
     paths.miPerfil,
@@ -362,6 +369,15 @@ export function hasEntregaAgendaToggleAccess(user: AuthUser) {
   }
 
   return getNormalizedRoles(user).includes("entrega");
+}
+
+export function hasEntregaAgendaEquipadoToggleAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.includes("coordinador") || normalizedRoles.includes("accesorios");
 }
 
 export function hasSystemConfigToggleAccess(user: AuthUser) {
