@@ -1531,12 +1531,34 @@ export const minutaParticipantsResponseSchema = z.object({
   data: z.array(minutaUserSchema),
 });
 
+export const minutaGrupoSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  participantes: z.array(minutaUserSchema),
+  participantesCount: z.number(),
+  createdBy: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const minutaGroupsListResponseSchema = z.object({
+  data: z.array(minutaGrupoSchema),
+});
+
+export const minutaGroupResponseSchema = z.object({
+  data: minutaGrupoSchema.nullable().optional(),
+  message: z.string().optional().default(""),
+});
+
 export type Minuta = z.infer<typeof minutaSchema>;
 export type MinutaTemario = z.infer<typeof minutaTemarioSchema>;
 export type MinutaUser = z.infer<typeof minutaUserSchema>;
 export type MinutaListResponse = z.infer<typeof minutaListResponseSchema>;
 export type MinutaResponse = z.infer<typeof minutaResponseSchema>;
 export type MinutaParticipantsResponse = z.infer<typeof minutaParticipantsResponseSchema>;
+export type MinutaGrupo = z.infer<typeof minutaGrupoSchema>;
+export type MinutaGroupsListResponse = z.infer<typeof minutaGroupsListResponseSchema>;
+export type MinutaGroupResponse = z.infer<typeof minutaGroupResponseSchema>;
 
 //**************************** */
 // ENTREGAS

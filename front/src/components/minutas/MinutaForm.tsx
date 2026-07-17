@@ -1,8 +1,9 @@
 import type { MinutaPayload } from "@/api/dms/minutasAPI";
 import { useAuth } from "@/hooks/useAuthe";
-import type { MinutaUser } from "@/types/index";
+import type { MinutaGrupo, MinutaUser } from "@/types/index";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import MinutaGroupsMultiSelect from "./MinutaGroupsMultiSelect";
 import ParticipantesMultiSelect from "./ParticipantesMultiSelect";
 import TemarioFieldArray, { type MinutaFormValues } from "./TemarioFieldArray";
 import { sanitizeRichTextHtml } from "@/utils/richTextSanitize";
@@ -11,6 +12,7 @@ type MinutaFormProps = {
   initialValues?: MinutaFormValues;
   onCancel?: () => void;
   onSubmit: (payload: MinutaPayload) => void;
+  groups: MinutaGrupo[];
   participants: MinutaUser[];
   pending?: boolean;
   submitLabel?: string;
@@ -25,11 +27,15 @@ export default function MinutaForm({
   initialValues,
   onCancel,
   onSubmit,
+  groups,
   participants,
   pending = false,
   submitLabel = "Guardar minuta",
 }: MinutaFormProps) {
   const { user } = useAuth();
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [manualParticipantIds, setManualParticipantIds] = useState<string[]>(initialValues?.participantes ?? []);
+  const [excludedGroupParticipantIds, setExcludedGroupParticipantIds] = useState<string[]>([]);
 
   const defaultValues = useMemo<MinutaFormValues>(
     () => ({
@@ -48,9 +54,11 @@ export default function MinutaForm({
 
   const {
     control,
+    getValues,
     handleSubmit,
     register,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<MinutaFormValues>({
     defaultValues: initialValues ?? defaultValues,
@@ -58,6 +66,9 @@ export default function MinutaForm({
 
   useEffect(() => {
     reset(initialValues ?? defaultValues);
+    setSelectedGroupIds([]);
+    setManualParticipantIds(initialValues?.participantes ?? []);
+    setExcludedGroupParticipantIds([]);
   }, [defaultValues, initialValues, reset]);
 
   const moderadorLabel = useMemo(() => {
@@ -75,6 +86,83 @@ export default function MinutaForm({
         desarrollo: sanitizeRichTextHtml(topic.desarrollo),
       })),
     });
+  };
+
+  const selectedGroups = useMemo(
+    () => groups.filter((group) => selectedGroupIds.includes(group._id)),
+    [groups, selectedGroupIds],
+  );
+
+  const selectedGroupParticipantIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    selectedGroups.forEach((group) => {
+      group.participantes.forEach((participant) => {
+        ids.add(participant._id);
+      });
+    });
+
+    return [...ids];
+  }, [selectedGroups]);
+
+  const finalParticipantIds = useMemo(() => {
+    const finalIds = new Set<string>(manualParticipantIds);
+
+    selectedGroupParticipantIds.forEach((id) => {
+      if (!excludedGroupParticipantIds.includes(id)) {
+        finalIds.add(id);
+      }
+    });
+
+    return [...finalIds];
+  }, [excludedGroupParticipantIds, manualParticipantIds, selectedGroupParticipantIds]);
+
+  useEffect(() => {
+    setValue("participantes", finalParticipantIds, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }, [finalParticipantIds, setValue]);
+
+  const handleGroupSelectionChange = (nextGroupIds: string[]) => {
+    const nextGroups = groups.filter((group) => nextGroupIds.includes(group._id));
+    const nextGroupParticipantSet = new Set<string>();
+
+    nextGroups.forEach((group) => {
+      group.participantes.forEach((participant) => {
+        nextGroupParticipantSet.add(participant._id);
+      });
+    });
+
+    setSelectedGroupIds(nextGroupIds);
+    setExcludedGroupParticipantIds((current) => current.filter((id) => nextGroupParticipantSet.has(id)));
+  };
+
+  const handleParticipantsChange = (nextSelectedIds: string[]) => {
+    const currentSelectedIds = getValues("participantes");
+    const removedIds = currentSelectedIds.filter((id) => !nextSelectedIds.includes(id));
+    const addedIds = nextSelectedIds.filter((id) => !currentSelectedIds.includes(id));
+    const groupParticipantSet = new Set<string>(selectedGroupParticipantIds);
+    const nextManual = new Set<string>(manualParticipantIds);
+    const nextExcluded = new Set<string>(excludedGroupParticipantIds);
+
+    removedIds.forEach((id) => {
+      nextManual.delete(id);
+
+      if (groupParticipantSet.has(id)) {
+        nextExcluded.add(id);
+      } else {
+        nextExcluded.delete(id);
+      }
+    });
+
+    addedIds.forEach((id) => {
+      nextManual.add(id);
+      nextExcluded.delete(id);
+    });
+
+    setManualParticipantIds([...nextManual]);
+    setExcludedGroupParticipantIds([...nextExcluded]);
   };
 
   return (
@@ -121,6 +209,21 @@ export default function MinutaForm({
 
           <div className="space-y-2 md:col-span-2">
             <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              Grupos de difusion
+            </label>
+            <MinutaGroupsMultiSelect
+              disabled={pending}
+              onChange={handleGroupSelectionChange}
+              options={groups}
+              value={selectedGroupIds}
+            />
+            <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Los grupos agregan sus integrantes a la minuta. Despues podes ajustar la lista final de participantes manualmente.
+            </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
               Participantes
             </label>
             <Controller
@@ -133,12 +236,16 @@ export default function MinutaForm({
                 <ParticipantesMultiSelect
                   disabled={pending}
                   error={errors.participantes?.message}
+                  onChange={handleParticipantsChange}
                   options={participants}
-                  value={field.value}
-                  onChange={field.onChange}
+                  value={field.value ?? []}
                 />
               )}
             />
+            <div className="flex flex-wrap gap-3 text-xs font-medium text-gray-500">
+              <span>{selectedGroups.length} grupo(s) seleccionado(s)</span>
+              <span>{finalParticipantIds.length} participante(s) finales</span>
+            </div>
           </div>
         </div>
       </section>

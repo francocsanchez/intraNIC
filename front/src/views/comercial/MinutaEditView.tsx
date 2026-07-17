@@ -1,5 +1,6 @@
 import {
   getMinutaById,
+  getMinutaGroups,
   getMinutaParticipants,
   updateMinuta,
   type MinutaPayload,
@@ -45,6 +46,16 @@ export default function MinutaEditView() {
     queryFn: getMinutaParticipants,
   });
 
+  const {
+    data: groupsResponse,
+    isLoading: isLoadingGroups,
+    isError: isGroupsError,
+    error: groupsError,
+  } = useQuery({
+    queryKey: ["minutas", "groups"],
+    queryFn: getMinutaGroups,
+  });
+
   const updateMutation = useMutation({
     mutationFn: (payload: MinutaPayload) => updateMinuta(id, payload),
     onSuccess: (response) => {
@@ -56,7 +67,7 @@ export default function MinutaEditView() {
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  if (isLoadingMinuta || isLoadingParticipants) {
+  if (isLoadingMinuta || isLoadingParticipants || isLoadingGroups) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando formulario de edición...</div>
@@ -64,7 +75,7 @@ export default function MinutaEditView() {
     );
   }
 
-  if (isMinutaError || isParticipantsError) {
+  if (isMinutaError || isParticipantsError || isGroupsError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
@@ -72,6 +83,8 @@ export default function MinutaEditView() {
             ? minutaError.message
             : participantsError instanceof Error
               ? participantsError.message
+              : groupsError instanceof Error
+                ? groupsError.message
               : "Error al cargar la minuta"}
         </div>
       </div>
@@ -165,6 +178,7 @@ export default function MinutaEditView() {
       </section>
 
       <MinutaForm
+        groups={groupsResponse?.data ?? []}
         initialValues={toInitialValues(minuta)}
         onCancel={() => navigate(paths.convencional.minutas)}
         onSubmit={(payload) => updateMutation.mutate(payload)}

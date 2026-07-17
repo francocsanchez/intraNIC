@@ -1,8 +1,12 @@
 import api from "@/libs/axios";
 import {
+  minutaGroupResponseSchema,
+  minutaGroupsListResponseSchema,
   minutaListResponseSchema,
   minutaParticipantsResponseSchema,
   minutaResponseSchema,
+  type MinutaGroupResponse,
+  type MinutaGroupsListResponse,
   type MinutaListResponse,
   type MinutaParticipantsResponse,
   type MinutaResponse,
@@ -19,6 +23,11 @@ export type MinutaPayload = {
   tema: string;
   participantes: string[];
   temario: MinutaTemarioPayload[];
+};
+
+export type MinutaGroupPayload = {
+  nombre: string;
+  participantes: string[];
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -71,6 +80,22 @@ export function deleteMinuta(id: string): Promise<MinutaResponse> {
 
 export function getMinutaParticipants(): Promise<MinutaParticipantsResponse> {
   return parseResponse(api.get("/dms/minutas/participants"), minutaParticipantsResponseSchema, "Error al obtener participantes");
+}
+
+export function getMinutaGroups(): Promise<MinutaGroupsListResponse> {
+  return parseResponse(api.get("/dms/minutas/groups"), minutaGroupsListResponseSchema, "Error al obtener grupos de difusion");
+}
+
+export function createMinutaGroup(payload: MinutaGroupPayload): Promise<MinutaGroupResponse> {
+  return parseResponse(api.post("/dms/minutas/groups", payload), minutaGroupResponseSchema, "Error al crear grupo de difusion");
+}
+
+export function updateMinutaGroup(id: string, payload: MinutaGroupPayload): Promise<MinutaGroupResponse> {
+  return parseResponse(api.put(`/dms/minutas/groups/${id}`, payload), minutaGroupResponseSchema, "Error al actualizar grupo de difusion");
+}
+
+export function deleteMinutaGroup(id: string): Promise<MinutaGroupResponse> {
+  return parseResponse(api.delete(`/dms/minutas/groups/${id}`), minutaGroupResponseSchema, "Error al eliminar grupo de difusion");
 }
 
 export async function exportMinutaPdf(id: string) {

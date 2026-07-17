@@ -1,4 +1,4 @@
-import { createMinuta, getMinutaParticipants, type MinutaPayload } from "@/api/dms/minutasAPI";
+import { createMinuta, getMinutaGroups, getMinutaParticipants, type MinutaPayload } from "@/api/dms/minutasAPI";
 import MinutaForm from "@/components/minutas/MinutaForm";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,9 +10,14 @@ export default function MinutaCreateView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: participantsResponse, isLoading, isError, error } = useQuery({
+  const { data: participantsResponse, isLoading: isLoadingParticipants, isError: isParticipantsError, error: participantsError } = useQuery({
     queryKey: ["minutas", "participants"],
     queryFn: getMinutaParticipants,
+  });
+
+  const { data: groupsResponse, isLoading: isLoadingGroups, isError: isGroupsError, error: groupsError } = useQuery({
+    queryKey: ["minutas", "groups"],
+    queryFn: getMinutaGroups,
   });
 
   const createMutation = useMutation({
@@ -25,7 +30,7 @@ export default function MinutaCreateView() {
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  if (isLoading) {
+  if (isLoadingParticipants || isLoadingGroups) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando formulario de minuta...</div>
@@ -33,11 +38,15 @@ export default function MinutaCreateView() {
     );
   }
 
-  if (isError) {
+  if (isParticipantsError || isGroupsError) {
     return (
       <div className="w-full px-4 py-6">
         <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
-          {error instanceof Error ? error.message : "Error al cargar el formulario de minutas"}
+          {participantsError instanceof Error
+            ? participantsError.message
+            : groupsError instanceof Error
+              ? groupsError.message
+              : "Error al cargar el formulario de minutas"}
         </div>
       </div>
     );
@@ -66,6 +75,7 @@ export default function MinutaCreateView() {
       </section>
 
       <MinutaForm
+        groups={groupsResponse?.data ?? []}
         onCancel={() => navigate(paths.convencional.minutas)}
         onSubmit={(payload) => createMutation.mutate(payload)}
         participants={participantsResponse?.data ?? []}

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 import Minuta from "../models/Minuta";
+import MinutaGrupo from "../models/MinutaGrupo";
 import User from "../models/User";
 import { logError } from "../utils/logError";
 import { generateMinutaPdfBuffer } from "../utils/minutaPdf";
@@ -10,6 +11,10 @@ import { hasMeaningfulRichText, sanitizeRichTextHtml } from "../utils/sanitizeHt
 
 const minutaPopulate: Array<{ path: string; select: string }> = [
   { path: "moderador", select: "name lastName email" },
+  { path: "participantes", select: "name lastName email enable" },
+];
+
+const minutaGrupoPopulate: Array<{ path: string; select: string }> = [
   { path: "participantes", select: "name lastName email enable" },
 ];
 
@@ -53,6 +58,18 @@ const buildMinutaResponse = (item: any) => ({
     : [],
   createdBy: String(item.createdBy ?? ""),
   sentAt: item.sentAt ? new Date(item.sentAt).toISOString() : null,
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+});
+
+const buildMinutaGrupoResponse = (item: any) => ({
+  _id: String(item._id),
+  nombre: item.nombre ?? "",
+  participantes: Array.isArray(item.participantes)
+    ? item.participantes.map(buildUserSummary)
+    : [],
+  participantesCount: Array.isArray(item.participantes) ? item.participantes.length : 0,
+  createdBy: String(item.createdBy ?? ""),
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
 });
@@ -114,6 +131,28 @@ const validateTemario = (
   return { data: normalized };
 };
 
+const validateGrupoPayload = async (
+  payload: Record<string, unknown>,
+): Promise<{ error: string } | { data: ValidatedMinutaGrupoPayload }> => {
+  const nombre = normalizeText(payload.nombre);
+
+  if (!nombre) {
+    return { error: "El nombre del grupo es obligatorio" };
+  }
+
+  const participantesValidation = await validateParticipantes(payload.participantes);
+  if ("error" in participantesValidation) {
+    return participantesValidation;
+  }
+
+  return {
+    data: {
+      nombre,
+      participantes: participantesValidation.data,
+    },
+  };
+};
+
 const validatePayload = async (
   payload: Record<string, unknown>,
 ): Promise<{ error: string } | { data: ValidatedMinutaPayload }> => {
@@ -161,6 +200,20 @@ const findActiveMinutaById = async (id: string) => {
   return Minuta.findOne({ _id: id, deletedAt: null }).populate(minutaPopulate).lean();
 };
 
+const findActiveMinutaGrupoById = async (id: string, userId: string) => {
+  if (!mongoose.isValidObjectId(id) || !mongoose.isValidObjectId(userId)) {
+    return null;
+  }
+
+  return MinutaGrupo.findOne({
+    _id: id,
+    createdBy: userId,
+    deletedAt: null,
+  })
+    .populate(minutaGrupoPopulate)
+    .lean();
+};
+
 const getMinutaEmailRecipients = (item: any) => {
   const recipients = [
     item?.moderador,
@@ -184,6 +237,133 @@ const getMinutaEmailRecipients = (item: any) => {
 };
 
 export class MinutaController {
+  static listGroups = async (req: Request, res: Response) => {
+    try {
+      if (!req.user?._id) {
+        return res.status(401).json({ error: "Usuario no autenticado" });
+      }
+
+      const data = await MinutaGrupo.find({
+        createdBy: req.user._id,
+        deletedAt: null,
+      })
+        .populate(minutaGrupoPopulate)
+        .sort({ nombre: 1, createdAt: -1 })
+        .lean();
+
+      return res.status(200).json({
+        data: data.map(buildMinutaGrupoResponse),
+      });
+    } catch (error) {
+      logError("MinutaController.listGroups");
+      console.error(error);
+      return res.status(500).json({ message: "Error al listar grupos de difusion" });
+    }
+  };
+
+  static createGroup = async (req: Request, res: Response) => {
+    try {
+      if (!req.user?._id) {
+        return res.status(401).json({ error: "Usuario no autenticado" });
+      }
+
+      const validated = await validateGrupoPayload(req.body ?? {});
+      if ("error" in validated) {
+        return res.status(400).json({ error: validated.error });
+      }
+
+      const data = await MinutaGrupo.create({
+        ...validated.data,
+        createdBy: new mongoose.Types.ObjectId(req.user._id),
+        updatedBy: new mongoose.Types.ObjectId(req.user._id),
+      });
+
+      const populated = await findActiveMinutaGrupoById(String(data._id), String(req.user._id));
+
+      return res.status(201).json({
+        message: "Grupo de difusion creado correctamente",
+        data: populated ? buildMinutaGrupoResponse(populated) : null,
+      });
+    } catch (error) {
+      logError("MinutaController.createGroup");
+      console.error(error);
+      return res.status(500).json({
+        error: error instanceof Error ? error.message : "No se pudo crear el grupo de difusion",
+      });
+    }
+  };
+
+  static updateGroup = async (req: Request, res: Response) => {
+    try {
+      if (!req.user?._id) {
+        return res.status(401).json({ error: "Usuario no autenticado" });
+      }
+
+      const grupo = await MinutaGrupo.findOne({
+        _id: String(req.params.id),
+        createdBy: req.user._id,
+        deletedAt: null,
+      });
+
+      if (!grupo) {
+        return res.status(404).json({ error: "Grupo de difusion no encontrado" });
+      }
+
+      const validated = await validateGrupoPayload(req.body ?? {});
+      if ("error" in validated) {
+        return res.status(400).json({ error: validated.error });
+      }
+
+      grupo.nombre = validated.data.nombre;
+      grupo.participantes = validated.data.participantes;
+      grupo.updatedBy = new mongoose.Types.ObjectId(req.user._id);
+
+      await grupo.save();
+
+      const populated = await findActiveMinutaGrupoById(String(grupo._id), String(req.user._id));
+
+      return res.status(200).json({
+        message: "Grupo de difusion actualizado correctamente",
+        data: populated ? buildMinutaGrupoResponse(populated) : null,
+      });
+    } catch (error) {
+      logError("MinutaController.updateGroup");
+      console.error(error);
+      return res.status(500).json({ message: "Error al actualizar el grupo de difusion" });
+    }
+  };
+
+  static removeGroup = async (req: Request, res: Response) => {
+    try {
+      if (!req.user?._id) {
+        return res.status(401).json({ error: "Usuario no autenticado" });
+      }
+
+      const grupo = await MinutaGrupo.findOne({
+        _id: String(req.params.id),
+        createdBy: req.user._id,
+        deletedAt: null,
+      });
+
+      if (!grupo) {
+        return res.status(404).json({ error: "Grupo de difusion no encontrado" });
+      }
+
+      grupo.deletedAt = new Date();
+      grupo.updatedBy = new mongoose.Types.ObjectId(req.user._id);
+      await grupo.save();
+
+      return res.status(200).json({
+        message: "Grupo de difusion eliminado correctamente",
+        data: null,
+      });
+    } catch (error) {
+      logError("MinutaController.removeGroup");
+      console.error(error);
+      return res.status(500).json({ message: "Error al eliminar el grupo de difusion" });
+    }
+  };
+
   static list = async (_req: Request, res: Response) => {
     try {
       const data = await Minuta.find({ deletedAt: null })
@@ -435,12 +615,12 @@ export class MinutaController {
 
       const recipientEmails = recipients.map((recipient) => recipient.email);
       const primaryRecipient = recipientEmails[0];
-      const hiddenRecipients = recipientEmails.slice(1);
+      const ccRecipients = recipientEmails.slice(1);
 
       try {
         await sendMail({
           to: primaryRecipient,
-          bcc: hiddenRecipients.length ? hiddenRecipients : undefined,
+          cc: ccRecipients.length ? ccRecipients : undefined,
           subject: `Minuta interna - ${response.fechaLabel}`,
           html: buildMinutaMailTemplate({
             fechaLabel: response.fechaLabel,
@@ -503,4 +683,9 @@ type ValidatedMinutaPayload = {
     nombre: string;
     desarrollo: string;
   }>;
+};
+
+type ValidatedMinutaGrupoPayload = {
+  nombre: string;
+  participantes: mongoose.Types.ObjectId[];
 };

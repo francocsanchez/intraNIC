@@ -1,9 +1,12 @@
 import {
   deleteMinuta,
   exportMinutaPdf,
+  getMinutaGroups,
+  getMinutaParticipants,
   getMinutas,
   sendMinutaByEmail,
 } from "@/api/dms/minutasAPI";
+import MinutaGroupManagerModal from "@/components/minutas/MinutaGroupManagerModal";
 import MinutasTable from "@/components/minutas/MinutasTable";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -29,10 +32,21 @@ export default function MinutasView() {
   const { user } = useAuth();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [groupManagerOpen, setGroupManagerOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["minutas"],
     queryFn: getMinutas,
+  });
+
+  const { data: participantsResponse } = useQuery({
+    queryKey: ["minutas", "participants"],
+    queryFn: getMinutaParticipants,
+  });
+
+  const { data: groupsResponse } = useQuery({
+    queryKey: ["minutas", "groups"],
+    queryFn: getMinutaGroups,
   });
 
   const deleteMutation = useMutation({
@@ -112,14 +126,24 @@ export default function MinutasView() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate(paths.convencional.minutasNueva)}
-            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
-          >
-            <Plus size={16} />
-            Generar minuta
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(paths.convencional.minutasNueva)}
+              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+            >
+              <Plus size={16} />
+              Generar minuta
+            </button>
+            <button
+              type="button"
+              onClick={() => setGroupManagerOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+            >
+              <Users size={16} />
+              Crear grupo de difusion
+            </button>
+          </div>
         </div>
       </section>
 
@@ -159,6 +183,13 @@ export default function MinutasView() {
           </article>
         </section>
       ) : null}
+
+      <MinutaGroupManagerModal
+        groups={groupsResponse?.data ?? []}
+        onClose={() => setGroupManagerOpen(false)}
+        open={groupManagerOpen}
+        participants={participantsResponse?.data ?? []}
+      />
     </div>
   );
 }

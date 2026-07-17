@@ -9,6 +9,10 @@ router.use(authenticate);
 router.use(authorizeModules("minutas"));
 
 router.get("/participants", MinutaController.listParticipants);
+router.get("/groups", MinutaController.listGroups);
+router.post("/groups", MinutaController.createGroup);
+router.put("/groups/:id", MinutaController.updateGroup);
+router.delete("/groups/:id", MinutaController.removeGroup);
 router.get("/", MinutaController.list);
 router.get("/:id", MinutaController.getById);
 router.get("/:id/pdf", MinutaController.exportPdf);
