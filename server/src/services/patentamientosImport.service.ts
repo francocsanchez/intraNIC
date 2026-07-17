@@ -57,6 +57,9 @@ const resolveStatus = (
   return errored > 0 ? "partial" : "success";
 };
 
+const formatFileList = (fileNames: string[]) =>
+  fileNames.length === 1 ? fileNames[0] : `${fileNames.length} archivos`;
+
 export class PatentamientosImportService {
   private static isRunning = false;
 
@@ -174,6 +177,7 @@ export class PatentamientosImportService {
         errorSummary: [] as string[],
         errorDetailsSample: [] as IImportExecutionErrorDetail[],
       };
+      const emptyFileNames: string[] = [];
       let lastProcessedFileName = pendingFiles[0].fileName;
 
       for (const pendingFile of pendingFiles) {
@@ -195,6 +199,10 @@ export class PatentamientosImportService {
         aggregatedSummary.errorSummary.push(...csvSummary.errorSummary);
         aggregatedSummary.errorDetailsSample.push(...csvSummary.errorDetailsSample);
 
+        if (csvSummary.isEmptyFile) {
+          emptyFileNames.push(pendingFile.fileName);
+        }
+
         console.log(`[patentamientos-import] archivo acumulado: ${pendingFile.fileName}`);
         await ImportExecutionLoggerService.registerProcessedFile(JOB_NAME, pendingFile.fileName);
 
@@ -203,18 +211,34 @@ export class PatentamientosImportService {
       }
 
       const finishedAt = new Date();
-      const status = resolveStatus(
-        aggregatedSummary.totalRead,
-        aggregatedSummary.inserted,
-        aggregatedSummary.updated,
-        aggregatedSummary.errored,
-      );
+      const onlyEmptyFiles = emptyFileNames.length === pendingFiles.length && aggregatedSummary.totalRead === 0;
+      const status: ImportExecutionStatus = onlyEmptyFiles
+        ? "skipped"
+        : resolveStatus(
+          aggregatedSummary.totalRead,
+          aggregatedSummary.inserted,
+          aggregatedSummary.updated,
+          aggregatedSummary.errored,
+        );
       const message =
-        status === "failed"
-          ? `Se leyeron ${pendingFiles.length} archivos, pero no se pudo acumular ningun registro valido`
-          : pendingFiles.length === 1
-            ? `Archivo ${lastProcessedFileName} acumulado correctamente (${aggregatedSummary.totalizedRows} grupos actualizados)`
-            : `${pendingFiles.length} archivos acumulados correctamente hasta ${lastProcessedFileName} (${aggregatedSummary.totalizedRows} grupos actualizados)`;
+        status === "skipped"
+          ? `${formatFileList(emptyFileNames)} sin registros para importar`
+          : status === "failed"
+            ? `Se leyeron ${pendingFiles.length} archivos, pero no se pudo acumular ningun registro valido`
+            : pendingFiles.length === 1
+              ? `Archivo ${lastProcessedFileName} acumulado correctamente (${aggregatedSummary.totalizedRows} grupos actualizados)`
+              : `${pendingFiles.length} archivos acumulados correctamente hasta ${lastProcessedFileName} (${aggregatedSummary.totalizedRows} grupos actualizados)`;
+      const resultLines =
+        status === "skipped"
+          ? [
+            `Archivos sin registros: ${emptyFileNames.length}`,
+            `Ultimo archivo: ${lastProcessedFileName}`,
+          ]
+          : [
+            `Grupos acumulados: ${aggregatedSummary.totalizedRows}`,
+            `Insertados: ${aggregatedSummary.inserted}`,
+            `Actualizados: ${aggregatedSummary.updated}`,
+          ];
 
       await ImportExecutionLoggerService.finishExecution(String(log._id), {
         status,
@@ -246,11 +270,7 @@ export class PatentamientosImportService {
         },
         resultSummary: {
           title: "Resultado",
-          lines: [
-            `Grupos acumulados: ${aggregatedSummary.totalizedRows}`,
-            `Insertados: ${aggregatedSummary.inserted}`,
-            `Actualizados: ${aggregatedSummary.updated}`,
-          ],
+          lines: resultLines,
         },
         requestSample: pendingFiles.slice(0, 5).map((pendingFile) => ({
           fileName: pendingFile.fileName,
@@ -300,11 +320,7 @@ export class PatentamientosImportService {
         },
         resultSummary: {
           title: "Resultado",
-          lines: [
-            `Grupos acumulados: ${aggregatedSummary.totalizedRows}`,
-            `Insertados: ${aggregatedSummary.inserted}`,
-            `Actualizados: ${aggregatedSummary.updated}`,
-          ],
+          lines: resultLines,
         },
         requestSample: pendingFiles.slice(0, 5).map((pendingFile) => ({
           fileName: pendingFile.fileName,

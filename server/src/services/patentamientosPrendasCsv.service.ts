@@ -41,6 +41,7 @@ export type PatentamientosCsvImportSummary = {
   discarded: number;
   errored: number;
   totalizedRows: number;
+  isEmptyFile: boolean;
   errorSummary: string[];
   errorDetailsSample: IImportExecutionErrorDetail[];
 };
@@ -245,6 +246,7 @@ export class PatentamientosPrendasCsvService {
       discarded: 0,
       errored: 0,
       totalizedRows: 0,
+      isEmptyFile: false,
       errorSummary: [],
       errorDetailsSample: [],
     };
@@ -377,7 +379,7 @@ export class PatentamientosPrendasCsvService {
           }
 
           if (!hasAtLeastOneDataRow) {
-            throw new Error("El archivo CSV no contiene registros para importar");
+            summary.isEmptyFile = true;
           }
 
           isSettled = true;
