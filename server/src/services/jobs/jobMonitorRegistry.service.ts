@@ -1,5 +1,12 @@
 import { PatentamientosImportService } from "../patentamientosImport.service";
 import {
+  getAgendaEntregaEnvioJobKey,
+  getAgendaEntregaEnvioJobName,
+  getAgendaEntregaEnvioScheduleLabel,
+  isAgendaEntregaEnvioJobRunning,
+  runAgendaEntregaEnvioJob,
+} from "../agendaEntregaEnvioCron.service";
+import {
   getFacturasAnticipoJobKey,
   getFacturasAnticipoJobName,
   getFacturasAnticipoScheduleLabel,
@@ -12,6 +19,16 @@ import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service"
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
 
 const JOB_CATALOG: JobMonitorCatalogItem[] = [
+  {
+    jobKey: getAgendaEntregaEnvioJobKey(),
+    title: "Envio agenda de entrega",
+    scheduleLabel: getAgendaEntregaEnvioScheduleLabel(),
+    jobName: getAgendaEntregaEnvioJobName(),
+    sourceType: "internal",
+    sourcePath: "AgendaEntrega",
+    isRunning: () => isAgendaEntregaEnvioJobRunning(),
+    run: (trigger) => runAgendaEntregaEnvioJob(trigger),
+  },
   {
     jobKey: PatentamientosImportService.getJobKey(),
     title: "Importacion de patentamientos",

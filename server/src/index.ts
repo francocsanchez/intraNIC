@@ -1,4 +1,5 @@
 import colors from "colors";
+import { startAgendaEntregaEnvioJob } from "./jobs/agendaEntregaEnvio.job";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
@@ -15,6 +16,7 @@ server.listen(Number(port), "0.0.0.0", () => {
   console.log(`${colors.yellow("⚙️  ENV:")} ${colors.green(process.env.NODE_ENV || "development")}`);
   console.log(colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━") + "\n");
 
+  startAgendaEntregaEnvioJob();
   startFacturasAnticipoJob();
   startPatentamientosImportJob();
   startTransferenciasImportJob();

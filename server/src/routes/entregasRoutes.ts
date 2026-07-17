@@ -1,6 +1,7 @@
 import { Router, type NextFunction, type Request, type Response } from "express";
 import multer from "multer";
 import { AgendaEntregaController } from "../controllers/AgendaEntregaController";
+import { AgendaEnvioConfigController } from "../controllers/AgendaEnvioConfigController";
 import { AgendaEntregaLogController } from "../controllers/AgendaEntregaLogController";
 import { PendienteTurnarController } from "../controllers/PendienteTurnarController";
 import { SucursalEntregaController } from "../controllers/SucursalEntregaController";
@@ -64,6 +65,9 @@ router.get("/sucursales", SucursalEntregaController.list);
 router.post("/sucursales", SucursalEntregaController.create);
 router.put("/sucursales/:id", SucursalEntregaController.update);
 router.delete("/sucursales/:id", SucursalEntregaController.remove);
+
+router.get("/envio-agenda", authorizeModules("configuracion"), AgendaEnvioConfigController.list);
+router.put("/envio-agenda/:sucursalId", authorizeModules("configuracion"), AgendaEnvioConfigController.upsert);
 
 router.get("/registros", AgendaEntregaLogController.list);
 

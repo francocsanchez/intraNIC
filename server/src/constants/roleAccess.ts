@@ -62,6 +62,7 @@ export type RoleAccessKey =
   | "planAhorro.promedios"
   | "sistema.usuarios"
   | "sistema.configuracion"
+  | "sistema.configuracion.envioAgenda"
   | "sistema.testDrive";
 
 const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "entrega", "accesorios"] as const;
@@ -172,6 +173,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "analisis.operaciones",
     "analisis.patentamientos",
     "analisis.transferencias",
+    "sistema.configuracion.envioAgenda",
     "sistema.testDrive",
   ]),
   gerente: new Set<RoleAccessKey>([
@@ -221,6 +223,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "analisis.patentamientos",
     "analisis.transferencias",
     "sistema.configuracion",
+    "sistema.configuracion.envioAgenda",
     "sistema.testDrive",
   ]),
   administracion: new Set<RoleAccessKey>([
@@ -251,6 +254,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "convencional.registroAsignaciones",
     "convencional.analisisStock",
     "sistema.configuracion",
+    "sistema.configuracion.envioAgenda",
     "preventas.read",
     "preventas.resumen",
     "preventas.create",

@@ -4,6 +4,8 @@ import {
   agendaEntregaLogListResponseSchema,
   agendaEntregaLookupResponseSchema,
   agendaEntregaResponseSchema,
+  agendaEnvioConfigListResponseSchema,
+  agendaEnvioConfigResponseSchema,
   pendienteTurnarListResponseSchema,
   pendienteTurnarImportResponseSchema,
   pendienteTurnarResponseSchema,
@@ -13,6 +15,8 @@ import {
   type AgendaEntregaLogListResponse,
   type AgendaEntregaLookup,
   type AgendaEntregaResponse,
+  type AgendaEnvioConfigListResponse,
+  type AgendaEnvioConfigResponse,
   type PendienteTurnarImportResponse,
   type PendienteTurnarListResponse,
   type PendienteTurnarResponse,
@@ -62,6 +66,11 @@ export type SucursalEntregaPayload = {
   activa?: boolean;
   horariosHabilitados?: string[];
   observaciones?: string;
+};
+
+export type AgendaEnvioConfigPayload = {
+  emails: string[];
+  activo?: boolean;
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -211,6 +220,31 @@ export function getSucursalesEntrega(): Promise<SucursalEntregaListResponse> {
 
     throw error;
   });
+}
+
+export function getAgendaEnvioConfigs(): Promise<AgendaEnvioConfigListResponse> {
+  return parseResponse(
+    api.get("/entregas/envio-agenda"),
+    agendaEnvioConfigListResponseSchema,
+    "Error al obtener la configuracion de envio de agenda",
+  ).catch((error) => {
+    if (isEmptyDataError(error)) {
+      return { data: [] };
+    }
+
+    throw error;
+  });
+}
+
+export function updateAgendaEnvioConfig(
+  sucursalId: string,
+  payload: AgendaEnvioConfigPayload,
+): Promise<AgendaEnvioConfigResponse> {
+  return parseResponse(
+    api.put(`/entregas/envio-agenda/${sucursalId}`, payload),
+    agendaEnvioConfigResponseSchema,
+    "Error al guardar la configuracion de envio de agenda",
+  );
 }
 
 export function getPendientesTurnar(params?: {

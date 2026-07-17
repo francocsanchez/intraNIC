@@ -20,6 +20,7 @@ const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
+const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
@@ -134,6 +135,7 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
+              <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
             </Route>
           </Route>
 

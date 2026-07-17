@@ -1586,6 +1586,29 @@ export const sucursalEntregaResponseSchema = z.object({
   message: z.string(),
 });
 
+export const agendaEnvioConfigSchema = z.object({
+  _id: z.string(),
+  sucursal: z.object({
+    _id: z.string(),
+    nombre: z.string(),
+    direccion: z.string().optional().default(""),
+    activa: z.boolean(),
+  }).nullable(),
+  emails: z.array(z.string()).default([]),
+  activo: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const agendaEnvioConfigListResponseSchema = z.object({
+  data: z.array(agendaEnvioConfigSchema),
+});
+
+export const agendaEnvioConfigResponseSchema = z.object({
+  data: agendaEnvioConfigSchema.nullable().optional(),
+  message: z.string().optional().default(""),
+});
+
 export const agendaEntregaSiacSchema = z.object({
   interno: z.number(),
   estado: z.number().nullable(),
@@ -1742,6 +1765,9 @@ export type AgendaEntregaResponse = z.infer<typeof agendaEntregaResponseSchema>;
 export type SucursalEntrega = z.infer<typeof sucursalEntregaSchema>;
 export type SucursalEntregaListResponse = z.infer<typeof sucursalEntregaListResponseSchema>;
 export type SucursalEntregaResponse = z.infer<typeof sucursalEntregaResponseSchema>;
+export type AgendaEnvioConfig = z.infer<typeof agendaEnvioConfigSchema>;
+export type AgendaEnvioConfigListResponse = z.infer<typeof agendaEnvioConfigListResponseSchema>;
+export type AgendaEnvioConfigResponse = z.infer<typeof agendaEnvioConfigResponseSchema>;
 export type AgendaEntregaListResponse = z.infer<typeof agendaEntregaListResponseSchema>;
 export type AgendaEntregaLog = z.infer<typeof agendaEntregaLogSchema>;
 export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListResponseSchema>;

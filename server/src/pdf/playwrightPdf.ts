@@ -72,10 +72,14 @@ export const generatePdfFromHtml = async (html: string, options?: GeneratePdfFro
     await page.setContent(html, { waitUntil: "load" });
     await page.emulateMedia({ media: "print" });
 
+    const headerTemplate = options?.headerTemplate ?? "<div></div>";
+    const footerTemplate = options?.footerTemplate ?? "<div></div>";
+    const displayHeaderFooter = Boolean(options?.headerTemplate || options?.footerTemplate);
+
     return await page.pdf({
-      displayHeaderFooter: true,
-      headerTemplate: `...`,
-      footerTemplate: options?.footerTemplate ?? "<div></div>",
+      displayHeaderFooter,
+      headerTemplate,
+      footerTemplate,
       format: options?.format ?? "A4",
       margin: {
         top: options?.margin?.top ?? "8mm",

@@ -21,6 +21,7 @@ export const paths = {
     editarUsuarioRoute: "/admin/usuarios/:idUsuario/editar",
     editarUsuario: (idUsuario: string) => `/admin/usuarios/${idUsuario}/editar`,
     configuracion: "/admin/configuracion",
+    configuracionEnvioAgenda: "/admin/configuracion/envio-agenda",
     configuracionConvencionalEditar: "/admin/configuracion/convencional/editar",
     configuracionUsadosEditar: "/admin/configuracion/usados/editar",
     planNegocio: "/admin/configuracion/plan-negocio",

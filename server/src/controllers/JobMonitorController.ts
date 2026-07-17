@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { AgendaEntregaEnvioAlreadyRunningError } from "../services/agendaEntregaEnvioCron.service";
 import { FacturasAnticipoAlreadyRunningError } from "../services/facturasAnticipoCron.service";
 import { JobMonitorNotFoundError, JobMonitorService } from "../services/jobs/jobMonitor.service";
 import { UnidadesDealersSyncAlreadyRunningError } from "../services/jobs/unidadesDealersSyncJob.service";
@@ -11,7 +12,8 @@ const handleError = (res: Response, context: string, error: unknown, fallback: s
   console.error(error);
 
   if (
-    error instanceof PatentamientosImportAlreadyRunningError
+    error instanceof AgendaEntregaEnvioAlreadyRunningError
+    || error instanceof PatentamientosImportAlreadyRunningError
     || error instanceof TransferenciasImportAlreadyRunningError
     || error instanceof UnidadesDealersSyncAlreadyRunningError
     || error instanceof FacturasAnticipoAlreadyRunningError
