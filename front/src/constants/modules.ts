@@ -34,6 +34,7 @@ export const moduleKeys = [
   "registroTestDrive",
   "promediosPlanAhorro",
   "minutas",
+  "agendaComercial",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];
@@ -75,6 +76,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   registroTestDrive: "Registro TestDrive Plan de ahorro",
   promediosPlanAhorro: "Promedios Plan de ahorro",
   minutas: "Minutas",
+  agendaComercial: "Agenda comercial",
 };
 
 export const moduleSections: Array<{
@@ -91,7 +93,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Comercial",
-    modules: ["preventas", "proformas", "registroTestDriveConvencional", "minutas"],
+    modules: ["preventas", "proformas", "registroTestDriveConvencional", "minutas", "agendaComercial"],
   },
   {
     title: "Plan de ahorro",

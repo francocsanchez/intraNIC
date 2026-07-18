@@ -14,7 +14,6 @@ import {
   hasEntregaAgendaEquipadoToggleAccess,
   hasEntregaAgendaManageAccess,
   hasEntregaAgendaToggleAccess,
-  hasSuperAdminRole,
 } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega } from "@/types/index";
@@ -98,18 +97,10 @@ export default function AgendaEntregaView() {
   const canManageAgenda = hasEntregaAgendaManageAccess(user);
   const canToggleEquipado = hasEntregaAgendaEquipadoToggleAccess(user);
   const canToggleEntregadaPor = hasEntregaAgendaToggleAccess(user);
-  const isSuperAdmin = hasSuperAdminRole(user);
-  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const preferredSucursalId = user?.sucursalPredeterminada?._id ?? user?.sucursalEntrega?._id ?? "";
   const activeSucursales = useMemo(
-    () =>
-      sucursales.filter((sucursal) => {
-        if (isSuperAdmin) {
-          return sucursal.activa;
-        }
-
-        return sucursal.activa && (!assignedSucursalId || sucursal._id === assignedSucursalId);
-      }),
-    [assignedSucursalId, isSuperAdmin, sucursales],
+    () => sucursales.filter((sucursal) => sucursal.activa),
+    [sucursales],
   );
   const selectedSucursal = useMemo(
     () => sucursales.find((sucursal) => sucursal._id === filters.sucursalId) ?? null,
@@ -120,12 +111,8 @@ export default function AgendaEntregaView() {
       return false;
     }
 
-    if (isSuperAdmin) {
-      return canToggleEntregadaPor;
-    }
-
-    return canToggleEntregadaPor && assignedSucursalId === filters.sucursalId;
-  }, [assignedSucursalId, canToggleEntregadaPor, filters.sucursalId, isSuperAdmin]);
+    return canToggleEntregadaPor;
+  }, [canToggleEntregadaPor, filters.sucursalId]);
   const canToggleEquipadoInSelectedSucursal = useMemo(() => {
     if (!filters.sucursalId) {
       return false;
@@ -135,13 +122,16 @@ export default function AgendaEntregaView() {
   }, [canToggleEquipado, filters.sucursalId]);
 
   useEffect(() => {
-    if (!filters.sucursalId && activeSucursales[0]?._id) {
+    if (!filters.sucursalId && (preferredSucursalId || activeSucursales[0]?._id)) {
       setFilters((current) => ({
         ...current,
-        sucursalId: activeSucursales[0]?._id ?? "",
+        sucursalId:
+          activeSucursales.find((sucursal) => sucursal._id === preferredSucursalId)?._id ??
+          activeSucursales[0]?._id ??
+          "",
       }));
     }
-  }, [activeSucursales, filters.sucursalId]);
+  }, [activeSucursales, filters.sucursalId, preferredSucursalId]);
 
   const closeTurnoModal = () => {
     setTurnoModalOpen(false);

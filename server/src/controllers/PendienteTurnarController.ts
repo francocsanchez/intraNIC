@@ -140,9 +140,6 @@ const getSucursalHorariosHabilitados = (sucursal: any) => {
 const buildUserName = (req: Request) =>
   req.user ? `${req.user.lastName}, ${req.user.name}` : "";
 
-const getAssignedSucursalEntregaId = (req: Request) =>
-  req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
-
 const userHasAgendaWriteAccess = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
   return roles.includes("superadmin") || roles.includes("coordinador");
@@ -177,7 +174,7 @@ const ensurePendienteImportAccess = (req: Request) => {
   return null;
 };
 
-const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
+const ensureSucursalAllowedForMutation = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
 
   if (roles.includes("superadmin")) {
@@ -186,16 +183,6 @@ const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
 
   if (!roles.includes("coordinador")) {
     return "No tienes permisos para operar registros de entrega";
-  }
-
-  const assignedSucursalId = getAssignedSucursalEntregaId(req);
-
-  if (!assignedSucursalId) {
-    return "El usuario coordinador no tiene una sucursal de entrega asignada";
-  }
-
-  if (assignedSucursalId !== sucursalId) {
-    return "Solo puedes operar registros de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -594,7 +581,7 @@ export class PendienteTurnarController {
         return res.status(400).json({ error: sucursalValidation.error });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(req, sucursalValidation.data.sucursalId);
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -763,7 +750,7 @@ export class PendienteTurnarController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -833,7 +820,7 @@ export class PendienteTurnarController {
       }
 
       const currentSucursalId = String((pendiente.sucursal as any)?._id ?? pendiente.sucursal ?? "");
-      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (currentSucursalAccessError) {
         return res.status(403).json({ error: currentSucursalAccessError });
       }
@@ -843,7 +830,7 @@ export class PendienteTurnarController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (nextSucursalAccessError) {
         return res.status(403).json({ error: nextSucursalAccessError });
       }
@@ -913,10 +900,7 @@ export class PendienteTurnarController {
         return res.status(404).json({ error: "Pendiente de turnar no encontrado" });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(
-        req,
-        String((pendiente.sucursal as any)?._id ?? pendiente.sucursal ?? ""),
-      );
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -965,7 +949,7 @@ export class PendienteTurnarController {
       }
 
       const currentSucursalId = String((pendiente.sucursal as any)?._id ?? pendiente.sucursal ?? "");
-      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (currentSucursalAccessError) {
         return res.status(403).json({ error: currentSucursalAccessError });
       }
@@ -975,7 +959,7 @@ export class PendienteTurnarController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (nextSucursalAccessError) {
         return res.status(403).json({ error: nextSucursalAccessError });
       }

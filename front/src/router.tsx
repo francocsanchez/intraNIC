@@ -24,6 +24,7 @@ const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configurac
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
+const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/UnidadesNegocioView"));
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
 const CrearUsuarioView = lazy(() => import("./views/admin/usuarios/CrearUsuarioView"));
@@ -77,6 +78,7 @@ const MinutaCreateView = lazy(() => import("./views/comercial/MinutaCreateView")
 const MinutaEditView = lazy(() => import("./views/comercial/MinutaEditView"));
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
+const AgendaComercialView = lazy(() => import("./views/comercial/AgendaComercialView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
@@ -135,6 +137,7 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
+              <Route path={paths.admin.unidadesNegocio} element={<UnidadesNegocioView />} />
               <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
             </Route>
           </Route>
@@ -209,6 +212,12 @@ export default function Router() {
               <Route path={paths.convencional.minutas} element={<MinutasView />} />
               <Route path={paths.convencional.minutasNueva} element={<MinutaCreateView />} />
               <Route path={paths.convencional.minutasEditarRoute} element={<MinutaEditView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["agendaComercial"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.agendaComercial} element={<AgendaComercialView />} />
             </Route>
           </Route>
 

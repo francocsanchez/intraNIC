@@ -3,7 +3,6 @@ import {
   updateReservaEntrega,
   type ReservaEntregaPayload,
 } from "@/api/entregasAPI";
-import { hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
@@ -47,8 +46,7 @@ export default function ReservaEntregaForm({
 }: ReservaEntregaFormProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const isSuperAdmin = hasSuperAdminRole(user);
-  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const preferredSucursalId = user?.sucursalPredeterminada?._id ?? user?.sucursalEntrega?._id ?? "";
 
   const {
     register,
@@ -72,7 +70,7 @@ export default function ReservaEntregaForm({
   useEffect(() => {
     if (!open) return;
 
-    const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
+    const defaultSucursal = !item ? preferredSucursalId : "";
 
     reset({
       sucursal: item?.sucursal?._id ?? defaultSucursal,
@@ -80,7 +78,7 @@ export default function ReservaEntregaForm({
       horaAgenda: item?.horaAgenda ?? "",
       observaciones: item?.observaciones ?? "",
     });
-  }, [assignedSucursalId, isSuperAdmin, item, open, reset]);
+  }, [item, open, preferredSucursalId, reset]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
@@ -110,9 +108,7 @@ export default function ReservaEntregaForm({
 
   const pending = createMutation.isPending || updateMutation.isPending;
   const activeSucursales = sucursales.filter((sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id);
-  const availableSucursales = isSuperAdmin
-    ? activeSucursales
-    : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
+  const availableSucursales = activeSucursales;
   const selectedSucursal = useMemo(
     () => availableSucursales.find((sucursal) => sucursal._id === selectedSucursalId) ?? null,
     [availableSucursales, selectedSucursalId],

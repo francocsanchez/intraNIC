@@ -8,7 +8,7 @@ import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import PendienteTurnarForm from "@/components/entregas/PendienteTurnarForm";
 import PendientesTurnarFilters from "@/components/entregas/PendientesTurnarFilters";
 import PendientesTurnarTable from "@/components/entregas/PendientesTurnarTable";
-import { hasEntregaAgendaManageAccess, hasPendienteTurnarImportAccess, hasSuperAdminRole } from "@/helpers/access";
+import { hasEntregaAgendaManageAccess, hasPendienteTurnarImportAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { PendienteTurnar } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,25 +66,22 @@ export default function PendientesTurnarView() {
   const sucursales = useMemo(() => sucursalesResponse?.data ?? [], [sucursalesResponse]);
   const canManageAgenda = hasEntregaAgendaManageAccess(user);
   const canImportPendientes = hasPendienteTurnarImportAccess(user);
-  const isSuperAdmin = hasSuperAdminRole(user);
-  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const preferredSucursalId = user?.sucursalPredeterminada?._id ?? user?.sucursalEntrega?._id ?? "";
   const activeSucursales = useMemo(
-    () =>
-      sucursales.filter((sucursal) => {
-        if (isSuperAdmin) {
-          return sucursal.activa;
-        }
-
-        return sucursal.activa && (!assignedSucursalId || sucursal._id === assignedSucursalId);
-      }),
-    [assignedSucursalId, isSuperAdmin, sucursales],
+    () => sucursales.filter((sucursal) => sucursal.activa),
+    [sucursales],
   );
 
   useEffect(() => {
-    if (!filters.sucursalId && activeSucursales[0]?._id) {
-      setFilters({ sucursalId: activeSucursales[0]._id });
+    if (!filters.sucursalId && (preferredSucursalId || activeSucursales[0]?._id)) {
+      setFilters({
+        sucursalId:
+          activeSucursales.find((sucursal) => sucursal._id === preferredSucursalId)?._id ??
+          activeSucursales[0]?._id ??
+          "",
+      });
     }
-  }, [activeSucursales, filters.sucursalId]);
+  }, [activeSucursales, filters.sucursalId, preferredSucursalId]);
 
   const closePendingModal = () => {
     setPendingModalOpen(false);

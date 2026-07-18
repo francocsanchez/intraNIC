@@ -131,7 +131,7 @@ export default function MiPerfilView() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]">Sucursal de entrega</p>
               </div>
               <p className="mt-3 text-sm font-medium text-gray-900">
-                {user.sucursalEntrega?.nombre || "Sin asignar"}
+                {user.sucursalPredeterminada?.nombre || "Sin asignar"}
               </p>
             </div>
           </div>

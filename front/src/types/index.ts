@@ -138,6 +138,24 @@ export const usuarioSchema = z.object({
   role: z.array(z.string()),
   company: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
+  unidadNegocio: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activo: z.boolean(),
+      orden: z.number(),
+    })
+    .nullable()
+    .optional(),
+  sucursalPredeterminada: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
   sucursalEntrega: z
     .object({
       _id: z.string(),
@@ -167,6 +185,24 @@ export const userSchema = z.object({
   role: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
   enable: z.boolean(),
+  unidadNegocio: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activo: z.boolean(),
+      orden: z.number(),
+    })
+    .nullable()
+    .optional(),
+  sucursalPredeterminada: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      activa: z.boolean(),
+      direccion: z.string().optional().default(""),
+    })
+    .nullable()
+    .optional(),
   sucursalEntrega: z
     .object({
       _id: z.string(),
@@ -1559,6 +1595,97 @@ export type MinutaParticipantsResponse = z.infer<typeof minutaParticipantsRespon
 export type MinutaGrupo = z.infer<typeof minutaGrupoSchema>;
 export type MinutaGroupsListResponse = z.infer<typeof minutaGroupsListResponseSchema>;
 export type MinutaGroupResponse = z.infer<typeof minutaGroupResponseSchema>;
+
+export const comercialAgendaUserSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  lastName: z.string(),
+  email: z.string().optional().default(""),
+});
+
+export const comercialAgendaPuestoSchema = z.object({
+  _id: z.string(),
+  unidadNegocioId: z.string(),
+  nombre: z.string(),
+  orden: z.number(),
+  activo: z.boolean(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const unidadNegocioSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  orden: z.number(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const comercialAgendaAsignacionSchema = z.object({
+  fecha: z.string(),
+  fechaLabel: z.string(),
+  puestoId: z.string(),
+  puestoNombre: z.string(),
+  asignacionId: z.string().nullable().optional(),
+  asistentes: z.array(comercialAgendaUserSchema),
+});
+
+export const comercialAgendaDaySchema = z.object({
+  fecha: z.string(),
+  fechaLabel: z.string(),
+  weekdayLabel: z.string(),
+  cells: z.array(comercialAgendaAsignacionSchema),
+});
+
+export const comercialAgendaSemanaSchema = z.object({
+  weekStart: z.string(),
+  weekEnd: z.string(),
+  weekLabel: z.string(),
+  puestos: z.array(comercialAgendaPuestoSchema),
+  days: z.array(comercialAgendaDaySchema),
+});
+
+export const comercialAgendaUsersResponseSchema = z.object({
+  data: z.array(comercialAgendaUserSchema),
+});
+
+export const unidadNegocioListResponseSchema = z.object({
+  data: z.array(unidadNegocioSchema),
+  message: z.string().optional().default(""),
+});
+
+export const unidadNegocioResponseSchema = z.object({
+  data: unidadNegocioSchema,
+  message: z.string().optional().default(""),
+});
+
+export const comercialAgendaPuestosResponseSchema = z.object({
+  data: z.array(comercialAgendaPuestoSchema),
+  message: z.string().optional().default(""),
+});
+
+export const comercialAgendaSemanaResponseSchema = z.object({
+  data: comercialAgendaSemanaSchema,
+});
+
+export const comercialAgendaCellResponseSchema = z.object({
+  data: comercialAgendaAsignacionSchema,
+  message: z.string().optional().default(""),
+});
+
+export type ComercialAgendaUser = z.infer<typeof comercialAgendaUserSchema>;
+export type ComercialAgendaPuesto = z.infer<typeof comercialAgendaPuestoSchema>;
+export type ComercialAgendaAsignacion = z.infer<typeof comercialAgendaAsignacionSchema>;
+export type ComercialAgendaDay = z.infer<typeof comercialAgendaDaySchema>;
+export type ComercialAgendaSemana = z.infer<typeof comercialAgendaSemanaSchema>;
+export type ComercialAgendaUsersResponse = z.infer<typeof comercialAgendaUsersResponseSchema>;
+export type ComercialAgendaPuestosResponse = z.infer<typeof comercialAgendaPuestosResponseSchema>;
+export type ComercialAgendaSemanaResponse = z.infer<typeof comercialAgendaSemanaResponseSchema>;
+export type ComercialAgendaCellResponse = z.infer<typeof comercialAgendaCellResponseSchema>;
+export type UnidadNegocio = z.infer<typeof unidadNegocioSchema>;
+export type UnidadNegocioListResponse = z.infer<typeof unidadNegocioListResponseSchema>;
+export type UnidadNegocioResponse = z.infer<typeof unidadNegocioResponseSchema>;
 
 //**************************** */
 // ENTREGAS

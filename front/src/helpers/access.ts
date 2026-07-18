@@ -1,6 +1,7 @@
 import type { Usuario } from "@/types/index";
 import { normalizeModules, type ModuleKey } from "@/constants/modules";
 import {
+  hasComercialAgendaManageAccess,
   hasEntregaAgendaEquipadoToggleAccess,
   hasEntregaAgendaManageAccess,
   hasPendienteTurnarImportAccess,
@@ -73,6 +74,7 @@ export function hasSegUnidadesFabricaImportAccess(user: AuthUser) {
 }
 
 export {
+  hasComercialAgendaManageAccess,
   hasEntregaAgendaManageAccess,
   hasEntregaAgendaEquipadoToggleAccess,
   hasPendienteTurnarImportAccess,

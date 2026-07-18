@@ -1,7 +1,8 @@
 import { Response, Request, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/User";
-import { sanitizeUserModules, type UserModules } from "../constants/modules";
+import { type UserModules } from "../constants/modules";
+import { serializeUserResponse } from "../utils/userResponse";
 
 declare global {
   namespace Express {
@@ -14,11 +15,23 @@ declare global {
         celular?: string;
         numberSaleNic?: number;
         numberSaleLiess?: number;
+        sucursalPredeterminada?: {
+          _id: string;
+          nombre: string;
+          activa: boolean;
+          direccion?: string;
+        } | null;
         sucursalEntrega?: {
           _id: string;
           nombre: string;
           activa: boolean;
           direccion?: string;
+        } | null;
+        unidadNegocio?: {
+          _id: string;
+          nombre: string;
+          activo: boolean;
+          orden: number;
         } | null;
         role: string[];
         company?: string[];
@@ -30,31 +43,6 @@ declare global {
 }
 
 type AuthPayload = JwtPayload & { sub?: string };
-
-const normalizeStringArray = (values: unknown): string[] => {
-  const normalizeEntry = (value: unknown) =>
-    String(value)
-      .normalize("NFKC")
-      .replace(/[\u200B-\u200D\uFEFF]/g, "")
-      .replace(/\s+/g, "")
-      .trim()
-      .toLowerCase();
-
-  if (Array.isArray(values)) {
-    return values
-      .map((value) => normalizeEntry(value))
-      .filter(Boolean);
-  }
-
-  if (typeof values === "string") {
-    return values
-      .split(",")
-      .map((value) => normalizeEntry(value))
-      .filter(Boolean);
-  }
-
-  return [];
-};
 
 export const authenticate = async (
   req: Request,
@@ -86,6 +74,7 @@ export const authenticate = async (
 
     const user = await User.findById(userId)
       .populate("sucursalEntrega", "nombre activa direccion")
+      .populate("unidadNegocio", "nombre activo orden")
       .lean();
 
     if (!user) {
@@ -98,38 +87,7 @@ export const authenticate = async (
       return;
     }
     
-    const sucursalEntrega =
-      user.sucursalEntrega && typeof user.sucursalEntrega === "object"
-        ? (user.sucursalEntrega as {
-            _id: unknown;
-            nombre?: string;
-            activa?: boolean;
-            direccion?: string;
-          })
-        : null;
-
-    req.user = {
-      _id: String(user._id),
-      name: user.name,
-      email: user.email,
-      lastName: user.lastName,
-      celular: user.celular,
-      role: normalizeStringArray(user.role),
-      enable: user.enable,
-      numberSaleNic: user.numberSaleNic,
-      numberSaleLiess: user.numberSaleLiess,
-      sucursalEntrega:
-        sucursalEntrega
-          ? {
-              _id: String(sucursalEntrega._id),
-              nombre: sucursalEntrega.nombre ?? "",
-              activa: Boolean(sucursalEntrega.activa),
-              direccion: sucursalEntrega.direccion ?? "",
-            }
-          : null,
-      company: normalizeStringArray(user.company),
-      modules: sanitizeUserModules(user.modules),
-    };
+    req.user = serializeUserResponse(user);
 
     next();
   } catch (error) {

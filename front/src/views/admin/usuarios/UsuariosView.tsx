@@ -178,7 +178,8 @@ export default function UsuariosView() {
               <tr>
                 <th className="px-6 py-3 text-left">Usuario</th>
                 <th className="px-6 py-3 text-left">Rol</th>
-                <th className="px-6 py-3 text-left">Sucursal entrega</th>
+                <th className="px-6 py-3 text-left">Unidad negocio</th>
+                <th className="px-6 py-3 text-left">Sucursal predeterminada</th>
                 <th className="px-6 py-3 text-left">Celular</th>
                 <th className="px-6 py-3 text-left">NIC</th>
                 <th className="px-6 py-3 text-left">LIESS</th>
@@ -210,7 +211,11 @@ export default function UsuariosView() {
                   </td>
 
                   <td className="px-6 py-3 text-gray-700">
-                    {u.sucursalEntrega?.nombre ?? "-"}
+                    {u.unidadNegocio?.nombre ?? "-"}
+                  </td>
+
+                  <td className="px-6 py-3 text-gray-700">
+                    {u.sucursalPredeterminada?.nombre ?? "-"}
                   </td>
 
                   <td className="px-6 py-3 text-gray-700">{u.celular || "-"}</td>
@@ -265,7 +270,7 @@ export default function UsuariosView() {
 
               {usuariosVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                     {visibleSection === "habilitados"
                       ? "No hay usuarios habilitados para mostrar."
                       : "No hay usuarios deshabilitados para mostrar."}

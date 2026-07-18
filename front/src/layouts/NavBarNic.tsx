@@ -3,8 +3,9 @@ import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, BriefcaseBusiness, ChevronDown, ClipboardList, Package } from "lucide-react";
+import { Archive, BookMarked, BriefcaseBusiness, CalendarDays, ChevronDown, ClipboardList, Package } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { hasSuperAdminRole } from "@/helpers/access";
 
 type NavBarProps = {
   negocio: string;
@@ -27,6 +28,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const canViewMisOperaciones = hasModulePathAccess(user, moduleKey, misOperacionesPath);
   const canViewMisReservas = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
   const canViewMiListaEspera = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
+  const canViewAgendaComercial = isConvencional && hasSuperAdminRole(user);
   const isGestionPath = isConvencional
     ? pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/")
     : pathname.startsWith("/usados/");
@@ -63,6 +65,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
             <Link to={paths.convencional.preventasResumen} className="flex items-center gap-2 relative hover:text-gray-900 transition">
               <ClipboardList size={16} strokeWidth={1.5} />
               P. Resumen
+            </Link>
+          ) : null}
+
+          {canViewAgendaComercial ? (
+            <Link to={paths.convencional.agendaComercial} className="flex items-center gap-2 relative hover:text-gray-900 transition">
+              <CalendarDays size={16} strokeWidth={1.5} />
+              Agenda comercial
             </Link>
           ) : null}
         </>

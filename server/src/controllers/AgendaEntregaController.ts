@@ -150,9 +150,6 @@ const getSucursalHorariosHabilitados = (sucursal: any) => {
 const buildUserName = (req: Request) =>
   req.user ? `${req.user.lastName}, ${req.user.name}` : "";
 
-const getAssignedSucursalEntregaId = (req: Request) =>
-  req.user?.sucursalEntrega?._id ? String(req.user.sucursalEntrega._id) : "";
-
 const userHasAgendaWriteAccess = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
   return roles.includes("superadmin") || roles.includes("coordinador");
@@ -180,7 +177,7 @@ const ensureAgendaWriteAccess = (req: Request) => {
   return null;
 };
 
-const ensureEntregadaPorToggleAccess = (req: Request, sucursalId: string) => {
+const ensureEntregadaPorToggleAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
   }
@@ -197,16 +194,6 @@ const ensureEntregadaPorToggleAccess = (req: Request, sucursalId: string) => {
 
   if (!roles.includes("entrega")) {
     return "No tienes permisos para marcar quien entrego la unidad";
-  }
-
-  const assignedSucursalId = getAssignedSucursalEntregaId(req);
-
-  if (!assignedSucursalId) {
-    return "El usuario entrega no tiene una sucursal de entrega asignada";
-  }
-
-  if (assignedSucursalId !== sucursalId) {
-    return "Solo puedes marcar entregas de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -234,7 +221,7 @@ const ensureEquipadoToggleAccess = (req: Request) => {
   return null;
 };
 
-const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
+const ensureSucursalAllowedForMutation = (req: Request) => {
   const roles = normalizeRoles(req.user?.role);
 
   if (roles.includes("superadmin")) {
@@ -243,16 +230,6 @@ const ensureSucursalAllowedForMutation = (req: Request, sucursalId: string) => {
 
   if (!roles.includes("coordinador")) {
     return "No tienes permisos para operar sobre turnos o reservas de entrega";
-  }
-
-  const assignedSucursalId = getAssignedSucursalEntregaId(req);
-
-  if (!assignedSucursalId) {
-    return "El usuario coordinador no tiene una sucursal de entrega asignada";
-  }
-
-  if (assignedSucursalId !== sucursalId) {
-    return "Solo puedes operar registros de tu sucursal de entrega asignada";
   }
 
   return null;
@@ -687,7 +664,7 @@ export class AgendaEntregaController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -760,7 +737,7 @@ export class AgendaEntregaController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -829,7 +806,7 @@ export class AgendaEntregaController {
       }
 
       const currentSucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
-      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (currentSucursalAccessError) {
         return res.status(403).json({ error: currentSucursalAccessError });
       }
@@ -839,7 +816,7 @@ export class AgendaEntregaController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (nextSucursalAccessError) {
         return res.status(403).json({ error: nextSucursalAccessError });
       }
@@ -941,7 +918,7 @@ export class AgendaEntregaController {
       }
 
       const currentSucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
-      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req, currentSucursalId);
+      const currentSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (currentSucursalAccessError) {
         return res.status(403).json({ error: currentSucursalAccessError });
       }
@@ -951,7 +928,7 @@ export class AgendaEntregaController {
         return res.status(400).json({ error: validation.error });
       }
 
-      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req, validation.data.sucursalId);
+      const nextSucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (nextSucursalAccessError) {
         return res.status(403).json({ error: nextSucursalAccessError });
       }
@@ -1034,7 +1011,7 @@ export class AgendaEntregaController {
       }
 
       const sucursalId = String((reserva.sucursal as any)?._id ?? reserva.sucursal ?? "");
-      const sucursalAccessError = ensureSucursalAllowedForMutation(req, sucursalId);
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }
@@ -1156,7 +1133,7 @@ export class AgendaEntregaController {
       }
 
       const sucursalId = String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? "");
-      const accessError = ensureEntregadaPorToggleAccess(req, sucursalId);
+      const accessError = ensureEntregadaPorToggleAccess(req);
       if (accessError) {
         return res.status(accessError === "Usuario no autenticado" ? 401 : 403).json({ error: accessError });
       }
@@ -1318,10 +1295,7 @@ export class AgendaEntregaController {
         return res.status(404).json({ error: "Agenda no encontrada" });
       }
 
-      const sucursalAccessError = ensureSucursalAllowedForMutation(
-        req,
-        String((agenda.sucursal as any)?._id ?? agenda.sucursal ?? ""),
-      );
+      const sucursalAccessError = ensureSucursalAllowedForMutation(req);
       if (sucursalAccessError) {
         return res.status(403).json({ error: sucursalAccessError });
       }

@@ -107,6 +107,7 @@ export default function Inicio() {
       items: [
         { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
         { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
+        { label: "Agenda comercial", to: paths.convencional.agendaComercial, enabled: hasModulePathAccess(user, "agendaComercial", paths.convencional.agendaComercial), icon: CalendarDays },
         { label: "Registro TestDrive", to: paths.convencional.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive), icon: CarFront },
       ],
     },

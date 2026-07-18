@@ -9,7 +9,6 @@ import {
   type ReservaEntregaConvertPayload,
 } from "@/api/entregasAPI";
 import InternoLookupCard from "@/components/entregas/InternoLookupCard";
-import { hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega, AgendaEntregaLookup, PendienteTurnar, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
@@ -66,8 +65,7 @@ export default function AgendaEntregaForm({
   );
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
-  const isSuperAdmin = hasSuperAdminRole(user);
-  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const preferredSucursalId = user?.sucursalPredeterminada?._id ?? user?.sucursalEntrega?._id ?? "";
   const isEditing = Boolean(item && item.tipoRegistro === "turno");
   const isConvertingReservation = Boolean(reservationToConvert);
   const isSchedulingPending = Boolean(pendingToSchedule);
@@ -100,7 +98,8 @@ export default function AgendaEntregaForm({
   useEffect(() => {
     if (!open) return;
 
-    const defaultSucursal = !item && !reservationToConvert && !pendingToSchedule && !isSuperAdmin ? assignedSucursalId : "";
+    const defaultSucursal =
+      !item && !reservationToConvert && !pendingToSchedule ? preferredSucursalId : "";
     const source = reservationToConvert ?? pendingToSchedule ?? item;
     const sourceFechaAgenda = reservationToConvert?.fechaAgenda ?? item?.fechaAgenda ?? "";
     const sourceHoraAgenda = reservationToConvert?.horaAgenda ?? item?.horaAgenda ?? "";
@@ -125,7 +124,7 @@ export default function AgendaEntregaForm({
       pendingToSchedule?.siac ?? (item?.tipoRegistro === "turno" ? (item.siac ?? null) : null),
     );
     setLookupError("");
-  }, [assignedSucursalId, isSuperAdmin, item, open, pendingToSchedule, reset, reservationToConvert]);
+  }, [item, open, pendingToSchedule, preferredSucursalId, reset, reservationToConvert]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["entregas", "agendas"] });
@@ -254,9 +253,7 @@ export default function AgendaEntregaForm({
       sucursal._id === reservationToConvert?.sucursal?._id ||
       sucursal._id === pendingToSchedule?.sucursal?._id,
   );
-  const availableSucursales = isSuperAdmin
-    ? activeSucursales
-    : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
+  const availableSucursales = activeSucursales;
   const selectedSucursal = useMemo(
     () => availableSucursales.find((sucursal) => sucursal._id === selectedSucursalId) ?? null,
     [availableSucursales, selectedSucursalId],

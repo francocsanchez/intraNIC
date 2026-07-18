@@ -8,6 +8,8 @@ import { generateJWT } from "../utils/jwt";
 import { sendPasswordResetEmail } from "../utils/mail";
 import { generateTemporaryPassword } from "../utils/password";
 import { sanitizeUserModules } from "../constants/modules";
+import UnidadNegocio from "../models/UnidadNegocio";
+import { serializeUserResponse } from "../utils/userResponse";
 
 const normalizeCelular = (value: unknown) => {
   if (typeof value !== "string") {
@@ -66,6 +68,15 @@ const normalizeSucursalEntrega = (value: unknown) => {
   return normalized.length ? normalized : null;
 };
 
+const normalizeUnidadNegocio = (value: unknown) => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length ? normalized : null;
+};
+
 const resetAndSendPassword = async (usuario: any) => {
   const temporaryPassword = generateTemporaryPassword();
   const previousPassword = usuario.password;
@@ -91,6 +102,7 @@ export class UsuarioController {
     try {
       const usuarios = await User.find({}, { password: 0 })
         .populate("sucursalEntrega", "nombre activa direccion")
+        .populate("unidadNegocio", "nombre activo orden")
         .sort({
           enable: -1,
           lastName: 1,
@@ -106,7 +118,7 @@ export class UsuarioController {
       }
 
       return res.status(200).json({
-        data: usuarios,
+        data: usuarios.map(serializeUserResponse),
         message: "Usuarios listados",
       });
     } catch (error) {
@@ -124,7 +136,10 @@ export class UsuarioController {
       const { email, password } = req.body;
       const celularInput = normalizeCelular(req.body?.celular);
       const celularError = validateCelular(celularInput);
-      const sucursalEntregaId = normalizeSucursalEntrega(req.body?.sucursalEntrega);
+      const sucursalEntregaId = normalizeSucursalEntrega(
+        req.body?.sucursalPredeterminada ?? req.body?.sucursalEntrega,
+      );
+      const unidadNegocioId = normalizeUnidadNegocio(req.body?.unidadNegocio);
 
       if (celularError) {
         return res.status(400).json({
@@ -147,6 +162,24 @@ export class UsuarioController {
           return res.status(400).json({
             data: null,
             message: "La sucursal de entrega seleccionada no existe",
+          });
+        }
+      }
+
+      if (unidadNegocioId) {
+        if (!mongoose.isValidObjectId(unidadNegocioId)) {
+          return res.status(400).json({
+            data: null,
+            message: "La unidad de negocio seleccionada no es valida",
+          });
+        }
+
+        const unidadNegocio = await UnidadNegocio.findById(unidadNegocioId).lean();
+
+        if (!unidadNegocio) {
+          return res.status(400).json({
+            data: null,
+            message: "La unidad de negocio seleccionada no existe",
           });
         }
       }
@@ -175,10 +208,16 @@ export class UsuarioController {
         celular: toWhatsappCelular(celularInput),
         password: hashedPassword,
         sucursalEntrega: sucursalEntregaId,
+        unidadNegocio: unidadNegocioId,
       });
 
       return res.status(201).json({
-        data: usuario,
+        data: serializeUserResponse(
+          await usuario.populate([
+            { path: "sucursalEntrega", select: "nombre activa direccion" },
+            { path: "unidadNegocio", select: "nombre activo orden" },
+          ]),
+        ),
         message: "Usuario creado correctamente",
       });
     } catch (error) {
@@ -227,6 +266,7 @@ export class UsuarioController {
 
       const usuario = await User.findById(idUsuario, { password: 0 })
         .populate("sucursalEntrega", "nombre activa direccion")
+        .populate("unidadNegocio", "nombre activo orden")
         .lean();
 
       if (!usuario) {
@@ -237,7 +277,7 @@ export class UsuarioController {
       }
 
       return res.status(200).json({
-        data: usuario,
+        data: serializeUserResponse(usuario),
         message: "Usuario obtenido correctamente",
       });
     } catch (error) {
@@ -275,10 +315,16 @@ export class UsuarioController {
         "numberSaleLiess",
         "enable",
         "sucursalEntrega",
+        "unidadNegocio",
       ] as const;
 
-      if (Object.prototype.hasOwnProperty.call(req.body, "sucursalEntrega")) {
-        const sucursalEntregaId = normalizeSucursalEntrega(req.body.sucursalEntrega);
+      if (
+        Object.prototype.hasOwnProperty.call(req.body, "sucursalEntrega") ||
+        Object.prototype.hasOwnProperty.call(req.body, "sucursalPredeterminada")
+      ) {
+        const sucursalEntregaId = normalizeSucursalEntrega(
+          req.body.sucursalPredeterminada ?? req.body.sucursalEntrega,
+        );
 
         if (sucursalEntregaId) {
           if (!mongoose.isValidObjectId(sucursalEntregaId)) {
@@ -299,6 +345,30 @@ export class UsuarioController {
         }
 
         req.body.sucursalEntrega = sucursalEntregaId;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.body, "unidadNegocio")) {
+        const unidadNegocioId = normalizeUnidadNegocio(req.body.unidadNegocio);
+
+        if (unidadNegocioId) {
+          if (!mongoose.isValidObjectId(unidadNegocioId)) {
+            return res.status(400).json({
+              data: null,
+              message: "La unidad de negocio seleccionada no es valida",
+            });
+          }
+
+          const unidadNegocio = await UnidadNegocio.findById(unidadNegocioId).lean();
+
+          if (!unidadNegocio) {
+            return res.status(400).json({
+              data: null,
+              message: "La unidad de negocio seleccionada no existe",
+            });
+          }
+        }
+
+        req.body.unidadNegocio = unidadNegocioId;
       }
 
       if (Object.prototype.hasOwnProperty.call(req.body, "celular")) {

@@ -39,6 +39,7 @@ export interface IUser extends Document {
   numberSaleLiess: number;
   modules?: UserModules;
   sucursalEntrega?: mongoose.Types.ObjectId | null;
+  unidadNegocio?: mongoose.Types.ObjectId | null;
 }
 
 const modulesSchemaDefinition = Object.fromEntries(
@@ -108,6 +109,11 @@ const userSchema: Schema = new Schema(
     sucursalEntrega: {
       type: Schema.Types.ObjectId,
       ref: "sucursales_entrega",
+      default: null,
+    },
+    unidadNegocio: {
+      type: Schema.Types.ObjectId,
+      ref: "unidades_negocio",
       default: null,
     },
   },

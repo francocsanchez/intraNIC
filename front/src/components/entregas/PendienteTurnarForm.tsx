@@ -5,7 +5,6 @@ import {
   type PendienteTurnarPayload,
 } from "@/api/entregasAPI";
 import InternoLookupCard from "@/components/entregas/InternoLookupCard";
-import { hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntregaLookup, PendienteTurnar, SucursalEntrega } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
@@ -47,8 +46,7 @@ export default function PendienteTurnarForm({
   const [lookup, setLookup] = useState<AgendaEntregaLookup | null>(item?.siac ?? null);
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
-  const isSuperAdmin = hasSuperAdminRole(user);
-  const assignedSucursalId = user?.sucursalEntrega?._id ?? "";
+  const preferredSucursalId = user?.sucursalPredeterminada?._id ?? user?.sucursalEntrega?._id ?? "";
   const isEditing = Boolean(item);
 
   const {
@@ -71,7 +69,7 @@ export default function PendienteTurnarForm({
   useEffect(() => {
     if (!open) return;
 
-    const defaultSucursal = !item && !isSuperAdmin ? assignedSucursalId : "";
+    const defaultSucursal = !item ? preferredSucursalId : "";
 
     reset({
       interno: item?.interno ?? undefined,
@@ -83,7 +81,7 @@ export default function PendienteTurnarForm({
     });
     setLookup(item?.siac ?? null);
     setLookupError("");
-  }, [assignedSucursalId, isSuperAdmin, item, open, reset]);
+  }, [item, open, preferredSucursalId, reset]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["entregas", "pendientes-turnar"] });
@@ -160,9 +158,7 @@ export default function PendienteTurnarForm({
   const activeSucursales = sucursales.filter(
     (sucursal) => sucursal.activa || sucursal._id === item?.sucursal?._id,
   );
-  const availableSucursales = isSuperAdmin
-    ? activeSucursales
-    : activeSucursales.filter((sucursal) => sucursal._id === assignedSucursalId);
+  const availableSucursales = activeSucursales;
 
   return (
     <Transition appear show={open} as={Fragment}>

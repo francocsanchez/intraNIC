@@ -43,6 +43,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.proformasNueva,
     /^\/convencional\/proformas\/[^/]+$/,
     paths.convencional.minutas,
+    paths.convencional.agendaComercial,
     paths.convencional.preventas,
     paths.convencional.preventasResumen,
     paths.convencional.registroTestDrive,
@@ -74,6 +75,7 @@ const roleAllowedPaths: Record<ActiveRoleKey, Array<string | RegExp>> = {
     paths.convencional.proformasNueva,
     /^\/convencional\/proformas\/[^/]+$/,
     paths.convencional.minutas,
+    paths.convencional.agendaComercial,
     paths.convencional.preventas,
     paths.convencional.preventasResumen,
     paths.convencional.preventasNueva,
@@ -247,6 +249,7 @@ const moduleOnlyPathMatchers: Array<string | RegExp> = [
   paths.planAhorro.registroTestDrive,
   paths.planAhorro.registroTestDriveCalendario,
   paths.planAhorro.promedios,
+  paths.convencional.agendaComercial,
   paths.usados.stockNoReparado,
   paths.usados.stockPendienteDocumentacion,
   paths.usados.stockIngresos,
@@ -389,4 +392,12 @@ export function hasSystemConfigToggleAccess(user: AuthUser) {
 
   const normalizedRoles = getNormalizedRoles(user);
   return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
+}
+
+export function hasComercialAgendaManageAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("supervisor");
 }

@@ -2,9 +2,10 @@ import { Controller, type Control, type FieldErrors, type UseFormRegister } from
 import { useQuery } from "@tanstack/react-query";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { getSucursalesEntrega } from "@/api/entregasAPI";
+import { getUnidadesNegocio } from "@/api/unidadNegocioAPI";
 import { moduleLabels, moduleSections, type ModuleKey } from "@/constants/modules";
 import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
-import type { SucursalEntrega } from "@/types/index";
+import type { SucursalEntrega, UnidadNegocio } from "@/types/index";
 
 type Vendedor = {
   codigo: number;
@@ -44,9 +45,14 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
     queryKey: ["entregas", "sucursales"],
     queryFn: getSucursalesEntrega,
   });
+  const { data: unidadesResponse, isLoading: isLoadingUnidades } = useQuery({
+    queryKey: ["unidades-negocio", "usuarios-form"],
+    queryFn: () => getUnidadesNegocio(true),
+  });
 
   const vendedores: Vendedor[] = vendedoresResponse?.data ?? [];
   const sucursales: SucursalEntrega[] = sucursalesResponse?.data ?? [];
+  const unidadesNegocio: UnidadNegocio[] = unidadesResponse?.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -98,15 +104,41 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
 
         <div className="space-y-2">
           <label
-            htmlFor="sucursalEntrega"
+            htmlFor="unidadNegocio"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
           >
-            Sucursal de entrega
+            Unidad de negocio
           </label>
           <select
-            id="sucursalEntrega"
+            id="unidadNegocio"
             className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
-            {...register("sucursalEntrega")}
+            {...register("unidadNegocio")}
+          >
+            <option value="">-- Sin asignar --</option>
+            {unidadesNegocio.map((unidad) => (
+              <option key={unidad._id} value={unidad._id}>
+                {unidad.nombre}{unidad.activo ? "" : " (Inactiva)"}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500">
+            Segmenta la agenda comercial y agrupa usuarios sin reemplazar el campo tecnico `company`.
+          </p>
+          {isLoadingUnidades ? <p className="text-xs text-gray-500">Cargando unidades de negocio...</p> : null}
+          <FieldError message={errors.unidadNegocio?.message} />
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="sucursalPredeterminada"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
+            Sucursal predeterminada
+          </label>
+          <select
+            id="sucursalPredeterminada"
+            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            {...register("sucursalPredeterminada")}
           >
             <option value="">-- Sin asignar --</option>
             {sucursales.map((sucursal) => (
@@ -116,10 +148,10 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             ))}
           </select>
           <p className="text-xs text-gray-500">
-            Se usara para futuras alertas de entrega y para los roles de coordinador y entrega por sucursal.
+            Se usa como sucursal inicial en entregas y pendientes, pero no limita el acceso a otras sucursales.
           </p>
           {isLoadingSucursales ? <p className="text-xs text-gray-500">Cargando sucursales de entrega...</p> : null}
-          <FieldError message={errors.sucursalEntrega?.message} />
+          <FieldError message={errors.sucursalPredeterminada?.message} />
         </div>
 
         <div className="space-y-2">
