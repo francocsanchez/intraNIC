@@ -75,7 +75,7 @@ export default function TransferenciasGeneralSection({
                 Porcentaje de operaciones propias sobre el total de transferencias del anio en Zona NIC.
               </p>
             </div>
-            <div className="rounded-2xl bg-sky-50 p-3 text-sky-700">
+            <div className="rounded-2xl bg-[#ecfdf8] p-3 text-[#128c80]">
               <Percent size={20} />
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function TransferenciasGeneralSection({
               <h3 className="text-lg font-semibold tracking-tight text-slate-950">Tendencia de transferencias</h3>
               <p className="text-sm text-slate-500">Transferencias de Zona NIC y operaciones asignadas por mes.</p>
               </div>
-              <div className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800">
+              <div className="inline-flex items-center rounded-full border border-[#b9e8e0] bg-[#ecfdf8] px-3 py-1 text-xs font-semibold text-[#0f766e]">
                 Market share anual {formatPercentage(data.summary.marketShare)}
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function TransferenciasGeneralSection({
                       />
                       <Bar
                         dataKey="operaciones"
-                        fill="#cbd5e1"
+                        fill="#9fd7cf"
                         radius={[10, 10, 0, 0]}
                         barSize={26}
                       />

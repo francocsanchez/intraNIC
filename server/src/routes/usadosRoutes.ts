@@ -29,7 +29,7 @@ router.get("/stock-guardado", authorizeModules("usados"), authorizeRoleAccess("u
  * @desc Listar stock no reparado.
  *
  */
-router.get("/stock-no-reparado", authorizeModules("noReparado"), authorizeRoleAccess("usados.noReparado"), UsadosController.vendedoresStockNoReparadoUsados);
+router.get("/stock-no-reparado", authorizeModules("noReparado"), UsadosController.vendedoresStockNoReparadoUsados);
 
 /**
  *
@@ -37,7 +37,7 @@ router.get("/stock-no-reparado", authorizeModules("noReparado"), authorizeRoleAc
  * @desc Listar stock pendiente de documentacion.
  *
  */
-router.get("/stock-pendiente-documentacion", authorizeModules("pendienteDocumentacion"), authorizeRoleAccess("usados.pendienteDocumentacion"), UsadosController.vendedoresStockPendDocuUsados);
+router.get("/stock-pendiente-documentacion", authorizeModules("pendienteDocumentacion"), UsadosController.vendedoresStockPendDocuUsados);
 
 /**
  *
@@ -69,7 +69,7 @@ router.get("/mis-operaciones/:mes/:ano", authorizeModules("usados"), authorizeRo
  * @desc Listar stock a ingresar.
  *
  */
-router.get("/stock-ingreso", authorizeModules("ingresos"), authorizeRoleAccess("usados.ingresos"), UsadosController.stockIngreso);
+router.get("/stock-ingreso", authorizeModules("ingresos"), UsadosController.stockIngreso);
 
 
 export default router;

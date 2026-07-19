@@ -4,15 +4,13 @@ import UnidadesDealersTreemap from "@/components/patentamientos/UnidadesDealersT
 import {
   getPatentamientosUnidadesDealersYears,
   getPatentamientosUnidadesDealersResumen,
-  syncPatentamientosUnidadesDealers,
 } from "@/services/patentamientosUnidadesDealersService";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutGrid, RefreshCcw, Table2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { LayoutGrid, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function InscripcionUnidadesView() {
-  const queryClient = useQueryClient();
   const [userSelectedYear, setUserSelectedYear] = useState<number | null>(null);
 
   const yearsQuery = useQuery({
@@ -26,20 +24,6 @@ export default function InscripcionUnidadesView() {
     queryKey: ["patentamientos-unidades-dealers", "resumen", selectedYear],
     queryFn: () => getPatentamientosUnidadesDealersResumen(selectedYear),
     enabled: yearsQuery.isSuccess,
-  });
-
-  const syncMutation = useMutation({
-    mutationFn: syncPatentamientosUnidadesDealers,
-    onMutate: () => {
-      toast.loading("Actualizando unidades de dealers...", { id: "sync-unidades-dealers" });
-    },
-    onSuccess: async () => {
-      toast.success("Base de unidades actualizada correctamente", { id: "sync-unidades-dealers" });
-      await queryClient.invalidateQueries({ queryKey: ["patentamientos-unidades-dealers"] });
-    },
-    onError: () => {
-      toast.error("No se pudo actualizar la base de unidades", { id: "sync-unidades-dealers" });
-    },
   });
 
   useEffect(() => {
@@ -100,16 +84,6 @@ export default function InscripcionUnidadesView() {
                 </option>
               ))}
             </select>
-
-            <button
-              type="button"
-              onClick={() => syncMutation.mutate()}
-              disabled={syncMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RefreshCcw size={16} className={syncMutation.isPending ? "animate-spin" : ""} />
-              {syncMutation.isPending ? "Actualizando..." : "Actualizar datos"}
-            </button>
           </div>
         </div>
       </section>

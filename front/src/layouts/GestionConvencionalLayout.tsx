@@ -2,75 +2,91 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { Link } from "react-router-dom";
+import { BarChart3, ClipboardList, FileStack, Package, Wrench } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 export default function GestionConvencionalLayout() {
   const { user } = useAuth();
+  const { pathname } = useLocation();
 
-  const canViewAsignaciones = hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones);
-  const canViewPlanNegocio = hasModulePathAccess(user, "planNegocio", paths.convencional.planNegocio);
-  const canViewRegistroAsignaciones = hasModulePathAccess(user, "registroAsignaciones", paths.convencional.registroAsignaciones);
-  const canViewPedidoMensual = hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual);
-  const canViewPedidoUnidades = hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades);
-  const canViewAnalisisStock = hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock);
-  const canViewAnalisisStockDictionary = canViewAnalisisStock;
-  const canViewPendFac = hasModulePathAccess(user, "pendFac", paths.convencional.pendFac);
+  const navItems = [
+    {
+      label: "Asignaciones",
+      to: paths.convencional.asignaciones,
+      icon: Wrench,
+      visible: hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones),
+      active: pathname === paths.convencional.asignaciones,
+    },
+    {
+      label: "Plan de negocio",
+      to: paths.convencional.planNegocio,
+      icon: BarChart3,
+      visible: hasModulePathAccess(user, "planNegocio", paths.convencional.planNegocio),
+      active: pathname === paths.convencional.planNegocio,
+    },
+    {
+      label: "Registro asign.",
+      to: paths.convencional.registroAsignaciones,
+      icon: ClipboardList,
+      visible: hasModulePathAccess(user, "registroAsignaciones", paths.convencional.registroAsignaciones),
+      active:
+        pathname === paths.convencional.registroAsignaciones ||
+        pathname === paths.convencional.registroAsignacionesResumen,
+    },
+    {
+      label: "Pedido unidades",
+      to: paths.convencional.pedidoUnidades,
+      icon: Package,
+      visible: hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades),
+      active: pathname === paths.convencional.pedidoUnidades,
+    },
+    {
+      label: "Analisis stock",
+      to: paths.convencional.analisisStock,
+      icon: BarChart3,
+      visible: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock),
+      active:
+        pathname === paths.convencional.analisisStock ||
+        pathname === paths.convencional.analisisStockDiccionarioVersiones,
+    },
+    {
+      label: "Pend. fac",
+      to: paths.convencional.pendFac,
+      icon: FileStack,
+      visible: hasModulePathAccess(user, "pendFac", paths.convencional.pendFac),
+      active: pathname === paths.convencional.pendFac,
+    },
+    {
+      label: "Dic. versiones",
+      to: paths.convencional.analisisStockDiccionarioVersiones,
+      icon: ClipboardList,
+      visible: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock),
+      active: pathname === paths.convencional.analisisStockDiccionarioVersiones,
+    },
+  ].filter((item) => item.visible);
 
   return (
     <BaseAppLayout
       footerLeft="Gestion convencional"
-      footerRight={new Date().getFullYear()}
+      footerRight="Franco Sanchez"
       centerContent={
         <>
-          {canViewAsignaciones ? (
-            <Link to={paths.convencional.asignaciones} className="hover:text-gray-900 transition">
-              Asignaciones
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={[
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
+                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              <item.icon size={16} strokeWidth={1.75} />
+              {item.label}
             </Link>
-          ) : null}
-
-          {canViewPlanNegocio ? (
-            <Link to={paths.convencional.planNegocio} className="hover:text-gray-900 transition">
-              Plan de negocio
-            </Link>
-          ) : null}
-
-          {canViewRegistroAsignaciones ? (
-            <Link to={paths.convencional.registroAsignaciones} className="hover:text-gray-900 transition">
-              Registro asignaciones
-            </Link>
-          ) : null}
-
-          {canViewPedidoMensual ? (
-            <Link to={paths.convencional.pedidoMensual} className="hover:text-gray-900 transition">
-              Pedido mensual
-            </Link>
-          ) : null}
-
-          {canViewPedidoUnidades ? (
-            <Link to={paths.convencional.pedidoUnidades} className="hover:text-gray-900 transition">
-              Pedido unidades
-            </Link>
-          ) : null}
-
-          {canViewAnalisisStock ? (
-            <Link to={paths.convencional.analisisStock} className="hover:text-gray-900 transition">
-              Analisis de stock
-            </Link>
-          ) : null}
-
-          {canViewPendFac ? (
-            <Link to={paths.convencional.pendFac} className="hover:text-gray-900 transition">
-              Pend Fac
-            </Link>
-          ) : null}
-
-          {canViewAnalisisStockDictionary ? (
-            <Link to={paths.convencional.analisisStockDiccionarioVersiones} className="hover:text-gray-900 transition">
-              Diccionario versiones
-            </Link>
-          ) : null}
+          ))}
         </>
       }
+      mainClassName="px-4 py-6"
     />
   );
 }

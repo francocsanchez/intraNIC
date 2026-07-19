@@ -7,11 +7,13 @@ import {
   Cog,
   Headset,
   CalendarDays,
+  FileSearch,
   FileText,
   FileSpreadsheet,
   FolderCog,
   Factory,
-  Handshake,
+  Hammer,
+  Inbox,
   LogOut,
   Motorbike,
   Package,
@@ -164,7 +166,6 @@ export default function Inicio() {
         { label: "Analisis de stock", to: paths.convencional.analisisStock, enabled: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock), icon: BarChart3 },
         { label: "Pend Fac", to: paths.convencional.pendFac, enabled: hasModulePathAccess(user, "pendFac", paths.convencional.pendFac), icon: ClipboardList },
         { label: "Preventas", to: preventasHomePath, enabled: hasModulePathAccess(user, "preventas", preventasHomePath), icon: ClipboardList },
-        { label: "Pedido mensual", to: paths.convencional.pedidoMensual, enabled: hasModulePathAccess(user, "pedidoMensual", paths.convencional.pedidoMensual), icon: Package },
         { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades), icon: Package },
       ],
     },
@@ -172,14 +173,14 @@ export default function Inicio() {
       title: "Gestion de stock usados",
       icon: Wrench,
       items: [
-        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasModulePathAccess(user, "noReparado", paths.usados.stockNoReparado), icon: Cog },
+        { label: "No reparado", to: paths.usados.stockNoReparado, enabled: hasModulePathAccess(user, "noReparado", paths.usados.stockNoReparado), icon: Hammer },
         {
           label: "Pendiente documentacion",
           to: paths.usados.stockPendienteDocumentacion,
           enabled: hasModulePathAccess(user, "pendienteDocumentacion", paths.usados.stockPendienteDocumentacion),
-          icon: ClipboardList,
+          icon: FileSearch,
         },
-        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos), icon: Handshake },
+        { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos), icon: Inbox },
       ],
     },
     {
@@ -209,7 +210,6 @@ export default function Inicio() {
       items: [
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
-        { label: "PN", to: paths.admin.planNegocio, enabled: hasModulePathAccess(user, "configuracion", paths.admin.planNegocio), icon: BarChart3 },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
         {
           label: "Act. Registros",

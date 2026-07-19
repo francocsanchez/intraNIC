@@ -2,7 +2,6 @@ import { Router } from "express";
 import { UsuarioController } from "../controllers/UsuarioController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
@@ -12,7 +11,7 @@ const router = Router();
  * @desc Listar usuarios.
  *
  */
-router.get("/", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.listUsuarios);
+router.get("/", authenticate, authorizeModules("usuarios"), UsuarioController.listUsuarios);
 
 /**
  *
@@ -20,7 +19,7 @@ router.get("/", authenticate, authorizeModules("usuarios"), authorizeRoleAccess(
  * @desc Crear usuarios.
  *
  */
-router.post("/", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.createUsuario);
+router.post("/", authenticate, authorizeModules("usuarios"), UsuarioController.createUsuario);
 
 
 /**
@@ -29,7 +28,7 @@ router.post("/", authenticate, authorizeModules("usuarios"), authorizeRoleAccess
  * @desc Actualizar usuario by ID.
  *
  */
-router.put("/:idUsuario", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.updateUsuarioById);
+router.put("/:idUsuario", authenticate, authorizeModules("usuarios"), UsuarioController.updateUsuarioById);
 
 /**
  *
@@ -37,7 +36,7 @@ router.put("/:idUsuario", authenticate, authorizeModules("usuarios"), authorizeR
  * @desc Activar-desactivar usuario.
  *
  */
-router.patch("/:idUsuario/change-status", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.changeStatusUsuario);
+router.patch("/:idUsuario/change-status", authenticate, authorizeModules("usuarios"), UsuarioController.changeStatusUsuario);
 
 /**
  *
@@ -69,7 +68,7 @@ router.get("/me", authenticate,UsuarioController.getMe);
  * @desc Obtener usuario by ID.
  *
  */
-router.get("/:idUsuario", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.getUsuarioByID);
+router.get("/:idUsuario", authenticate, authorizeModules("usuarios"), UsuarioController.getUsuarioByID);
 
 /**
  *
@@ -77,7 +76,7 @@ router.get("/:idUsuario", authenticate, authorizeModules("usuarios"), authorizeR
  * @desc Resetear password.
  *
  */
-router.patch("/reset-password/:idUsuario", authenticate, authorizeModules("usuarios"), authorizeRoleAccess("sistema.usuarios"), UsuarioController.resetPassword);
+router.patch("/reset-password/:idUsuario", authenticate, authorizeModules("usuarios"), UsuarioController.resetPassword);
 
 /**
  *

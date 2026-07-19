@@ -11,20 +11,25 @@ La logica vigente es:
 - Un modulo esta **habilitado** solo cuando su valor es `1`.
 - Un modulo esta **deshabilitado** cuando su valor es `0`, `null` o no existe.
 - Si el usuario tiene el rol `superAdmin`, debe saltear cualquier restriccion funcional del sistema.
-- Si el usuario tiene mas de un rol activo, los permisos deben combinarse por **union de accesos permitidos**.
+- Si el usuario tiene mas de un rol activo, los permisos de accion deben combinarse por **union de accesos permitidos**.
 - La validacion de modulos debe aplicarse en:
   - frontend
   - rutas protegidas
   - backend
   - endpoints sensibles
 - `company` **sigue existiendo en el modelo**, pero **no debe usarse actualmente para decidir accesos**.
-- `role` ya participa en accesos **solo** para los roles actualmente definidos:
+- `role` no debe usarse para habilitar o bloquear el acceso a modulos o pantallas.
+- `role` debe usarse solo para definir acciones dentro de modulos ya habilitados.
+- Los roles actualmente definidos son:
   - `superAdmin`
   - `vendedor`
   - `supervisor`
   - `gerente`
   - `administracion`
   - `stock`
+  - `coordinador`
+  - `entrega`
+  - `accesorios`
 
 ## Catalogo actual de modulos
 - `convencional`
@@ -67,24 +72,25 @@ La logica vigente es:
 Para cualquier pantalla, menu, accion o endpoint:
 
 - Si el usuario tiene el rol `superAdmin`, el acceso debe permitirse siempre.
-- Si el usuario tiene varios roles activos definidos, debe permitirse la **suma de permisos** de esos roles, sin convertir eso en acceso total.
 - Si el modulo requerido esta en `1`, el acceso debe permitirse.
 - Si el modulo requerido esta en `0`, `null` o ausente, el acceso debe bloquearse.
+- El rol no debe bloquear la visibilidad ni el ingreso por URL a una pantalla cuyo modulo este habilitado.
 
 Esto implica:
 
 - `superAdmin` debe ver todos los accesos y entrar a cualquier URL sin depender de `modules`.
-- Combinar roles nunca debe abrir acceso global; solo debe sumar los accesos explicitamente definidos para cada rol.
 - No mostrar accesos habilitables en `Inicio` cuando el modulo no esta activo.
 - No mostrar links o acciones internas cuando el modulo no esta activo.
 - Bloquear ingreso por URL directa cuando el modulo no esta activo.
 - Responder `403` desde backend cuando el modulo no esta activo.
+- Definir permisos por rol solo para acciones puntuales dentro de cada modulo.
 
 ## Regla de combinacion de roles
 Cuando un usuario tenga mas de un rol definido:
 
-- se debe aplicar la **union** de permisos de todos sus roles activos
+- se debe aplicar la **union** de permisos de accion de todos sus roles activos
 - no se debe tomar la presencia de multiples roles como acceso total
+- combinar roles no debe habilitar modulos no marcados en el formulario del usuario
 - `superAdmin` sigue siendo la unica excepcion con acceso irrestricto
 
 Ejemplo:
@@ -94,14 +100,10 @@ Ejemplo:
 - cualquier combinacion con `superAdmin` = acceso total
 
 ## Etapa actual: pantallas controladas solo por modulo
-En esta etapa se definio que algunas pantallas dependen solo de los modulos habilitados en el usuario, sin bloquearse por rol.
+En la etapa actual, todas las pantallas y secciones del sistema dependen solo de los modulos habilitados en el usuario, sin bloquearse por rol.
 
-Aplica a estas areas:
-
-- `Call Center`
-- `Plan de ahorro`
-- `Gestion de stock usados`
-- `Analisis`
+- Esta regla aplica a todos los modulos actuales del sistema.
+- El rol queda reservado para acciones puntuales dentro de cada modulo.
 
 ### Call Center
 
@@ -129,6 +131,12 @@ Aplica a estas areas:
 - `Pendiente documentacion` depende de `modules.pendienteDocumentacion = 1`.
 - `Ingresos` depende de `modules.ingresos = 1`.
 - Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
+- Esto incluye acceso por menu, acceso por URL directa y acceso a los endpoints backend del modulo.
+- El navbar interno de `Gestion de stock usados` debe mostrar solo modulos de esta seccion:
+  - `No reparado`
+  - `Pendiente documentacion`
+  - `Ingresos`
+- En esta seccion, el acceso debe depender solo del modulo habilitado y nunca del rol del usuario.
 
 ### Analisis
 
@@ -138,6 +146,51 @@ Aplica a estas areas:
 - `Patentamientos` depende de `modules.patentamientos = 1`.
 - `Transferencias` depende de `modules.transferencias = 1`.
 - Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
+- Esto incluye acceso por menu, acceso por URL directa y acceso a los endpoints backend del modulo.
+- `Ranking` debe permitir ingreso a `/analisis/ranking-convencional` solo por `modules.ranking = 1`.
+- `Promedio` debe permitir ingreso a `/analisis/promedio-convencional` solo por `modules.promedio = 1`.
+- `Patentamientos` y `Transferencias` forman un modulo visual unificado en sidebar, pero cada uno sigue dependiendo de su propio modulo habilitado.
+- El navbar de `Analisis` debe mostrar solo modulos propios de la seccion:
+  - `Operaciones`
+  - `Ranking`
+  - `Promedio`
+- `Transferencias` ya no debe aparecer en el navbar superior de `Analisis`.
+- `Patentamientos` y `Transferencias` ya no deben vivir como accesos separados en ese navbar superior, porque se navegan desde su sidebar unificado.
+
+### Regla transversal para todos los modulos
+
+- Cualquier usuario puede acceder a un modulo si ese modulo esta habilitado en su formulario de usuario.
+- Ningun rol debe bloquear el acceso a una pantalla o ruta si el modulo correspondiente esta habilitado.
+- Las restricciones por rol deben implementarse despues, modulo por modulo, solo sobre acciones concretas.
+
+## Seccion Sistemas
+
+- `Usuarios`: todas las acciones se permiten si el usuario tiene `modules.usuarios = 1`.
+- `Configuracion`: todas las acciones se permiten si el usuario tiene `modules.configuracion = 1`.
+- `PN`: ya no aparece como modulo independiente en `Inicio`.
+- `PN`: se administra desde `/admin/configuracion`, dentro del bloque `Parametros de sistema`.
+- `PN`: el acceso funcional depende de `modules.configuracion = 1`.
+- `PN`: el bloque `Parametros de sistema` solo debe ser visible para usuarios con rol `superAdmin`.
+- `Pedido mensual`: ya no forma parte de `Gestion de stock convencional` en la navegacion.
+- `Pedido mensual`: debe accederse desde `Configuracion`, dentro del bloque `Parametros de sistema`.
+- `Ac Registros`: todas las acciones se permiten si el usuario tiene `modules.actualizacionRegistros = 1`.
+- `TestDrive`: todas las acciones se permiten si el usuario tiene `modules.testDrive = 1`.
+- En esta seccion, el rol no debe bloquear lectura, creacion, edicion, eliminacion, activacion, desactivacion ni acciones administrativas.
+- El navbar interno de esta seccion debe mostrar solo modulos de `Sistemas`.
+- El navbar interno de `Sistemas` debe incluir:
+  - `Usuarios`
+  - `Configuracion`
+  - `TestDrive`
+  - `Act. Registros`
+- `Act. Registros`, aunque mantenga la ruta `/analisis/registros`, debe navegar con el navbar de `Sistemas` y no con el navbar de `Analisis`.
+- El acceso a `Usuarios`, `Configuracion`, `TestDrive` y `Act. Registros` debe depender solo del modulo habilitado, nunca del rol del usuario.
+- La seccion `Parametros de sistema` dentro de `Configuracion` reemplaza visualmente al acceso antiguo de `Catalogos preventas`.
+- `Parametros de sistema` debe agrupar:
+  - `Colores`
+  - `Versiones`
+  - `PN`
+  - `Pedido mensual`
+- `Parametros de sistema` solo debe ser visible para `superAdmin`.
 
 ## Relacion actual modulo -> acceso funcional
 - `convencional`: stock y vistas generales de convencional
@@ -164,6 +217,7 @@ Aplica a estas areas:
 - `pendienteDocumentacion`: usados pendiente documentacion
 - `ingresos`: usados ingresos
 - `operaciones`: analisis de operaciones
+- `actualizacionRegistros`: actualizacion/importacion de registros
 - `ranking`: ranking convencional
 - `promedio`: promedio convencional
 - `patentamientos`: analisis de patentamientos
@@ -184,6 +238,9 @@ Estado actual de definicion funcional:
 - `supervisor`: definido e implementado
 - `gerente`: definido e implementado
 - `vendedor`: definido e implementado
+- `coordinador`: definido e implementado
+- `entrega`: definido e implementado
+- `accesorios`: definido e implementado
 - `superAdmin`: definido e implementado
 
 ## Definiciones por rol
@@ -287,6 +344,33 @@ Estado: definido
   - `registroAsignaciones`
   - `preventas` con permisos parciales
 
+### Rol `coordinador`
+Estado: definido
+
+- Objetivo del rol:
+  Usuario operativo de entregas con capacidad de administrar turnos y reservas de agenda de entrega.
+- Regla actual:
+  - el acceso a pantallas sigue dependiendo del modulo habilitado en el usuario
+  - las acciones sobre agenda de entrega se controlan por rol en backend
+
+### Rol `entrega`
+Estado: definido
+
+- Objetivo del rol:
+  Usuario de entregas habilitado para marcar quien realizo la entrega en la agenda.
+- Regla actual:
+  - el acceso a pantallas sigue dependiendo del modulo habilitado en el usuario
+  - las acciones sobre `entregada por` se controlan por rol en backend
+
+### Rol `accesorios`
+Estado: definido
+
+- Objetivo del rol:
+  Usuario de accesorios habilitado para marcar el estado de equipado/accesorios en la agenda de entrega.
+- Regla actual:
+  - el acceso a pantallas sigue dependiendo del modulo habilitado en el usuario
+  - las acciones sobre `equipado/accesorios` se controlan por rol en backend
+
 ### Rol `supervisor`
 Estado: definido
 
@@ -314,10 +398,10 @@ Estado: definido
 - Acceso funcional asociado: `sistema.testDrive`
 - Ruta principal: `/admin/test-drive`
 - Accion habilitada: ABM de unidades destinadas a test drive
-- Roles permitidos:
-  - `supervisor`
-  - `gerente`
-  - `superAdmin`
+- Regla vigente:
+  - cualquier usuario con `modules.testDrive = 1` puede acceder y operar el modulo
+  - el rol no debe bloquear ninguna accion del modulo
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
 
 ## Acceso especifico del modulo `registroTestDrive`
 - Modulo asociado: `registroTestDrive`
@@ -369,6 +453,6 @@ Hasta nuevo aviso:
 
 - los modulos siguen siendo la base principal de acceso
 - no se deben volver a introducir reglas por `company`
-- los unicos roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion` y `stock`
-- no se deben volver a introducir reglas por otros `role` hasta definir formalmente la siguiente etapa
+- los roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion`, `stock`, `coordinador`, `entrega` y `accesorios`
+- no se deben asumir otros `role` fuera de esa lista hasta definir formalmente una nueva etapa
 - `superAdmin` siempre debe tener acceso total

@@ -3,72 +3,76 @@ import { hasAnyModuleAccess, hasModuleAccess, hasModulePathAccess, hasPathAccess
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { ClipboardList, FileWarning, List, ReceiptText, Factory } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function AdminModuleLayout() {
   const { user } = useAuth();
+  const { pathname } = useLocation();
 
-  const canViewReventas = hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes);
-  const canViewPedidoUnidades = hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia);
-  const canViewFacturasAnticipo = hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo);
-  const canViewSegUnidadesFabrica = hasModuleAccess(user, "segUnidadesFabrica");
-  const canViewPedidoUnidadesRegistros = hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"])
-    && hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros);
+  const navItems = [
+    {
+      label: "Pend. reventas",
+      to: paths.administracion.reventaPendientes,
+      icon: ReceiptText,
+      visible: hasModulePathAccess(user, "reventaPendientes", paths.administracion.reventaPendientes),
+      active: pathname === paths.administracion.reventaPendientes,
+    },
+    {
+      label: "Pedido unidades",
+      to: paths.administracion.pedidoUnidadesListaPrevia,
+      icon: ClipboardList,
+      visible: hasModulePathAccess(user, "listaPrevia", paths.administracion.pedidoUnidadesListaPrevia),
+      active:
+        pathname === paths.administracion.pedidoUnidadesListaPrevia ||
+        pathname === paths.administracion.pedidoUnidadesRegistros,
+    },
+    {
+      label: "Registros pedidos",
+      to: paths.administracion.pedidoUnidadesRegistros,
+      icon: List,
+      visible:
+        hasAnyModuleAccess(user, ["listaPrevia", "pedidoUnidades"]) &&
+        hasPathAccess(user, paths.administracion.pedidoUnidadesRegistros),
+      active: pathname === paths.administracion.pedidoUnidadesRegistros,
+    },
+    {
+      label: "Fact. anticipo",
+      to: paths.administracion.facturasAnticipo,
+      icon: FileWarning,
+      visible: hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo),
+      active: pathname === paths.administracion.facturasAnticipo,
+    },
+    {
+      label: "Seg. fabrica",
+      to: paths.administracion.segUnidadesFabrica,
+      icon: Factory,
+      visible: hasModuleAccess(user, "segUnidadesFabrica"),
+      active: pathname === paths.administracion.segUnidadesFabrica,
+    },
+  ].filter((item) => item.visible);
 
   return (
     <BaseAppLayout
       footerLeft="Modulo de administracion"
-      footerRight={new Date().getFullYear()}
+      footerRight="Franco Sanchez"
       centerContent={
         <>
-          {canViewReventas && (
-            <Link to={paths.administracion.reventaPendientes} className="inline-flex items-center gap-1 hover:text-gray-900 transition">
-              <ReceiptText size={15} strokeWidth={1.5} />
-              Pendientes de reventas
-            </Link>
-          )}
-
-          {canViewPedidoUnidades && (
+          {navItems.map((item) => (
             <Link
-              to={paths.administracion.pedidoUnidadesListaPrevia}
-              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
+              key={item.to}
+              to={item.to}
+              className={[
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
+                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
             >
-              <ClipboardList size={15} strokeWidth={1.5} />
-              Pedido de Unidades
+              <item.icon size={16} strokeWidth={1.75} />
+              {item.label}
             </Link>
-          )}
-
-          {canViewPedidoUnidadesRegistros && (
-            <Link
-              to={paths.administracion.pedidoUnidadesRegistros}
-              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
-            >
-              <List size={15} strokeWidth={1.5} />
-              Registros de pedidos
-            </Link>
-          )}
-
-          {canViewFacturasAnticipo && (
-            <Link
-              to={paths.administracion.facturasAnticipo}
-              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
-            >
-              <FileWarning size={15} strokeWidth={1.5} />
-              Facturas de anticipo
-            </Link>
-          )}
-
-          {canViewSegUnidadesFabrica && (
-            <Link
-              to={paths.administracion.segUnidadesFabrica}
-              className="inline-flex items-center gap-1 hover:text-gray-900 transition"
-            >
-              <Factory size={15} strokeWidth={1.5} />
-              Seg. unidades fabrica
-            </Link>
-          )}
+          ))}
         </>
       }
+      mainClassName="px-4 py-6"
     />
   );
 }

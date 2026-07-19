@@ -2,51 +2,59 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { Link } from "react-router-dom";
+import { BarChart3, ChartColumn, Trophy } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 export default function AnalisisLayout() {
   const { user } = useAuth();
+  const { pathname } = useLocation();
 
-  const canViewOperaciones = hasModulePathAccess(user, "operaciones", paths.analisis.operaciones);
-  const canViewRanking = hasModulePathAccess(user, "ranking", paths.convencional.ranking);
-  const canViewPromedio = hasModulePathAccess(user, "promedio", paths.convencional.promedio);
-  const canViewTransferencias = hasModulePathAccess(
-    user,
-    "transferencias",
-    paths.analisis.transferencias.dashboardGeneral,
-  );
+  const navItems = [
+    {
+      label: "Operaciones",
+      to: paths.analisis.operaciones,
+      icon: ChartColumn,
+      visible: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones),
+      active: pathname === paths.analisis.operaciones,
+    },
+    {
+      label: "Ranking",
+      to: paths.convencional.ranking,
+      icon: Trophy,
+      visible: hasModulePathAccess(user, "ranking", paths.convencional.ranking),
+      active: pathname === paths.convencional.ranking,
+    },
+    {
+      label: "Promedio",
+      to: paths.convencional.promedio,
+      icon: BarChart3,
+      visible: hasModulePathAccess(user, "promedio", paths.convencional.promedio),
+      active: pathname === paths.convencional.promedio,
+    },
+  ].filter((item) => item.visible);
 
   return (
     <BaseAppLayout
       footerLeft="Analisis"
-      footerRight={new Date().getFullYear()}
+      footerRight="Franco Sanchez"
       centerContent={
         <>
-          {canViewOperaciones ? (
-            <Link to={paths.analisis.operaciones} className="hover:text-gray-900 transition">
-              Operaciones
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={[
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
+                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              <item.icon size={16} strokeWidth={1.75} />
+              {item.label}
             </Link>
-          ) : null}
-
-          {canViewRanking ? (
-            <Link to={paths.convencional.ranking} className="hover:text-gray-900 transition">
-              Ranking
-            </Link>
-          ) : null}
-
-          {canViewPromedio ? (
-            <Link to={paths.convencional.promedio} className="hover:text-gray-900 transition">
-              Promedio
-            </Link>
-          ) : null}
-
-          {canViewTransferencias ? (
-            <Link to={paths.analisis.transferencias.dashboardGeneral} className="hover:text-gray-900 transition">
-              Transferencias
-            </Link>
-          ) : null}
+          ))}
         </>
       }
+      mainClassName="px-4 py-6"
     />
   );
 }

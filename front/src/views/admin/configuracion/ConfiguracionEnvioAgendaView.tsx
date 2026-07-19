@@ -3,8 +3,6 @@ import {
   updateAgendaEnvioConfig,
   type AgendaEnvioConfigPayload,
 } from "@/api/entregasAPI";
-import { hasSuperAdminRole } from "@/helpers/access";
-import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import type { AgendaEnvioConfig } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -54,10 +52,8 @@ const validateDraft = (draft: DraftItem) => {
 };
 
 export default function ConfiguracionEnvioAgendaView() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [drafts, setDrafts] = useState<Record<string, DraftItem>>({});
-  const canManage = hasSuperAdminRole(user);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["entregas", "envio-agenda"],
@@ -100,13 +96,13 @@ export default function ConfiguracionEnvioAgendaView() {
   };
 
   if (isLoading) {
-    return <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando configuración de envío de agenda...</div>;
+    return <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando configuracion de envio de agenda...</div>;
   }
 
   if (isError) {
     return (
       <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
-        {error instanceof Error ? error.message : "Error al cargar la configuración de envío de agenda"}
+        {error instanceof Error ? error.message : "Error al cargar la configuracion de envio de agenda"}
       </div>
     );
   }
@@ -115,10 +111,10 @@ export default function ConfiguracionEnvioAgendaView() {
     <div className="w-full px-4 py-6 space-y-6">
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Envío de agenda</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Envio de agenda</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Define por sucursal quién recibe el PDF automático diario de la agenda de entrega.
+            Define por sucursal quien recibe el PDF automatico diario de la agenda de entrega.
           </p>
         </div>
 
@@ -129,12 +125,6 @@ export default function ConfiguracionEnvioAgendaView() {
           Volver
         </Link>
       </section>
-
-      {!canManage ? (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 shadow-sm">
-          Solo usuarios con rol `superAdmin` pueden editar esta configuración. La vista queda disponible en modo lectura.
-        </section>
-      ) : null}
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         {items.map((item) => {
@@ -155,14 +145,13 @@ export default function ConfiguracionEnvioAgendaView() {
                     <Building2 size={16} className="text-gray-500" />
                     <span>{sucursal.nombre}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">{sucursal.direccion || "Sin dirección cargada"}</p>
+                  <p className="mt-1 text-sm text-gray-500">{sucursal.direccion || "Sin direccion cargada"}</p>
                 </div>
 
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <input
                     type="checkbox"
                     checked={draft.activo}
-                    disabled={!canManage}
                     onChange={(event) => {
                       const checked = event.target.checked;
                       setDraft(sucursal._id, (current) => ({
@@ -182,21 +171,19 @@ export default function ConfiguracionEnvioAgendaView() {
                     <p className="mt-1 text-sm text-gray-500">Carga manual de emails, sin necesidad de usuarios del sistema.</p>
                   </div>
 
-                  {canManage ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDraft(sucursal._id, (current) => ({
-                          ...current,
-                          emails: [...current.emails, ""],
-                        }))
-                      }
-                      className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
-                    >
-                      <Plus size={14} />
-                      Agregar email
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDraft(sucursal._id, (current) => ({
+                        ...current,
+                        emails: [...current.emails, ""],
+                      }))
+                    }
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    <Plus size={14} />
+                    Agregar email
+                  </button>
                 </div>
 
                 <div className="space-y-3">
@@ -207,7 +194,6 @@ export default function ConfiguracionEnvioAgendaView() {
                         <input
                           type="email"
                           value={email}
-                          disabled={!canManage}
                           onChange={(event) => {
                             const nextValue = event.target.value;
                             setDraft(sucursal._id, (current) => ({
@@ -222,22 +208,20 @@ export default function ConfiguracionEnvioAgendaView() {
                         />
                       </div>
 
-                      {canManage ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDraft(sucursal._id, (current) => ({
-                              ...current,
-                              emails: current.emails.length > 1
-                                ? current.emails.filter((_, currentIndex) => currentIndex !== index)
-                                : [""],
-                            }))
-                          }
-                          className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDraft(sucursal._id, (current) => ({
+                            ...current,
+                            emails: current.emails.length > 1
+                              ? current.emails.filter((_, currentIndex) => currentIndex !== index)
+                              : [""],
+                          }))
+                        }
+                        className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -248,32 +232,30 @@ export default function ConfiguracionEnvioAgendaView() {
                   Estado sucursal: {sucursal.activa ? "Activa" : "Inactiva"}
                 </div>
 
-                {canManage ? (
-                  <button
-                    type="button"
-                    disabled={isSaving}
-                    onClick={() => {
-                      const validationError = validateDraft(draft);
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => {
+                    const validationError = validateDraft(draft);
 
-                      if (validationError) {
-                        toast.error(validationError);
-                        return;
-                      }
+                    if (validationError) {
+                      toast.error(validationError);
+                      return;
+                    }
 
-                      saveMutation.mutate({
-                        sucursalId: sucursal._id,
-                        payload: {
-                          activo: draft.activo,
-                          emails: draft.emails.map(normalizeEmail),
-                        },
-                      });
-                    }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Save size={16} />
-                    {isSaving ? "Guardando..." : "Guardar"}
-                  </button>
-                ) : null}
+                    saveMutation.mutate({
+                      sucursalId: sucursal._id,
+                      payload: {
+                        activo: draft.activo,
+                        emails: draft.emails.map(normalizeEmail),
+                      },
+                    });
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Save size={16} />
+                  {isSaving ? "Guardando..." : "Guardar"}
+                </button>
               </div>
             </article>
           );

@@ -70,6 +70,6 @@ router.get("/lista-de-espera", authorizeModules("convencional"), authorizeRoleAc
 router.get("/mis-reservas", authorizeModules("convencional"), authorizeRoleAccess("convencional.misReservas"), ConvencionalController.misReservas);
 
 router.get("/mis-operaciones/:mes/:ano", authorizeModules("convencional"), authorizeRoleAccess("convencional.misOperaciones"), ConvencionalController.misOperaciones);
-router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), authorizeRoleAccess("convencional.promedio"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), authorizeRoleAccess("convencional.ranking"), ConvencionalController.rankingOperaciones);
+router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), ConvencionalController.promedioOperaciones);
+router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), ConvencionalController.rankingOperaciones);
 export default router;

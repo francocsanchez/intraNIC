@@ -3,9 +3,8 @@ import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, BriefcaseBusiness, CalendarDays, ChevronDown, ClipboardList, Package } from "lucide-react";
+import { Archive, BookMarked, BriefcaseBusiness, CalendarDays, CarFront, ChevronDown, ClipboardList, FileText, Package } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { hasSuperAdminRole } from "@/helpers/access";
 
 type NavBarProps = {
   negocio: string;
@@ -28,52 +27,109 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const canViewMisOperaciones = hasModulePathAccess(user, moduleKey, misOperacionesPath);
   const canViewMisReservas = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
   const canViewMiListaEspera = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
-  const canViewAgendaComercial = isConvencional && hasSuperAdminRole(user);
+  const canViewProformas = isConvencional && hasModulePathAccess(user, "proformas", paths.convencional.proformas);
+  const canViewMinutas = isConvencional && hasModulePathAccess(user, "minutas", paths.convencional.minutas);
+  const canViewAgendaComercial = isConvencional && hasModulePathAccess(user, "agendaComercial", paths.convencional.agendaComercial);
+  const canViewRegistroTestDrive = isConvencional && hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive);
+  const isCommercialPath =
+    isConvencional &&
+    (pathname.startsWith("/convencional/proformas") ||
+      pathname.startsWith("/convencional/minutas") ||
+      pathname === paths.convencional.agendaComercial ||
+      pathname.startsWith("/gestion/convencional/test-drive"));
   const isGestionPath = isConvencional
     ? pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/")
     : pathname.startsWith("/usados/");
   const showGestionMenu =
     isGestionPath &&
+    !isCommercialPath &&
     (canViewMisOperaciones || canViewMisReservas || canViewMiListaEspera);
+  const stockNavItems = [
+    {
+      label: "Disponible",
+      to: disponiblePath,
+      icon: Package,
+      visible: canViewConvencional,
+      active: pathname === disponiblePath,
+    },
+    {
+      label: "Reservas",
+      to: reservasPath,
+      icon: BookMarked,
+      visible: buttonReservas,
+      active: pathname === reservasPath,
+    },
+    {
+      label: "Guardado",
+      to: guardadoPath,
+      icon: Archive,
+      visible: buttonGuardado,
+      active: pathname === guardadoPath,
+    },
+    {
+      label: "P. Resumen",
+      to: paths.convencional.preventasResumen,
+      icon: ClipboardList,
+      visible: isConvencional && canViewPreventas,
+      active:
+        pathname === paths.convencional.preventasResumen ||
+        pathname === paths.convencional.preventas ||
+        pathname === paths.convencional.preventasAsignadas ||
+        pathname === paths.convencional.preventasNueva ||
+        pathname.startsWith("/gestion/convencional/preventas/"),
+    },
+  ].filter((item) => item.visible);
+
+  const commercialNavItems = [
+    {
+      label: "Proformas",
+      to: paths.convencional.proformas,
+      icon: FileText,
+      visible: canViewProformas,
+      active: pathname === paths.convencional.proformas || pathname === paths.convencional.proformasNueva || pathname.startsWith("/convencional/proformas/"),
+    },
+    {
+      label: "Minutas",
+      to: paths.convencional.minutas,
+      icon: ClipboardList,
+      visible: canViewMinutas,
+      active: pathname === paths.convencional.minutas || pathname === paths.convencional.minutasNueva || pathname.startsWith("/convencional/minutas/"),
+    },
+    {
+      label: "Agenda comercial",
+      to: paths.convencional.agendaComercial,
+      icon: CalendarDays,
+      visible: canViewAgendaComercial,
+      active: pathname === paths.convencional.agendaComercial,
+    },
+    {
+      label: "Registro TestDrive",
+      to: paths.convencional.registroTestDrive,
+      icon: CarFront,
+      visible: canViewRegistroTestDrive,
+      active: pathname === paths.convencional.registroTestDrive || pathname === paths.convencional.registroTestDriveCalendario,
+    },
+  ].filter((item) => item.visible);
+
+  const navItems = isCommercialPath ? commercialNavItems : stockNavItems;
 
   return (
     <GlobalNavbar
       centerContent={
         <>
-          {canViewConvencional ? (
-            <Link to={disponiblePath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <Package size={16} strokeWidth={1.5} />
-              Disponible
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={[
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
+                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              <item.icon size={16} strokeWidth={1.75} />
+              {item.label}
             </Link>
-          ) : null}
-
-          {buttonReservas ? (
-            <Link to={reservasPath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <BookMarked size={16} strokeWidth={1.5} />
-              Reservas
-            </Link>
-          ) : null}
-
-          {buttonGuardado ? (
-            <Link to={guardadoPath} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <Archive size={16} strokeWidth={1.5} />
-              Guardado
-            </Link>
-          ) : null}
-
-          {isConvencional && canViewPreventas ? (
-            <Link to={paths.convencional.preventasResumen} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <ClipboardList size={16} strokeWidth={1.5} />
-              P. Resumen
-            </Link>
-          ) : null}
-
-          {canViewAgendaComercial ? (
-            <Link to={paths.convencional.agendaComercial} className="flex items-center gap-2 relative hover:text-gray-900 transition">
-              <CalendarDays size={16} strokeWidth={1.5} />
-              Agenda comercial
-            </Link>
-          ) : null}
+          ))}
         </>
       }
       rightContent={

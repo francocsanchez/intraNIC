@@ -1,18 +1,8 @@
 import { Response, Request } from "express";
 import Configuration from "../models/Config";
-import { hasSuperAdminRole, normalizeRoles } from "../constants/roleAccess";
 import { logError } from "../utils/logError";
 
 export class ConfigController {
-  private static canToggleBusinessSystem(req: Request) {
-    if (hasSuperAdminRole(req.user?.role)) {
-      return true;
-    }
-
-    const normalizedRoles = normalizeRoles(req.user?.role);
-    return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
-  }
-
   static listConfig = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne().lean();
@@ -63,53 +53,6 @@ export class ConfigController {
 
   static updateConfig = async (req: Request, res: Response) => {
     try {
-      const userCompanies = req.user?.company ?? [];
-      const bodyKeys = Object.keys(req.body ?? {});
-
-      const conventionalKeys = [
-        "sistemaActivoConvencional",
-        "vendedoresReservasConvencional",
-        "vendedoresDisponibleConvencional",
-        "vendedoresStockGuardadoConvencional",
-      ];
-
-      const usadosKeys = [
-        "sistemaActivoUsados",
-        "vendedoresReservasUsados",
-        "vendedoresDisponibleUsados",
-        "vendedoresStockGuardadoUsados",
-        "vendedoresStockNoReparadoUsados",
-        "vendedoresStockPendDocuUsados",
-      ];
-
-      const touchesConvencional = bodyKeys.some((key) =>
-        conventionalKeys.includes(key),
-      );
-      const touchesUsados = bodyKeys.some((key) => usadosKeys.includes(key));
-      const touchesConvencionalStatus = bodyKeys.includes("sistemaActivoConvencional");
-      const touchesUsadosStatus = bodyKeys.includes("sistemaActivoUsados");
-
-      if (touchesConvencional && !userCompanies.includes("convencional")) {
-        return res.status(403).json({
-          error: "No tienes permisos para editar la configuracion de Convencional.",
-        });
-      }
-
-      if (touchesUsados && !userCompanies.includes("usados")) {
-        return res.status(403).json({
-          error: "No tienes permisos para editar la configuracion de Usados.",
-        });
-      }
-
-      if (
-        (touchesConvencionalStatus || touchesUsadosStatus) &&
-        !ConfigController.canToggleBusinessSystem(req)
-      ) {
-        return res.status(403).json({
-          error: "Solo usuarios con rol stock, gerente o superAdmin pueden cambiar el estado del sistema.",
-        });
-      }
-
       const config = await Configuration.findOneAndUpdate({}, req.body, {
         returnDocument: "after",
         runValidators: true,
@@ -134,12 +77,6 @@ export class ConfigController {
 
   static toggleSistemaConvencional = async (req: Request, res: Response) => {
     try {
-      if (!ConfigController.canToggleBusinessSystem(req)) {
-        return res.status(403).json({
-          error: "Solo usuarios con rol stock, gerente o superAdmin pueden cambiar el estado del sistema.",
-        });
-      }
-
       const config = await Configuration.findOne();
 
       if (!config) {
@@ -166,12 +103,6 @@ export class ConfigController {
 
   static toggleSistemaUsados = async (req: Request, res: Response) => {
     try {
-      if (!ConfigController.canToggleBusinessSystem(req)) {
-        return res.status(403).json({
-          error: "Solo usuarios con rol stock, gerente o superAdmin pueden cambiar el estado del sistema.",
-        });
-      }
-
       const config = await Configuration.findOne();
 
       if (!config) {

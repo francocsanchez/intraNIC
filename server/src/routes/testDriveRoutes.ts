@@ -3,12 +3,18 @@ import type { NextFunction, Request, Response } from "express";
 import { TestDriveController } from "../controllers/TestDriveController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { authorizeAnyRoleAccess, authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
+import { hasEnabledModule, sanitizeUserModules } from "../constants/modules";
+import { authorizeAnyRoleAccess } from "../middleware/authorizeRoleAccess";
 
 const router = Router();
 
 const authorizeTestDriveOptions = (req: Request, res: Response, next: NextFunction) => {
   const negocio = typeof req.query.negocio === "string" ? req.query.negocio.trim() : "";
+  const modules = sanitizeUserModules(req.user?.modules);
+
+  if (hasEnabledModule(modules, ["testDrive"])) {
+    return next();
+  }
 
   if (negocio === "planAhorro") {
     return next();
@@ -35,28 +41,24 @@ router.get(
 router.get(
   "/",
   authorizeModules("testDrive"),
-  authorizeRoleAccess("sistema.testDrive"),
   TestDriveController.list,
 );
 
 router.post(
   "/",
   authorizeModules("testDrive"),
-  authorizeRoleAccess("sistema.testDrive"),
   TestDriveController.create,
 );
 
 router.put(
   "/:id",
   authorizeModules("testDrive"),
-  authorizeRoleAccess("sistema.testDrive"),
   TestDriveController.update,
 );
 
 router.patch(
   "/:id/change-status",
   authorizeModules("testDrive"),
-  authorizeRoleAccess("sistema.testDrive"),
   TestDriveController.changeStatus,
 );
 

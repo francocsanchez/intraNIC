@@ -1,8 +1,6 @@
 import { getConfiguracion, updateConfiguracionConvencional } from "@/api/configuracionAPI";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import CheckListVendedores from "@/components/configuracion/CheckListVendedores";
-import { hasSystemConfigToggleAccess } from "@/helpers/access";
-import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -19,7 +17,6 @@ type ConfigConvForm = {
 };
 
 export default function EditConfiguracionConvView() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -69,7 +66,6 @@ export default function EditConfiguracionConvView() {
     control,
     name: "sistemaActivoConvencional",
   });
-  const canToggleSystem = hasSystemConfigToggleAccess(user);
 
   const { mutate, isPending } = useMutation({
     mutationFn: updateConfiguracionConvencional,
@@ -188,9 +184,7 @@ export default function EditConfiguracionConvView() {
             <label className="inline-flex items-center gap-3">
               <Switch
                 checked={enabled}
-                disabled={!canToggleSystem}
                 onChange={(val) => {
-                  if (!canToggleSystem) return;
                   setValue("sistemaActivoConvencional", val, {
                     shouldDirty: true,
                     shouldTouch: true,
@@ -198,7 +192,7 @@ export default function EditConfiguracionConvView() {
                 }}
                 className={`${
                   enabled ? "bg-black" : "bg-gray-300"
-                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-black/40 disabled:cursor-not-allowed disabled:opacity-60`}
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-black/40`}
               >
                 <span className="sr-only">Cambiar estado del sistema</span>
                 <span
@@ -211,10 +205,6 @@ export default function EditConfiguracionConvView() {
               <input type="hidden" {...register("sistemaActivoConvencional")} />
             </label>
           </div>
-
-          {!canToggleSystem ? (
-            <p className="-mt-2 text-sm text-amber-700">Solo usuarios con rol `stock`, `gerente` o `superAdmin` pueden cambiar el estado del sistema.</p>
-          ) : null}
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <CheckListVendedores

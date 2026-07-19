@@ -1,6 +1,6 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
-import { hasModuleAccess, hasPathAccess } from "@/helpers/access";
+import { hasModuleAccess, hasPathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
@@ -52,6 +52,12 @@ export default function ConfiguracionView() {
   const canManagePlanNegocio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.planNegocio);
+  const canManagePedidoMensual =
+    hasModuleAccess(user, "pedidoMensual") &&
+    hasPathAccess(user, paths.convencional.pedidoMensual);
+  const canManageSystemParameters =
+    hasSuperAdminRole(user) &&
+    (canManagePreventasCatalogs || canManagePlanNegocio || canManagePedidoMensual);
   const canManageAgendaEnvio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.configuracionEnvioAgenda);
@@ -85,15 +91,14 @@ export default function ConfiguracionView() {
       canView: true,
       canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionConvencionalEditar),
       editPath: paths.admin.configuracionConvencionalEditar,
-      catalogos: canManagePreventasCatalogs
+      catalogos: canManageSystemParameters
         ? [
             { label: "Colores", to: paths.convencional.preventasColores },
             { label: "Versiones", to: paths.convencional.preventasVersiones },
             ...(canManagePlanNegocio ? [{ label: "PN", to: paths.admin.planNegocio }] : []),
+            ...(canManagePedidoMensual ? [{ label: "Pedido mensual", to: paths.convencional.pedidoMensual }] : []),
           ]
-        : canManagePlanNegocio
-          ? [{ label: "PN", to: paths.admin.planNegocio }]
-          : [],
+        : [],
     },
     {
       title: "Usados",
@@ -191,7 +196,7 @@ export default function ConfiguracionView() {
 
               {sistema.catalogos.length ? (
                 <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Catalogos preventas</div>
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Parametros de sistema</div>
                   <div className="flex flex-wrap gap-2">
                     {sistema.catalogos.map((catalogo) => (
                       <Link

@@ -10,9 +10,6 @@ const normalizeOrden = (value: unknown, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const hasSuperAdminAccess = (req: Request) =>
-  (req.user?.role ?? []).some((role) => String(role).trim().toLowerCase() === "superadmin");
-
 const buildUnidadNegocioResponse = (item: any) => ({
   _id: String(item._id),
   nombre: item.nombre ?? "",
@@ -23,14 +20,9 @@ const buildUnidadNegocioResponse = (item: any) => ({
 });
 
 export class UnidadNegocioController {
-  static ensureSuperAdmin(req: Request, res: Response) {
+  static ensureAuthenticated(req: Request, res: Response) {
     if (!req.user?._id) {
       res.status(401).json({ error: "Usuario no autenticado" });
-      return false;
-    }
-
-    if (!hasSuperAdminAccess(req)) {
-      res.status(403).json({ error: "Solo superAdmin puede administrar unidades de negocio" });
       return false;
     }
 
@@ -39,7 +31,7 @@ export class UnidadNegocioController {
 
   static list = async (req: Request, res: Response) => {
     try {
-      if (!UnidadNegocioController.ensureSuperAdmin(req, res)) {
+      if (!UnidadNegocioController.ensureAuthenticated(req, res)) {
         return;
       }
 
@@ -60,7 +52,7 @@ export class UnidadNegocioController {
 
   static create = async (req: Request, res: Response) => {
     try {
-      if (!UnidadNegocioController.ensureSuperAdmin(req, res)) {
+      if (!UnidadNegocioController.ensureAuthenticated(req, res)) {
         return;
       }
 
@@ -88,7 +80,7 @@ export class UnidadNegocioController {
 
   static update = async (req: Request, res: Response) => {
     try {
-      if (!UnidadNegocioController.ensureSuperAdmin(req, res)) {
+      if (!UnidadNegocioController.ensureAuthenticated(req, res)) {
         return;
       }
 
@@ -134,7 +126,7 @@ export class UnidadNegocioController {
 
   static remove = async (req: Request, res: Response) => {
     try {
-      if (!UnidadNegocioController.ensureSuperAdmin(req, res)) {
+      if (!UnidadNegocioController.ensureAuthenticated(req, res)) {
         return;
       }
 

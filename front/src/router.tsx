@@ -6,8 +6,7 @@ import { paths } from "./routes/paths";
 const NICLayout = lazy(() => import("./layouts/NICLayout"));
 const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
-const PatentamientosLayout = lazy(() => import("./layouts/PatentamientosLayout"));
-const TransferenciasLayout = lazy(() => import("./layouts/TransferenciasLayout"));
+const AnalisisMercadoLayout = lazy(() => import("./layouts/AnalisisMercadoLayout"));
 const CallCenterLayout = lazy(() => import("./layouts/CallCenterLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
@@ -16,6 +15,7 @@ const GestionUsadosLayout = lazy(() => import("./layouts/GestionUsadosLayout"));
 const AnalisisLayout = lazy(() => import("./layouts/AnalisisLayout"));
 const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute"));
 const ModuleProtectedRoute = lazy(() => import("./layouts/ModuleProtectedRoute"));
+const SuperAdminProtectedRoute = lazy(() => import("./layouts/SuperAdminProtectedRoute"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
 
@@ -164,7 +164,14 @@ export default function Router() {
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
               <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
-              <Route path={paths.admin.planNegocio} element={<PlanNegocioCrudView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
+            <Route element={<SuperAdminProtectedRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path={paths.admin.planNegocio} element={<PlanNegocioCrudView />} />
+              </Route>
             </Route>
           </Route>
 
@@ -290,10 +297,6 @@ export default function Router() {
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["actualizacionRegistros"]} />}>
-              <Route path={paths.analisis.registros} element={<PatentamientosRegistrosView />} />
-            </Route>
-
             <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>
               <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
             </Route>
@@ -302,8 +305,14 @@ export default function Router() {
             </Route>
           </Route>
 
+          <Route element={<ModuleProtectedRoute allowedModules={["actualizacionRegistros"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path={paths.analisis.registros} element={<PatentamientosRegistrosView />} />
+            </Route>
+          </Route>
+
           <Route element={<ModuleProtectedRoute allowedModules={["patentamientos"]} />}>
-            <Route element={<PatentamientosLayout />}>
+            <Route element={<AnalisisMercadoLayout />}>
               <Route path={paths.analisis.patentamientos.home} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboard} element={<Navigate to={paths.analisis.patentamientos.dashboardGeneral} replace />} />
               <Route path={paths.analisis.patentamientos.dashboardInscripcionUnidades} element={<InscripcionUnidadesView />} />
@@ -312,7 +321,7 @@ export default function Router() {
           </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["transferencias"]} />}>
-            <Route element={<TransferenciasLayout />}>
+            <Route element={<AnalisisMercadoLayout />}>
               <Route path={paths.analisis.transferencias.home} element={<Navigate to={paths.analisis.transferencias.dashboardGeneral} replace />} />
               <Route path={paths.analisis.transferencias.dashboard} element={<Navigate to={paths.analisis.transferencias.dashboardGeneral} replace />} />
               <Route path={paths.analisis.transferencias.dashboardSectionRoute} element={<DashboardTransferenciasView />} />
@@ -322,12 +331,19 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<NICLayout />}>
               <Route path={paths.admin.vendedores} element={<VendedoresView />} />
-              <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
-              <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.convencional.preventasColores} replace />} />
-              <Route path={paths.convencional.preventasColoresEditarRoute} element={<Navigate to={paths.convencional.preventasColores} replace />} />
-              <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
-              <Route path={paths.convencional.preventasVersionesNuevo} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
-              <Route path={paths.convencional.preventasVersionesEditarRoute} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
+            <Route element={<SuperAdminProtectedRoute />}>
+              <Route element={<NICLayout />}>
+                <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
+                <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.convencional.preventasColores} replace />} />
+                <Route path={paths.convencional.preventasColoresEditarRoute} element={<Navigate to={paths.convencional.preventasColores} replace />} />
+                <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
+                <Route path={paths.convencional.preventasVersionesNuevo} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
+                <Route path={paths.convencional.preventasVersionesEditarRoute} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
+              </Route>
             </Route>
           </Route>
 
@@ -372,7 +388,7 @@ export default function Router() {
           </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["pedidoMensual"]} />}>
-            <Route element={<GestionConvencionalLayout />}>
+            <Route element={<AdminLayout />}>
               <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
             </Route>
           </Route>

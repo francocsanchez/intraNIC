@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import AgendaEnvioConfig from "../models/AgendaEnvioConfig";
 import SucursalEntrega from "../models/SucursalEntrega";
-import { hasSuperAdminRole } from "../constants/roleAccess";
 import { logError } from "../utils/logError";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
@@ -16,10 +15,6 @@ const isValidObjectId = (value: unknown) =>
 const ensureAccess = (req: Request) => {
   if (!req.user?._id) {
     return "Usuario no autenticado";
-  }
-
-  if (!hasSuperAdminRole(req.user.role)) {
-    return "Solo superAdmin puede administrar el envio automatico de agendas";
   }
 
   return null;
