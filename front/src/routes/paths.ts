@@ -28,6 +28,7 @@ export const paths = {
     planNegocio: "/admin/configuracion/plan-negocio",
     testDrive: "/admin/test-drive",
     vendedores: "/admin/dms/vendedores",
+    fsanchez: "/admin/fsanchez",
   },
   administracion: {
     home: "/administracion",

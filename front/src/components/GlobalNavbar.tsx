@@ -1,7 +1,8 @@
 import { useAuth } from "@/hooks/useAuthe";
+import { hasSuperAdminRole } from "@/helpers/access";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { ChevronDown, LogOut, Menu as MenuIcon, UserRound, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu as MenuIcon, ShieldCheck, UserRound, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
@@ -28,6 +29,8 @@ export default function GlobalNavbar({ centerContent, rightContent }: GlobalNavb
     navigate(paths.login, { replace: true });
   };
 
+  const canViewFsanchez = hasSuperAdminRole(user);
+
   return (
     <header className="border-b border-gray-200 bg-white backdrop-blur-sm">
       <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -49,6 +52,16 @@ export default function GlobalNavbar({ centerContent, rightContent }: GlobalNavb
         </div>
 
         <div className="hidden items-center gap-3 shrink-0 md:flex">
+          {canViewFsanchez ? (
+            <Link
+              to={paths.admin.fsanchez}
+              className="inline-flex items-center gap-2 rounded-md border border-[#d6ddff] bg-[#eef2ff] px-3 py-2 text-sm font-medium text-[#3345a8] transition hover:border-[#bcc8ff] hover:bg-[#e4eaff]"
+            >
+              <ShieldCheck size={16} strokeWidth={1.75} />
+              FSANCHEZ
+            </Link>
+          ) : null}
+
           {rightContent}
 
           <Menu as="div" className="relative">
@@ -119,6 +132,17 @@ export default function GlobalNavbar({ centerContent, rightContent }: GlobalNavb
               <div className="flex flex-col gap-2 [&_.mobile-menu-hidden]:hidden">
                 {rightContent}
               </div>
+            ) : null}
+
+            {canViewFsanchez ? (
+              <Link
+                to={paths.admin.fsanchez}
+                onClick={() => setMobileMenuOpen(false)}
+                className="inline-flex items-center gap-2 rounded-lg border border-[#d6ddff] bg-[#eef2ff] px-3 py-2 text-sm font-medium text-[#3345a8] transition hover:bg-[#e4eaff]"
+              >
+                <ShieldCheck size={16} strokeWidth={1.5} />
+                FSANCHEZ
+              </Link>
             ) : null}
 
             <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">

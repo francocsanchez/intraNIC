@@ -28,6 +28,7 @@ const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/Unida
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
 const CrearUsuarioView = lazy(() => import("./views/admin/usuarios/CrearUsuarioView"));
+const FsanchezView = lazy(() => import("./views/admin/FsanchezView"));
 const TestDriveView = lazy(() => import("./views/admin/testDrive/TestDriveView"));
 const MiPerfilView = lazy(() => import("./views/auth/MiPerfilView"));
 const MisOperacionesView = lazy(() => import("./views/auth/MisOperacionesView"));
@@ -172,6 +173,12 @@ export default function Router() {
               <Route element={<AdminLayout />}>
                 <Route path={paths.admin.planNegocio} element={<PlanNegocioCrudView />} />
               </Route>
+            </Route>
+          </Route>
+
+          <Route element={<SuperAdminProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path={paths.admin.fsanchez} element={<FsanchezView />} />
             </Route>
           </Route>
 

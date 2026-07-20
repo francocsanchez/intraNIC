@@ -1422,6 +1422,43 @@ export const pendFacResponseSchema = z.object({
   data: pendFacDataSchema,
 });
 
+export const fsanchezOperacionItemSchema = z.object({
+  interno: z.string(),
+  nrofab: z.string(),
+  version: z.string(),
+  modelo: z.string(),
+  chasis: z.string(),
+  color: z.string(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  ubicacion: z.string(),
+  opera: z.string(),
+  diasAsignado: z.number(),
+  cancelada: z.boolean(),
+});
+
+export const fsanchezOperacionesResponseSchema = z.object({
+  data: z.array(fsanchezOperacionItemSchema),
+  meta: z.object({
+    total: z.number(),
+    conSaldo: z.number(),
+    canceladas: z.number(),
+  }),
+});
+
+export const fsanchezOperacionEstadoResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    _id: z.string(),
+    opera: z.string(),
+    cancelada: z.boolean(),
+    updatedBy: z.string().nullable(),
+    updatedByName: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+});
+
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
@@ -1466,6 +1503,9 @@ export type PendFacRow = z.infer<typeof pendFacRowSchema>;
 export type PendFacGroup = z.infer<typeof pendFacGroupSchema>;
 export type PendFacData = z.infer<typeof pendFacDataSchema>;
 export type PendFacResponse = z.infer<typeof pendFacResponseSchema>;
+export type FsanchezOperacionItem = z.infer<typeof fsanchezOperacionItemSchema>;
+export type FsanchezOperacionesResponse = z.infer<typeof fsanchezOperacionesResponseSchema>;
+export type FsanchezOperacionEstadoResponse = z.infer<typeof fsanchezOperacionEstadoResponseSchema>;
 
 //**************************** */
 // PROFORMAS

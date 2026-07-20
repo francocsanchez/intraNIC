@@ -19,6 +19,7 @@ import { getStockConsolidadoLiess } from "./querys/liess.query";
 import { buildResumenFacturasReventas } from "../utils/reportFacturaRevetnas";
 import AnalisisStockPedido from "../models/AnalisisStockPedido";
 import AnalisisStockVersionDictionary from "../models/AnalisisStockVersionDictionary";
+import FsanchezOperacionEstado from "../models/FsanchezOperacionEstado";
 import * as XLSX from "xlsx";
 
 type AnalisisStockRow = {
@@ -107,6 +108,10 @@ type PendFacResponseData = {
   meta: {
     totalUnidades: number;
   };
+};
+
+type FsanchezOperacionItem = PendFacUnit & {
+  cancelada: boolean;
 };
 
 type AnalisisStockDictionaryPayload = {
@@ -333,6 +338,39 @@ const buildPendFacData = (rows: PendFacRow[]): PendFacResponseData => {
     },
   };
 };
+
+const serializeFsanchezOperacionEstado = (item: any) => ({
+  _id: String(item._id),
+  opera: normalizePendFacText(item.opera, ""),
+  cancelada: item.cancelada === true,
+  updatedBy: item.updatedBy ? String(item.updatedBy) : null,
+  updatedByName: typeof item.updatedByName === "string" ? item.updatedByName : "",
+  createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
+  updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
+});
+
+const buildFsanchezOperaciones = (
+  rows: PendFacRow[],
+  canceledByOpera: Map<string, boolean>,
+): FsanchezOperacionItem[] =>
+  rows.map((row) => {
+    const opera = normalizePendFacText(row.opera, "-");
+
+    return {
+      interno: normalizePendFacText(row.interno, "-"),
+      nrofab: normalizePendFacText(row.nrofab, "-"),
+      version: normalizeAnalisisText(row.version, "Sin version"),
+      modelo: normalizeAnalisisModel(row.modelo),
+      chasis: normalizePendFacText(row.chasis, "-"),
+      color: normalizePendFacText(row.color, "-"),
+      cliente: normalizePendFacText(row.cliente, "-"),
+      vendedor: normalizePendFacText(row.vendedor, "-"),
+      ubicacion: normalizeAnalisisText(row.ubicacion, "Sin ubicacion"),
+      opera,
+      diasAsignado: normalizePendFacNumber(row.diasAsignado, 0),
+      cancelada: canceledByOpera.get(opera) ?? false,
+    };
+  });
 
 const getAnalisisCanonicalVersion = (
   modelo: string,
@@ -1022,6 +1060,82 @@ export class DmsController {
       logError("DmsController.exportPendFac");
       console.error(error);
       return res.status(500).json({ message: "Error al exportar Pend Fac" });
+    }
+  };
+
+  static getFsanchezOperaciones = async (_req: Request, res: Response) => {
+    try {
+      const [rows, estados] = await Promise.all([
+        sequelizeNIC.query<PendFacRow>(getPendFacConvencional(), {
+          type: QueryTypes.SELECT,
+        }),
+        FsanchezOperacionEstado.find().lean(),
+      ]);
+
+      const canceledByOpera = estados.reduce<Map<string, boolean>>((acc, item) => {
+        const opera = normalizePendFacText(item.opera, "");
+
+        if (opera) {
+          acc.set(opera, item.cancelada === true);
+        }
+
+        return acc;
+      }, new Map());
+
+      const data = buildFsanchezOperaciones(rows, canceledByOpera);
+      const canceladas = data.filter((item) => item.cancelada).length;
+
+      return res.status(200).json({
+        data,
+        meta: {
+          total: data.length,
+          conSaldo: data.length - canceladas,
+          canceladas,
+        },
+      });
+    } catch (error) {
+      logError("DmsController.getFsanchezOperaciones");
+      console.error(error);
+      return res.status(500).json({ message: "Error al obtener las operaciones FSANCHEZ" });
+    }
+  };
+
+  static updateFsanchezOperacionEstado = async (req: Request, res: Response) => {
+    const opera = normalizePendFacText(req.params.opera, "");
+    const cancelada = req.body?.cancelada;
+
+    if (!opera || opera === "-") {
+      return res.status(400).json({ error: "La operacion es obligatoria" });
+    }
+
+    if (typeof cancelada !== "boolean") {
+      return res.status(400).json({ error: "El estado cancelada debe ser booleano" });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+
+    try {
+      const data = await FsanchezOperacionEstado.findOneAndUpdate(
+        { opera },
+        {
+          opera,
+          cancelada,
+          updatedBy: req.user._id,
+          updatedByName: `${req.user.lastName} ${req.user.name}`.trim(),
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+      ).lean();
+
+      return res.status(200).json({
+        message: cancelada ? "Operacion marcada como cancelada" : "Operacion marcada como con saldo",
+        data: serializeFsanchezOperacionEstado(data),
+      });
+    } catch (error) {
+      logError("DmsController.updateFsanchezOperacionEstado");
+      console.error(error);
+      return res.status(500).json({ message: "Error al actualizar el estado de la operacion" });
     }
   };
 

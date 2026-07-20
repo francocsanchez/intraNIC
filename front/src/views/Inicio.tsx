@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasModuleAccess, hasModulePathAccess } from "@/helpers/access";
+import { hasModuleAccess, hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -17,6 +17,7 @@ import {
   LogOut,
   Motorbike,
   Package,
+  ShieldCheck,
   Settings2, ShoppingCart,
   Trophy,
   UserCog,
@@ -56,6 +57,7 @@ export default function Inicio() {
   const preventasHomePath = hasModulePathAccess(user, "preventas", paths.convencional.preventas)
     ? paths.convencional.preventas
     : paths.convencional.preventasResumen;
+  const canViewFsanchez = hasSuperAdminRole(user);
 
   const sections: HomeSection[] = [
     {
@@ -211,6 +213,7 @@ export default function Inicio() {
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
+        { label: "FSANCHEZ", to: paths.admin.fsanchez, enabled: canViewFsanchez, icon: ShieldCheck },
         {
           label: "Act. Registros",
           to: paths.analisis.registros,
