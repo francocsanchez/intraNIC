@@ -1,6 +1,8 @@
 import { exportFsanchezOperaciones, getFsanchezOperaciones, updateFsanchezOperacionEstado } from "@/api/dms/fsanchezAPI";
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
+import { hasSuperAdminRole } from "@/helpers/access";
+import { useAuth } from "@/hooks/useAuthe";
 import type { FsanchezOperacionItem } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +19,7 @@ function ComentarioModal({
   open,
   operacion,
   comentario,
+  canEdit,
   onComentarioChange,
   onClose,
   onSave,
@@ -25,6 +28,7 @@ function ComentarioModal({
   open: boolean;
   operacion: FsanchezOperacionItem | null;
   comentario: string;
+  canEdit: boolean;
   onComentarioChange: (value: string) => void;
   onClose: () => void;
   onSave: () => void;
@@ -78,30 +82,48 @@ function ComentarioModal({
                 </div>
 
                 <div className="space-y-4 px-5 py-4">
-                  <textarea
-                    value={comentario}
-                    onChange={(event) => onComentarioChange(event.target.value)}
-                    rows={6}
-                    placeholder="Agrega un comentario para esta operacion"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-400"
-                  />
+                  {canEdit ? (
+                    <textarea
+                      value={comentario}
+                      onChange={(event) => onComentarioChange(event.target.value)}
+                      rows={6}
+                      placeholder="Agrega un comentario para esta operacion"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+                    />
+                  ) : (
+                    <div className="min-h-[144px] rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900">
+                      {comentario.trim() || "Sin comentario"}
+                    </div>
+                  )}
 
                   <div className="flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                    >
-                      Cerrar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onSave}
-                      disabled={isSaving}
-                      className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSaving ? "Guardando..." : "Guardar comentario"}
-                    </button>
+                    {canEdit ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={onClose}
+                          className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                        >
+                          Cerrar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={onSave}
+                          disabled={isSaving}
+                          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isSaving ? "Guardando..." : "Guardar comentario"}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                      >
+                        Cerrar
+                      </button>
+                    )}
                   </div>
                 </div>
               </Dialog.Panel>
@@ -125,6 +147,7 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export default function FsanchezView() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [visibleSection, setVisibleSection] = useState<VisibleSection>("conSaldo");
   const [visibleLocation, setVisibleLocation] = useState<string>("todas");
@@ -179,6 +202,7 @@ export default function FsanchezView() {
 
   const operaciones = data?.data ?? [];
   const meta = data?.meta;
+  const canManageFsanchez = hasSuperAdminRole(user);
   const ubicaciones = useMemo(
     () => ["todas", ...Array.from(new Set(operaciones.map((item) => item.ubicacion))).sort((a, b) => a.localeCompare(b, "es"))],
     [operaciones],
@@ -228,10 +252,18 @@ export default function FsanchezView() {
       : "No hay operaciones canceladas para mostrar.";
 
   const handleToggle = (item: FsanchezOperacionItem) => {
+    if (!canManageFsanchez) {
+      return;
+    }
+
     updateMutation.mutate({ opera: item.opera, payload: { cancelada: !item.cancelada } });
   };
 
   const handleAlertChange = (item: FsanchezOperacionItem, alerta: AlertLevel) => {
+    if (!canManageFsanchez) {
+      return;
+    }
+
     updateMutation.mutate({ opera: item.opera, payload: { alerta } });
   };
 
@@ -259,7 +291,7 @@ export default function FsanchezView() {
   };
 
   const saveComentario = () => {
-    if (!comentarioModalOperacion) {
+    if (!comentarioModalOperacion || !canManageFsanchez) {
       return;
     }
 
@@ -330,6 +362,11 @@ export default function FsanchezView() {
                 ? "Vista principal con operaciones activas."
                 : "Vista separada con operaciones marcadas manualmente como canceladas."}
             </p>
+            {!canManageFsanchez ? (
+              <p className="mt-1 text-xs text-gray-500">
+                Modo solo lectura: puedes ver, filtrar, exportar y consultar comentarios.
+              </p>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-3 md:items-end">
@@ -442,7 +479,7 @@ export default function FsanchezView() {
                       <select
                         value={item.alerta}
                         onChange={(event) => handleAlertChange(item, event.target.value as AlertLevel)}
-                        disabled={isUpdating}
+                        disabled={isUpdating || !canManageFsanchez}
                         className={[
                           "rounded-md border px-2 py-1 text-xs font-semibold uppercase outline-none",
                           item.alerta === "alta"
@@ -461,10 +498,11 @@ export default function FsanchezView() {
                       <button
                         type="button"
                         onClick={() => openComentarioModal(item)}
+                        disabled={!canManageFsanchez && !item.comentario.trim()}
                         className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-semibold leading-none text-gray-700 transition-colors hover:bg-gray-50"
                       >
                         <MessageSquare size={12} strokeWidth={1.75} />
-                        {item.comentario ? "Ver" : "Agregar"}
+                        {item.comentario ? "Ver" : canManageFsanchez ? "Agregar" : "Sin comentario"}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{item.diasAsignado}</td>
@@ -477,7 +515,7 @@ export default function FsanchezView() {
                       <button
                         type="button"
                         onClick={() => handleToggle(item)}
-                        disabled={isUpdating}
+                        disabled={isUpdating || !canManageFsanchez}
                         title={nextIsCancelada ? "Cancelar operacion" : "Volver a con saldo"}
                         aria-label={nextIsCancelada ? "Cancelar operacion" : "Volver a con saldo"}
                         className={[
@@ -516,13 +554,14 @@ export default function FsanchezView() {
         open={Boolean(comentarioModalOperacion)}
         operacion={comentarioModalOperacion}
         comentario={comentarioDraft}
+        canEdit={canManageFsanchez}
         onComentarioChange={setComentarioDraft}
         onClose={() => {
           setComentarioModalOperacion(null);
           setComentarioDraft("");
         }}
         onSave={saveComentario}
-        isSaving={updateMutation.isPending && Boolean(comentarioModalOperacion)}
+        isSaving={canManageFsanchez && updateMutation.isPending && Boolean(comentarioModalOperacion)}
       />
     </div>
   );

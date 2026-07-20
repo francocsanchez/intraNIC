@@ -30,6 +30,7 @@ export const moduleKeys = [
   "usuarios",
   "configuracion",
   "testDrive",
+  "fsanchez",
   "registroTestDriveConvencional",
   "registroTestDrive",
   "promediosPlanAhorro",

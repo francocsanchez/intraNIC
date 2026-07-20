@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuthe";
-import { hasSuperAdminRole } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDown, LogOut, Menu as MenuIcon, ShieldCheck, UserRound, X } from "lucide-react";
@@ -29,7 +29,7 @@ export default function GlobalNavbar({ centerContent, rightContent }: GlobalNavb
     navigate(paths.login, { replace: true });
   };
 
-  const canViewFsanchez = hasSuperAdminRole(user);
+  const canViewFsanchez = hasModulePathAccess(user, "fsanchez", paths.admin.fsanchez);
 
   return (
     <header className="border-b border-gray-200 bg-white backdrop-blur-sm">

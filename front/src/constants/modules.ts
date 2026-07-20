@@ -30,6 +30,7 @@ export const moduleKeys = [
   "usuarios",
   "configuracion",
   "testDrive",
+  "fsanchez",
   "registroTestDriveConvencional",
   "registroTestDrive",
   "promediosPlanAhorro",
@@ -72,6 +73,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   usuarios: "Usuarios",
   configuracion: "Configuracion",
   testDrive: "TestDrive",
+  fsanchez: "FSANCHEZ",
   registroTestDriveConvencional: "Registro TestDrive Comercial",
   registroTestDrive: "Registro TestDrive Plan de ahorro",
   promediosPlanAhorro: "Promedios Plan de ahorro",
@@ -121,7 +123,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Sistema",
-    modules: ["usuarios", "configuracion", "testDrive", "actualizacionRegistros"],
+    modules: ["usuarios", "configuracion", "testDrive", "fsanchez", "actualizacionRegistros"],
   },
 ];
 

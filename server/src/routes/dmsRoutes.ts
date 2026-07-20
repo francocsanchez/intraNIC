@@ -55,9 +55,9 @@ router.get(
   authorizeRoleAccess("convencional.analisisStock"),
   DmsController.exportPendFac,
 );
-router.get("/fsanchez/operaciones", requireSuperAdmin, DmsController.getFsanchezOperaciones);
-router.get("/fsanchez/operaciones/export", requireSuperAdmin, DmsController.exportFsanchezOperaciones);
-router.patch("/fsanchez/operaciones/:opera", requireSuperAdmin, DmsController.updateFsanchezOperacionEstado);
+router.get("/fsanchez/operaciones", authorizeModules("fsanchez"), DmsController.getFsanchezOperaciones);
+router.get("/fsanchez/operaciones/export", authorizeModules("fsanchez"), DmsController.exportFsanchezOperaciones);
+router.patch("/fsanchez/operaciones/:opera", authorizeModules("fsanchez"), requireSuperAdmin, DmsController.updateFsanchezOperacionEstado);
 router.post(
   "/analisis-stock/ped",
   authorizeModules("analisisStock"),

@@ -2,7 +2,6 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { hasSuperAdminRole } from "@/helpers/access";
 import { Cog, FileSpreadsheet, CarFront, ShieldCheck, UserCog } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -50,7 +49,7 @@ export default function AdminLayout() {
       label: "FSANCHEZ",
       to: paths.admin.fsanchez,
       icon: ShieldCheck,
-      visible: hasSuperAdminRole(user),
+      visible: hasModulePathAccess(user, "fsanchez", paths.admin.fsanchez),
       active: pathname === paths.admin.fsanchez,
     },
   ].filter((item) => item.visible);

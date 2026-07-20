@@ -176,7 +176,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<SuperAdminProtectedRoute />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["fsanchez"]} />}>
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.fsanchez} element={<FsanchezView />} />
             </Route>
