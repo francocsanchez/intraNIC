@@ -25,3 +25,15 @@ export async function getPendFac(): Promise<PendFacResponse> {
     throw new Error(getErrorMessage(error, "Error al obtener Pend Fac"));
   }
 }
+
+export async function exportPendFac(): Promise<Blob> {
+  try {
+    const { data } = await api.get("/dms/pend-fac/export", {
+      responseType: "blob",
+    });
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al exportar Pend Fac"));
+  }
+}

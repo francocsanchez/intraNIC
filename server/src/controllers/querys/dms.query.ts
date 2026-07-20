@@ -290,7 +290,8 @@ SELECT
 		WHEN movnped.mnp_status IN ('STOCK CONCESIONARIO', 'TRANSITO TASA-CONCESIONARIO') THEN 'FURLONG'
 		ELSE movnped.mnp_status
 	END AS ubicacion,
-	stoauto.sa_opera AS opera
+	stoauto.sa_opera AS opera,
+	DATEDIFF(DAY, opera.ope_fecasig, GETDATE()) AS diasAsignado
 FROM stoauto
 INNER JOIN movnped
 	ON stoauto.sa_codigo = movnped.mnp_stoauto

@@ -48,6 +48,12 @@ router.get(
   authorizeRoleAccess("convencional.analisisStock"),
   DmsController.getPendFac,
 );
+router.get(
+  "/pend-fac/export",
+  authorizeModules("pendFac"),
+  authorizeRoleAccess("convencional.analisisStock"),
+  DmsController.exportPendFac,
+);
 router.post(
   "/analisis-stock/ped",
   authorizeModules("analisisStock"),

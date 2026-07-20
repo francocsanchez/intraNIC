@@ -1388,6 +1388,7 @@ export const pendFacUnitSchema = z.object({
   vendedor: z.string(),
   ubicacion: z.string(),
   opera: z.string(),
+  diasAsignado: z.number(),
 });
 
 export const pendFacRowSchema = z.object({

@@ -1,11 +1,12 @@
-import { getPendFac } from "@/api/dms/pendFacAPI";
+import { exportPendFac, getPendFac } from "@/api/dms/pendFacAPI";
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
 import type { PendFacUnit } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
-import { X } from "lucide-react";
+import { Download, X } from "lucide-react";
+import { toast } from "sonner";
 
 type PendFacDetail = {
   modelo: string;
@@ -16,6 +17,17 @@ type PendFacDetail = {
 
 const MODEL_COLUMN_WIDTH = 144;
 const VERSION_COLUMN_WIDTH = 320;
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
 
 function PendFacDetailModal({
   open,
@@ -77,6 +89,7 @@ function PendFacDetailModal({
                       <tr>
                         <th className="px-4 py-3 text-left">Interno</th>
                         <th className="px-4 py-3 text-left">Nro. fab</th>
+                        <th className="px-4 py-3 text-left">Dias asignado</th>
                         <th className="px-4 py-3 text-left">Version</th>
                         <th className="px-4 py-3 text-left">Modelo</th>
                         <th className="px-4 py-3 text-left">Chasis</th>
@@ -92,6 +105,7 @@ function PendFacDetailModal({
                         <tr key={`${unit.interno}-${unit.nrofab}-${unit.opera}`} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-gray-900">{unit.interno}</td>
                           <td className="px-4 py-3 text-gray-700">{unit.nrofab}</td>
+                          <td className="px-4 py-3 text-gray-700">{unit.diasAsignado}</td>
                           <td className="px-4 py-3 text-gray-700">{unit.version}</td>
                           <td className="px-4 py-3 text-gray-700">{unit.modelo}</td>
                           <td className="px-4 py-3 text-gray-700">{unit.chasis}</td>
@@ -123,6 +137,17 @@ export default function PendFacView() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["pend-fac"],
     queryFn: getPendFac,
+  });
+  const exportMutation = useMutation({
+    mutationFn: exportPendFac,
+    onSuccess: (blob) => {
+      const today = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `pend-fac-detalle-${today}.xlsx`);
+      toast.success("Excel exportado correctamente");
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message);
+    },
   });
 
   if (isLoading) return <Loading />;
@@ -163,10 +188,22 @@ export default function PendFacView() {
             </p>
           </div>
 
-          <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">Unidades</p>
-            <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">{totalUnidades}</p>
-          </article>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <button
+              type="button"
+              onClick={() => exportMutation.mutate()}
+              disabled={exportMutation.isPending}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e293b] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download size={16} />
+              {exportMutation.isPending ? "Exportando..." : "Exportar detalle a Excel"}
+            </button>
+
+            <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">Unidades</p>
+              <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">{totalUnidades}</p>
+            </article>
+          </div>
         </div>
       </section>
 
