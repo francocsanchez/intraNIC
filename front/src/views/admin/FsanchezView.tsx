@@ -2,16 +2,122 @@ import { getFsanchezOperaciones, updateFsanchezOperacionEstado } from "@/api/dms
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
 import type { FsanchezOperacionItem } from "@/types/index";
+import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
+import { MessageSquare, RotateCcw, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 type VisibleSection = "conSaldo" | "canceladas";
+type AlertLevel = "normal" | "media" | "alta";
+
+function ComentarioModal({
+  open,
+  operacion,
+  comentario,
+  onComentarioChange,
+  onClose,
+  onSave,
+  isSaving,
+}: {
+  open: boolean;
+  operacion: FsanchezOperacionItem | null;
+  comentario: string;
+  onComentarioChange: (value: string) => void;
+  onClose: () => void;
+  onSave: () => void;
+  isSaving: boolean;
+}) {
+  return (
+    <Transition appear show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/30" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+                <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Comentario</p>
+                    <Dialog.Title className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+                      Operacion {operacion?.opera ?? "-"}
+                    </Dialog.Title>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {operacion?.cliente ?? "-"} | {operacion?.modelo ?? "-"} | {operacion?.version ?? "-"}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="space-y-4 px-5 py-4">
+                  <textarea
+                    value={comentario}
+                    onChange={(event) => onComentarioChange(event.target.value)}
+                    rows={6}
+                    placeholder="Agrega un comentario para esta operacion"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+                  />
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                    >
+                      Cerrar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onSave}
+                      disabled={isSaving}
+                      className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSaving ? "Guardando..." : "Guardar comentario"}
+                    </button>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+}
 
 export default function FsanchezView() {
   const queryClient = useQueryClient();
   const [visibleSection, setVisibleSection] = useState<VisibleSection>("conSaldo");
+  const [visibleLocation, setVisibleLocation] = useState<string>("todas");
   const [updatingOpera, setUpdatingOpera] = useState<string | null>(null);
+  const [comentarioModalOperacion, setComentarioModalOperacion] = useState<FsanchezOperacionItem | null>(null);
+  const [comentarioDraft, setComentarioDraft] = useState("");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["fsanchez", "operaciones"],
@@ -19,8 +125,13 @@ export default function FsanchezView() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ opera, cancelada }: { opera: string; cancelada: boolean }) =>
-      updateFsanchezOperacionEstado(opera, cancelada),
+    mutationFn: ({
+      opera,
+      payload,
+    }: {
+      opera: string;
+      payload: { cancelada?: boolean; alerta?: AlertLevel; comentario?: string };
+    }) => updateFsanchezOperacionEstado(opera, payload),
     onMutate: ({ opera }) => {
       setUpdatingOpera(opera);
     },
@@ -38,10 +149,30 @@ export default function FsanchezView() {
 
   const operaciones = data?.data ?? [];
   const meta = data?.meta;
+  const ubicaciones = useMemo(
+    () => ["todas", ...Array.from(new Set(operaciones.map((item) => item.ubicacion))).sort((a, b) => a.localeCompare(b, "es"))],
+    [operaciones],
+  );
 
   const operacionesVisibles = useMemo(() => {
-    return operaciones.filter((item) => (visibleSection === "conSaldo" ? !item.cancelada : item.cancelada));
-  }, [operaciones, visibleSection]);
+    return operaciones.filter((item) => {
+      const matchesSection = visibleSection === "conSaldo" ? !item.cancelada : item.cancelada;
+      const matchesLocation = visibleLocation === "todas" ? true : item.ubicacion === visibleLocation;
+
+      return matchesSection && matchesLocation;
+    });
+  }, [operaciones, visibleLocation, visibleSection]);
+
+  const locationCounts = useMemo(() => {
+    return ubicaciones.reduce<Record<string, number>>((acc, location) => {
+      acc[location] = operaciones.filter((item) => {
+        const matchesSection = visibleSection === "conSaldo" ? !item.cancelada : item.cancelada;
+        const matchesLocation = location === "todas" ? true : item.ubicacion === location;
+        return matchesSection && matchesLocation;
+      }).length;
+      return acc;
+    }, {});
+  }, [operaciones, ubicaciones, visibleSection]);
 
   const emptyMessage =
     visibleSection === "conSaldo"
@@ -49,7 +180,37 @@ export default function FsanchezView() {
       : "No hay operaciones canceladas para mostrar.";
 
   const handleToggle = (item: FsanchezOperacionItem) => {
-    updateMutation.mutate({ opera: item.opera, cancelada: !item.cancelada });
+    updateMutation.mutate({ opera: item.opera, payload: { cancelada: !item.cancelada } });
+  };
+
+  const handleAlertChange = (item: FsanchezOperacionItem, alerta: AlertLevel) => {
+    updateMutation.mutate({ opera: item.opera, payload: { alerta } });
+  };
+
+  const openComentarioModal = (item: FsanchezOperacionItem) => {
+    setComentarioModalOperacion(item);
+    setComentarioDraft(item.comentario ?? "");
+  };
+
+  const saveComentario = () => {
+    if (!comentarioModalOperacion) {
+      return;
+    }
+
+    updateMutation.mutate(
+      {
+        opera: comentarioModalOperacion.opera,
+        payload: { comentario: comentarioDraft },
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          queryClient.invalidateQueries({ queryKey: ["fsanchez", "operaciones"] });
+          setComentarioModalOperacion(null);
+          setComentarioDraft("");
+        },
+      },
+    );
   };
 
   if (isLoading) return <Loading />;
@@ -105,27 +266,47 @@ export default function FsanchezView() {
             </p>
           </div>
 
-          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
-            <button
-              type="button"
-              onClick={() => setVisibleSection("conSaldo")}
-              className={[
-                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "conSaldo" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
-              ].join(" ")}
-            >
-              Con saldo ({meta?.conSaldo ?? 0})
-            </button>
-            <button
-              type="button"
-              onClick={() => setVisibleSection("canceladas")}
-              className={[
-                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "canceladas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
-              ].join(" ")}
-            >
-              Canceladas ({meta?.canceladas ?? 0})
-            </button>
+          <div className="flex flex-col gap-3 md:items-end">
+            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+              <button
+                type="button"
+                onClick={() => setVisibleSection("conSaldo")}
+                className={[
+                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                  visibleSection === "conSaldo" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                ].join(" ")}
+              >
+                Con saldo ({meta?.conSaldo ?? 0})
+              </button>
+              <button
+                type="button"
+                onClick={() => setVisibleSection("canceladas")}
+                className={[
+                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                  visibleSection === "canceladas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                ].join(" ")}
+              >
+                Canceladas ({meta?.canceladas ?? 0})
+              </button>
+            </div>
+
+            <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
+              {ubicaciones.map((ubicacion) => (
+                <button
+                  key={ubicacion}
+                  type="button"
+                  onClick={() => setVisibleLocation(ubicacion)}
+                  className={[
+                    "shrink-0 rounded-md border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+                    visibleLocation === ubicacion
+                      ? "border-gray-900 bg-gray-900 text-white"
+                      : "border-gray-200 bg-white text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
+                >
+                  {ubicacion === "todas" ? "Todas" : ubicacion} ({locationCounts[ubicacion] ?? 0})
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -134,15 +315,14 @@ export default function FsanchezView() {
             <thead className="bg-gray-50 text-xs uppercase tracking-[0.16em] text-gray-500">
               <tr>
                 <th className="px-4 py-3 text-left">Opera</th>
-                <th className="px-4 py-3 text-left">Interno</th>
-                <th className="px-4 py-3 text-left">Nro. fab</th>
                 <th className="px-4 py-3 text-left">Modelo</th>
                 <th className="px-4 py-3 text-left">Version</th>
                 <th className="px-4 py-3 text-left">Cliente</th>
                 <th className="px-4 py-3 text-left">Vendedor</th>
                 <th className="px-4 py-3 text-left">Ubicacion</th>
+                <th className="px-4 py-3 text-left">Alerta</th>
+                <th className="px-4 py-3 text-left">Comentario</th>
                 <th className="px-4 py-3 text-left">Dias asignado</th>
-                <th className="px-4 py-3 text-left">Chasis</th>
                 <th className="px-4 py-3 text-left">Color</th>
                 <th className="px-4 py-3 text-right">Accion</th>
               </tr>
@@ -155,15 +335,41 @@ export default function FsanchezView() {
                 return (
                   <tr key={`${item.opera}-${item.interno}-${item.nrofab}`} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900">{item.opera}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.interno}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.nrofab}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
+                    <td className="px-4 py-3 text-[12px] text-gray-700">{item.modelo}</td>
                     <td className="px-4 py-3 text-gray-700">{item.version}</td>
                     <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
                     <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
                     <td className="px-4 py-3 text-gray-700">{item.ubicacion}</td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={item.alerta}
+                        onChange={(event) => handleAlertChange(item, event.target.value as AlertLevel)}
+                        disabled={isUpdating}
+                        className={[
+                          "rounded-md border px-2 py-1 text-xs font-semibold uppercase outline-none",
+                          item.alerta === "alta"
+                            ? "border-red-200 bg-red-50 text-red-700"
+                            : item.alerta === "media"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : "border-gray-200 bg-white text-gray-700",
+                        ].join(" ")}
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="media">Media</option>
+                        <option value="alta">Alta</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => openComentarioModal(item)}
+                        className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] font-semibold leading-none text-gray-700 transition-colors hover:bg-gray-50"
+                      >
+                        <MessageSquare size={12} strokeWidth={1.75} />
+                        {item.comentario ? "Ver" : "Agregar"}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-gray-700">{item.diasAsignado}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.chasis}</td>
                     <td className="px-4 py-3 text-gray-700">
                       <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
                         {item.color}
@@ -174,14 +380,22 @@ export default function FsanchezView() {
                         type="button"
                         onClick={() => handleToggle(item)}
                         disabled={isUpdating}
+                        title={nextIsCancelada ? "Cancelar operacion" : "Volver a con saldo"}
+                        aria-label={nextIsCancelada ? "Cancelar operacion" : "Volver a con saldo"}
                         className={[
-                          "inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                          "inline-flex items-center justify-center rounded-lg p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                           nextIsCancelada
                             ? "border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
                             : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
                         ].join(" ")}
                       >
-                        {isUpdating ? "Guardando..." : nextIsCancelada ? "Cancelar" : "Volver a con saldo"}
+                        {isUpdating ? (
+                          <span className="text-[11px] font-semibold">...</span>
+                        ) : nextIsCancelada ? (
+                          <XCircle size={16} strokeWidth={1.9} />
+                        ) : (
+                          <RotateCcw size={16} strokeWidth={1.9} />
+                        )}
                       </button>
                     </td>
                   </tr>
@@ -190,7 +404,7 @@ export default function FsanchezView() {
 
               {operacionesVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
                     {emptyMessage}
                   </td>
                 </tr>
@@ -199,6 +413,19 @@ export default function FsanchezView() {
           </table>
         </div>
       </section>
+
+      <ComentarioModal
+        open={Boolean(comentarioModalOperacion)}
+        operacion={comentarioModalOperacion}
+        comentario={comentarioDraft}
+        onComentarioChange={setComentarioDraft}
+        onClose={() => {
+          setComentarioModalOperacion(null);
+          setComentarioDraft("");
+        }}
+        onSave={saveComentario}
+        isSaving={updateMutation.isPending && Boolean(comentarioModalOperacion)}
+      />
     </div>
   );
 }

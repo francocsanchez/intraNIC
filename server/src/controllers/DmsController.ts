@@ -112,6 +112,8 @@ type PendFacResponseData = {
 
 type FsanchezOperacionItem = PendFacUnit & {
   cancelada: boolean;
+  alerta: "normal" | "media" | "alta";
+  comentario: string;
 };
 
 type AnalisisStockDictionaryPayload = {
@@ -343,6 +345,8 @@ const serializeFsanchezOperacionEstado = (item: any) => ({
   _id: String(item._id),
   opera: normalizePendFacText(item.opera, ""),
   cancelada: item.cancelada === true,
+  alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
+  comentario: typeof item.comentario === "string" ? item.comentario : "",
   updatedBy: item.updatedBy ? String(item.updatedBy) : null,
   updatedByName: typeof item.updatedByName === "string" ? item.updatedByName : "",
   createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
@@ -351,10 +355,11 @@ const serializeFsanchezOperacionEstado = (item: any) => ({
 
 const buildFsanchezOperaciones = (
   rows: PendFacRow[],
-  canceledByOpera: Map<string, boolean>,
+  stateByOpera: Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>,
 ): FsanchezOperacionItem[] =>
   rows.map((row) => {
     const opera = normalizePendFacText(row.opera, "-");
+    const currentState = stateByOpera.get(opera);
 
     return {
       interno: normalizePendFacText(row.interno, "-"),
@@ -368,7 +373,9 @@ const buildFsanchezOperaciones = (
       ubicacion: normalizeAnalisisText(row.ubicacion, "Sin ubicacion"),
       opera,
       diasAsignado: normalizePendFacNumber(row.diasAsignado, 0),
-      cancelada: canceledByOpera.get(opera) ?? false,
+      cancelada: currentState?.cancelada ?? false,
+      alerta: currentState?.alerta ?? "normal",
+      comentario: currentState?.comentario ?? "",
     };
   });
 
@@ -1072,17 +1079,23 @@ export class DmsController {
         FsanchezOperacionEstado.find().lean(),
       ]);
 
-      const canceledByOpera = estados.reduce<Map<string, boolean>>((acc, item) => {
+      const stateByOpera = estados.reduce<
+        Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>
+      >((acc, item) => {
         const opera = normalizePendFacText(item.opera, "");
 
         if (opera) {
-          acc.set(opera, item.cancelada === true);
+          acc.set(opera, {
+            cancelada: item.cancelada === true,
+            alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
+            comentario: typeof item.comentario === "string" ? item.comentario : "",
+          });
         }
 
         return acc;
       }, new Map());
 
-      const data = buildFsanchezOperaciones(rows, canceledByOpera);
+      const data = buildFsanchezOperaciones(rows, stateByOpera);
       const canceladas = data.filter((item) => item.cancelada).length;
 
       return res.status(200).json({
@@ -1103,13 +1116,23 @@ export class DmsController {
   static updateFsanchezOperacionEstado = async (req: Request, res: Response) => {
     const opera = normalizePendFacText(req.params.opera, "");
     const cancelada = req.body?.cancelada;
+    const alertaRaw = typeof req.body?.alerta === "string" ? req.body.alerta.trim().toLowerCase() : undefined;
+    const comentario = req.body?.comentario;
 
     if (!opera || opera === "-") {
       return res.status(400).json({ error: "La operacion es obligatoria" });
     }
 
-    if (typeof cancelada !== "boolean") {
+    if (cancelada !== undefined && typeof cancelada !== "boolean") {
       return res.status(400).json({ error: "El estado cancelada debe ser booleano" });
+    }
+
+    if (alertaRaw !== undefined && !["normal", "media", "alta"].includes(alertaRaw)) {
+      return res.status(400).json({ error: "La alerta debe ser normal, media o alta" });
+    }
+
+    if (comentario !== undefined && typeof comentario !== "string") {
+      return res.status(400).json({ error: "El comentario debe ser texto" });
     }
 
     if (!req.user) {
@@ -1117,19 +1140,31 @@ export class DmsController {
     }
 
     try {
+      const existing = await FsanchezOperacionEstado.findOne({ opera }).lean();
       const data = await FsanchezOperacionEstado.findOneAndUpdate(
         { opera },
         {
           opera,
-          cancelada,
+          cancelada: typeof cancelada === "boolean" ? cancelada : existing?.cancelada ?? false,
+          alerta: alertaRaw ?? existing?.alerta ?? "normal",
+          comentario: typeof comentario === "string" ? comentario.trim() : existing?.comentario ?? "",
           updatedBy: req.user._id,
           updatedByName: `${req.user.lastName} ${req.user.name}`.trim(),
         },
         { new: true, upsert: true, setDefaultsOnInsert: true },
       ).lean();
 
+      let message = "Operacion actualizada";
+      if (typeof cancelada === "boolean") {
+        message = cancelada ? "Operacion marcada como cancelada" : "Operacion marcada como con saldo";
+      } else if (alertaRaw !== undefined) {
+        message = "Alerta actualizada correctamente";
+      } else if (typeof comentario === "string") {
+        message = "Comentario actualizado correctamente";
+      }
+
       return res.status(200).json({
-        message: cancelada ? "Operacion marcada como cancelada" : "Operacion marcada como con saldo",
+        message,
         data: serializeFsanchezOperacionEstado(data),
       });
     } catch (error) {

@@ -3,6 +3,8 @@ import mongoose, { Document, Schema, Types } from "mongoose";
 export interface IFsanchezOperacionEstado extends Document {
   opera: string;
   cancelada: boolean;
+  alerta: "normal" | "media" | "alta";
+  comentario: string;
   updatedBy?: Types.ObjectId | null;
   updatedByName?: string | null;
   createdAt: Date;
@@ -20,6 +22,17 @@ const fsanchezOperacionEstadoSchema = new Schema<IFsanchezOperacionEstado>(
     cancelada: {
       type: Boolean,
       default: true,
+    },
+    alerta: {
+      type: String,
+      enum: ["normal", "media", "alta"],
+      default: "normal",
+      trim: true,
+    },
+    comentario: {
+      type: String,
+      default: "",
+      trim: true,
     },
     updatedBy: {
       type: Schema.Types.ObjectId,

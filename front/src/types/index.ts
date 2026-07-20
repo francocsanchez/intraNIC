@@ -1435,6 +1435,8 @@ export const fsanchezOperacionItemSchema = z.object({
   opera: z.string(),
   diasAsignado: z.number(),
   cancelada: z.boolean(),
+  alerta: z.enum(["normal", "media", "alta"]).default("normal"),
+  comentario: z.string().default(""),
 });
 
 export const fsanchezOperacionesResponseSchema = z.object({
@@ -1452,6 +1454,8 @@ export const fsanchezOperacionEstadoResponseSchema = z.object({
     _id: z.string(),
     opera: z.string(),
     cancelada: z.boolean(),
+    alerta: z.enum(["normal", "media", "alta"]).default("normal"),
+    comentario: z.string().default(""),
     updatedBy: z.string().nullable(),
     updatedByName: z.string(),
     createdAt: z.string(),

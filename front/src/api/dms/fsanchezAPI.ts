@@ -33,10 +33,10 @@ export async function getFsanchezOperaciones(): Promise<FsanchezOperacionesRespo
 
 export async function updateFsanchezOperacionEstado(
   opera: string,
-  cancelada: boolean,
+  payload: { cancelada?: boolean; alerta?: "normal" | "media" | "alta"; comentario?: string },
 ): Promise<FsanchezOperacionEstadoResponse> {
   try {
-    const { data } = await api.patch(`/dms/fsanchez/operaciones/${encodeURIComponent(opera)}`, { cancelada });
+    const { data } = await api.patch(`/dms/fsanchez/operaciones/${encodeURIComponent(opera)}`, payload);
     const parsed = fsanchezOperacionEstadoResponseSchema.safeParse(data);
 
     if (!parsed.success) {
