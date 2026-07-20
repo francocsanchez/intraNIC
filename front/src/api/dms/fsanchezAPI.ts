@@ -31,6 +31,22 @@ export async function getFsanchezOperaciones(): Promise<FsanchezOperacionesRespo
   }
 }
 
+export async function exportFsanchezOperaciones(params?: {
+  section?: "conSaldo" | "canceladas";
+  location?: string;
+}): Promise<Blob> {
+  try {
+    const { data } = await api.get("/dms/fsanchez/operaciones/export", {
+      params,
+      responseType: "blob",
+    });
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al exportar operaciones FSANCHEZ"));
+  }
+}
+
 export async function updateFsanchezOperacionEstado(
   opera: string,
   payload: { cancelada?: boolean; alerta?: "normal" | "media" | "alta"; comentario?: string },

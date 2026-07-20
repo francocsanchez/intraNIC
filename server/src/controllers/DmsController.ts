@@ -379,6 +379,28 @@ const buildFsanchezOperaciones = (
     };
   });
 
+const filterFsanchezOperaciones = (
+  items: FsanchezOperacionItem[],
+  section?: string,
+  location?: string,
+) => {
+  const normalizedSection = String(section ?? "").trim().toLowerCase();
+  const normalizedLocation = String(location ?? "").trim();
+
+  return items.filter((item) => {
+    const matchesSection =
+      normalizedSection === "canceladas"
+        ? item.cancelada
+        : normalizedSection === "consaldo"
+          ? !item.cancelada
+          : true;
+    const matchesLocation =
+      normalizedLocation && normalizedLocation.toLowerCase() !== "todas" ? item.ubicacion === normalizedLocation : true;
+
+    return matchesSection && matchesLocation;
+  });
+};
+
 const getAnalisisCanonicalVersion = (
   modelo: string,
   version: string,
@@ -1110,6 +1132,82 @@ export class DmsController {
       logError("DmsController.getFsanchezOperaciones");
       console.error(error);
       return res.status(500).json({ message: "Error al obtener las operaciones FSANCHEZ" });
+    }
+  };
+
+  static exportFsanchezOperaciones = async (req: Request, res: Response) => {
+    try {
+      const [rows, estados] = await Promise.all([
+        sequelizeNIC.query<PendFacRow>(getPendFacConvencional(), {
+          type: QueryTypes.SELECT,
+        }),
+        FsanchezOperacionEstado.find().lean(),
+      ]);
+
+      const stateByOpera = estados.reduce<
+        Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>
+      >((acc, item) => {
+        const opera = normalizePendFacText(item.opera, "");
+
+        if (opera) {
+          acc.set(opera, {
+            cancelada: item.cancelada === true,
+            alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
+            comentario: typeof item.comentario === "string" ? item.comentario : "",
+          });
+        }
+
+        return acc;
+      }, new Map());
+
+      const data = buildFsanchezOperaciones(rows, stateByOpera);
+      const filtered = filterFsanchezOperaciones(
+        data,
+        typeof req.query.section === "string" ? req.query.section : undefined,
+        typeof req.query.location === "string" ? req.query.location : undefined,
+      );
+      const detailRows = filtered.map((item) => ({
+        opera: item.opera,
+        modelo: item.modelo,
+        version: item.version,
+        cliente: item.cliente,
+        vendedor: item.vendedor,
+        ubicacion: item.ubicacion,
+        alerta: item.alerta,
+        comentario: item.comentario || "",
+        "dias asignado": item.diasAsignado,
+        color: item.color,
+        estado: item.cancelada ? "Cancelada" : "Con saldo",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(detailRows);
+      worksheet["!cols"] = [
+        { wch: 14 },
+        { wch: 18 },
+        { wch: 34 },
+        { wch: 30 },
+        { wch: 24 },
+        { wch: 24 },
+        { wch: 12 },
+        { wch: 42 },
+        { wch: 14 },
+        { wch: 16 },
+        { wch: 14 },
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "FSANCHEZ");
+
+      const fileBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+      const filename = `fsanchez-${formatFileDate()}.xlsx`;
+
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename=\"${filename}\"`);
+      return res.status(200).send(fileBuffer);
+    } catch (error) {
+      logError("DmsController.exportFsanchezOperaciones");
+      console.error(error);
+      return res.status(500).json({ message: "Error al exportar FSANCHEZ" });
     }
   };
 

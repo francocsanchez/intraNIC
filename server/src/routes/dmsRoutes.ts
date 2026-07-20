@@ -56,6 +56,7 @@ router.get(
   DmsController.exportPendFac,
 );
 router.get("/fsanchez/operaciones", requireSuperAdmin, DmsController.getFsanchezOperaciones);
+router.get("/fsanchez/operaciones/export", requireSuperAdmin, DmsController.exportFsanchezOperaciones);
 router.patch("/fsanchez/operaciones/:opera", requireSuperAdmin, DmsController.updateFsanchezOperacionEstado);
 router.post(
   "/analisis-stock/ped",

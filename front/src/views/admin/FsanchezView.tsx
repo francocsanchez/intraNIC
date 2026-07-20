@@ -1,11 +1,11 @@
-import { getFsanchezOperaciones, updateFsanchezOperacionEstado } from "@/api/dms/fsanchezAPI";
+import { exportFsanchezOperaciones, getFsanchezOperaciones, updateFsanchezOperacionEstado } from "@/api/dms/fsanchezAPI";
 import Loading from "@/components/Loading";
 import { textToColor } from "@/helpers/colores";
 import type { FsanchezOperacionItem } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
-import { MessageSquare, RotateCcw, X, XCircle } from "lucide-react";
+import { Download, MessageSquare, RotateCcw, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 type VisibleSection = "conSaldo" | "canceladas";
@@ -113,6 +113,17 @@ function ComentarioModal({
   );
 }
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
 export default function FsanchezView() {
   const queryClient = useQueryClient();
   const [visibleSection, setVisibleSection] = useState<VisibleSection>("conSaldo");
@@ -148,6 +159,21 @@ export default function FsanchezView() {
     },
     onSettled: () => {
       setUpdatingOpera(null);
+    },
+  });
+  const exportMutation = useMutation({
+    mutationFn: () =>
+      exportFsanchezOperaciones({
+        section: visibleSection,
+        location: visibleLocation,
+      }),
+    onSuccess: (blob) => {
+      const today = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `fsanchez-${today}.xlsx`);
+      toast.success("Excel exportado correctamente");
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message);
     },
   });
 
@@ -307,26 +333,38 @@ export default function FsanchezView() {
           </div>
 
           <div className="flex flex-col gap-3 md:items-end">
-            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+            <div className="flex w-full gap-2 md:w-auto">
+              <div className="inline-flex flex-1 rounded-lg bg-gray-100 p-1 md:flex-none">
+                <button
+                  type="button"
+                  onClick={() => setVisibleSection("conSaldo")}
+                  className={[
+                    "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                    visibleSection === "conSaldo" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
+                >
+                  Con saldo ({meta?.conSaldo ?? 0})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibleSection("canceladas")}
+                  className={[
+                    "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                    visibleSection === "canceladas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
+                >
+                  Canceladas ({meta?.canceladas ?? 0})
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setVisibleSection("conSaldo")}
-                className={[
-                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                  visibleSection === "conSaldo" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
-                ].join(" ")}
+                onClick={() => exportMutation.mutate()}
+                disabled={exportMutation.isPending}
+                className="inline-flex h-[42px] items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-xs font-semibold uppercase tracking-wide text-gray-700 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Con saldo ({meta?.conSaldo ?? 0})
-              </button>
-              <button
-                type="button"
-                onClick={() => setVisibleSection("canceladas")}
-                className={[
-                  "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                  visibleSection === "canceladas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
-                ].join(" ")}
-              >
-                Canceladas ({meta?.canceladas ?? 0})
+                <Download size={14} />
+                {exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
               </button>
             </div>
 
