@@ -321,6 +321,18 @@ ORDER BY
 	nrofab
 `;
 
+export const getFsanchezOperacionesFacturadasQuery = (operas: string) => `
+SELECT DISTINCT
+	CAST(ope.ope_codigo AS VARCHAR(50)) AS opera
+FROM
+	opera ope
+WHERE
+	ope.ope_tipo = 5
+	AND ope.ope_fecbaj IS NULL
+	AND ope.ope_fecfac IS NOT NULL
+	AND ope.ope_codigo IN (${operas})
+`;
+
 export const getAnalisisStockVersionesDisponibles = () => `
 SELECT DISTINCT
 	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,

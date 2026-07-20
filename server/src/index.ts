@@ -1,5 +1,6 @@
 import colors from "colors";
 import { startAgendaEntregaEnvioJob } from "./jobs/agendaEntregaEnvio.job";
+import { startFsanchezCleanupJob } from "./jobs/fsanchezCleanup.job";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
@@ -18,6 +19,7 @@ server.listen(Number(port), "0.0.0.0", () => {
 
   startAgendaEntregaEnvioJob();
   startFacturasAnticipoJob();
+  startFsanchezCleanupJob();
   startPatentamientosImportJob();
   startTransferenciasImportJob();
   startUnidadesDealersJob();

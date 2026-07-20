@@ -31,6 +31,12 @@ const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "schedu
     scheduleLabel: "Lunes a viernes a las 21:00",
     canRun: true,
   },
+  {
+    jobKey: "fsanchez-cleanup",
+    title: "Limpieza FSANCHEZ",
+    scheduleLabel: "Todos los dias a las 20:30",
+    canRun: true,
+  },
 ];
 
 const STATUS_LABELS: Record<string, string> = {

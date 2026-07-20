@@ -13,6 +13,13 @@ import {
   isFacturasAnticipoJobRunning,
   runFacturasAnticipoJob,
 } from "../facturasAnticipoCron.service";
+import {
+  getFsanchezCleanupJobKey,
+  getFsanchezCleanupJobName,
+  getFsanchezCleanupScheduleLabel,
+  isFsanchezCleanupJobRunning,
+  runFsanchezCleanupJob,
+} from "../fsanchezCleanupCron.service";
 import { TransferenciasImportService } from "../transferenciasImport.service";
 import { UnidadesDealersService } from "../unidadesDealers.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
@@ -68,6 +75,16 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     sourcePath: "OperacionFacturaAnticipo",
     isRunning: () => isFacturasAnticipoJobRunning(),
     run: (trigger) => runFacturasAnticipoJob(trigger),
+  },
+  {
+    jobKey: getFsanchezCleanupJobKey(),
+    title: "Limpieza FSANCHEZ",
+    scheduleLabel: getFsanchezCleanupScheduleLabel(),
+    jobName: getFsanchezCleanupJobName(),
+    sourceType: "database",
+    sourcePath: "fsanchez_operaciones_estado",
+    isRunning: () => isFsanchezCleanupJobRunning(),
+    run: (trigger) => runFsanchezCleanupJob(trigger),
   },
 ];
 

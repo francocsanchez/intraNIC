@@ -10,6 +10,8 @@ import { toast } from "sonner";
 
 type VisibleSection = "conSaldo" | "canceladas";
 type AlertLevel = "normal" | "media" | "alta";
+type SortField = "version" | "cliente" | "vendedor" | "diasAsignado";
+type SortDirection = "asc" | "desc";
 
 function ComentarioModal({
   open,
@@ -115,6 +117,8 @@ export default function FsanchezView() {
   const queryClient = useQueryClient();
   const [visibleSection, setVisibleSection] = useState<VisibleSection>("conSaldo");
   const [visibleLocation, setVisibleLocation] = useState<string>("todas");
+  const [sortField, setSortField] = useState<SortField>("diasAsignado");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [updatingOpera, setUpdatingOpera] = useState<string | null>(null);
   const [comentarioModalOperacion, setComentarioModalOperacion] = useState<FsanchezOperacionItem | null>(null);
   const [comentarioDraft, setComentarioDraft] = useState("");
@@ -155,13 +159,31 @@ export default function FsanchezView() {
   );
 
   const operacionesVisibles = useMemo(() => {
-    return operaciones.filter((item) => {
+    const filtered = operaciones.filter((item) => {
       const matchesSection = visibleSection === "conSaldo" ? !item.cancelada : item.cancelada;
       const matchesLocation = visibleLocation === "todas" ? true : item.ubicacion === visibleLocation;
 
       return matchesSection && matchesLocation;
     });
-  }, [operaciones, visibleLocation, visibleSection]);
+
+    return [...filtered].sort((left, right) => {
+      const directionFactor = sortDirection === "asc" ? 1 : -1;
+
+      if (sortField === "diasAsignado") {
+        const diff = left.diasAsignado - right.diasAsignado;
+        if (diff !== 0) {
+          return diff * directionFactor;
+        }
+      } else {
+        const leftValue = left[sortField].localeCompare(right[sortField], "es", { sensitivity: "base" });
+        if (leftValue !== 0) {
+          return leftValue * directionFactor;
+        }
+      }
+
+      return left.opera.localeCompare(right.opera, "es") * directionFactor;
+    });
+  }, [operaciones, sortDirection, sortField, visibleLocation, visibleSection]);
 
   const locationCounts = useMemo(() => {
     return ubicaciones.reduce<Record<string, number>>((acc, location) => {
@@ -185,6 +207,24 @@ export default function FsanchezView() {
 
   const handleAlertChange = (item: FsanchezOperacionItem, alerta: AlertLevel) => {
     updateMutation.mutate({ opera: item.opera, payload: { alerta } });
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setSortField(field);
+    setSortDirection(field === "diasAsignado" ? "desc" : "asc");
+  };
+
+  const getSortLabel = (field: SortField) => {
+    if (sortField !== field) {
+      return "";
+    }
+
+    return sortDirection === "asc" ? " ▲" : " ▼";
   };
 
   const openComentarioModal = (item: FsanchezOperacionItem) => {
@@ -316,13 +356,33 @@ export default function FsanchezView() {
               <tr>
                 <th className="px-4 py-3 text-left">Opera</th>
                 <th className="px-4 py-3 text-left">Modelo</th>
-                <th className="px-4 py-3 text-left">Version</th>
-                <th className="px-4 py-3 text-left">Cliente</th>
-                <th className="px-4 py-3 text-left">Vendedor</th>
+                <th className="px-4 py-3 text-left">
+                  <button type="button" onClick={() => handleSort("version")} className="transition hover:text-gray-900">
+                    Version{getSortLabel("version")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left">
+                  <button type="button" onClick={() => handleSort("cliente")} className="transition hover:text-gray-900">
+                    Cliente{getSortLabel("cliente")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left">
+                  <button type="button" onClick={() => handleSort("vendedor")} className="transition hover:text-gray-900">
+                    Vendedor{getSortLabel("vendedor")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 text-left">Ubicacion</th>
                 <th className="px-4 py-3 text-left">Alerta</th>
                 <th className="px-4 py-3 text-left">Comentario</th>
-                <th className="px-4 py-3 text-left">Dias asignado</th>
+                <th className="px-4 py-3 text-left">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("diasAsignado")}
+                    className="transition hover:text-gray-900"
+                  >
+                    Dias asignado{getSortLabel("diasAsignado")}
+                  </button>
+                </th>
                 <th className="px-4 py-3 text-left">Color</th>
                 <th className="px-4 py-3 text-right">Accion</th>
               </tr>
