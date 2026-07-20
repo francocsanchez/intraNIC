@@ -56,13 +56,6 @@ export default function GestionConvencionalLayout() {
       visible: hasModulePathAccess(user, "pendFac", paths.convencional.pendFac),
       active: pathname === paths.convencional.pendFac,
     },
-    {
-      label: "Dic. versiones",
-      to: paths.convencional.analisisStockDiccionarioVersiones,
-      icon: ClipboardList,
-      visible: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock),
-      active: pathname === paths.convencional.analisisStockDiccionarioVersiones,
-    },
   ].filter((item) => item.visible);
 
   return (
