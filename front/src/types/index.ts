@@ -733,6 +733,74 @@ export const operacionesDashboardResponseSchema = z.object({
 export type OperacionDashboard = z.infer<typeof operacionDashboardSchema>;
 export type OperacionesDashboardResponse = z.infer<typeof operacionesDashboardResponseSchema>;
 
+export const analisisOperacionesPreventaTipoSchema = z.enum(["Cero"]);
+
+export const analisisOperacionesPreventaItemSchema = z.object({
+  numero: z.number().nullable(),
+  interno: z.number().nullable(),
+  fecha: z.string().nullable(),
+  version: z.string(),
+  modelo: z.string(),
+  precio: z.number().nullable(),
+  vehiculo: z.number().nullable(),
+  accesorios: z.number().nullable(),
+  patentamiento: z.number().nullable(),
+  flete: z.number().nullable(),
+  formulario: z.number().nullable(),
+  prenda: z.number().nullable(),
+  equipamiento: z.number().nullable(),
+  preentrega: z.number().nullable(),
+  otro: z.number().nullable(),
+  bonificacion: z.number().nullable(),
+});
+
+export const analisisOperacionesPreventaFormaPagoSchema = z.object({
+  numero: z.number().nullable(),
+  usados: z.number().nullable(),
+  contado: z.number().nullable(),
+  cheque: z.number().nullable(),
+  credito_bancario: z.number().nullable(),
+});
+
+export const analisisOperacionesPreventaResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    mes: z.number(),
+    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+  }),
+  data: z.array(analisisOperacionesPreventaItemSchema),
+});
+
+export const analisisOperacionesPreventaFormaPagoResponseSchema = z.object({
+  data: analisisOperacionesPreventaFormaPagoSchema,
+});
+
+export const analisisOperacionesPreventaDescuentoMensualItemSchema = z.object({
+  mes: z.number(),
+  modelo: z.string(),
+  descuentoPromedio: z.number(),
+});
+
+export const analisisOperacionesPreventaDescuentoMensualResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+  }),
+  data: z.array(analisisOperacionesPreventaDescuentoMensualItemSchema),
+});
+
+export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
+export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperacionesPreventaItemSchema>;
+export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
+export type AnalisisOperacionesPreventaFormaPago = z.infer<typeof analisisOperacionesPreventaFormaPagoSchema>;
+export type AnalisisOperacionesPreventaFormaPagoResponse = z.infer<typeof analisisOperacionesPreventaFormaPagoResponseSchema>;
+export type AnalisisOperacionesPreventaDescuentoMensualItem = z.infer<
+  typeof analisisOperacionesPreventaDescuentoMensualItemSchema
+>;
+export type AnalisisOperacionesPreventaDescuentoMensualResponse = z.infer<
+  typeof analisisOperacionesPreventaDescuentoMensualResponseSchema
+>;
+
 //**************************** */
 // PEDIDO UNIDADES
 //**************************** */

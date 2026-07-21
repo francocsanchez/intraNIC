@@ -1,6 +1,11 @@
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
-import { operacionesDashboardQuery } from "../controllers/querys/operaciones.query";
+import {
+  analisisOperacionesPreventaDescuentoMensualQuery,
+  analisisOperacionesPreventaFormaPagoQuery,
+  analisisOperacionesPreventaQuery,
+  operacionesDashboardQuery,
+} from "../controllers/querys/operaciones.query";
 
 type OperacionesDashboardFilters = {
   anios: number[];
@@ -8,6 +13,15 @@ type OperacionesDashboardFilters = {
   sucursales: string[];
   modelos: string[];
   dias: number[];
+};
+
+export const OPERACIONES_ANALISIS_TIPO_VALUES = ["Cero"] as const;
+export type OperacionesAnalisisTipo = (typeof OPERACIONES_ANALISIS_TIPO_VALUES)[number];
+
+type OperacionesAnalisisPreventaFilters = {
+  anio: number;
+  mes: number;
+  tipo: OperacionesAnalisisTipo;
 };
 
 type OperacionDashboardRow = {
@@ -50,8 +64,117 @@ type OperacionesDashboardResponse = {
   };
 };
 
+type AnalisisOperacionPreventaRow = {
+  numero: number | string | null;
+  interno: number | string | null;
+  fecha: string | Date | null;
+  version: string | null;
+  modelo: string | null;
+  precio: number | string | null;
+  vehiculo: number | string | null;
+  accesorios: number | string | null;
+  patentamiento: number | string | null;
+  flete: number | string | null;
+  formulario: number | string | null;
+  prenda: number | string | null;
+  equipamiento: number | string | null;
+  preentrega: number | string | null;
+  otro: number | string | null;
+  bonificacion: number | string | null;
+};
+
+type AnalisisOperacionPreventaItem = {
+  numero: number | null;
+  interno: number | null;
+  fecha: string | null;
+  version: string;
+  modelo: string;
+  precio: number | null;
+  vehiculo: number | null;
+  accesorios: number | null;
+  patentamiento: number | null;
+  flete: number | null;
+  formulario: number | null;
+  prenda: number | null;
+  equipamiento: number | null;
+  preentrega: number | null;
+  otro: number | null;
+  bonificacion: number | null;
+};
+
+type AnalisisOperacionPreventaFormaPagoRow = {
+  numero: number | string | null;
+  usados: number | null;
+  contado: number | null;
+  cheque: number | null;
+  credito_bancario: number | null;
+};
+
+type AnalisisOperacionPreventaFormaPagoItem = {
+  numero: number | null;
+  usados: number | null;
+  contado: number | null;
+  cheque: number | null;
+  credito_bancario: number | null;
+};
+
+type AnalisisOperacionPreventaResponse = {
+  filters: OperacionesAnalisisPreventaFilters;
+  data: AnalisisOperacionPreventaItem[];
+};
+
+type AnalisisOperacionPreventaFormaPagoResponse = {
+  data: AnalisisOperacionPreventaFormaPagoItem;
+};
+
+type AnalisisOperacionPreventaDescuentoMensualRow = {
+  mes: number | string | null;
+  modelo: string | null;
+  descuento_promedio: number | string | null;
+};
+
+type AnalisisOperacionPreventaDescuentoMensualItem = {
+  mes: number;
+  modelo: string;
+  descuentoPromedio: number;
+};
+
+type AnalisisOperacionPreventaDescuentoMensualResponse = {
+  filters: {
+    anio: number;
+    tipo: OperacionesAnalisisTipo;
+  };
+  data: AnalisisOperacionPreventaDescuentoMensualItem[];
+};
+
 const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
   fechaAsignacion instanceof Date ? fechaAsignacion.toISOString() : fechaAsignacion;
+
+const serializeNullableDate = (value: string | Date | null) => {
+  if (!value) {
+    return null;
+  }
+
+  return value instanceof Date ? value.toISOString() : value;
+};
+
+const normalizeNullableString = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const normalized = String(value).trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
+const normalizeNullableNumber = (value: unknown) => {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 const getDayFromFechaAsignacion = (fechaAsignacion: string | Date) => {
   if (fechaAsignacion instanceof Date) {
@@ -189,6 +312,111 @@ export class OperacionesDashboardService {
       grafico,
       tabla,
       filtros,
+    };
+  }
+
+  static async getAnalisisPreventa(
+    filters: OperacionesAnalisisPreventaFilters,
+  ): Promise<AnalisisOperacionPreventaResponse> {
+    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaRow>(
+      analisisOperacionesPreventaQuery(),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          anio: filters.anio,
+          mes: filters.mes,
+        },
+      },
+    );
+
+    const data = rows.map((row) => ({
+      numero: normalizeNullableNumber(row.numero),
+      interno: normalizeNullableNumber(row.interno),
+      fecha: serializeNullableDate(row.fecha),
+      version: normalizeNullableString(row.version) ?? "",
+      modelo: normalizeNullableString(row.modelo) ?? "",
+      precio: normalizeNullableNumber(row.precio),
+      vehiculo: normalizeNullableNumber(row.vehiculo),
+      accesorios: normalizeNullableNumber(row.accesorios),
+      patentamiento: normalizeNullableNumber(row.patentamiento),
+      flete: normalizeNullableNumber(row.flete),
+      formulario: normalizeNullableNumber(row.formulario),
+      prenda: normalizeNullableNumber(row.prenda),
+      equipamiento: normalizeNullableNumber(row.equipamiento),
+      preentrega: normalizeNullableNumber(row.preentrega),
+      otro: normalizeNullableNumber(row.otro),
+      bonificacion: normalizeNullableNumber(row.bonificacion),
+    }));
+
+    return {
+      filters,
+      data,
+    };
+  }
+
+  static async getAnalisisPreventaFormaPago(
+    numero: number,
+  ): Promise<AnalisisOperacionPreventaFormaPagoResponse | null> {
+    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaFormaPagoRow>(
+      analisisOperacionesPreventaFormaPagoQuery(),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          numero,
+        },
+      },
+    );
+
+    const row = rows[0];
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      data: {
+        numero: normalizeNullableNumber(row.numero),
+        usados: normalizeNullableNumber(row.usados),
+        contado: normalizeNullableNumber(row.contado),
+        cheque: normalizeNullableNumber(row.cheque),
+        credito_bancario: normalizeNullableNumber(row.credito_bancario),
+      },
+    };
+  }
+
+  static async getAnalisisPreventaDescuentoMensual(
+    anio: number,
+  ): Promise<AnalisisOperacionPreventaDescuentoMensualResponse> {
+    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaDescuentoMensualRow>(
+      analisisOperacionesPreventaDescuentoMensualQuery(),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          anio,
+        },
+      },
+    );
+
+    const data = rows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        modelo: normalizeNullableString(row.modelo) ?? "SIN MODELO",
+        descuentoPromedio: normalizeNullableNumber(row.descuento_promedio),
+      }))
+      .filter(
+        (row): row is AnalisisOperacionPreventaDescuentoMensualItem =>
+          row.mes !== null &&
+          row.mes >= 1 &&
+          row.mes <= 12 &&
+          row.descuentoPromedio !== null,
+      );
+
+    return {
+      filters: {
+        anio,
+        tipo: "Cero",
+      },
+      data,
     };
   }
 }

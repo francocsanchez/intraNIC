@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasModuleAccess, hasModulePathAccess } from "@/helpers/access";
+import { hasModuleAccess, hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -58,6 +58,9 @@ export default function Inicio() {
     ? paths.convencional.preventas
     : paths.convencional.preventasResumen;
   const canViewFsanchez = hasModulePathAccess(user, "fsanchez", paths.admin.fsanchez);
+  const canViewAnalisisOperaciones =
+    hasSuperAdminRole(user) &&
+    hasModulePathAccess(user, "analisisOperaciones", paths.analisis.analisisOperaciones);
 
   const sections: HomeSection[] = [
     {
@@ -190,6 +193,12 @@ export default function Inicio() {
       icon: BarChart3,
       items: [
         { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones), icon: BarChart3 },
+        {
+          label: "Analisis Operaciones",
+          to: paths.analisis.analisisOperaciones,
+          enabled: canViewAnalisisOperaciones,
+          icon: FileSpreadsheet,
+        },
         { label: "Ranking", to: paths.convencional.ranking, enabled: hasModulePathAccess(user, "ranking", paths.convencional.ranking), icon: Trophy },
         { label: "Promedio", to: paths.convencional.promedio, enabled: hasModulePathAccess(user, "promedio", paths.convencional.promedio), icon: BarChart3 },
         {

@@ -20,6 +20,7 @@ export const moduleKeys = [
   "pendienteDocumentacion",
   "ingresos",
   "operaciones",
+  "analisisOperaciones",
   "ranking",
   "promedio",
   "patentamientos",

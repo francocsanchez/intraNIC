@@ -47,3 +47,99 @@ ORDER BY
     ope.ope_fecasig DESC,
     vende.ven_nombre ASC;
 `;
+
+export const analisisOperacionesPreventaQuery = () => `
+SELECT
+    vp.numero,
+    stoauto.sa_codigo AS interno,
+    vp.fecha,
+    LTRIM(RTRIM(vp.modelo)) AS version,
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
+    vp.precio,
+    vp.vehiculo,
+    vp.accesorios,
+    vp.patentamiento,
+    vp.flete,
+    vp.formulario,
+    vp.prenda,
+    vp.equipamiento,
+    vp.preentrega,
+    vp.otro,
+    vp.bonificacion
+FROM
+    viewpreventa vp
+LEFT JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+LEFT JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND MONTH(vp.fecha) = :mes
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+ORDER BY
+    vp.fecha DESC,
+    vp.numero DESC;
+`;
+
+export const analisisOperacionesPreventaFormaPagoQuery = () => `
+SELECT TOP 1
+    numero,
+    usados,
+    contado,
+    cheque,
+    credito_bancario
+FROM
+    viewpreventa
+WHERE
+    fecha_anulacion IS NULL
+    AND numero = :numero
+    AND UPPER(LTRIM(RTRIM(tipo))) = 'CERO'
+ORDER BY
+    fecha DESC,
+    numero DESC;
+`;
+
+export const analisisOperacionesPreventaDescuentoMensualQuery = () => `
+SELECT
+    MONTH(vp.fecha) AS mes,
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) AS modelo,
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS descuento_promedio
+FROM
+    viewpreventa vp
+LEFT JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND vp.precio IS NOT NULL
+    AND vp.precio > 0
+    AND vp.bonificacion IS NOT NULL
+GROUP BY
+    MONTH(vp.fecha),
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO')))
+ORDER BY
+    mes ASC,
+    modelo ASC;
+`;
