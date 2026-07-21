@@ -282,6 +282,7 @@ SELECT
 	LTRIM(RTRIM(auto.au_nombre)) AS version,
 	LTRIM(RTRIM(famiauto.fam_nombre)) AS modelo,
 	movnped.mnp_chasis AS chasis,
+	movnped.mnp_certif AS certif,
 	color.col_nombre AS color,
 	cliente.cli_nombre AS cliente,
 	vendedor.ven_nombre AS vendedor,

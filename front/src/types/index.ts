@@ -1428,6 +1428,7 @@ export const fsanchezOperacionItemSchema = z.object({
   version: z.string(),
   modelo: z.string(),
   chasis: z.string(),
+  certif: z.boolean().default(false),
   color: z.string(),
   cliente: z.string(),
   vendedor: z.string(),

@@ -56,6 +56,7 @@ type PendFacRow = {
   version: string | null;
   modelo: string | null;
   chasis: string | null;
+  certif: unknown;
   color: string | null;
   cliente: string | null;
   vendedor: string | null;
@@ -70,6 +71,7 @@ type PendFacUnit = {
   version: string;
   modelo: string;
   chasis: string;
+  certif: boolean;
   color: string;
   cliente: string;
   vendedor: string;
@@ -171,6 +173,14 @@ const normalizePendFacNumber = (value: unknown, fallback = 0) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const normalizePendFacCertif = (value: unknown) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+
+  const normalized = String(value ?? "").trim();
+  return normalized.length > 0;
+};
+
 const normalizeAnalisisModel = (value: unknown) => {
   const normalized = normalizeAnalisisText(value, "Sin modelo").toUpperCase();
 
@@ -261,6 +271,7 @@ const buildPendFacData = (rows: PendFacRow[]): PendFacResponseData => {
       version,
       modelo,
       chasis: normalizePendFacText(row.chasis, "-"),
+      certif: normalizePendFacCertif(row.certif),
       color: normalizePendFacText(row.color, "-"),
       cliente: normalizePendFacText(row.cliente, "-"),
       vendedor: normalizePendFacText(row.vendedor, "-"),
@@ -367,6 +378,7 @@ const buildFsanchezOperaciones = (
       version: normalizeAnalisisText(row.version, "Sin version"),
       modelo: normalizeAnalisisModel(row.modelo),
       chasis: normalizePendFacText(row.chasis, "-"),
+      certif: normalizePendFacCertif(row.certif),
       color: normalizePendFacText(row.color, "-"),
       cliente: normalizePendFacText(row.cliente, "-"),
       vendedor: normalizePendFacText(row.vendedor, "-"),
@@ -1176,6 +1188,7 @@ export class DmsController {
         alerta: item.alerta,
         comentario: item.comentario || "",
         "dias asignado": item.diasAsignado,
+        certificado: item.certif ? "✓" : "",
         color: item.color,
         estado: item.cancelada ? "Cancelada" : "Con saldo",
       }));
@@ -1191,6 +1204,7 @@ export class DmsController {
         { wch: 12 },
         { wch: 42 },
         { wch: 14 },
+        { wch: 12 },
         { wch: 16 },
         { wch: 14 },
       ];

@@ -7,7 +7,7 @@ import type { FsanchezOperacionItem } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
-import { Download, MessageSquare, RotateCcw, X, XCircle } from "lucide-react";
+import { Check, Download, MessageSquare, RotateCcw, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 type VisibleSection = "conSaldo" | "canceladas";
@@ -458,6 +458,7 @@ export default function FsanchezView() {
                     Dias asignado{getSortLabel("diasAsignado")}
                   </button>
                 </th>
+                <th className="px-4 py-3 text-center">Cert.</th>
                 <th className="px-4 py-3 text-left">Color</th>
                 <th className="px-4 py-3 text-right">Accion</th>
               </tr>
@@ -506,6 +507,9 @@ export default function FsanchezView() {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{item.diasAsignado}</td>
+                    <td className="px-4 py-3 text-center">
+                      {item.certif ? <Check size={14} strokeWidth={2.4} className="mx-auto text-emerald-700" /> : null}
+                    </td>
                     <td className="px-4 py-3 text-gray-700">
                       <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
                         {item.color}
@@ -540,7 +544,7 @@ export default function FsanchezView() {
 
               {operacionesVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={12} className="px-6 py-10 text-center text-sm text-gray-500">
                     {emptyMessage}
                   </td>
                 </tr>
