@@ -68,10 +68,11 @@ SELECT
     vp.bonificacion
 FROM
     viewpreventa vp
-LEFT JOIN opera ope ON
+INNER JOIN opera ope ON
     ope.ope_codigo = vp.numero
     AND ope.ope_tipo = 5
-LEFT JOIN stoauto ON
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
@@ -80,36 +81,39 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
-    AND MONTH(vp.fecha) = :mes
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 ORDER BY
-    vp.fecha DESC,
+    ope.ope_fecasig DESC,
     vp.numero DESC;
 `;
 
 export const analisisOperacionesPreventaFormaPagoQuery = () => `
 SELECT TOP 1
-    numero,
-    usados,
-    contado,
-    cheque,
-    credito_bancario
+    vp.numero,
+    vp.usados,
+    vp.contado,
+    vp.cheque,
+    vp.credito_bancario
 FROM
-    viewpreventa
+    viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
 WHERE
-    fecha_anulacion IS NULL
-    AND numero = :numero
-    AND UPPER(LTRIM(RTRIM(tipo))) = 'CERO'
+    vp.fecha_anulacion IS NULL
+    AND vp.numero = :numero
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 ORDER BY
-    fecha DESC,
-    numero DESC;
+    ope.ope_fecasig DESC,
+    vp.numero DESC;
 `;
 
 export const analisisOperacionesPreventaDescuentoMensualQuery = () => `
 SELECT
-    MONTH(vp.fecha) AS mes,
+    MONTH(ope.ope_fecasig) AS mes,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) AS modelo,
     AVG(
         CASE
@@ -120,9 +124,12 @@ SELECT
     ) AS descuento_promedio
 FROM
     viewpreventa vp
-LEFT JOIN opera ope ON
+INNER JOIN opera ope ON
     ope.ope_codigo = vp.numero
     AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
     AND auto.au_marca = ope.ope_marca
@@ -130,14 +137,13 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
+    AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
 GROUP BY
-    MONTH(vp.fecha),
+    MONTH(ope.ope_fecasig),
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO')))
 ORDER BY
     mes ASC,
@@ -156,11 +162,16 @@ SELECT
     ) AS promedio_valor_usado
 FROM
     viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
-    AND MONTH(vp.fecha) = :mes
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO';
 `;
 
@@ -175,9 +186,12 @@ SELECT
     ) AS promedio_credito
 FROM
     viewpreventa vp
-LEFT JOIN opera ope ON
+INNER JOIN opera ope ON
     ope.ope_codigo = vp.numero
     AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
     AND auto.au_marca = ope.ope_marca
@@ -185,9 +199,8 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
-    AND MONTH(vp.fecha) = :mes
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND ISNULL(vp.credito_bancario, 0) > 0
 GROUP BY
@@ -198,7 +211,7 @@ ORDER BY
 
 export const analisisOperacionesPreventaUsadosMensualQuery = () => `
 SELECT
-    MONTH(vp.fecha) AS mes,
+    MONTH(ope.ope_fecasig) AS mes,
     SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_usados,
     AVG(
         CASE
@@ -208,20 +221,25 @@ SELECT
     ) AS promedio_valor_usado
 FROM
     viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
+    AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 GROUP BY
-    MONTH(vp.fecha)
+    MONTH(ope.ope_fecasig)
 ORDER BY
     mes ASC;
 `;
 
 export const analisisOperacionesPreventaCreditoMensualQuery = () => `
 SELECT
-    MONTH(vp.fecha) AS mes,
+    MONTH(ope.ope_fecasig) AS mes,
     AVG(
         CASE
             WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN vp.credito_bancario * 1.0
@@ -230,14 +248,19 @@ SELECT
     ) AS promedio_credito
 FROM
     viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
-    AND vp.fecha IS NOT NULL
-    AND YEAR(vp.fecha) = :anio
+    AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND ISNULL(vp.credito_bancario, 0) > 0
 GROUP BY
-    MONTH(vp.fecha)
+    MONTH(ope.ope_fecasig)
 ORDER BY
     mes ASC;
 `;
