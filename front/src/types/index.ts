@@ -789,6 +789,25 @@ export const analisisOperacionesPreventaDescuentoMensualResponseSchema = z.objec
   data: z.array(analisisOperacionesPreventaDescuentoMensualItemSchema),
 });
 
+export const analisisOperacionesPreventaResumenFinanciacionResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    mes: z.number(),
+    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+  }),
+  data: z.object({
+    cantidadOperacionesCredito: z.number(),
+    cantidadOperacionesUsado: z.number(),
+    promedioValorUsado: z.number().nullable(),
+    promedioCreditoPorModelo: z.array(
+      z.object({
+        modelo: z.string(),
+        promedioCredito: z.number(),
+      }),
+    ),
+  }),
+});
+
 export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
 export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperacionesPreventaItemSchema>;
 export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
@@ -799,6 +818,9 @@ export type AnalisisOperacionesPreventaDescuentoMensualItem = z.infer<
 >;
 export type AnalisisOperacionesPreventaDescuentoMensualResponse = z.infer<
   typeof analisisOperacionesPreventaDescuentoMensualResponseSchema
+>;
+export type AnalisisOperacionesPreventaResumenFinanciacionResponse = z.infer<
+  typeof analisisOperacionesPreventaResumenFinanciacionResponseSchema
 >;
 
 //**************************** */

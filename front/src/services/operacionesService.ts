@@ -2,10 +2,12 @@ import api from "@/libs/axios";
 import {
   analisisOperacionesPreventaDescuentoMensualResponseSchema,
   analisisOperacionesPreventaFormaPagoResponseSchema,
+  analisisOperacionesPreventaResumenFinanciacionResponseSchema,
   analisisOperacionesPreventaResponseSchema,
   operacionesDashboardResponseSchema,
   type AnalisisOperacionesPreventaDescuentoMensualResponse,
   type AnalisisOperacionesPreventaFormaPagoResponse,
+  type AnalisisOperacionesPreventaResumenFinanciacionResponse,
   type AnalisisOperacionesPreventaResponse,
   type OperacionesDashboardResponse,
 } from "@/types/index";
@@ -117,5 +119,26 @@ export async function getAnalisisOperacionesPreventaDescuentoMensual(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener el descuento mensual por modelo"));
+  }
+}
+
+export async function getAnalisisOperacionesPreventaResumenFinanciacion(
+  params: AnalisisOperacionesPreventaParams,
+): Promise<AnalisisOperacionesPreventaResumenFinanciacionResponse> {
+  try {
+    const { data } = await api.get("/operaciones/analisis-preventa/resumen-financiacion", {
+      params,
+    });
+
+    const parsed = analisisOperacionesPreventaResumenFinanciacionResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el resumen de financiacion"));
   }
 }

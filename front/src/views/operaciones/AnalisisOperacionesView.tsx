@@ -4,6 +4,7 @@ import {
   getAnalisisOperacionesPreventaDescuentoMensual,
   getAnalisisOperacionesPreventa,
   getAnalisisOperacionesPreventaFormaPago,
+  getAnalisisOperacionesPreventaResumenFinanciacion,
 } from "@/services/operacionesService";
 import type {
   AnalisisOperacionesPreventaDescuentoMensualItem,
@@ -355,6 +356,16 @@ export default function AnalisisOperacionesView() {
     refetchOnWindowFocus: false,
   });
 
+  const {
+    data: resumenFinanciacionData,
+    isLoading: isResumenFinanciacionLoading,
+    error: resumenFinanciacionError,
+  } = useQuery({
+    queryKey: ["analisis-operaciones-preventa-resumen-financiacion", anio, mes],
+    queryFn: () => getAnalisisOperacionesPreventaResumenFinanciacion({ anio, mes }),
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     if (error instanceof Error) {
       toast.error(error.message);
@@ -372,6 +383,12 @@ export default function AnalisisOperacionesView() {
       toast.error(descuentoMensualError.message);
     }
   }, [descuentoMensualError]);
+
+  useEffect(() => {
+    if (resumenFinanciacionError instanceof Error) {
+      toast.error(resumenFinanciacionError.message);
+    }
+  }, [resumenFinanciacionError]);
 
   if (isLoading) return <Loading />;
 
@@ -465,7 +482,68 @@ export default function AnalisisOperacionesView() {
         </article>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+          <div className="flex h-full flex-col">
+            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Financiacion</h2>
+            <p className="mt-1 text-xs text-gray-600">Indicadores del periodo filtrado para credito y usado.</p>
+
+            <div className="mt-4 grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con credito</p>
+                <p className="mt-1 text-2xl font-bold text-gray-900">
+                  {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesCredito ?? 0)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con usado</p>
+                <p className="mt-1 text-2xl font-bold text-gray-900">
+                  {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesUsado ?? 0)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Promedio valor de usado</p>
+                <p className="mt-1 text-lg font-bold text-gray-900">
+                  {isResumenFinanciacionLoading
+                    ? "..."
+                    : formatMoney(resumenFinanciacionData?.data.promedioValorUsado ?? null)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+          <div className="flex h-full flex-col">
+            <h2 className="text-xl font-semibold tracking-tight text-gray-900">PROM CREDITO</h2>
+            <p className="mt-1 text-xs text-gray-600">Promedio de credito por modelo en el periodo filtrado.</p>
+
+            <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
+              {isResumenFinanciacionLoading ? (
+                <div className="h-24 w-full animate-pulse rounded-xl bg-gray-100" />
+              ) : resumenFinanciacionData?.data.promedioCreditoPorModelo.length ? (
+                resumenFinanciacionData.data.promedioCreditoPorModelo.map((item) => (
+                  <div
+                    key={item.modelo}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-800"
+                  >
+                    <span className="font-semibold uppercase text-gray-700">{item.modelo}</span>
+                    <span className="font-bold text-[#128c80]">{formatMoney(item.promedioCredito)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="inline-flex items-center rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-600">
+                  Sin operaciones con credito en el periodo.
+                </div>
+              )}
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Por Mes</h2>
@@ -479,7 +557,7 @@ export default function AnalisisOperacionesView() {
           </div>
         </div>
 
-        <div className="mt-4 h-[340px]">
+        <div className="mt-4 h-[340px] min-w-0">
           {isDescuentoMensualLoading ? (
             <div className="h-full animate-pulse rounded-xl bg-gray-100" />
           ) : !chartModels.length ? (

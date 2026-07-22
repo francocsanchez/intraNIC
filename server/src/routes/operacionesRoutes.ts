@@ -21,6 +21,12 @@ router.get(
   OperacionesController.getAnalisisPreventaDescuentoMensual,
 );
 router.get(
+  "/analisis-preventa/resumen-financiacion",
+  authorizeModules("analisisOperaciones"),
+  requireSuperAdmin,
+  OperacionesController.getAnalisisPreventaResumenFinanciacion,
+);
+router.get(
   "/analisis-preventa/:numero/forma-pago",
   authorizeModules("analisisOperaciones"),
   requireSuperAdmin,

@@ -2,8 +2,10 @@ import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
 import {
   analisisOperacionesPreventaDescuentoMensualQuery,
+  analisisOperacionesPreventaPromedioCreditoPorModeloQuery,
   analisisOperacionesPreventaFormaPagoQuery,
   analisisOperacionesPreventaQuery,
+  analisisOperacionesPreventaResumenFinanciacionQuery,
   operacionesDashboardQuery,
 } from "../controllers/querys/operaciones.query";
 
@@ -145,6 +147,34 @@ type AnalisisOperacionPreventaDescuentoMensualResponse = {
     tipo: OperacionesAnalisisTipo;
   };
   data: AnalisisOperacionPreventaDescuentoMensualItem[];
+};
+
+type AnalisisOperacionPreventaResumenFinanciacionRow = {
+  cantidad_operaciones_credito: number | string | null;
+  cantidad_operaciones_usado: number | string | null;
+  promedio_valor_usado: number | string | null;
+};
+
+type AnalisisOperacionPreventaPromedioCreditoPorModeloRow = {
+  modelo: string | null;
+  promedio_credito: number | string | null;
+};
+
+type AnalisisOperacionPreventaResumenFinanciacionResponse = {
+  filters: {
+    anio: number;
+    mes: number;
+    tipo: OperacionesAnalisisTipo;
+  };
+  data: {
+    cantidadOperacionesCredito: number;
+    cantidadOperacionesUsado: number;
+    promedioValorUsado: number | null;
+    promedioCreditoPorModelo: Array<{
+      modelo: string;
+      promedioCredito: number;
+    }>;
+  };
 };
 
 const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
@@ -417,6 +447,63 @@ export class OperacionesDashboardService {
         tipo: "Cero",
       },
       data,
+    };
+  }
+
+  static async getAnalisisPreventaResumenFinanciacion(
+    anio: number,
+    mes: number,
+  ): Promise<AnalisisOperacionPreventaResumenFinanciacionResponse> {
+    const [rowsResumen, rowsPromedioCredito] = await Promise.all([
+      sequelizeNIC.query<AnalisisOperacionPreventaResumenFinanciacionRow>(
+        analisisOperacionesPreventaResumenFinanciacionQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio,
+            mes,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisOperacionPreventaPromedioCreditoPorModeloRow>(
+        analisisOperacionesPreventaPromedioCreditoPorModeloQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio,
+            mes,
+          },
+        },
+      ),
+    ]);
+
+    const resumen = rowsResumen[0];
+
+    return {
+      filters: {
+        anio,
+        mes,
+        tipo: "Cero",
+      },
+      data: {
+        cantidadOperacionesCredito: normalizeNullableNumber(resumen?.cantidad_operaciones_credito) ?? 0,
+        cantidadOperacionesUsado: normalizeNullableNumber(resumen?.cantidad_operaciones_usado) ?? 0,
+        promedioValorUsado: normalizeNullableNumber(resumen?.promedio_valor_usado),
+        promedioCreditoPorModelo: rowsPromedioCredito
+          .map((row) => ({
+            modelo: normalizeNullableString(row.modelo) ?? "SIN MODELO",
+            promedioCredito: normalizeNullableNumber(row.promedio_credito),
+          }))
+          .filter(
+            (
+              row,
+            ): row is {
+              modelo: string;
+              promedioCredito: number;
+            } => row.promedioCredito !== null,
+          )
+          .sort((a, b) => a.modelo.localeCompare(b.modelo)),
+      },
     };
   }
 }

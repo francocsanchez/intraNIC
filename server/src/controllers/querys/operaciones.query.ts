@@ -143,3 +143,55 @@ ORDER BY
     mes ASC,
     modelo ASC;
 `;
+
+export const analisisOperacionesPreventaResumenFinanciacionQuery = () => `
+SELECT
+    SUM(CASE WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_operaciones_credito,
+    SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_operaciones_usado,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.usados, 0) > 0 THEN vp.usados * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_valor_usado
+FROM
+    viewpreventa vp
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND MONTH(vp.fecha) = :mes
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO';
+`;
+
+export const analisisOperacionesPreventaPromedioCreditoPorModeloQuery = () => `
+SELECT
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) AS modelo,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN vp.credito_bancario * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_credito
+FROM
+    viewpreventa vp
+LEFT JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND MONTH(vp.fecha) = :mes
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND ISNULL(vp.credito_bancario, 0) > 0
+GROUP BY
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO')))
+ORDER BY
+    modelo ASC;
+`;
