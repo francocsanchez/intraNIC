@@ -114,6 +114,15 @@ const canDeleteManaged = (roles: unknown) => {
   return normalizedRoles.has("supervisor") || normalizedRoles.has("gerente");
 };
 
+const canManagePlanAhorroUpdate = (roles: unknown) => {
+  if (hasSuperAdminRole(roles)) {
+    return true;
+  }
+
+  const normalizedRoles = new Set(normalizeRoles(roles));
+  return normalizedRoles.has("gerente");
+};
+
 const formatRegistro = (item: any) => ({
   _id: String(item._id),
   unidadId: item.unidadId?._id ? String(item.unidadId._id) : String(item.unidadId),
@@ -399,7 +408,9 @@ export class TestDriveRegistroController {
         });
       }
 
-      if (!hasSuperAdminRole(req.user.role) && registro.solicitadoPorId !== req.user._id) {
+      const canEditManagedPlanAhorro = negocio === "planAhorro" && canManagePlanAhorroUpdate(req.user.role);
+
+      if (!canEditManagedPlanAhorro && !hasSuperAdminRole(req.user.role) && registro.solicitadoPorId !== req.user._id) {
         return res.status(403).json({ error: "Solo puedes editar registros cargados por tu usuario" });
       }
 

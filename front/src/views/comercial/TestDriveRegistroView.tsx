@@ -512,10 +512,17 @@ export default function TestDriveRegistroView({
                 const isOwnRecord = item.solicitadoPorId === user?._id;
                 const isPastRecord = hasStarted(item.retiroAt);
                 const isSuperAdmin = hasSuperAdminRole(user);
+                const canEditManagedPlanAhorro = negocio === "planAhorro"
+                  ? hasRegistroTestDriveActionAccess(user, "editPlanAhorroManaged")
+                  : false;
                 const canDeleteManaged = negocio === "planAhorro"
                   ? false
                   : hasRegistroTestDriveActionAccess(user, "deleteManaged");
-                const canEdit = isSuperAdmin || (isOwnRecord && (!isPastRecord || negocio !== "planAhorro"));
+                const canEdit = isSuperAdmin || (
+                  !isPastRecord || negocio !== "planAhorro"
+                    ? isOwnRecord || canEditManagedPlanAhorro
+                    : false
+                );
                 const canDelete = isSuperAdmin || (
                   !isPastRecord || negocio !== "planAhorro"
                     ? isOwnRecord || canDeleteManaged
