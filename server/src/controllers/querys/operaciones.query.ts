@@ -220,6 +220,7 @@ ORDER BY
 export const analisisOperacionesPreventaUsadosMensualQuery = () => `
 SELECT
     MONTH(ope.ope_fecasig) AS mes,
+    COUNT(*) AS total_operaciones,
     SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_usados,
     AVG(
         CASE
@@ -249,6 +250,8 @@ ORDER BY
 export const analisisOperacionesPreventaCreditoMensualQuery = () => `
 SELECT
     MONTH(ope.ope_fecasig) AS mes,
+    COUNT(*) AS total_operaciones,
+    SUM(CASE WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_operaciones_credito,
     AVG(
         CASE
             WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN vp.credito_bancario * 1.0
@@ -268,7 +271,6 @@ WHERE
     AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
-    AND ISNULL(vp.credito_bancario, 0) > 0
 GROUP BY
     MONTH(ope.ope_fecasig)
 ORDER BY

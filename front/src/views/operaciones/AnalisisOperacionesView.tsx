@@ -20,6 +20,7 @@ import {
   Bar,
   ComposedChart,
   CartesianGrid,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -135,6 +136,22 @@ const getTotalOperacion = (row: AnalisisOperacionesPreventaItem) =>
 const formatPercentage = (value: number | null) => {
   if (value === null || Number.isNaN(value)) {
     return "-";
+  }
+
+  return `${Math.round(value)}%`;
+};
+
+const formatPercentageCompact = (value: number | null) => {
+  if (value === null || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return `${value.toFixed(1)}%`;
+};
+
+const formatBarLabelPercentage = (value: number | null) => {
+  if (value === null || Number.isNaN(value)) {
+    return "";
   }
 
   return `${Math.round(value)}%`;
@@ -458,19 +475,32 @@ export default function AnalisisOperacionesView() {
   const { chartData, models: chartModels } = buildChartData(descuentoMensualData?.data ?? []);
   const usadosChartData = buildMonthlyBaseData().map((month) => {
     const match = usadosMensualData?.data.find((item) => item.mes === month.monthValue);
+    const porcentajeToma = match && match.totalOperaciones > 0
+      ? (match.cantidadUsados / match.totalOperaciones) * 100
+      : null;
     return {
       mes: month.mes,
+      porcentajeToma,
       cantidadUsados: match?.cantidadUsados ?? 0,
       promedioValorUsado: match?.promedioValorUsado ?? null,
     };
   });
   const creditoChartData = buildMonthlyBaseData().map((month) => {
     const match = creditoMensualData?.data.find((item) => item.mes === month.monthValue);
+    const porcentajeCredito = match && match.totalOperaciones > 0
+      ? (match.cantidadOperacionesCredito / match.totalOperaciones) * 100
+      : null;
     return {
       mes: month.mes,
+      porcentajeCredito,
       promedioCredito: match?.promedioCredito ?? null,
     };
   });
+  const totalOperacionesMes = data.data.length;
+  const cantidadOperacionesUsado = resumenFinanciacionData?.data.cantidadOperacionesUsado ?? 0;
+  const porcentajeToma = totalOperacionesMes > 0
+    ? (cantidadOperacionesUsado / totalOperacionesMes) * 100
+    : null;
 
   return (
     <div className="w-full space-y-4 px-4 py-4">
@@ -546,24 +576,31 @@ export default function AnalisisOperacionesView() {
             <h2 className="text-xl font-semibold tracking-tight text-gray-900">Financiacion</h2>
             
 
-            <div className="mt-4 grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="mt-4 grid flex-1 grid-cols-2 gap-3 xl:grid-cols-4">
               <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con credito</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">
+                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesCredito ?? 0)}
                 </p>
               </div>
 
               <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con usado</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">
+                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesUsado ?? 0)}
                 </p>
               </div>
 
               <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">% Toma</p>
+                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
+                  {isResumenFinanciacionLoading ? "..." : formatPercentageCompact(porcentajeToma)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Promedio valor de usado</p>
-                <p className="mt-1 text-lg font-bold text-gray-900">
+                <p className="mt-1 text-sm font-bold text-gray-900 xl:text-lg">
                   {isResumenFinanciacionLoading
                     ? "..."
                     : formatMoney(resumenFinanciacionData?.data.promedioValorUsado ?? null)}
@@ -645,7 +682,23 @@ export default function AnalisisOperacionesView() {
                     labelFormatter={(label) => `Mes: ${label}`}
                   />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="cantidadUsados" name="Cantidad usados" fill="#128c80" radius={[6, 6, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="cantidadUsados" name="Cantidad usados" fill="#128c80" radius={[6, 6, 0, 0]}>
+                    <LabelList
+                      dataKey="porcentajeToma"
+                      position="insideTop"
+                      offset={10}
+                      fill="#ffffff"
+                      fontSize={11}
+                      fontWeight={700}
+                      formatter={(value) =>
+                        formatBarLabelPercentage(
+                          value === null || value === undefined || value === ""
+                            ? null
+                            : Number(value),
+                        )
+                      }
+                    />
+                  </Bar>
                   <Line
                     yAxisId="right"
                     type="monotone"
@@ -698,7 +751,23 @@ export default function AnalisisOperacionesView() {
                     name="Promedio credito"
                     fill="#f59e0b"
                     radius={[6, 6, 0, 0]}
-                  />
+                  >
+                    <LabelList
+                      dataKey="porcentajeCredito"
+                      position="insideTop"
+                      offset={10}
+                      fill="#ffffff"
+                      fontSize={11}
+                      fontWeight={700}
+                      formatter={(value) =>
+                        formatBarLabelPercentage(
+                          value === null || value === undefined || value === ""
+                            ? null
+                            : Number(value),
+                        )
+                      }
+                    />
+                  </Bar>
                 </ComposedChart>
               </ResponsiveContainer>
             )}

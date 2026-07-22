@@ -183,12 +183,15 @@ type AnalisisOperacionPreventaResumenFinanciacionResponse = {
 
 type AnalisisOperacionPreventaUsadosMensualRow = {
   mes: number | string | null;
+  total_operaciones: number | string | null;
   cantidad_usados: number | string | null;
   promedio_valor_usado: number | string | null;
 };
 
 type AnalisisOperacionPreventaCreditoMensualRow = {
   mes: number | string | null;
+  total_operaciones: number | string | null;
+  cantidad_operaciones_credito: number | string | null;
   promedio_credito: number | string | null;
 };
 
@@ -199,6 +202,7 @@ type AnalisisOperacionPreventaUsadosMensualResponse = {
   };
   data: Array<{
     mes: number;
+    totalOperaciones: number;
     cantidadUsados: number;
     promedioValorUsado: number | null;
   }>;
@@ -211,6 +215,8 @@ type AnalisisOperacionPreventaCreditoMensualResponse = {
   };
   data: Array<{
     mes: number;
+    totalOperaciones: number;
+    cantidadOperacionesCredito: number;
     promedioCredito: number | null;
   }>;
 };
@@ -560,11 +566,12 @@ export class OperacionesDashboardService {
     const data = rows
       .map((row) => ({
         mes: normalizeNullableNumber(row.mes),
+        totalOperaciones: normalizeNullableNumber(row.total_operaciones) ?? 0,
         cantidadUsados: normalizeNullableNumber(row.cantidad_usados) ?? 0,
         promedioValorUsado: normalizeNullableNumber(row.promedio_valor_usado),
       }))
       .filter(
-        (row): row is { mes: number; cantidadUsados: number; promedioValorUsado: number | null } =>
+        (row): row is { mes: number; totalOperaciones: number; cantidadUsados: number; promedioValorUsado: number | null } =>
           row.mes !== null && row.mes >= 1 && row.mes <= 12,
       );
 
@@ -591,10 +598,12 @@ export class OperacionesDashboardService {
     const data = rows
       .map((row) => ({
         mes: normalizeNullableNumber(row.mes),
+        totalOperaciones: normalizeNullableNumber(row.total_operaciones) ?? 0,
+        cantidadOperacionesCredito: normalizeNullableNumber(row.cantidad_operaciones_credito) ?? 0,
         promedioCredito: normalizeNullableNumber(row.promedio_credito),
       }))
       .filter(
-        (row): row is { mes: number; promedioCredito: number | null } =>
+        (row): row is { mes: number; totalOperaciones: number; cantidadOperacionesCredito: number; promedioCredito: number | null } =>
           row.mes !== null && row.mes >= 1 && row.mes <= 12,
       );
 

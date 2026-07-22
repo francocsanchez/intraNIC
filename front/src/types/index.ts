@@ -817,6 +817,7 @@ export const analisisOperacionesPreventaUsadosMensualResponseSchema = z.object({
   data: z.array(
     z.object({
       mes: z.number(),
+      totalOperaciones: z.number(),
       cantidadUsados: z.number(),
       promedioValorUsado: z.number().nullable(),
     }),
@@ -831,6 +832,8 @@ export const analisisOperacionesPreventaCreditoMensualResponseSchema = z.object(
   data: z.array(
     z.object({
       mes: z.number(),
+      totalOperaciones: z.number(),
+      cantidadOperacionesCredito: z.number(),
       promedioCredito: z.number().nullable(),
     }),
   ),
