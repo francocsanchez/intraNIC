@@ -1,10 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Loading from "@/components/Loading";
 import {
+  getAnalisisOperacionesPreventaCreditoMensual,
   getAnalisisOperacionesPreventaDescuentoMensual,
   getAnalisisOperacionesPreventa,
   getAnalisisOperacionesPreventaFormaPago,
   getAnalisisOperacionesPreventaResumenFinanciacion,
+  getAnalisisOperacionesPreventaUsadosMensual,
 } from "@/services/operacionesService";
 import type {
   AnalisisOperacionesPreventaDescuentoMensualItem,
@@ -15,6 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, CalendarRange, Inbox, Rows3 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
+  Bar,
+  ComposedChart,
   CartesianGrid,
   Legend,
   Line,
@@ -221,6 +225,12 @@ const buildChartData = (rows: AnalisisOperacionesPreventaDescuentoMensualItem[])
   };
 };
 
+const buildMonthlyBaseData = () =>
+  MONTH_OPTIONS.map((month) => ({
+    mes: month.label.slice(0, 3),
+    monthValue: month.value,
+  }));
+
 type FormaPagoModalProps = {
   detalle: AnalisisOperacionesPreventaFormaPago | null;
   errorMessage: string | null;
@@ -366,6 +376,26 @@ export default function AnalisisOperacionesView() {
     refetchOnWindowFocus: false,
   });
 
+  const {
+    data: usadosMensualData,
+    isLoading: isUsadosMensualLoading,
+    error: usadosMensualError,
+  } = useQuery({
+    queryKey: ["analisis-operaciones-preventa-usados-mensual", anio],
+    queryFn: () => getAnalisisOperacionesPreventaUsadosMensual(anio),
+    refetchOnWindowFocus: false,
+  });
+
+  const {
+    data: creditoMensualData,
+    isLoading: isCreditoMensualLoading,
+    error: creditoMensualError,
+  } = useQuery({
+    queryKey: ["analisis-operaciones-preventa-credito-mensual", anio],
+    queryFn: () => getAnalisisOperacionesPreventaCreditoMensual(anio),
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     if (error instanceof Error) {
       toast.error(error.message);
@@ -390,6 +420,18 @@ export default function AnalisisOperacionesView() {
     }
   }, [resumenFinanciacionError]);
 
+  useEffect(() => {
+    if (usadosMensualError instanceof Error) {
+      toast.error(usadosMensualError.message);
+    }
+  }, [usadosMensualError]);
+
+  useEffect(() => {
+    if (creditoMensualError instanceof Error) {
+      toast.error(creditoMensualError.message);
+    }
+  }, [creditoMensualError]);
+
   if (isLoading) return <Loading />;
 
   if (isError) {
@@ -413,6 +455,21 @@ export default function AnalisisOperacionesView() {
   const currentMonthLabel = MONTH_OPTIONS.find((item) => item.value === mes)?.label ?? String(mes);
   const promedioDescuentoPorModelo = buildPromedioDescuentoPorModelo(data.data);
   const { chartData, models: chartModels } = buildChartData(descuentoMensualData?.data ?? []);
+  const usadosChartData = buildMonthlyBaseData().map((month) => {
+    const match = usadosMensualData?.data.find((item) => item.mes === month.monthValue);
+    return {
+      mes: month.mes,
+      cantidadUsados: match?.cantidadUsados ?? 0,
+      promedioValorUsado: match?.promedioValorUsado ?? null,
+    };
+  });
+  const creditoChartData = buildMonthlyBaseData().map((month) => {
+    const match = creditoMensualData?.data.find((item) => item.mes === month.monthValue);
+    return {
+      mes: month.mes,
+      promedioCredito: match?.promedioCredito ?? null,
+    };
+  });
 
   return (
     <div className="w-full space-y-4 px-4 py-4">
@@ -459,7 +516,7 @@ export default function AnalisisOperacionesView() {
           <div className="flex h-full flex-col">
          
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">PROM DESC.</h2>
-            <p className="mt-1 text-xs text-gray-600">Promedio de descuento por modelo para el periodo filtrado.</p>
+        
 
             <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
               {promedioDescuentoPorModelo.length ? (
@@ -486,7 +543,7 @@ export default function AnalisisOperacionesView() {
         <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
           <div className="flex h-full flex-col">
             <h2 className="text-xl font-semibold tracking-tight text-gray-900">Financiacion</h2>
-            <p className="mt-1 text-xs text-gray-600">Indicadores del periodo filtrado para credito y usado.</p>
+            
 
             <div className="mt-4 grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
               <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
@@ -518,7 +575,7 @@ export default function AnalisisOperacionesView() {
         <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
           <div className="flex h-full flex-col">
             <h2 className="text-xl font-semibold tracking-tight text-gray-900">PROM CREDITO</h2>
-            <p className="mt-1 text-xs text-gray-600">Promedio de credito por modelo en el periodo filtrado.</p>
+           
 
             <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
               {isResumenFinanciacionLoading ? (
@@ -539,6 +596,111 @@ export default function AnalisisOperacionesView() {
                 </div>
               )}
             </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-gray-200 pb-3">
+            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Usados Anualizado</h2>
+            <p className="text-xs text-gray-600">Cantidad de usados por mes y valor promedio de usado durante {anio}.</p>
+          </div>
+
+          <div className="mt-4 h-[320px] min-w-0">
+            {isUsadosMensualLoading ? (
+              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={usadosChartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                  <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4b5563" }} />
+                  <YAxis
+                    yAxisId="left"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    allowDecimals={false}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => formatMoney(Number(value)) as string}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 16,
+                      borderColor: "#cfe7ee",
+                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+                    }}
+                    formatter={(value, name) =>
+                      name === "Cantidad usados"
+                        ? [value, name]
+                        : [formatMoney(Number(value)), name]
+                    }
+                    labelFormatter={(label) => `Mes: ${label}`}
+                  />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="cantidadUsados" name="Cantidad usados" fill="#128c80" radius={[6, 6, 0, 0]} />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="promedioValorUsado"
+                    name="Promedio valor usado"
+                    stroke="#1d4ed8"
+                    strokeWidth={2.5}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                    connectNulls
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </article>
+
+        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-gray-200 pb-3">
+            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Monto Promedio de Credito</h2>
+            <p className="text-xs text-gray-600">Promedio mensual de credito bancario durante {anio}.</p>
+          </div>
+
+          <div className="mt-4 h-[320px] min-w-0">
+            {isCreditoMensualLoading ? (
+              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={creditoChartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                  <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4b5563" }} />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => formatMoney(Number(value)) as string}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 16,
+                      borderColor: "#cfe7ee",
+                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+                    }}
+                    formatter={(value) => [formatMoney(Number(value)), "Promedio credito"]}
+                    labelFormatter={(label) => `Mes: ${label}`}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="promedioCredito"
+                    name="Promedio credito"
+                    fill="#f59e0b"
+                    radius={[6, 6, 0, 0]}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </article>
       </section>

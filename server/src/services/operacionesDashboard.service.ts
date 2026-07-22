@@ -1,11 +1,13 @@
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
 import {
+  analisisOperacionesPreventaCreditoMensualQuery,
   analisisOperacionesPreventaDescuentoMensualQuery,
   analisisOperacionesPreventaPromedioCreditoPorModeloQuery,
   analisisOperacionesPreventaFormaPagoQuery,
   analisisOperacionesPreventaQuery,
   analisisOperacionesPreventaResumenFinanciacionQuery,
+  analisisOperacionesPreventaUsadosMensualQuery,
   operacionesDashboardQuery,
 } from "../controllers/querys/operaciones.query";
 
@@ -175,6 +177,40 @@ type AnalisisOperacionPreventaResumenFinanciacionResponse = {
       promedioCredito: number;
     }>;
   };
+};
+
+type AnalisisOperacionPreventaUsadosMensualRow = {
+  mes: number | string | null;
+  cantidad_usados: number | string | null;
+  promedio_valor_usado: number | string | null;
+};
+
+type AnalisisOperacionPreventaCreditoMensualRow = {
+  mes: number | string | null;
+  promedio_credito: number | string | null;
+};
+
+type AnalisisOperacionPreventaUsadosMensualResponse = {
+  filters: {
+    anio: number;
+    tipo: OperacionesAnalisisTipo;
+  };
+  data: Array<{
+    mes: number;
+    cantidadUsados: number;
+    promedioValorUsado: number | null;
+  }>;
+};
+
+type AnalisisOperacionPreventaCreditoMensualResponse = {
+  filters: {
+    anio: number;
+    tipo: OperacionesAnalisisTipo;
+  };
+  data: Array<{
+    mes: number;
+    promedioCredito: number | null;
+  }>;
 };
 
 const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
@@ -504,6 +540,67 @@ export class OperacionesDashboardService {
           )
           .sort((a, b) => a.modelo.localeCompare(b.modelo)),
       },
+    };
+  }
+
+  static async getAnalisisPreventaUsadosMensual(
+    anio: number,
+  ): Promise<AnalisisOperacionPreventaUsadosMensualResponse> {
+    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaUsadosMensualRow>(
+      analisisOperacionesPreventaUsadosMensualQuery(),
+      {
+        type: QueryTypes.SELECT,
+        replacements: { anio },
+      },
+    );
+
+    const data = rows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        cantidadUsados: normalizeNullableNumber(row.cantidad_usados) ?? 0,
+        promedioValorUsado: normalizeNullableNumber(row.promedio_valor_usado),
+      }))
+      .filter(
+        (row): row is { mes: number; cantidadUsados: number; promedioValorUsado: number | null } =>
+          row.mes !== null && row.mes >= 1 && row.mes <= 12,
+      );
+
+    return {
+      filters: {
+        anio,
+        tipo: "Cero",
+      },
+      data,
+    };
+  }
+
+  static async getAnalisisPreventaCreditoMensual(
+    anio: number,
+  ): Promise<AnalisisOperacionPreventaCreditoMensualResponse> {
+    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaCreditoMensualRow>(
+      analisisOperacionesPreventaCreditoMensualQuery(),
+      {
+        type: QueryTypes.SELECT,
+        replacements: { anio },
+      },
+    );
+
+    const data = rows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        promedioCredito: normalizeNullableNumber(row.promedio_credito),
+      }))
+      .filter(
+        (row): row is { mes: number; promedioCredito: number | null } =>
+          row.mes !== null && row.mes >= 1 && row.mes <= 12,
+      );
+
+    return {
+      filters: {
+        anio,
+        tipo: "Cero",
+      },
+      data,
     };
   }
 }

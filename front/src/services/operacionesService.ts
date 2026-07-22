@@ -1,15 +1,19 @@
 import api from "@/libs/axios";
 import {
+  analisisOperacionesPreventaCreditoMensualResponseSchema,
   analisisOperacionesPreventaDescuentoMensualResponseSchema,
   analisisOperacionesPreventaFormaPagoResponseSchema,
   analisisOperacionesPreventaResumenFinanciacionResponseSchema,
   analisisOperacionesPreventaResponseSchema,
   operacionesDashboardResponseSchema,
+  type AnalisisOperacionesPreventaCreditoMensualResponse,
   type AnalisisOperacionesPreventaDescuentoMensualResponse,
   type AnalisisOperacionesPreventaFormaPagoResponse,
   type AnalisisOperacionesPreventaResumenFinanciacionResponse,
   type AnalisisOperacionesPreventaResponse,
+  type AnalisisOperacionesPreventaUsadosMensualResponse,
   type OperacionesDashboardResponse,
+  analisisOperacionesPreventaUsadosMensualResponseSchema,
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
@@ -140,5 +144,47 @@ export async function getAnalisisOperacionesPreventaResumenFinanciacion(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener el resumen de financiacion"));
+  }
+}
+
+export async function getAnalisisOperacionesPreventaUsadosMensual(
+  anio: number,
+): Promise<AnalisisOperacionesPreventaUsadosMensualResponse> {
+  try {
+    const { data } = await api.get("/operaciones/analisis-preventa/usados-mensual", {
+      params: { anio },
+    });
+
+    const parsed = analisisOperacionesPreventaUsadosMensualResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el resumen anualizado de usados"));
+  }
+}
+
+export async function getAnalisisOperacionesPreventaCreditoMensual(
+  anio: number,
+): Promise<AnalisisOperacionesPreventaCreditoMensualResponse> {
+  try {
+    const { data } = await api.get("/operaciones/analisis-preventa/credito-mensual", {
+      params: { anio },
+    });
+
+    const parsed = analisisOperacionesPreventaCreditoMensualResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el promedio mensual de credito"));
   }
 }

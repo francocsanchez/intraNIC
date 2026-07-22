@@ -195,3 +195,49 @@ GROUP BY
 ORDER BY
     modelo ASC;
 `;
+
+export const analisisOperacionesPreventaUsadosMensualQuery = () => `
+SELECT
+    MONTH(vp.fecha) AS mes,
+    SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_usados,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.usados, 0) > 0 THEN vp.usados * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_valor_usado
+FROM
+    viewpreventa vp
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+GROUP BY
+    MONTH(vp.fecha)
+ORDER BY
+    mes ASC;
+`;
+
+export const analisisOperacionesPreventaCreditoMensualQuery = () => `
+SELECT
+    MONTH(vp.fecha) AS mes,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN vp.credito_bancario * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_credito
+FROM
+    viewpreventa vp
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND vp.fecha IS NOT NULL
+    AND YEAR(vp.fecha) = :anio
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND ISNULL(vp.credito_bancario, 0) > 0
+GROUP BY
+    MONTH(vp.fecha)
+ORDER BY
+    mes ASC;
+`;

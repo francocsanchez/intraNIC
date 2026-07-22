@@ -153,4 +153,38 @@ export class OperacionesController {
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }
   };
+
+  static getAnalisisPreventaUsadosMensual = async (req: Request, res: Response) => {
+    const anio = parseStrictPositiveInt(req.query.anio);
+
+    if (!anio) {
+      return res.status(400).json({ message: "El parametro anio es obligatorio y debe ser un entero valido" });
+    }
+
+    try {
+      const response = await OperacionesDashboardService.getAnalisisPreventaUsadosMensual(anio);
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getAnalisisPreventaUsadosMensual");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getAnalisisPreventaCreditoMensual = async (req: Request, res: Response) => {
+    const anio = parseStrictPositiveInt(req.query.anio);
+
+    if (!anio) {
+      return res.status(400).json({ message: "El parametro anio es obligatorio y debe ser un entero valido" });
+    }
+
+    try {
+      const response = await OperacionesDashboardService.getAnalisisPreventaCreditoMensual(anio);
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getAnalisisPreventaCreditoMensual");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
 }

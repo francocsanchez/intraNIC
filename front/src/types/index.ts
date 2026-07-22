@@ -808,6 +808,33 @@ export const analisisOperacionesPreventaResumenFinanciacionResponseSchema = z.ob
   }),
 });
 
+export const analisisOperacionesPreventaUsadosMensualResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+  }),
+  data: z.array(
+    z.object({
+      mes: z.number(),
+      cantidadUsados: z.number(),
+      promedioValorUsado: z.number().nullable(),
+    }),
+  ),
+});
+
+export const analisisOperacionesPreventaCreditoMensualResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+  }),
+  data: z.array(
+    z.object({
+      mes: z.number(),
+      promedioCredito: z.number().nullable(),
+    }),
+  ),
+});
+
 export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
 export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperacionesPreventaItemSchema>;
 export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
@@ -821,6 +848,12 @@ export type AnalisisOperacionesPreventaDescuentoMensualResponse = z.infer<
 >;
 export type AnalisisOperacionesPreventaResumenFinanciacionResponse = z.infer<
   typeof analisisOperacionesPreventaResumenFinanciacionResponseSchema
+>;
+export type AnalisisOperacionesPreventaUsadosMensualResponse = z.infer<
+  typeof analisisOperacionesPreventaUsadosMensualResponseSchema
+>;
+export type AnalisisOperacionesPreventaCreditoMensualResponse = z.infer<
+  typeof analisisOperacionesPreventaCreditoMensualResponseSchema
 >;
 
 //**************************** */
