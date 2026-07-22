@@ -2,7 +2,6 @@ import { Router } from "express";
 import { authenticate } from "../middleware/authenticate";
 import { OperacionesController } from "../controllers/OperacionesController";
 import { authorizeModules } from "../middleware/authorizeModules";
-import { requireSuperAdmin } from "../middleware/requireSuperAdmin";
 
 const router = Router();
 
@@ -11,37 +10,31 @@ router.get("/dashboard", authorizeModules("operaciones"), OperacionesController.
 router.get(
   "/analisis-preventa",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventa,
 );
 router.get(
   "/analisis-preventa/descuento-mensual",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventaDescuentoMensual,
 );
 router.get(
   "/analisis-preventa/resumen-financiacion",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventaResumenFinanciacion,
 );
 router.get(
   "/analisis-preventa/usados-mensual",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventaUsadosMensual,
 );
 router.get(
   "/analisis-preventa/credito-mensual",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventaCreditoMensual,
 );
 router.get(
   "/analisis-preventa/:numero/forma-pago",
   authorizeModules("analisisOperaciones"),
-  requireSuperAdmin,
   OperacionesController.getAnalisisPreventaFormaPago,
 );
 
