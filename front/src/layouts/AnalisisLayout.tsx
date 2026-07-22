@@ -1,4 +1,4 @@
-import { hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -21,9 +21,7 @@ export default function AnalisisLayout() {
       label: "Analisis Operaciones",
       to: paths.analisis.analisisOperaciones,
       icon: Rows3,
-      visible:
-        hasSuperAdminRole(user) &&
-        hasModulePathAccess(user, "analisisOperaciones", paths.analisis.analisisOperaciones),
+      visible: hasModulePathAccess(user, "analisisOperaciones", paths.analisis.analisisOperaciones),
       active: pathname === paths.analisis.analisisOperaciones,
     },
     {

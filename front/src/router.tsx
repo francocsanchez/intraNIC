@@ -306,9 +306,7 @@ export default function Router() {
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["analisisOperaciones"]} />}>
-              <Route element={<SuperAdminProtectedRoute />}>
-                <Route path={paths.analisis.analisisOperaciones} element={<AnalisisOperacionesView />} />
-              </Route>
+              <Route path={paths.analisis.analisisOperaciones} element={<AnalisisOperacionesView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>

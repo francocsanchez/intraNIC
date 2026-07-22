@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { hasModuleAccess, hasModulePathAccess, hasSuperAdminRole } from "@/helpers/access";
+import { hasModuleAccess, hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -58,9 +58,11 @@ export default function Inicio() {
     ? paths.convencional.preventas
     : paths.convencional.preventasResumen;
   const canViewFsanchez = hasModulePathAccess(user, "fsanchez", paths.admin.fsanchez);
-  const canViewAnalisisOperaciones =
-    hasSuperAdminRole(user) &&
-    hasModulePathAccess(user, "analisisOperaciones", paths.analisis.analisisOperaciones);
+  const canViewAnalisisOperaciones = hasModulePathAccess(
+    user,
+    "analisisOperaciones",
+    paths.analisis.analisisOperaciones,
+  );
 
   const sections: HomeSection[] = [
     {
