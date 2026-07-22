@@ -53,6 +53,7 @@ SELECT
     vp.numero,
     stoauto.sa_codigo AS interno,
     vp.fecha,
+    ope.ope_fecfac AS fecha_factura,
     LTRIM(RTRIM(vp.modelo)) AS version,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
     vp.precio,
@@ -81,6 +82,7 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
@@ -102,8 +104,11 @@ INNER JOIN opera ope ON
     ope.ope_codigo = vp.numero
     AND ope.ope_tipo = 5
     AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND vp.numero = :numero
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 ORDER BY
@@ -137,6 +142,7 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND vp.precio IS NOT NULL
@@ -170,6 +176,7 @@ INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO';
@@ -199,6 +206,7 @@ LEFT JOIN famiauto ON
     auto.au_familia = famiauto.fam_codigo
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND MONTH(ope.ope_fecasig) = :mes
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
@@ -229,6 +237,7 @@ INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 GROUP BY
@@ -256,6 +265,7 @@ INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
 WHERE
     vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
     AND YEAR(ope.ope_fecasig) = :anio
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND ISNULL(vp.credito_bancario, 0) > 0

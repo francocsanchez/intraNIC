@@ -72,6 +72,7 @@ type AnalisisOperacionPreventaRow = {
   numero: number | string | null;
   interno: number | string | null;
   fecha: string | Date | null;
+  fecha_factura: string | Date | null;
   version: string | null;
   modelo: string | null;
   precio: number | string | null;
@@ -91,6 +92,7 @@ type AnalisisOperacionPreventaItem = {
   numero: number | null;
   interno: number | null;
   fecha: string | null;
+  fechaFactura: string | null;
   version: string;
   modelo: string;
   precio: number | null;
@@ -399,6 +401,7 @@ export class OperacionesDashboardService {
       numero: normalizeNullableNumber(row.numero),
       interno: normalizeNullableNumber(row.interno),
       fecha: serializeNullableDate(row.fecha),
+      fechaFactura: serializeNullableDate(row.fecha_factura),
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
       precio: normalizeNullableNumber(row.precio),

@@ -739,6 +739,7 @@ export const analisisOperacionesPreventaItemSchema = z.object({
   numero: z.number().nullable(),
   interno: z.number().nullable(),
   fecha: z.string().nullable(),
+  fechaFactura: z.string().nullable(),
   version: z.string(),
   modelo: z.string(),
   precio: z.number().nullable(),

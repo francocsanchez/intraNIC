@@ -14,7 +14,7 @@ import type {
   AnalisisOperacionesPreventaItem,
 } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, CalendarRange, Inbox, Rows3 } from "lucide-react";
+import { AlertCircle, CalendarRange, FileText, Inbox, Rows3 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -59,7 +59,7 @@ const MONEY_COLUMNS: Array<keyof AnalisisOperacionesPreventaItem> = [
 type TableColumn =
   | { kind: "field"; key: keyof AnalisisOperacionesPreventaItem; label: string }
   | { kind: "derived"; key: "descuentoPorcentaje" | "total"; label: string }
-  | { kind: "action"; key: "formaPago"; label: string };
+  | { kind: "action"; key: "formaPago" | "facturada"; label: string };
 
 const TABLE_COLUMNS: TableColumn[] = [
   { kind: "field", key: "numero", label: "OP" },
@@ -77,6 +77,7 @@ const TABLE_COLUMNS: TableColumn[] = [
   { kind: "field", key: "otro", label: "Otro" },
   { kind: "derived", key: "total", label: "Total" },
   { kind: "action", key: "formaPago", label: "F. Pago" },
+  { kind: "action", key: "facturada", label: "F" },
 ];
 
 const monthShortNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -853,14 +854,25 @@ export default function AnalisisOperacionesView() {
                         className="whitespace-nowrap px-2.5 py-2.5 text-xs text-gray-700"
                       >
                         {column.kind === "action" ? (
-                          row.numero ? (
-                            <button
-                              type="button"
-                              onClick={() => setNumeroFormaPago(row.numero)}
-                              className="inline-flex rounded-full bg-gray-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-gray-700"
+                          column.key === "formaPago" ? (
+                            row.numero ? (
+                              <button
+                                type="button"
+                                onClick={() => setNumeroFormaPago(row.numero)}
+                                className="inline-flex rounded-full bg-gray-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-gray-700"
+                              >
+                                Ver
+                              </button>
+                            ) : (
+                              "-"
+                            )
+                          ) : row.fechaFactura ? (
+                            <span
+                              className="inline-flex items-center justify-center text-[#128c80]"
+                              title="Operacion facturada"
                             >
-                              Ver
-                            </button>
+                              <FileText size={14} />
+                            </span>
                           ) : (
                             "-"
                           )
