@@ -3,7 +3,7 @@ import { textToColor } from "@/helpers/colores";
 import { useAuth } from "@/hooks/useAuthe";
 import { misOperaciones } from "@/api/convencional/stockAPI";
 import { misOperacionesUsados } from "@/api/usados/stockAPI";
-import type { MisOperacionesResponse } from "@/types";
+import type { MisOperacionesResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -78,7 +78,7 @@ function buildCombinedAnnualChartData(resumen?: MisOperacionesResponse["resumen"
     .slice(0, 4)
     .map(([modelo]) => modelo);
 
-  const data = anual.map((month) => {
+  const data = anual.map((month: MisOperacionesResponse["resumen"]["anual"][number]) => {
     const point: Record<string, number | string> = {
       mes: MONTH_SHORT_LABELS[month.mes - 1] ?? String(month.mes),
       total: month.total,
@@ -89,7 +89,7 @@ function buildCombinedAnnualChartData(resumen?: MisOperacionesResponse["resumen"
       point[modelo] = month.porModelo[modelo] ?? 0;
     }
 
-    for (const [modelo, total] of Object.entries(month.porModelo)) {
+    for (const [modelo, total] of Object.entries(month.porModelo) as Array<[string, number]>) {
       if (!topModels.includes(modelo)) {
         point.otros = Number(point.otros ?? 0) + total;
       }
@@ -158,7 +158,7 @@ export default function MisOperacionesView() {
   const showConvencionalExtraCharts = negocio === "convencional";
 
   const ventasPorDia = useMemo(() => {
-    return Object.entries(resumen?.porDia ?? {})
+    return (Object.entries(resumen?.porDia ?? {}) as Array<[string, number]>)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([fecha, total]) => ({
         fecha,
@@ -168,7 +168,7 @@ export default function MisOperacionesView() {
   }, [resumen]);
 
   const distribucionPorModelo = useMemo(() => {
-    return Object.entries(resumen?.porModelo ?? {})
+    return (Object.entries(resumen?.porModelo ?? {}) as Array<[string, number]>)
       .sort((a, b) => b[1] - a[1])
       .map(([modelo, total]) => ({
         modelo,
