@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import * as XLSX from "xlsx";
 import FinancialPlan, { type FinancialValueType } from "../models/FinancialPlan";
 import { logError } from "../utils/logError";
 
@@ -26,6 +27,30 @@ const normalizeNumber = (value: unknown, { min = 0, integer = false }: { min?: n
 const normalizeValueType = (value: unknown): FinancialValueType | null => {
   return value === "porcentaje" || value === "monto" ? value : null;
 };
+
+const normalizeSpreadsheetText = (value: unknown) => String(value ?? "").trim();
+
+const normalizeBoolean = (value: unknown) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return ["1", "true", "si", "sí", "yes", "activo"].includes(normalized);
+  }
+
+  return false;
+};
+
+const hasValidExcelExtension = (filename: string) => /\.(xls|xlsx)$/i.test(filename);
+
+const EXCEL_MIME_TYPES = new Set([
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/octet-stream",
+]);
+
+const isExcelCompatibleFile = (file: Express.Multer.File) =>
+  hasValidExcelExtension(file.originalname) || EXCEL_MIME_TYPES.has(file.mimetype);
 
 type NormalizedTerm = {
   plazo: number;
@@ -222,6 +247,162 @@ export class FinancialPlanController {
       logError("FinancialPlanController.remove");
       console.error(error);
       return res.status(500).json({ message: "Error al eliminar el plan financiero" });
+    }
+  };
+
+  static exportExcel = async (_req: Request, res: Response) => {
+    try {
+      const data = await FinancialPlan.find({}).sort({ entidad: 1, nombre: 1 }).lean();
+
+      const rows = data.flatMap((plan) =>
+        plan.plazos.map((term) => ({
+          planId: String(plan._id),
+          entidad: plan.entidad,
+          nombre: plan.nombre,
+          planActivo: plan.activo ? "SI" : "NO",
+          plazo: term.plazo,
+          tna: term.tna,
+          quebrantoTipo: term.quebrantoTipo,
+          quebrantoValor: term.quebrantoValor,
+          maxFinanciacionTipo: term.maxFinanciacionTipo,
+          maxFinanciacionValor: term.maxFinanciacionValor,
+          plazoActivo: term.activo ? "SI" : "NO",
+        })),
+      );
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Planes");
+
+      const fileBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", 'attachment; filename="cotizador-planes.xlsx"');
+      return res.status(200).send(fileBuffer);
+    } catch (error) {
+      logError("FinancialPlanController.exportExcel");
+      console.error(error);
+      return res.status(500).json({ message: "Error al exportar los planes financieros" });
+    }
+  };
+
+  static importExcel = async (req: Request, res: Response) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "Debes seleccionar un archivo para importar" });
+    }
+
+    if (!isExcelCompatibleFile(req.file)) {
+      return res.status(400).json({ error: "El archivo debe ser .xls o .xlsx" });
+    }
+
+    try {
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      const firstSheetName = workbook.SheetNames[0];
+
+      if (!firstSheetName) {
+        return res.status(400).json({ error: "El archivo no contiene hojas para importar" });
+      }
+
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" });
+
+      if (!rows.length) {
+        return res.status(400).json({ error: "El archivo no contiene filas de datos" });
+      }
+
+      const groups = new Map<string, { entidad: string; nombre: string; activo: boolean; plazos: NormalizedTerm[] }>();
+
+      for (const [index, row] of rows.entries()) {
+        const entidad = normalizeSpreadsheetText(row.entidad);
+        const nombre = normalizeSpreadsheetText(row.nombre);
+        const plazo = normalizeNumber(row.plazo, { min: 1, integer: true });
+        const tna = normalizeNumber(row.tna, { min: 0 });
+        const quebrantoTipo = normalizeValueType(row.quebrantoTipo);
+        const quebrantoValor = normalizeNumber(row.quebrantoValor, { min: 0 });
+        const maxFinanciacionTipo = normalizeValueType(row.maxFinanciacionTipo);
+        const maxFinanciacionValor = normalizeNumber(row.maxFinanciacionValor, { min: 0 });
+
+        if (!entidad) {
+          return res.status(400).json({ error: `La fila ${index + 2} no tiene entidad.` });
+        }
+
+        if (!nombre) {
+          return res.status(400).json({ error: `La fila ${index + 2} no tiene nombre de plan.` });
+        }
+
+        if (!plazo) {
+          return res.status(400).json({ error: `La fila ${index + 2} tiene un plazo invalido.` });
+        }
+
+        if (tna === null) {
+          return res.status(400).json({ error: `La fila ${index + 2} tiene una TNA invalida.` });
+        }
+
+        if (!quebrantoTipo || quebrantoValor === null) {
+          return res.status(400).json({ error: `La fila ${index + 2} tiene un quebranto invalido.` });
+        }
+
+        if (!maxFinanciacionTipo || maxFinanciacionValor === null) {
+          return res.status(400).json({ error: `La fila ${index + 2} tiene un maximo financiable invalido.` });
+        }
+
+        const key = `${entidad.toLowerCase()}::${nombre.toLowerCase()}`;
+        const current = groups.get(key) ?? {
+          entidad,
+          nombre,
+          activo: normalizeBoolean(row.planActivo),
+          plazos: [],
+        };
+
+        current.plazos.push({
+          plazo,
+          tna,
+          quebrantoTipo,
+          quebrantoValor,
+          maxFinanciacionTipo,
+          maxFinanciacionValor,
+          activo: normalizeBoolean(row.plazoActivo),
+        });
+
+        groups.set(key, current);
+      }
+
+      let created = 0;
+      let updated = 0;
+
+      for (const group of groups.values()) {
+        const uniquePlazos = new Set(group.plazos.map((item) => item.plazo));
+        if (uniquePlazos.size !== group.plazos.length) {
+          return res.status(400).json({ error: `El plan ${group.entidad} / ${group.nombre} repite plazos en el archivo.` });
+        }
+
+        const existing = await FinancialPlan.findOne({
+          entidad: new RegExp(`^${group.entidad}$`, "i"),
+          nombre: new RegExp(`^${group.nombre}$`, "i"),
+        });
+
+        if (existing) {
+          existing.entidad = group.entidad;
+          existing.nombre = group.nombre;
+          existing.activo = group.activo;
+          existing.plazos = group.plazos;
+          await existing.save();
+          updated += 1;
+          continue;
+        }
+
+        await FinancialPlan.create(group);
+        created += 1;
+      }
+
+      return res.status(200).json({
+        message: `Importacion completada. ${created} creados y ${updated} actualizados.`,
+        data: { created, updated, processed: rows.length, plans: groups.size },
+      });
+    } catch (error) {
+      logError("FinancialPlanController.importExcel");
+      console.error(error);
+      return res.status(500).json({ message: "Error al importar los planes financieros" });
     }
   };
 }

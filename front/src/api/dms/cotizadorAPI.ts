@@ -1,11 +1,13 @@
 import api from "@/libs/axios";
 import {
   cotizadorCatalogoResponseSchema,
+  cotizadorImportResponseSchema,
   planFinancieroListResponseSchema,
   planFinancieroResponseSchema,
   versionPrecioMensualListResponseSchema,
   versionPrecioMensualResponseSchema,
   type CotizadorCatalogoResponse,
+  type CotizadorImportResponse,
   type PlanFinancieroListResponse,
   type PlanFinancieroResponse,
   type VersionPrecioMensualListResponse,
@@ -77,6 +79,34 @@ export function getVersionesPreciosMensuales(mes?: string, activo?: boolean): Pr
   );
 }
 
+export async function exportVersionesPreciosMensuales(mes?: string): Promise<Blob> {
+  try {
+    const { data } = await api.get("/dms/versiones-precios/exportar", {
+      params: mes ? { mes } : undefined,
+      responseType: "blob",
+    });
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al exportar los precios mensuales"));
+  }
+}
+
+export async function importVersionesPreciosMensuales(file: File): Promise<CotizadorImportResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return parseResponse(
+    api.post("/dms/versiones-precios/importar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+    cotizadorImportResponseSchema,
+    "Error al importar los precios mensuales",
+  );
+}
+
 export function createVersionPrecioMensual(payload: VersionPrecioMensualPayload): Promise<VersionPrecioMensualResponse> {
   return parseResponse(
     api.post("/dms/versiones-precios", payload),
@@ -108,6 +138,33 @@ export function getPlanesFinancieros(activo?: boolean): Promise<PlanFinancieroLi
     }),
     planFinancieroListResponseSchema,
     "Error al obtener los planes financieros",
+  );
+}
+
+export async function exportPlanesFinancieros(): Promise<Blob> {
+  try {
+    const { data } = await api.get("/dms/planes-financieros/exportar", {
+      responseType: "blob",
+    });
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al exportar los planes financieros"));
+  }
+}
+
+export async function importPlanesFinancieros(file: File): Promise<CotizadorImportResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return parseResponse(
+    api.post("/dms/planes-financieros/importar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+    cotizadorImportResponseSchema,
+    "Error al importar los planes financieros",
   );
 }
 

@@ -1414,6 +1414,16 @@ export const versionPrecioMensualResponseSchema = z.object({
   message: z.string(),
 });
 
+export const cotizadorImportResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    created: z.number(),
+    updated: z.number(),
+    processed: z.number(),
+    plans: z.number().optional(),
+  }),
+});
+
 export const planFinancieroPlazoSchema = z.object({
   _id: z.string(),
   plazo: z.number(),
@@ -1703,6 +1713,7 @@ export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
 export type VersionPrecioMensual = z.infer<typeof versionPrecioMensualSchema>;
 export type VersionPrecioMensualListResponse = z.infer<typeof versionPrecioMensualListResponseSchema>;
 export type VersionPrecioMensualResponse = z.infer<typeof versionPrecioMensualResponseSchema>;
+export type CotizadorImportResponse = z.infer<typeof cotizadorImportResponseSchema>;
 export type PlanFinancieroPlazo = z.infer<typeof planFinancieroPlazoSchema>;
 export type PlanFinanciero = z.infer<typeof planFinancieroSchema>;
 export type PlanFinancieroListResponse = z.infer<typeof planFinancieroListResponseSchema>;

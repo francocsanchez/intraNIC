@@ -1,10 +1,10 @@
 import Loading from "@/components/Loading";
-import { createVersionPrecioMensual, deleteVersionPrecioMensual, getVersionesPreciosMensuales, updateVersionPrecioMensual } from "@/api/dms/cotizadorAPI";
+import { createVersionPrecioMensual, deleteVersionPrecioMensual, exportVersionesPreciosMensuales, getVersionesPreciosMensuales, importVersionesPreciosMensuales, updateVersionPrecioMensual } from "@/api/dms/cotizadorAPI";
 import { getVersiones } from "@/api/dms/preventasAPI";
 import { formatMoney, getCurrentMonthValue } from "@/views/admin/siac/cotizadorUtils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Power, Save, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Download, Pencil, Power, Save, Trash2, Upload } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { paths } from "@/routes/paths";
@@ -12,8 +12,18 @@ import { paths } from "@/routes/paths";
 const EMPTY_PRICES: Awaited<ReturnType<typeof getVersionesPreciosMensuales>>["data"] = [];
 const EMPTY_VERSIONES: Awaited<ReturnType<typeof getVersiones>>["data"] = [];
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  window.URL.revokeObjectURL(url);
+}
+
 export default function CotizadorVersionesPreciosView() {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [mes, setMes] = useState(getCurrentMonthValue());
   const [version, setVersion] = useState("");
   const [precio, setPrecio] = useState("");
@@ -98,6 +108,25 @@ export default function CotizadorVersionesPreciosView() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const exportMutation = useMutation({
+    mutationFn: () => exportVersionesPreciosMensuales(mes),
+    onSuccess: (blob) => {
+      downloadBlob(blob, `cotizador-precios-${mes}.xlsx`);
+      toast.success("Excel exportado correctamente");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const importMutation = useMutation({
+    mutationFn: importVersionesPreciosMensuales,
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["cotizador-precios"] });
+      queryClient.invalidateQueries({ queryKey: ["cotizador-catalogo"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const loading = preciosQuery.isLoading || versionesQuery.isLoading;
   const error = preciosQuery.error || versionesQuery.error;
 
@@ -144,7 +173,41 @@ export default function CotizadorVersionesPreciosView() {
           >
             Ir a planes financieros
           </Link>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  importMutation.mutate(file);
+                }
+                event.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => exportMutation.mutate()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition hover:bg-gray-50"
+            >
+              <Download size={14} />
+              Descargar Excel
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition hover:bg-gray-50"
+            >
+              <Upload size={14} />
+              Importar Excel
+            </button>
+          </div>
         </div>
+        <p className="mt-2 text-[11px] text-gray-600">
+          El Excel descargado sirve como plantilla: al reimportarlo se actualizan las filas existentes por version + mes y se crean las nuevas.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">

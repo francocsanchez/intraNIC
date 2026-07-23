@@ -1,11 +1,11 @@
 import Loading from "@/components/Loading";
-import { createPlanFinanciero, deletePlanFinanciero, getPlanesFinancieros, updatePlanFinanciero, type PlanFinancieroPayload } from "@/api/dms/cotizadorAPI";
+import { createPlanFinanciero, deletePlanFinanciero, exportPlanesFinancieros, getPlanesFinancieros, importPlanesFinancieros, updatePlanFinanciero, type PlanFinancieroPayload } from "@/api/dms/cotizadorAPI";
 import type { PlanFinanciero } from "@/types/index";
 import { formatMoney, formatPercent } from "@/views/admin/siac/cotizadorUtils";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { Calculator, Pencil, Plus, Power, Trash2, X } from "lucide-react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Calculator, Download, Pencil, Plus, Power, Trash2, Upload, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { paths } from "@/routes/paths";
@@ -13,6 +13,15 @@ import { paths } from "@/routes/paths";
 type PlanTermForm = PlanFinancieroPayload["plazos"][number];
 
 const EMPTY_PLANES: Awaited<ReturnType<typeof getPlanesFinancieros>>["data"] = [];
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  window.URL.revokeObjectURL(url);
+}
 
 const createEmptyTerm = (): PlanTermForm => ({
   plazo: 12,
@@ -356,6 +365,7 @@ function PlanFinancieroModal({
 
 export default function PlanesFinancierosView() {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<PlanFinanciero | null>(null);
 
@@ -390,6 +400,25 @@ export default function PlanesFinancierosView() {
           activo: item.activo,
         })),
       }),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["planes-financieros"] });
+      queryClient.invalidateQueries({ queryKey: ["cotizador-catalogo"] });
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
+
+  const exportMutation = useMutation({
+    mutationFn: exportPlanesFinancieros,
+    onSuccess: (blob) => {
+      downloadBlob(blob, "cotizador-planes.xlsx");
+      toast.success("Excel exportado correctamente");
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
+
+  const importMutation = useMutation({
+    mutationFn: importPlanesFinancieros,
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["planes-financieros"] });
@@ -434,12 +463,41 @@ export default function PlanesFinancierosView() {
           </div>
 
           <div className="flex gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  importMutation.mutate(file);
+                }
+                event.target.value = "";
+              }}
+            />
             <Link
               to={paths.admin.cotizadorPrecios}
               className="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
             >
               Ver precios mensuales
             </Link>
+            <button
+              type="button"
+              onClick={() => exportMutation.mutate()}
+              className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+            >
+              <Download size={16} />
+              Descargar Excel
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+            >
+              <Upload size={16} />
+              Importar Excel
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -453,6 +511,9 @@ export default function PlanesFinancierosView() {
             </button>
           </div>
         </div>
+        <p className="mt-2 text-xs text-gray-600">
+          El Excel exporta una fila por plazo. Al importar, si el plan ya existe por entidad + nombre se actualiza completo; si no existe, se crea.
+        </p>
       </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
