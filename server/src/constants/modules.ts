@@ -11,6 +11,7 @@ export const moduleKeys = [
   "segUnidadesFabrica",
   "asignaciones",
   "planNegocio",
+  "cotizador",
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",

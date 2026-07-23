@@ -1,6 +1,6 @@
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
-import { hasModuleAccess, hasPathAccess, hasSuperAdminRole } from "@/helpers/access";
+import { hasCotizadorManageAccess, hasModuleAccess, hasPathAccess, hasSuperAdminRole } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
@@ -55,9 +55,13 @@ export default function ConfiguracionView() {
   const canManagePedidoMensual =
     hasModuleAccess(user, "pedidoMensual") &&
     hasPathAccess(user, paths.convencional.pedidoMensual);
+  const canManageCotizador =
+    hasModuleAccess(user, "cotizador") &&
+    hasCotizadorManageAccess(user) &&
+    (hasPathAccess(user, paths.admin.cotizadorPrecios) || hasPathAccess(user, paths.admin.cotizadorPlanes));
   const canManageSystemParameters =
     hasSuperAdminRole(user) &&
-    (canManagePreventasCatalogs || canManagePlanNegocio || canManagePedidoMensual);
+    (canManagePreventasCatalogs || canManagePlanNegocio || canManagePedidoMensual || canManageCotizador);
   const canManageAgendaEnvio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.configuracionEnvioAgenda);
@@ -97,6 +101,12 @@ export default function ConfiguracionView() {
             { label: "Versiones", to: paths.convencional.preventasVersiones },
             ...(canManagePlanNegocio ? [{ label: "PN", to: paths.admin.planNegocio }] : []),
             ...(canManagePedidoMensual ? [{ label: "Pedido mensual", to: paths.convencional.pedidoMensual }] : []),
+            ...(canManageCotizador
+              ? [
+                  { label: "Precios cotizador", to: paths.admin.cotizadorPrecios },
+                  { label: "Planes cotizador", to: paths.admin.cotizadorPlanes },
+                ]
+              : []),
           ]
         : [],
     },

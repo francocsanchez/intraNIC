@@ -6,6 +6,7 @@ import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
   Headset,
+  Calculator,
   CalendarDays,
   FileSearch,
   FileText,
@@ -115,6 +116,7 @@ export default function Inicio() {
       icon: ShoppingCart,
       items: [
         { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
+        { label: "Cotizador", to: paths.convencional.cotizador, enabled: hasModulePathAccess(user, "cotizador", paths.convencional.cotizador), icon: Calculator },
         { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
         { label: "Agenda comercial", to: paths.convencional.agendaComercial, enabled: hasModulePathAccess(user, "agendaComercial", paths.convencional.agendaComercial), icon: CalendarDays },
         { label: "Registro TestDrive", to: paths.convencional.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive), icon: CarFront },

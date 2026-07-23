@@ -316,12 +316,24 @@ export const misOperacionesItemSchema = z.object({
   modelo: z.string(),
   vendedor: z.string(),
   color: z.string(),
+  descuentoPorcentaje: z.number().nullable().optional().default(null),
 });
 
 export const misOperacionesResumenSchema = z.object({
   total: z.number(),
   porDia: z.record(z.string(), z.number()),
   porModelo: z.record(z.string(), z.number()),
+  anual: z
+    .array(
+      z.object({
+        mes: z.number(),
+        total: z.number(),
+        porModelo: z.record(z.string(), z.number()),
+      }),
+    )
+    .optional()
+    .default([]),
+  descuentoPromedioMes: z.number().nullable().optional().default(null),
 });
 
 export const misOperacionesSchema = z.object({
@@ -1382,6 +1394,75 @@ export const pedidoMensualResponseSchema = z.object({
   message: z.string(),
 });
 
+export const versionPrecioMensualSchema = z.object({
+  _id: z.string(),
+  version: catalogoSchema,
+  mes: z.string(),
+  precio: z.number(),
+  descuentoReferenciaPct: z.number(),
+  activo: z.boolean(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const versionPrecioMensualListResponseSchema = z.object({
+  data: z.array(versionPrecioMensualSchema),
+});
+
+export const versionPrecioMensualResponseSchema = z.object({
+  data: versionPrecioMensualSchema,
+  message: z.string(),
+});
+
+export const planFinancieroPlazoSchema = z.object({
+  _id: z.string(),
+  plazo: z.number(),
+  tna: z.number(),
+  quebrantoTipo: z.enum(["porcentaje", "monto"]),
+  quebrantoValor: z.number(),
+  maxFinanciacionTipo: z.enum(["porcentaje", "monto"]),
+  maxFinanciacionValor: z.number(),
+  activo: z.boolean(),
+});
+
+export const planFinancieroSchema = z.object({
+  _id: z.string(),
+  entidad: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  plazos: z.array(planFinancieroPlazoSchema),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const planFinancieroListResponseSchema = z.object({
+  data: z.array(planFinancieroSchema),
+});
+
+export const planFinancieroResponseSchema = z.object({
+  data: planFinancieroSchema,
+  message: z.string(),
+});
+
+export const cotizadorVersionSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  activo: z.boolean(),
+  precioId: z.string().nullable(),
+  precio: z.number().nullable(),
+  descuentoReferenciaPct: z.number(),
+  precioActivo: z.boolean(),
+});
+
+export const cotizadorCatalogoResponseSchema = z.object({
+  data: z.object({
+    mes: z.string(),
+    versiones: z.array(cotizadorVersionSchema),
+    entidades: z.array(z.string()),
+    planes: z.array(planFinancieroSchema),
+  }),
+});
+
 export const resumenPedidoMensualItemSchema = z.object({
   versionId: z.string(),
   version: z.string(),
@@ -1619,6 +1700,15 @@ export type PreventaResumenResponse = z.infer<typeof preventaResumenResponseSche
 export type PedidoMensual = z.infer<typeof pedidoMensualSchema>;
 export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponseSchema>;
 export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
+export type VersionPrecioMensual = z.infer<typeof versionPrecioMensualSchema>;
+export type VersionPrecioMensualListResponse = z.infer<typeof versionPrecioMensualListResponseSchema>;
+export type VersionPrecioMensualResponse = z.infer<typeof versionPrecioMensualResponseSchema>;
+export type PlanFinancieroPlazo = z.infer<typeof planFinancieroPlazoSchema>;
+export type PlanFinanciero = z.infer<typeof planFinancieroSchema>;
+export type PlanFinancieroListResponse = z.infer<typeof planFinancieroListResponseSchema>;
+export type PlanFinancieroResponse = z.infer<typeof planFinancieroResponseSchema>;
+export type CotizadorVersion = z.infer<typeof cotizadorVersionSchema>;
+export type CotizadorCatalogoResponse = z.infer<typeof cotizadorCatalogoResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
 export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;

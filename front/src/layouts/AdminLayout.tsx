@@ -27,6 +27,8 @@ export default function AdminLayout() {
         pathname === paths.admin.configuracionEnvioAgenda ||
         pathname === paths.admin.unidadesNegocio ||
         pathname === paths.admin.planNegocio ||
+        pathname === paths.admin.cotizadorPrecios ||
+        pathname === paths.admin.cotizadorPlanes ||
         pathname === paths.convencional.pedidoMensual ||
         pathname === paths.admin.configuracionConvencionalEditar ||
         pathname === paths.admin.configuracionUsadosEditar,

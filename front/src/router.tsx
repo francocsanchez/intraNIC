@@ -15,6 +15,7 @@ const GestionUsadosLayout = lazy(() => import("./layouts/GestionUsadosLayout"));
 const AnalisisLayout = lazy(() => import("./layouts/AnalisisLayout"));
 const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute"));
 const ModuleProtectedRoute = lazy(() => import("./layouts/ModuleProtectedRoute"));
+const CotizadorConfigProtectedRoute = lazy(() => import("./layouts/CotizadorConfigProtectedRoute"));
 const SuperAdminProtectedRoute = lazy(() => import("./layouts/SuperAdminProtectedRoute"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
@@ -71,6 +72,9 @@ const VersionesView = lazy(() => import("./views/admin/siac/VersionesView"));
 const PlanNegocioCrudView = lazy(() => import("./views/admin/siac/PlanNegocioCrudView"));
 const PlanNegocioView = lazy(() => import("./views/admin/siac/PlanNegocioView"));
 const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualView"));
+const CotizadorVersionesPreciosView = lazy(() => import("./views/admin/siac/CotizadorVersionesPreciosView"));
+const PlanesFinancierosView = lazy(() => import("./views/admin/siac/PlanesFinancierosView"));
+const CotizadorView = lazy(() => import("./views/admin/siac/CotizadorView"));
 const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
 const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
 const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailView"));
@@ -173,6 +177,15 @@ export default function Router() {
             <Route element={<SuperAdminProtectedRoute />}>
               <Route element={<AdminLayout />}>
                 <Route path={paths.admin.planNegocio} element={<PlanNegocioCrudView />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["cotizador"]} />}>
+            <Route element={<CotizadorConfigProtectedRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path={paths.admin.cotizadorPrecios} element={<CotizadorVersionesPreciosView />} />
+                <Route path={paths.admin.cotizadorPlanes} element={<PlanesFinancierosView />} />
               </Route>
             </Route>
           </Route>
@@ -383,6 +396,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["planNegocio"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.planNegocio} element={<PlanNegocioView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["cotizador"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.cotizador} element={<CotizadorView />} />
             </Route>
           </Route>
 

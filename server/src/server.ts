@@ -34,6 +34,9 @@ import minutaRoutes from "./routes/minutaRoutes";
 import planNegocioRoutes from "./routes/planNegocioRoutes";
 import comercialAgendaRoutes from "./routes/comercialAgendaRoutes";
 import unidadNegocioRoutes from "./routes/unidadNegocioRoutes";
+import versionPriceMonthlyRoutes from "./routes/versionPriceMonthlyRoutes";
+import financialPlanRoutes from "./routes/financialPlanRoutes";
+import cotizadorRoutes from "./routes/cotizadorRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -56,8 +59,11 @@ app.use("/api/dms/pedido-unidades", pedidoUnidadRoutes);
 app.use("/api/dms/registro-asignaciones", registroAsignacionRoutes);
 app.use("/api/dms/colores", colorRoutes);
 app.use("/api/dms/versiones", versionRoutes);
+app.use("/api/dms/versiones-precios", versionPriceMonthlyRoutes);
 app.use("/api/dms/preventas", preventaRoutes);
 app.use("/api/dms/pedido-mensual", pedidoMensualRoutes);
+app.use("/api/dms/planes-financieros", financialPlanRoutes);
+app.use("/api/dms/cotizador", cotizadorRoutes);
 app.use("/api/dms/proformas", proformaRoutes);
 app.use("/api/dms/minutas", minutaRoutes);
 app.use("/api/dms/plan-negocio", planNegocioRoutes);

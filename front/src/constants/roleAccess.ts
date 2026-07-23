@@ -137,3 +137,12 @@ export function hasComercialAgendaManageAccess(user: AuthUser) {
 
   return getNormalizedRoles(user).includes("supervisor");
 }
+
+export function hasCotizadorManageAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.includes("supervisor") || normalizedRoles.includes("gerente");
+}

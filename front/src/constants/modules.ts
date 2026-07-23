@@ -11,6 +11,7 @@ export const moduleKeys = [
   "segUnidadesFabrica",
   "asignaciones",
   "planNegocio",
+  "cotizador",
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",
@@ -55,6 +56,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   segUnidadesFabrica: "Seg. unidades fabrica",
   asignaciones: "Asignaciones",
   planNegocio: "Plan de negocio",
+  cotizador: "Cotizador",
   registroAsignaciones: "Registro asignaciones",
   pedidoMensual: "Pedido mensual",
   pedidoUnidades: "Pedido unidades",
@@ -97,7 +99,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Comercial",
-    modules: ["preventas", "proformas", "registroTestDriveConvencional", "minutas", "agendaComercial"],
+    modules: ["preventas", "proformas", "cotizador", "registroTestDriveConvencional", "minutas", "agendaComercial"],
   },
   {
     title: "Plan de ahorro",
