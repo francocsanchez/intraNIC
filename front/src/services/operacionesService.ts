@@ -107,10 +107,11 @@ export async function getAnalisisOperacionesPreventaFormaPago(
 
 export async function getAnalisisOperacionesPreventaDescuentoMensual(
   anio: number,
+  modelo?: string,
 ): Promise<AnalisisOperacionesPreventaDescuentoMensualResponse> {
   try {
     const { data } = await api.get("/operaciones/analisis-preventa/descuento-mensual", {
-      params: { anio },
+      params: { anio, modelo: modelo || undefined },
     });
 
     const parsed = analisisOperacionesPreventaDescuentoMensualResponseSchema.safeParse(data);

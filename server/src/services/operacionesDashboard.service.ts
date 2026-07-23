@@ -3,6 +3,8 @@ import { sequelizeNIC } from "../config/database";
 import {
   analisisOperacionesPreventaCreditoMensualQuery,
   analisisOperacionesPreventaDescuentoMensualQuery,
+  analisisOperacionesPreventaDescuentoMensualSucursalQuery,
+  analisisOperacionesPreventaDescuentoMensualVendedorQuery,
   analisisOperacionesPreventaPromedioCreditoPorModeloQuery,
   analisisOperacionesPreventaFormaPagoQuery,
   analisisOperacionesPreventaQuery,
@@ -73,6 +75,7 @@ type AnalisisOperacionPreventaRow = {
   interno: number | string | null;
   fecha: string | Date | null;
   fecha_factura: string | Date | null;
+  sucursal: string | null;
   version: string | null;
   modelo: string | null;
   precio: number | string | null;
@@ -93,6 +96,7 @@ type AnalisisOperacionPreventaItem = {
   interno: number | null;
   fecha: string | null;
   fechaFactura: string | null;
+  sucursal: string;
   version: string;
   modelo: string;
   precio: number | null;
@@ -136,12 +140,16 @@ type AnalisisOperacionPreventaFormaPagoResponse = {
 type AnalisisOperacionPreventaDescuentoMensualRow = {
   mes: number | string | null;
   modelo: string | null;
+  sucursal?: string | null;
+  vendedor?: string | null;
   descuento_promedio: number | string | null;
 };
 
 type AnalisisOperacionPreventaDescuentoMensualItem = {
   mes: number;
-  modelo: string;
+  modelo?: string;
+  sucursal?: string;
+  vendedor?: string;
   descuentoPromedio: number;
 };
 
@@ -408,6 +416,7 @@ export class OperacionesDashboardService {
       interno: normalizeNullableNumber(row.interno),
       fecha: serializeNullableDate(row.fecha),
       fechaFactura: serializeNullableDate(row.fecha_factura),
+      sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
       precio: normalizeNullableNumber(row.precio),
@@ -461,30 +470,90 @@ export class OperacionesDashboardService {
 
   static async getAnalisisPreventaDescuentoMensual(
     anio: number,
+    modelo?: string,
   ): Promise<AnalisisOperacionPreventaDescuentoMensualResponse> {
-    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaDescuentoMensualRow>(
-      analisisOperacionesPreventaDescuentoMensualQuery(),
-      {
-        type: QueryTypes.SELECT,
-        replacements: {
-          anio,
+    const [rowsModelo, rowsSucursal, rowsVendedor] = await Promise.all([
+      sequelizeNIC.query<AnalisisOperacionPreventaDescuentoMensualRow>(
+        analisisOperacionesPreventaDescuentoMensualQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio,
+          },
         },
-      },
-    );
+      ),
+      sequelizeNIC.query<AnalisisOperacionPreventaDescuentoMensualRow>(
+        analisisOperacionesPreventaDescuentoMensualSucursalQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisOperacionPreventaDescuentoMensualRow>(
+        analisisOperacionesPreventaDescuentoMensualVendedorQuery(Boolean(modelo)),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio,
+            modelo,
+          },
+        },
+      ),
+    ]);
 
-    const data = rows
-      .map((row) => ({
+    const normalizedRows = [
+      ...rowsModelo.map((row) => ({
         mes: normalizeNullableNumber(row.mes),
         modelo: normalizeNullableString(row.modelo) ?? "SIN MODELO",
         descuentoPromedio: normalizeNullableNumber(row.descuento_promedio),
-      }))
+      })),
+      ...rowsSucursal.map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
+        descuentoPromedio: normalizeNullableNumber(row.descuento_promedio),
+      })),
+      ...rowsVendedor.map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        vendedor: normalizeNullableString(row.vendedor) ?? "SIN VENDEDOR",
+        descuentoPromedio: normalizeNullableNumber(row.descuento_promedio),
+      })),
+    ];
+
+    const data: AnalisisOperacionPreventaDescuentoMensualItem[] = normalizedRows
       .filter(
-        (row): row is AnalisisOperacionPreventaDescuentoMensualItem =>
+        (row) =>
           row.mes !== null &&
           row.mes >= 1 &&
           row.mes <= 12 &&
           row.descuentoPromedio !== null,
-      );
+      )
+      .map((row) => {
+        const base = {
+          mes: row.mes as number,
+          descuentoPromedio: row.descuentoPromedio as number,
+        };
+
+        if ("modelo" in row) {
+          return {
+            ...base,
+            modelo: row.modelo,
+          };
+        }
+
+        if ("sucursal" in row) {
+          return {
+            ...base,
+            sucursal: row.sucursal,
+          };
+        }
+
+        return {
+          ...base,
+          vendedor: row.vendedor,
+        };
+      });
 
     return {
       filters: {

@@ -157,6 +157,22 @@ const formatBarLabelPercentage = (value: number | null) => {
   return `${Math.round(value)}%`;
 };
 
+const getDescuentoCellClassName = (value: number | null) => {
+  if (value === null || Number.isNaN(value)) {
+    return "";
+  }
+
+  if (value > 9) {
+    return "bg-red-100/70 text-red-700";
+  }
+
+  if (value >= 6) {
+    return "bg-amber-100/70 text-amber-700";
+  }
+
+  return "bg-emerald-100/70 text-emerald-700";
+};
+
 const formatCellValue = (row: AnalisisOperacionesPreventaItem, column: Exclude<TableColumn, { kind: "action" }>) => {
   if (column.kind === "derived") {
     if (column.key === "descuentoPorcentaje") {
@@ -184,17 +200,21 @@ const formatCellValue = (row: AnalisisOperacionesPreventaItem, column: Exclude<T
   return String(value);
 };
 
-const buildPromedioDescuentoPorModelo = (rows: AnalisisOperacionesPreventaItem[]) =>
+const buildPromedioDescuento = (
+  rows: AnalisisOperacionesPreventaItem[],
+  key: "modelo" | "sucursal",
+  emptyLabel: string,
+) =>
   rows
-    .reduce<Array<{ modelo: string; promedio: number }>>((acc, row) => {
-      const modelo = row.modelo.trim();
+    .reduce<Array<{ nombre: string; promedio: number }>>((acc, row) => {
+      const nombre = row[key].trim();
       const descuento = getDescuentoPorcentaje(row);
 
-      if (!modelo || descuento === null || Number.isNaN(descuento)) {
+      if (!nombre || descuento === null || Number.isNaN(descuento)) {
         return acc;
       }
 
-      const existing = acc.find((item) => item.modelo === modelo);
+      const existing = acc.find((item) => item.nombre === nombre);
 
       if (existing) {
         existing.promedio = existing.promedio + descuento;
@@ -204,42 +224,52 @@ const buildPromedioDescuentoPorModelo = (rows: AnalisisOperacionesPreventaItem[]
       }
 
       acc.push({
-        modelo,
+        nombre,
         promedio: descuento,
         cantidad: 1,
-      } as { modelo: string; promedio: number } & { cantidad: number });
+      } as { nombre: string; promedio: number } & { cantidad: number });
 
       return acc;
     }, [])
     .map((item) => {
       const cantidad = (item as typeof item & { cantidad?: number }).cantidad ?? 1;
       return {
-        modelo: item.modelo,
+        nombre: item.nombre || emptyLabel,
         promedio: item.promedio / cantidad,
       };
     })
-    .sort((a, b) => a.modelo.localeCompare(b.modelo));
+    .sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-const buildChartData = (rows: AnalisisOperacionesPreventaDescuentoMensualItem[]) => {
+const buildChartData = (
+  rows: AnalisisOperacionesPreventaDescuentoMensualItem[],
+  dimension: "modelo" | "sucursal" | "vendedor",
+) => {
   const points = MONTH_OPTIONS.map((month) => ({
     mes: month.label.slice(0, 3),
     monthValue: month.value,
   })) as Array<{ mes: string; monthValue: number } & Record<string, string | number | null>>;
 
-  const modelSet = new Set<string>();
+  const itemSet = new Set<string>();
 
   rows.forEach((row) => {
-    modelSet.add(row.modelo);
+    const seriesName =
+      dimension === "modelo" ? row.modelo : dimension === "sucursal" ? row.sucursal : row.vendedor;
+
+    if (!seriesName) {
+      return;
+    }
+
+    itemSet.add(seriesName);
     const point = points.find((item) => item.monthValue === row.mes);
 
     if (point) {
-      point[row.modelo] = Math.round(row.descuentoPromedio);
+      point[seriesName] = Math.round(row.descuentoPromedio);
     }
   });
 
   return {
     chartData: points,
-    models: Array.from(modelSet).sort((a, b) => a.localeCompare(b)),
+    items: Array.from(itemSet).sort((a, b) => a.localeCompare(b)),
   };
 };
 
@@ -471,8 +501,16 @@ export default function AnalisisOperacionesView() {
   if (!data) return <Loading />;
 
   const currentMonthLabel = MONTH_OPTIONS.find((item) => item.value === mes)?.label ?? String(mes);
-  const promedioDescuentoPorModelo = buildPromedioDescuentoPorModelo(data.data);
-  const { chartData, models: chartModels } = buildChartData(descuentoMensualData?.data ?? []);
+  const promedioDescuentoPorModelo = buildPromedioDescuento(data.data, "modelo", "SIN MODELO");
+  const promedioDescuentoPorSucursal = buildPromedioDescuento(data.data, "sucursal", "SIN SUCURSAL");
+  const { chartData: chartDataModelos, items: chartModels } = buildChartData(
+    (descuentoMensualData?.data ?? []).filter((item) => Boolean(item.modelo)),
+    "modelo",
+  );
+  const { chartData: chartDataSucursales, items: chartSucursales } = buildChartData(
+    (descuentoMensualData?.data ?? []).filter((item) => Boolean(item.sucursal)),
+    "sucursal",
+  );
   const usadosChartData = buildMonthlyBaseData().map((month) => {
     const match = usadosMensualData?.data.find((item) => item.mes === month.monthValue);
     const porcentajeToma = match && match.totalOperaciones > 0
@@ -504,8 +542,48 @@ export default function AnalisisOperacionesView() {
 
   return (
     <div className="w-full space-y-4 px-4 py-4">
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <label htmlFor="analisis-operaciones-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              Ano
+            </label>
+            <select
+              id="analisis-operaciones-anio"
+              value={anio}
+              onChange={(event) => setAnio(Number(event.target.value))}
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            >
+              {yearOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="analisis-operaciones-mes" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              Mes
+            </label>
+            <select
+              id="analisis-operaciones-mes"
+              value={mes}
+              onChange={(event) => setMes(Number(event.target.value))}
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            >
+              {MONTH_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.9fr)]">
+        <article className="min-w-0 rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
           <div className="flex h-full flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
              
@@ -543,23 +621,39 @@ export default function AnalisisOperacionesView() {
           </div>
         </article>
 
-        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+        <article className="min-w-0 rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
           <div className="flex h-full flex-col">
          
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">PROM DESC.</h2>
         
 
-            <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
-              {promedioDescuentoPorModelo.length ? (
-                promedioDescuentoPorModelo.map((item) => (
-                  <div
-                    key={item.modelo}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-800"
-                  >
-                    <span className="font-semibold uppercase text-gray-700">{item.modelo}</span>
-                    <span className="font-bold text-[#128c80]">{formatPercentage(item.promedio)}</span>
+            <div className="mt-4 grid flex-1 grid-cols-1 gap-3 xl:grid-cols-2">
+              {promedioDescuentoPorModelo.length || promedioDescuentoPorSucursal.length ? (
+                <>
+                  <div className="rounded-lg bg-[#e4f3fa] px-3 py-2.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Modelos</p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-800">
+                      {promedioDescuentoPorModelo.map((item) => (
+                        <div key={item.nombre} className="inline-flex items-center gap-1.5">
+                          <span className="font-semibold uppercase text-gray-700">{item.nombre}</span>
+                          <span className="font-bold text-[#128c80]">{formatPercentage(item.promedio)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))
+
+                  <div className="rounded-lg bg-[#e4f3fa] px-3 py-2.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Sucursales</p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-800">
+                      {promedioDescuentoPorSucursal.map((item) => (
+                        <div key={item.nombre} className="inline-flex items-center gap-1.5">
+                          <span className="font-semibold uppercase text-gray-700">{item.nombre}</span>
+                          <span className="font-bold text-[#128c80]">{formatPercentage(item.promedio)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="inline-flex items-center rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-600">
                   Sin datos para calcular promedio.
@@ -775,110 +869,138 @@ export default function AnalisisOperacionesView() {
         </article>
       </section>
 
-      <section className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Por Mes</h2>
-            <p className="mt-1 text-xs text-gray-600">
-              Evolucion mensual del porcentaje de descuento por modelo durante {anio}.
-            </p>
-          </div>
-
-          <div className="inline-flex w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
-            {chartModels.length} modelos
-          </div>
-        </div>
-
-        <div className="mt-4 h-[340px] min-w-0">
-          {isDescuentoMensualLoading ? (
-            <div className="h-full animate-pulse rounded-xl bg-gray-100" />
-          ) : !chartModels.length ? (
-            <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#b7d8e3] bg-[#f8fcff] text-sm text-gray-500">
-              Sin datos de descuento para graficar en {anio}.
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Por Mes</h2>
+              <p className="mt-1 text-xs text-gray-600">
+                Evolucion mensual del porcentaje de descuento por modelo durante {anio}.
+              </p>
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="mes"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#4b5563" }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#6b7280" }}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 16,
-                    borderColor: "#cfe7ee",
-                    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                  }}
-                  formatter={(value, name) => [`${value}%`, name]}
-                  labelFormatter={(label) => `Mes: ${label}`}
-                />
-                <Legend />
-                {chartModels.map((model, index) => (
-                  <Line
-                    key={model}
-                    type="monotone"
-                    dataKey={model}
-                    name={model}
-                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                    connectNulls
+
+            <div className="inline-flex w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
+              {chartModels.length} modelos
+            </div>
+          </div>
+
+          <div className="mt-4 h-[340px] min-w-0">
+            {isDescuentoMensualLoading ? (
+              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+            ) : !chartModels.length ? (
+              <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#b7d8e3] bg-[#f8fcff] text-sm text-gray-500">
+                Sin datos de descuento por modelo en {anio}.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartDataModelos} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="mes"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#4b5563" }}
                   />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </section>
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 16,
+                      borderColor: "#cfe7ee",
+                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+                    }}
+                    formatter={(value, name) => [`${value}%`, name]}
+                    labelFormatter={(label) => `Mes: ${label}`}
+                  />
+                  <Legend />
+                  {chartModels.map((model, index) => (
+                    <Line
+                      key={model}
+                      type="monotone"
+                      dataKey={model}
+                      name={model}
+                      stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </article>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="analisis-operaciones-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-              Ano
-            </label>
-            <select
-              id="analisis-operaciones-anio"
-              value={anio}
-              onChange={(event) => setAnio(Number(event.target.value))}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
-            >
-              {yearOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Anual Sucursal</h2>
+              <p className="mt-1 text-xs text-gray-600">
+                Evolucion mensual del porcentaje de descuento por sucursal durante {anio}.
+              </p>
+            </div>
+
+            <div className="inline-flex w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
+              {chartSucursales.length} sucursales
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="analisis-operaciones-mes" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-              Mes
-            </label>
-            <select
-              id="analisis-operaciones-mes"
-              value={mes}
-              onChange={(event) => setMes(Number(event.target.value))}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
-            >
-              {MONTH_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          <div className="mt-4 h-[340px] min-w-0">
+            {isDescuentoMensualLoading ? (
+              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+            ) : !chartSucursales.length ? (
+              <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#b7d8e3] bg-[#f8fcff] text-sm text-gray-500">
+                Sin datos de descuento por sucursal en {anio}.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartDataSucursales} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="mes"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#4b5563" }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#6b7280" }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 16,
+                      borderColor: "#cfe7ee",
+                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+                    }}
+                    formatter={(value, name) => [`${value}%`, name]}
+                    labelFormatter={(label) => `Mes: ${label}`}
+                  />
+                  <Legend />
+                  {chartSucursales.map((sucursal, index) => (
+                    <Line
+                      key={sucursal}
+                      type="monotone"
+                      dataKey={sucursal}
+                      name={sucursal}
+                      stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
-        </div>
+        </article>
       </section>
 
       {!data.data.length ? (
@@ -906,7 +1028,7 @@ export default function AnalisisOperacionesView() {
                   {TABLE_COLUMNS.map((column) => (
                     <th
                       key={column.key}
-                      className="whitespace-nowrap px-2.5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500"
+                      className="whitespace-nowrap px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500"
                     >
                       {column.label}
                     </th>
@@ -918,9 +1040,21 @@ export default function AnalisisOperacionesView() {
                 {data.data.map((row) => (
                   <tr key={`${row.numero ?? "sin-numero"}-${row.fecha ?? "sin-fecha"}-${row.modelo}`} className="hover:bg-gray-50/70">
                     {TABLE_COLUMNS.map((column) => (
+                      (() => {
+                        const descuentoValue =
+                          column.kind === "derived" && column.key === "descuentoPorcentaje"
+                            ? getDescuentoPorcentaje(row)
+                            : null;
+
+                        const colorClassName =
+                          column.kind === "derived" && column.key === "descuentoPorcentaje"
+                            ? getDescuentoCellClassName(descuentoValue)
+                            : "";
+
+                        return (
                       <td
                         key={`${row.numero ?? "sin-numero"}-${row.fecha ?? "sin-fecha"}-${String(column.key)}`}
-                        className="whitespace-nowrap px-2.5 py-2.5 text-xs text-gray-700"
+                        className={`whitespace-nowrap px-2 py-1.5 text-xs text-gray-700 ${colorClassName}`}
                       >
                         {column.kind === "action" ? (
                           column.key === "formaPago" ? (
@@ -949,6 +1083,8 @@ export default function AnalisisOperacionesView() {
                           formatCellValue(row, column)
                         )}
                       </td>
+                        );
+                      })()
                     ))}
                   </tr>
                 ))}

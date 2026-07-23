@@ -740,6 +740,7 @@ export const analisisOperacionesPreventaItemSchema = z.object({
   interno: z.number().nullable(),
   fecha: z.string().nullable(),
   fechaFactura: z.string().nullable(),
+  sucursal: z.string(),
   version: z.string(),
   modelo: z.string(),
   precio: z.number().nullable(),
@@ -778,7 +779,9 @@ export const analisisOperacionesPreventaFormaPagoResponseSchema = z.object({
 
 export const analisisOperacionesPreventaDescuentoMensualItemSchema = z.object({
   mes: z.number(),
-  modelo: z.string(),
+  modelo: z.string().optional(),
+  sucursal: z.string().optional(),
+  vendedor: z.string().optional(),
   descuentoPromedio: z.number(),
 });
 

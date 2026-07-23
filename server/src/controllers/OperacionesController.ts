@@ -117,13 +117,17 @@ export class OperacionesController {
 
   static getAnalisisPreventaDescuentoMensual = async (req: Request, res: Response) => {
     const anio = parseStrictPositiveInt(req.query.anio);
+    const modelo = typeof req.query.modelo === "string" ? req.query.modelo.trim() : "";
 
     if (!anio) {
       return res.status(400).json({ message: "El parametro anio es obligatorio y debe ser un entero valido" });
     }
 
     try {
-      const response = await OperacionesDashboardService.getAnalisisPreventaDescuentoMensual(anio);
+      const response = await OperacionesDashboardService.getAnalisisPreventaDescuentoMensual(
+        anio,
+        modelo || undefined,
+      );
       return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getAnalisisPreventaDescuentoMensual");

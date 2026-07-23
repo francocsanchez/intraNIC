@@ -54,6 +54,7 @@ SELECT
     stoauto.sa_codigo AS interno,
     vp.fecha,
     ope.ope_fecfac AS fecha_factura,
+    LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL'))) AS sucursal,
     LTRIM(RTRIM(vp.modelo)) AS version,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
     vp.precio,
@@ -75,6 +76,8 @@ INNER JOIN opera ope ON
     AND ope.ope_fecasig IS NOT NULL
 INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN sucursal ON
+    sucursal.suc_codigo = vp.sucursal_id
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
     AND auto.au_marca = ope.ope_marca
@@ -154,6 +157,86 @@ GROUP BY
 ORDER BY
     mes ASC,
     modelo ASC;
+`;
+
+export const analisisOperacionesPreventaDescuentoMensualSucursalQuery = () => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL'))) AS sucursal,
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS descuento_promedio
+FROM
+    viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN sucursal ON
+    sucursal.suc_codigo = vp.sucursal_id
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND vp.precio IS NOT NULL
+    AND vp.precio > 0
+    AND vp.bonificacion IS NOT NULL
+GROUP BY
+    MONTH(ope.ope_fecasig),
+    LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL')))
+ORDER BY
+    mes ASC,
+    sucursal ASC;
+`;
+
+export const analisisOperacionesPreventaDescuentoMensualVendedorQuery = (hasModeloFilter: boolean) => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR'))) AS vendedor,
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS descuento_promedio
+FROM
+    viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = vp.vendedor_id
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    ${hasModeloFilter ? "AND LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) = :modelo" : ""}
+    AND vp.precio IS NOT NULL
+    AND vp.precio > 0
+    AND vp.bonificacion IS NOT NULL
+GROUP BY
+    MONTH(ope.ope_fecasig),
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR')))
+ORDER BY
+    mes ASC,
+    vendedor ASC;
 `;
 
 export const analisisOperacionesPreventaResumenFinanciacionQuery = () => `
