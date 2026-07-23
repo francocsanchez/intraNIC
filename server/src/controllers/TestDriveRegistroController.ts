@@ -96,7 +96,7 @@ const userCanAccessNegocio = (
 
   if (negocio === "planAhorro") {
     if (action === "deleteManaged") {
-      return false;
+      return canManagePlanAhorroUpdate(user.role);
     }
 
     return true;
@@ -402,13 +402,18 @@ export class TestDriveRegistroController {
         });
       }
 
-      if (!hasSuperAdminRole(req.user.role) && negocio === "planAhorro" && hasStarted(registro.retiroAt)) {
+      const canEditManagedPlanAhorro = negocio === "planAhorro" && canManagePlanAhorroUpdate(req.user.role);
+
+      if (
+        !hasSuperAdminRole(req.user.role) &&
+        !canEditManagedPlanAhorro &&
+        negocio === "planAhorro" &&
+        hasStarted(registro.retiroAt)
+      ) {
         return res.status(403).json({
           error: "No puedes editar un registro de TestDrive una vez iniciada la fecha y hora del turno",
         });
       }
-
-      const canEditManagedPlanAhorro = negocio === "planAhorro" && canManagePlanAhorroUpdate(req.user.role);
 
       if (!canEditManagedPlanAhorro && !hasSuperAdminRole(req.user.role) && registro.solicitadoPorId !== req.user._id) {
         return res.status(403).json({ error: "Solo puedes editar registros cargados por tu usuario" });
@@ -462,7 +467,14 @@ export class TestDriveRegistroController {
         return res.status(400).json({ error: "No se pudo determinar el negocio del registro" });
       }
 
-      if (!hasSuperAdminRole(req.user.role) && negocio === "planAhorro" && hasStarted(registro.retiroAt)) {
+      const canDeleteManagedPlanAhorro = negocio === "planAhorro" && canManagePlanAhorroUpdate(req.user.role);
+
+      if (
+        !hasSuperAdminRole(req.user.role) &&
+        !canDeleteManagedPlanAhorro &&
+        negocio === "planAhorro" &&
+        hasStarted(registro.retiroAt)
+      ) {
         return res.status(403).json({
           error: "No puedes eliminar un registro de TestDrive una vez iniciada la fecha y hora del turno",
         });

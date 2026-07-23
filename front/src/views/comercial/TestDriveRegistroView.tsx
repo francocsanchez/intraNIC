@@ -516,16 +516,16 @@ export default function TestDriveRegistroView({
                   ? hasRegistroTestDriveActionAccess(user, "editPlanAhorroManaged")
                   : false;
                 const canDeleteManaged = negocio === "planAhorro"
-                  ? false
+                  ? canEditManagedPlanAhorro
                   : hasRegistroTestDriveActionAccess(user, "deleteManaged");
-                const canEdit = isSuperAdmin || (
+                const canEdit = isSuperAdmin || canEditManagedPlanAhorro || (
                   !isPastRecord || negocio !== "planAhorro"
-                    ? isOwnRecord || canEditManagedPlanAhorro
+                    ? isOwnRecord
                     : false
                 );
-                const canDelete = isSuperAdmin || (
+                const canDelete = isSuperAdmin || canDeleteManaged || (
                   !isPastRecord || negocio !== "planAhorro"
-                    ? isOwnRecord || canDeleteManaged
+                    ? isOwnRecord
                     : false
                 );
                 const actionMessage = negocio === "planAhorro" && isPastRecord
