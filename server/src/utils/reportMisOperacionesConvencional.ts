@@ -10,6 +10,19 @@ export type MisOperacionRow = {
   modelo: string;
   vendedor: string;
   color: string;
+  descuentoPorcentaje: number | null;
+};
+
+export type MisOperacionAnualRow = {
+  opera: number;
+  fechaAsignacion: string | null;
+  modelo: string;
+};
+
+type MisOperacionAnualMesResumen = {
+  mes: number;
+  total: number;
+  porModelo: Record<string, number>;
 };
 
 const formatDateKey = (value: string | null) => {
@@ -55,4 +68,29 @@ export const buildResumenMisOperaciones = (rows: MisOperacionRow[]) => {
     porDia,
     porModelo,
   };
+};
+
+export const buildResumenMisOperacionesAnual = (rows: MisOperacionAnualRow[]): MisOperacionAnualMesResumen[] => {
+  const meses = new Map<number, MisOperacionAnualMesResumen>();
+
+  for (let mes = 1; mes <= 12; mes += 1) {
+    meses.set(mes, { mes, total: 0, porModelo: {} });
+  }
+
+  for (const row of rows) {
+    if (!row.fechaAsignacion) continue;
+
+    const fecha = new Date(row.fechaAsignacion);
+    if (Number.isNaN(fecha.getTime())) continue;
+
+    const mes = fecha.getMonth() + 1;
+    const item = meses.get(mes);
+    if (!item) continue;
+
+    const modeloKey = toModelKey(row.modelo);
+    item.total += 1;
+    item.porModelo[modeloKey] = (item.porModelo[modeloKey] ?? 0) + 1;
+  }
+
+  return Array.from(meses.values());
 };

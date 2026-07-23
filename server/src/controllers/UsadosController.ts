@@ -8,10 +8,16 @@ import { logError } from "../utils/logError";
 
 import { StockRow } from "../utils/reportUnidadesConvencional";
 import { buildResumenListaDeEspera, ListaEsperaRow } from "../utils/reportOperacionesConvencional";
-import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisOperacionesConvencional";
+import {
+  buildResumenMisOperaciones,
+  buildResumenMisOperacionesAnual,
+  MisOperacionAnualRow,
+  MisOperacionRow,
+} from "../utils/reportMisOperacionesConvencional";
 import {
   listaDeEsperaUsadoQuery,
   miListaDeEsperaUsadoQuery,
+  misOperacionesAnualQuery,
   misOperacionesQuery,
   misReservasUsadoQuery,
   reservasUsadoQuery,
@@ -287,8 +293,19 @@ export class UsadosController {
       });
 
       const resumen = buildResumenMisOperaciones(data);
+      const annualData = await sequelizeNIC.query<MisOperacionAnualRow>(misOperacionesAnualQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { ano: anoNumber, numberSaleNic },
+      });
 
-      return res.status(200).json({ data, resumen });
+      return res.status(200).json({
+        data,
+        resumen: {
+          ...resumen,
+          anual: buildResumenMisOperacionesAnual(annualData),
+          descuentoPromedioMes: null,
+        },
+      });
     } catch (error) {
       logError("UsadosController.misOperaciones");
       console.error(error);

@@ -259,7 +259,8 @@ SELECT
 	auto.au_nombre AS "version",
 	ISNULL(famiauto.fam_nombre, 'OTRAS') AS "modelo",
 	vende.ven_nombre as "vendedor",
-	color.col_nombre AS "color"
+	color.col_nombre AS "color",
+	NULL AS "descuentoPorcentaje"
 FROM
 	opera ope
 INNER JOIN cliente cli ON
@@ -285,4 +286,26 @@ WHERE
 	AND ope.ope_vende = :numberSaleNic
 ORDER BY
 	cli.cli_nombre
+`;
+
+export const misOperacionesAnualQuery = () => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_fecasig as "fechaAsignacion",
+	ISNULL(famiauto.fam_nombre, 'OTRAS') AS "modelo"
+FROM
+	opera ope
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 10
+	AND YEAR(ope.ope_fecasig) = :ano
+	AND ope.ope_vende = :numberSaleNic
+ORDER BY
+	ope.ope_fecasig,
+	ope.ope_codigo
 `;

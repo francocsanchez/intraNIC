@@ -240,7 +240,12 @@ SELECT
 	auto.au_nombre AS "version",
 	famiauto.fam_nombre AS "modelo",
 	vende.ven_nombre as "vendedor",
-	color.col_nombre AS "color"
+	color.col_nombre AS "color",
+	CASE
+		WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+			THEN (vp.bonificacion * 100.0) / vp.precio
+		ELSE NULL
+	END AS "descuentoPorcentaje"
 FROM
 	opera ope
 INNER JOIN cliente cli ON
@@ -258,6 +263,11 @@ INNER JOIN color ON
 	movnped.mnp_col1 = color.col_codigo
 INNER JOIN famiauto ON
 	auto.au_familia = famiauto.fam_codigo
+LEFT JOIN viewpreventa vp ON
+	vp.numero = ope.ope_codigo
+	AND vp.vendedor_id = ope.ope_vende
+	AND vp.fecha_anulacion IS NULL
+	AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
 WHERE
 	ope.ope_fecbaj IS NULL
 	AND ope.ope_tipo = 5
@@ -266,6 +276,53 @@ WHERE
 	AND ope.ope_vende = :numberSaleNic
 ORDER BY
 	cli.cli_nombre
+`;
+
+export const misOperacionesAnualQuery = () => `
+SELECT
+	ope.ope_codigo as "opera",
+	ope.ope_fecasig as "fechaAsignacion",
+	famiauto.fam_nombre AS "modelo"
+FROM
+	opera ope
+INNER JOIN auto ON
+	auto.au_codigo = ope.ope_auto
+	AND auto.au_marca = ope.ope_marca
+INNER JOIN famiauto ON
+	auto.au_familia = famiauto.fam_codigo
+WHERE
+	ope.ope_fecbaj IS NULL
+	AND ope.ope_tipo = 5
+	AND YEAR(ope.ope_fecasig) = :ano
+	AND ope.ope_vende = :numberSaleNic
+ORDER BY
+	ope.ope_fecasig,
+	ope.ope_codigo
+`;
+
+export const misOperacionesDescuentoPromedioMensualQuery = () => `
+SELECT
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS "descuentoPromedio"
+FROM
+    viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND YEAR(ope.ope_fecasig) = :ano
+    AND MONTH(ope.ope_fecasig) = :mes
+    AND vp.vendedor_id = :numberSaleNic
+    AND vp.precio IS NOT NULL
+    AND vp.precio > 0
+    AND vp.bonificacion IS NOT NULL
 `;
 
 export const datoOpera = () => `

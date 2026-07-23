@@ -13,13 +13,20 @@ import {
   stockConvencionalQuery,
   listaDeEsperaConvencionalQuery,
   misOperacionesQuery,
+  misOperacionesAnualQuery,
+  misOperacionesDescuentoPromedioMensualQuery,
   operacionesConvencional,
   operacionesConvencionalRanking,
 } from "./querys/convencional.query";
 
 import { buildResumen, StockRow } from "../utils/reportUnidadesConvencional";
 import { buildResumenListaDeEspera, ListaEsperaRow } from "../utils/reportOperacionesConvencional";
-import { buildResumenMisOperaciones, MisOperacionRow } from "../utils/reportMisOperacionesConvencional";
+import {
+  buildResumenMisOperaciones,
+  buildResumenMisOperacionesAnual,
+  MisOperacionAnualRow,
+  MisOperacionRow,
+} from "../utils/reportMisOperacionesConvencional";
 import { buildReportePromedioOperaciones, PromedioOperacionRow } from "../utils/reportPromedioOperacionesConvencional";
 import { buildReporteRankingOperaciones, RankingOperacionRow } from "../utils/reportRankingOperacionesConvencional";
 
@@ -251,8 +258,26 @@ export class ConvencionalController {
       });
 
       const resumen = buildResumenMisOperaciones(data);
+      const annualData = await sequelizeNIC.query<MisOperacionAnualRow>(misOperacionesAnualQuery(), {
+        type: QueryTypes.SELECT,
+        replacements: { ano: anoNumber, numberSaleNic },
+      });
+      const descuentoPromedioRows = await sequelizeNIC.query<{ descuentoPromedio: number | null }>(
+        misOperacionesDescuentoPromedioMensualQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: { mes: mesNumber, ano: anoNumber, numberSaleNic },
+        },
+      );
 
-      return res.status(200).json({ data, resumen });
+      return res.status(200).json({
+        data,
+        resumen: {
+          ...resumen,
+          anual: buildResumenMisOperacionesAnual(annualData),
+          descuentoPromedioMes: descuentoPromedioRows[0]?.descuentoPromedio ?? null,
+        },
+      });
     } catch (error) {
       logError("ConvencionalController.misOperaciones");
       console.error(error);
