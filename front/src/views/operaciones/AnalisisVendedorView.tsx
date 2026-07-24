@@ -4,7 +4,7 @@ import type { AnalisisOperacionesPreventaItem, AnalisisVendedorFilterOption } fr
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Inbox, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Bar, BarChart, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ComposedChart, LabelList, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
 const STACK_COLORS = [
@@ -354,6 +354,13 @@ export default function AnalisisVendedorView() {
                     formatter={(value, name) => [`${value} operaciones`, String(name)]}
                     labelFormatter={(label) => `Mes: ${label}`}
                   />
+                  <ReferenceLine
+                    y={12}
+                    stroke="#dc2626"
+                    strokeDasharray="6 6"
+                    strokeWidth={2}
+                    label={{ value: "Target 12", position: "insideTopRight", fill: "#dc2626", fontSize: 11 }}
+                  />
                   <Legend />
                   {data.context.modelos.map((modelo, index) => (
                     <Bar
@@ -562,6 +569,13 @@ export default function AnalisisVendedorView() {
                     }}
                     formatter={(value, name) => [`${Number(value).toFixed(1)}%`, String(name)]}
                     labelFormatter={(label) => `Mes: ${label}`}
+                  />
+                  <ReferenceLine
+                    y={8}
+                    stroke="#dc2626"
+                    strokeDasharray="6 6"
+                    strokeWidth={2}
+                    label={{ value: "Target 8%", position: "insideTopRight", fill: "#dc2626", fontSize: 11 }}
                   />
                   <Legend />
                   <Bar dataKey="descuentoPromedio" name="Descuento promedio" fill="#7c3aed" radius={[6, 6, 0, 0]}>
