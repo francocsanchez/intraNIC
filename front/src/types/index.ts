@@ -942,6 +942,98 @@ export type AnalisisVendedorFiltersResponse = z.infer<typeof analisisVendedorFil
 export type AnalisisVendedorChartItem = z.infer<typeof analisisVendedorChartItemSchema>;
 export type AnalisisVendedorResponse = z.infer<typeof analisisVendedorResponseSchema>;
 
+export const centralDeudoresSituacionSchema = z.number().int().min(0).max(5);
+
+export const centralDeudoresEntidadActualSchema = z.object({
+  entidad: z.string(),
+  situacion: centralDeudoresSituacionSchema,
+  fechaSit1: z.string().nullable(),
+  monto: z.number(),
+  diasAtrasoPago: z.number(),
+  refinanciaciones: z.boolean(),
+  recategorizacionOblig: z.boolean(),
+  situacionJuridica: z.boolean(),
+  irrecDisposicionTecnica: z.boolean(),
+  enRevision: z.boolean(),
+  procesoJud: z.boolean(),
+});
+
+export const centralDeudoresEntidadHistoricaSchema = z.object({
+  entidad: z.string(),
+  situacion: centralDeudoresSituacionSchema,
+  monto: z.number(),
+  enRevision: z.boolean(),
+  procesoJud: z.boolean(),
+});
+
+export const centralDeudoresChequeDetalleSchema = z.object({
+  nroCheque: z.number(),
+  fechaRechazo: z.string(),
+  monto: z.number(),
+  fechaPago: z.string().nullable(),
+  fechaPagoMulta: z.string().nullable(),
+  estadoMulta: z.string().nullable(),
+  ctaPersonal: z.boolean(),
+  denomJuridica: z.string().nullable(),
+  enRevision: z.boolean(),
+  procesoJud: z.boolean(),
+});
+
+export const centralDeudoresResponseSchema = z.object({
+  data: z.object({
+    identificacion: z.string(),
+    denominacion: z.string(),
+    resumen: z.object({
+      periodoActual: z.string().nullable(),
+      peorSituacion: centralDeudoresSituacionSchema.nullable(),
+      peorSituacionLabel: z.string(),
+      totalDeuda: z.number(),
+      cantidadEntidades: z.number(),
+      cantidadPeriodosHistoricos: z.number(),
+      cantidadChequesRechazados: z.number(),
+    }),
+    deudaActual: z.object({
+      periodo: z.string().nullable(),
+      entidades: z.array(centralDeudoresEntidadActualSchema),
+      error: z.string().nullable(),
+    }),
+    historicas: z.object({
+      periodos: z.array(
+        z.object({
+          periodo: z.string(),
+          cantidadEntidades: z.number(),
+          montoTotal: z.number(),
+          peorSituacion: centralDeudoresSituacionSchema.nullable(),
+          entidades: z.array(centralDeudoresEntidadHistoricaSchema),
+        }),
+      ),
+      error: z.string().nullable(),
+    }),
+    chequesRechazados: z.object({
+      causales: z.array(
+        z.object({
+          causal: z.string(),
+          cantidadCheques: z.number(),
+          entidades: z.array(
+            z.object({
+              entidad: z.number(),
+              detalle: z.array(centralDeudoresChequeDetalleSchema),
+            }),
+          ),
+        }),
+      ),
+      error: z.string().nullable(),
+    }),
+    erroresParciales: z.array(z.string()),
+  }),
+});
+
+export type CentralDeudoresResponse = z.infer<typeof centralDeudoresResponseSchema>;
+export type CentralDeudoresData = CentralDeudoresResponse["data"];
+export type CentralDeudoresEntidadActual = z.infer<typeof centralDeudoresEntidadActualSchema>;
+export type CentralDeudoresEntidadHistorica = z.infer<typeof centralDeudoresEntidadHistoricaSchema>;
+export type CentralDeudoresChequeDetalle = z.infer<typeof centralDeudoresChequeDetalleSchema>;
+
 //**************************** */
 // PEDIDO UNIDADES
 //**************************** */

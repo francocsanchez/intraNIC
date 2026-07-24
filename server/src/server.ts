@@ -37,6 +37,7 @@ import unidadNegocioRoutes from "./routes/unidadNegocioRoutes";
 import versionPriceMonthlyRoutes from "./routes/versionPriceMonthlyRoutes";
 import financialPlanRoutes from "./routes/financialPlanRoutes";
 import cotizadorRoutes from "./routes/cotizadorRoutes";
+import centralDeudoresRoutes from "./routes/centralDeudoresRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -81,5 +82,6 @@ app.use("/api/entregas", entregasRoutes);
 app.use("/api/call-center", callCenterRoutes);
 app.use("/api/seg-unidades-fabrica", segUnidadesFabricaRoutes);
 app.use("/api/jobs-monitor", jobMonitorRoutes);
+app.use("/api/central-deudores", centralDeudoresRoutes);
 
 export default app;

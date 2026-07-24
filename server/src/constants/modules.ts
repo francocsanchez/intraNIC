@@ -21,6 +21,7 @@ export const moduleKeys = [
   "pendienteDocumentacion",
   "ingresos",
   "operaciones",
+  "centralDeudores",
   "analisisOperaciones",
   "analisisVendedor",
   "ranking",

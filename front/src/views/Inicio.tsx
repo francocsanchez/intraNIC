@@ -5,6 +5,7 @@ import { paths } from "@/routes/paths";
 import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
+  ShieldAlert,
   Headset,
   Calculator,
   CalendarDays,
@@ -197,6 +198,12 @@ export default function Inicio() {
       icon: BarChart3,
       items: [
         { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones), icon: BarChart3 },
+        {
+          label: "Central de Deudores",
+          to: paths.analisis.centralDeudores,
+          enabled: hasModulePathAccess(user, "centralDeudores", paths.analisis.centralDeudores),
+          icon: ShieldAlert,
+        },
         {
           label: "Analisis Operaciones",
           to: paths.analisis.analisisOperaciones,
