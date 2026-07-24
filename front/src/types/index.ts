@@ -875,6 +875,73 @@ export type AnalisisOperacionesPreventaCreditoMensualResponse = z.infer<
   typeof analisisOperacionesPreventaCreditoMensualResponseSchema
 >;
 
+export const analisisVendedorFilterOptionSchema = z.object({
+  label: z.string(),
+  value: z.number(),
+});
+
+export const analisisVendedorFiltersResponseSchema = z.object({
+  filters: z.object({
+    vendedores: z.array(analisisVendedorFilterOptionSchema),
+  }),
+});
+
+export const analisisVendedorChartItemSchema = z.object({
+  mes: z.number(),
+  label: z.string(),
+  total: z.number(),
+}).catchall(z.union([z.string(), z.number()]));
+
+export const analisisVendedorResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    vendedor: z.number().nullable(),
+    vendedores: z.array(analisisVendedorFilterOptionSchema),
+  }),
+  context: z.object({
+    vendedorLabel: z.string(),
+    modelos: z.array(z.string()),
+  }),
+  chartData: z.array(analisisVendedorChartItemSchema),
+  operations: z.array(analisisOperacionesPreventaItemSchema),
+  summary: z.object({
+    totalOperaciones: z.number(),
+    cantidadOperacionesCredito: z.number(),
+    cantidadOperacionesUsado: z.number(),
+    porcentajeToma: z.number().nullable(),
+    porcentajeVendedor: z.number().nullable(),
+    porcentajeVendedorSucursal: z.number().nullable(),
+  }),
+  usadosMensual: z.array(
+    z.object({
+      mes: z.number(),
+      totalOperaciones: z.number(),
+      cantidadUsados: z.number(),
+      promedioValorUsado: z.number().nullable(),
+    }),
+  ),
+  creditoMensual: z.array(
+    z.object({
+      mes: z.number(),
+      totalOperaciones: z.number(),
+      cantidadOperacionesCredito: z.number(),
+      promedioCredito: z.number().nullable(),
+    }),
+  ),
+  descuentoMensual: z.array(
+    z.object({
+      mes: z.number(),
+      descuentoPromedio: z.number().nullable(),
+      descuentoPromedioHilux: z.number().nullable(),
+    }),
+  ),
+});
+
+export type AnalisisVendedorFilterOption = z.infer<typeof analisisVendedorFilterOptionSchema>;
+export type AnalisisVendedorFiltersResponse = z.infer<typeof analisisVendedorFiltersResponseSchema>;
+export type AnalisisVendedorChartItem = z.infer<typeof analisisVendedorChartItemSchema>;
+export type AnalisisVendedorResponse = z.infer<typeof analisisVendedorResponseSchema>;
+
 //**************************** */
 // PEDIDO UNIDADES
 //**************************** */

@@ -22,6 +22,7 @@ export const moduleKeys = [
   "ingresos",
   "operaciones",
   "analisisOperaciones",
+  "analisisVendedor",
   "ranking",
   "promedio",
   "patentamientos",

@@ -93,6 +93,45 @@ export class OperacionesController {
     }
   };
 
+  static getAnalisisVendedorFilters = async (_req: Request, res: Response) => {
+    try {
+      const response = await OperacionesDashboardService.getAnalisisVendedorFilters();
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getAnalisisVendedorFilters");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getAnalisisVendedor = async (req: Request, res: Response) => {
+    const anio = parseStrictPositiveInt(req.query.anio);
+    const vendedor =
+      typeof req.query.vendedor === "undefined" || String(req.query.vendedor).trim() === ""
+        ? null
+        : parseStrictPositiveInt(req.query.vendedor);
+
+    if (!anio) {
+      return res.status(400).json({ message: "El parametro anio es obligatorio y debe ser un entero valido" });
+    }
+
+    if (typeof req.query.vendedor !== "undefined" && String(req.query.vendedor).trim() !== "" && !vendedor) {
+      return res.status(400).json({ message: "El parametro vendedor debe ser un entero valido" });
+    }
+
+    try {
+      const response = await OperacionesDashboardService.getAnalisisVendedor({
+        anio,
+        vendedor,
+      });
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getAnalisisVendedor");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
   static getAnalisisPreventaFormaPago = async (req: Request, res: Response) => {
     const numero = parsePositiveInt(req.params.numero);
 

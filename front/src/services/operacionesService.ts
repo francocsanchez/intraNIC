@@ -1,11 +1,15 @@
 import api from "@/libs/axios";
 import {
+  analisisVendedorFiltersResponseSchema,
+  analisisVendedorResponseSchema,
   analisisOperacionesPreventaCreditoMensualResponseSchema,
   analisisOperacionesPreventaDescuentoMensualResponseSchema,
   analisisOperacionesPreventaFormaPagoResponseSchema,
   analisisOperacionesPreventaResumenFinanciacionResponseSchema,
   analisisOperacionesPreventaResponseSchema,
   operacionesDashboardResponseSchema,
+  type AnalisisVendedorFiltersResponse,
+  type AnalisisVendedorResponse,
   type AnalisisOperacionesPreventaCreditoMensualResponse,
   type AnalisisOperacionesPreventaDescuentoMensualResponse,
   type AnalisisOperacionesPreventaFormaPagoResponse,
@@ -28,6 +32,11 @@ type OperacionesDashboardParams = {
 type AnalisisOperacionesPreventaParams = {
   anio: number;
   mes: number;
+};
+
+type AnalisisVendedorParams = {
+  anio: number;
+  vendedor?: number | null;
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -187,5 +196,46 @@ export async function getAnalisisOperacionesPreventaCreditoMensual(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener el promedio mensual de credito"));
+  }
+}
+
+export async function getAnalisisVendedorFilters(): Promise<AnalisisVendedorFiltersResponse> {
+  try {
+    const { data } = await api.get("/operaciones/analisis-vendedor/filtros");
+
+    const parsed = analisisVendedorFiltersResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener los filtros de Analisis Vendedor"));
+  }
+}
+
+export async function getAnalisisVendedor(
+  params: AnalisisVendedorParams,
+): Promise<AnalisisVendedorResponse> {
+  try {
+    const { data } = await api.get("/operaciones/analisis-vendedor", {
+      params: {
+        anio: params.anio,
+        vendedor: params.vendedor ?? undefined,
+      },
+    });
+
+    const parsed = analisisVendedorResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener Analisis Vendedor"));
   }
 }

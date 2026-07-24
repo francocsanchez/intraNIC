@@ -86,6 +86,7 @@ const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCa
 const AgendaComercialView = lazy(() => import("./views/comercial/AgendaComercialView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
+const AnalisisVendedorView = lazy(() => import("./views/operaciones/AnalisisVendedorView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
@@ -320,6 +321,10 @@ export default function Router() {
 
             <Route element={<ModuleProtectedRoute allowedModules={["analisisOperaciones"]} />}>
               <Route path={paths.analisis.analisisOperaciones} element={<AnalisisOperacionesView />} />
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["analisisVendedor"]} />}>
+              <Route path={paths.analisis.vendedor} element={<AnalisisVendedorView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>

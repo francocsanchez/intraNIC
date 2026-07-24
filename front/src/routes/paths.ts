@@ -43,6 +43,7 @@ export const paths = {
   analisis: {
     operaciones: "/analisis/operaciones",
     analisisOperaciones: "/analisis/operaciones-preventa",
+    vendedor: "/analisis/vendedor",
     registros: "/analisis/registros",
     patentamientos: {
       home: "/analisis/patentamientos",

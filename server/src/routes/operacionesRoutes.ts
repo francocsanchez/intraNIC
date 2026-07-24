@@ -8,6 +8,16 @@ const router = Router();
 router.use(authenticate);
 router.get("/dashboard", authorizeModules("operaciones"), OperacionesController.getDashboard);
 router.get(
+  "/analisis-vendedor/filtros",
+  authorizeModules("analisisVendedor"),
+  OperacionesController.getAnalisisVendedorFilters,
+);
+router.get(
+  "/analisis-vendedor",
+  authorizeModules("analisisVendedor"),
+  OperacionesController.getAnalisisVendedor,
+);
+router.get(
   "/analisis-preventa",
   authorizeModules("analisisOperaciones"),
   OperacionesController.getAnalisisPreventa,

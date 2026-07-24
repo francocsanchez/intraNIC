@@ -203,6 +203,12 @@ export default function Inicio() {
           enabled: canViewAnalisisOperaciones,
           icon: FileSpreadsheet,
         },
+        {
+          label: "Analisis Vendedor",
+          to: paths.analisis.vendedor,
+          enabled: hasModulePathAccess(user, "analisisVendedor", paths.analisis.vendedor),
+          icon: FileSpreadsheet,
+        },
         { label: "Ranking", to: paths.convencional.ranking, enabled: hasModulePathAccess(user, "ranking", paths.convencional.ranking), icon: Trophy },
         { label: "Promedio", to: paths.convencional.promedio, enabled: hasModulePathAccess(user, "promedio", paths.convencional.promedio), icon: BarChart3 },
         {

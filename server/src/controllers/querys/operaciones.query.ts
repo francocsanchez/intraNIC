@@ -359,3 +359,220 @@ GROUP BY
 ORDER BY
     mes ASC;
 `;
+
+export const analisisVendedorMensualPorModeloQuery = (hasVendedorFilter: boolean) => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) AS modelo,
+    COUNT(*) AS total
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = ope.ope_vende
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
+GROUP BY
+    MONTH(ope.ope_fecasig),
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO')))
+ORDER BY
+    mes ASC,
+    modelo ASC;
+`;
+
+export const analisisVendedorOperacionesQuery = (hasVendedorFilter: boolean) => `
+SELECT
+    vp.numero,
+    stoauto.sa_codigo AS interno,
+    vp.fecha,
+    LTRIM(RTRIM(vp.modelo)) AS version,
+    LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
+    vp.precio,
+    vp.patentamiento,
+    vp.flete,
+    vp.formulario,
+    vp.prenda,
+    vp.equipamiento,
+    vp.otro,
+    vp.bonificacion
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
+ORDER BY
+    ope.ope_fecasig DESC,
+    vp.numero DESC;
+`;
+
+export const analisisVendedorUsadosMensualQuery = (hasVendedorFilter: boolean) => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    COUNT(*) AS total_operaciones,
+    SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_usados,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.usados, 0) > 0 THEN vp.usados * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_valor_usado
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
+GROUP BY
+    MONTH(ope.ope_fecasig)
+ORDER BY
+    mes ASC;
+`;
+
+export const analisisVendedorCreditoMensualQuery = (hasVendedorFilter: boolean) => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    COUNT(*) AS total_operaciones,
+    SUM(CASE WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN 1 ELSE 0 END) AS cantidad_operaciones_credito,
+    AVG(
+        CASE
+            WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN vp.credito_bancario * 1.0
+            ELSE NULL
+        END
+    ) AS promedio_credito
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
+GROUP BY
+    MONTH(ope.ope_fecasig)
+ORDER BY
+    mes ASC;
+`;
+
+export const analisisVendedorDescuentoMensualQuery = (hasVendedorFilter: boolean) => `
+SELECT
+    MONTH(ope.ope_fecasig) AS mes,
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS descuento_promedio,
+    AVG(
+        CASE
+            WHEN vp.precio IS NOT NULL
+                AND vp.precio > 0
+                AND vp.bonificacion IS NOT NULL
+                AND UPPER(LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, '')))) = 'HILUX'
+                THEN (vp.bonificacion * 100.0) / vp.precio
+            ELSE NULL
+        END
+    ) AS descuento_promedio_hilux
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN auto ON
+    auto.au_codigo = ope.ope_auto
+    AND auto.au_marca = ope.ope_marca
+LEFT JOIN famiauto ON
+    auto.au_familia = famiauto.fam_codigo
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND vp.precio IS NOT NULL
+    AND vp.precio > 0
+    AND vp.bonificacion IS NOT NULL
+    ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
+GROUP BY
+    MONTH(ope.ope_fecasig)
+ORDER BY
+    mes ASC;
+`;
+
+export const analisisVendedorTotalSucursalQuery = () => `
+SELECT
+    COUNT(*) AS total
+FROM
+    opera ope
+LEFT JOIN viewpreventa vp ON
+    CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = ope.ope_vende
+WHERE
+    ope.ope_fecbaj IS NULL
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND vp.fecha_anulacion IS NULL
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND vende.ven_sucur = (
+        SELECT TOP 1
+            ven_sucur
+        FROM
+            vendedor
+        WHERE
+            ven_codigo = :vendedor
+    );
+`;

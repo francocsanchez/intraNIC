@@ -1,6 +1,13 @@
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
+import { getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
 import {
+  analisisVendedorCreditoMensualQuery,
+  analisisVendedorDescuentoMensualQuery,
+  analisisVendedorMensualPorModeloQuery,
+  analisisVendedorOperacionesQuery,
+  analisisVendedorTotalSucursalQuery,
+  analisisVendedorUsadosMensualQuery,
   analisisOperacionesPreventaCreditoMensualQuery,
   analisisOperacionesPreventaDescuentoMensualQuery,
   analisisOperacionesPreventaDescuentoMensualSucursalQuery,
@@ -28,6 +35,98 @@ type OperacionesAnalisisPreventaFilters = {
   anio: number;
   mes: number;
   tipo: OperacionesAnalisisTipo;
+};
+
+type AnalisisVendedorFilters = {
+  anio: number;
+  vendedor: number | null;
+};
+
+type AnalisisVendedorFilterOption = {
+  label: string;
+  value: number;
+};
+
+type AnalisisVendedorFiltersResponse = {
+  filters: {
+    vendedores: AnalisisVendedorFilterOption[];
+  };
+};
+
+type AnalisisVendedorChartItem = {
+  mes: number;
+  label: string;
+  total: number;
+  [modelo: string]: string | number;
+};
+
+type AnalisisVendedorResponse = {
+  filters: {
+    anio: number;
+    vendedor: number | null;
+    vendedores: AnalisisVendedorFilterOption[];
+  };
+  context: {
+    vendedorLabel: string;
+    modelos: string[];
+  };
+  chartData: AnalisisVendedorChartItem[];
+  operations: AnalisisOperacionPreventaItem[];
+  summary: {
+    totalOperaciones: number;
+    cantidadOperacionesCredito: number;
+    cantidadOperacionesUsado: number;
+    porcentajeToma: number | null;
+    porcentajeVendedor: number | null;
+    porcentajeVendedorSucursal: number | null;
+  };
+  usadosMensual: Array<{
+    mes: number;
+    totalOperaciones: number;
+    cantidadUsados: number;
+    promedioValorUsado: number | null;
+  }>;
+  creditoMensual: Array<{
+    mes: number;
+    totalOperaciones: number;
+    cantidadOperacionesCredito: number;
+    promedioCredito: number | null;
+  }>;
+  descuentoMensual: Array<{
+    mes: number;
+    descuentoPromedio: number | null;
+    descuentoPromedioHilux: number | null;
+  }>;
+};
+
+type AnalisisVendedorMensualPorModeloRow = {
+  mes: number | string | null;
+  modelo: string | null;
+  total: number | string | null;
+};
+
+type AnalisisVendedorTotalRow = {
+  total: number | string | null;
+};
+
+type AnalisisVendedorUsadosMensualRow = {
+  mes: number | string | null;
+  total_operaciones: number | string | null;
+  cantidad_usados: number | string | null;
+  promedio_valor_usado: number | string | null;
+};
+
+type AnalisisVendedorCreditoMensualRow = {
+  mes: number | string | null;
+  total_operaciones: number | string | null;
+  cantidad_operaciones_credito: number | string | null;
+  promedio_credito: number | string | null;
+};
+
+type AnalisisVendedorDescuentoMensualRow = {
+  mes: number | string | null;
+  descuento_promedio: number | string | null;
+  descuento_promedio_hilux: number | string | null;
 };
 
 type OperacionDashboardRow = {
@@ -274,7 +373,40 @@ const getDayFromFechaAsignacion = (fechaAsignacion: string | Date) => {
   return Number.isInteger(parsed) ? parsed : NaN;
 };
 
+const MONTH_LABELS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+] as const;
+
 export class OperacionesDashboardService {
+  static async getAnalisisVendedorFilters(): Promise<AnalisisVendedorFiltersResponse> {
+    const vendedores = await sequelizeNIC.query<{ vendedor: string; codigo: number }>(getVendedoresActivosNuevoNic(), {
+      type: QueryTypes.SELECT,
+    });
+
+    return {
+      filters: {
+        vendedores: vendedores
+          .map((item) => ({
+            label: String(item.vendedor ?? "").trim(),
+            value: Number(item.codigo),
+          }))
+          .filter((item) => Number.isFinite(item.value) && item.value > 0 && item.label.length > 0)
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      },
+    };
+  }
+
   static async getDashboard(
     filters: OperacionesDashboardFilters,
   ): Promise<OperacionesDashboardResponse> {
@@ -435,6 +567,225 @@ export class OperacionesDashboardService {
     return {
       filters,
       data,
+    };
+  }
+
+  static async getAnalisisVendedor(
+    filters: AnalisisVendedorFilters,
+  ): Promise<AnalisisVendedorResponse> {
+    const [vendedores, resumenRows, operationRows, usadosRows, creditoRows, descuentoRows, totalRows] = await Promise.all([
+      this.getAnalisisVendedorFilters(),
+      sequelizeNIC.query<AnalisisVendedorMensualPorModeloRow>(
+        analisisVendedorMensualPorModeloQuery(filters.vendedor !== null),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            vendedor: filters.vendedor ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisOperacionPreventaRow>(
+        analisisVendedorOperacionesQuery(filters.vendedor !== null),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            vendedor: filters.vendedor ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisVendedorUsadosMensualRow>(
+        analisisVendedorUsadosMensualQuery(filters.vendedor !== null),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            vendedor: filters.vendedor ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisVendedorCreditoMensualRow>(
+        analisisVendedorCreditoMensualQuery(filters.vendedor !== null),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            vendedor: filters.vendedor ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisVendedorDescuentoMensualRow>(
+        analisisVendedorDescuentoMensualQuery(filters.vendedor !== null),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            vendedor: filters.vendedor ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<AnalisisVendedorTotalRow>(
+        analisisVendedorMensualPorModeloQuery(false),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+          },
+        },
+      ),
+    ]);
+
+    const totalSucursalRows =
+      filters.vendedor === null
+        ? []
+        : await sequelizeNIC.query<AnalisisVendedorTotalRow>(
+            analisisVendedorTotalSucursalQuery(),
+            {
+              type: QueryTypes.SELECT,
+              replacements: {
+                anio: filters.anio,
+                vendedor: filters.vendedor,
+              },
+            },
+          );
+
+    const modelos = Array.from(
+      new Set(
+        resumenRows
+          .map((row) => String(row.modelo ?? "").trim())
+          .filter(Boolean),
+      ),
+    ).sort((a, b) => a.localeCompare(b));
+
+    const chartData: AnalisisVendedorChartItem[] = MONTH_LABELS.map((label, index) => {
+      const baseRow: AnalisisVendedorChartItem = {
+        mes: index + 1,
+        label,
+        total: 0,
+      };
+
+      modelos.forEach((modelo) => {
+        baseRow[modelo] = 0;
+      });
+
+      return baseRow;
+    });
+
+    resumenRows.forEach((row) => {
+      const mes = normalizeNullableNumber(row.mes);
+      const total = normalizeNullableNumber(row.total) ?? 0;
+      const modelo = normalizeNullableString(row.modelo) ?? "SIN MODELO";
+
+      if (!mes || mes < 1 || mes > 12) {
+        return;
+      }
+
+      const currentMonth = chartData[mes - 1];
+
+      if (!currentMonth) {
+        return;
+      }
+
+      currentMonth[modelo] = total;
+      currentMonth.total += total;
+    });
+
+    const vendedorLabel =
+      filters.vendedor === null
+        ? "Todos los vendedores"
+        : vendedores.filters.vendedores.find((item) => item.value === filters.vendedor)?.label ?? `Vendedor ${filters.vendedor}`;
+
+    const operations = operationRows.map((row) => ({
+      numero: normalizeNullableNumber(row.numero),
+      interno: normalizeNullableNumber(row.interno),
+      fecha: serializeNullableDate(row.fecha),
+      fechaFactura: null,
+      sucursal: "",
+      version: normalizeNullableString(row.version) ?? "",
+      modelo: normalizeNullableString(row.modelo) ?? "",
+      precio: normalizeNullableNumber(row.precio),
+      vehiculo: null,
+      accesorios: null,
+      patentamiento: normalizeNullableNumber(row.patentamiento),
+      flete: normalizeNullableNumber(row.flete),
+      formulario: normalizeNullableNumber(row.formulario),
+      prenda: normalizeNullableNumber(row.prenda),
+      equipamiento: normalizeNullableNumber(row.equipamiento),
+      preentrega: null,
+      otro: normalizeNullableNumber(row.otro),
+      bonificacion: normalizeNullableNumber(row.bonificacion),
+    }));
+
+    const usadosMensual = usadosRows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        totalOperaciones: normalizeNullableNumber(row.total_operaciones) ?? 0,
+        cantidadUsados: normalizeNullableNumber(row.cantidad_usados) ?? 0,
+        promedioValorUsado: normalizeNullableNumber(row.promedio_valor_usado),
+      }))
+      .filter(
+        (row): row is { mes: number; totalOperaciones: number; cantidadUsados: number; promedioValorUsado: number | null } =>
+          row.mes !== null && row.mes >= 1 && row.mes <= 12,
+      );
+
+    const creditoMensual = creditoRows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        totalOperaciones: normalizeNullableNumber(row.total_operaciones) ?? 0,
+        cantidadOperacionesCredito: normalizeNullableNumber(row.cantidad_operaciones_credito) ?? 0,
+        promedioCredito: normalizeNullableNumber(row.promedio_credito),
+      }))
+      .filter(
+        (row): row is { mes: number; totalOperaciones: number; cantidadOperacionesCredito: number; promedioCredito: number | null } =>
+          row.mes !== null && row.mes >= 1 && row.mes <= 12,
+      );
+
+    const descuentoMensual = descuentoRows
+      .map((row) => ({
+        mes: normalizeNullableNumber(row.mes),
+        descuentoPromedio: normalizeNullableNumber(row.descuento_promedio),
+        descuentoPromedioHilux: normalizeNullableNumber(row.descuento_promedio_hilux),
+      }))
+      .filter(
+        (row): row is { mes: number; descuentoPromedio: number | null; descuentoPromedioHilux: number | null } =>
+          row.mes !== null && row.mes >= 1 && row.mes <= 12,
+      );
+
+    const totalOperaciones = chartData.reduce((acc, row) => acc + row.total, 0);
+    const cantidadOperacionesCredito = creditoMensual.reduce((acc, row) => acc + row.cantidadOperacionesCredito, 0);
+    const cantidadOperacionesUsado = usadosMensual.reduce((acc, row) => acc + row.cantidadUsados, 0);
+    const totalNegocio = totalRows.reduce((acc, row) => acc + (normalizeNullableNumber(row.total) ?? 0), 0);
+    const porcentajeToma = totalOperaciones > 0 ? (cantidadOperacionesUsado / totalOperaciones) * 100 : null;
+    const porcentajeVendedor =
+      totalNegocio > 0 ? (totalOperaciones / totalNegocio) * 100 : null;
+    const totalSucursal = totalSucursalRows.reduce((acc, row) => acc + (normalizeNullableNumber(row.total) ?? 0), 0);
+    const porcentajeVendedorSucursal =
+      filters.vendedor !== null && totalSucursal > 0 ? (totalOperaciones / totalSucursal) * 100 : null;
+
+    return {
+      filters: {
+        anio: filters.anio,
+        vendedor: filters.vendedor,
+        vendedores: vendedores.filters.vendedores,
+      },
+      context: {
+        vendedorLabel,
+        modelos,
+      },
+      chartData,
+      operations,
+      summary: {
+        totalOperaciones,
+        cantidadOperacionesCredito,
+        cantidadOperacionesUsado,
+        porcentajeToma,
+        porcentajeVendedor,
+        porcentajeVendedorSucursal,
+      },
+      usadosMensual,
+      creditoMensual,
+      descuentoMensual,
     };
   }
 
