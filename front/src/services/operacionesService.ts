@@ -7,6 +7,7 @@ import {
   analisisOperacionesPreventaFormaPagoResponseSchema,
   analisisOperacionesPreventaResumenFinanciacionResponseSchema,
   analisisOperacionesPreventaResponseSchema,
+  saldoOperacionResponseSchema,
   operacionesDashboardResponseSchema,
   type AnalisisVendedorFiltersResponse,
   type AnalisisVendedorResponse,
@@ -17,6 +18,7 @@ import {
   type AnalisisOperacionesPreventaResponse,
   type AnalisisOperacionesPreventaUsadosMensualResponse,
   type OperacionesDashboardResponse,
+  type SaldoOperacionResponse,
   analisisOperacionesPreventaUsadosMensualResponseSchema,
 } from "@/types/index";
 import { isAxiosError } from "axios";
@@ -37,6 +39,12 @@ type AnalisisOperacionesPreventaParams = {
 type AnalisisVendedorParams = {
   anio: number;
   vendedor?: number | null;
+};
+
+type SaldoOperacionParams = {
+  estado?: string;
+  page?: number;
+  limit?: number;
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -237,5 +245,30 @@ export async function getAnalisisVendedor(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener Analisis Vendedor"));
+  }
+}
+
+export async function getSaldoOperacion(
+  params: SaldoOperacionParams = {},
+): Promise<SaldoOperacionResponse> {
+  try {
+    const { data } = await api.get("/operaciones/saldo-operacion", {
+      params: {
+        estado: params.estado?.trim() ? params.estado : undefined,
+        page: params.page ?? 1,
+        limit: params.limit ?? 100,
+      },
+    });
+
+    const parsed = saldoOperacionResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener Saldo de operacion"));
   }
 }

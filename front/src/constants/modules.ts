@@ -24,6 +24,7 @@ export const moduleKeys = [
   "centralDeudores",
   "analisisOperaciones",
   "analisisVendedor",
+  "saldoOperacion",
   "ranking",
   "promedio",
   "patentamientos",
@@ -71,6 +72,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   centralDeudores: "Central de Deudores",
   analisisOperaciones: "Analisis Operaciones",
   analisisVendedor: "Analisis Vendedor",
+  saldoOperacion: "Saldo de operacion",
   ranking: "Ranking",
   promedio: "Promedio",
   patentamientos: "Patentamientos",
@@ -123,7 +125,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Analisis",
-    modules: ["operaciones", "centralDeudores", "analisisOperaciones", "analisisVendedor", "ranking", "promedio", "patentamientos", "transferencias"],
+    modules: ["operaciones", "centralDeudores", "analisisOperaciones", "analisisVendedor", "saldoOperacion", "ranking", "promedio", "patentamientos", "transferencias"],
   },
   {
     title: "Entregas",

@@ -24,6 +24,7 @@ export const moduleKeys = [
   "centralDeudores",
   "analisisOperaciones",
   "analisisVendedor",
+  "saldoOperacion",
   "ranking",
   "promedio",
   "patentamientos",

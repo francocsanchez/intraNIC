@@ -2,7 +2,7 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { BarChart3, ChartColumn, Rows3, ShieldAlert, Trophy, UserRound } from "lucide-react";
+import { BarChart3, ChartColumn, Rows3, ShieldAlert, TableProperties, Trophy, UserRound } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AnalisisLayout() {
@@ -37,6 +37,13 @@ export default function AnalisisLayout() {
       icon: UserRound,
       visible: hasModulePathAccess(user, "analisisVendedor", paths.analisis.vendedor),
       active: pathname === paths.analisis.vendedor,
+    },
+    {
+      label: "Saldo de operacion",
+      to: paths.analisis.saldoOperacion,
+      icon: TableProperties,
+      visible: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion),
+      active: pathname === paths.analisis.saldoOperacion,
     },
     {
       label: "Ranking",

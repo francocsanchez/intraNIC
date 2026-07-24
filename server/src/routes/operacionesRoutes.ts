@@ -47,5 +47,10 @@ router.get(
   authorizeModules("analisisOperaciones"),
   OperacionesController.getAnalisisPreventaFormaPago,
 );
+router.get(
+  "/saldo-operacion",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.getSaldoOperacion,
+);
 
 export default router;

@@ -854,6 +854,41 @@ export const analisisOperacionesPreventaCreditoMensualResponseSchema = z.object(
   ),
 });
 
+export const saldoOperacionItemSchema = z.object({
+  codigoOperacion: z.number().nullable(),
+  clienteNombre: z.string(),
+  vendedor: z.string(),
+  numeroFabrica: z.string(),
+  pcioVenta: z.number().nullable(),
+  bonifVenta: z.number().nullable(),
+  gestoria: z.number().nullable(),
+  total: z.number().nullable(),
+  senas: z.number().nullable(),
+  usado: z.number().nullable(),
+  version: z.string(),
+  modeloGeneral: z.string(),
+  estado: z.string(),
+});
+
+const saldoOperacionPaginationSchema = z.object({
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  totalPages: z.number(),
+});
+
+export const saldoOperacionResponseSchema = z.object({
+  filters: z.object({
+    estado: z.string().nullable(),
+  }),
+  data: z.array(saldoOperacionItemSchema),
+  meta: z.object({
+    total: z.number(),
+    estados: z.array(z.string()),
+  }),
+  pagination: saldoOperacionPaginationSchema,
+});
+
 export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
 export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperacionesPreventaItemSchema>;
 export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
@@ -874,6 +909,8 @@ export type AnalisisOperacionesPreventaUsadosMensualResponse = z.infer<
 export type AnalisisOperacionesPreventaCreditoMensualResponse = z.infer<
   typeof analisisOperacionesPreventaCreditoMensualResponseSchema
 >;
+export type SaldoOperacionItem = z.infer<typeof saldoOperacionItemSchema>;
+export type SaldoOperacionResponse = z.infer<typeof saldoOperacionResponseSchema>;
 
 export const analisisVendedorFilterOptionSchema = z.object({
   label: z.string(),

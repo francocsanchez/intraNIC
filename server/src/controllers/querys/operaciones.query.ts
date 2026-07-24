@@ -576,3 +576,64 @@ WHERE
             ven_codigo = :vendedor
     );
 `;
+
+export const saldoOperacionQuery = (hasEstadoFilter: boolean) => `
+SELECT
+    csq.Codigo_operacion AS codigo_operacion,
+    LTRIM(RTRIM(ISNULL(csq.cliente_nombre, ''))) AS cliente_nombre,
+    LTRIM(RTRIM(ISNULL(csq.Vendedor, ''))) AS vendedor,
+    LTRIM(RTRIM(ISNULL(csq.Numero_Fabrica, ''))) AS numero_fabrica,
+    csq.Pcio_Venta AS pcio_venta,
+    csq.Bonif_Venta AS bonif_venta,
+    csq.gestoria AS gestoria,
+    csq.Senas AS senas,
+    csq.Usado AS usado,
+    LTRIM(RTRIM(ISNULL(csq.Version, ''))) AS version,
+    LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) AS modelo_general,
+    CASE
+        WHEN LTRIM(RTRIM(ISNULL(csq.Estado, ''))) = '' THEN 'Sin estado'
+        ELSE LTRIM(RTRIM(csq.Estado))
+    END AS estado
+FROM
+    csqUnidades csq
+WHERE
+    csq.Numero_Fabrica LIKE 'NIC%'
+    AND csq.Codigo_operacion IS NOT NULL
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+    ${hasEstadoFilter ? "AND LTRIM(RTRIM(ISNULL(csq.Estado, 'Sin estado'))) = :estado" : ""}
+ORDER BY
+    csq.Numero_Fabrica ASC,
+    csq.Codigo_operacion ASC
+OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY;
+`;
+
+export const saldoOperacionCountQuery = (hasEstadoFilter: boolean) => `
+SELECT
+    COUNT(*) AS total
+FROM
+    csqUnidades csq
+WHERE
+    csq.Numero_Fabrica LIKE 'NIC%'
+    AND csq.Codigo_operacion IS NOT NULL
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+    ${hasEstadoFilter ? "AND LTRIM(RTRIM(ISNULL(csq.Estado, 'Sin estado'))) = :estado" : ""};
+`;
+
+export const saldoOperacionEstadosQuery = () => `
+SELECT DISTINCT
+    CASE
+        WHEN LTRIM(RTRIM(ISNULL(csq.Estado, ''))) = '' THEN 'Sin estado'
+        ELSE LTRIM(RTRIM(csq.Estado))
+    END AS estado
+FROM
+    csqUnidades csq
+WHERE
+    csq.Numero_Fabrica LIKE 'NIC%'
+    AND csq.Codigo_operacion IS NOT NULL
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+ORDER BY
+    estado ASC;
+`;

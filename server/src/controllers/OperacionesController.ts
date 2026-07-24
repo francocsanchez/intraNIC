@@ -16,6 +16,15 @@ const parseStringList = (value: unknown) => {
     .filter(Boolean);
 };
 
+const parseOptionalString = (value: unknown) => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
 const parseNumericList = (value: unknown) =>
   parseStringList(value)
     .map((item) => Number(item))
@@ -226,6 +235,21 @@ export class OperacionesController {
       return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getAnalisisPreventaCreditoMensual");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getSaldoOperacion = async (req: Request, res: Response) => {
+    const estado = parseOptionalString(req.query.estado);
+    const page = parsePositiveInt(req.query.page) ?? 1;
+    const limit = parsePositiveInt(req.query.limit) ?? 100;
+
+    try {
+      const response = await OperacionesDashboardService.getSaldoOperacion(estado, page, limit);
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getSaldoOperacion");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

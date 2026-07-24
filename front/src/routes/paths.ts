@@ -45,6 +45,7 @@ export const paths = {
     centralDeudores: "/analisis/central-de-deudores",
     analisisOperaciones: "/analisis/operaciones-preventa",
     vendedor: "/analisis/vendedor",
+    saldoOperacion: "/analisis/saldo-operacion",
     registros: "/analisis/registros",
     patentamientos: {
       home: "/analisis/patentamientos",

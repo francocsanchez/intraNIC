@@ -18,6 +18,9 @@ import {
   analisisOperacionesPreventaResumenFinanciacionQuery,
   analisisOperacionesPreventaUsadosMensualQuery,
   operacionesDashboardQuery,
+  saldoOperacionCountQuery,
+  saldoOperacionEstadosQuery,
+  saldoOperacionQuery,
 } from "../controllers/querys/operaciones.query";
 
 type OperacionesDashboardFilters = {
@@ -328,6 +331,54 @@ type AnalisisOperacionPreventaCreditoMensualResponse = {
   }>;
 };
 
+type SaldoOperacionRow = {
+  codigo_operacion: number | string | null;
+  cliente_nombre: string | null;
+  vendedor: string | null;
+  numero_fabrica: string | null;
+  pcio_venta: number | string | null;
+  bonif_venta: number | string | null;
+  gestoria: number | string | null;
+  senas: number | string | null;
+  usado: number | string | null;
+  version: string | null;
+  modelo_general: string | null;
+  estado: string | null;
+};
+
+type SaldoOperacionItem = {
+  codigoOperacion: number | null;
+  clienteNombre: string;
+  vendedor: string;
+  numeroFabrica: string;
+  pcioVenta: number | null;
+  bonifVenta: number | null;
+  gestoria: number | null;
+  total: number | null;
+  senas: number | null;
+  usado: number | null;
+  version: string;
+  modeloGeneral: string;
+  estado: string;
+};
+
+type SaldoOperacionResponse = {
+  filters: {
+    estado: string | null;
+  };
+  data: SaldoOperacionItem[];
+  meta: {
+    total: number;
+    estados: string[];
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
   fechaAsignacion instanceof Date ? fechaAsignacion.toISOString() : fechaAsignacion;
 
@@ -355,6 +406,19 @@ const normalizeNullableNumber = (value: unknown) => {
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+const normalizeBoolean = (value: unknown) => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return value !== 0;
+  }
+
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return normalized === "1" || normalized === "true";
 };
 
 const getDayFromFechaAsignacion = (fechaAsignacion: string | Date) => {
@@ -1033,6 +1097,89 @@ export class OperacionesDashboardService {
         tipo: "Cero",
       },
       data,
+    };
+  }
+
+  static async getSaldoOperacion(
+    estado: string | null,
+    page: number,
+    limit: number,
+  ): Promise<SaldoOperacionResponse> {
+    const normalizedEstado = normalizeNullableString(estado);
+    const safePage = Number.isInteger(page) && page > 0 ? page : 1;
+    const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 200) : 100;
+    const offset = (safePage - 1) * safeLimit;
+
+    const [rows, countRows, estadoRows] = await Promise.all([
+      sequelizeNIC.query<SaldoOperacionRow>(
+        saldoOperacionQuery(Boolean(normalizedEstado)),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            estado: normalizedEstado ?? undefined,
+            offset,
+            limit: safeLimit,
+          },
+        },
+      ),
+      sequelizeNIC.query<{ total: number | string | null }>(
+        saldoOperacionCountQuery(Boolean(normalizedEstado)),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            estado: normalizedEstado ?? undefined,
+          },
+        },
+      ),
+      sequelizeNIC.query<{ estado: string | null }>(
+        saldoOperacionEstadosQuery(),
+        {
+          type: QueryTypes.SELECT,
+        },
+      ),
+    ]);
+
+    const data = rows.map((row) => ({
+      codigoOperacion: normalizeNullableNumber(row.codigo_operacion),
+      clienteNombre: normalizeNullableString(row.cliente_nombre) ?? "-",
+      vendedor: normalizeNullableString(row.vendedor) ?? "-",
+      numeroFabrica: normalizeNullableString(row.numero_fabrica) ?? "-",
+      pcioVenta: normalizeNullableNumber(row.pcio_venta),
+      bonifVenta: normalizeNullableNumber(row.bonif_venta),
+      gestoria: normalizeNullableNumber(row.gestoria),
+      total:
+        (normalizeNullableNumber(row.pcio_venta) ?? 0) +
+        (normalizeNullableNumber(row.gestoria) ?? 0) -
+        (normalizeNullableNumber(row.bonif_venta) ?? 0),
+      senas: normalizeNullableNumber(row.senas),
+      usado: normalizeNullableNumber(row.usado),
+      version: normalizeNullableString(row.version) ?? "",
+      modeloGeneral: normalizeNullableString(row.modelo_general) ?? "",
+      estado: normalizeNullableString(row.estado) ?? "Sin estado",
+    }));
+
+    const total = normalizeNullableNumber(countRows[0]?.total) ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+    const estados = estadoRows
+      .map((item) => normalizeNullableString(item.estado) ?? "Sin estado")
+      .filter((item, index, array) => array.indexOf(item) === index)
+      .sort((a, b) => a.localeCompare(b, "es"));
+
+    return {
+      filters: {
+        estado: normalizedEstado,
+      },
+      data,
+      meta: {
+        total,
+        estados,
+      },
+      pagination: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages,
+      },
     };
   }
 }
