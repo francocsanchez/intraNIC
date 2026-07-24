@@ -341,6 +341,7 @@ type SaldoOperacionRow = {
   gestoria: number | string | null;
   senas: number | string | null;
   usado: number | string | null;
+  credito_banco: number | string | null;
   version: string | null;
   modelo_general: string | null;
   estado: string | null;
@@ -357,6 +358,7 @@ type SaldoOperacionItem = {
   total: number | null;
   senas: number | null;
   usado: number | null;
+  creditoBanco: number | null;
   version: string;
   modeloGeneral: string;
   estado: string;
@@ -1153,6 +1155,7 @@ export class OperacionesDashboardService {
         (normalizeNullableNumber(row.bonif_venta) ?? 0),
       senas: normalizeNullableNumber(row.senas),
       usado: normalizeNullableNumber(row.usado),
+      creditoBanco: normalizeNullableNumber(row.credito_banco),
       version: normalizeNullableString(row.version) ?? "",
       modeloGeneral: normalizeNullableString(row.modelo_general) ?? "",
       estado: normalizeNullableString(row.estado) ?? "Sin estado",

@@ -22,12 +22,17 @@ const formatMoney = (value: number | null) => {
   }).format(value);
 };
 
-const calculateSaldo = (total: number | null, abonado: number | null, usado: number | null) => {
+const calculateSaldo = (
+  total: number | null,
+  abonado: number | null,
+  usado: number | null,
+  creditoBanco: number | null,
+) => {
   if (total === null) {
     return null;
   }
 
-  return total - (abonado ?? 0) - (usado ?? 0);
+  return total - (abonado ?? 0) - (usado ?? 0) - (creditoBanco ?? 0);
 };
 
 function buildRowKey(row: SaldoOperacionItem) {
@@ -136,6 +141,20 @@ export default function SaldoOperacionView() {
             <table className="min-w-full divide-y divide-gray-200 text-xs">
               <thead className="bg-gray-50">
                 <tr>
+                  <th
+                    colSpan={6}
+                    className="border-b border-gray-200 px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500"
+                  >
+                    Operacion
+                  </th>
+                  <th
+                    colSpan={7}
+                    className="border-b border-gray-200 px-2 py-1 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500"
+                  >
+                    Resumen economico
+                  </th>
+                </tr>
+                <tr>
                   <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
                     OP
                   </th>
@@ -174,6 +193,9 @@ export default function SaldoOperacionView() {
                     $ Usado
                   </th>
                   <th className="whitespace-nowrap px-2 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
+                    $ Credito
+                  </th>
+                  <th className="whitespace-nowrap px-2 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
                     $ Saldo
                   </th>
                 </tr>
@@ -195,8 +217,9 @@ export default function SaldoOperacionView() {
                     <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-gray-900">{formatMoney(row.total)}</td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.senas)}</td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.usado)}</td>
+                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.creditoBanco)}</td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-amber-700">
-                      {formatMoney(calculateSaldo(row.total, row.senas, row.usado))}
+                      {formatMoney(calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco))}
                     </td>
                   </tr>
                 ))}

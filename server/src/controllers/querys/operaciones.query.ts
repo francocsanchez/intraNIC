@@ -588,6 +588,7 @@ SELECT
     csq.gestoria AS gestoria,
     csq.Senas AS senas,
     csq.Usado AS usado,
+    csq.total_Cred_banco AS credito_banco,
     LTRIM(RTRIM(ISNULL(csq.Version, ''))) AS version,
     LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) AS modelo_general,
     CASE

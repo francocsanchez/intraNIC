@@ -865,6 +865,7 @@ export const saldoOperacionItemSchema = z.object({
   total: z.number().nullable(),
   senas: z.number().nullable(),
   usado: z.number().nullable(),
+  creditoBanco: z.number().nullable(),
   version: z.string(),
   modeloGeneral: z.string(),
   estado: z.string(),
