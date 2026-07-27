@@ -1,5 +1,4 @@
 import { useAuth } from "@/hooks/useAuthe";
-import { hasModulePathAccess } from "@/helpers/access";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDown, LogOut, Menu as MenuIcon, UserRound, X } from "lucide-react";

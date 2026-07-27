@@ -95,7 +95,7 @@ export default function SaldoOperacionView() {
     refetchOnWindowFocus: false,
   });
 
-  const { data, isLoading, isError, error, isFetching } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["saldo-operacion", section, ubicacion, page],
     queryFn: () =>
       getSaldoOperacion({
