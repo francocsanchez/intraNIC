@@ -5,6 +5,7 @@ import { JobMonitorNotFoundError, JobMonitorService } from "../services/jobs/job
 import { UnidadesDealersSyncAlreadyRunningError } from "../services/jobs/unidadesDealersSyncJob.service";
 import { PatentamientosImportAlreadyRunningError } from "../services/patentamientosImport.service";
 import { TransferenciasImportAlreadyRunningError } from "../services/transferenciasImport.service";
+import { VinChasisExportAlreadyRunningError } from "../services/vinChasisExport.service";
 import { logError } from "../utils/logError";
 
 const handleError = (res: Response, context: string, error: unknown, fallback: string) => {
@@ -17,6 +18,7 @@ const handleError = (res: Response, context: string, error: unknown, fallback: s
     || error instanceof TransferenciasImportAlreadyRunningError
     || error instanceof UnidadesDealersSyncAlreadyRunningError
     || error instanceof FacturasAnticipoAlreadyRunningError
+    || error instanceof VinChasisExportAlreadyRunningError
   ) {
     return res.status(409).json({ error: error.message });
   }

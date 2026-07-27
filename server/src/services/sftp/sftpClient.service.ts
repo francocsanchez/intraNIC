@@ -53,6 +53,29 @@ export class ReusableSftpClientService {
     await this.client.fastGet(remotePath, localPath);
   }
 
+  async upload(localPath: string, remotePath: string) {
+    await this.client.fastPut(localPath, normalizeRemotePath(remotePath));
+  }
+
+  async ensureDirectory(remotePath: string) {
+    const normalizedPath = normalizeRemotePath(remotePath);
+    await this.client.mkdir(normalizedPath, true);
+  }
+
+  async resolveChildDirectory(remoteDirectory: string, childDirectoryName: string) {
+    const normalizedDirectory = normalizeRemotePath(remoteDirectory);
+    const entries = await this.client.list(normalizedDirectory);
+    const matchedDirectory = entries.find(
+      (entry) => entry.type === "d" && entry.name.toLowerCase() === childDirectoryName.toLowerCase(),
+    );
+
+    if (matchedDirectory) {
+      return this.buildRemoteFilePath(normalizedDirectory, matchedDirectory.name);
+    }
+
+    return this.buildRemoteFilePath(normalizedDirectory, childDirectoryName);
+  }
+
   buildRemoteFilePath(remoteDirectory: string, fileName: string) {
     const normalizedDirectory = normalizeRemotePath(remoteDirectory);
     return normalizedDirectory === "/" ? `/${fileName}` : path.posix.join(normalizedDirectory, fileName);

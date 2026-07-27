@@ -32,6 +32,12 @@ const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "schedu
     canRun: true,
   },
   {
+    jobKey: "vin-chasis-export",
+    title: "Exportacion VIN chasis",
+    scheduleLabel: "Lunes a viernes a las 21:30",
+    canRun: true,
+  },
+  {
     jobKey: "saldo-operacion-cleanup",
     title: "Limpieza Saldo de operacion",
     scheduleLabel: "Todos los dias a las 20:30",
@@ -52,6 +58,16 @@ const STATUS_STYLES: Record<string, string> = {
   failed: "border-red-200 bg-red-50 text-red-700",
   skipped: "border-slate-200 bg-slate-50 text-slate-700",
   running: "border-sky-200 bg-sky-50 text-sky-700",
+};
+
+const getScheduleSortValue = (scheduleLabel: string) => {
+  const match = scheduleLabel.match(/(\d{2}):(\d{2})/);
+
+  if (!match) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return Number(match[1]) * 60 + Number(match[2]);
 };
 
 const formatDateTime = (value: string | null) => {
@@ -360,7 +376,15 @@ export default function PatentamientosRegistrosView() {
           lastStatus: null,
         }));
 
-      return [...rowsFromDetails, ...missingExpectedRows];
+      return [...rowsFromDetails, ...missingExpectedRows].sort((left, right) => {
+        const scheduleDelta = getScheduleSortValue(left.scheduleLabel) - getScheduleSortValue(right.scheduleLabel);
+
+        if (scheduleDelta !== 0) {
+          return scheduleDelta;
+        }
+
+        return left.title.localeCompare(right.title);
+      });
     },
     [details],
   );

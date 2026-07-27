@@ -22,6 +22,7 @@ import {
   isSaldoOperacionCleanupJobRunning,
   runSaldoOperacionCleanupJob,
 } from "../saldoOperacionCleanupCron.service";
+import { VinChasisExportService } from "../vinChasisExport.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
 
@@ -65,6 +66,16 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     sourcePath: UnidadesDealersService.getSourceUrl(),
     isRunning: () => UnidadesDealersSyncJobService.isJobRunning(),
     run: (trigger) => UnidadesDealersSyncJobService.run(trigger),
+  },
+  {
+    jobKey: VinChasisExportService.getJobKey(),
+    title: "Exportacion VIN chasis",
+    scheduleLabel: VinChasisExportService.getScheduleLabel(),
+    jobName: VinChasisExportService.getJobName(),
+    sourceType: "database",
+    sourcePath: "movnped -> SFTP /Chasis",
+    isRunning: () => VinChasisExportService.isJobRunning(),
+    run: (trigger) => VinChasisExportService.run(trigger),
   },
   {
     jobKey: getFacturasAnticipoJobKey(),

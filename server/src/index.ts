@@ -6,6 +6,7 @@ import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
 import { startSaldoOperacionCleanupJob } from "./jobs/saldoOperacionCleanup.job";
 import { startTransferenciasImportJob } from "./jobs/transferenciasImport.job";
 import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
+import { startVinChasisExportJob } from "./jobs/vinChasisExport.job";
 
 const port = process.env.PORT || 4002;
 
@@ -23,4 +24,5 @@ server.listen(Number(port), "0.0.0.0", () => {
   startPatentamientosImportJob();
   startTransferenciasImportJob();
   startUnidadesDealersJob();
+  startVinChasisExportJob();
 });
