@@ -112,12 +112,6 @@ type PendFacResponseData = {
   };
 };
 
-type FsanchezOperacionItem = PendFacUnit & {
-  cancelada: boolean;
-  alerta: "normal" | "media" | "alta";
-  comentario: string;
-};
-
 type AnalisisStockDictionaryPayload = {
   modelo?: unknown;
   versionRaw?: unknown;
@@ -166,6 +160,12 @@ const normalizeAnalisisText = (value: unknown, fallback: string) => {
 const normalizePendFacText = (value: unknown, fallback: string) => {
   const normalized = String(value ?? "").trim();
   return normalized || fallback;
+};
+
+type FsanchezOperacionItem = PendFacUnit & {
+  cancelada: boolean;
+  alerta: "normal" | "media" | "alta";
+  comentario: string;
 };
 
 const normalizePendFacNumber = (value: unknown, fallback = 0) => {
@@ -240,6 +240,67 @@ const formatFileDate = (date = new Date()) => {
 };
 
 const buildAnalisisCompositeKey = (modelo: string, versionKey: string) => `${modelo}::${versionKey}`;
+
+const serializeFsanchezOperacionEstado = (item: any) => ({
+  _id: String(item._id),
+  opera: normalizePendFacText(item.opera, ""),
+  cancelada: item.cancelada === true,
+  alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
+  comentario: typeof item.comentario === "string" ? item.comentario : "",
+  updatedBy: item.updatedBy ? String(item.updatedBy) : null,
+  updatedByName: typeof item.updatedByName === "string" ? item.updatedByName : "",
+  createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
+  updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
+});
+
+const buildFsanchezOperaciones = (
+  rows: PendFacRow[],
+  stateByOpera: Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>,
+): FsanchezOperacionItem[] =>
+  rows.map((row) => {
+    const opera = normalizePendFacText(row.opera, "-");
+    const currentState = stateByOpera.get(opera);
+
+    return {
+      interno: normalizePendFacText(row.interno, "-"),
+      nrofab: normalizePendFacText(row.nrofab, "-"),
+      version: normalizeAnalisisText(row.version, "Sin version"),
+      modelo: normalizeAnalisisModel(row.modelo),
+      chasis: normalizePendFacText(row.chasis, "-"),
+      certif: normalizePendFacCertif(row.certif),
+      color: normalizePendFacText(row.color, "-"),
+      cliente: normalizePendFacText(row.cliente, "-"),
+      vendedor: normalizePendFacText(row.vendedor, "-"),
+      ubicacion: normalizeAnalisisText(row.ubicacion, "Sin ubicacion"),
+      opera,
+      diasAsignado: normalizePendFacNumber(row.diasAsignado, 0),
+      cancelada: currentState?.cancelada ?? false,
+      alerta: currentState?.alerta ?? "normal",
+      comentario: currentState?.comentario ?? "",
+    };
+  });
+
+const filterFsanchezOperaciones = (
+  items: FsanchezOperacionItem[],
+  section?: string,
+  location?: string,
+) => {
+  const normalizedSection = String(section ?? "").trim().toLowerCase();
+  const normalizedLocation = String(location ?? "").trim();
+
+  return items.filter((item) => {
+    const matchesSection =
+      normalizedSection === "canceladas"
+        ? item.cancelada
+        : normalizedSection === "consaldo"
+          ? !item.cancelada
+          : true;
+    const matchesLocation =
+      normalizedLocation && normalizedLocation.toLowerCase() !== "todas" ? item.ubicacion === normalizedLocation : true;
+
+    return matchesSection && matchesLocation;
+  });
+};
 
 const buildPendFacData = (rows: PendFacRow[]): PendFacResponseData => {
   const locationsMap = new Map<string, PendFacLocation>();
@@ -350,67 +411,6 @@ const buildPendFacData = (rows: PendFacRow[]): PendFacResponseData => {
       totalUnidades: totals.total,
     },
   };
-};
-
-const serializeFsanchezOperacionEstado = (item: any) => ({
-  _id: String(item._id),
-  opera: normalizePendFacText(item.opera, ""),
-  cancelada: item.cancelada === true,
-  alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
-  comentario: typeof item.comentario === "string" ? item.comentario : "",
-  updatedBy: item.updatedBy ? String(item.updatedBy) : null,
-  updatedByName: typeof item.updatedByName === "string" ? item.updatedByName : "",
-  createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
-  updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
-});
-
-const buildFsanchezOperaciones = (
-  rows: PendFacRow[],
-  stateByOpera: Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>,
-): FsanchezOperacionItem[] =>
-  rows.map((row) => {
-    const opera = normalizePendFacText(row.opera, "-");
-    const currentState = stateByOpera.get(opera);
-
-    return {
-      interno: normalizePendFacText(row.interno, "-"),
-      nrofab: normalizePendFacText(row.nrofab, "-"),
-      version: normalizeAnalisisText(row.version, "Sin version"),
-      modelo: normalizeAnalisisModel(row.modelo),
-      chasis: normalizePendFacText(row.chasis, "-"),
-      certif: normalizePendFacCertif(row.certif),
-      color: normalizePendFacText(row.color, "-"),
-      cliente: normalizePendFacText(row.cliente, "-"),
-      vendedor: normalizePendFacText(row.vendedor, "-"),
-      ubicacion: normalizeAnalisisText(row.ubicacion, "Sin ubicacion"),
-      opera,
-      diasAsignado: normalizePendFacNumber(row.diasAsignado, 0),
-      cancelada: currentState?.cancelada ?? false,
-      alerta: currentState?.alerta ?? "normal",
-      comentario: currentState?.comentario ?? "",
-    };
-  });
-
-const filterFsanchezOperaciones = (
-  items: FsanchezOperacionItem[],
-  section?: string,
-  location?: string,
-) => {
-  const normalizedSection = String(section ?? "").trim().toLowerCase();
-  const normalizedLocation = String(location ?? "").trim();
-
-  return items.filter((item) => {
-    const matchesSection =
-      normalizedSection === "canceladas"
-        ? item.cancelada
-        : normalizedSection === "consaldo"
-          ? !item.cancelada
-          : true;
-    const matchesLocation =
-      normalizedLocation && normalizedLocation.toLowerCase() !== "todas" ? item.ubicacion === normalizedLocation : true;
-
-    return matchesSection && matchesLocation;
-  });
 };
 
 const getAnalisisCanonicalVersion = (
@@ -1101,49 +1101,6 @@ export class DmsController {
       logError("DmsController.exportPendFac");
       console.error(error);
       return res.status(500).json({ message: "Error al exportar Pend Fac" });
-    }
-  };
-
-  static getFsanchezOperaciones = async (_req: Request, res: Response) => {
-    try {
-      const [rows, estados] = await Promise.all([
-        sequelizeNIC.query<PendFacRow>(getPendFacConvencional(), {
-          type: QueryTypes.SELECT,
-        }),
-        FsanchezOperacionEstado.find().lean(),
-      ]);
-
-      const stateByOpera = estados.reduce<
-        Map<string, { cancelada: boolean; alerta: "normal" | "media" | "alta"; comentario: string }>
-      >((acc, item) => {
-        const opera = normalizePendFacText(item.opera, "");
-
-        if (opera) {
-          acc.set(opera, {
-            cancelada: item.cancelada === true,
-            alerta: item.alerta === "media" || item.alerta === "alta" ? item.alerta : "normal",
-            comentario: typeof item.comentario === "string" ? item.comentario : "",
-          });
-        }
-
-        return acc;
-      }, new Map());
-
-      const data = buildFsanchezOperaciones(rows, stateByOpera);
-      const canceladas = data.filter((item) => item.cancelada).length;
-
-      return res.status(200).json({
-        data,
-        meta: {
-          total: data.length,
-          conSaldo: data.length - canceladas,
-          canceladas,
-        },
-      });
-    } catch (error) {
-      logError("DmsController.getFsanchezOperaciones");
-      console.error(error);
-      return res.status(500).json({ message: "Error al obtener las operaciones FSANCHEZ" });
     }
   };
 

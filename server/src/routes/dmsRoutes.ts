@@ -3,7 +3,6 @@ import { DmsController } from "../controllers/DmsController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
 import { authorizeRoleAccess } from "../middleware/authorizeRoleAccess";
-import { requireSuperAdmin } from "../middleware/requireSuperAdmin";
 
 const router = Router();
 router.use(authenticate);
@@ -55,9 +54,6 @@ router.get(
   authorizeRoleAccess("convencional.analisisStock"),
   DmsController.exportPendFac,
 );
-router.get("/fsanchez/operaciones", authorizeModules("fsanchez"), DmsController.getFsanchezOperaciones);
-router.get("/fsanchez/operaciones/export", authorizeModules("fsanchez"), DmsController.exportFsanchezOperaciones);
-router.patch("/fsanchez/operaciones/:opera", authorizeModules("fsanchez"), requireSuperAdmin, DmsController.updateFsanchezOperacionEstado);
 router.post(
   "/analisis-stock/ped",
   authorizeModules("analisisStock"),

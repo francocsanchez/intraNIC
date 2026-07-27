@@ -13,15 +13,15 @@ import {
   isFacturasAnticipoJobRunning,
   runFacturasAnticipoJob,
 } from "../facturasAnticipoCron.service";
-import {
-  getFsanchezCleanupJobKey,
-  getFsanchezCleanupJobName,
-  getFsanchezCleanupScheduleLabel,
-  isFsanchezCleanupJobRunning,
-  runFsanchezCleanupJob,
-} from "../fsanchezCleanupCron.service";
 import { TransferenciasImportService } from "../transferenciasImport.service";
 import { UnidadesDealersService } from "../unidadesDealers.service";
+import {
+  getSaldoOperacionCleanupJobKey,
+  getSaldoOperacionCleanupJobName,
+  getSaldoOperacionCleanupScheduleLabel,
+  isSaldoOperacionCleanupJobRunning,
+  runSaldoOperacionCleanupJob,
+} from "../saldoOperacionCleanupCron.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
 
@@ -77,14 +77,14 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     run: (trigger) => runFacturasAnticipoJob(trigger),
   },
   {
-    jobKey: getFsanchezCleanupJobKey(),
-    title: "Limpieza FSANCHEZ",
-    scheduleLabel: getFsanchezCleanupScheduleLabel(),
-    jobName: getFsanchezCleanupJobName(),
+    jobKey: getSaldoOperacionCleanupJobKey(),
+    title: "Limpieza Saldo de operacion",
+    scheduleLabel: getSaldoOperacionCleanupScheduleLabel(),
+    jobName: getSaldoOperacionCleanupJobName(),
     sourceType: "database",
-    sourcePath: "fsanchez_operaciones_estado",
-    isRunning: () => isFsanchezCleanupJobRunning(),
-    run: (trigger) => runFsanchezCleanupJob(trigger),
+    sourcePath: "saldo_operacion_canceladas",
+    isRunning: () => isSaldoOperacionCleanupJobRunning(),
+    run: (trigger) => runSaldoOperacionCleanupJob(trigger),
   },
 ];
 

@@ -344,7 +344,7 @@ ORDER BY
 	nrofab
 `;
 
-export const getFsanchezOperacionesFacturadasQuery = (operas: string) => `
+export const getOperacionesFacturadasByCodigoQuery = (operas: string) => `
 SELECT DISTINCT
 	CAST(ope.ope_codigo AS VARCHAR(50)) AS opera
 FROM

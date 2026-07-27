@@ -2,7 +2,7 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { Cog, FileSpreadsheet, CarFront, ShieldCheck, UserCog } from "lucide-react";
+import { Cog, FileSpreadsheet, CarFront, UserCog } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AdminLayout() {
@@ -46,13 +46,6 @@ export default function AdminLayout() {
       icon: FileSpreadsheet,
       visible: hasModulePathAccess(user, "actualizacionRegistros", paths.analisis.registros),
       active: pathname === paths.analisis.registros,
-    },
-    {
-      label: "FSANCHEZ",
-      to: paths.admin.fsanchez,
-      icon: ShieldCheck,
-      visible: hasModulePathAccess(user, "fsanchez", paths.admin.fsanchez),
-      active: pathname === paths.admin.fsanchez,
     },
   ].filter((item) => item.visible);
 

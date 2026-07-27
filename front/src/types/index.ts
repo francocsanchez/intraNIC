@@ -868,7 +868,9 @@ export const saldoOperacionItemSchema = z.object({
   creditoBanco: z.number().nullable(),
   version: z.string(),
   modeloGeneral: z.string(),
+  diasAsignada: z.number().nullable(),
   estado: z.string(),
+  cancelada: z.boolean(),
 });
 
 const saldoOperacionPaginationSchema = z.object({
@@ -880,14 +882,35 @@ const saldoOperacionPaginationSchema = z.object({
 
 export const saldoOperacionResponseSchema = z.object({
   filters: z.object({
+    section: z.enum(["conSaldo", "canceladas"]),
     estado: z.string().nullable(),
+    ubicacion: z.string().nullable(),
   }),
   data: z.array(saldoOperacionItemSchema),
   meta: z.object({
     total: z.number(),
-    estados: z.array(z.string()),
   }),
   pagination: saldoOperacionPaginationSchema,
+});
+
+export const saldoOperacionFiltersResponseSchema = z.object({
+  meta: z.object({
+    estados: z.array(z.string()),
+    ubicaciones: z.array(z.string()),
+  }),
+});
+
+export const saldoOperacionCanceladaResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    codigoOperacion: z.number(),
+    numeroFabrica: z.string(),
+    cancelada: z.boolean(),
+    updatedBy: z.string().nullable(),
+    updatedByName: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
 });
 
 export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
@@ -912,6 +935,8 @@ export type AnalisisOperacionesPreventaCreditoMensualResponse = z.infer<
 >;
 export type SaldoOperacionItem = z.infer<typeof saldoOperacionItemSchema>;
 export type SaldoOperacionResponse = z.infer<typeof saldoOperacionResponseSchema>;
+export type SaldoOperacionFiltersResponse = z.infer<typeof saldoOperacionFiltersResponseSchema>;
+export type SaldoOperacionCanceladaResponse = z.infer<typeof saldoOperacionCanceladaResponseSchema>;
 
 export const analisisVendedorFilterOptionSchema = z.object({
   label: z.string(),

@@ -1,13 +1,20 @@
 import Loading from "@/components/Loading";
-import { getSaldoOperacion } from "@/services/operacionesService";
+import {
+  exportSaldoOperacion,
+  getSaldoOperacion,
+  getSaldoOperacionFilters,
+  updateSaldoOperacionCancelada,
+} from "@/services/operacionesService";
 import type { SaldoOperacionItem } from "@/types/index";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Inbox } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, DollarSign, Download, Inbox } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const ESTADO_TODOS = "__TODOS__";
-const PAGE_SIZE = 100;
+const UBICACION_TODAS = "__TODAS__";
+const PAGE_SIZE = 60;
+
+type SaldoOperacionSection = "conSaldo" | "canceladas";
 
 const formatMoney = (value: number | null) => {
   if (value === null || Number.isNaN(value)) {
@@ -35,23 +42,110 @@ const calculateSaldo = (
   return total - (abonado ?? 0) - (usado ?? 0) - (creditoBanco ?? 0);
 };
 
+const getSaldoColorClass = (saldo: number | null) => {
+  if (saldo === null) {
+    return "text-gray-500";
+  }
+
+  return saldo <= 0 ? "text-emerald-700" : "text-red-600";
+};
+
+const getDiasAsignadaBadgeClass = (diasAsignada: number | null) => {
+  if (diasAsignada === null) {
+    return "bg-gray-100 text-gray-500";
+  }
+
+  if (diasAsignada < 10) {
+    return "bg-emerald-100 text-emerald-800";
+  }
+
+  if (diasAsignada <= 15) {
+    return "bg-amber-100 text-amber-800";
+  }
+
+  return "bg-red-100 text-red-700";
+};
+
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 function buildRowKey(row: SaldoOperacionItem) {
   return [row.codigoOperacion ?? "sin-operacion", row.numeroFabrica].join("-");
 }
 
 export default function SaldoOperacionView() {
-  const [estado, setEstado] = useState<string>(ESTADO_TODOS);
+  const queryClient = useQueryClient();
+  const [section, setSection] = useState<SaldoOperacionSection>("conSaldo");
+  const [ubicacion, setUbicacion] = useState<string>(UBICACION_TODAS);
   const [page, setPage] = useState(1);
+  const [updatingOperacion, setUpdatingOperacion] = useState<number | null>(null);
+
+  const filtersQuery = useQuery({
+    queryKey: ["saldo-operacion-filtros"],
+    queryFn: () => getSaldoOperacionFilters(),
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
 
   const { data, isLoading, isError, error, isFetching } = useQuery({
-    queryKey: ["saldo-operacion", estado, page],
+    queryKey: ["saldo-operacion", section, ubicacion, page],
     queryFn: () =>
       getSaldoOperacion({
-        estado: estado === ESTADO_TODOS ? undefined : estado,
+        section,
+        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
         page,
         limit: PAGE_SIZE,
       }),
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      codigoOperacion,
+      cancelada,
+      numeroFabrica,
+    }: {
+      codigoOperacion: number;
+      cancelada: boolean;
+      numeroFabrica: string;
+    }) => updateSaldoOperacionCancelada(codigoOperacion, { cancelada, numeroFabrica }),
+    onMutate: ({ codigoOperacion }) => {
+      setUpdatingOperacion(codigoOperacion);
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["saldo-operacion"] });
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message);
+    },
+    onSettled: () => {
+      setUpdatingOperacion(null);
+    },
+  });
+
+  const exportMutation = useMutation({
+    mutationFn: () =>
+      exportSaldoOperacion({
+        section,
+        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
+      }),
+    onSuccess: (blob) => {
+      const today = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `saldo-operacion-${today}.xlsx`);
+      toast.success("Excel exportado correctamente");
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message);
+    },
   });
 
   useEffect(() => {
@@ -60,9 +154,15 @@ export default function SaldoOperacionView() {
     }
   }, [error]);
 
-  if (isLoading) return <Loading />;
+  useEffect(() => {
+    if (filtersQuery.error instanceof Error) {
+      toast.error(filtersQuery.error.message);
+    }
+  }, [filtersQuery.error]);
 
-  if (isError) {
+  if (isLoading || filtersQuery.isLoading) return <Loading />;
+
+  if (isError || filtersQuery.isError) {
     return (
       <div className="w-full px-4 py-6">
         <section className="rounded-[28px] border border-red-200 bg-white p-6 shadow-sm">
@@ -71,53 +171,99 @@ export default function SaldoOperacionView() {
             <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Saldo de operacion</h1>
           </div>
           <p className="mt-2 text-sm text-red-600">
-            {error instanceof Error ? error.message : "No fue posible obtener los registros solicitados."}
+            {error instanceof Error
+              ? error.message
+              : filtersQuery.error instanceof Error
+                ? filtersQuery.error.message
+                : "No fue posible obtener los registros solicitados."}
           </p>
         </section>
       </div>
     );
   }
 
-  if (!data) return <Loading />;
+  if (!data || !filtersQuery.data) return <Loading />;
 
   return (
     <div className="w-full space-y-4 px-4 py-4">
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,280px)_1fr] md:items-end">
-          <div className="space-y-2">
-            <label
-              htmlFor="saldo-operacion-estado"
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
-            >
-              Estado
-            </label>
-            <select
-              id="saldo-operacion-estado"
-              value={estado}
-              onChange={(event) => {
-                setEstado(event.target.value);
+      <section className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-lg bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setSection("conSaldo");
                 setPage(1);
               }}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className={[
+                "rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+                section === "conSaldo" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
             >
-              <option value={ESTADO_TODOS}>Todos</option>
-              {data.meta.estados.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+              Con saldo
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSection("canceladas");
+                setPage(1);
+              }}
+              className={[
+                "rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+                section === "canceladas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Canceladas
+            </button>
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Registros</p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{data.pagination.total}</p>
-            </div>
-            <div className="text-right text-xs text-gray-500">
-              {isFetching ? "Actualizando..." : "Solo se muestran operaciones NIC con codigo de operacion no facturadas"}
-            </div>
+          <div className="rounded-xl bg-gray-50 px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Registros</p>
+            <p className="mt-0.5 text-xl font-semibold tracking-tight text-gray-900">{data.pagination.total}</p>
           </div>
+
+          <div className="flex flex-wrap rounded-lg bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setUbicacion(UBICACION_TODAS);
+                setPage(1);
+              }}
+              className={[
+                "rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+                ubicacion === UBICACION_TODAS ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+              ].join(" ")}
+            >
+              Todas
+            </button>
+            {filtersQuery.data.meta.ubicaciones.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setUbicacion(item);
+                  setPage(1);
+                }}
+                className={[
+                  "rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+                  ubicacion === item ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                ].join(" ")}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => exportMutation.mutate()}
+            disabled={exportMutation.isPending}
+            title={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
+            aria-label={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
+            className="inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download size={14} />
+          </button>
         </div>
       </section>
 
@@ -127,13 +273,18 @@ export default function SaldoOperacionView() {
             <Inbox size={20} />
           </div>
           <h2 className="mt-3 text-lg font-semibold text-gray-900">No hay registros para mostrar</h2>
-          <p className="mt-1 text-sm text-gray-500">Proba cambiar el filtro de estado para ampliar el resultado.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            {section === "conSaldo"
+              ? "Proba cambiar los filtros para ampliar el resultado."
+              : "No hay operaciones marcadas como canceladas para estos filtros."}
+          </p>
         </section>
       ) : (
         <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 px-3 py-2">
             <p className="text-sm font-medium text-gray-600">
-              {data.pagination.total} registros encontrados{estado !== ESTADO_TODOS ? ` para ${estado}.` : "."}
+              {data.pagination.total} registros encontrados en {section === "conSaldo" ? "Con saldo" : "Canceladas"}
+              {ubicacion !== UBICACION_TODAS ? ` para ${ubicacion}.` : "."}
             </p>
           </div>
 
@@ -148,7 +299,7 @@ export default function SaldoOperacionView() {
                     Operacion
                   </th>
                   <th
-                    colSpan={7}
+                    colSpan={8}
                     className="border-b border-gray-200 px-2 py-1 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500"
                   >
                     Resumen economico
@@ -167,7 +318,6 @@ export default function SaldoOperacionView() {
                   <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
                     Modelo
                   </th>
-                  
                   <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
                     Cliente
                   </th>
@@ -198,31 +348,84 @@ export default function SaldoOperacionView() {
                   <th className="whitespace-nowrap px-2 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
                     $ Saldo
                   </th>
+                  <th className="whitespace-nowrap px-2 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
+                    Dias
+                  </th>
+                  <th className="whitespace-nowrap px-2 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
+                    Accion
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100 bg-white">
-                {data.data.map((row) => (
-                  <tr key={buildRowKey(row)} className="hover:bg-gray-50/70">
-                    <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.codigoOperacion ?? "-"}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 font-medium text-gray-900">{row.numeroFabrica}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.version || "-"}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.modeloGeneral || "-"}</td>
-         
-                    <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.clienteNombre}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.vendedor}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.pcioVenta)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.bonifVenta)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.gestoria)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-gray-900">{formatMoney(row.total)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.senas)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.usado)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.creditoBanco)}</td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-amber-700">
-                      {formatMoney(calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco))}
-                    </td>
-                  </tr>
-                ))}
+                {data.data.map((row) => {
+                  const isUpdating = updatingOperacion === row.codigoOperacion;
+                  const nextCancelada = !row.cancelada;
+                  const saldo = calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco);
+
+                  return (
+                    <tr key={buildRowKey(row)} className="hover:bg-gray-50/70">
+                      <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.codigoOperacion ?? "-"}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 font-medium text-gray-900">{row.numeroFabrica}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.version || "-"}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.modeloGeneral || "-"}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.clienteNombre}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-gray-700">{row.vendedor}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.pcioVenta)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.bonifVenta)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.gestoria)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-gray-900">{formatMoney(row.total)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.senas)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.usado)}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-gray-700">{formatMoney(row.creditoBanco)}</td>
+                      <td
+                        className={[
+                          "whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold",
+                          getSaldoColorClass(saldo),
+                        ].join(" ")}
+                      >
+                        {formatMoney(saldo)}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right">
+                        <span
+                          className={[
+                            "inline-flex min-w-[42px] items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tabular-nums",
+                            getDiasAsignadaBadgeClass(row.diasAsignada),
+                          ].join(" ")}
+                        >
+                          {row.diasAsignada ?? "-"}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!row.codigoOperacion) {
+                              return;
+                            }
+
+                            updateMutation.mutate({
+                              codigoOperacion: row.codigoOperacion,
+                              cancelada: nextCancelada,
+                              numeroFabrica: row.numeroFabrica,
+                            });
+                          }}
+                          disabled={isUpdating || !row.codigoOperacion}
+                          title={nextCancelada ? "Marcar como cancelada por pago total" : "Volver a con saldo"}
+                          aria-label={nextCancelada ? "Marcar como cancelada por pago total" : "Volver a con saldo"}
+                          className={[
+                            "inline-flex items-center justify-center rounded-lg border p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                            nextCancelada
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
+                          ].join(" ")}
+                        >
+                          {isUpdating ? <span className="text-[11px] font-semibold">...</span> : <DollarSign size={16} strokeWidth={2} />}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

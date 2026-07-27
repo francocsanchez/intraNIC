@@ -1,9 +1,9 @@
 import colors from "colors";
 import { startAgendaEntregaEnvioJob } from "./jobs/agendaEntregaEnvio.job";
-import { startFsanchezCleanupJob } from "./jobs/fsanchezCleanup.job";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
+import { startSaldoOperacionCleanupJob } from "./jobs/saldoOperacionCleanup.job";
 import { startTransferenciasImportJob } from "./jobs/transferenciasImport.job";
 import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
 
@@ -19,7 +19,7 @@ server.listen(Number(port), "0.0.0.0", () => {
 
   startAgendaEntregaEnvioJob();
   startFacturasAnticipoJob();
-  startFsanchezCleanupJob();
+  startSaldoOperacionCleanupJob();
   startPatentamientosImportJob();
   startTransferenciasImportJob();
   startUnidadesDealersJob();

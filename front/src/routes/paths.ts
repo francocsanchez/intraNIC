@@ -30,7 +30,6 @@ export const paths = {
     cotizadorPlanes: "/admin/configuracion/cotizador/planes",
     testDrive: "/admin/test-drive",
     vendedores: "/admin/dms/vendedores",
-    fsanchez: "/admin/fsanchez",
   },
   administracion: {
     home: "/administracion",

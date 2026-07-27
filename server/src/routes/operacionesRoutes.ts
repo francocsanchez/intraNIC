@@ -48,9 +48,24 @@ router.get(
   OperacionesController.getAnalisisPreventaFormaPago,
 );
 router.get(
+  "/saldo-operacion/filtros",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.getSaldoOperacionFilters,
+);
+router.get(
+  "/saldo-operacion/export",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.exportSaldoOperacion,
+);
+router.get(
   "/saldo-operacion",
   authorizeModules("saldoOperacion"),
   OperacionesController.getSaldoOperacion,
+);
+router.patch(
+  "/saldo-operacion/:codigoOperacion/cancelada",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.updateSaldoOperacionCancelada,
 );
 
 export default router;

@@ -1,4 +1,4 @@
-import { runFsanchezCleanupCron } from "../services/fsanchezCleanupCron.service";
+import { runSaldoOperacionCleanupCron } from "../services/saldoOperacionCleanupCron.service";
 
 const JOB_TIMEZONE = "America/Argentina/Buenos_Aires";
 const JOB_HOUR = 20;
@@ -46,16 +46,12 @@ const executeIfNeeded = async () => {
   const now = new Date();
   const runKey = buildRunKey(now);
 
-  if (!shouldRunNow(now)) {
-    return;
-  }
-
-  if (lastRunKey === runKey) {
+  if (!shouldRunNow(now) || lastRunKey === runKey) {
     return;
   }
 
   if (isRunning) {
-    console.warn("[fsanchez-cleanup-cron] la ejecucion anterior sigue en curso, se omite este ciclo");
+    console.warn("[saldo-operacion-cleanup-cron] la ejecucion anterior sigue en curso, se omite este ciclo");
     return;
   }
 
@@ -63,15 +59,15 @@ const executeIfNeeded = async () => {
   lastRunKey = runKey;
 
   try {
-    await runFsanchezCleanupCron();
+    await runSaldoOperacionCleanupCron();
   } finally {
     isRunning = false;
   }
 };
 
-export const startFsanchezCleanupJob = () => {
+export const startSaldoOperacionCleanupJob = () => {
   console.log(
-    `[fsanchez-cleanup-cron] programado todos los dias a las ${String(JOB_HOUR).padStart(2, "0")}:${String(JOB_MINUTE).padStart(2, "0")} (${JOB_TIMEZONE})`,
+    `[saldo-operacion-cleanup-cron] programado todos los dias a las ${String(JOB_HOUR).padStart(2, "0")}:${String(JOB_MINUTE).padStart(2, "0")} (${JOB_TIMEZONE})`,
   );
 
   void executeIfNeeded();

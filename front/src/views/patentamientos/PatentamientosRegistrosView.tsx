@@ -32,8 +32,8 @@ const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "schedu
     canRun: true,
   },
   {
-    jobKey: "fsanchez-cleanup",
-    title: "Limpieza FSANCHEZ",
+    jobKey: "saldo-operacion-cleanup",
+    title: "Limpieza Saldo de operacion",
     scheduleLabel: "Todos los dias a las 20:30",
     canRun: true,
   },

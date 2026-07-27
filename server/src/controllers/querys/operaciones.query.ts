@@ -577,7 +577,49 @@ WHERE
     );
 `;
 
-export const saldoOperacionQuery = (hasEstadoFilter: boolean) => `
+const saldoOperacionBaseFrom = `
+FROM
+    csqUnidades csq
+OUTER APPLY (
+    SELECT TOP 1
+        ope.ope_fecasig AS fecha_asignacion
+    FROM
+        opera ope
+    WHERE
+        ope.ope_tipo = 5
+        AND ope.ope_codigo = csq.Codigo_operacion
+        AND ope.ope_fecbaj IS NULL
+    ORDER BY
+        ope.ope_fecasig DESC
+) opera
+OUTER APPLY (
+    SELECT TOP 1
+        LTRIM(RTRIM(ISNULL(mnp.mnp_status, ''))) AS ubicacion
+    FROM
+        movnped mnp
+    WHERE
+        LTRIM(RTRIM(ISNULL(mnp.mnp_nrofab, ''))) = LTRIM(RTRIM(ISNULL(csq.Numero_Fabrica, '')))
+) mov
+WHERE
+    csq.Numero_Fabrica LIKE 'NIC%'
+    AND csq.Codigo_operacion IS NOT NULL
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
+    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+`;
+
+const saldoOperacionUbicacionCase = `
+CASE
+    WHEN LTRIM(RTRIM(ISNULL(mov.ubicacion, ''))) = '' THEN 'STOCK CONCESIONARIO'
+    ELSE LTRIM(RTRIM(mov.ubicacion))
+END
+`;
+
+export const saldoOperacionQuery = (
+  hasEstadoFilter: boolean,
+  hasUbicacionFilter: boolean,
+  cancelacionClause: string,
+  includePagination = true,
+) => `
 SELECT
     csq.Codigo_operacion AS codigo_operacion,
     LTRIM(RTRIM(ISNULL(csq.cliente_nombre, ''))) AS cliente_nombre,
@@ -592,34 +634,36 @@ SELECT
     LTRIM(RTRIM(ISNULL(csq.Version, ''))) AS version,
     LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) AS modelo_general,
     CASE
+        WHEN opera.fecha_asignacion IS NULL THEN NULL
+        ELSE DATEDIFF(DAY, opera.fecha_asignacion, GETDATE())
+    END AS dias_asignada,
+    CASE
         WHEN LTRIM(RTRIM(ISNULL(csq.Estado, ''))) = '' THEN 'Sin estado'
         ELSE LTRIM(RTRIM(csq.Estado))
     END AS estado
-FROM
-    csqUnidades csq
-WHERE
-    csq.Numero_Fabrica LIKE 'NIC%'
-    AND csq.Codigo_operacion IS NOT NULL
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+${saldoOperacionBaseFrom}
     ${hasEstadoFilter ? "AND LTRIM(RTRIM(ISNULL(csq.Estado, 'Sin estado'))) = :estado" : ""}
+    ${hasUbicacionFilter ? `AND ${saldoOperacionUbicacionCase} = :ubicacion` : ""}
+    ${cancelacionClause}
 ORDER BY
+    LTRIM(RTRIM(ISNULL(csq.Vendedor, ''))) ASC,
+    LTRIM(RTRIM(ISNULL(csq.cliente_nombre, ''))) ASC,
     csq.Numero_Fabrica ASC,
     csq.Codigo_operacion ASC
-OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY;
+${includePagination ? "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY;" : ";"}
 `;
 
-export const saldoOperacionCountQuery = (hasEstadoFilter: boolean) => `
+export const saldoOperacionCountQuery = (
+  hasEstadoFilter: boolean,
+  hasUbicacionFilter: boolean,
+  cancelacionClause: string,
+) => `
 SELECT
     COUNT(*) AS total
-FROM
-    csqUnidades csq
-WHERE
-    csq.Numero_Fabrica LIKE 'NIC%'
-    AND csq.Codigo_operacion IS NOT NULL
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
-    ${hasEstadoFilter ? "AND LTRIM(RTRIM(ISNULL(csq.Estado, 'Sin estado'))) = :estado" : ""};
+${saldoOperacionBaseFrom}
+    ${hasEstadoFilter ? "AND LTRIM(RTRIM(ISNULL(csq.Estado, 'Sin estado'))) = :estado" : ""}
+    ${hasUbicacionFilter ? `AND ${saldoOperacionUbicacionCase} = :ubicacion` : ""}
+    ${cancelacionClause};
 `;
 
 export const saldoOperacionEstadosQuery = () => `
@@ -628,13 +672,15 @@ SELECT DISTINCT
         WHEN LTRIM(RTRIM(ISNULL(csq.Estado, ''))) = '' THEN 'Sin estado'
         ELSE LTRIM(RTRIM(csq.Estado))
     END AS estado
-FROM
-    csqUnidades csq
-WHERE
-    csq.Numero_Fabrica LIKE 'NIC%'
-    AND csq.Codigo_operacion IS NOT NULL
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Estado, '')))) NOT LIKE 'ENT%'
-    AND UPPER(LTRIM(RTRIM(ISNULL(csq.Facturado, 'NO')))) NOT IN ('SI', 'S', 'YES', 'Y')
+${saldoOperacionBaseFrom}
 ORDER BY
     estado ASC;
+`;
+
+export const saldoOperacionUbicacionesQuery = () => `
+SELECT DISTINCT
+    ${saldoOperacionUbicacionCase} AS ubicacion
+${saldoOperacionBaseFrom}
+ORDER BY
+    ubicacion ASC;
 `;

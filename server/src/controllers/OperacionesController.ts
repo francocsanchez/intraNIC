@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { OperacionesDashboardService } from "../services/operacionesDashboard.service";
 import { logError } from "../utils/logError";
+import * as XLSX from "xlsx";
 
 const parsePositiveInt = (value: unknown) => {
   const parsed = Number(value);
@@ -241,17 +242,112 @@ export class OperacionesController {
   };
 
   static getSaldoOperacion = async (req: Request, res: Response) => {
+    const section = parseOptionalString(req.query.section);
     const estado = parseOptionalString(req.query.estado);
+    const ubicacion = parseOptionalString(req.query.ubicacion);
     const page = parsePositiveInt(req.query.page) ?? 1;
     const limit = parsePositiveInt(req.query.limit) ?? 100;
 
     try {
-      const response = await OperacionesDashboardService.getSaldoOperacion(estado, page, limit);
+      const response = await OperacionesDashboardService.getSaldoOperacion(section, estado, ubicacion, page, limit);
       return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getSaldoOperacion");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getSaldoOperacionFilters = async (_req: Request, res: Response) => {
+    try {
+      const response = await OperacionesDashboardService.getSaldoOperacionFilters();
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getSaldoOperacionFilters");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static updateSaldoOperacionCancelada = async (req: Request, res: Response) => {
+    const codigoOperacion = parsePositiveInt(req.params.codigoOperacion);
+    const cancelada = req.body?.cancelada;
+    const numeroFabrica =
+      typeof req.body?.numeroFabrica === "string" ? req.body.numeroFabrica.trim() : "";
+
+    if (!codigoOperacion) {
+      return res.status(400).json({ message: "El codigo de operacion es obligatorio y debe ser un entero valido" });
+    }
+
+    if (typeof cancelada !== "boolean") {
+      return res.status(400).json({ message: "El estado cancelada debe ser booleano" });
+    }
+
+    if (!numeroFabrica) {
+      return res.status(400).json({ message: "El numero de fabrica es obligatorio" });
+    }
+
+    if (!req.user?._id) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
+    try {
+      const response = await OperacionesDashboardService.updateSaldoOperacionCancelada(
+        codigoOperacion,
+        numeroFabrica,
+        cancelada,
+        {
+          id: req.user._id,
+          name: `${req.user.lastName ?? ""} ${req.user.name ?? ""}`.trim(),
+        },
+      );
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.updateSaldoOperacionCancelada");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static exportSaldoOperacion = async (req: Request, res: Response) => {
+    const section = parseOptionalString(req.query.section);
+    const estado = parseOptionalString(req.query.estado);
+    const ubicacion = parseOptionalString(req.query.ubicacion);
+
+    try {
+      const response = await OperacionesDashboardService.exportSaldoOperacion(section, estado, ubicacion);
+      const rows = response.data.map((item) => ({
+        op: item.codigoOperacion ?? "",
+        numero_fabrica: item.numeroFabrica,
+        version: item.version,
+        modelo: item.modeloGeneral,
+        cliente: item.clienteNombre,
+        vendedor: item.vendedor,
+        estado_unidad: ubicacion ?? "",
+        estado_operacion: item.estado,
+        total: item.total ?? 0,
+        abonado: item.senas ?? 0,
+        usado: item.usado ?? 0,
+        credito: item.creditoBanco ?? 0,
+        saldo: (item.total ?? 0) - (item.senas ?? 0) - (item.usado ?? 0) - (item.creditoBanco ?? 0),
+        seccion: item.cancelada ? "Cancelada" : "Con saldo",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "SaldoOperacion");
+
+      const fileBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+      const date = new Date();
+      const filename = `saldo-operacion-${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}.xlsx`;
+
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename=\"${filename}\"`);
+      return res.status(200).send(fileBuffer);
+    } catch (error) {
+      logError("OperacionesController.exportSaldoOperacion");
+      console.error(error);
+      return res.status(500).json({ message: "Error al exportar Saldo de operacion" });
     }
   };
 }
