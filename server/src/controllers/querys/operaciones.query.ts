@@ -582,7 +582,9 @@ FROM
     csqUnidades csq
 OUTER APPLY (
     SELECT TOP 1
-        ope.ope_fecasig AS fecha_asignacion
+        ope.ope_fecasig AS fecha_asignacion,
+        ope.ope_auto AS auto_codigo,
+        ope.ope_marca AS auto_marca
     FROM
         opera ope
     WHERE
@@ -592,6 +594,11 @@ OUTER APPLY (
     ORDER BY
         ope.ope_fecasig DESC
 ) opera
+LEFT JOIN auto auto_modelo ON
+    auto_modelo.au_codigo = opera.auto_codigo
+    AND auto_modelo.au_marca = opera.auto_marca
+LEFT JOIN famiauto famiauto_modelo ON
+    famiauto_modelo.fam_codigo = auto_modelo.au_familia
 OUTER APPLY (
     SELECT TOP 1
         LTRIM(RTRIM(ISNULL(mnp.mnp_status, ''))) AS ubicacion
@@ -632,7 +639,10 @@ SELECT
     csq.Usado AS usado,
     csq.total_Cred_banco AS credito_banco,
     LTRIM(RTRIM(ISNULL(csq.Version, ''))) AS version,
-    LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) AS modelo_general,
+    CASE
+        WHEN LTRIM(RTRIM(ISNULL(famiauto_modelo.fam_nombre, ''))) <> '' THEN LTRIM(RTRIM(famiauto_modelo.fam_nombre))
+        ELSE LTRIM(RTRIM(ISNULL(csq.Modelo_General, '')))
+    END AS modelo_general,
     CASE
         WHEN opera.fecha_asignacion IS NULL THEN NULL
         ELSE DATEDIFF(DAY, opera.fecha_asignacion, GETDATE())
@@ -683,4 +693,49 @@ SELECT DISTINCT
 ${saldoOperacionBaseFrom}
 ORDER BY
     ubicacion ASC;
+`;
+
+export const saldoOperacionSaldosPorModeloQuery = (
+  hasUbicacionFilter: boolean,
+  cancelacionClause: string,
+) => `
+SELECT
+    CASE
+        WHEN LTRIM(RTRIM(ISNULL(famiauto_modelo.fam_nombre, ''))) <> '' THEN LTRIM(RTRIM(famiauto_modelo.fam_nombre))
+        WHEN LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) <> '' THEN LTRIM(RTRIM(csq.Modelo_General))
+        ELSE 'SIN MODELO'
+    END AS modelo_general,
+    SUM(
+        (
+            ISNULL(csq.Pcio_Venta, 0)
+            + ISNULL(csq.gestoria, 0)
+            - ISNULL(csq.Bonif_Venta, 0)
+        )
+        - ISNULL(csq.Senas, 0)
+        - ISNULL(csq.Usado, 0)
+        - ISNULL(csq.total_Cred_banco, 0)
+    ) AS saldo_total
+${saldoOperacionBaseFrom}
+    ${hasUbicacionFilter ? `AND ${saldoOperacionUbicacionCase} = :ubicacion` : ""}
+    ${cancelacionClause}
+GROUP BY
+    CASE
+        WHEN LTRIM(RTRIM(ISNULL(famiauto_modelo.fam_nombre, ''))) <> '' THEN LTRIM(RTRIM(famiauto_modelo.fam_nombre))
+        WHEN LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) <> '' THEN LTRIM(RTRIM(csq.Modelo_General))
+        ELSE 'SIN MODELO'
+    END
+HAVING
+    SUM(
+        (
+            ISNULL(csq.Pcio_Venta, 0)
+            + ISNULL(csq.gestoria, 0)
+            - ISNULL(csq.Bonif_Venta, 0)
+        )
+        - ISNULL(csq.Senas, 0)
+        - ISNULL(csq.Usado, 0)
+        - ISNULL(csq.total_Cred_banco, 0)
+    ) > 0
+ORDER BY
+    saldo_total DESC,
+    modelo_general ASC;
 `;

@@ -889,6 +889,15 @@ export const saldoOperacionResponseSchema = z.object({
   data: z.array(saldoOperacionItemSchema),
   meta: z.object({
     total: z.number(),
+    saldosPorModelo: z
+      .array(
+        z.object({
+          modelo: z.string(),
+          saldo: z.number(),
+        }),
+      )
+      .optional()
+      .default([]),
   }),
   pagination: saldoOperacionPaginationSchema,
 });

@@ -184,6 +184,32 @@ export default function SaldoOperacionView() {
 
   if (!data || !filtersQuery.data) return <Loading />;
 
+  const saldosPorModelo =
+    data.meta.saldosPorModelo.length > 0
+      ? data.meta.saldosPorModelo
+      : Array.from(
+          data.data.reduce(
+            (accumulator, row) => {
+              if (section !== "conSaldo") {
+                return accumulator;
+              }
+
+              const saldo = calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco);
+
+              if (saldo === null || saldo <= 0) {
+                return accumulator;
+              }
+
+              const modelo = row.modeloGeneral.trim() || "SIN MODELO";
+              accumulator.set(modelo, (accumulator.get(modelo) ?? 0) + saldo);
+              return accumulator;
+            },
+            new Map<string, number>(),
+          ),
+        )
+          .map(([modelo, saldo]) => ({ modelo, saldo }))
+          .sort((a, b) => b.saldo - a.saldo || a.modelo.localeCompare(b.modelo, "es"));
+
   return (
     <div className="w-full space-y-4 px-4 py-4">
       <section className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
@@ -266,6 +292,24 @@ export default function SaldoOperacionView() {
           </button>
         </div>
       </section>
+
+      {section === "conSaldo" && saldosPorModelo.length ? (
+        <section className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-gray-900">Saldos restantes a cobrar por modelo</h2>
+            <span className="text-[11px] text-gray-500">{saldosPorModelo.length} modelos</span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {saldosPorModelo.map((item) => (
+              <div key={item.modelo} className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">{item.modelo}</p>
+                <p className="mt-1 text-lg font-semibold tracking-tight text-red-600">{formatMoney(item.saldo)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {!data.data.length ? (
         <section className="rounded-xl border border-dashed border-[#b7d8e3] bg-white px-5 py-10 text-center shadow-sm">

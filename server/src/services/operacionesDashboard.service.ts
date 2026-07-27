@@ -23,6 +23,7 @@ import {
   saldoOperacionCountQuery,
   saldoOperacionEstadosQuery,
   saldoOperacionQuery,
+  saldoOperacionSaldosPorModeloQuery,
   saldoOperacionUbicacionesQuery,
 } from "../controllers/querys/operaciones.query";
 
@@ -370,6 +371,16 @@ type SaldoOperacionItem = {
   cancelada: boolean;
 };
 
+type SaldoOperacionSaldoModeloRow = {
+  modelo_general: string | null;
+  saldo_total: number | string | null;
+};
+
+type SaldoOperacionSaldoModeloItem = {
+  modelo: string;
+  saldo: number;
+};
+
 type SaldoOperacionSection = "conSaldo" | "canceladas";
 
 type SaldoOperacionResponse = {
@@ -381,6 +392,7 @@ type SaldoOperacionResponse = {
   data: SaldoOperacionItem[];
   meta: {
     total: number;
+    saldosPorModelo: SaldoOperacionSaldoModeloItem[];
   };
   pagination: {
     page: number;
@@ -1265,6 +1277,31 @@ export class OperacionesDashboardService {
     };
   }
 
+  private static async getSaldoOperacionSaldosPorModelo(params: {
+    ubicacion: string | null;
+  }): Promise<SaldoOperacionSaldoModeloItem[]> {
+    const normalizedUbicacion = normalizeNullableString(params.ubicacion);
+    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
+    const cancelacionClause = buildSaldoOperacionCancelacionClause(codigosCancelados, "conSaldo");
+
+    const rows = await sequelizeNIC.query<SaldoOperacionSaldoModeloRow>(
+      saldoOperacionSaldosPorModeloQuery(Boolean(normalizedUbicacion), cancelacionClause),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          ubicacion: normalizedUbicacion ?? undefined,
+        },
+      },
+    );
+
+    return rows
+      .map((row) => ({
+        modelo: normalizeNullableString(row.modelo_general) ?? "SIN MODELO",
+        saldo: normalizeNullableNumber(row.saldo_total) ?? 0,
+      }))
+      .filter((row) => row.saldo > 0);
+  }
+
   static async getSaldoOperacion(
     section: string | null,
     estado: string | null,
@@ -1274,14 +1311,19 @@ export class OperacionesDashboardService {
   ): Promise<SaldoOperacionResponse> {
     const safePage = Number.isInteger(page) && page > 0 ? page : 1;
     const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 200) : 100;
-    const result = await this.getSaldoOperacionRows({
-      section: normalizeSaldoOperacionSection(section),
-      estado,
-      ubicacion,
-      page: safePage,
-      limit: safeLimit,
-      paginated: true,
-    });
+    const [result, saldosPorModelo] = await Promise.all([
+      this.getSaldoOperacionRows({
+        section: normalizeSaldoOperacionSection(section),
+        estado,
+        ubicacion,
+        page: safePage,
+        limit: safeLimit,
+        paginated: true,
+      }),
+      this.getSaldoOperacionSaldosPorModelo({
+        ubicacion,
+      }),
+    ]);
     const totalPages = Math.max(1, Math.ceil(result.total / safeLimit));
 
     return {
@@ -1293,6 +1335,7 @@ export class OperacionesDashboardService {
       data: result.data,
       meta: {
         total: result.total,
+        saldosPorModelo,
       },
       pagination: {
         page: safePage,
