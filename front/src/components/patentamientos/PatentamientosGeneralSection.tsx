@@ -1,6 +1,6 @@
 import type { PatentamientosDashboardGeneral } from "@/services/patentamientosDashboardService";
 import { ArrowLeft, ArrowRight, Trophy, TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type PatentamientosGeneralSectionProps = {
   data: PatentamientosDashboardGeneral;
@@ -15,6 +15,50 @@ const formatPercentage = (value: number) =>
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   })}%`;
+
+function PatentamientosTrendTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: { total?: number; ownTotal?: number; toyotaTotal?: number; marketCoverage?: number } }>;
+  label?: string | number;
+}) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const point = payload[0]?.payload as
+    | {
+      total?: number;
+      ownTotal?: number;
+      toyotaTotal?: number;
+      marketCoverage?: number;
+    }
+    | undefined;
+
+  const total = Math.round(Number(point?.total ?? 0));
+  const ownTotal = Math.round(Number(point?.ownTotal ?? 0));
+  const toyotaTotal = Math.round(Number(point?.toyotaTotal ?? 0));
+  const marketCoverage = Number(
+    point?.marketCoverage ?? (toyotaTotal > 0 ? (ownTotal / toyotaTotal) * 100 : 0),
+  );
+
+  return (
+    <div
+      className="rounded-2xl border border-[#cfe7ee] bg-white px-4 py-3 text-sm shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
+    >
+      <p className="mb-2 font-semibold text-slate-900">{label}</p>
+      <div className="space-y-1 text-slate-700">
+        <p>Patentamientos: {formatInteger(total)}</p>
+        <p>Patentamientos propios: {formatInteger(ownTotal)}</p>
+        <p>Patentamientos Toyota: {formatInteger(toyotaTotal)}</p>
+        <p>Cobertura Toyota: {formatPercentage(marketCoverage)}</p>
+      </div>
+    </div>
+  );
+}
 
 function DashboardCard({
   children,
@@ -38,6 +82,10 @@ export default function PatentamientosGeneralSection({
   const hasTrend = data.trend.length > 0;
   const hasTopModels = data.topModels.length > 0;
   const topModelsPagination = data.topModelsPagination;
+  const ownUnitsDescription =
+    selectedMonthLabel && selectedMonthLabel !== "Todos"
+      ? `Patentamientos propios registrados en ${selectedMonthLabel}.`
+      : "Patentamientos propios acumulados del anio seleccionado en Zona NIC.";
   const averageTrendValue = hasTrend
     ? data.trend.reduce((sum, point) => sum + point.total, 0) / data.trend.length
     : 0;
@@ -45,7 +93,7 @@ export default function PatentamientosGeneralSection({
   return (
     <div className="space-y-6">
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -66,21 +114,50 @@ export default function PatentamientosGeneralSection({
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Marca lider</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Patentamientos propios</p>
+              <div className="mt-4 flex items-end gap-2">
+                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                  {formatInteger(data.summary.ownPatentamientos)}
+                </h3>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">{ownUnitsDescription}</p>
+            </div>
+            <div className="rounded-2xl bg-sky-50 p-3 text-sky-700">
+              <TrendingUp size={20} />
+            </div>
+          </div>
+        </DashboardCard>
+
+        <DashboardCard className="p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Patentamientos Toyota</p>
               <div className="mt-4 flex flex-wrap items-end gap-2">
                 <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
-                  {data.summary.marketLeader?.brand ?? "-"}
+                  {formatInteger(data.summary.toyotaPatentamientos)}
                 </h3>
-                {data.summary.marketLeader ? (
-                  <span className="text-sm font-semibold text-slate-500">
-                    {formatPercentage(data.summary.marketLeader.percentage)} share
-                  </span>
-                ) : null}
               </div>
               <p className="mt-2 text-sm text-slate-500">
-                {data.summary.marketLeader
-                  ? `${formatInteger(data.summary.marketLeader.total)} patentamientos acumulados en Zona NIC.`
-                  : "Todavia no hay datos importados para calcular la marca lider."}
+                Total Toyota acumulado del anio seleccionado en Zona NIC.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-red-50 p-3 text-red-600">
+              <TrendingUp size={20} />
+            </div>
+          </div>
+        </DashboardCard>
+
+        <DashboardCard className="p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Cobertura Toyota</p>
+              <div className="mt-4 flex flex-wrap items-end gap-2">
+                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                  {formatPercentage(data.summary.marketCoverage)}
+                </h3>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                {`${formatInteger(data.summary.ownPatentamientos)} propios sobre ${formatInteger(data.summary.toyotaPatentamientos)} patentamientos Toyota.`}
               </p>
             </div>
             <div className="rounded-2xl bg-amber-50 p-3 text-amber-600">
@@ -108,7 +185,7 @@ export default function PatentamientosGeneralSection({
               <div className="h-72 rounded-[18px] bg-white/60 p-2">
                 {hasTrend ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={data.trend} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
+                    <ComposedChart data={data.trend} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
                       <CartesianGrid stroke="#dbeafe" strokeDasharray="3 3" />
                       <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#475569" }} />
                       <YAxis
@@ -117,17 +194,7 @@ export default function PatentamientosGeneralSection({
                         tick={{ fontSize: 12, fill: "#64748b" }}
                         tickFormatter={(value) => formatInteger(Number(value))}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: 16,
-                          borderColor: "#cfe7ee",
-                          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                        }}
-                        formatter={(value, name) => [
-                          formatInteger(Math.round(Number(value))),
-                          name === "average" ? "Promedio" : "Patentamientos",
-                        ]}
-                      />
+                      <Tooltip content={<PatentamientosTrendTooltip />} />
                       <ReferenceLine
                         y={averageTrendValue}
                         stroke="#0f766e"
@@ -141,15 +208,33 @@ export default function PatentamientosGeneralSection({
                           fontSize: 12,
                         }}
                       />
+                      <Bar
+                        dataKey="ownTotal"
+                        name="ownTotal"
+                        fill="#7dd3fc"
+                        stroke="#38bdf8"
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={32}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="toyotaTotal"
+                        name="toyotaTotal"
+                        stroke="#dc2626"
+                        strokeWidth={3}
+                        dot={{ r: 3, fill: "#dc2626", stroke: "#dc2626" }}
+                        activeDot={{ r: 5, fill: "#dc2626", stroke: "#dc2626" }}
+                      />
                       <Line
                         type="monotone"
                         dataKey="total"
+                        name="total"
                         stroke="#15aa9a"
                         strokeWidth={3}
                         dot={{ r: 4, fill: "#15aa9a", stroke: "#15aa9a" }}
                         activeDot={{ r: 6, fill: "#15aa9a", stroke: "#15aa9a" }}
                       />
-                    </LineChart>
+                    </ComposedChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white px-6 text-center text-sm text-slate-500">

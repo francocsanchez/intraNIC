@@ -56,6 +56,9 @@ type DashboardAvailableYearsResponse = {
 
 type DashboardGeneralSummary = {
   totalPatentamientos: number;
+  ownPatentamientos: number;
+  toyotaPatentamientos: number;
+  marketCoverage: number;
   marketLeader: {
     brand: string;
     total: number;
@@ -67,6 +70,9 @@ type DashboardGeneralTrendPoint = {
   key: string;
   label: string;
   total: number;
+  ownTotal: number;
+  toyotaTotal: number;
+  marketCoverage: number;
 };
 
 type DashboardGeneralTopBrand = {
@@ -1002,17 +1008,26 @@ const getToyotaEvolution = async (
   };
 };
 
-const getGeneralSummaryFromTotalizados = async (year: number): Promise<DashboardGeneralSummary> => {
+const getGeneralSummaryFromTotalizados = async (
+  year: number,
+  month: number | null,
+): Promise<DashboardGeneralSummary> => {
+  const matchStage: Record<string, unknown> = {
+    anio: year,
+    registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
+    marca: { $exists: true, $ne: "" },
+  };
+
+  if (month !== null) {
+    matchStage.mes = month;
+  }
+
   const rows = await PatentamientoTotalizado.aggregate<{
     brand: string;
     total: number;
   }>([
     {
-      $match: {
-        anio: year,
-        registroLocalidad: { $in: ZONA_NIC_LOCALITIES },
-        marca: { $exists: true, $ne: "" },
-      },
+      $match: matchStage,
     },
     {
       $group: {
@@ -1034,12 +1049,59 @@ const getGeneralSummaryFromTotalizados = async (year: number): Promise<Dashboard
       },
     },
   ]);
+  const [ownAggregation, toyotaAggregation] = await Promise.all([
+    PatentamientoTotalizado.aggregate<{ total: number }>([
+      {
+        $match: {
+          ...matchStage,
+          esPropio: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$total" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+        },
+      },
+    ]),
+    PatentamientoTotalizado.aggregate<{ total: number }>([
+      {
+        $match: {
+          ...matchStage,
+          marca: "TOYOTA",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$total" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+        },
+      },
+    ]),
+  ]);
 
   const totalPatentamientos = rows.reduce((sum, row) => sum + row.total, 0);
+  const ownPatentamientos = ownAggregation[0]?.total ?? 0;
+  const toyotaPatentamientos = toyotaAggregation[0]?.total ?? 0;
   const leader = rows[0];
 
   return {
     totalPatentamientos,
+    ownPatentamientos,
+    toyotaPatentamientos,
+    marketCoverage: toyotaPatentamientos > 0 ? roundPercentage((ownPatentamientos / toyotaPatentamientos) * 100) : 0,
     marketLeader: leader
       ? {
           brand: leader.brand,
@@ -1073,7 +1135,7 @@ const getGeneralTrendFromTotalizados = async (
   months: DashboardMonthColumn[],
 ): Promise<DashboardGeneralTrendPoint[]> => {
   if (month) {
-    const rows = await PatentamientoTotalizado.aggregate<{ dayNumber: number; total: number }>([
+    const rows = await PatentamientoTotalizado.aggregate<{ dayNumber: number; total: number; ownTotal: number; toyotaTotal: number }>([
       {
         $match: {
           anio: year,
@@ -1085,6 +1147,16 @@ const getGeneralTrendFromTotalizados = async (
         $group: {
           _id: "$dia",
           total: { $sum: "$total" },
+          ownTotal: {
+            $sum: {
+              $cond: [{ $eq: ["$esPropio", true] }, "$total", 0],
+            },
+          },
+          toyotaTotal: {
+            $sum: {
+              $cond: [{ $eq: ["$marca", "TOYOTA"] }, "$total", 0],
+            },
+          },
         },
       },
       {
@@ -1092,6 +1164,8 @@ const getGeneralTrendFromTotalizados = async (
           _id: 0,
           dayNumber: "$_id",
           total: 1,
+          ownTotal: 1,
+          toyotaTotal: 1,
         },
       },
       { $sort: { dayNumber: 1 } },
@@ -1108,11 +1182,14 @@ const getGeneralTrendFromTotalizados = async (
         key: `${year}-${monthKey}-${dayKey}`,
         label: dayKey,
         total: row.total,
+        ownTotal: row.ownTotal,
+        toyotaTotal: row.toyotaTotal,
+        marketCoverage: row.toyotaTotal > 0 ? roundPercentage((row.ownTotal / row.toyotaTotal) * 100) : 0,
       };
       });
   }
 
-  const rows = await PatentamientoTotalizado.aggregate<{ monthNumber: number; total: number }>([
+  const rows = await PatentamientoTotalizado.aggregate<{ monthNumber: number; total: number; ownTotal: number; toyotaTotal: number }>([
     {
       $match: {
         anio: year,
@@ -1123,6 +1200,16 @@ const getGeneralTrendFromTotalizados = async (
       $group: {
         _id: "$mes",
         total: { $sum: "$total" },
+        ownTotal: {
+          $sum: {
+            $cond: [{ $eq: ["$esPropio", true] }, "$total", 0],
+          },
+        },
+        toyotaTotal: {
+          $sum: {
+            $cond: [{ $eq: ["$marca", "TOYOTA"] }, "$total", 0],
+          },
+        },
       },
     },
     {
@@ -1130,17 +1217,29 @@ const getGeneralTrendFromTotalizados = async (
         _id: 0,
         monthNumber: "$_id",
         total: 1,
+        ownTotal: 1,
+        toyotaTotal: 1,
       },
     },
     { $sort: { monthNumber: 1 } },
   ]);
 
   const totalsByMonth = new Map(rows.map((row) => [row.monthNumber, row.total]));
+  const ownTotalsByMonth = new Map(rows.map((row) => [row.monthNumber, row.ownTotal]));
+  const toyotaTotalsByMonth = new Map(rows.map((row) => [row.monthNumber, row.toyotaTotal]));
 
   return months.map((monthItem) => ({
     key: monthItem.key,
     label: monthItem.label,
     total: totalsByMonth.get(monthItem.monthNumber) ?? 0,
+    ownTotal: ownTotalsByMonth.get(monthItem.monthNumber) ?? 0,
+    toyotaTotal: toyotaTotalsByMonth.get(monthItem.monthNumber) ?? 0,
+    marketCoverage:
+      (toyotaTotalsByMonth.get(monthItem.monthNumber) ?? 0) > 0
+        ? roundPercentage(
+          ((ownTotalsByMonth.get(monthItem.monthNumber) ?? 0) / (toyotaTotalsByMonth.get(monthItem.monthNumber) ?? 0)) * 100,
+        )
+        : 0,
   }));
 };
 
@@ -1226,7 +1325,7 @@ const getGeneralZonaNic = async (
   pageSize: number,
 ): Promise<DashboardGeneralResponse> => {
   const [summary, months, topModelsData] = await Promise.all([
-    getGeneralSummaryFromTotalizados(year),
+    getGeneralSummaryFromTotalizados(year, month),
     getGeneralMonthsFromTotalizados(year),
     getGeneralTopModelsFromTotalizados(year, month, page, pageSize),
   ]);

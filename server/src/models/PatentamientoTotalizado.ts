@@ -8,6 +8,7 @@ export interface IPatentamientoTotalizado extends Document {
   modelo: string;
   registroProvincia: string;
   registroLocalidad: string;
+  esPropio: boolean;
   prendado: boolean | null;
   tipoAcreedorPrendario: string;
   total: number;
@@ -25,6 +26,7 @@ const patentamientoTotalizadoSchema = new Schema<IPatentamientoTotalizado>(
     modelo: { type: String, required: true, trim: true, index: true, default: "SIN MODELO" },
     registroProvincia: { type: String, required: true, trim: true, index: true, default: "SIN PROVINCIA" },
     registroLocalidad: { type: String, required: true, trim: true, default: "SIN LOCALIDAD" },
+    esPropio: { type: Boolean, required: true, default: false, index: true },
     prendado: { type: Boolean, default: null, index: true },
     tipoAcreedorPrendario: { type: String, required: true, trim: true, index: true, default: "SIN ACREEDOR" },
     total: { type: Number, required: true, default: 0 },
@@ -37,6 +39,7 @@ patentamientoTotalizadoSchema.index({ anio: 1, mes: 1, dia: 1 });
 patentamientoTotalizadoSchema.index({ marca: 1, anio: 1, mes: 1 });
 patentamientoTotalizadoSchema.index({ modelo: 1, anio: 1, mes: 1 });
 patentamientoTotalizadoSchema.index({ registroProvincia: 1, anio: 1, mes: 1 });
+patentamientoTotalizadoSchema.index({ esPropio: 1, anio: 1, mes: 1 });
 patentamientoTotalizadoSchema.index({ prendado: 1, anio: 1, mes: 1 });
 patentamientoTotalizadoSchema.index({ tipoAcreedorPrendario: 1, anio: 1, mes: 1 });
 

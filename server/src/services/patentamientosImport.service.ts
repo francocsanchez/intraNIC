@@ -148,8 +148,13 @@ export class PatentamientosImportService {
         throw new PatentamientosImportSkippedError("No se encontro ningun archivo Patent_Prendas para importar");
       }
 
-      if (trackedIdentifiersCount === 0 && totalizadosCount > 0) {
-        console.warn("[patentamientos-import] base legacy detectada sin huella de IdentificadorUnico; se reinicia para reconstruir");
+      if (trackedIdentifiersCount === 0) {
+        if (totalizadosCount > 0) {
+          console.warn("[patentamientos-import] base legacy detectada sin huella de IdentificadorUnico; se reinicia para reconstruir");
+        } else {
+          console.warn("[patentamientos-import] no hay identificadores acumulados; se ignoran marcas de archivos procesados y se reconstruye desde cero");
+        }
+
         await Promise.all([
           PatentamientoTotalizado.deleteMany({}),
           ImportedPatentamientoIdentifier.deleteMany({}),

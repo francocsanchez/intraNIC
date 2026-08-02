@@ -4,7 +4,7 @@ import PatentamientoTotalizado from "../models/PatentamientoTotalizado";
 import ImportedPatentamientoIdentifier from "../models/ImportedPatentamientoIdentifier";
 import type { IImportExecutionErrorDetail } from "../models/ImportExecutionLog";
 
-const CSV_HEADERS = [
+const REQUIRED_CSV_HEADERS = [
   "IdentificadorUnico",
   "Marca",
   "Modelo",
@@ -15,8 +15,12 @@ const CSV_HEADERS = [
   "TipoAcreedorPrendario",
 ] as const;
 
-type CsvHeader = (typeof CSV_HEADERS)[number];
-type CsvRow = Record<CsvHeader, string>;
+const OPTIONAL_CSV_HEADERS = [
+  "ChasisPropio",
+] as const;
+
+type CsvHeader = ((typeof REQUIRED_CSV_HEADERS)[number]) | ((typeof OPTIONAL_CSV_HEADERS)[number]);
+type CsvRow = Partial<Record<CsvHeader, string>> & Record<(typeof REQUIRED_CSV_HEADERS)[number], string>;
 
 type PatentamientoTotalizadoWritePayload = {
   anio: number;
@@ -26,6 +30,7 @@ type PatentamientoTotalizadoWritePayload = {
   modelo: string;
   registroProvincia: string;
   registroLocalidad: string;
+  esPropio: boolean;
   prendado: boolean | null;
   tipoAcreedorPrendario: string;
   total: number;
@@ -70,6 +75,7 @@ const normalizeText = (value: unknown) =>
     .toUpperCase();
 
 const normalizeDimensionValue = (value: unknown, fallback: string) => trimCell(value) || fallback;
+const parseOwnChassisFlag = (value: unknown) => trimCell(value) !== "";
 
 const parseNullableBoolean = (value: unknown, fieldName: string) => {
   const raw = trimCell(value);
@@ -135,7 +141,7 @@ const parseRequiredDate = (value: unknown, fieldName: string) => {
 
 const validateHeaders = (headers: string[]) => {
   const normalizedHeaders = headers.map((header) => trimCell(header).replace(/^\uFEFF/, ""));
-  const missingHeaders = CSV_HEADERS.filter((header) => !normalizedHeaders.includes(header));
+  const missingHeaders = REQUIRED_CSV_HEADERS.filter((header) => !normalizedHeaders.includes(header));
 
   if (missingHeaders.length) {
     throw new Error(`Faltan columnas requeridas: ${missingHeaders.join(", ")}`);
@@ -153,6 +159,7 @@ const buildAggregationKey = (
     payload.modelo,
     payload.registroProvincia,
     payload.registroLocalidad,
+    payload.esPropio ? "1" : "0",
     payload.prendado === null ? "null" : payload.prendado ? "1" : "0",
     payload.tipoAcreedorPrendario,
   ].join("|");
@@ -182,6 +189,7 @@ const buildTotalizadoPayload = (
     modelo: modelo || "SIN MODELO",
     registroProvincia: normalizeDimensionValue(row.RegistroProvincia, EMPTY_PROVINCE_LABEL),
     registroLocalidad: normalizeDimensionValue(row.RegistroLocalidad, EMPTY_LOCALITY_LABEL),
+    esPropio: parseOwnChassisFlag(row.ChasisPropio),
     prendado: parseNullableBoolean(row.Prendado, "Prendado"),
     tipoAcreedorPrendario: normalizeDimensionValue(row.TipoAcreedorPrendario, EMPTY_ACREEDOR_LABEL),
   };
@@ -421,6 +429,7 @@ export class PatentamientosPrendasCsvService {
             modelo: row.modelo,
             registroProvincia: row.registroProvincia,
             registroLocalidad: row.registroLocalidad,
+            esPropio: row.esPropio,
             prendado: row.prendado,
             tipoAcreedorPrendario: row.tipoAcreedorPrendario,
           },
@@ -435,6 +444,7 @@ export class PatentamientosPrendasCsvService {
               modelo: row.modelo,
               registroProvincia: row.registroProvincia,
               registroLocalidad: row.registroLocalidad,
+              esPropio: row.esPropio,
               prendado: row.prendado,
               tipoAcreedorPrendario: row.tipoAcreedorPrendario,
               createdAt: sourceUpdatedAt,

@@ -65,6 +65,9 @@ const dashboardGeneralTrendPointSchema = z.object({
   key: z.string(),
   label: z.string(),
   total: z.number(),
+  ownTotal: z.number(),
+  toyotaTotal: z.number(),
+  marketCoverage: z.number(),
 });
 
 const dashboardGeneralSchema = z.object({
@@ -72,6 +75,9 @@ const dashboardGeneralSchema = z.object({
   months: z.array(dashboardMonthSchema),
   summary: z.object({
     totalPatentamientos: z.number(),
+    ownPatentamientos: z.number(),
+    toyotaPatentamientos: z.number(),
+    marketCoverage: z.number(),
     marketLeader: z
       .object({
         brand: z.string(),
