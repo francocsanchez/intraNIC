@@ -427,43 +427,43 @@ export default function DashboardPatentamientosView() {
 
         {isMarcasSection ? (
           <>
-            {topPais.data ? <PatentamientosComparisonTable data={topPais.data} showMonthlyParticipation /> : null}
-            {topZonaNic.data ? <PatentamientosComparisonTable data={topZonaNic.data} showMonthlyParticipation /> : null}
+            {topPais.data ? <PatentamientosComparisonTable data={topPais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {topZonaNic.data ? <PatentamientosComparisonTable data={topZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
         {isPickupSection ? (
           <>
-            {pickupPais.data ? <PatentamientosComparisonTable data={pickupPais.data} showMonthlyParticipation /> : null}
-            {pickupZonaNic.data ? <PatentamientosComparisonTable data={pickupZonaNic.data} showMonthlyParticipation /> : null}
+            {pickupPais.data ? <PatentamientosComparisonTable data={pickupPais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {pickupZonaNic.data ? <PatentamientosComparisonTable data={pickupZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
         {isSw4Section ? (
           <>
-            {sw4Pais.data ? <PatentamientosComparisonTable data={sw4Pais.data} showMonthlyParticipation /> : null}
-            {sw4ZonaNic.data ? <PatentamientosComparisonTable data={sw4ZonaNic.data} showMonthlyParticipation /> : null}
+            {sw4Pais.data ? <PatentamientosComparisonTable data={sw4Pais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {sw4ZonaNic.data ? <PatentamientosComparisonTable data={sw4ZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
         {isCCrossSection ? (
           <>
-            {cCrossPais.data ? <PatentamientosComparisonTable data={cCrossPais.data} showMonthlyParticipation /> : null}
-            {cCrossZonaNic.data ? <PatentamientosComparisonTable data={cCrossZonaNic.data} showMonthlyParticipation /> : null}
+            {cCrossPais.data ? <PatentamientosComparisonTable data={cCrossPais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {cCrossZonaNic.data ? <PatentamientosComparisonTable data={cCrossZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
         {isYCrossSection ? (
           <>
-            {yCrossPais.data ? <PatentamientosComparisonTable data={yCrossPais.data} showMonthlyParticipation /> : null}
-            {yCrossZonaNic.data ? <PatentamientosComparisonTable data={yCrossZonaNic.data} showMonthlyParticipation /> : null}
+            {yCrossPais.data ? <PatentamientosComparisonTable data={yCrossPais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {yCrossZonaNic.data ? <PatentamientosComparisonTable data={yCrossZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
         {isYarisSection ? (
           <>
-            {yarisPais.data ? <PatentamientosComparisonTable data={yarisPais.data} showMonthlyParticipation /> : null}
-            {yarisZonaNic.data ? <PatentamientosComparisonTable data={yarisZonaNic.data} showMonthlyParticipation /> : null}
+            {yarisPais.data ? <PatentamientosComparisonTable data={yarisPais.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
+            {yarisZonaNic.data ? <PatentamientosComparisonTable data={yarisZonaNic.data} showMonthlyParticipation showMonthlyTrendArrows /> : null}
           </>
         ) : null}
 
@@ -482,11 +482,11 @@ export default function DashboardPatentamientosView() {
               ) : null}
               .
             </div>
-            <PatentamientosComparisonTable data={locationAnalysis.data.tables.hilux} showMonthlyParticipation />
-            <PatentamientosComparisonTable data={locationAnalysis.data.tables.sw4} showMonthlyParticipation />
-            <PatentamientosComparisonTable data={locationAnalysis.data.tables.cCross} showMonthlyParticipation />
-            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yCross} showMonthlyParticipation />
-            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yaris} showMonthlyParticipation />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.hilux} showMonthlyParticipation showMonthlyTrendArrows />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.sw4} showMonthlyParticipation showMonthlyTrendArrows />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.cCross} showMonthlyParticipation showMonthlyTrendArrows />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yCross} showMonthlyParticipation showMonthlyTrendArrows />
+            <PatentamientosComparisonTable data={locationAnalysis.data.tables.yaris} showMonthlyParticipation showMonthlyTrendArrows />
           </>
         ) : null}
 

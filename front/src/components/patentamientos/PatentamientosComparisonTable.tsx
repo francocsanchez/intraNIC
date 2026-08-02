@@ -1,9 +1,11 @@
 import type { PatentamientosDashboardTable } from "@/services/patentamientosDashboardService";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { Fragment } from "react";
 
 type PatentamientosComparisonTableProps = {
   data: PatentamientosDashboardTable;
   showMonthlyParticipation?: boolean;
+  showMonthlyTrendArrows?: boolean;
 };
 
 const ZONA_NIC_LEGEND = [
@@ -50,6 +52,7 @@ const getHeatmapStyle = (value: number, min: number, max: number) => {
 export default function PatentamientosComparisonTable({
   data,
   showMonthlyParticipation = false,
+  showMonthlyTrendArrows = false,
 }: PatentamientosComparisonTableProps) {
   const percentages = data.rows.map((row) => row.percentage);
   const minPercentage = percentages.length ? Math.min(...percentages) : 0;
@@ -63,6 +66,41 @@ export default function PatentamientosComparisonTable({
     }
 
     return (value / monthTotal) * 100;
+  };
+  const getPreviousMonthKey = (monthIndex: number) => {
+    if (monthIndex <= 0) {
+      return null;
+    }
+
+    return data.months[monthIndex - 1]?.key ?? null;
+  };
+  const getMonthlyTrendDirection = (rowMonths: Record<string, number>, monthIndex: number) => {
+    const currentMonthKey = data.months[monthIndex]?.key;
+    const previousMonthKey = getPreviousMonthKey(monthIndex);
+
+    if (!currentMonthKey || !previousMonthKey) {
+      return null;
+    }
+
+    const currentMonthTotal = data.totalRow.months[currentMonthKey] ?? 0;
+    const previousMonthTotal = data.totalRow.months[previousMonthKey] ?? 0;
+
+    if (currentMonthTotal <= 0 || previousMonthTotal <= 0) {
+      return null;
+    }
+
+    const currentParticipation = getMonthlyParticipation(rowMonths[currentMonthKey] ?? 0, currentMonthKey);
+    const previousParticipation = getMonthlyParticipation(rowMonths[previousMonthKey] ?? 0, previousMonthKey);
+
+    if (currentParticipation > previousParticipation) {
+      return "up";
+    }
+
+    if (currentParticipation < previousParticipation) {
+      return "down";
+    }
+
+    return null;
   };
 
   return (
@@ -114,7 +152,7 @@ export default function PatentamientosComparisonTable({
                     >
                       {row.label}
                     </td>
-                    {data.months.map((month) => (
+                    {data.months.map((month, monthIndex) => (
                       <Fragment key={`${row.label}-${month.key}-group`}>
                         <td
                           className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
@@ -129,7 +167,24 @@ export default function PatentamientosComparisonTable({
                               isToyotaRow(row.label) ? "bg-red-100" : ""
                             }`}
                           >
-                            {formatPercentage(getMonthlyParticipation(row.months[month.key] ?? 0, month.key))}
+                            <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
+                              <span>{formatPercentage(getMonthlyParticipation(row.months[month.key] ?? 0, month.key))}</span>
+                              {showMonthlyTrendArrows ? (
+                                (() => {
+                                  const trendDirection = getMonthlyTrendDirection(row.months, monthIndex);
+
+                                  if (trendDirection === "up") {
+                                    return <ArrowUp size={12} className="text-emerald-600" aria-hidden="true" />;
+                                  }
+
+                                  if (trendDirection === "down") {
+                                    return <ArrowDown size={12} className="text-red-600" aria-hidden="true" />;
+                                  }
+
+                                  return null;
+                                })()
+                              ) : null}
+                            </span>
                           </td>
                         ) : null}
                       </Fragment>
