@@ -76,6 +76,8 @@ export const paths = {
     stockDisponible: "/convencional/stock/disponible",
     stockReservado: "/convencional/stock/reservado",
     stockGuardado: "/convencional/stock/guardado",
+    stockValorizacion: "/convencional/stock/valorizacion",
+    stockValorizacionListaPrecios: "/convencional/stock/valorizacion/lista-precios",
     cotizador: "/gestion/convencional/cotizador",
     ranking: "/analisis/ranking-convencional",
     promedio: "/analisis/promedio-convencional",

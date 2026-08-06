@@ -1,5 +1,6 @@
 export const moduleKeys = [
   "convencional",
+  "valorizacion",
   "usados",
   "belgrano",
   "liess",

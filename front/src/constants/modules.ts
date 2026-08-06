@@ -1,5 +1,6 @@
 export const moduleKeys = [
   "convencional",
+  "valorizacion",
   "usados",
   "belgrano",
   "liess",
@@ -48,6 +49,7 @@ export type UserModules = Partial<Record<ModuleKey, number | null>>;
 
 export const moduleLabels: Record<ModuleKey, string> = {
   convencional: "Convencional",
+  valorizacion: "Valorizacion",
   usados: "Usados",
   belgrano: "Belgrano",
   liess: "Liess",
@@ -97,7 +99,7 @@ export const moduleSections: Array<{
 }> = [
   {
     title: "Stock de unidades",
-    modules: ["convencional", "usados", "belgrano", "liess"],
+    modules: ["convencional", "valorizacion", "usados", "belgrano", "liess"],
   },
   {
     title: "Call Center",

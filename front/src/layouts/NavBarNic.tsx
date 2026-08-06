@@ -19,11 +19,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const disponiblePath = isConvencional ? paths.convencional.stockDisponible : paths.usados.stockDisponible;
   const reservasPath = isConvencional ? paths.convencional.stockReservado : paths.usados.stockReservado;
   const guardadoPath = isConvencional ? paths.convencional.stockGuardado : paths.usados.stockGuardado;
+  const valorizacionPath = paths.convencional.stockValorizacion;
   const misOperacionesPath = isConvencional ? paths.convencional.misOperaciones : paths.usados.misOperaciones;
   const canViewConvencional = hasModulePathAccess(user, moduleKey, disponiblePath);
   const canViewPreventas = hasModulePathAccess(user, "preventas", paths.convencional.preventasResumen);
   const buttonGuardado = hasModulePathAccess(user, moduleKey, guardadoPath);
   const buttonReservas = hasModulePathAccess(user, moduleKey, reservasPath);
+  const canViewValorizacion = isConvencional && hasModulePathAccess(user, "valorizacion", valorizacionPath);
   const canViewMisOperaciones = hasModulePathAccess(user, moduleKey, misOperacionesPath);
   const canViewMisReservas = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
   const canViewMiListaEspera = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
@@ -67,6 +69,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
       icon: Archive,
       visible: buttonGuardado,
       active: pathname === guardadoPath,
+    },
+    {
+      label: "Valorizacion",
+      to: valorizacionPath,
+      icon: Calculator,
+      visible: canViewValorizacion,
+      active: pathname === valorizacionPath || pathname.startsWith(`${valorizacionPath}/`),
     },
     {
       label: "P. Resumen",

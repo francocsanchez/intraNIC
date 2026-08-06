@@ -33,6 +33,7 @@ La logica vigente es:
 
 ## Catalogo actual de modulos
 - `convencional`
+- `valorizacion`
 - `usados`
 - `liess`
 - `callCenter`
@@ -194,6 +195,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 
 ## Relacion actual modulo -> acceso funcional
 - `convencional`: stock y vistas generales de convencional
+- `valorizacion`: resumen consolidado de stock convencional por modelo
 - `usados`: stock y vistas generales de usados
 - `liess`: vistas de Liess
 - `callCenter`: seccion de importacion y administracion de origenes
@@ -431,13 +433,25 @@ Estado: definido
 - Esta etapa solo cambia acceso a pantallas y navegacion para las areas listadas arriba.
 - El resto de permisos por rol del sistema se mantiene sin cambios.
 - No se modifica la estructura de `User.modules`.
-- No se agregan modulos nuevos.
+- Se agrega el modulo `valorizacion` para `Convencional > Stock de unidades`.
 
 ## Carga de permisos en usuarios
 
 - La habilitacion se administra desde el formulario de alta y edicion de usuario.
 - Los checks siguen siendo por modulo individual.
 - Una seccion se muestra cuando el usuario tiene al menos uno de sus modulos hijos habilitado.
+- `Valorizacion` debe poder habilitarse desde la seccion `Stock de unidades`.
+
+## Acceso especifico del modulo `valorizacion`
+- Modulo asociado: `valorizacion`
+- Seccion visible en UI: `Stock de unidades / Convencional`
+- Ruta principal: `/convencional/stock/valorizacion`
+- Subvista incluida: `/convencional/stock/valorizacion/lista-precios`
+- Reglas vigentes:
+  - cualquier usuario con `modules.valorizacion = 1` puede acceder a la pantalla
+  - el acceso no depende de `modules.convencional`
+  - el rol no debe bloquear el acceso a la pantalla, a la subvista ni a los endpoints del modulo
+  - `superAdmin` puede acceder siempre aunque no tenga el modulo activo
 
 ## Regla para futuras definiciones
 Cuando se agreguen permisos por rol, cada definicion debe indicar:

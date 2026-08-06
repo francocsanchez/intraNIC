@@ -44,6 +44,8 @@ const NoAutorizadoView = lazy(() => import("./views/NoAutorizadoView"));
 const StockDisponibleConvencional = lazy(() => import("./views/convencional/StockDisponibleConvencional"));
 const StockGuardadoConvencioanl = lazy(() => import("./views/convencional/StockGuardadoConvencioanl"));
 const StockReservasConvencional = lazy(() => import("./views/convencional/StockReservasConvencional"));
+const StockValorizacionConvencional = lazy(() => import("./views/convencional/StockValorizacionConvencional"));
+const StockValorizacionListaPreciosView = lazy(() => import("./views/convencional/StockValorizacionListaPreciosView"));
 const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
 const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
 const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
@@ -392,6 +394,14 @@ export default function Router() {
               <Route path={paths.convencional.miListaEspera} element={<MiListaDeEsperaView />} />
               <Route path={paths.convencional.misOperaciones} element={<MisOperacionesView />} />
               <Route path={paths.convencional.stockDisponible} element={<StockDisponibleConvencional />} />
+              <Route path={paths.convencional.stockValorizacionListaPrecios} element={<StockValorizacionListaPreciosView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["valorizacion"]} />}>
+            <Route element={<NICLayout />}>
+              <Route path={paths.convencional.stockValorizacion} element={<StockValorizacionConvencional />} />
+              <Route path={paths.convencional.stockValorizacionListaPrecios} element={<StockValorizacionListaPreciosView />} />
             </Route>
           </Route>
 

@@ -35,6 +35,60 @@ export const stockDisponibleConvencionalSchema = z.object({
   resumen: stockDisponibleConvencionalResumenSchema,
 });
 
+export const stockValorizacionConvencionalItemSchema = z.object({
+  modelo: z.string(),
+  stockDisponible: z.number(),
+  stockReservado: z.number(),
+  stockGuardado: z.number(),
+  total: z.number(),
+  valorizacion: z.number(),
+});
+
+export const stockValorizacionConvencionalResumenSchema = z.object({
+  modelos: z.number(),
+  stockDisponible: z.number(),
+  stockReservado: z.number(),
+  stockGuardado: z.number(),
+  total: z.number(),
+  valorizacionTotal: z.number(),
+  versionesSinPrecio: z.number(),
+  unidadesSinPrecio: z.number(),
+});
+
+export const stockValorizacionConvencionalFaltanteSchema = z.object({
+  modelo: z.string(),
+  version: z.string(),
+  cantidadUnidades: z.number(),
+});
+
+export const stockValorizacionConvencionalSchema = z.object({
+  data: z.array(stockValorizacionConvencionalItemSchema),
+  resumen: stockValorizacionConvencionalResumenSchema,
+  faltantes: z.array(stockValorizacionConvencionalFaltanteSchema),
+});
+
+export type StockValorizacionConvencionalResponse = z.infer<typeof stockValorizacionConvencionalSchema>;
+
+export const stockValorizacionPrecioItemSchema = z.object({
+  version: z.string(),
+  modelo: z.string(),
+  cantidadUnidades: z.number(),
+  valor: z.number().nullable(),
+  tienePrecio: z.boolean(),
+});
+
+export const stockValorizacionPrecioListResponseSchema = z.object({
+  data: z.array(stockValorizacionPrecioItemSchema),
+});
+
+export const stockValorizacionPrecioResponseSchema = z.object({
+  data: stockValorizacionPrecioItemSchema,
+  message: z.string(),
+});
+
+export type StockValorizacionPrecioListResponse = z.infer<typeof stockValorizacionPrecioListResponseSchema>;
+export type StockValorizacionPrecioResponse = z.infer<typeof stockValorizacionPrecioResponseSchema>;
+
 //**************************** */
 // STOCK RESERVADO
 //**************************** */
