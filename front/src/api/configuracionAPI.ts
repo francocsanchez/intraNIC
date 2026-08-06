@@ -63,3 +63,20 @@ export async function updateConfiguracionUsado(formData: ConfigUsaForm) {
     }
   }
 }
+
+type ConfigBelgranoForm = {
+  sistemaActivoBelgrano: boolean;
+  vendedoresDisponibleBelgrano: string[];
+};
+
+export async function updateConfiguracionBelgrano(formData: ConfigBelgranoForm) {
+  try {
+    const { data } = await api.patch("/config/", formData);
+
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error);
+    }
+  }
+}

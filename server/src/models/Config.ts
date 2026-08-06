@@ -13,6 +13,9 @@ export interface IConfiguration extends Document {
   vendedoresStockNoReparadoUsados: string[];
   vendedoresStockPendDocuUsados: string[];
 
+  sistemaActivoBelgrano: boolean;
+  vendedoresDisponibleBelgrano: string[];
+
   sistemaActivoLIESS: boolean;
   vendedoresDisponibleLIESS: string[];
   vendedoresStockGuardadoLIESS: string[];
@@ -32,6 +35,9 @@ const configSchema: Schema = new Schema(
     vendedoresStockGuardadoUsados: { type: [String] },
     vendedoresStockNoReparadoUsados: { type: [String] },
     vendedoresStockPendDocuUsados: { type: [String] },
+
+    sistemaActivoBelgrano: { type: Boolean, default: true },
+    vendedoresDisponibleBelgrano: { type: [String] },
 
     sistemaActivoLIESS: { type: Boolean, default: true },
     vendedoresDisponibleLIESS: { type: [String] },

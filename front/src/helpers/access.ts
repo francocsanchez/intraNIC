@@ -15,7 +15,7 @@ import {
 } from "@/constants/roleAccess";
 
 type AuthUser = Usuario | null | undefined;
-type BusinessMaintenanceKey = "convencional" | "usados";
+type BusinessMaintenanceKey = "convencional" | "usados" | "belgrano";
 
 const normalizeRole = (role: unknown) =>
   String(role)
@@ -62,7 +62,7 @@ export function shouldShowMaintenanceForBusiness(user: AuthUser, business: Busin
     return false;
   }
 
-  return business === "convencional" || business === "usados";
+  return business === "convencional" || business === "usados" || business === "belgrano";
 }
 
 export function hasSegUnidadesFabricaImportAccess(user: AuthUser) {

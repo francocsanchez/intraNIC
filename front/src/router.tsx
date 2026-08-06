@@ -19,12 +19,14 @@ const CotizadorConfigProtectedRoute = lazy(() => import("./layouts/CotizadorConf
 const SuperAdminProtectedRoute = lazy(() => import("./layouts/SuperAdminProtectedRoute"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
+const NICBelgranoLayout = lazy(() => import("./layouts/NICBelgranoLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
+const EditConfiguracionBelgranoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionBelgranoView"));
 const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/UnidadesNegocioView"));
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
@@ -45,6 +47,7 @@ const StockReservasConvencional = lazy(() => import("./views/convencional/StockR
 const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
 const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
 const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
+const StockDisponibleBelgrano = lazy(() => import("./views/belgrano/StockDisponibleBelgrano"));
 const StockGuardadoUsados = lazy(() => import("./views/usados/StockGuardadoUsados"));
 const MisReservasUsadosView = lazy(() => import("./views/usados/MisReservasUsadosView"));
 const StockNoReparadoUsadosView = lazy(() => import("./views/usados/StockNoReparadoUsadosView"));
@@ -172,6 +175,7 @@ export default function Router() {
             <Route element={<AdminLayout />}>
               <Route path={paths.admin.configuracionConvencionalEditar} element={<EditConfiguracionConvView />} />
               <Route path={paths.admin.configuracionUsadosEditar} element={<EditConfiguracionUsadoView />} />
+              <Route path={paths.admin.configuracionBelgranoEditar} element={<EditConfiguracionBelgranoView />} />
             </Route>
           </Route>
 
@@ -461,6 +465,12 @@ export default function Router() {
               <Route path={paths.usados.misReservas} element={<MisReservasUsadosView />} />
               <Route path={paths.usados.stockGuardado} element={<StockGuardadoUsados />} />
               <Route path={paths.usados.stockReservado} element={<StockReservasUsados />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["belgrano"]} />}>
+            <Route element={<NICBelgranoLayout />}>
+              <Route path={paths.belgrano.stockDisponible} element={<StockDisponibleBelgrano />} />
             </Route>
           </Route>
 

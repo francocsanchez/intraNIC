@@ -23,6 +23,7 @@ export type RoleAccessKey =
   | "preventas.assign"
   | "proformas"
   | "usados.stockDisponible"
+  | "belgrano.stockDisponible"
   | "usados.stockGuardado"
   | "usados.stockReservado"
   | "usados.misReservas"
@@ -127,6 +128,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.minutas.delete",
     "comercial.minutas.pdf",
     "usados.stockDisponible",
+    "belgrano.stockDisponible",
     "usados.misOperaciones",
     "liess.stockDisponible",
   ]),
@@ -167,6 +169,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.minutas.delete",
     "comercial.minutas.pdf",
     "usados.stockDisponible",
+    "belgrano.stockDisponible",
     "usados.stockReservado",
     "usados.misOperaciones",
     "liess.stockDisponible",
@@ -216,6 +219,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "comercial.minutas.delete",
     "comercial.minutas.pdf",
     "usados.stockDisponible",
+    "belgrano.stockDisponible",
     "usados.stockReservado",
     "usados.misOperaciones",
     "liess.stockDisponible",
@@ -242,6 +246,7 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "convencional.stockGuardado",
     "convencional.stockReservado",
     "usados.stockDisponible",
+    "belgrano.stockDisponible",
     "usados.stockGuardado",
     "usados.stockReservado",
     "usados.noReparado",

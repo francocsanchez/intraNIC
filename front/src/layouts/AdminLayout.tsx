@@ -31,7 +31,8 @@ export default function AdminLayout() {
         pathname === paths.admin.cotizadorPlanes ||
         pathname === paths.convencional.pedidoMensual ||
         pathname === paths.admin.configuracionConvencionalEditar ||
-        pathname === paths.admin.configuracionUsadosEditar,
+        pathname === paths.admin.configuracionUsadosEditar ||
+        pathname === paths.admin.configuracionBelgranoEditar,
     },
     {
       label: "TestDrive",

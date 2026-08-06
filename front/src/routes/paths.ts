@@ -25,6 +25,7 @@ export const paths = {
     configuracionEnvioAgenda: "/admin/configuracion/envio-agenda",
     configuracionConvencionalEditar: "/admin/configuracion/convencional/editar",
     configuracionUsadosEditar: "/admin/configuracion/usados/editar",
+    configuracionBelgranoEditar: "/admin/configuracion/belgrano/editar",
     planNegocio: "/admin/configuracion/plan-negocio",
     cotizadorPrecios: "/admin/configuracion/cotizador/precios",
     cotizadorPlanes: "/admin/configuracion/cotizador/planes",
@@ -130,6 +131,9 @@ export const paths = {
     stockIngresos: "/gestion/usados/stock/ingresos",
     misReservas: "/usados/mis-reservas",
     misOperaciones: "/usados/mis-operaciones",
+  },
+  belgrano: {
+    stockDisponible: "/belgrano/stock/disponible",
   },
   liess: {
     stockDisponibleRoute: "/liess/stock/:tipo",

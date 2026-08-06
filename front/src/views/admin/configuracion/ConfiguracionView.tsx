@@ -141,6 +141,21 @@ export default function ConfiguracionView() {
       editPath: paths.admin.configuracionUsadosEditar,
       catalogos: [],
     },
+    {
+      title: "Belgrano",
+      slug: "belgrano",
+      activo: config.sistemaActivoBelgrano,
+      bloques: [
+        {
+          label: "Vendedores Disponible",
+          values: mapCodigos(config.vendedoresDisponibleBelgrano ?? []),
+        },
+      ],
+      canView: true,
+      canEdit: canEditConfiguracion && hasPathAccess(user, paths.admin.configuracionBelgranoEditar),
+      editPath: paths.admin.configuracionBelgranoEditar,
+      catalogos: [],
+    },
   ];
 
   return (
