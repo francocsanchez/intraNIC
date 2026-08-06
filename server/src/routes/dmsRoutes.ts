@@ -45,13 +45,11 @@ router.get(
 router.get(
   "/pend-fac",
   authorizeModules("pendFac"),
-  authorizeRoleAccess("convencional.analisisStock"),
   DmsController.getPendFac,
 );
 router.get(
   "/pend-fac/export",
   authorizeModules("pendFac"),
-  authorizeRoleAccess("convencional.analisisStock"),
   DmsController.exportPendFac,
 );
 router.post(
