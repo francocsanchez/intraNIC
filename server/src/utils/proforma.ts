@@ -91,62 +91,6 @@ export const formatPercentAr = (value: number) =>
 
 export const roundTo2 = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 
-export const buildUnitRows = (unidad: {
-  versionNombre: string;
-  cantidad: number;
-  ivaUnidad: number;
-  totalUnidad: number;
-  descuentoUnidad: number;
-  totalPatentamiento: number;
-  totalFlete: number;
-}): ProformaPdfRow[] => {
-  const rows: ProformaPdfRow[] = [
-    {
-      detalle: unidad.versionNombre,
-      cantidad: unidad.cantidad,
-      iva: unidad.ivaUnidad,
-      neto: roundTo2(unidad.totalUnidad / (1 + unidad.ivaUnidad / 100)),
-      total: roundTo2(unidad.totalUnidad),
-      totales: roundTo2(unidad.cantidad * unidad.totalUnidad),
-    },
-  ];
-
-  if (unidad.totalPatentamiento > 0) {
-    rows.push({
-      detalle: "Patentamiento",
-      cantidad: unidad.cantidad,
-      iva: 0,
-      neto: roundTo2(unidad.totalPatentamiento),
-      total: roundTo2(unidad.totalPatentamiento),
-      totales: roundTo2(unidad.cantidad * unidad.totalPatentamiento),
-    });
-  }
-
-  if (unidad.totalFlete > 0) {
-    rows.push({
-      detalle: "Flete",
-      cantidad: unidad.cantidad,
-      iva: 21,
-      neto: roundTo2(unidad.totalFlete / 1.21),
-      total: roundTo2(unidad.totalFlete),
-      totales: roundTo2(unidad.cantidad * unidad.totalFlete),
-    });
-  }
-
-  if (unidad.descuentoUnidad > 0) {
-    rows.push({
-      detalle: "Descuento",
-      cantidad: unidad.cantidad,
-      iva: unidad.ivaUnidad,
-      neto: roundTo2((unidad.descuentoUnidad / (1 + unidad.ivaUnidad / 100)) * -1),
-      total: roundTo2(unidad.descuentoUnidad * -1),
-      totales: roundTo2(unidad.cantidad * unidad.descuentoUnidad * -1),
-    });
-  }
-
-  return rows;
-};
-
 export const getNextProformaNumber = async () => {
   const counter = await Counter.findOneAndUpdate(
     { key: "proformas" },
@@ -228,6 +172,48 @@ export const validateAndCalculateProforma = async (payload: ProformaPayload): Pr
       throw new Error(`El flete de la unidad ${index + 1} debe ser mayor o igual a 0`);
     }
 
+    const unitRow: ProformaPdfRow = {
+      detalle: version.nombre,
+      cantidad,
+      iva: ivaUnidad,
+      neto: roundTo2(totalUnidad / (1 + ivaUnidad / 100)),
+      total: roundTo2(totalUnidad),
+      totales: roundTo2(cantidad * totalUnidad),
+    };
+
+    const patentamientoRow: ProformaPdfRow = {
+      detalle: "Patentamiento",
+      cantidad,
+      iva: 0,
+      neto: roundTo2(totalPatentamiento),
+      total: roundTo2(totalPatentamiento),
+      totales: roundTo2(cantidad * totalPatentamiento),
+    };
+
+    const fleteRow: ProformaPdfRow = {
+      detalle: "Flete",
+      cantidad,
+      iva: 21,
+      neto: roundTo2(totalFlete / 1.21),
+      total: roundTo2(totalFlete),
+      totales: roundTo2(cantidad * totalFlete),
+    };
+
+    const descuentoRow: ProformaPdfRow = {
+      detalle: "Descuento",
+      cantidad,
+      iva: ivaUnidad,
+      neto: roundTo2((descuentoUnidad / (1 + ivaUnidad / 100)) * -1),
+      total: roundTo2(descuentoUnidad * -1),
+      totales: roundTo2(cantidad * descuentoUnidad * -1),
+    };
+
+    const rows = [unitRow];
+
+    if (totalPatentamiento > 0) rows.push(patentamientoRow);
+    if (totalFlete > 0) rows.push(fleteRow);
+    if (descuentoUnidad > 0) rows.push(descuentoRow);
+
     return {
       versionId,
       versionNombre: version.nombre,
@@ -237,15 +223,7 @@ export const validateAndCalculateProforma = async (payload: ProformaPayload): Pr
       descuentoUnidad: roundTo2(descuentoUnidad),
       totalPatentamiento: roundTo2(totalPatentamiento),
       totalFlete: roundTo2(totalFlete),
-      rows: buildUnitRows({
-        versionNombre: version.nombre,
-        cantidad,
-        ivaUnidad,
-        totalUnidad,
-        descuentoUnidad,
-        totalPatentamiento,
-        totalFlete,
-      }),
+      rows,
     };
   });
 
@@ -275,15 +253,49 @@ export const buildProformaResponse = (proforma: any) => {
         const totalPatentamiento = Number(unidad.totalPatentamiento);
         const totalFlete = Number(unidad.totalFlete);
 
-        const rows = buildUnitRows({
-          versionNombre: unidad.versionNombre,
-          cantidad,
-          ivaUnidad,
-          totalUnidad,
-          descuentoUnidad,
-          totalPatentamiento,
-          totalFlete,
-        });
+        const rows: ProformaPdfRow[] = [
+          {
+            detalle: unidad.versionNombre,
+            cantidad,
+            iva: ivaUnidad,
+            neto: roundTo2(totalUnidad / (1 + ivaUnidad / 100)),
+            total: roundTo2(totalUnidad),
+            totales: roundTo2(cantidad * totalUnidad),
+          },
+        ];
+
+        if (totalPatentamiento > 0) {
+          rows.push({
+            detalle: "Patentamiento",
+            cantidad,
+            iva: 0,
+            neto: roundTo2(totalPatentamiento),
+            total: roundTo2(totalPatentamiento),
+            totales: roundTo2(cantidad * totalPatentamiento),
+          });
+        }
+
+        if (totalFlete > 0) {
+          rows.push({
+            detalle: "Flete",
+            cantidad,
+            iva: 21,
+            neto: roundTo2(totalFlete / 1.21),
+            total: roundTo2(totalFlete),
+            totales: roundTo2(cantidad * totalFlete),
+          });
+        }
+
+        if (descuentoUnidad > 0) {
+          rows.push({
+            detalle: "Descuento",
+            cantidad,
+            iva: ivaUnidad,
+            neto: roundTo2((descuentoUnidad / (1 + ivaUnidad / 100)) * -1),
+            total: roundTo2(descuentoUnidad * -1),
+            totales: roundTo2(cantidad * descuentoUnidad * -1),
+          });
+        }
 
         return {
           _id: String(unidad._id),

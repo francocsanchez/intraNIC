@@ -51,8 +51,6 @@ type ProcessFileOptions = {
 const ERROR_SAMPLE_LIMIT = 20;
 const EMPTY_PROVINCE_LABEL = "SIN PROVINCIA";
 const EMPTY_LOCALITY_LABEL = "SIN LOCALIDAD";
-const MIN_ANIO_MODELO = 2010;
-const ANIO_MODELO_MIN_ERROR = `El campo "AnioModelo" debe ser mayor o igual a ${MIN_ANIO_MODELO}`;
 
 const trimCell = (value: unknown) =>
   String(value ?? "")
@@ -177,8 +175,8 @@ const buildTotalizadoPayload = (
     anioModelo: (() => {
       const anioModelo = parseRequiredYear(row.AnioModelo, "AnioModelo");
 
-      if (anioModelo < MIN_ANIO_MODELO) {
-        throw new Error(ANIO_MODELO_MIN_ERROR);
+      if (anioModelo < 2010) {
+        throw new Error('El campo "AnioModelo" debe ser mayor o igual a 2010');
       }
 
       return anioModelo;
@@ -193,14 +191,8 @@ const pushError = (
   line: number,
   message: string,
   identificadorUnico = "",
-  countAsError = true,
 ) => {
   summary.discarded += 1;
-
-  if (!countAsError) {
-    return;
-  }
-
   summary.errored += 1;
 
   if (summary.errorDetailsSample.length < ERROR_SAMPLE_LIMIT) {
@@ -361,13 +353,7 @@ export class TransferenciasPrendasCsvService {
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "No se pudo procesar la fila";
-          pushError(
-            summary,
-            lineNumber,
-            errorMessage,
-            trimCell(rawRow.IdentificadorUnico),
-            errorMessage !== ANIO_MODELO_MIN_ERROR,
-          );
+          pushError(summary, lineNumber, errorMessage, trimCell(rawRow.IdentificadorUnico));
         } finally {
           parser.resume();
         }
