@@ -304,7 +304,7 @@ export const misOperacionesDescuentoPromedioMensualQuery = () => `
 SELECT
     AVG(
         CASE
-            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL AND vp.bonificacion > 0
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
         END
@@ -323,6 +323,7 @@ WHERE
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
+    AND vp.bonificacion > 0
 `;
 
 export const datoOpera = () => `

@@ -809,6 +809,7 @@ export const analisisOperacionesPreventaItemSchema = z.object({
   interno: z.number().nullable(),
   fecha: z.string().nullable(),
   fechaFactura: z.string().nullable(),
+  cliente: z.string(),
   sucursal: z.string(),
   version: z.string(),
   modelo: z.string(),
@@ -827,6 +828,7 @@ export const analisisOperacionesPreventaItemSchema = z.object({
 
 export const analisisOperacionesPreventaFormaPagoSchema = z.object({
   numero: z.number().nullable(),
+  vendedor: z.string(),
   usados: z.number().nullable(),
   contado: z.number().nullable(),
   cheque: z.number().nullable(),

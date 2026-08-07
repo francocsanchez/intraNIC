@@ -112,7 +112,7 @@ function buildMonthlyDiscountByModel(rows: MisOperacionesResponse["data"]) {
 
   for (const row of rows) {
     const descuento = row.descuentoPorcentaje;
-    if (descuento === null || descuento === undefined || Number.isNaN(descuento)) continue;
+    if (descuento === null || descuento === undefined || Number.isNaN(descuento) || descuento <= 0) continue;
 
     const modelo = row.modelo?.trim() || "SIN MODELO";
     const current = accumulator.get(modelo) ?? { total: 0, count: 0 };

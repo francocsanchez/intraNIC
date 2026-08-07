@@ -181,6 +181,7 @@ type AnalisisOperacionPreventaRow = {
   interno: number | string | null;
   fecha: string | Date | null;
   fecha_factura: string | Date | null;
+  cliente: string | null;
   sucursal: string | null;
   version: string | null;
   modelo: string | null;
@@ -202,6 +203,7 @@ type AnalisisOperacionPreventaItem = {
   interno: number | null;
   fecha: string | null;
   fechaFactura: string | null;
+  cliente: string;
   sucursal: string;
   version: string;
   modelo: string;
@@ -220,6 +222,7 @@ type AnalisisOperacionPreventaItem = {
 
 type AnalisisOperacionPreventaFormaPagoRow = {
   numero: number | string | null;
+  vendedor: string | null;
   usados: number | null;
   contado: number | null;
   cheque: number | null;
@@ -228,6 +231,7 @@ type AnalisisOperacionPreventaFormaPagoRow = {
 
 type AnalisisOperacionPreventaFormaPagoItem = {
   numero: number | null;
+  vendedor: string;
   usados: number | null;
   contado: number | null;
   cheque: number | null;
@@ -692,6 +696,7 @@ export class OperacionesDashboardService {
       interno: normalizeNullableNumber(row.interno),
       fecha: serializeNullableDate(row.fecha),
       fechaFactura: serializeNullableDate(row.fecha_factura),
+      cliente: normalizeNullableString(row.cliente) ?? "-",
       sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
@@ -845,6 +850,7 @@ export class OperacionesDashboardService {
       interno: normalizeNullableNumber(row.interno),
       fecha: serializeNullableDate(row.fecha),
       fechaFactura: null,
+      cliente: normalizeNullableString(row.cliente) ?? "-",
       sucursal: "",
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
@@ -955,6 +961,7 @@ export class OperacionesDashboardService {
     return {
       data: {
         numero: normalizeNullableNumber(row.numero),
+        vendedor: normalizeNullableString(row.vendedor) ?? "SIN VENDEDOR",
         usados: normalizeNullableNumber(row.usados),
         contado: normalizeNullableNumber(row.contado),
         cheque: normalizeNullableNumber(row.cheque),

@@ -66,6 +66,7 @@ const TABLE_COLUMNS: TableColumn[] = [
   { kind: "field", key: "numero", label: "OP" },
   { kind: "field", key: "interno", label: "Stoauto" },
   { kind: "field", key: "fecha", label: "Fecha" },
+  { kind: "field", key: "cliente", label: "Cliente" },
   { kind: "field", key: "modelo", label: "Modelo" },
   { kind: "field", key: "version", label: "Version" },
   { kind: "field", key: "precio", label: "Precio" },
@@ -115,7 +116,7 @@ const formatMoney = (value: number | null) => {
 };
 
 const getDescuentoPorcentaje = (row: AnalisisOperacionesPreventaItem) => {
-  if (!row.precio || !row.bonificacion) {
+  if (!row.precio || !row.bonificacion || row.bonificacion <= 0) {
     return null;
   }
 
@@ -333,7 +334,7 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                 <div className="px-5 py-4">
                   {isLoading ? (
                     <div className="space-y-3">
-                      {Array.from({ length: 4 }).map((_, index) => (
+                      {Array.from({ length: 5 }).map((_, index) => (
                         <div key={index} className="h-10 animate-pulse rounded-xl bg-gray-100" />
                       ))}
                     </div>
@@ -343,6 +344,10 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                     </div>
                   ) : (
                     <div className="space-y-2">
+                      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                        <span className="text-sm font-medium text-gray-600">Vendedor</span>
+                        <span className="text-sm font-semibold text-gray-900">{detalle?.vendedor ?? "-"}</span>
+                      </div>
                       {items.map((item) => (
                         <div
                           key={item.label}

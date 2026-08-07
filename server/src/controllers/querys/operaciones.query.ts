@@ -54,6 +54,7 @@ SELECT
     stoauto.sa_codigo AS interno,
     vp.fecha,
     ope.ope_fecfac AS fecha_factura,
+    LTRIM(RTRIM(ISNULL(cli.cli_nombre, '-'))) AS cliente,
     LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL'))) AS sucursal,
     LTRIM(RTRIM(vp.modelo)) AS version,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
@@ -76,6 +77,8 @@ INNER JOIN opera ope ON
     AND ope.ope_fecasig IS NOT NULL
 INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN cliente cli ON
+    cli.cli_codigo = ope.ope_cliente
 LEFT JOIN sucursal ON
     sucursal.suc_codigo = vp.sucursal_id
 LEFT JOIN auto ON
@@ -97,6 +100,7 @@ ORDER BY
 export const analisisOperacionesPreventaFormaPagoQuery = () => `
 SELECT TOP 1
     vp.numero,
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR'))) AS vendedor,
     vp.usados,
     vp.contado,
     vp.cheque,
@@ -109,6 +113,8 @@ INNER JOIN opera ope ON
     AND ope.ope_fecasig IS NOT NULL
 INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = vp.vendedor_id
 WHERE
     vp.fecha_anulacion IS NULL
     AND stoauto.sa_nrofab LIKE 'NIC%'
@@ -125,7 +131,7 @@ SELECT
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO'))) AS modelo,
     AVG(
         CASE
-            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL AND vp.bonificacion > 0
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
         END
@@ -151,6 +157,7 @@ WHERE
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
+    AND vp.bonificacion > 0
 GROUP BY
     MONTH(ope.ope_fecasig),
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, 'SIN MODELO')))
@@ -165,7 +172,7 @@ SELECT
     LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL'))) AS sucursal,
     AVG(
         CASE
-            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL AND vp.bonificacion > 0
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
         END
@@ -188,6 +195,7 @@ WHERE
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
+    AND vp.bonificacion > 0
 GROUP BY
     MONTH(ope.ope_fecasig),
     LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL')))
@@ -202,7 +210,7 @@ SELECT
     LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR'))) AS vendedor,
     AVG(
         CASE
-            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL AND vp.bonificacion > 0
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
         END
@@ -231,6 +239,7 @@ WHERE
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
+    AND vp.bonificacion > 0
 GROUP BY
     MONTH(ope.ope_fecasig),
     LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR')))
@@ -400,6 +409,7 @@ SELECT
     vp.numero,
     stoauto.sa_codigo AS interno,
     vp.fecha,
+    LTRIM(RTRIM(ISNULL(cli.cli_nombre, '-'))) AS cliente,
     LTRIM(RTRIM(vp.modelo)) AS version,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
     vp.precio,
@@ -416,6 +426,8 @@ LEFT JOIN viewpreventa vp ON
     CAST(vp.id AS VARCHAR(50)) = CONCAT(CAST(ope.ope_tipo AS VARCHAR(20)), '-', CAST(ope.ope_codigo AS VARCHAR(20)))
 INNER JOIN stoauto ON
     stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN cliente cli ON
+    cli.cli_codigo = ope.ope_cliente
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
     AND auto.au_marca = ope.ope_marca
@@ -504,7 +516,7 @@ SELECT
     MONTH(ope.ope_fecasig) AS mes,
     AVG(
         CASE
-            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL
+            WHEN vp.precio IS NOT NULL AND vp.precio > 0 AND vp.bonificacion IS NOT NULL AND vp.bonificacion > 0
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
         END
@@ -514,6 +526,7 @@ SELECT
             WHEN vp.precio IS NOT NULL
                 AND vp.precio > 0
                 AND vp.bonificacion IS NOT NULL
+                AND vp.bonificacion > 0
                 AND UPPER(LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, '')))) = 'HILUX'
                 THEN (vp.bonificacion * 100.0) / vp.precio
             ELSE NULL
@@ -541,6 +554,7 @@ WHERE
     AND vp.precio IS NOT NULL
     AND vp.precio > 0
     AND vp.bonificacion IS NOT NULL
+    AND vp.bonificacion > 0
     ${hasVendedorFilter ? "AND ope.ope_vende = :vendedor" : ""}
 GROUP BY
     MONTH(ope.ope_fecasig)

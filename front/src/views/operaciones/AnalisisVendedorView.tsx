@@ -41,6 +41,7 @@ type VendorTableColumn =
 const TABLE_COLUMNS: VendorTableColumn[] = [
   { kind: "field", key: "numero", label: "OP" },
   { kind: "field", key: "interno", label: "Stoauto" },
+  { kind: "field", key: "cliente", label: "Cliente" },
   { kind: "field", key: "modelo", label: "Modelo" },
   { kind: "field", key: "version", label: "Version" },
   { kind: "field", key: "precio", label: "Precio" },
