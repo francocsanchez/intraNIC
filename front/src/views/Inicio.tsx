@@ -9,6 +9,7 @@ import {
   Headset,
   Calculator,
   CalendarDays,
+  PhoneCall,
   FileSearch,
   FileText,
   FileSpreadsheet,
@@ -90,6 +91,18 @@ export default function Inicio() {
           to: paths.callCenter.origenesDatos,
           enabled: hasModulePathAccess(user, "callCenter", paths.callCenter.origenesDatos),
           icon: Cog,
+        },
+      ],
+    },
+    {
+      title: "Calidad",
+      icon: PhoneCall,
+      items: [
+        {
+          label: "SSI Ventas",
+          to: paths.calidad.ssiVentas,
+          enabled: hasModulePathAccess(user, "ssiVentas", paths.calidad.ssiVentas),
+          icon: PhoneCall,
         },
       ],
     },

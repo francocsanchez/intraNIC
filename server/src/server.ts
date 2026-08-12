@@ -39,6 +39,7 @@ import versionPriceMonthlyRoutes from "./routes/versionPriceMonthlyRoutes";
 import financialPlanRoutes from "./routes/financialPlanRoutes";
 import cotizadorRoutes from "./routes/cotizadorRoutes";
 import centralDeudoresRoutes from "./routes/centralDeudoresRoutes";
+import ssiVentasRoutes from "./routes/ssiVentasRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -85,5 +86,6 @@ app.use("/api/call-center", callCenterRoutes);
 app.use("/api/seg-unidades-fabrica", segUnidadesFabricaRoutes);
 app.use("/api/jobs-monitor", jobMonitorRoutes);
 app.use("/api/central-deudores", centralDeudoresRoutes);
+app.use("/api/calidad/ssi-ventas", ssiVentasRoutes);
 
 export default app;

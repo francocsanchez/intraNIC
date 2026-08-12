@@ -42,6 +42,7 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "agendaComercial",
+  "ssiVentas",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];

@@ -5,7 +5,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged" | "editPlanAhorroManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega", "accesorios"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega", "accesorios", "ssi"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>

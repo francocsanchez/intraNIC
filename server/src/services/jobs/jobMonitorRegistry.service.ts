@@ -7,6 +7,13 @@ import {
   runAgendaEntregaEnvioJob,
 } from "../agendaEntregaEnvioCron.service";
 import {
+  getSsiVentasHotAlertJobKey,
+  getSsiVentasHotAlertJobName,
+  getSsiVentasHotAlertScheduleLabel,
+  isSsiVentasHotAlertJobRunning,
+  runSsiVentasHotAlertJob,
+} from "../ssiVentasHotAlertCron.service";
+import {
   getFacturasAnticipoJobKey,
   getFacturasAnticipoJobName,
   getFacturasAnticipoScheduleLabel,
@@ -36,6 +43,16 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     sourcePath: "AgendaEntrega",
     isRunning: () => isAgendaEntregaEnvioJobRunning(),
     run: (trigger) => runAgendaEntregaEnvioJob(trigger),
+  },
+  {
+    jobKey: getSsiVentasHotAlertJobKey(),
+    title: "Envio Hot Alert SSI",
+    scheduleLabel: getSsiVentasHotAlertScheduleLabel(),
+    jobName: getSsiVentasHotAlertJobName(),
+    sourceType: "internal",
+    sourcePath: "SsiVentasHotAlert",
+    isRunning: () => isSsiVentasHotAlertJobRunning(),
+    run: (trigger) => runSsiVentasHotAlertJob(trigger),
   },
   {
     jobKey: PatentamientosImportService.getJobKey(),

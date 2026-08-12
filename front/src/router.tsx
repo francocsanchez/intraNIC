@@ -8,6 +8,7 @@ const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const AnalisisMercadoLayout = lazy(() => import("./layouts/AnalisisMercadoLayout"));
 const CallCenterLayout = lazy(() => import("./layouts/CallCenterLayout"));
+const CalidadLayout = lazy(() => import("./layouts/CalidadLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
 const GestionConvencionalLayout = lazy(() => import("./layouts/GestionConvencionalLayout"));
@@ -23,6 +24,7 @@ const NICBelgranoLayout = lazy(() => import("./layouts/NICBelgranoLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
+const ConfiguracionHotAlertView = lazy(() => import("./views/admin/configuracion/ConfiguracionHotAlertView"));
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
@@ -104,6 +106,7 @@ const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntr
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 const CallCenterImportView = lazy(() => import("./views/callCenter/CallCenterImportView"));
 const CallCenterOriginsView = lazy(() => import("./views/callCenter/CallCenterOriginsView"));
+const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
 
 export default function Router() {
   return (
@@ -126,6 +129,13 @@ export default function Router() {
                 <Route path={paths.callCenter.home} element={<Navigate to={paths.callCenter.importar} replace />} />
                 <Route path={paths.callCenter.importar} element={<CallCenterImportView />} />
                 <Route path={paths.callCenter.origenesDatos} element={<CallCenterOriginsView />} />
+              </Route>
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
+              <Route element={<CalidadLayout />}>
+                <Route path={paths.calidad.home} element={<Navigate to={paths.calidad.ssiVentas} replace />} />
+                <Route path={paths.calidad.ssiVentas} element={<SsiVentasView />} />
               </Route>
             </Route>
 
@@ -152,6 +162,7 @@ export default function Router() {
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
               <Route path={paths.admin.unidadesNegocio} element={<UnidadesNegocioView />} />
               <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
+              <Route path={paths.admin.configuracionHotAlert} element={<ConfiguracionHotAlertView />} />
             </Route>
           </Route>
 

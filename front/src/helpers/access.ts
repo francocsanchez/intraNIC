@@ -74,6 +74,28 @@ export function hasSegUnidadesFabricaImportAccess(user: AuthUser) {
   return normalizedRoles.includes("stock");
 }
 
+export function hasSsiSurveyAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = (user?.role ?? []).map(normalizeRole);
+  return normalizedRoles.includes("ssi");
+}
+
+export function hasSsiImportAccess(user: AuthUser) {
+  return hasSsiSurveyAccess(user);
+}
+
+export function hasSsiAdministrativaAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = (user?.role ?? []).map(normalizeRole);
+  return normalizedRoles.includes("administracion");
+}
+
 export {
   hasComercialAgendaManageAccess,
   hasCotizadorManageAccess,

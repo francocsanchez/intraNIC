@@ -39,7 +39,8 @@ export type MailOptions = {
   cc?: string | string[];
   to: string | string[];
   subject: string;
-  html: string;
+  html?: string;
+  text?: string;
   attachments?: Array<{
     filename: string;
     content: Buffer;
@@ -118,6 +119,7 @@ export async function sendMail(data: MailOptions) {
     to: data.to,
     subject: data.subject,
     html: data.html,
+    text: data.text,
     attachments: data.attachments,
   });
 }

@@ -2553,3 +2553,230 @@ export type CallCenterDataOriginsResponse = z.infer<typeof callCenterDataOrigins
 export type CallCenterOriginResponse = z.infer<typeof callCenterOriginResponseSchema>;
 export type CallCenterSummaryOriginsResponse = z.infer<typeof callCenterSummaryOriginsResponseSchema>;
 export type CallCenterSummaryOriginResponse = z.infer<typeof callCenterSummaryOriginResponseSchema>;
+
+//**************************** */
+// CALIDAD - SSI VENTAS
+//**************************** */
+
+export const ssiVentasStatusSchema = z.enum([
+  "pendiente",
+  "enGestion",
+  "encuestada",
+  "imposibleComunicarse",
+]);
+
+export const ssiVentasClosedReasonSchema = z.enum([
+  "encuestaRespondida",
+  "imposibleComunicarse",
+]);
+
+export const ssiVentasBinaryResponseSchema = z.enum(["si", "no", "noSabe"]);
+export const ssiVentasIdentificadorClienteSchema = z.enum(["promotor", "neutro", "detractor"]);
+
+export const ssiVentasNumericAnswersSchema = z.object({
+  instalacionesConcesionario: z.number().int().min(1).max(10),
+  atencionVendedor: z.number().int().min(1).max(10),
+  atencionAdministrativa: z.number().int().min(1).max(10),
+  informacionFechaEntrega: z.number().int().min(1).max(10),
+  atencionAsesorEntregas: z.number().int().min(1).max(10),
+  recomendariaConcesionario: z.number().int().min(1).max(10),
+});
+
+export const ssiVentasBinaryAnswersSchema = z.object({
+  usadoPartePago: ssiVentasBinaryResponseSchema,
+  financiacionCompra: ssiVentasBinaryResponseSchema,
+  seguroVehiculo: ssiVentasBinaryResponseSchema,
+  accesoriosVehiculo: ssiVentasBinaryResponseSchema,
+  aplicacionToyota: ssiVentasBinaryResponseSchema,
+  toyotaServiciosConectados: ssiVentasBinaryResponseSchema,
+});
+
+export const ssiVentasSurveyDataSchema = z.object({
+  numeric: ssiVentasNumericAnswersSchema,
+  binary: ssiVentasBinaryAnswersSchema,
+  hotAlert: z.boolean().optional().default(false),
+  observaciones: z.string().optional().default(""),
+});
+
+export const ssiVentasListItemSchema = z.object({
+  operacion: z.number(),
+  fechaEntrega: z.string().nullable(),
+  vendedorCodigo: z.number().nullable(),
+  vendedor: z.string(),
+  cliente: z.string(),
+  telefonoCliente: z.string(),
+  modelo: z.string(),
+  sucursal: z.string(),
+  hotAlert: z.boolean().optional().default(false),
+  centralTelefonica: z.boolean().optional().default(false),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  administrativaId: z.string().nullable().optional(),
+  administrativaNombre: z.string().optional().default(""),
+  status: ssiVentasStatusSchema,
+  attemptsCount: z.number(),
+  noAnswerCount: z.number(),
+  attemptProgressLabel: z.string(),
+  canManage: z.boolean(),
+  closedAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+});
+
+export const ssiVentasCaseSchema = z.object({
+  _id: z.string().nullable(),
+  operacion: z.number(),
+  surveyType: z.literal("convencional"),
+  status: ssiVentasStatusSchema,
+  attemptsCount: z.number(),
+  noAnswerCount: z.number(),
+  closedAt: z.string().nullable(),
+  closedReason: ssiVentasClosedReasonSchema.nullable().optional(),
+  fechaEntrega: z.string().nullable(),
+  vendedorCodigo: z.number().nullable(),
+  vendedor: z.string(),
+  cliente: z.string(),
+  telefonoCliente: z.string(),
+  modelo: z.string(),
+  sucursal: z.string(),
+  hotAlert: z.boolean().optional().default(false),
+  centralTelefonica: z.boolean().optional().default(false),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  administrativaId: z.string().nullable().optional(),
+  administrativaNombre: z.string().optional().default(""),
+  createdBy: z.string().nullable(),
+  createdByName: z.string(),
+  updatedBy: z.string().nullable(),
+  updatedByName: z.string(),
+  createdAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+});
+
+export const ssiVentasAttemptSchema = z.object({
+  _id: z.string(),
+  operacion: z.number(),
+  attemptNumber: z.number(),
+  result: z.enum(["respondio", "noAtendio"]),
+  surveyData: ssiVentasSurveyDataSchema.nullable(),
+  observaciones: z.string().optional().default(""),
+  createdBy: z.string().nullable(),
+  createdByName: z.string(),
+  centralTelefonica: z.boolean().optional().default(false),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  importMetadata: z
+    .object({
+      fechaEnvio: z.string().nullable().optional(),
+      fechaRespuesta: z.string().nullable().optional(),
+      categoriaOriginal: z.string().nullable().optional(),
+      nps: z.number().nullable().optional(),
+      contactoNombre: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const ssiVentasDetailDataSchema = z.object({
+  snapshot: z.object({
+    operacion: z.number(),
+    fechaEntrega: z.string().nullable(),
+    vendedorCodigo: z.number().nullable(),
+    vendedor: z.string(),
+    cliente: z.string(),
+    telefonoCliente: z.string(),
+    modelo: z.string(),
+    sucursal: z.string(),
+  }),
+  case: ssiVentasCaseSchema,
+  attempts: z.array(ssiVentasAttemptSchema),
+});
+
+export const ssiVentasListResponseSchema = z.object({
+  data: z.array(ssiVentasListItemSchema),
+  pagination: paginationSchema,
+});
+
+export const ssiVentasDetailResponseSchema = z.object({
+  data: ssiVentasDetailDataSchema,
+});
+
+export const ssiVentasCaseActionResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    case: ssiVentasCaseSchema,
+    attempt: ssiVentasAttemptSchema,
+  }),
+});
+
+export const ssiVentasCaseUpdateResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    case: ssiVentasCaseSchema,
+  }),
+});
+
+export const ssiVentasAdministrativaSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+});
+
+export const ssiVentasAdministrativasResponseSchema = z.object({
+  data: z.array(ssiVentasAdministrativaSchema),
+});
+
+export const ssiVentasImportRowResultSchema = z.object({
+  rowNumber: z.number(),
+  status: z.enum(["importada", "ignoradaNoRespondida", "operacionNoEncontrada", "conflicto", "errorValidacion"]),
+  operacion: z.number().nullable(),
+  contactoNombre: z.string(),
+  message: z.string(),
+});
+
+export const ssiVentasImportResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    summary: z.object({
+      totalRead: z.number(),
+      imported: z.number(),
+      ignoredNoRespondida: z.number(),
+      notFound: z.number(),
+      conflicts: z.number(),
+      validationErrors: z.number(),
+    }),
+    results: z.array(ssiVentasImportRowResultSchema),
+  }),
+});
+
+export const hotAlertMailConfigSchema = z.object({
+  _id: z.string(),
+  emails: z.array(z.string()).default([]),
+  activo: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const hotAlertMailConfigResponseSchema = z.object({
+  data: hotAlertMailConfigSchema,
+  message: z.string().optional().default(""),
+});
+
+export type SsiVentasStatus = z.infer<typeof ssiVentasStatusSchema>;
+export type SsiVentasClosedReason = z.infer<typeof ssiVentasClosedReasonSchema>;
+export type SsiVentasBinaryResponse = z.infer<typeof ssiVentasBinaryResponseSchema>;
+export type SsiVentasIdentificadorCliente = z.infer<typeof ssiVentasIdentificadorClienteSchema>;
+export type SsiVentasNumericAnswers = z.infer<typeof ssiVentasNumericAnswersSchema>;
+export type SsiVentasBinaryAnswers = z.infer<typeof ssiVentasBinaryAnswersSchema>;
+export type SsiVentasSurveyData = z.infer<typeof ssiVentasSurveyDataSchema>;
+export type SsiVentasListItem = z.infer<typeof ssiVentasListItemSchema>;
+export type SsiVentasCase = z.infer<typeof ssiVentasCaseSchema>;
+export type SsiVentasAttempt = z.infer<typeof ssiVentasAttemptSchema>;
+export type SsiVentasDetailData = z.infer<typeof ssiVentasDetailDataSchema>;
+export type SsiVentasListResponse = z.infer<typeof ssiVentasListResponseSchema>;
+export type SsiVentasDetailResponse = z.infer<typeof ssiVentasDetailResponseSchema>;
+export type SsiVentasCaseActionResponse = z.infer<typeof ssiVentasCaseActionResponseSchema>;
+export type SsiVentasCaseUpdateResponse = z.infer<typeof ssiVentasCaseUpdateResponseSchema>;
+export type SsiVentasAdministrativa = z.infer<typeof ssiVentasAdministrativaSchema>;
+export type SsiVentasAdministrativasResponse = z.infer<typeof ssiVentasAdministrativasResponseSchema>;
+export type SsiVentasImportRowResult = z.infer<typeof ssiVentasImportRowResultSchema>;
+export type SsiVentasImportResponse = z.infer<typeof ssiVentasImportResponseSchema>;
+export type HotAlertMailConfig = z.infer<typeof hotAlertMailConfigSchema>;
+export type HotAlertMailConfigResponse = z.infer<typeof hotAlertMailConfigResponseSchema>;

@@ -9,6 +9,10 @@ export const paths = {
     importar: "/call-center/importador",
     origenesDatos: "/call-center/origenes-datos",
   },
+  calidad: {
+    home: "/calidad",
+    ssiVentas: "/calidad/ssi-ventas",
+  },
   entregas: {
     agenda: "/entregas/agenda",
     pendientesTurnar: "/entregas/pendientes-turnar",
@@ -23,6 +27,7 @@ export const paths = {
     configuracion: "/admin/configuracion",
     unidadesNegocio: "/admin/configuracion/unidades-negocio",
     configuracionEnvioAgenda: "/admin/configuracion/envio-agenda",
+    configuracionHotAlert: "/admin/configuracion/hot-alert",
     configuracionConvencionalEditar: "/admin/configuracion/convencional/editar",
     configuracionUsadosEditar: "/admin/configuracion/usados/editar",
     configuracionBelgranoEditar: "/admin/configuracion/belgrano/editar",

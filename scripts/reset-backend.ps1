@@ -1,5 +1,5 @@
 param(
-    [int]$Port = 4002,
+    [int[]]$Ports = @(4002, 3000),
     [switch]$Start
 )
 
@@ -29,8 +29,10 @@ function Stop-ProcessIfRunning {
 
 $targetPids = New-Object 'System.Collections.Generic.HashSet[int]'
 
-$portConnections = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
-    Where-Object { $_.OwningProcess -gt 0 }
+$portConnections = foreach ($port in $Ports) {
+    Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue |
+        Where-Object { $_.OwningProcess -gt 0 }
+}
 
 foreach ($connection in $portConnections) {
     [void]$targetPids.Add([int]$connection.OwningProcess)
@@ -48,11 +50,13 @@ foreach ($process in $backendProcesses) {
 }
 
 if ($targetPids.Count -eq 0) {
-    Write-Host ("[ok] No encontre procesos viejos del backend en {0}." -f $serverPath)
+    Write-Host ("[ok] No encontre procesos viejos del backend en {0} ni ocupando los puertos {1}." -f $serverPath, ($Ports -join ", "))
 } else {
     foreach ($targetPid in $targetPids) {
-        $reason = if ($portConnections | Where-Object { $_.OwningProcess -eq $targetPid }) {
-            "ocupando el puerto $Port"
+        $matchedConnection = $portConnections | Where-Object { $_.OwningProcess -eq $targetPid } | Select-Object -First 1
+
+        $reason = if ($matchedConnection) {
+            "ocupando el puerto $($matchedConnection.LocalPort)"
         } else {
             "proceso del backend en $serverPath"
         }
@@ -61,13 +65,18 @@ if ($targetPids.Count -eq 0) {
     }
 
     Start-Sleep -Milliseconds 500
-    $remaining = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
-        Where-Object { $_.State -eq "Listen" -and $_.OwningProcess -gt 0 }
+
+    $remaining = foreach ($port in $Ports) {
+        Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue |
+            Where-Object { $_.State -eq "Listen" -and $_.OwningProcess -gt 0 }
+    }
 
     if ($remaining) {
-        Write-Host ("[warn] El puerto {0} sigue ocupado por PID {1}." -f $Port, ($remaining[0].OwningProcess))
+        foreach ($item in $remaining) {
+            Write-Host ("[warn] El puerto {0} sigue ocupado por PID {1}." -f $item.LocalPort, $item.OwningProcess)
+        }
     } else {
-        Write-Host ("[ok] Backend limpiado. El puerto {0} quedo libre." -f $Port)
+        Write-Host ("[ok] Backend limpiado. Los puertos {0} quedaron libres." -f ($Ports -join ", "))
     }
 }
 

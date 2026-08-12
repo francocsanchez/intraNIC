@@ -42,6 +42,7 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "agendaComercial",
+  "ssiVentas",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];
@@ -91,6 +92,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   promediosPlanAhorro: "Promedios Plan de ahorro",
   minutas: "Minutas",
   agendaComercial: "Agenda comercial",
+  ssiVentas: "SSI Ventas",
 };
 
 export const moduleSections: Array<{
@@ -136,6 +138,10 @@ export const moduleSections: Array<{
   {
     title: "Sistema",
     modules: ["usuarios", "configuracion", "testDrive", "actualizacionRegistros"],
+  },
+  {
+    title: "Calidad",
+    modules: ["ssiVentas"],
   },
 ];
 
