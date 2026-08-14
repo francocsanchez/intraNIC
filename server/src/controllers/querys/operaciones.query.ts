@@ -125,6 +125,31 @@ ORDER BY
     vp.numero DESC;
 `;
 
+export const analisisOperacionesPreventaFormaPagoChequesQuery = () => `
+SELECT
+    oc.oc_renglon,
+    oc.oc_fecha,
+    oc.oc_capital,
+    oc.oc_interes
+FROM
+    operacheq oc
+INNER JOIN opera ope ON
+    ope.ope_codigo = oc.oc_codigo
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+INNER JOIN viewpreventa vp ON
+    vp.numero = ope.ope_codigo
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND oc.oc_codigo = :numero
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+ORDER BY
+    oc.oc_renglon ASC;
+`;
+
 export const analisisOperacionesPreventaDescuentoMensualQuery = () => `
 SELECT
     MONTH(ope.ope_fecasig) AS mes,

@@ -84,6 +84,7 @@ const TABLE_COLUMNS: TableColumn[] = [
 
 const monthShortNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const CHART_COLORS = ["#128c80", "#1d4ed8", "#f59e0b", "#dc2626", "#7c3aed", "#059669", "#ea580c", "#475569"];
+const IVA_RATE = 0.21;
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -148,6 +149,14 @@ const formatPercentageCompact = (value: number | null) => {
   }
 
   return `${value.toFixed(1)}%`;
+};
+
+const formatPercentageDetailed = (value: number | null) => {
+  if (value === null || Number.isNaN(value)) {
+    return "-";
+  }
+
+  return `${value.toFixed(value >= 10 ? 1 : 2)}%`;
 };
 
 const formatBarLabelPercentage = (value: number | null) => {
@@ -296,6 +305,27 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
     { label: "Cheque", value: detalle?.cheque ?? null },
     { label: "Cred", value: detalle?.credito_bancario ?? null },
   ];
+  const cheques = detalle?.cheques ?? [];
+  const chequesDetallados = cheques.map((cheque, index) => {
+    const saldoFinanciado = cheques
+      .slice(index)
+      .reduce<number>((acc, item) => acc + Number(item.capital ?? 0), 0);
+    const interes = Number(cheque.interes ?? 0);
+    const tasaMensualConIva = saldoFinanciado > 0 && interes > 0 ? (interes / saldoFinanciado) * 100 : null;
+    const tasaAnual = tasaMensualConIva !== null ? (tasaMensualConIva / (1 + IVA_RATE)) * 12 : null;
+
+    return {
+      ...cheque,
+      saldoFinanciado,
+      tasaAnual,
+    };
+  });
+  const totalCapitalCheques = cheques.reduce<number>((acc, cheque) => acc + Number(cheque.capital ?? 0), 0);
+  const totalInteresCheques = cheques.reduce<number>((acc, cheque) => acc + Number(cheque.interes ?? 0), 0);
+  const totalImporteCheques = totalCapitalCheques + totalInteresCheques;
+  const tasaAnualCheques =
+    chequesDetallados.find((cheque) => cheque.tasaAnual !== null)?.tasaAnual ??
+    (totalCapitalCheques > 0 ? ((totalInteresCheques / totalCapitalCheques) * 100 * 12) / (1 + IVA_RATE) : null);
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -323,7 +353,7 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+              <Dialog.Panel className="w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
                 <div className="border-b border-gray-200 px-5 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#128c80]">Analisis</p>
                   <Dialog.Title className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
@@ -331,10 +361,10 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                   </Dialog.Title>
                 </div>
 
-                <div className="px-5 py-4">
+                <div className="max-h-[75vh] overflow-y-auto px-5 py-4">
                   {isLoading ? (
                     <div className="space-y-3">
-                      {Array.from({ length: 5 }).map((_, index) => (
+                      {Array.from({ length: 7 }).map((_, index) => (
                         <div key={index} className="h-10 animate-pulse rounded-xl bg-gray-100" />
                       ))}
                     </div>
@@ -343,20 +373,111 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                       {errorMessage}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                        <span className="text-sm font-medium text-gray-600">Vendedor</span>
-                        <span className="text-sm font-semibold text-gray-900">{detalle?.vendedor ?? "-"}</span>
-                      </div>
-                      {items.map((item) => (
-                        <div
-                          key={item.label}
-                          className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
-                        >
-                          <span className="text-sm font-medium text-gray-600">{item.label}</span>
-                          <span className="text-sm font-semibold text-gray-900">{formatMoney(item.value)}</span>
+                    <div className="space-y-5">
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 md:col-span-2">
+                          <span className="text-sm font-medium text-gray-600">Vendedor</span>
+                          <span className="text-sm font-semibold text-gray-900">{detalle?.vendedor ?? "-"}</span>
                         </div>
-                      ))}
+                        {items.map((item) => (
+                          <div
+                            key={item.label}
+                            className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                          >
+                            <span className="text-sm font-medium text-gray-600">{item.label}</span>
+                            <span className="text-sm font-semibold text-gray-900">{formatMoney(item.value)}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <section className="rounded-2xl border border-gray-200 bg-white">
+                        <div className="border-b border-gray-200 px-4 py-3">
+                          <h3 className="text-sm font-semibold text-gray-900">Detalle de cheques</h3>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Interes por cheque, tasa anual aplicada y resumen total del capital financiado.
+                          </p>
+                        </div>
+
+                        {cheques.length === 0 ? (
+                          <div className="px-4 py-6 text-sm text-gray-500">
+                            Esta operación no tiene cheques asociados para mostrar.
+                          </div>
+                        ) : (
+                          <div className="space-y-4 p-4">
+                            <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                  Capital financiado
+                                </p>
+                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                  {formatMoney(totalCapitalCheques)}
+                                </p>
+                              </div>
+                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                  Interes total
+                                </p>
+                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                  {formatMoney(totalInteresCheques)}
+                                </p>
+                              </div>
+                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                  Tasa anual
+                                </p>
+                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                  {formatPercentageDetailed(tasaAnualCheques)}
+                                </p>
+                              </div>
+                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                  Total cheques
+                                </p>
+                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                  {formatMoney(totalImporteCheques)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr className="text-left text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                  <th className="px-4 py-3">Cheque</th>
+                                  <th className="px-4 py-3">Fecha</th>
+                                  <th className="px-4 py-3 text-right">Capital</th>
+                                  <th className="px-4 py-3 text-right">Interes</th>
+                                  <th className="px-4 py-3 text-right">Tasa</th>
+                                  <th className="px-4 py-3 text-right">Importe</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100 bg-white">
+                                {chequesDetallados.map((cheque) => (
+                                  <tr key={`${cheque.renglon ?? "sin-renglon"}-${cheque.fecha ?? "sin-fecha"}`}>
+                                    <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                                      {cheque.renglon !== null ? `Cheque ${cheque.renglon}` : "-"}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">{formatDate(cheque.fecha)}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                      {formatMoney(cheque.capital)}
+                                    </td>
+                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                      {formatMoney(cheque.interes)}
+                                    </td>
+                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                      {formatPercentageDetailed(cheque.tasaAnual)}
+                                    </td>
+                                    <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                                      {formatMoney(cheque.importeTotal)}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          </div>
+                        )}
+                      </section>
                     </div>
                   )}
                 </div>

@@ -14,6 +14,7 @@ import {
   analisisOperacionesPreventaDescuentoMensualQuery,
   analisisOperacionesPreventaDescuentoMensualSucursalQuery,
   analisisOperacionesPreventaDescuentoMensualVendedorQuery,
+  analisisOperacionesPreventaFormaPagoChequesQuery,
   analisisOperacionesPreventaPromedioCreditoPorModeloQuery,
   analisisOperacionesPreventaFormaPagoQuery,
   analisisOperacionesPreventaQuery,
@@ -229,6 +230,22 @@ type AnalisisOperacionPreventaFormaPagoRow = {
   credito_bancario: number | null;
 };
 
+type AnalisisOperacionPreventaFormaPagoChequeRow = {
+  oc_renglon: number | string | null;
+  oc_fecha: string | Date | null;
+  oc_capital: number | string | null;
+  oc_interes: number | string | null;
+};
+
+type AnalisisOperacionPreventaFormaPagoChequeItem = {
+  renglon: number | null;
+  fecha: string | null;
+  capital: number | null;
+  interes: number | null;
+  tasaInteres: number | null;
+  importeTotal: number | null;
+};
+
 type AnalisisOperacionPreventaFormaPagoItem = {
   numero: number | null;
   vendedor: string;
@@ -236,6 +253,7 @@ type AnalisisOperacionPreventaFormaPagoItem = {
   contado: number | null;
   cheque: number | null;
   credito_bancario: number | null;
+  cheques: AnalisisOperacionPreventaFormaPagoChequeItem[];
 };
 
 type AnalisisOperacionPreventaResponse = {
@@ -942,21 +960,53 @@ export class OperacionesDashboardService {
   static async getAnalisisPreventaFormaPago(
     numero: number,
   ): Promise<AnalisisOperacionPreventaFormaPagoResponse | null> {
-    const rows = await sequelizeNIC.query<AnalisisOperacionPreventaFormaPagoRow>(
-      analisisOperacionesPreventaFormaPagoQuery(),
-      {
-        type: QueryTypes.SELECT,
-        replacements: {
-          numero,
+    const [rows, chequesRows] = await Promise.all([
+      sequelizeNIC.query<AnalisisOperacionPreventaFormaPagoRow>(
+        analisisOperacionesPreventaFormaPagoQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            numero,
+          },
         },
-      },
-    );
+      ),
+      sequelizeNIC.query<AnalisisOperacionPreventaFormaPagoChequeRow>(
+        analisisOperacionesPreventaFormaPagoChequesQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            numero,
+          },
+        },
+      ),
+    ]);
 
     const row = rows[0];
 
     if (!row) {
       return null;
     }
+
+    const cheques = chequesRows.map((chequeRow) => {
+      const capital = normalizeNullableNumber(chequeRow.oc_capital);
+      const interes = normalizeNullableNumber(chequeRow.oc_interes);
+      const importeTotal =
+        capital === null && interes === null ? null : Number(capital ?? 0) + Number(interes ?? 0);
+      const tasaInteres =
+        capital !== null && capital > 0 && interes !== null ? (interes / capital) * 100 : null;
+
+      return {
+        renglon: normalizeNullableNumber(chequeRow.oc_renglon),
+        fecha:
+          chequeRow.oc_fecha instanceof Date
+            ? chequeRow.oc_fecha.toISOString()
+            : normalizeNullableString(chequeRow.oc_fecha),
+        capital,
+        interes,
+        tasaInteres,
+        importeTotal,
+      };
+    });
 
     return {
       data: {
@@ -966,6 +1016,7 @@ export class OperacionesDashboardService {
         contado: normalizeNullableNumber(row.contado),
         cheque: normalizeNullableNumber(row.cheque),
         credito_bancario: normalizeNullableNumber(row.credito_bancario),
+        cheques,
       },
     };
   }

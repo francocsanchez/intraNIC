@@ -833,6 +833,16 @@ export const analisisOperacionesPreventaFormaPagoSchema = z.object({
   contado: z.number().nullable(),
   cheque: z.number().nullable(),
   credito_bancario: z.number().nullable(),
+  cheques: z.array(
+    z.object({
+      renglon: z.number().nullable(),
+      fecha: z.string().nullable(),
+      capital: z.number().nullable(),
+      interes: z.number().nullable(),
+      tasaInteres: z.number().nullable(),
+      importeTotal: z.number().nullable(),
+    }),
+  ),
 });
 
 export const analisisOperacionesPreventaResponseSchema = z.object({
