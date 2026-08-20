@@ -17,6 +17,7 @@ import { logError } from "../utils/logError";
 const normalizeDate = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 const normalizeTime = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 const normalizeText = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+const normalizeId = (value: unknown) => (typeof value === "string" ? value.trim() : String(value ?? "").trim());
 const VALID_NEGOCIOS = ["convencional", "planAhorro"] as const;
 type RegistroNegocio = (typeof VALID_NEGOCIOS)[number];
 
@@ -63,6 +64,9 @@ const hasStarted = (retiroAt: Date | string) => {
   const parsed = new Date(retiroAt);
   return !Number.isNaN(parsed.getTime()) && parsed.getTime() <= Date.now();
 };
+
+const isOwnRecord = (ownerId: unknown, userId: unknown) =>
+  normalizeId(ownerId) !== "" && normalizeId(ownerId) === normalizeId(userId);
 
 const userHasNegocioModule = (user: Request["user"], negocio: RegistroNegocio) => {
   if (!user) {
@@ -415,7 +419,11 @@ export class TestDriveRegistroController {
         });
       }
 
-      if (!canEditManagedPlanAhorro && !hasSuperAdminRole(req.user.role) && registro.solicitadoPorId !== req.user._id) {
+      if (
+        !canEditManagedPlanAhorro &&
+        !hasSuperAdminRole(req.user.role) &&
+        !isOwnRecord(registro.solicitadoPorId, req.user._id)
+      ) {
         return res.status(403).json({ error: "Solo puedes editar registros cargados por tu usuario" });
       }
 
@@ -480,11 +488,11 @@ export class TestDriveRegistroController {
         });
       }
 
-      const isOwnRecord = registro.solicitadoPorId === req.user._id;
+      const ownRecord = isOwnRecord(registro.solicitadoPorId, req.user._id);
       const canDelete =
-        (isOwnRecord && userCanAccessNegocio(req.user, negocio, "deleteOwn")) ||
-        (!isOwnRecord && userCanAccessNegocio(req.user, negocio, "deleteManaged")) ||
-        (isOwnRecord && canDeleteManaged(req.user.role) && userHasNegocioModule(req.user, negocio));
+        (ownRecord && userCanAccessNegocio(req.user, negocio, "deleteOwn")) ||
+        (!ownRecord && userCanAccessNegocio(req.user, negocio, "deleteManaged")) ||
+        (ownRecord && canDeleteManaged(req.user.role) && userHasNegocioModule(req.user, negocio));
 
       if (!canDelete) {
         return res.status(403).json({ error: "No tienes permisos para eliminar este registro" });

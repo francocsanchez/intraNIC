@@ -59,6 +59,10 @@ function hasStarted(value: string) {
   return parsed.getTime() <= Date.now();
 }
 
+function normalizeId(value: unknown) {
+  return typeof value === "string" ? value.trim() : String(value ?? "").trim();
+}
+
 function RegistroModal({
   negocio,
   sectionLabel,
@@ -509,7 +513,7 @@ export default function TestDriveRegistroView({
 
             <tbody className="divide-y divide-gray-100">
               {items.map((item) => {
-                const isOwnRecord = item.solicitadoPorId === user?._id;
+                const isOwnRecord = normalizeId(item.solicitadoPorId) !== "" && normalizeId(item.solicitadoPorId) === normalizeId(user?._id);
                 const isPastRecord = hasStarted(item.retiroAt);
                 const isSuperAdmin = hasSuperAdminRole(user);
                 const canEditManagedPlanAhorro = negocio === "planAhorro"
