@@ -7,7 +7,6 @@ const NICLayout = lazy(() => import("./layouts/NICLayout"));
 const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const AnalisisMercadoLayout = lazy(() => import("./layouts/AnalisisMercadoLayout"));
-const CallCenterLayout = lazy(() => import("./layouts/CallCenterLayout"));
 const CalidadLayout = lazy(() => import("./layouts/CalidadLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
@@ -16,7 +15,6 @@ const GestionUsadosLayout = lazy(() => import("./layouts/GestionUsadosLayout"));
 const AnalisisLayout = lazy(() => import("./layouts/AnalisisLayout"));
 const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute"));
 const ModuleProtectedRoute = lazy(() => import("./layouts/ModuleProtectedRoute"));
-const CotizadorConfigProtectedRoute = lazy(() => import("./layouts/CotizadorConfigProtectedRoute"));
 const SuperAdminProtectedRoute = lazy(() => import("./layouts/SuperAdminProtectedRoute"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
@@ -64,7 +62,6 @@ const RankingConvencionalView = lazy(() => import("./views/admin/siac/RankingCon
 const PedidoUnidadesView = lazy(() => import("./views/admin/siac/PedidoUnidadesView"));
 const PedidoUnidadesPreviasView = lazy(() => import("./views/admin/siac/PedidoUnidadesPreviasView"));
 const FacturasAnticipoView = lazy(() => import("./views/admin/siac/FacturasAnticipoView"));
-const SegUnidadesFabricaView = lazy(() => import("./views/admin/siac/SegUnidadesFabricaView"));
 const RegistroAsignacionesView = lazy(() => import("./views/admin/siac/RegistroAsignacionesView"));
 const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/RegistroAsignacionesResumenView"));
 const AnalisisStockView = lazy(() => import("./views/admin/siac/AnalisisStockView"));
@@ -78,9 +75,6 @@ const VersionesView = lazy(() => import("./views/admin/siac/VersionesView"));
 const PlanNegocioCrudView = lazy(() => import("./views/admin/siac/PlanNegocioCrudView"));
 const PlanNegocioView = lazy(() => import("./views/admin/siac/PlanNegocioView"));
 const PedidoMensualView = lazy(() => import("./views/admin/siac/PedidoMensualView"));
-const CotizadorVersionesPreciosView = lazy(() => import("./views/admin/siac/CotizadorVersionesPreciosView"));
-const PlanesFinancierosView = lazy(() => import("./views/admin/siac/PlanesFinancierosView"));
-const CotizadorView = lazy(() => import("./views/admin/siac/CotizadorView"));
 const ProformasView = lazy(() => import("./views/admin/siac/ProformasView"));
 const ProformaFormView = lazy(() => import("./views/admin/siac/ProformaFormView"));
 const ProformaDetailView = lazy(() => import("./views/admin/siac/ProformaDetailView"));
@@ -89,7 +83,6 @@ const MinutaCreateView = lazy(() => import("./views/comercial/MinutaCreateView")
 const MinutaEditView = lazy(() => import("./views/comercial/MinutaEditView"));
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
-const AgendaComercialView = lazy(() => import("./views/comercial/AgendaComercialView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
@@ -104,8 +97,6 @@ const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"
 const PendientesTurnarView = lazy(() => import("./views/entregas/PendientesTurnarView"));
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
-const CallCenterImportView = lazy(() => import("./views/callCenter/CallCenterImportView"));
-const CallCenterOriginsView = lazy(() => import("./views/callCenter/CallCenterOriginsView"));
 const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
 
 export default function Router() {
@@ -123,14 +114,6 @@ export default function Router() {
               <Route path={paths.miPerfil} element={<MiPerfilView />} />
             </Route>
             <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
-
-            <Route element={<ModuleProtectedRoute allowedModules={["callCenter"]} />}>
-              <Route element={<CallCenterLayout />}>
-                <Route path={paths.callCenter.home} element={<Navigate to={paths.callCenter.importar} replace />} />
-                <Route path={paths.callCenter.importar} element={<CallCenterImportView />} />
-                <Route path={paths.callCenter.origenesDatos} element={<CallCenterOriginsView />} />
-              </Route>
-            </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
               <Route element={<CalidadLayout />}>
@@ -200,16 +183,7 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<ModuleProtectedRoute allowedModules={["cotizador"]} />}>
-            <Route element={<CotizadorConfigProtectedRoute />}>
-              <Route element={<AdminLayout />}>
-                <Route path={paths.admin.cotizadorPrecios} element={<CotizadorVersionesPreciosView />} />
-                <Route path={paths.admin.cotizadorPlanes} element={<PlanesFinancierosView />} />
-              </Route>
-            </Route>
-          </Route>
-
-          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes", "listaPrevia", "facturasAnticipo", "segUnidadesFabrica"]} />}>
+          <Route element={<ModuleProtectedRoute allowedModules={["reventaPendientes", "listaPrevia", "facturasAnticipo"]} />}>
             <Route element={<AdminModuleLayout />}>
               <Route path={paths.administracion.home} element={<AdministracionHubView />} />
             </Route>
@@ -234,12 +208,6 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<ModuleProtectedRoute allowedModules={["segUnidadesFabrica"]} />}>
-            <Route element={<AdminModuleLayout />}>
-              <Route path={paths.administracion.segUnidadesFabrica} element={<SegUnidadesFabricaView />} />
-            </Route>
-          </Route>
-
           <Route element={<ModuleProtectedRoute allowedModules={["proformas"]} />}>
             <Route element={<NICLayout />}>
               <Route path={paths.convencional.proformas} element={<ProformasView />} />
@@ -253,12 +221,6 @@ export default function Router() {
               <Route path={paths.convencional.minutas} element={<MinutasView />} />
               <Route path={paths.convencional.minutasNueva} element={<MinutaCreateView />} />
               <Route path={paths.convencional.minutasEditarRoute} element={<MinutaEditView />} />
-            </Route>
-          </Route>
-
-          <Route element={<ModuleProtectedRoute allowedModules={["agendaComercial"]} />}>
-            <Route element={<NICLayout />}>
-              <Route path={paths.convencional.agendaComercial} element={<AgendaComercialView />} />
             </Route>
           </Route>
 
@@ -429,12 +391,6 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["planNegocio"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.planNegocio} element={<PlanNegocioView />} />
-            </Route>
-          </Route>
-
-          <Route element={<ModuleProtectedRoute allowedModules={["cotizador"]} />}>
-            <Route element={<NICLayout />}>
-              <Route path={paths.convencional.cotizador} element={<CotizadorView />} />
             </Route>
           </Route>
 

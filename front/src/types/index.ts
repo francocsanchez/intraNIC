@@ -1324,45 +1324,6 @@ export const facturaAnticipoResponseSchema = z.object({
 export type FacturaAnticipo = z.infer<typeof facturaAnticipoSchema>;
 
 //**************************** */
-// SEG. UNIDADES FABRICA
-//**************************** */
-
-export const segUnidadFabricaSchema = z.object({
-  _id: z.string(),
-  orderNumber: z.string(),
-  modelo: z.string().nullable(),
-  version: z.string().nullable(),
-  opera: z.number().nullable().optional(),
-  cliente: z.string().optional().default("-"),
-  color: z.string().optional().default("-"),
-  ubicacion: z.string().nullable(),
-  fechaLimiteDePago: z.string().nullable(),
-  habilitacionFinanzas: z.string().nullable(),
-  usuarioImportacion: z.string(),
-  fechaImportacion: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-export const segUnidadesFabricaListResponseSchema = z.object({
-  data: z.array(segUnidadFabricaSchema),
-});
-
-export const segUnidadesFabricaImportResponseSchema = z.object({
-  data: z.object({
-    totalRows: z.number(),
-    importedRows: z.number(),
-    omittedRows: z.number(),
-    removedWithVin: z.number(),
-    removedWithFinanzas: z.number(),
-    removedMissing: z.number(),
-  }),
-  message: z.string(),
-});
-
-export type SegUnidadFabrica = z.infer<typeof segUnidadFabricaSchema>;
-
-//**************************** */
 // REGISTRO ASIGNACIONES
 //**************************** */
 
@@ -1694,82 +1655,13 @@ export const pedidoMensualResponseSchema = z.object({
   message: z.string(),
 });
 
-export const versionPrecioMensualSchema = z.object({
-  _id: z.string(),
-  version: catalogoSchema,
-  mes: z.string(),
-  precio: z.number(),
-  descuentoReferenciaPct: z.number(),
-  activo: z.boolean(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
-
-export const versionPrecioMensualListResponseSchema = z.object({
-  data: z.array(versionPrecioMensualSchema),
-});
-
-export const versionPrecioMensualResponseSchema = z.object({
-  data: versionPrecioMensualSchema,
-  message: z.string(),
-});
-
-export const cotizadorImportResponseSchema = z.object({
+export const importRecordsResponseSchema = z.object({
   message: z.string(),
   data: z.object({
     created: z.number(),
     updated: z.number(),
     processed: z.number(),
     plans: z.number().optional(),
-  }),
-});
-
-export const planFinancieroPlazoSchema = z.object({
-  _id: z.string(),
-  plazo: z.number(),
-  tna: z.number(),
-  quebrantoTipo: z.enum(["porcentaje", "monto"]),
-  quebrantoValor: z.number(),
-  maxFinanciacionTipo: z.enum(["porcentaje", "monto"]),
-  maxFinanciacionValor: z.number(),
-  activo: z.boolean(),
-});
-
-export const planFinancieroSchema = z.object({
-  _id: z.string(),
-  entidad: z.string(),
-  nombre: z.string(),
-  activo: z.boolean(),
-  plazos: z.array(planFinancieroPlazoSchema),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
-
-export const planFinancieroListResponseSchema = z.object({
-  data: z.array(planFinancieroSchema),
-});
-
-export const planFinancieroResponseSchema = z.object({
-  data: planFinancieroSchema,
-  message: z.string(),
-});
-
-export const cotizadorVersionSchema = z.object({
-  _id: z.string(),
-  nombre: z.string(),
-  activo: z.boolean(),
-  precioId: z.string().nullable(),
-  precio: z.number().nullable(),
-  descuentoReferenciaPct: z.number(),
-  precioActivo: z.boolean(),
-});
-
-export const cotizadorCatalogoResponseSchema = z.object({
-  data: z.object({
-    mes: z.string(),
-    versiones: z.array(cotizadorVersionSchema),
-    entidades: z.array(z.string()),
-    planes: z.array(planFinancieroSchema),
   }),
 });
 
@@ -2010,16 +1902,6 @@ export type PreventaResumenResponse = z.infer<typeof preventaResumenResponseSche
 export type PedidoMensual = z.infer<typeof pedidoMensualSchema>;
 export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponseSchema>;
 export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
-export type VersionPrecioMensual = z.infer<typeof versionPrecioMensualSchema>;
-export type VersionPrecioMensualListResponse = z.infer<typeof versionPrecioMensualListResponseSchema>;
-export type VersionPrecioMensualResponse = z.infer<typeof versionPrecioMensualResponseSchema>;
-export type CotizadorImportResponse = z.infer<typeof cotizadorImportResponseSchema>;
-export type PlanFinancieroPlazo = z.infer<typeof planFinancieroPlazoSchema>;
-export type PlanFinanciero = z.infer<typeof planFinancieroSchema>;
-export type PlanFinancieroListResponse = z.infer<typeof planFinancieroListResponseSchema>;
-export type PlanFinancieroResponse = z.infer<typeof planFinancieroResponseSchema>;
-export type CotizadorVersion = z.infer<typeof cotizadorVersionSchema>;
-export type CotizadorCatalogoResponse = z.infer<typeof cotizadorCatalogoResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
 export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;
@@ -2173,23 +2055,6 @@ export type MinutaGrupo = z.infer<typeof minutaGrupoSchema>;
 export type MinutaGroupsListResponse = z.infer<typeof minutaGroupsListResponseSchema>;
 export type MinutaGroupResponse = z.infer<typeof minutaGroupResponseSchema>;
 
-export const comercialAgendaUserSchema = z.object({
-  _id: z.string(),
-  name: z.string(),
-  lastName: z.string(),
-  email: z.string().optional().default(""),
-});
-
-export const comercialAgendaPuestoSchema = z.object({
-  _id: z.string(),
-  unidadNegocioId: z.string(),
-  nombre: z.string(),
-  orden: z.number(),
-  activo: z.boolean(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
-
 export const unidadNegocioSchema = z.object({
   _id: z.string(),
   nombre: z.string(),
@@ -2197,34 +2062,6 @@ export const unidadNegocioSchema = z.object({
   orden: z.number(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
-});
-
-export const comercialAgendaAsignacionSchema = z.object({
-  fecha: z.string(),
-  fechaLabel: z.string(),
-  puestoId: z.string(),
-  puestoNombre: z.string(),
-  asignacionId: z.string().nullable().optional(),
-  asistentes: z.array(comercialAgendaUserSchema),
-});
-
-export const comercialAgendaDaySchema = z.object({
-  fecha: z.string(),
-  fechaLabel: z.string(),
-  weekdayLabel: z.string(),
-  cells: z.array(comercialAgendaAsignacionSchema),
-});
-
-export const comercialAgendaSemanaSchema = z.object({
-  weekStart: z.string(),
-  weekEnd: z.string(),
-  weekLabel: z.string(),
-  puestos: z.array(comercialAgendaPuestoSchema),
-  days: z.array(comercialAgendaDaySchema),
-});
-
-export const comercialAgendaUsersResponseSchema = z.object({
-  data: z.array(comercialAgendaUserSchema),
 });
 
 export const unidadNegocioListResponseSchema = z.object({
@@ -2237,29 +2074,6 @@ export const unidadNegocioResponseSchema = z.object({
   message: z.string().optional().default(""),
 });
 
-export const comercialAgendaPuestosResponseSchema = z.object({
-  data: z.array(comercialAgendaPuestoSchema),
-  message: z.string().optional().default(""),
-});
-
-export const comercialAgendaSemanaResponseSchema = z.object({
-  data: comercialAgendaSemanaSchema,
-});
-
-export const comercialAgendaCellResponseSchema = z.object({
-  data: comercialAgendaAsignacionSchema,
-  message: z.string().optional().default(""),
-});
-
-export type ComercialAgendaUser = z.infer<typeof comercialAgendaUserSchema>;
-export type ComercialAgendaPuesto = z.infer<typeof comercialAgendaPuestoSchema>;
-export type ComercialAgendaAsignacion = z.infer<typeof comercialAgendaAsignacionSchema>;
-export type ComercialAgendaDay = z.infer<typeof comercialAgendaDaySchema>;
-export type ComercialAgendaSemana = z.infer<typeof comercialAgendaSemanaSchema>;
-export type ComercialAgendaUsersResponse = z.infer<typeof comercialAgendaUsersResponseSchema>;
-export type ComercialAgendaPuestosResponse = z.infer<typeof comercialAgendaPuestosResponseSchema>;
-export type ComercialAgendaSemanaResponse = z.infer<typeof comercialAgendaSemanaResponseSchema>;
-export type ComercialAgendaCellResponse = z.infer<typeof comercialAgendaCellResponseSchema>;
 export type UnidadNegocio = z.infer<typeof unidadNegocioSchema>;
 export type UnidadNegocioListResponse = z.infer<typeof unidadNegocioListResponseSchema>;
 export type UnidadNegocioResponse = z.infer<typeof unidadNegocioResponseSchema>;
@@ -2502,67 +2316,6 @@ export type PendienteTurnarListResponse = z.infer<typeof pendienteTurnarListResp
 export type PendienteTurnarResponse = z.infer<typeof pendienteTurnarResponseSchema>;
 export type PendienteTurnarImportSummary = z.infer<typeof pendienteTurnarImportSummarySchema>;
 export type PendienteTurnarImportResponse = z.infer<typeof pendienteTurnarImportResponseSchema>;
-
-//**************************** */
-// CALL CENTER
-//**************************** */
-
-export const callCenterImportDataSchema = z.object({
-  worksheetName: z.string(),
-  importedRows: z.number(),
-  createdOrigins: z.number(),
-});
-
-export const callCenterImportResponseSchema = z.object({
-  data: callCenterImportDataSchema,
-  message: z.string(),
-});
-
-export const callCenterSummaryOriginSchema = z.object({
-  _id: z.string(),
-  nombre: z.string(),
-  activo: z.boolean(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
-
-export const callCenterDataOriginSchema = z.object({
-  _id: z.string(),
-  origen: z.string(),
-  origenResumidoId: z.string().nullable(),
-  origenResumido: callCenterSummaryOriginSchema.nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-export const callCenterDataOriginsResponseSchema = z.object({
-  data: z.array(callCenterDataOriginSchema),
-  message: z.string(),
-});
-
-export const callCenterOriginResponseSchema = z.object({
-  data: callCenterDataOriginSchema,
-  message: z.string(),
-});
-
-export const callCenterSummaryOriginsResponseSchema = z.object({
-  data: z.array(callCenterSummaryOriginSchema),
-  message: z.string(),
-});
-
-export const callCenterSummaryOriginResponseSchema = z.object({
-  data: callCenterSummaryOriginSchema,
-  message: z.string(),
-});
-
-export type CallCenterImportData = z.infer<typeof callCenterImportDataSchema>;
-export type CallCenterImportResponse = z.infer<typeof callCenterImportResponseSchema>;
-export type CallCenterSummaryOrigin = z.infer<typeof callCenterSummaryOriginSchema>;
-export type CallCenterDataOrigin = z.infer<typeof callCenterDataOriginSchema>;
-export type CallCenterDataOriginsResponse = z.infer<typeof callCenterDataOriginsResponseSchema>;
-export type CallCenterOriginResponse = z.infer<typeof callCenterOriginResponseSchema>;
-export type CallCenterSummaryOriginsResponse = z.infer<typeof callCenterSummaryOriginsResponseSchema>;
-export type CallCenterSummaryOriginResponse = z.infer<typeof callCenterSummaryOriginResponseSchema>;
 
 //**************************** */
 // CALIDAD - SSI VENTAS

@@ -129,20 +129,3 @@ export function hasSystemConfigToggleAccess(user: AuthUser) {
   const normalizedRoles = getNormalizedRoles(user);
   return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
 }
-
-export function hasComercialAgendaManageAccess(user: AuthUser) {
-  if (hasSuperAdminRole(user)) {
-    return true;
-  }
-
-  return getNormalizedRoles(user).includes("supervisor");
-}
-
-export function hasCotizadorManageAccess(user: AuthUser) {
-  if (hasSuperAdminRole(user)) {
-    return true;
-  }
-
-  const normalizedRoles = getNormalizedRoles(user);
-  return normalizedRoles.includes("supervisor") || normalizedRoles.includes("gerente");
-}

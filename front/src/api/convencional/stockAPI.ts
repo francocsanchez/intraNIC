@@ -1,6 +1,6 @@
 import api from "@/libs/axios";
 import {
-  cotizadorImportResponseSchema,
+  importRecordsResponseSchema,
   misListaDeEsperaResponseSchema,
   misOperacionesSchema,
   misReservasResponseSchema,
@@ -179,7 +179,7 @@ export async function importStockValorizacionListaPreciosExcel(file: File) {
       },
     });
 
-    const parsed = cotizadorImportResponseSchema.safeParse(data);
+    const parsed = importRecordsResponseSchema.safeParse(data);
 
     if (!parsed.success) {
       console.error(parsed.error.issues);

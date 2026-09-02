@@ -1,8 +1,6 @@
 import type { Usuario } from "@/types/index";
 import { normalizeModules, type ModuleKey } from "@/constants/modules";
 import {
-  hasComercialAgendaManageAccess,
-  hasCotizadorManageAccess,
   hasEntregaAgendaEquipadoToggleAccess,
   hasEntregaAgendaManageAccess,
   hasPendienteTurnarImportAccess,
@@ -65,15 +63,6 @@ export function shouldShowMaintenanceForBusiness(user: AuthUser, business: Busin
   return business === "convencional" || business === "usados" || business === "belgrano";
 }
 
-export function hasSegUnidadesFabricaImportAccess(user: AuthUser) {
-  if (hasSuperAdminRole(user)) {
-    return true;
-  }
-
-  const normalizedRoles = (user?.role ?? []).map(normalizeRole);
-  return normalizedRoles.includes("stock");
-}
-
 export function hasSsiSurveyAccess(user: AuthUser) {
   if (hasSuperAdminRole(user)) {
     return true;
@@ -97,8 +86,6 @@ export function hasSsiAdministrativaAccess(user: AuthUser) {
 }
 
 export {
-  hasComercialAgendaManageAccess,
-  hasCotizadorManageAccess,
   hasEntregaAgendaManageAccess,
   hasEntregaAgendaEquipadoToggleAccess,
   hasPendienteTurnarImportAccess,

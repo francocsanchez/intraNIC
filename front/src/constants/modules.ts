@@ -4,16 +4,13 @@ export const moduleKeys = [
   "usados",
   "belgrano",
   "liess",
-  "callCenter",
   "preventas",
   "proformas",
   "reventaPendientes",
   "listaPrevia",
   "facturasAnticipo",
-  "segUnidadesFabrica",
   "asignaciones",
   "planNegocio",
-  "cotizador",
   "registroAsignaciones",
   "pedidoMensual",
   "pedidoUnidades",
@@ -41,7 +38,6 @@ export const moduleKeys = [
   "registroTestDrive",
   "promediosPlanAhorro",
   "minutas",
-  "agendaComercial",
   "ssiVentas",
 ] as const;
 
@@ -54,16 +50,13 @@ export const moduleLabels: Record<ModuleKey, string> = {
   usados: "Usados",
   belgrano: "Belgrano",
   liess: "Liess",
-  callCenter: "Call Center",
   preventas: "Preventas",
   proformas: "Proformas",
   reventaPendientes: "Reventa pendientes",
   listaPrevia: "Lista previa",
   facturasAnticipo: "Facturas anticipo",
-  segUnidadesFabrica: "Seg. unidades fabrica",
   asignaciones: "Asignaciones",
   planNegocio: "Plan de negocio",
-  cotizador: "Cotizador",
   registroAsignaciones: "Registro asignaciones",
   pedidoMensual: "Pedido mensual",
   pedidoUnidades: "Pedido unidades",
@@ -91,7 +84,6 @@ export const moduleLabels: Record<ModuleKey, string> = {
   registroTestDrive: "Registro TestDrive Plan de ahorro",
   promediosPlanAhorro: "Promedios Plan de ahorro",
   minutas: "Minutas",
-  agendaComercial: "Agenda comercial",
   ssiVentas: "SSI Ventas",
 };
 
@@ -104,12 +96,8 @@ export const moduleSections: Array<{
     modules: ["convencional", "valorizacion", "usados", "belgrano", "liess"],
   },
   {
-    title: "Call Center",
-    modules: ["callCenter"],
-  },
-  {
     title: "Comercial",
-    modules: ["preventas", "proformas", "cotizador", "registroTestDriveConvencional", "minutas", "agendaComercial"],
+    modules: ["preventas", "proformas", "registroTestDriveConvencional", "minutas"],
   },
   {
     title: "Plan de ahorro",
@@ -117,7 +105,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Administracion convencional",
-    modules: ["reventaPendientes", "listaPrevia", "facturasAnticipo", "segUnidadesFabrica"],
+    modules: ["reventaPendientes", "listaPrevia", "facturasAnticipo"],
   },
   {
     title: "Gestion de stock convencional",

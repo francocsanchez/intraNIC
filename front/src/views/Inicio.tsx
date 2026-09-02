@@ -1,20 +1,17 @@
 import Loading from "@/components/Loading";
-import { hasModuleAccess, hasModulePathAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
   ShieldAlert,
-  Headset,
-  Calculator,
   CalendarDays,
   PhoneCall,
   FileSearch,
   FileText,
   FileSpreadsheet,
   FolderCog,
-  Factory,
   Hammer,
   Inbox,
   LogOut,
@@ -77,24 +74,6 @@ export default function Inicio() {
       ],
     },
     {
-      title: "Call Center",
-      icon: Headset,
-      items: [
-        {
-          label: "Importador de datos",
-          to: paths.callCenter.importar,
-          enabled: hasModulePathAccess(user, "callCenter", paths.callCenter.importar),
-          icon: FileText,
-        },
-        {
-          label: "Origenes de datos",
-          to: paths.callCenter.origenesDatos,
-          enabled: hasModulePathAccess(user, "callCenter", paths.callCenter.origenesDatos),
-          icon: Cog,
-        },
-      ],
-    },
-    {
       title: "Calidad",
       icon: PhoneCall,
       items: [
@@ -129,9 +108,7 @@ export default function Inicio() {
       icon: ShoppingCart,
       items: [
         { label: "Proformas", to: paths.convencional.proformas, enabled: hasModulePathAccess(user, "proformas", paths.convencional.proformas), icon: FileText },
-        { label: "Cotizador", to: paths.convencional.cotizador, enabled: hasModulePathAccess(user, "cotizador", paths.convencional.cotizador), icon: Calculator },
         { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
-        { label: "Agenda comercial", to: paths.convencional.agendaComercial, enabled: hasModulePathAccess(user, "agendaComercial", paths.convencional.agendaComercial), icon: CalendarDays },
         { label: "Registro TestDrive", to: paths.convencional.registroTestDrive, enabled: hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive), icon: CarFront },
       ],
     },
@@ -164,12 +141,6 @@ export default function Inicio() {
           to: paths.administracion.facturasAnticipo,
           enabled: hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo),
           icon: CalendarRange,
-        },
-        {
-          label: "Seg. unidades fabrica",
-          to: paths.administracion.segUnidadesFabrica,
-          enabled: hasModuleAccess(user, "segUnidadesFabrica"),
-          icon: Factory,
         },
       ],
     },

@@ -1,8 +1,8 @@
 import BaseAppLayout from "@/layouts/BaseAppLayout";
-import { hasAnyModuleAccess, hasModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
+import { hasAnyModuleAccess, hasModulePathAccess, hasPathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ClipboardList, FileWarning, List, ReceiptText, Factory } from "lucide-react";
+import { ClipboardList, FileWarning, List, ReceiptText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AdminModuleLayout() {
@@ -41,13 +41,6 @@ export default function AdminModuleLayout() {
       icon: FileWarning,
       visible: hasModulePathAccess(user, "facturasAnticipo", paths.administracion.facturasAnticipo),
       active: pathname === paths.administracion.facturasAnticipo,
-    },
-    {
-      label: "Seg. fabrica",
-      to: paths.administracion.segUnidadesFabrica,
-      icon: Factory,
-      visible: hasModuleAccess(user, "segUnidadesFabrica"),
-      active: pathname === paths.administracion.segUnidadesFabrica,
     },
   ].filter((item) => item.visible);
 

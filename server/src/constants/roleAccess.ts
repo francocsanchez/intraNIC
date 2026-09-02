@@ -1,5 +1,4 @@
 export type RoleAccessKey =
-  | "callCenter"
   | "convencional.stockDisponible"
   | "convencional.stockGuardado"
   | "convencional.stockReservado"
@@ -39,7 +38,6 @@ export type RoleAccessKey =
   | "administracion.listaPrevia"
   | "administracion.pedidoUnidadesRegistros"
   | "administracion.facturasAnticipo"
-  | "administracion.segUnidadesFabrica"
   | "comercial.testDriveRegistroConvencional.read"
   | "comercial.testDriveRegistroConvencional.create"
   | "comercial.testDriveRegistroConvencional.updateOwn"
@@ -99,7 +97,6 @@ export const hasSuperAdminRole = (roles: unknown) =>
 
 const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
   vendedor: new Set<RoleAccessKey>([
-    "callCenter",
     "convencional.stockDisponible",
     "convencional.misReservas",
     "convencional.misOperaciones",
@@ -133,7 +130,6 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "liess.stockDisponible",
   ]),
   supervisor: new Set<RoleAccessKey>([
-    "callCenter",
     "convencional.stockDisponible",
     "convencional.stockReservado",
     "convencional.misReservas",
@@ -180,7 +176,6 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "sistema.testDrive",
   ]),
   gerente: new Set<RoleAccessKey>([
-    "callCenter",
     "convencional.stockDisponible",
     "convencional.stockReservado",
     "convencional.misReservas",
@@ -231,15 +226,12 @@ const roleAllowedAccess: Record<ActiveRoleKey, Set<RoleAccessKey>> = {
     "sistema.testDrive",
   ]),
   administracion: new Set<RoleAccessKey>([
-    "callCenter",
     "administracion.reventaPendientes",
     "administracion.listaPrevia",
     "administracion.pedidoUnidadesRegistros",
     "administracion.facturasAnticipo",
-    "administracion.segUnidadesFabrica",
   ]),
   stock: new Set<RoleAccessKey>([
-    "callCenter",
     "administracion.listaPrevia",
     "liess.stockDisponible",
     "convencional.stockDisponible",

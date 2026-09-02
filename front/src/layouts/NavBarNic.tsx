@@ -3,7 +3,7 @@ import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, BriefcaseBusiness, CalendarDays, Calculator, CarFront, ChevronDown, ClipboardList, FileText, Package } from "lucide-react";
+import { Archive, BookMarked, BriefcaseBusiness, Calculator, CarFront, ChevronDown, ClipboardList, FileText, Package } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 type NavBarProps = {
@@ -30,16 +30,12 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const canViewMisReservas = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.misReservas);
   const canViewMiListaEspera = isConvencional && hasModulePathAccess(user, "convencional", paths.convencional.miListaEspera);
   const canViewProformas = isConvencional && hasModulePathAccess(user, "proformas", paths.convencional.proformas);
-  const canViewCotizador = isConvencional && hasModulePathAccess(user, "cotizador", paths.convencional.cotizador);
   const canViewMinutas = isConvencional && hasModulePathAccess(user, "minutas", paths.convencional.minutas);
-  const canViewAgendaComercial = isConvencional && hasModulePathAccess(user, "agendaComercial", paths.convencional.agendaComercial);
   const canViewRegistroTestDrive = isConvencional && hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive);
   const isCommercialPath =
     isConvencional &&
     (pathname.startsWith("/convencional/proformas") ||
-      pathname === paths.convencional.cotizador ||
       pathname.startsWith("/convencional/minutas") ||
-      pathname === paths.convencional.agendaComercial ||
       pathname.startsWith("/gestion/convencional/test-drive"));
   const isGestionPath = isConvencional
     ? pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/")
@@ -100,25 +96,11 @@ export default function NavBarNic({ negocio }: NavBarProps) {
       active: pathname === paths.convencional.proformas || pathname === paths.convencional.proformasNueva || pathname.startsWith("/convencional/proformas/"),
     },
     {
-      label: "Cotizador",
-      to: paths.convencional.cotizador,
-      icon: Calculator,
-      visible: canViewCotizador,
-      active: pathname === paths.convencional.cotizador,
-    },
-    {
       label: "Minutas",
       to: paths.convencional.minutas,
       icon: ClipboardList,
       visible: canViewMinutas,
       active: pathname === paths.convencional.minutas || pathname === paths.convencional.minutasNueva || pathname.startsWith("/convencional/minutas/"),
-    },
-    {
-      label: "Agenda comercial",
-      to: paths.convencional.agendaComercial,
-      icon: CalendarDays,
-      visible: canViewAgendaComercial,
-      active: pathname === paths.convencional.agendaComercial,
     },
     {
       label: "Registro TestDrive",
