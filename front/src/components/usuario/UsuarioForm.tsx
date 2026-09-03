@@ -56,8 +56,8 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
   const unidadesNegocio: UnidadNegocio[] = unidadesResponse?.data ?? [];
 
   return (
-    <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="space-y-4">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-2">
           <label htmlFor="name" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
             Nombre
@@ -207,26 +207,26 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
         ) : null}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-4 py-3">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modulos</div>
-          <div className="mt-1 text-xs text-gray-500">Marca los modulos que queres habilitar para este usuario.</div>
+      <section className="border-t border-border pt-3">
+        <div className="pb-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modulos</div>
+          <div className="mt-1 text-xs text-muted-foreground">Marca los modulos que queres habilitar para este usuario.</div>
         </div>
 
-        <div className="space-y-4 p-4">
+        <div className="space-y-3">
           {moduleSections.map((section) => (
-            <div key={section.title} className="rounded-xl border border-gray-100 bg-gray-50/60 p-3">
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">{section.title}</div>
+            <div key={section.title} className="border-t border-border pt-3 first:border-t-0 first:pt-1">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{section.title}</div>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
                 {section.modules.map((moduleKey) => (
                   <Controller
                     key={moduleKey}
                     control={control}
                     name={`modules.${moduleKey}` as `modules.${ModuleKey}`}
                     render={({ field }) => (
-                      <label className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 transition-colors hover:bg-gray-100">
-                        <span className="text-xs font-medium leading-4 text-gray-800">{moduleLabels[moduleKey as ModuleKey]}</span>
+                      <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2 transition-colors hover:bg-muted">
+                        <span className="text-xs font-medium leading-4 text-foreground">{moduleLabels[moduleKey as ModuleKey]}</span>
 
                         <input
                           type="checkbox"
@@ -244,7 +244,7 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="role" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
             Roles
@@ -267,7 +267,7 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
           <p className="text-xs text-gray-500">Usa Ctrl/Cmd + click para seleccionar multiples opciones.</p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="space-y-2">
             <label
               htmlFor="numberSaleNic"

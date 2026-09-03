@@ -168,12 +168,12 @@ const JobsControlTable = ({
 }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full border-collapse text-sm">
-      <thead className="bg-gray-100 text-gray-700">
+      <thead className="bg-muted text-muted-foreground">
         <tr>
-          <th className="border border-gray-200 px-2 py-2 text-left font-semibold">Cron</th>
-          <th className="border border-gray-200 px-2 py-2 text-left font-semibold">Fecha</th>
-          <th className="border border-gray-200 px-2 py-2 text-left font-semibold">Estado</th>
-          <th className="border border-gray-200 px-2 py-2 text-left font-semibold">Acciones</th>
+          <th className="border border-border px-2 py-2 text-left font-semibold">Cron</th>
+          <th className="border border-border px-2 py-2 text-left font-semibold">Fecha</th>
+          <th className="border border-border px-2 py-2 text-left font-semibold">Estado</th>
+          <th className="border border-border px-2 py-2 text-left font-semibold">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -182,18 +182,18 @@ const JobsControlTable = ({
           const isMutating = activeJobKey === row.jobKey;
 
           return (
-            <tr key={row.jobKey} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
-              <td className="border border-gray-200 px-2 py-2 align-top text-gray-900">
+            <tr key={row.jobKey} className={index % 2 === 0 ? "bg-card" : "bg-muted/50"}>
+              <td className="border border-border px-2 py-2 align-top text-foreground">
                 <div className="font-semibold">{row.title}</div>
                 <div className="mt-0.5 text-xs text-gray-500">{row.scheduleLabel}</div>
               </td>
-              <td className="border border-gray-200 px-2 py-2 align-top text-gray-700">{formatDateTime(row.lastExecutionAt)}</td>
-              <td className="border border-gray-200 px-2 py-2 align-top">
+              <td className="border border-border px-2 py-2 align-top text-foreground">{formatDateTime(row.lastExecutionAt)}</td>
+              <td className="border border-border px-2 py-2 align-top">
                 <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${status.style}`}>
                   {status.label}
                 </span>
               </td>
-              <td className="border border-gray-200 px-2 py-2 align-top">
+              <td className="border border-border px-2 py-2 align-top">
                 {row.canRun ? (
                   <button
                     type="button"
@@ -233,9 +233,9 @@ const JobsLogTable = ({
 }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full border-collapse text-xs">
-      <thead className="bg-gray-100 text-gray-700">
+      <thead className="bg-muted text-muted-foreground">
         <tr>
-          <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Fecha de procesado</th>
+          <th className="border border-border px-2 py-1.5 text-left font-semibold">Fecha de procesado</th>
           <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Cron</th>
           <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Resultado</th>
           <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Alertas</th>
@@ -427,10 +427,10 @@ export default function PatentamientosRegistrosView() {
 
   if (jobsQuery.error instanceof Error) {
     return (
-      <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el control de cronos</h1>
-          <p className="mt-2 text-sm text-red-600">{jobsQuery.error.message}</p>
+      <div className="font-preset w-full px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar el control de cronos</h1>
+          <p className="mt-2 text-sm text-destructive">{jobsQuery.error.message}</p>
         </section>
       </div>
     );
@@ -438,22 +438,22 @@ export default function PatentamientosRegistrosView() {
 
   if (detailsQuery.error instanceof Error) {
     return (
-      <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el detalle de cronos</h1>
-          <p className="mt-2 text-sm text-red-600">{detailsQuery.error.message}</p>
+      <div className="font-preset w-full px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar el detalle de cronos</h1>
+          <p className="mt-2 text-sm text-destructive">{detailsQuery.error.message}</p>
         </section>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-3 px-1 py-1">
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-gray-900">Control de cronos</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Control de cronos</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Vista simplificada con lo que recibe y lo que devuelve cada cron.
             </p>
           </div>
@@ -475,8 +475,8 @@ export default function PatentamientosRegistrosView() {
         />
       </section>
 
-      <section className="mt-6 rounded-2xl border border-black-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 px-1 text-md font-semibold text-gray-900">Registro de acciones</div>
+      <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+        <div className="mb-3 text-md font-semibold text-foreground">Registro de acciones</div>
         <JobsLogTable
           rows={paginatedLogRows}
           page={safeLogsPage}

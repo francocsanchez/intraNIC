@@ -16,6 +16,10 @@
 - Se resaltan en verde los avances iguales o superiores al 100%.
 
 ### Vistas operativas
+- Se adapto el navbar y footer exclusivos de Administracion al preset, con la leyenda de uso interno y autoria solicitadas.
+- Se adaptaron los flujos de creación y edición de usuarios, incluido el formulario compartido y sus estados de carga, al preset compacto.
+- Se simplifico el bloque de módulos del formulario de usuarios para eliminar cards anidadas y reducir el espaciado.
+- Se migraron Usuarios, Configuración, TestDrive y Registros al preset visual compacto, con superficies, bordes y tipografía semánticos.
 - Se integro el detalle de cheques rechazados en el panel de Titular de Central de Deudores para eliminar su fila independiente.
 - Se alineo toda la vista Central de Deudores con los tokens del preset, incluidos sus estados de riesgo, paneles y detalles.
 - Se adaptaron Reventas pendientes, Central de Deudores y Promedio convencional al sistema visual shadcn, con encabezados compactos que unifican filtros y resúmenes.

@@ -6,26 +6,26 @@ import EditUsuarioForm from "./EditUsuarioForm";
 
 function LoadingState() {
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div className="h-7 w-48 animate-pulse rounded bg-gray-200" />
         <div className="mt-2 h-4 w-80 animate-pulse rounded bg-gray-100" />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <article key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <article key={i} className="rounded-lg border border-border bg-card p-3 shadow-sm">
             <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
             <div className="mt-3 h-6 w-32 animate-pulse rounded bg-gray-100" />
           </article>
         ))}
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <section className="rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-3">
           <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
         </div>
-        <div className="space-y-4 p-6">
+        <div className="space-y-4 p-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-100" />
           ))}

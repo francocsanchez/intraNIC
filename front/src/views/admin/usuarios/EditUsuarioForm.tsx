@@ -74,40 +74,40 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
   };
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Editar usuario</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Editar usuario</h1>
         </div>
 
         <Link
           to={paths.admin.usuarios}
-          className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:opacity-90"
         >
           Volver
         </Link>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="grid grid-cols-1 gap-1 border-y border-border bg-card md:grid-cols-4">
+        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usuario</p>
           <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">
             {data.lastName}, {data.name}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Estado</p>
           <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">{data.enable ? "Activo" : "Inactivo"}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Email</p>
           <p className="mt-2 break-all text-sm font-medium text-gray-900">{data.email}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="px-3 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursal predeterminada</p>
           <p className="mt-2 text-sm font-medium text-gray-900">
             {data.sucursalPredeterminada?.nombre ?? "Sin asignar"}
@@ -116,28 +116,28 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
       </section>
 
       <form
-        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+        className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm"
         onSubmit={handleSubmit(handleFormSubmit)}
         noValidate
       >
-        <div className="border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-border px-3 py-3">
           <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
           <p className="mt-1 text-sm text-gray-500">
             Actualiza los datos, la unidad de negocio, la sucursal predeterminada y los modulos habilitados.
           </p>
         </div>
 
-        <div className="p-6">
+        <div className="p-3">
           <UsuarioForm register={register} control={control} errors={errors} />
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-gray-500">Revisa los datos antes de guardar la edicion.</div>
 
           <input
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex cursor-pointer justify-center rounded-lg bg-black px-6 py-2.5 text-sm font-semibold uppercase text-white shadow-sm transition-colors hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex cursor-pointer justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             value={mutation.isPending ? "Guardando..." : "Guardar cambios"}
           />
         </div>

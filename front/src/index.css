@@ -135,6 +135,40 @@
     font-family: "Nunito Sans", sans-serif;
   }
 
+  /* Keeps migrated screens on preset tokens while legacy utility markup is retired. */
+  .font-preset .border-gray-100,
+  .font-preset .border-gray-200,
+  .font-preset .border-gray-300 {
+    border-color: var(--border) !important;
+  }
+
+  .font-preset .bg-white,
+  .font-preset .bg-gray-50,
+  .font-preset .bg-gray-100 {
+    background-color: var(--card) !important;
+  }
+
+  .font-preset .text-gray-400,
+  .font-preset .text-gray-500,
+  .font-preset .text-gray-600,
+  .font-preset .text-gray-700,
+  .font-preset .text-gray-800 {
+    color: var(--muted-foreground) !important;
+  }
+
+  .font-preset .text-gray-900 {
+    color: var(--foreground) !important;
+  }
+
+  .font-preset .rounded-xl,
+  .font-preset .rounded-2xl {
+    border-radius: var(--radius) !important;
+  }
+
+  .font-preset .border-gray-300 {
+    border-color: var(--input) !important;
+  }
+
   .mobile-scroll {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;

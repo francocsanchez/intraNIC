@@ -95,16 +95,16 @@ export default function UsuariosView() {
 
   if (isLoading) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando usuarios...</div>
+      <div className="font-preset w-full px-2 py-3">
+        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">Cargando usuarios...</div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">
+      <div className="font-preset w-full px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm text-destructive">
           Error al cargar los usuarios
         </div>
       </div>
@@ -118,40 +118,40 @@ export default function UsuariosView() {
   const usuariosVisibles = visibleSection === "habilitados" ? usuariosHabilitados : usuariosDeshabilitados;
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Usuarios</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Usuarios</h1>
         </div>
 
         {canManageUsers ? (
           <Link
             to={paths.admin.crearUsuario}
-            className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-colors hover:opacity-90"
           >
             Crear usuario
           </Link>
         ) : null}
       </section>
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de usuarios</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Lista de usuarios</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {visibleSection === "habilitados"
                 ? "Vista limpia con solo usuarios habilitados."
                 : "Listado separado de usuarios deshabilitados."}
             </p>
           </div>
 
-          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+          <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
             <button
               type="button"
               onClick={() => setVisibleSection("habilitados")}
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "habilitados" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                visibleSection === "habilitados" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Habilitados ({activos})
@@ -163,8 +163,8 @@ export default function UsuariosView() {
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
                 visibleSection === "deshabilitados"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900",
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Deshabilitados ({deshabilitados})
@@ -174,35 +174,35 @@ export default function UsuariosView() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-6 py-3 text-left">Usuario</th>
-                <th className="px-6 py-3 text-left">Rol</th>
-                <th className="px-6 py-3 text-left">Unidad negocio</th>
-                <th className="px-6 py-3 text-left">Sucursal predeterminada</th>
-                <th className="px-6 py-3 text-left">Celular</th>
-                <th className="px-6 py-3 text-left">NIC</th>
-                <th className="px-6 py-3 text-left">LIESS</th>
-                <th className="px-6 py-3 text-right">Acciones</th>
+                <th className="px-3 py-3 text-left">Usuario</th>
+                <th className="px-3 py-3 text-left">Rol</th>
+                <th className="px-3 py-3 text-left">Unidad negocio</th>
+                <th className="px-3 py-3 text-left">Sucursal predeterminada</th>
+                <th className="px-3 py-3 text-left">Celular</th>
+                <th className="px-3 py-3 text-left">NIC</th>
+                <th className="px-3 py-3 text-left">LIESS</th>
+                <th className="px-3 py-3 text-right">Acciones</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {usuariosVisibles.map((u) => (
-                <tr key={u.email} className="hover:bg-gray-50">
-                  <td className="px-6 py-3">
-                    <div className="font-medium text-gray-900">
+                <tr key={u.email} className="hover:bg-muted">
+                  <td className="px-3 py-3">
+                    <div className="font-medium text-foreground">
                       {capitalize(u.lastName)}, {capitalize(u.name)}
                     </div>
-                    <div className="mt-0.5 text-xs text-gray-500">{u.email}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{u.email}</div>
                   </td>
 
-                  <td className="px-6 py-3">
+                  <td className="px-3 py-3">
                     <div className="flex flex-wrap gap-2">
                       {u.role.map((r) => (
                         <span
                           key={r}
-                          className="rounded-full border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+                          className="rounded-full border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground"
                         >
                           {r}
                         </span>
@@ -210,25 +210,25 @@ export default function UsuariosView() {
                     </div>
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-3 py-3 text-foreground">
                     {u.unidadNegocio?.nombre ?? "-"}
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-3 py-3 text-foreground">
                     {u.sucursalPredeterminada?.nombre ?? "-"}
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">{u.celular || "-"}</td>
+                  <td className="px-3 py-3 text-foreground">{u.celular || "-"}</td>
 
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-3 py-3 text-foreground">
                     {u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}
                   </td>
 
-                  <td className="px-6 py-3 text-gray-700">
+                  <td className="px-3 py-3 text-foreground">
                     {u.numberSaleLiess ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess) : "-"}
                   </td>
 
-                  <td className="px-6 py-3">
+                  <td className="px-3 py-3">
                     <div className="flex justify-end gap-2">
                       {canManageUsers ? (
                         <>
@@ -236,10 +236,10 @@ export default function UsuariosView() {
                             type="button"
                             onClick={() => changeStatus(u._id)}
                             className={[
-                              "inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
+                              "inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition-colors",
                               u.enable
-                                ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                                : "border border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
+                                ? "border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                                : "border border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
                             ].join(" ")}
                           >
                             {u.enable ? "Deshabilitar" : "Habilitar"}
@@ -249,7 +249,7 @@ export default function UsuariosView() {
                             type="button"
                             onClick={() => resetPasswordUser(u._id)}
                             disabled={resettingUserId === u._id}
-                            className="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                            className="inline-flex items-center justify-center gap-1 rounded-md border border-amber-500/30 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
                           >
                             <RotateCcw size={14} strokeWidth={1.8} />
                             {resettingUserId === u._id ? "Enviando..." : "Enviar nueva pass"}
@@ -257,7 +257,7 @@ export default function UsuariosView() {
 
                           <Link
                             to={paths.admin.editarUsuario(u._id)}
-                            className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
                           >
                             Editar
                           </Link>
@@ -270,7 +270,7 @@ export default function UsuariosView() {
 
               {usuariosVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-3 py-10 text-center text-sm text-muted-foreground">
                     {visibleSection === "habilitados"
                       ? "No hay usuarios habilitados para mostrar."
                       : "No hay usuarios deshabilitados para mostrar."}

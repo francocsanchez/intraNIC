@@ -30,11 +30,11 @@ export default function ConfiguracionView() {
   const vendedores = vendedoresResponse?.data ?? [];
 
   if (configLoading || vendedoresLoading) {
-    return <div className="px-4 py-6">Cargando...</div>;
+    return <div className="font-preset px-2 py-3 text-muted-foreground">Cargando...</div>;
   }
 
   if (configError || vendedoresError) {
-    return <div className="px-4 py-6 text-red-600">Error al cargar la configuración</div>;
+    return <div className="font-preset px-2 py-3 text-destructive">Error al cargar la configuración</div>;
   }
 
   const vendedoresMap = new Map(vendedores.map((v) => [String(v.codigo), v.vendedor]));
@@ -150,18 +150,18 @@ export default function ConfiguracionView() {
   ];
 
   return (
-    <div className="w-full px-4 py-6 space-y-5">
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Configuración</h1>
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administración</p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Configuración</h1>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         {sistemas.filter((sistema) => sistema.canView).map((sistema) => (
-          <div key={sistema.title} className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5">
+          <div key={sistema.title} className="rounded-lg border border-border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b border-border px-3 py-3">
               <div className="flex items-center gap-2.5">
-                <h2 className="text-sm font-semibold text-gray-900">{sistema.title}</h2>
+                <h2 className="text-sm font-semibold text-foreground">{sistema.title}</h2>
 
                 <span
                   className={[
@@ -176,27 +176,27 @@ export default function ConfiguracionView() {
               {sistema.canEdit ? (
                 <Link
                   to={sistema.editPath}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                  className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
                 >
                   Editar
                 </Link>
               ) : (
-                <span className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-400">
+                <span className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                   Sin acceso de edicion
                 </span>
               )}
             </div>
 
-            <div className="space-y-4 p-5">
+            <div className="space-y-3 p-3">
               {sistema.bloques.map((bloque) => (
                 <div key={bloque.label}>
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">{bloque.label}</div>
-                    {bloque.values.length > 0 ? <span className="text-xs text-gray-400">{bloque.values.length}</span> : null}
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{bloque.label}</div>
+                    {bloque.values.length > 0 ? <span className="text-xs text-muted-foreground">{bloque.values.length}</span> : null}
                   </div>
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+                  <div className="rounded-md border border-border bg-muted px-3 py-2.5">
                     {bloque.values.length > 0 ? (
-                      <ul className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm text-gray-700 sm:grid-cols-2 xl:grid-cols-3">
+                      <ul className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm text-foreground sm:grid-cols-2 xl:grid-cols-3">
                         {bloque.values.map((v) => (
                           <li key={v} className="truncate">
                             {v}
@@ -204,7 +204,7 @@ export default function ConfiguracionView() {
                         ))}
                       </ul>
                     ) : (
-                      <span className="text-xs text-gray-400">Sin vendedores configurados</span>
+                      <span className="text-xs text-muted-foreground">Sin vendedores configurados</span>
                     )}
                   </div>
                 </div>
@@ -212,13 +212,13 @@ export default function ConfiguracionView() {
 
               {sistema.catalogos.length ? (
                 <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Parametros de sistema</div>
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Parametros de sistema</div>
                   <div className="flex flex-wrap gap-2">
                     {sistema.catalogos.map((catalogo) => (
                       <Link
                         key={catalogo.to}
                         to={catalogo.to}
-                        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                        className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
                       >
                         {catalogo.label}
                       </Link>
@@ -232,7 +232,7 @@ export default function ConfiguracionView() {
       </section>
 
       {canManageAgendaEnvio ? (
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sistema</p>
@@ -253,7 +253,7 @@ export default function ConfiguracionView() {
       ) : null}
 
       {canManageHotAlert ? (
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Calidad</p>
@@ -274,7 +274,7 @@ export default function ConfiguracionView() {
       ) : null}
 
       {canManageUnidadesNegocio ? (
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>

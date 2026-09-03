@@ -164,11 +164,11 @@ function TestDriveModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <Dialog.Panel className="font-preset w-full max-w-3xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                <div className="flex items-center justify-between border-b border-border px-3 py-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sistema</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sistema</p>
+                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
                       {isEditing ? "Editar unidad TestDrive" : "Nueva unidad TestDrive"}
                     </Dialog.Title>
                   </div>
@@ -177,14 +177,14 @@ function TestDriveModal({
                     type="button"
                     onClick={onClose}
                     disabled={isPending}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-border p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit(submitHandler)} noValidate>
-                  <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
                     <div className="space-y-2">
                       <label htmlFor="dominio" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                         Dominio
@@ -192,7 +192,7 @@ function TestDriveModal({
                       <input
                         id="dominio"
                         type="text"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
                         {...register("dominio", { required: "El dominio es obligatorio" })}
                       />
                       <FieldError message={errors.dominio?.message} />
@@ -315,21 +315,21 @@ function TestDriveModal({
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-gray-500">Completa los datos de la unidad antes de guardar.</div>
+                  <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">Completa los datos de la unidad antes de guardar.</div>
                     <div className="flex gap-3">
                       <button
                         type="button"
                         onClick={onClose}
                         disabled={isPending}
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
                         disabled={isPending}
-                        className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear unidad"}
                       </button>
@@ -399,8 +399,8 @@ export default function TestDriveView() {
 
   if (isLoading) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="font-preset w-full px-2 py-3">
+        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
           Cargando unidades de TestDrive...
         </div>
       </div>
@@ -409,8 +409,8 @@ export default function TestDriveView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm text-red-600">
+      <div className="font-preset w-full px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm text-destructive">
           {error instanceof Error ? error.message : "Error al cargar las unidades de TestDrive"}
         </div>
       </div>
@@ -418,41 +418,41 @@ export default function TestDriveView() {
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sistema</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">TestDrive</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sistema</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">TestDrive</h1>
         </div>
 
         <button
           type="button"
           onClick={handleCreate}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-colors hover:opacity-90"
         >
           <Plus size={16} />
           Nuevo TD
         </button>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de unidades TestDrive</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Lista de unidades TestDrive</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {visibleSection === "activas"
                 ? "Vista principal con las unidades habilitadas."
                 : "Listado separado de unidades deshabilitadas."}
             </p>
           </div>
 
-          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+          <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
             <button
               type="button"
               onClick={() => setVisibleSection("activas")}
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "activas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                visibleSection === "activas" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Activas ({unidadesActivas.length})
@@ -464,8 +464,8 @@ export default function TestDriveView() {
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
                 visibleSection === "deshabilitadas"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900",
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Deshabilitadas ({unidadesDeshabilitadas.length})
@@ -475,7 +475,7 @@ export default function TestDriveView() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-6 py-3 text-left">Dominio</th>
                 <th className="px-6 py-3 text-left">Modelo</th>
@@ -489,9 +489,9 @@ export default function TestDriveView() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {unidadesVisibles.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
+                <tr key={item._id} className="hover:bg-muted">
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2 font-medium text-gray-900">
                       <CarFront size={16} className="text-gray-500" />
