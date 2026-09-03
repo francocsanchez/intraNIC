@@ -11,6 +11,7 @@ import {
   pendienteTurnarResponseSchema,
   sucursalEntregaListResponseSchema,
   sucursalEntregaResponseSchema,
+  type AgendaEntrega,
   type AgendaEntregaListResponse,
   type AgendaEntregaLogListResponse,
   type AgendaEntregaLookup,
@@ -132,6 +133,26 @@ export function getAgendasEntrega(params?: {
 
     throw error;
   });
+}
+
+export async function getAgendaEntregaByInterno(interno: number): Promise<AgendaEntrega | null> {
+  try {
+    const { data } = await api.get(`/entregas/agendas/interno/${interno}`);
+    const parsed = agendaEntregaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data.data ?? null;
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
+    throw new Error(getErrorMessage(error, "Error al buscar el turno por interno"));
+  }
 }
 
 export function createAgendaEntrega(payload: AgendaEntregaPayload): Promise<AgendaEntregaResponse> {

@@ -1,6 +1,7 @@
 import {
   deleteAgendaEntrega,
   deleteReservaEntrega,
+  getAgendaEntregaByInterno,
   getAgendasEntrega,
   getSucursalesEntrega,
   toggleAgendaEntregaEquipado,
@@ -9,6 +10,7 @@ import {
 import AgendaEntregaFilters from "@/components/entregas/AgendaEntregaFilters";
 import AgendaEntregaForm from "@/components/entregas/AgendaEntregaForm";
 import AgendaEntregaTable from "@/components/entregas/AgendaEntregaTable";
+import InternoLookupCard from "@/components/entregas/InternoLookupCard";
 import ReservaEntregaForm from "@/components/entregas/ReservaEntregaForm";
 import {
   hasEntregaAgendaEquipadoToggleAccess,
@@ -18,9 +20,10 @@ import {
 import { useAuth } from "@/hooks/useAuthe";
 import type { AgendaEntrega } from "@/types/index";
 import { openAgendaEntregaPrintView } from "@/utils/agendaEntregaPrint";
+import { Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarPlus, FileSpreadsheet, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { CalendarPlus, FileSpreadsheet, Plus, Search, X } from "lucide-react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const getTodayDate = () => {
@@ -40,6 +43,11 @@ export default function AgendaEntregaView() {
   const [editingTurno, setEditingTurno] = useState<AgendaEntrega | null>(null);
   const [editingReserva, setEditingReserva] = useState<AgendaEntrega | null>(null);
   const [reservationToConvert, setReservationToConvert] = useState<AgendaEntrega | null>(null);
+  const [searchInterno, setSearchInterno] = useState("");
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [searchedInterno, setSearchedInterno] = useState<number | null>(null);
+  const [searchedAgenda, setSearchedAgenda] = useState<AgendaEntrega | null>(null);
+  const [searchLookupError, setSearchLookupError] = useState("");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["entregas", "agendas", filters],
@@ -190,6 +198,58 @@ export default function AgendaEntregaView() {
     toggleEquipadoMutation.mutate({ id: item._id, checked });
   };
 
+  const handleCloseSearchDialog = () => {
+    setSearchDialogOpen(false);
+    setSearchedInterno(null);
+    setSearchedAgenda(null);
+    setSearchLookupError("");
+  };
+
+  const handleSearchByInterno = async () => {
+    const interno = Number(searchInterno.trim());
+
+    if (!Number.isInteger(interno) || interno <= 0) {
+      toast.error("Ingresa un numero de interno valido");
+      return;
+    }
+
+    setSearchLookupError("");
+
+    try {
+      const agenda = await getAgendaEntregaByInterno(interno);
+      setSearchedInterno(interno);
+      setSearchedAgenda(agenda);
+      setSearchDialogOpen(true);
+    } catch (searchError) {
+      setSearchedInterno(interno);
+      setSearchedAgenda(null);
+      setSearchLookupError(
+        searchError instanceof Error ? searchError.message : "No se pudo buscar el turno por interno",
+      );
+      setSearchDialogOpen(true);
+    }
+  };
+
+  const searchMutation = useMutation({
+    mutationFn: handleSearchByInterno,
+  });
+
+  const searchedAgendaOperacion = useMemo(() => {
+    if (!searchedAgenda?.siac) {
+      return "-";
+    }
+
+    if (searchedAgenda.siac.operacion) {
+      return String(searchedAgenda.siac.operacion);
+    }
+
+    if (searchedAgenda.siac.grupo && searchedAgenda.siac.orden) {
+      return `[${searchedAgenda.siac.grupo} | ${searchedAgenda.siac.orden}]`;
+    }
+
+    return "-";
+  }, [searchedAgenda]);
+
   const handlePrint = () => {
     if (!filters.fecha) {
       toast.error("Selecciona una fecha para imprimir la agenda del dia");
@@ -239,6 +299,34 @@ export default function AgendaEntregaView() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={searchInterno}
+                onChange={(event) => setSearchInterno(event.target.value.replace(/\D/g, ""))}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!searchMutation.isPending) {
+                      searchMutation.mutate();
+                    }
+                  }
+                }}
+                placeholder="Buscar interno"
+                className="w-32 border-none bg-transparent px-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+              />
+              <button
+                type="button"
+                onClick={() => searchMutation.mutate()}
+                disabled={searchMutation.isPending}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
+                aria-label="Buscar turno por interno"
+              >
+                <Search size={16} />
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={handlePrint}
@@ -317,6 +405,124 @@ export default function AgendaEntregaView() {
           />
         </>
       ) : null}
+
+      <Transition appear show={searchDialogOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => (searchMutation.isPending ? undefined : handleCloseSearchDialog())}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/40" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+                  <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
+                      <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                        Busqueda de turno por interno
+                      </Dialog.Title>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCloseSearchDialog}
+                      disabled={searchMutation.isPending}
+                      className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-6 p-6">
+                    {searchLookupError ? (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {searchLookupError}
+                      </div>
+                    ) : searchedAgenda ? (
+                      <>
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+                          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Turno asignado</p>
+                              <h3 className="mt-1 text-lg font-semibold text-gray-900">
+                                Interno {searchedAgenda.interno}
+                              </h3>
+                              <p className="mt-1 text-sm text-gray-600">
+                                {searchedAgenda.sucursal?.nombre || "-"} | {searchedAgenda.fechaAgenda} | {searchedAgenda.horaAgenda}
+                              </p>
+                            </div>
+                            <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700">
+                              Operacion {searchedAgendaOperacion}
+                            </span>
+                          </div>
+
+                          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Tipo</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.tipoOperacion || searchedAgenda.siac?.tipoOperacion || "-"}</p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Entregada por</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">
+                                {searchedAgenda.entregadaPorMarcada ? searchedAgenda.entregadaPorNombre || "-" : "-"}
+                              </p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Equipado</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.equipado ? "Si" : "No"}</p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Entrega usado</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.entregaUsado ? "Si" : "No"}</p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Siniestro</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.siniestro ? "Si" : "No"}</p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Observaciones</p>
+                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.observaciones?.trim() || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <InternoLookupCard data={searchedAgenda.siac ?? null} error={searchedAgenda.siacSyncError ? searchedAgenda.siacSyncMessage : ""} />
+                      </>
+                    ) : (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Resultado</p>
+                        <h3 className="mt-1 text-lg font-semibold text-amber-900">
+                          {searchedInterno ? `Interno ${searchedInterno}` : "Interno"}: turno sin asignar
+                        </h3>
+                        <p className="mt-1 text-sm text-amber-800">
+                          No existe un turno cargado en agenda para ese interno.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

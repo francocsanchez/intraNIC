@@ -37,6 +37,7 @@ router.use(authenticate);
 
 router.get("/interno/:interno", AgendaEntregaController.getInterno);
 
+router.get("/agendas/interno/:interno", AgendaEntregaController.getByInterno);
 router.get("/agendas", AgendaEntregaController.list);
 router.post("/agendas/reservas", AgendaEntregaController.createReserva);
 router.put("/agendas/reservas/:id", AgendaEntregaController.updateReserva);

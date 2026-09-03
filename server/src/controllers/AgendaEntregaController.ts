@@ -554,6 +554,46 @@ export class AgendaEntregaController {
     }
   };
 
+  static getByInterno = async (req: Request, res: Response) => {
+    const interno = Number(req.params.interno);
+
+    if (!Number.isInteger(interno) || interno <= 0) {
+      return res.status(400).json({ error: "El interno ingresado no es valido" });
+    }
+
+    try {
+      const agenda = await AgendaEntrega.findOne({ tipoRegistro: "turno", interno })
+        .populate("sucursal", "nombre direccion activa")
+        .lean();
+
+      if (!agenda) {
+        return res.status(404).json({ error: "Turno sin asignar" });
+      }
+
+      let lookup: AgendaEntregaLookup | null = null;
+      let lookupError = "";
+
+      try {
+        lookup = await lookupAgendaEntregaInterno(interno);
+        if (!lookup) {
+          lookupError = "No se pudo obtener informacion actualizada desde SIAC";
+        }
+      } catch (error) {
+        console.error(error);
+        lookupError = "No se pudo obtener informacion actualizada desde SIAC";
+      }
+
+      return res.status(200).json({
+        message: "Turno encontrado",
+        data: formatAgendaRow(agenda, lookup, lookupError),
+      });
+    } catch (error) {
+      logError("AgendaEntregaController.getByInterno");
+      console.error(error);
+      return res.status(500).json({ message: "Error al buscar el turno por interno" });
+    }
+  };
+
   static list = async (req: Request, res: Response) => {
     try {
       const fecha = typeof req.query.fecha === "string" ? req.query.fecha.trim() : "";
