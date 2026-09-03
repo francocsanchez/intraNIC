@@ -43,10 +43,10 @@ export default function MisReservasViewContent({
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="mx-auto max-w-7xl rounded-2xl border border-red-200 bg-red-50 p-6">
-          <h1 className="text-lg font-semibold text-red-700">Error al cargar tus reservas</h1>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Ocurrio un error al obtener la informacion."}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar tus reservas</h1>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Ocurrio un error al obtener la informacion."}</p>
         </div>
       </div>
     );
@@ -55,78 +55,70 @@ export default function MisReservasViewContent({
   const reservas = data?.data ?? [];
 
   return (
-    <div className="w-full px-4 py-6">
-      <div className="space-y-6">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mis reservas</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{heading}</h1>
-        </section>
-
-      
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Detalle</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">Tabla de reservas</h2>
+    <div className="font-preset w-full bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="border-b border-border px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mis reservas</p>
+            <h1 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{heading}</h1>
           </div>
 
           {reservas.length === 0 ? (
-            <div className="px-6 py-10 text-sm text-gray-500">No tenes reservas para mostrar.</div>
+            <div className="px-3 py-8 text-sm text-muted-foreground">No tenes reservas para mostrar.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    <th className="px-4 py-3">Interno</th>
-                    <th className="px-4 py-3">Modelo</th>
-                    <th className="px-4 py-3">Version</th>
-                    <th className="px-4 py-3">Color</th>
-                    <th className="px-4 py-3">Ubicacion</th>
-                    <th className="px-4 py-3">Chasis</th>
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted">
+                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <th className="px-3 py-2">Interno</th>
+                    <th className="px-3 py-2">Modelo</th>
+                    <th className="px-3 py-2">Version</th>
+                    <th className="px-3 py-2">Color</th>
+                    <th className="px-3 py-2">Ubicacion</th>
+                    <th className="px-3 py-2">Chasis</th>
                    
-                    <th className="px-4 py-3">Fecha reserva</th>
-                    <th className="px-4 py-3">Fecha recepcion</th>
-                    <th className="px-4 py-3">Cliente</th>
-                    <th className="px-4 py-3 text-center">Dias</th>
+                    <th className="px-3 py-2">Fecha reserva</th>
+                    <th className="px-3 py-2">Fecha recepcion</th>
+                    <th className="px-3 py-2">Cliente</th>
+                    <th className="px-3 py-2 text-center">Dias</th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-border">
                   {reservas.map((reserva) => (
-                    <tr key={`${reserva.interno}-${reserva.fechaReserva}`} className="align-top text-sm text-gray-700">
-                      <td className="px-4 py-4 font-medium text-gray-900">{reserva.interno}</td>
-                      <td className="px-4 py-4">{reserva.modelo}</td>
-                      <td className="min-w-[260px] px-4 py-4">{reserva.version}</td>
-                      <td className="px-4 py-4">
-                        <div className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(reserva.color)} `}>
+                    <tr key={`${reserva.interno}-${reserva.fechaReserva}`} className="align-top text-muted-foreground hover:bg-muted">
+                      <td className="px-3 py-1.5 font-medium text-foreground">{reserva.interno}</td>
+                      <td className="px-3 py-1.5">{reserva.modelo}</td>
+                      <td className="min-w-[260px] px-3 py-1.5">{reserva.version}</td>
+                      <td className="px-3 py-1.5">
+                        <div className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(reserva.color)}`}>
                           {reserva.color}
                         </div>
                       </td>
-                      <td className="px-4 py-4">{reserva.ubicacion ?? "EN PRODUCCION"}</td>
-                      <td className="px-4 py-4">{reserva.chasis}</td>
+                      <td className="px-3 py-1.5">{reserva.ubicacion ?? "EN PRODUCCION"}</td>
+                      <td className="px-3 py-1.5">{reserva.chasis}</td>
                      
-                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaReserva)}</td>
-                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">{formatReservaDate(reserva.fechaRecepcion)}</td>
-                      <td className="px-4 py-4">
+                      <td className="whitespace-nowrap px-3 py-1.5 font-medium text-foreground">{formatReservaDate(reserva.fechaReserva)}</td>
+                      <td className="whitespace-nowrap px-3 py-1.5 font-medium text-foreground">{formatReservaDate(reserva.fechaRecepcion)}</td>
+                      <td className="px-3 py-1.5">
                         <button
                           type="button"
                           onClick={() => setReservaSeleccionada(reserva)}
-                          className="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-700"
+                          className="inline-flex items-center rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                         >
                           Ver
                         </button>
                       </td>
-                      <td className="px-4 py-4 text-center">{getDiasReservada(reserva.fechaReserva)}</td>
+                      <td className="px-3 py-1.5 text-center">{getDiasReservada(reserva.fechaReserva)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </section>
-      </div>
+      </section>
 
       <Transition appear show={!!reservaSeleccionada} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setReservaSeleccionada(null)}>
+        <Dialog as="div" className="font-preset relative z-50" onClose={() => setReservaSeleccionada(null)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -136,7 +128,7 @@ export default function MisReservasViewContent({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/40" />
+            <div className="fixed inset-0 bg-foreground/40" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -150,11 +142,11 @@ export default function MisReservasViewContent({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                  <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                  <div className="flex items-center justify-between border-b border-border px-3 py-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mis reservas</p>
-                      <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mis reservas</p>
+                      <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
                         Cliente de la reserva
                       </Dialog.Title>
                     </div>
@@ -162,24 +154,24 @@ export default function MisReservasViewContent({
                     <button
                       type="button"
                       onClick={() => setReservaSeleccionada(null)}
-                      className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                      className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
                       <X size={18} />
                     </button>
                   </div>
 
-                  <div className="px-6 py-5">
-                    <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Nombre</p>
-                      <p className="mt-2 text-sm font-medium text-gray-900">{reservaSeleccionada?.clienteReserva || "Sin cliente"}</p>
+                  <div className="p-3">
+                    <div className="rounded-md border border-border bg-muted px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Nombre</p>
+                      <p className="mt-1 text-sm font-medium text-foreground">{reservaSeleccionada?.clienteReserva || "Sin cliente"}</p>
                     </div>
                   </div>
 
-                  <div className="flex justify-end border-t border-gray-200 bg-gray-50 px-6 py-4">
+                  <div className="flex justify-end border-t border-border bg-muted px-3 py-3">
                     <button
                       type="button"
                       onClick={() => setReservaSeleccionada(null)}
-                      className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
+                      className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                     >
                       Cerrar
                     </button>

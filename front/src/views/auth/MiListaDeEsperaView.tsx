@@ -14,10 +14,10 @@ export default function MiListaDeEsperaView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="mx-auto max-w-7xl rounded-2xl border border-red-200 bg-red-50 p-6">
-          <h1 className="text-lg font-semibold text-red-700">Error al cargar tu lista de espera</h1>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Ocurrió un error al obtener la información."}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar tu lista de espera</h1>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Ocurrió un error al obtener la información."}</p>
         </div>
       </div>
     );
@@ -33,54 +33,48 @@ export default function MiListaDeEsperaView() {
     }).format(new Date(value));
 
   return (
-    <div className="w-full px-4 py-6">
-      <div className="space-y-6">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mi lista de espera</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Resumen de operaciones</h1>
-        </section>
-
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Detalle</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">Tabla de reservas</h2>
+    <div className="font-preset w-full bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="border-b border-border px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mi lista de espera</p>
+            <h1 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Resumen de operaciones</h1>
           </div>
 
           {operaciones.length === 0 ? (
-            <div className="px-6 py-10 text-sm text-gray-500">No tenés reservas para mostrar.</div>
+            <div className="px-3 py-8 text-sm text-muted-foreground">No tenés reservas para mostrar.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    <th className="px-4 py-3">Operacion</th>
-                    <th className="px-4 py-3">Fecha</th>
-                    <th className="px-4 py-3">Modelo</th>
-                    <th className="px-4 py-3">Versión</th>
-                    <th className="px-4 py-3">Cliente</th>
-                    <th className="px-4 py-3 text-center">Color 1</th>
-                    <th className="px-4 py-3 text-center">Color 2</th>
+              <table className="min-w-full text-sm">
+                <thead className="bg-muted">
+                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <th className="px-3 py-2">Operacion</th>
+                    <th className="px-3 py-2">Fecha</th>
+                    <th className="px-3 py-2">Modelo</th>
+                    <th className="px-3 py-2">Versión</th>
+                    <th className="px-3 py-2">Cliente</th>
+                    <th className="px-3 py-2 text-center">Color 1</th>
+                    <th className="px-3 py-2 text-center">Color 2</th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-border">
                   {operaciones.map((operacion) => (
-                    <tr key={operacion.opera} className="align-top text-sm text-gray-700">
-                      <td className="px-4 py-4 font-medium text-gray-900">{operacion.opera}</td>
-                      <td className="px-4 py-4 font-medium text-gray-900">{formatDate(operacion.fecha)}</td>
-                      <td className="px-4 py-4">{operacion.modelo}</td>
-                      <td className="px-4 py-4 min-w-[260px]">{operacion.version}</td>
-                      <td className="px-4 py-4">{operacion.clienteNombre}</td>
-                      <td className="px-4 py-4 text-center">
+                    <tr key={operacion.opera} className="align-top text-muted-foreground hover:bg-muted">
+                      <td className="px-3 py-1.5 font-medium text-foreground">{operacion.opera}</td>
+                      <td className="px-3 py-1.5 font-medium text-foreground">{formatDate(operacion.fecha)}</td>
+                      <td className="px-3 py-1.5">{operacion.modelo}</td>
+                      <td className="min-w-[260px] px-3 py-1.5">{operacion.version}</td>
+                      <td className="px-3 py-1.5">{operacion.clienteNombre}</td>
+                      <td className="px-3 py-1.5 text-center">
                         <div
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(operacion.color1)} `}
+                          className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(operacion.color1)}`}
                         >
                           {operacion.color1}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-3 py-1.5 text-center">
                         <div
-                          className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(operacion.color2)} `}
+                          className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(operacion.color2)}`}
                         >
                           {operacion.color2}
                         </div>
@@ -91,8 +85,7 @@ export default function MiListaDeEsperaView() {
               </table>
             </div>
           )}
-        </section>
-      </div>
+      </section>
     </div>
   );
 }

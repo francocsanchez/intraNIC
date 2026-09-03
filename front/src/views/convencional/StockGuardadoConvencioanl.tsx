@@ -267,7 +267,7 @@ export default function StockGuardadoConvencioanl() {
                     <div className="text-xs text-muted-foreground">{item.chasis}</div>
                   </td>
                   <td className="px-3 py-1.5 text-center text-muted-foreground">
-                    <span className={`inline-block rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
+                    <span className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
                       {item.color}
                     </span>
                   </td>

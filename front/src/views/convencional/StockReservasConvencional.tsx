@@ -198,7 +198,7 @@ export default function StockReservasConvencional() {
                       <div className="font-medium">{item.version}</div>
                     </td>
                     <td className="px-3 py-1.5 text-muted-foreground">
-                      <span className={`inline-block rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
+                      <span className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
                         {item.color}
                       </span>
                     </td>
