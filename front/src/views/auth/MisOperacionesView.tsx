@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import EChart from "@/components/charts/EChart";
 import { textToColor } from "@/helpers/colores";
 import { useAuth } from "@/hooks/useAuthe";
 import { misOperaciones } from "@/api/convencional/stockAPI";
@@ -6,24 +7,9 @@ import { misOperacionesUsados } from "@/api/usados/stockAPI";
 import type { MisOperacionesResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  LabelList,
-  Legend,
-  Line,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import type { EChartsCoreOption } from "echarts/core";
 
 const MESES = [
   { label: "ENERO", value: 1 },
@@ -40,9 +26,12 @@ const MESES = [
   { label: "DICIEMBRE", value: 12 },
 ];
 
-const CHART_COLORS = ["#15aa9a", "#7bc8c2", "#b8e0d2", "#a7d8de", "#9fc3e6", "#b7b5e8", "#d2b7e5", "#e3bfd3"];
-const COMBINED_MODEL_COLORS = ["#15aa9a", "#0f766e", "#3b82f6", "#f59e0b"];
 const MONTH_SHORT_LABELS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+
+function getPresetChartPalette() {
+  const styles = getComputedStyle(document.documentElement);
+  return ["--foreground", "--muted-foreground", "--chart-3", "--chart-4", "--chart-5"].map((token) => styles.getPropertyValue(token).trim());
+}
 
 function buildFullName(name?: string, lastName?: string) {
   return `${name ?? ""} ${lastName ?? ""}`.trim().toUpperCase() || "MIS OPERACIONES";
@@ -130,10 +119,6 @@ function buildMonthlyDiscountByModel(rows: MisOperacionesResponse["data"]) {
     .sort((a, b) => b.promedio - a.promedio);
 }
 
-function ChartPlaceholder({ className = "" }: { className?: string }) {
-  return <div className={`h-full w-full animate-pulse rounded-xl bg-gray-100 ${className}`.trim()} />;
-}
-
 export default function MisOperacionesView() {
   const { user } = useAuth();
   const { pathname } = useLocation();
@@ -142,7 +127,6 @@ export default function MisOperacionesView() {
   const anioActual = new Date().getFullYear();
   const [anio, setAnio] = useState<number>(anioActual);
   const [mes, setMes] = useState<number>(() => new Date().getMonth() + 1);
-  const [readyChartKey, setReadyChartKey] = useState("");
 
   const ANIOS = Array.from({ length: 5 }, (_, i) => anioActual - i);
 
@@ -182,41 +166,58 @@ export default function MisOperacionesView() {
   const totalOperaciones = resumen?.total ?? operaciones.length;
   const nombreUsuario = buildFullName(user?.name, user?.lastName);
   const mesActivo = MESES.find((item) => item.value === mes)?.label ?? "";
-  const chartKey = `${negocio}-${anio}-${mes}`;
-  const chartsReady = readyChartKey === chartKey;
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setReadyChartKey(chartKey);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [chartKey]);
+  const chartPalette = useMemo(() => getPresetChartPalette(), []);
+  const annualChartOption = useMemo<EChartsCoreOption>(() => ({
+    color: chartPalette,
+    tooltip: { trigger: "axis" },
+    legend: { bottom: 0, textStyle: { color: chartPalette[1] } },
+    grid: { top: 20, right: 12, bottom: 36, left: 36 },
+    xAxis: { type: "category", data: annualChart.data.map((item) => String(item.mes)), axisLine: { lineStyle: { color: chartPalette[1] } }, axisTick: { show: false }, axisLabel: { color: chartPalette[1] } },
+    yAxis: { type: "value", minInterval: 1, axisLine: { show: false }, splitLine: { lineStyle: { color: chartPalette[1], opacity: 0.2 } }, axisLabel: { color: chartPalette[1] } },
+    series: [
+      ...annualChart.modelKeys.map((key, index) => ({ type: "bar" as const, name: key === "otros" ? "OTROS" : key, stack: "modelos", barMaxWidth: 28, data: annualChart.data.map((item) => Number(item[key] ?? 0)), itemStyle: { color: chartPalette[index % chartPalette.length] } })),
+      { type: "line" as const, name: "TOTAL", data: annualChart.data.map((item) => Number(item.total)), smooth: true, symbolSize: 6, lineStyle: { width: 2, color: chartPalette[0] }, itemStyle: { color: chartPalette[0] }, label: { show: true, position: "top", color: chartPalette[0], fontSize: 11 } },
+    ],
+  }), [annualChart, chartPalette]);
+  const dailyChartOption = useMemo<EChartsCoreOption>(() => ({
+    color: [chartPalette[0]],
+    tooltip: { trigger: "axis" },
+    grid: { top: 22, right: 8, bottom: 26, left: 32 },
+    xAxis: { type: "category", data: ventasPorDia.map((item) => item.fechaCorta), axisLine: { lineStyle: { color: chartPalette[1] } }, axisTick: { show: false }, axisLabel: { color: chartPalette[1] } },
+    yAxis: { type: "value", minInterval: 1, axisLine: { show: false }, splitLine: { lineStyle: { color: chartPalette[1], opacity: 0.2 } }, axisLabel: { color: chartPalette[1] } },
+    series: [{ type: "bar", name: "Ventas", barMaxWidth: 32, data: ventasPorDia.map((item) => item.total), label: { show: true, position: "top", color: chartPalette[0], fontSize: 11 }, itemStyle: { color: chartPalette[0], borderRadius: [3, 3, 0, 0] } }],
+  }), [chartPalette, ventasPorDia]);
+  const modelChartOption = useMemo<EChartsCoreOption>(() => ({
+    color: chartPalette,
+    tooltip: { trigger: "item", formatter: "{b}: {c}" },
+    series: [{ type: "pie", radius: ["48%", "72%"], label: { color: chartPalette[1] }, data: distribucionPorModelo.map((item) => ({ name: item.modelo, value: item.total })) }],
+  }), [chartPalette, distribucionPorModelo]);
 
   if (isLoading) return <Loading />;
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar operaciones</h1>
-          <p className="mt-2 text-sm text-red-600">No fue posible obtener la informacion.</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar operaciones</h1>
+          <p className="mt-2 text-sm text-destructive">No fue posible obtener la informacion.</p>
         </section>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">{nombreUsuario}</h1>
-            <p className="mt-1 text-sm text-gray-500">Analisis de operaciones.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mis operaciones</p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">{nombreUsuario}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Analisis de operaciones.</p>
           </div>
 
           <div className="flex items-center gap-3 self-start">
-            <label htmlFor="anio" className="text-sm font-semibold text-gray-900">
+            <label htmlFor="anio" className="text-sm font-semibold text-foreground">
               Seleccione un ano
             </label>
 
@@ -224,7 +225,7 @@ export default function MisOperacionesView() {
               id="anio"
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             >
               {ANIOS.map((item) => (
                 <option key={item} value={item}>
@@ -236,7 +237,7 @@ export default function MisOperacionesView() {
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-12">
+      <section className="flex gap-1 overflow-x-auto">
         {MESES.map((item) => {
           const activo = mes === item.value;
 
@@ -246,8 +247,8 @@ export default function MisOperacionesView() {
               type="button"
               onClick={() => setMes(item.value)}
               className={[
-                "h-12 rounded-xl border text-sm font-semibold transition-colors",
-                activo ? "border-gray-950 bg-gray-950 text-white shadow-sm" : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
+                "h-9 min-w-24 flex-1 whitespace-nowrap rounded-md border text-xs font-semibold transition-colors",
+                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {item.label}
@@ -257,103 +258,52 @@ export default function MisOperacionesView() {
       </section>
 
       {showConvencionalExtraCharts ? (
-        <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+        <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-border px-3 py-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-gray-900">Operaciones anualizadas del vendedor</h2>
-              <p className="text-sm text-gray-500">Linea de total mensual y barras apiladas por modelo durante {anio}.</p>
+              <h2 className="text-base font-semibold tracking-tight text-foreground">Operaciones anualizadas del vendedor</h2>
+              <p className="text-sm text-muted-foreground">Linea de total mensual y barras apiladas por modelo durante {anio}.</p>
             </div>
 
-            <p className="text-sm text-gray-500">{nombreUsuario} · vendedor {user?.numberSaleNic ?? "-"}</p>
+            <p className="text-sm text-muted-foreground">{nombreUsuario} · vendedor {user?.numberSaleNic ?? "-"}</p>
           </div>
 
-          <div className="mt-5 h-[19rem] min-w-0">
-            {chartsReady ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
-                <ComposedChart data={annualChart.data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="mes" axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={30} />
-                  <Tooltip />
-                  <Legend />
-                {annualChart.modelKeys.map((key, index) => (
-                  <Bar
-                    key={key}
-                    dataKey={key}
-                    fill={key === "otros" ? "#cbd5e1" : COMBINED_MODEL_COLORS[index % COMBINED_MODEL_COLORS.length]}
-                    radius={[4, 4, 0, 0]}
-                    name={key === "otros" ? "OTROS" : key}
-                    maxBarSize={28}
-                  />
-                ))}
-                <Line type="monotone" dataKey="total" name="TOTAL" stroke="#111827" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }}>
-                  <LabelList dataKey="total" position="top" style={{ fill: "#111827", fontSize: 12, fontWeight: 700 }} />
-                </Line>
-              </ComposedChart>
-            </ResponsiveContainer>
-          ) : (
-              <ChartPlaceholder />
-            )}
+          <div className="h-72 min-w-0 p-3">
+            <EChart option={annualChartOption} />
           </div>
         </section>
       ) : null}
 
-      <section className={`grid grid-cols-1 gap-6 ${showConvencionalExtraCharts ? "xl:grid-cols-3" : "xl:grid-cols-2"}`}>
-        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Ventas por dia</h2>
+      <section className={`grid grid-cols-1 gap-3 ${showConvencionalExtraCharts ? "xl:grid-cols-3" : "xl:grid-cols-2"}`}>
+        <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <h2 className="border-b border-border px-3 py-3 text-base font-semibold tracking-tight text-foreground">Ventas por dia</h2>
 
-          <div className={`mt-6 min-w-0 ${showConvencionalExtraCharts ? "h-60" : "h-72"}`}>
-            {chartsReady ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
-                <BarChart data={ventasPorDia}>
-                  <XAxis dataKey="fechaCorta" axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={30} />
-                  <Tooltip formatter={(value) => [Number(value ?? 0), "Ventas"]} />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]} fill="#15aa9a" maxBarSize={42}>
-                    <LabelList dataKey="total" position="top" style={{ fill: "#374151", fontSize: 12 }} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <ChartPlaceholder />
-            )}
+          <div className={`min-w-0 p-3 ${showConvencionalExtraCharts ? "h-60" : "h-72"}`}>
+            <EChart option={dailyChartOption} />
           </div>
         </article>
 
-        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Distribucion por modelo</h2>
+        <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <h2 className="border-b border-border px-3 py-3 text-base font-semibold tracking-tight text-foreground">Distribucion por modelo</h2>
 
-          <div className={`relative mt-6 min-w-0 ${showConvencionalExtraCharts ? "h-60" : "h-72"}`}>
-            {chartsReady ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
-                <PieChart>
-                  <Pie data={distribucionPorModelo} dataKey="total" nameKey="modelo" innerRadius={showConvencionalExtraCharts ? 48 : 60} outerRadius={showConvencionalExtraCharts ? 84 : 95} paddingAngle={3}>
-                    {distribucionPorModelo.map((entry, index) => (
-                      <Cell key={entry.modelo} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value, _name, props) => [Number(value ?? 0), props?.payload?.modelo ?? "Modelo"]} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <ChartPlaceholder className="absolute inset-0" />
-            )}
+          <div className={`relative min-w-0 p-3 ${showConvencionalExtraCharts ? "h-60" : "h-72"}`}>
+            <EChart option={modelChartOption} />
 
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <p className="text-3xl font-bold text-gray-900">{totalOperaciones}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-500">Total</p>
+                <p className="text-3xl font-bold text-foreground">{totalOperaciones}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Total</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 px-3 pb-3">
             {distribucionPorModelo.map((item, index) => (
-              <div key={item.modelo} className="flex items-center gap-2 text-sm text-gray-700">
+              <div key={item.modelo} className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span
                   className="h-3 w-3 rounded-full"
                   style={{
-                    backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
+                    backgroundColor: chartPalette[index % chartPalette.length],
                   }}
                 />
                 <span>{item.modelo}</span>
@@ -363,47 +313,47 @@ export default function MisOperacionesView() {
         </article>
 
         {showConvencionalExtraCharts ? (
-          <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-base font-semibold tracking-tight text-gray-900">Descuento promedio</h2>
-                <p className="mt-1 text-sm text-gray-500">
+              <div className="px-3 py-3">
+                <h2 className="text-base font-semibold tracking-tight text-foreground">Descuento promedio</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Resumen de descuento aplicado en {mesActivo.toLowerCase()} de {anio}.
                 </p>
               </div>
 
-              <div className="text-right">
-                <p className="text-3xl font-bold tracking-tight text-gray-900">{formatPercentage(descuentoPromedioMes)}</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Promedio total</p>
+              <div className="px-3 py-3 text-right">
+                <p className="text-3xl font-bold tracking-tight text-foreground">{formatPercentage(descuentoPromedioMes)}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Promedio total</p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">Promedio total del mes</p>
-                <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-950">{formatPercentage(descuentoPromedioMes)}</p>
+            <div className="space-y-3 border-t border-border p-3">
+              <div className="rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Promedio total del mes</p>
+                <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{formatPercentage(descuentoPromedioMes)}</p>
               </div>
 
-              <div className="rounded-xl border border-gray-200">
-                <div className="border-b border-gray-200 px-4 py-3">
-                  <p className="text-sm font-semibold text-gray-900">Promedio por modelo</p>
+              <div className="rounded-md border border-border">
+                <div className="border-b border-border px-3 py-2">
+                  <p className="text-sm font-semibold text-foreground">Promedio por modelo</p>
                 </div>
 
                 <div className="max-h-52 overflow-y-auto">
                   {descuentoPromedioPorModelo.length ? (
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-border">
                       {descuentoPromedioPorModelo.map((item) => (
-                        <div key={item.modelo} className="flex items-center justify-between gap-4 px-4 py-3">
+                        <div key={item.modelo} className="flex items-center justify-between gap-4 px-3 py-2">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-900">{item.modelo}</p>
-                            <p className="text-xs text-gray-500">{item.cantidad} operaciones</p>
+                            <p className="truncate text-sm font-medium text-foreground">{item.modelo}</p>
+                            <p className="text-xs text-muted-foreground">{item.cantidad} operaciones</p>
                           </div>
-                          <p className="shrink-0 text-sm font-semibold text-gray-900">{formatPercentage(item.promedio)}</p>
+                          <p className="shrink-0 text-sm font-semibold text-foreground">{formatPercentage(item.promedio)}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="px-4 py-6 text-sm text-gray-500">Sin descuentos registrados para este mes.</div>
+                    <div className="px-3 py-4 text-sm text-muted-foreground">Sin descuentos registrados para este mes.</div>
                   )}
                 </div>
               </div>
@@ -412,67 +362,67 @@ export default function MisOperacionesView() {
         ) : null}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Operaciones del mes</h2>
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="border-b border-border px-3 py-3">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">Operaciones del mes</h2>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {totalOperaciones} operaciones registradas en {mesActivo.toLowerCase()} de {anio}.
           </p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-6 py-3 text-left">#</th>
-                <th className="px-6 py-3 text-left">Operacion</th>
-                <th className="px-6 py-3 text-left">Cliente</th>
-                <th className="px-6 py-3 text-left">Interno</th>
-                <th className="px-6 py-3 text-left">Modelo</th>
-                <th className="px-6 py-3 text-left">Version</th>
-                <th className="px-6 py-3 text-left">Color</th>
-                <th className="px-6 py-3 text-center">Fac</th>
-                <th className="px-6 py-3 text-center">Entregado</th>
+                <th className="px-3 py-2 text-left">#</th>
+                <th className="px-3 py-2 text-left">Operacion</th>
+                <th className="px-3 py-2 text-left">Cliente</th>
+                <th className="px-3 py-2 text-left">Interno</th>
+                <th className="px-3 py-2 text-left">Modelo</th>
+                <th className="px-3 py-2 text-left">Version</th>
+                <th className="px-3 py-2 text-left">Color</th>
+                <th className="px-3 py-2 text-center">Fac</th>
+                <th className="px-3 py-2 text-center">Entregado</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {operaciones.map((item, index) => (
-                <tr key={item.opera} className="hover:bg-gray-50">
-                  <td className="px-6 py-3">{index + 1}</td>
-                  <td className="px-6 py-3 font-medium">{item.opera}</td>
-                  <td className="px-6 py-3">{item.clienteNombre}</td>
-                  <td className="px-6 py-3">{item.interno}</td>
-                  <td className="px-6 py-3">{item.modelo}</td>
-                  <td className="px-6 py-3">{item.version}</td>
-                  <td className="px-4 py-4">
-                    <div className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)} `}>
+                <tr key={item.opera} className="hover:bg-muted">
+                  <td className="px-3 py-1.5">{index + 1}</td>
+                  <td className="px-3 py-1.5 font-medium">{item.opera}</td>
+                  <td className="px-3 py-1.5">{item.clienteNombre}</td>
+                  <td className="px-3 py-1.5">{item.interno}</td>
+                  <td className="px-3 py-1.5">{item.modelo}</td>
+                  <td className="px-3 py-1.5">{item.version}</td>
+                  <td className="px-3 py-1.5">
+                    <div className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
                       {item.color}
                     </div>
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="px-3 py-1.5">
                     <div className="flex justify-center">
                       {item.fechaFactura ? (
-                        <span className="inline-flex items-center justify-center rounded-full bg-green-100 p-1 text-green-700">
+                        <span className="inline-flex items-center justify-center rounded-full bg-primary p-1 text-primary-foreground">
                           <Check size={14} strokeWidth={2.5} />
                         </span>
                       ) : (
-                        <span className="inline-flex items-center justify-center rounded-full bg-red-100 p-1 text-red-700">
+                        <span className="inline-flex items-center justify-center rounded-full bg-muted p-1 text-muted-foreground">
                           <X size={14} strokeWidth={2.5} />
                         </span>
                       )}
                     </div>
                   </td>
 
-                  <td className="px-6 py-3">
+                  <td className="px-3 py-1.5">
                     <div className="flex justify-center">
                       {item.fechaEntrega ? (
-                        <span className="inline-flex items-center justify-center rounded-full bg-green-100 p-1 text-green-700">
+                        <span className="inline-flex items-center justify-center rounded-full bg-primary p-1 text-primary-foreground">
                           <Check size={14} strokeWidth={2.5} />
                         </span>
                       ) : (
-                        <span className="inline-flex items-center justify-center rounded-full bg-red-100 p-1 text-red-700">
+                        <span className="inline-flex items-center justify-center rounded-full bg-muted p-1 text-muted-foreground">
                           <X size={14} strokeWidth={2.5} />
                         </span>
                       )}

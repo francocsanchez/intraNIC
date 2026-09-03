@@ -5,6 +5,9 @@
 ### Preventas
 - Se migro `/gestion/convencional/preventas/resumen` al preset con resumen unificado, fondo `muted` y tablas de alta densidad sin estilos heredados.
 
+### Gestion personal
+- Se migraron `/convencional/mis-reservas` y `/convencional/mi-lista-espera` al preset con superficies unificadas, tablas compactas, badges de color de ancho consistente y dialogo de cliente alineado a los tokens semanticos.
+
 ### Stock convencional
 - Se migro `/convencional/stock/disponible` al preset con navbar, footer y fondo unificados, hero y resumen en una unica superficie, filtros compactos y tabla de alta densidad.
 - Se conservaron exclusivamente los colores que representan datos operativos de la unidad y alertas de reserva.
@@ -25,6 +28,10 @@
 - Se alinearon los dialogos de colores, versiones y plan de negocio con los tokens del preset: paneles, controles, acciones y pies compactos, sin colores hexadecimales ni utilidades visuales heredadas.
 
 ## 2026-09-03
+
+### Mis operaciones
+- Se reemplazaron los graficos de `/convencional/mis-operaciones` por ECharts con renderizado SVG y paleta resuelta desde los tokens del preset.
+- Se migro la vista completa al preset compacto: fondo, superficies, filtros, indicadores, tabla y estados sin clases ni colores del diseno anterior.
 
 ### Sistema de diseno
 - Se inicializo shadcn/ui para Vite con el preset `b1D0dvg8`, aliases para componentes y la utilidad compartida `cn`.

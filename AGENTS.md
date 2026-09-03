@@ -119,5 +119,6 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Los catalogos accesibles desde `/admin/configuracion` deben conservar su URL funcional, pero renderizar bajo `AdminLayout` para compartir navbar, fondo y footer del preset.
 - Al migrar una vista al preset, no inventar colores, gradientes, sombras, radios ni variantes visuales. Usar exclusivamente los tokens semanticos y componentes del preset; solo conservar un color adicional cuando el usuario lo solicite expresamente. Eliminar las clases y valores del diseño anterior de la vista migrada, incluidos hexadecimales y utilidades `gray` heredadas.
 - Los dialogos de vistas migradas deben usar directamente tokens del preset en panel, campos, acciones y pie; no depender de adaptadores de compatibilidad ni conservar colores heredados dentro del modal.
+- Los graficos de vistas migradas deben usar ECharts y una paleta resuelta desde los tokens semanticos del preset; no incorporar paletas hardcodeadas ni colores heredados.
 - Las pantallas publicas migradas, incluido `/login`, deben usar `font-preset`, `bg-muted` y una unica superficie `bg-card`; no usan navbar y conservan el footer institucional indicado arriba.
 - La portada autenticada (`/`) se considera una vista migrada: sus accesos se agrupan en superficies compactas del preset y no puede conservar CSS inline, colores hexadecimales ni tipografias heredadas.
