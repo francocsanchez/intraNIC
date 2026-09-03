@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-03
+
+### Sistema de diseno
+- Se inicializo shadcn/ui para Vite con el preset `b1D0dvg8`, aliases para componentes y la utilidad compartida `cn`.
+- Se agregaron los tokens de color, radio y modo oscuro para que los nuevos componentes shadcn adopten el nuevo sistema visual sin modificar las vistas existentes.
+- Se actualizo Tailwind CSS a la version 4 para usar los componentes generados por el preset de shadcn/ui.
+
+### Plan de negocio
+- Se rediseño `/gestion/convencional/plan-negocio` con shadcn/ui, indicadores anuales y una grilla mensual con el mes actual destacado.
+- Se redujo el espaciado de la vista para concentrar mas informacion en pantalla.
+- Se unificaron el encabezado y los indicadores del resumen anual en una sola card.
+- Se elimino el contenedor de la tabla para que la grilla ocupe todo el ancho disponible.
+- Se resaltan en verde los avances iguales o superiores al 100%.
+
+## 2026-09-03
+
+### Agenda de entregas
+- Se incorporo la busqueda global de turnos por interno, sin depender del dia ni de la sucursal seleccionados en la agenda.
+- El resultado ahora informa en forma destacada la sucursal, fecha y hora de entrega, y permite abrir directamente esa agenda diaria.
+
 ## 2026-08-07
 
 ### Analisis de descuentos

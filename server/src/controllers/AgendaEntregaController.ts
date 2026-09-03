@@ -562,7 +562,9 @@ export class AgendaEntregaController {
     }
 
     try {
+      // La busqueda por interno no depende de los filtros diarios de la agenda.
       const agenda = await AgendaEntrega.findOne({ tipoRegistro: "turno", interno })
+        .sort({ fechaAgenda: 1, horaAgenda: 1 })
         .populate("sucursal", "nombre direccion activa")
         .lean();
 

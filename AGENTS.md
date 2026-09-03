@@ -26,6 +26,8 @@ El repositorio contiene dos aplicaciones independientes:
 front/src/
   api/          Clientes HTTP y esquemas de respuesta.
   components/   Componentes reutilizables y componentes por modulo.
+  components/ui/ Componentes base generados por shadcn/ui.
+  lib/          Utilidades compartidas, incluido `cn` para clases Tailwind.
   views/        Pantallas agrupadas por dominio funcional.
   router.tsx    Declaracion de rutas y proteccion de acceso.
   helpers/      Reglas y transformaciones reutilizables.
@@ -80,6 +82,8 @@ El backend no cuenta con un script de tests automatizados definido actualmente. 
 
 - Para endpoints nuevos, agregar la ruta en `server/src/routes/`, implementar la logica en `server/src/controllers/` y delegar la logica reutilizable o de integracion en `server/src/services/`.
 - Para cambios de interfaz, reutilizar el cliente en `front/src/api/`, los componentes y patrones visuales existentes del modulo, y TanStack Query para consultas y mutaciones remotas.
+- Para nuevas vistas o componentes visuales, usar `shadcn/ui` desde `front/src/components/ui` y los tokens definidos en `front/src/index.css`. No migrar ni reemplazar estilos existentes salvo que la tarea lo solicite expresamente.
+- El sistema shadcn esta configurado para Vite en `front/components.json`; antes de agregar componentes con el CLI, verificar que se creen bajo `front/src/components/ui`.
 - Mantener la separacion por dominio funcional: por ejemplo, las entregas usan `front/src/views/entregas`, `front/src/components/entregas` y las rutas bajo `/api/entregas`.
 - Validar permisos tanto en el frontend como en el backend cuando una funcionalidad este restringida por rol, modulo o compania.
 - Conservar el estilo TypeScript y evitar cambios ajenos a la funcionalidad solicitada.

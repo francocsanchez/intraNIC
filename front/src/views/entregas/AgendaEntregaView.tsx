@@ -205,6 +205,18 @@ export default function AgendaEntregaView() {
     setSearchLookupError("");
   };
 
+  const handleOpenSearchedAgenda = () => {
+    if (!searchedAgenda?.sucursal?._id) {
+      return;
+    }
+
+    setFilters({
+      fecha: searchedAgenda.fechaAgenda,
+      sucursalId: searchedAgenda.sucursal._id,
+    });
+    handleCloseSearchDialog();
+  };
+
   const handleSearchByInterno = async () => {
     const interno = Number(searchInterno.trim());
 
@@ -464,13 +476,26 @@ export default function AgendaEntregaView() {
                               <h3 className="mt-1 text-lg font-semibold text-gray-900">
                                 Interno {searchedAgenda.interno}
                               </h3>
-                              <p className="mt-1 text-sm text-gray-600">
-                                {searchedAgenda.sucursal?.nombre || "-"} | {searchedAgenda.fechaAgenda} | {searchedAgenda.horaAgenda}
-                              </p>
+                              <p className="mt-1 text-sm text-gray-600">Resultado encontrado en toda la agenda.</p>
                             </div>
                             <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700">
                               Operacion {searchedAgendaOperacion}
                             </span>
+                          </div>
+
+                          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Sucursal de entrega</p>
+                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.sucursal?.nombre || "-"}</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Fecha de entrega</p>
+                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.fechaAgenda}</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Hora de entrega</p>
+                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.horaAgenda}</p>
+                            </div>
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -501,6 +526,18 @@ export default function AgendaEntregaView() {
                               <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.observaciones?.trim() || "-"}</p>
                             </div>
                           </div>
+
+                          {searchedAgenda.sucursal?._id ? (
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={handleOpenSearchedAgenda}
+                                className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                              >
+                                Ver en agenda
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
 
                         <InternoLookupCard data={searchedAgenda.siac ?? null} error={searchedAgenda.siacSyncError ? searchedAgenda.siacSyncMessage : ""} />
