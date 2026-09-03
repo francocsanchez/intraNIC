@@ -16,6 +16,8 @@
 - Se resaltan en verde los avances iguales o superiores al 100%.
 
 ### Vistas operativas
+- Se integro el detalle de cheques rechazados en el panel de Titular de Central de Deudores para eliminar su fila independiente.
+- Se alineo toda la vista Central de Deudores con los tokens del preset, incluidos sus estados de riesgo, paneles y detalles.
 - Se adaptaron Reventas pendientes, Central de Deudores y Promedio convencional al sistema visual shadcn, con encabezados compactos que unifican filtros y resúmenes.
 - Se mejoraron los indicadores de antigüedad de Reventas pendientes con cantidades centradas y de mayor tamaño.
 - Se organizo el resumen por modelo en una sola fila desplazable para eliminar espacios vacios.

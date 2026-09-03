@@ -112,14 +112,14 @@ export default function CentralDeudoresView() {
         </section>
 
         {!submittedId && !viewModel ? (
-          <section className="px-4 py-8">
-            <div className="flex min-h-[320px] items-center justify-center rounded-[20px] border border-dashed border-[#C9B27C]/45 bg-white/75 px-6 text-center">
+          <section className="px-3 py-5">
+            <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-dashed border-border bg-muted px-3 text-center">
               <div>
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#182126] text-white">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-primary text-primary-foreground">
                   <ShieldAlert size={20} />
                 </div>
-                <h2 className="mt-4 text-lg font-semibold tracking-[-0.03em] text-[#182126]">Consulta lista para usar</h2>
-                <p className="mt-1 text-sm text-[#6D7A80]">
+                <h2 className="mt-4 text-lg font-semibold tracking-tight text-foreground">Consulta lista para usar</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Ingresa un CUIT de 11 digitos y el sistema traerá la deuda actual, la evolucion historica y los cheques rechazados.
                 </p>
               </div>
@@ -134,13 +134,13 @@ export default function CentralDeudoresView() {
         ) : null}
 
         {viewModel ? (
-          <section className="grid gap-3 px-4 py-3 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.35fr)_minmax(0,1.05fr)]">
-            <article className={`rounded-[18px] border bg-white px-3 py-3 shadow-sm ${viewModel.riesgoVisual.borderClassName}`}>
+          <section className="grid gap-3 px-3 py-3 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.35fr)_minmax(0,1.05fr)]">
+            <article className={`rounded-lg border bg-card px-3 py-3 shadow-sm ${viewModel.riesgoVisual.borderClassName}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6D7A80]">Titular</p>
-                  <h2 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-[#182126]">{viewModel.denominacion}</h2>
-                  <p className="text-xs text-[#6D7A80]">{viewModel.identificacion}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Titular</p>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{viewModel.denominacion}</h2>
+                  <p className="text-xs text-muted-foreground">{viewModel.identificacion}</p>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${viewModel.riesgoVisual.chipClassName}`}>
                   {viewModel.resumen.peorSituacionLabel}
@@ -148,45 +148,98 @@ export default function CentralDeudoresView() {
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className={`rounded-[14px] border px-3 py-2 ${viewModel.riesgoVisual.borderClassName} ${viewModel.riesgoVisual.softClassName}`}>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#6D7A80]">Deuda vigente</p>
-                  <p className="mt-1 text-lg font-semibold text-[#182126]">{formatCentralDeudoresMoney(viewModel.resumen.totalDeuda)}</p>
+                <div className={`rounded-md border px-3 py-2 ${viewModel.riesgoVisual.borderClassName} ${viewModel.riesgoVisual.softClassName}`}>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Deuda vigente</p>
+                  <p className="mt-1 text-lg font-semibold text-foreground">{formatCentralDeudoresMoney(viewModel.resumen.totalDeuda)}</p>
                 </div>
-                <div className="rounded-[14px] border border-[#C9B27C]/28 bg-[#F7F4EC] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#6D7A80]">Periodo</p>
-                  <p className="mt-1 text-lg font-semibold text-[#182126]">{formatPeriodo(viewModel.resumen.periodoActual)}</p>
+                <div className="rounded-md border border-border bg-muted px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Periodo</p>
+                  <p className="mt-1 text-lg font-semibold text-foreground">{formatPeriodo(viewModel.resumen.periodoActual)}</p>
                 </div>
-                <div className="rounded-[14px] border border-[#C9B27C]/28 bg-[#F7F4EC] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#6D7A80]">Entidades</p>
-                  <p className="mt-1 text-lg font-semibold text-[#182126]">{viewModel.resumen.cantidadEntidades}</p>
+                <div className="rounded-md border border-border bg-muted px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Entidades</p>
+                  <p className="mt-1 text-lg font-semibold text-foreground">{viewModel.resumen.cantidadEntidades}</p>
                 </div>
-                <div className="rounded-[14px] border border-[#C9B27C]/28 bg-[#F7F4EC] px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#6D7A80]">Cheques</p>
-                  <p className="mt-1 text-lg font-semibold text-[#182126]">{viewModel.resumen.cantidadChequesRechazados}</p>
+                <div className="rounded-md border border-border bg-muted px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Cheques</p>
+                  <p className="mt-1 text-lg font-semibold text-foreground">{viewModel.resumen.cantidadChequesRechazados}</p>
                 </div>
               </div>
 
               {viewModel.erroresParciales.length ? (
-                <div className="mt-3 space-y-1 rounded-[14px] border border-[#D96C2F]/20 bg-[#D96C2F]/8 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8b4f23]">Datos parciales</p>
+                <div className="mt-3 space-y-1 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-destructive">Datos parciales</p>
                   {viewModel.erroresParciales.map((item) => (
-                    <p key={item} className="text-xs text-[#8b4f23]">{item}</p>
+                    <p key={item} className="text-xs text-destructive">{item}</p>
                   ))}
                 </div>
               ) : null}
+
+              <section className="mt-3 border-t border-border pt-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Cheques rechazados</p>
+                    <h3 className="text-base font-semibold tracking-tight text-foreground">Detalle por causal</h3>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{viewModel.resumen.cantidadChequesRechazados} cheques</span>
+                </div>
+
+                {viewModel.chequesRechazados.error ? (
+                  <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {viewModel.chequesRechazados.error}
+                  </div>
+                ) : viewModel.chequesRechazados.causales.length ? (
+                  <div className="mt-3 space-y-3">
+                    {viewModel.chequesRechazados.causales.map((causal) => (
+                      <div key={causal.causal} className="rounded-md border border-border bg-muted px-3 py-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-semibold text-foreground">{causal.causal}</h4>
+                          <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-primary-foreground">
+                            {causal.cantidadCheques}
+                          </span>
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                          {causal.entidades.map((entidad) => (
+                            <div key={`${causal.causal}-${entidad.entidad}`} className="rounded-md border border-border bg-card px-3 py-2">
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                                {formatBankGroup(entidad.entidad)}
+                              </p>
+                              <div className="mt-2 space-y-2">
+                                {entidad.detalle.map((detalle) => (
+                                  <div key={`${detalle.nroCheque}-${detalle.fechaRechazo}`} className="grid gap-1 rounded-md bg-background px-2.5 py-2 text-xs text-foreground">
+                                    <span>Cheque {detalle.nroCheque}</span>
+                                    <span>Rechazo {formatCentralDeudoresDate(detalle.fechaRechazo)}</span>
+                                    <span>{formatCentralDeudoresMoney(detalle.monto, "")}</span>
+                                    <span>{detalle.estadoMulta ?? "Sin estado multa"}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-md border border-dashed border-border bg-muted px-3 py-5 text-center text-sm text-muted-foreground">
+                    No hay cheques rechazados informados para esta identificacion.
+                  </div>
+                )}
+              </section>
             </article>
 
-            <article className="rounded-[18px] border border-[#C9B27C]/28 bg-white px-3 py-3 shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-[#C9B27C]/20 pb-2">
+            <article className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6D7A80]">Deuda actual</p>
-                  <h2 className="text-base font-semibold tracking-[-0.03em] text-[#182126]">Entidades informantes</h2>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Deuda actual</p>
+                  <h2 className="text-base font-semibold tracking-tight text-foreground">Entidades informantes</h2>
                 </div>
-                <span className="text-xs text-[#6D7A80]">{formatPeriodo(viewModel.deudaActual.periodo)}</span>
+                <span className="text-xs text-muted-foreground">{formatPeriodo(viewModel.deudaActual.periodo)}</span>
               </div>
 
               {viewModel.deudaActual.error ? (
-                <div className="mt-3 rounded-[14px] border border-[#B42318]/20 bg-[#B42318]/8 px-3 py-2 text-sm text-[#8f1b13]">
+                <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {viewModel.deudaActual.error}
                 </div>
               ) : (
@@ -197,11 +250,11 @@ export default function CentralDeudoresView() {
                       const flags = FLAG_LABELS.filter(({ key }) => Boolean((entidad as Record<string, unknown>)[key]));
 
                       return (
-                        <div key={`${entidad.entidad}-${entidad.situacion}-${entidad.monto}`} className="rounded-[14px] border border-[#C9B27C]/24 bg-[#FCFBF8] px-3 py-2">
+                        <div key={`${entidad.entidad}-${entidad.situacion}-${entidad.monto}`} className="rounded-md border border-border bg-muted px-3 py-2">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-[#182126]">{entidad.entidad}</p>
-                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#6D7A80]">
+                              <p className="truncate text-sm font-semibold text-foreground">{entidad.entidad}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                 <span>{formatCentralDeudoresMoney(entidad.monto)}</span>
                                 <span>Atraso: {entidad.diasAtrasoPago} dias</span>
                                 <span>Situacion 1 desde {formatCentralDeudoresDate(entidad.fechaSit1)}</span>
@@ -215,7 +268,7 @@ export default function CentralDeudoresView() {
                           {flags.length ? (
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {flags.map((flag) => (
-                                <span key={flag.key} className="rounded-full border border-[#C9B27C]/28 bg-white px-2 py-0.5 text-[10px] font-medium text-[#6D7A80]">
+                                <span key={flag.key} className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                                   {flag.label}
                                 </span>
                               ))}
@@ -225,7 +278,7 @@ export default function CentralDeudoresView() {
                       );
                     })
                   ) : (
-                    <div className="rounded-[14px] border border-dashed border-[#C9B27C]/35 bg-[#F7F4EC] px-3 py-5 text-center text-sm text-[#6D7A80]">
+                    <div className="rounded-md border border-dashed border-border bg-muted px-3 py-5 text-center text-sm text-muted-foreground">
                       Sin entidades informadas en el ultimo periodo.
                     </div>
                   )}
@@ -233,14 +286,14 @@ export default function CentralDeudoresView() {
               )}
             </article>
 
-            <article className="rounded-[18px] border border-[#C9B27C]/28 bg-white px-3 py-3 shadow-sm">
-              <div className="border-b border-[#C9B27C]/20 pb-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6D7A80]">Historicas</p>
-                <h2 className="text-base font-semibold tracking-[-0.03em] text-[#182126]">Ultimos 24 meses</h2>
+            <article className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+              <div className="border-b border-border pb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Historicas</p>
+                <h2 className="text-base font-semibold tracking-tight text-foreground">Ultimos 24 meses</h2>
               </div>
 
               {viewModel.historicas.error ? (
-                <div className="mt-3 rounded-[14px] border border-[#B42318]/20 bg-[#B42318]/8 px-3 py-2 text-sm text-[#8f1b13]">
+                <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {viewModel.historicas.error}
                 </div>
               ) : (
@@ -249,22 +302,22 @@ export default function CentralDeudoresView() {
                     viewModel.timeline.map((periodo) => (
                       <div
                         key={periodo.periodo}
-                        className={`rounded-[14px] border px-3 py-2 ${periodo.riesgoVisual.borderClassName} ${periodo.riesgoVisual.softClassName}`}
+                        className={`rounded-md border px-3 py-2 ${periodo.riesgoVisual.borderClassName} ${periodo.riesgoVisual.softClassName}`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-semibold text-[#182126]">{formatPeriodo(periodo.periodo)}</p>
+                          <p className="text-sm font-semibold text-foreground">{formatPeriodo(periodo.periodo)}</p>
                           <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${periodo.riesgoVisual.chipClassName}`}>
                             {periodo.peorSituacionLabel}
                           </span>
                         </div>
-                        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-[#6D7A80]">
+                        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span>{periodo.cantidadEntidades} entidades</span>
                           <span>{formatCentralDeudoresMoney(periodo.montoTotal)}</span>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="rounded-[14px] border border-dashed border-[#C9B27C]/35 bg-[#F7F4EC] px-3 py-5 text-center text-sm text-[#6D7A80]">
+                    <div className="rounded-md border border-dashed border-border bg-muted px-3 py-5 text-center text-sm text-muted-foreground">
                       Sin historial disponible.
                     </div>
                   )}
@@ -272,58 +325,6 @@ export default function CentralDeudoresView() {
               )}
             </article>
 
-            <article className="rounded-[18px] border border-[#C9B27C]/28 bg-white px-3 py-3 shadow-sm xl:col-span-3">
-              <div className="flex items-center justify-between gap-3 border-b border-[#C9B27C]/20 pb-2">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6D7A80]">Cheques rechazados</p>
-                  <h2 className="text-base font-semibold tracking-[-0.03em] text-[#182126]">Detalle por causal</h2>
-                </div>
-                <span className="text-xs text-[#6D7A80]">{viewModel.resumen.cantidadChequesRechazados} cheques</span>
-              </div>
-
-              {viewModel.chequesRechazados.error ? (
-                <div className="mt-3 rounded-[14px] border border-[#B42318]/20 bg-[#B42318]/8 px-3 py-2 text-sm text-[#8f1b13]">
-                  {viewModel.chequesRechazados.error}
-                </div>
-              ) : viewModel.chequesRechazados.causales.length ? (
-                <div className="mt-3 grid gap-3 xl:grid-cols-2">
-                  {viewModel.chequesRechazados.causales.map((causal) => (
-                    <div key={causal.causal} className="rounded-[16px] border border-[#C9B27C]/24 bg-[#FCFBF8] px-3 py-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-sm font-semibold text-[#182126]">{causal.causal}</h3>
-                        <span className="rounded-full bg-[#182126] px-2.5 py-1 text-[10px] font-semibold text-white">
-                          {causal.cantidadCheques}
-                        </span>
-                      </div>
-
-                      <div className="mt-3 space-y-2">
-                        {causal.entidades.map((entidad) => (
-                          <div key={`${causal.causal}-${entidad.entidad}`} className="rounded-[14px] border border-[#C9B27C]/20 bg-white px-3 py-2">
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6D7A80]">
-                              {formatBankGroup(entidad.entidad)}
-                            </p>
-                            <div className="mt-2 space-y-2">
-                              {entidad.detalle.map((detalle) => (
-                                <div key={`${detalle.nroCheque}-${detalle.fechaRechazo}`} className="grid gap-1 rounded-[12px] bg-[#F7F4EC] px-2.5 py-2 text-xs text-[#182126] sm:grid-cols-2 xl:grid-cols-4">
-                                  <span>Cheque {detalle.nroCheque}</span>
-                                  <span>Rechazo {formatCentralDeudoresDate(detalle.fechaRechazo)}</span>
-                                  <span>{formatCentralDeudoresMoney(detalle.monto, "")}</span>
-                                  <span>{detalle.estadoMulta ?? "Sin estado multa"}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-3 rounded-[14px] border border-dashed border-[#C9B27C]/35 bg-[#F7F4EC] px-3 py-5 text-center text-sm text-[#6D7A80]">
-                  No hay cheques rechazados informados para esta identificacion.
-                </div>
-              )}
-            </article>
           </section>
         ) : null}
       </div>
