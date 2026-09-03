@@ -8,6 +8,11 @@
 ### Gestion personal
 - Se migraron `/convencional/mis-reservas` y `/convencional/mi-lista-espera` al preset con superficies unificadas, tablas compactas, badges de color de ancho consistente y dialogo de cliente alineado a los tokens semanticos.
 
+### Stock usados
+- Se migraron `/usados/stock/disponible`, `/usados/stock/reservado` y `/usados/stock/guardado` al preset con heroes integrados, filtros y tablas compactas, badges de color unificados y dialogos semanticos.
+- Se actualizo el layout de Usados con el fondo, navbar y footer institucional del preset.
+- `/usados/mis-operaciones` utiliza el mismo componente de operaciones con ECharts, superficies compactas y tokens semanticos del preset.
+
 ### Stock convencional
 - Se migro `/convencional/stock/disponible` al preset con navbar, footer y fondo unificados, hero y resumen en una unica superficie, filtros compactos y tabla de alta densidad.
 - Se conservaron exclusivamente los colores que representan datos operativos de la unidad y alertas de reserva.

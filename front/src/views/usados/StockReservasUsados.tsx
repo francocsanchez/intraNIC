@@ -1,211 +1,80 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { getStockReservaUsados } from "@/api/usados/stockAPI";
 import { textToColor } from "@/helpers/colores";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 
 type ReservaUsado = {
   interno: number;
   vendedorReserva: string;
   version: string;
   marca: string;
-  observaciones: string;
   color: string;
   anio: number;
-  precioVenta: number;
   fechaRecepcion: string;
   kilometros: number;
-  sucursal: string;
 };
-
-type ReservasUsadosResponse = {
-  data: Record<string, ReservaUsado[]>;
-  resumen: {
-    total: number;
-    sucursales: Record<string, number>;
-  };
-};
-
+type ReservasUsadosResponse = { data: Record<string, ReservaUsado[]>; resumen: { total: number; sucursales: Record<string, number> } };
 type MarcaFiltro = "TODOS" | string;
 
 export default function StockReservasUsados() {
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
   const [currentTime] = useState(() => Date.now());
-
   const { data, isLoading, isError, error } = useQuery<ReservasUsadosResponse>({
     queryKey: ["stockReservado", "usados"],
     queryFn: getStockReservaUsados,
     refetchOnWindowFocus: true,
     refetchInterval: 1000,
   });
+  const reservasPorSucursal = useMemo(() => Object.entries(data?.data ?? {}), [data]);
+  const todosLosItems = useMemo(() => Object.values(data?.data ?? {}).flat(), [data]);
+  const filtrosDisponibles = useMemo(
+    () => ["TODOS", ...Array.from(new Set(todosLosItems.map((item) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) => a.localeCompare(b))],
+    [todosLosItems],
+  );
+  const sucursalesFiltradas = useMemo(
+    () => reservasPorSucursal.map(([sucursal, reservas]) => [sucursal, marcaActiva === "TODOS" ? reservas : reservas.filter((item) => (item.marca || "").trim().toUpperCase() === marcaActiva)] as const).filter(([, reservas]) => reservas.length),
+    [marcaActiva, reservasPorSucursal],
+  );
+  const totalFiltrado = useMemo(() => sucursalesFiltradas.reduce((total, [, reservas]) => total + reservas.length, 0), [sucursalesFiltradas]);
+  const diasReserva = (fecha: string) => Math.floor((currentTime - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24));
 
-  const reservasPorSucursal = useMemo(() => {
-    return Object.entries(data?.data ?? {});
-  }, [data]);
-
-  const todosLosItems = useMemo(() => {
-    return Object.values(data?.data ?? {}).flat();
-  }, [data]);
-
-  const filtrosDisponibles = useMemo(() => {
-    const marcas = Array.from(new Set(todosLosItems.map((item) => (item.marca || "").trim().toUpperCase()).filter(Boolean))).sort((a, b) =>
-      a.localeCompare(b),
-    );
-
-    return ["TODOS", ...marcas];
-  }, [todosLosItems]);
-
-  const sucursalesFiltradas = useMemo(() => {
-    return reservasPorSucursal
-      .map(([sucursal, reservas]) => {
-        const filtradas = marcaActiva === "TODOS" ? reservas : reservas.filter((item) => (item.marca || "").trim().toUpperCase() === marcaActiva);
-
-        return [sucursal, filtradas] as const;
-      })
-      .filter(([, reservas]) => reservas.length > 0);
-  }, [reservasPorSucursal, marcaActiva]);
-
-  const totalFiltrado = useMemo(() => {
-    return sucursalesFiltradas.reduce((acc, [, reservas]) => acc + reservas.length, 0);
-  }, [sucursalesFiltradas]);
-
-  const diasReserva = (fecha: string) => {
-    const start = new Date(fecha).getTime();
-    const diff = currentTime - start;
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
-  };
-
-  if (isLoading) return <div className="px-4 py-6">Cargando...</div>;
-
-  if (isError) {
-    return <div className="px-4 py-6">{error instanceof Error ? error.message : "Error"}</div>;
-  }
+  if (isLoading) return <div className="font-preset w-full space-y-3 bg-muted px-2 py-3"><div className="h-28 animate-pulse rounded-lg border border-border bg-card" /><div className="h-9 animate-pulse rounded-md bg-muted-foreground/20" /><div className="h-72 animate-pulse rounded-lg border border-border bg-card" /></div>;
+  if (isError) return <div className="font-preset w-full bg-muted px-2 py-3"><section className="rounded-lg border border-destructive/30 bg-card p-3 text-card-foreground shadow-sm"><h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar reservas</h1><p className="mt-1 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p></section></div>;
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usados</p>
-        <h1 className=" text-2xl font-semibold tracking-tight text-gray-900">Stock Reservado Usados</h1>
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="px-3 py-3"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Usados</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Stock reservado</h1></div>
+        <div className="grid border-t border-border xl:grid-cols-[minmax(0,1fr)_9rem]">
+          <div className="min-w-0 px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sucursales</p>
+            <div className="mt-2 flex overflow-x-auto border-y border-border">
+              {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => <div key={sucursal} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0"><p className="truncate text-[10px] text-muted-foreground">{sucursal}</p><p className="text-sm font-semibold text-foreground">{total}</p></div>)}
+              {!Object.keys(data?.resumen.sucursales ?? {}).length && <p className="w-full px-2 py-2 text-center text-sm text-muted-foreground">Sin sucursales</p>}
+            </div>
+          </div>
+          <div className="flex min-h-24 flex-col items-center justify-center border-t border-border px-3 py-3 text-center xl:border-t-0 xl:border-l"><p className="text-4xl font-semibold tracking-tight text-foreground">{marcaActiva === "TODOS" ? data?.resumen.total ?? 0 : totalFiltrado}</p><p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">Totales</p></div>
+        </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[3fr_1fr]">
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursales</p>
-
-          <div
-            className="mt-5 grid divide-x divide-gray-200"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(Object.keys(data?.resumen.sucursales ?? {}).length, 1)}, minmax(0,1fr))`,
-            }}
-          >
-            {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => (
-              <div key={sucursal} className="px-4 first:pl-0 last:pr-0">
-                <p className="text-sm text-gray-500">{sucursal}</p>
-                <p className="text-2xl font-semibold text-gray-900">{total}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-6xl font-semibold text-gray-900">{marcaActiva === "TODOS" ? (data?.resumen.total ?? 0) : totalFiltrado}</p>
-            <p className="text-sm text-gray-500">Totales</p>
-          </div>
-        </article>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        {filtrosDisponibles.map((filtro) => {
-          const activo = marcaActiva === filtro;
-
-          return (
-            <button
-              key={filtro}
-              type="button"
-              onClick={() => setMarcaActiva(filtro)}
-              className={[
-                "h-12 rounded-xl border text-sm font-medium transition-colors",
-                activo ? "border-gray-950 bg-gray-950 text-white shadow-sm" : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
-              ].join(" ")}
-            >
-              {filtro}
-            </button>
-          );
-        })}
+      <section className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8">
+        {filtrosDisponibles.map((filtro) => { const activo = marcaActiva === filtro; return <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>{filtro}</button>; })}
       </section>
 
       {sucursalesFiltradas.map(([sucursal, reservas]) => (
-        <section key={sucursal} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-900">{sucursal}</h2>
-          </div>
-
+        <section key={sucursal} className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2"><h2 className="text-base font-semibold tracking-tight text-foreground">{sucursal}</h2><p className="text-sm text-muted-foreground">{reservas.length} registros</p></div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Interno</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Marca</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Versión</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Color</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Año</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Km</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Vendedor</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Días</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {reservas.map((item, i) => (
-                  <tr
-                    key={`${item.interno}-${i}-${item.fechaRecepcion}`}
-                    className={[
-                      "border-b border-gray-100",
-                      diasReserva(item.fechaRecepcion) > 2 ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50",
-                    ].join(" ")}
-                  >
-                    <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-
-                    <td className="px-4 py-2 text-gray-700">{item.marca}</td>
-
-                    <td className="px-4 py-2 text-gray-700">
-                      <div className="font-medium">{item.version}</div>
-                    </td>
-
-                    <td className="px-4 py-2 text-gray-700">
-                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(item.color)}`}>
-                        {item.color}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-2 text-gray-700">{item.anio}</td>
-
-                    <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td>
-
-                    <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
-
-                    <td className="px-4 py-2 text-gray-700">{diasReserva(item.fechaRecepcion)}</td>
-                  </tr>
-                ))}
-
-                {reservas.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="px-6 py-10 text-center text-sm text-gray-500">
-                      No hay unidades para el filtro seleccionado.
-                    </td>
-                  </tr>
-                )}
+              <thead className="bg-muted text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"><tr>{['Interno', 'Marca', 'Version', 'Color', 'Ano', 'Km', 'Vendedor', 'Dias'].map((heading) => <th key={heading} className="px-3 py-2 text-left">{heading}</th>)}</tr></thead>
+              <tbody className="divide-y divide-border">
+                {reservas.map((item, index) => <tr key={`${item.interno}-${index}-${item.fechaRecepcion}`} className="hover:bg-muted"><td className="px-3 py-1.5 font-medium text-foreground">{item.interno}</td><td className="px-3 py-1.5"><span className="inline-flex rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground">{item.marca}</span></td><td className="min-w-60 px-3 py-1.5 text-foreground">{item.version}</td><td className="px-3 py-1.5"><span className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>{item.color}</span></td><td className="px-3 py-1.5 text-muted-foreground">{item.anio}</td><td className="px-3 py-1.5 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td><td className="px-3 py-1.5 text-muted-foreground">{item.vendedorReserva}</td><td className="px-3 py-1.5 text-muted-foreground">{diasReserva(item.fechaRecepcion)}</td></tr>)}
               </tbody>
             </table>
           </div>
         </section>
       ))}
-
-      {sucursalesFiltradas.length === 0 && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500 shadow-sm">
-          No hay unidades reservadas para la marca seleccionada.
-        </section>
-      )}
+      {!sucursalesFiltradas.length && <section className="rounded-lg border border-border bg-card px-3 py-8 text-center text-sm text-muted-foreground shadow-sm">No hay unidades reservadas para la marca seleccionada.</section>}
     </div>
   );
 }
