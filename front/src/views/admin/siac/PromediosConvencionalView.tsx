@@ -218,24 +218,24 @@ export default function PromediosConvencionalView() {
           <table className="min-w-[1080px] w-full border-separate border-spacing-0 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="sticky left-0 z-20 border-b border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-0 z-20 border-b border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                   Sucursal
                 </th>
-                <th className="sticky left-[180px] z-20 border-b border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-[180px] z-20 border-b border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
                   Vendedor
                 </th>
                 {meses.map((item) => (
                   <th
                     key={item.key}
-                    className="border-b border-gray-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+                    className="border-b border-gray-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
                   >
                     {item.label}
                   </th>
                 ))}
-                <th className="border-b border-gray-200 bg-[#f4fbfa] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
+                <th className="border-b border-gray-200 bg-[#f4fbfa] px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
                   Mes
                 </th>
-                <th className="border-b border-gray-200 bg-[#f8fafc] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
+                <th className="border-b border-gray-200 bg-[#f8fafc] px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
                   Prom
                 </th>
               </tr>
@@ -252,13 +252,13 @@ export default function PromediosConvencionalView() {
                       {index === 0 ? (
                         <td
                           rowSpan={sucursal.vendedores.length + 1}
-                          className="sticky left-0 z-10 border-b border-gray-200 bg-white px-4 py-4 align-middle text-left font-semibold uppercase tracking-[0.08em] text-gray-700"
+                          className="sticky left-0 z-10 border-b border-gray-200 bg-white px-3 py-2 align-middle text-left font-semibold uppercase tracking-[0.08em] text-gray-700"
                         >
                           <div className="min-w-[180px]">{sucursal.sucursal}</div>
                         </td>
                       ) : null}
 
-                      <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-inherit px-4 py-3 font-medium text-gray-900">
+                      <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-inherit px-3 py-1.5 font-medium text-gray-900">
                         <div className="min-w-[220px]">{vendedor.vendedor}</div>
                       </td>
 
@@ -268,20 +268,20 @@ export default function PromediosConvencionalView() {
                         return (
                           <td
                             key={`${vendedor.vendedor}-${mesItem.key}`}
-                            className={`border-b border-gray-200 px-4 py-3 text-center ${getMesCellClass(value)}`}
+                            className={`border-b border-gray-200 px-3 py-1.5 text-center ${getMesCellClass(value)}`}
                           >
                             {value}
                           </td>
                         );
                       })}
 
-                      <td className="border-b border-gray-200 bg-[#f4fbfa] px-4 py-3 text-center font-semibold text-[#0f8f82]">
+                      <td className="border-b border-gray-200 bg-[#f4fbfa] px-3 py-1.5 text-center font-semibold text-[#0f8f82]">
                         {vendedor.ventasMesActual}
                       </td>
 
-                      <td className="border-b border-gray-200 px-4 py-3 text-center">
+                      <td className="border-b border-gray-200 px-3 py-1.5 text-center">
                         <span
-                          className={`inline-flex min-w-10 justify-center rounded-md px-2.5 py-1 font-semibold ${getPromedioCellClass(
+                          className={`inline-flex min-w-10 justify-center rounded-md px-2 py-0.5 font-semibold ${getPromedioCellClass(
                             vendedor.promedio,
                           )}`}
                         >
@@ -292,7 +292,7 @@ export default function PromediosConvencionalView() {
                   ))}
 
                   <tr key={`${sucursal.sucursal}-promedio`} className="bg-[#eef9f7]">
-                    <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-[#eef9f7] px-4 py-3 font-semibold uppercase tracking-[0.08em] text-[#0f8f82]">
+                    <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-[#eef9f7] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-[#0f8f82]">
                       <div className="min-w-[220px]">Promedio sucursal</div>
                     </td>
 
@@ -302,20 +302,20 @@ export default function PromediosConvencionalView() {
                       return (
                         <td
                           key={`${sucursal.sucursal}-${mesItem.key}-promedio`}
-                          className="border-b border-gray-200 px-4 py-3 text-center font-semibold text-[#0f8f82]"
+                          className="border-b border-gray-200 px-3 py-1.5 text-center font-semibold text-[#0f8f82]"
                         >
                           {value}
                         </td>
                       );
                     })}
 
-                    <td className="border-b border-gray-200 bg-[#dcf4f0] px-4 py-3 text-center font-bold text-[#0a766b]">
+                    <td className="border-b border-gray-200 bg-[#dcf4f0] px-3 py-1.5 text-center font-bold text-[#0a766b]">
                       {sucursal.ventasMesActual}
                     </td>
 
-                    <td className="border-b border-gray-200 px-4 py-3 text-center">
+                    <td className="border-b border-gray-200 px-3 py-1.5 text-center">
                       <span
-                        className={`inline-flex min-w-10 justify-center rounded-md px-2.5 py-1 font-semibold ${getPromedioCellClass(
+                        className={`inline-flex min-w-10 justify-center rounded-md px-2 py-0.5 font-semibold ${getPromedioCellClass(
                           sucursal.promedio,
                         )}`}
                       >

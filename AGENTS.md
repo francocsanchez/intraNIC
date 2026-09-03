@@ -107,3 +107,11 @@ git commit -m "{commitSugerido}"
 Siempre el Footer de toda la app debe de la siguiente manera
 Lado Izquiero - IntraNIC - Uso interno Nippon Car
 Lado Derecho - Desarrollado por Franco Sanchez
+
+## Layouts migrados al preset
+
+- Para modulos migrados, habilitar `presetNavigation` en `BaseAppLayout`, usar `font-preset` en las vistas y los tokens semanticos de `front/src/index.css`.
+- Los layouts migrados deben usar el mismo fondo global `bg-background`; no mezclar fondos heredados como `bg-gray-50` entre modulos del preset.
+- Mantener el espaciado compacto y unificar titulo, resumen e indicadores en una sola superficie cuando correspondan a la misma vista.
+- Las vistas con el mismo patron funcional deben reutilizar exactamente las mismas decisiones visuales del preset. En particular, los filtros de resumen usan `grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8`, botones `h-9 rounded-md border text-xs`, estado activo `border-primary bg-primary text-primary-foreground` e inactivo `border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground`.
+- En tablas de alta densidad, priorizar filas compactas: encabezados con `py-2`, celdas con `py-1.5` y badges con `py-0.5`, sin afectar columnas sticky ni datos legibles.

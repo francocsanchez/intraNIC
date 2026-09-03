@@ -16,6 +16,10 @@
 - Se resaltan en verde los avances iguales o superiores al 100%.
 
 ### Vistas operativas
+- Se compactaron las filas, encabezados y badges de la tabla de Promedio convencional para mostrar mas registros en pantalla.
+- Se unifico el fondo global de Reventas y Stock Usados al activar el layout del preset en el modulo de administracion.
+- Se unificaron los filtros de Reventas y Stock Usados con una unica especificacion de espaciado, dimensiones y estados del preset.
+- Se migraron No reparado, Pendiente de documentacion e Ingresos de Stock Usados al preset, con navbar, footer, heroes integrados y filtros compactos.
 - Se rediseño Mi Perfil con el preset compacto: navbar y footer semánticos, hero con resumen integrado y datos sin cards anidadas.
 - Se simplificaron los datos principales y el cambio de contraseña de Mi Perfil para eliminar divisores verticales y contenedores redundantes.
 - Se adapto el navbar y footer exclusivos de Administracion al preset, con la leyenda de uso interno y autoria solicitadas.
