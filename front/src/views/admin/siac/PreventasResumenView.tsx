@@ -22,10 +22,10 @@ export default function PreventasResumenView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar el resumen</h1>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar el resumen</h1>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </section>
       </div>
     );
@@ -54,77 +54,74 @@ export default function PreventasResumenView() {
   const totalDisponible = rows.reduce((acc, row) => acc + row.disponible, 0);
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex items-start justify-between gap-3 px-3 py-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Analitica</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Resumen pedido vs preventas</h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Preventas</p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Resumen pedido vs preventas</h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Compara la cantidad actual cargada por version contra las preventas pendientes sin asignar.
             </p>
           </div>
-          <Layers3 size={20} className="text-[#15aa9a]" />
+          <Layers3 size={20} className="shrink-0 text-muted-foreground" />
+        </div>
+
+        <div className="grid border-t border-border sm:grid-cols-2 xl:grid-cols-5">
+          <article className="border-b border-border px-3 py-2.5 sm:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Versiones</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{rows.length}</p>
+          </article>
+          <article className="border-b border-border px-3 py-2.5 xl:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Pedido total</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{totalPedido}</p>
+          </article>
+          <article className="border-b border-border px-3 py-2.5 sm:border-r sm:border-b-0 xl:border-r">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Pendientes</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{totalPreventas}</p>
+          </article>
+          <article className="border-b border-border px-3 py-2.5 xl:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Vendedores</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{resumenPorVendedor.length}</p>
+          </article>
+          <article className="px-3 py-2.5 sm:col-span-2 xl:col-span-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Disponible</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{totalDisponible}</p>
+          </article>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versiones</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{rows.length}</p>
-        </article>
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Pedido total</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{totalPedido}</p>
-        </article>
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Preventas pendientes</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{totalPreventas}</p>
-        </article>
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Vendedores</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{resumenPorVendedor.length}</p>
-        </article>
-      </section>
-
-      <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Disponible total</p>
-        <p className={["mt-2 text-3xl font-semibold", totalDisponible < 0 ? "text-red-600" : totalDisponible === 0 ? "text-amber-600" : "text-emerald-600"].join(" ")}>
-          {totalDisponible}
-        </p>
-      </section>
-
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex items-start justify-between gap-3 border-b border-border px-3 py-3">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Resumen por vendedor</h2>
-            <p className="mt-1 text-sm text-gray-500">Preventas pendientes sin asignar agrupadas por vendedor.</p>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Resumen por vendedor</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Preventas pendientes sin asignar agrupadas por vendedor.</p>
           </div>
-          <UsersRound size={18} className="text-[#15aa9a]" />
+          <UsersRound size={18} className="shrink-0 text-muted-foreground" />
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[560px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 text-left">Vendedor</th>
-                <th className="px-4 py-3 text-center">Preventas pendientes</th>
-                <th className="px-4 py-3 text-center">Participacion</th>
+                <th className="px-3 py-2 text-left">Vendedor</th>
+                <th className="px-3 py-2 text-center">Preventas pendientes</th>
+                <th className="px-3 py-2 text-center">Participacion</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {resumenPorVendedor.map((row) => (
-                <tr key={row.vendedor} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{row.vendedor}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.preventas_pendientes}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">
+                <tr key={row.vendedor} className="hover:bg-muted">
+                  <td className="px-3 py-1.5 font-medium text-foreground">{row.vendedor}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.preventas_pendientes}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">
                     {totalPreventas ? `${Math.round((row.preventas_pendientes / totalPreventas) * 100)}%` : "0%"}
                   </td>
                 </tr>
               ))}
               {!resumenPorVendedor.length ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={3} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay preventas pendientes para resumir por vendedor.
                   </td>
                 </tr>
@@ -134,40 +131,38 @@ export default function PreventasResumenView() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Comparacion por version</h2>
-          <p className="mt-1 text-sm text-gray-500">Disponible = pedido mensual - preventas pendientes sin asignar.</p>
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="border-b border-border px-3 py-3">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">Comparacion por version</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Disponible = pedido mensual - preventas pendientes sin asignar.</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[760px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 text-left">Version</th>
-                <th className="px-4 py-3 text-center">Pedido</th>
-                <th className="px-4 py-3 text-center">Preventas pendientes</th>
-                <th className="px-4 py-3 text-center">Disponible</th>
+                <th className="px-3 py-2 text-left">Version</th>
+                <th className="px-3 py-2 text-center">Pedido</th>
+                <th className="px-3 py-2 text-center">Preventas pendientes</th>
+                <th className="px-3 py-2 text-center">Disponible</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {rows.map((row) => (
-                <tr key={row.versionId} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-700">{row.version}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.pedido}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.preventas_pendientes}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className="inline-flex min-w-10 justify-center rounded-full bg-[#eef9f7] px-3 py-1 font-semibold">
-                      <span className={[row.disponible < 0 ? "text-red-600" : row.disponible === 0 ? "text-amber-600" : "text-emerald-600"].join(" ")}>
-                        {row.disponible}
-                      </span>
+                <tr key={row.versionId} className="hover:bg-muted">
+                  <td className="px-3 py-1.5 text-muted-foreground">{row.version}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.pedido}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.preventas_pendientes}</td>
+                  <td className="px-3 py-1.5 text-center">
+                    <span className="inline-flex min-w-10 justify-center rounded-full bg-muted px-3 py-0.5 font-semibold text-foreground">
+                      {row.disponible}
                     </span>
                   </td>
                 </tr>
               ))}
               {!rows.length ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={4} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay versiones para resumir.
                   </td>
                 </tr>

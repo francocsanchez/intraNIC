@@ -2,11 +2,15 @@
 
 ## 2026-09-03
 
+### Preventas
+- Se migro `/gestion/convencional/preventas/resumen` al preset con resumen unificado, fondo `muted` y tablas de alta densidad sin estilos heredados.
+
 ### Stock convencional
 - Se migro `/convencional/stock/disponible` al preset con navbar, footer y fondo unificados, hero y resumen en una unica superficie, filtros compactos y tabla de alta densidad.
 - Se conservaron exclusivamente los colores que representan datos operativos de la unidad y alertas de reserva.
 - Se migraron `/convencional/stock/reservado` y `/convencional/stock/guardado` con el mismo esquema visual, incluyendo tablas compactas y resumen integrado.
 - Se unifico la fila de filtros de modelo en las tres vistas de stock convencional, con desplazamiento horizontal en pantallas angostas.
+- Se unifico el ancho y la alineacion de los badges de color en las tres tablas de stock convencional.
 
 ### Inicio
 - Se migro `/` al preset con una portada compacta, accesos por modulo bajo tokens semanticos, header simplificado y footer institucional.
