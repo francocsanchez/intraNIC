@@ -2,6 +2,14 @@
 
 ## 2026-09-03
 
+### Inicio
+- Se migro `/` al preset con una portada compacta, accesos por modulo bajo tokens semanticos, header simplificado y footer institucional.
+- Se separaron los accesos de cada modulo para recuperar la lectura de botones independientes, sin fondos de relleno ni huecos visuales.
+- Se aplico un fondo `muted` del preset en la portada para distinguir los accesos `bg-card` sin incorporar tonos fijos.
+
+### Acceso
+- Se migro `/login` al preset: superficie unica compacta, tipografia Nunito Sans, controles semanticos, fondo unificado y footer institucional.
+
 ### Configuracion administrativa
 - Se alinearon los dialogos de colores, versiones y plan de negocio con los tokens del preset: paneles, controles, acciones y pies compactos, sin colores hexadecimales ni utilidades visuales heredadas.
 

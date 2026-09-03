@@ -40,7 +40,7 @@ type HomeSection = {
 };
 
 const cardClass =
-  "home-module-card group block rounded-sm border border-[#E5E7EB] bg-white text-left shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#111827]";
+  "group flex h-12 items-center gap-2 rounded-md border border-border bg-card px-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary";
 
 export default function Inicio() {
   const navigate = useNavigate();
@@ -251,230 +251,53 @@ export default function Inicio() {
   };
 
   return (
-    <>
-      <style>
-        {`
-          .inicio-page {
-            min-height: 100vh;
-            background: #F9FAFB;
-            color: #111827;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            display: flex;
-            flex-direction: column;
-          }
-
-          .inicio-header {
-            width: 100%;
-            background: #FFFFFF;
-            border-bottom: 1px solid #E5E7EB;
-          }
-
-          .inicio-header-inner {
-            max-width: 1280px;
-            height: 64px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          }
-
-          .inicio-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-          }
-
-          .inicio-logo {
-            width: 32px;
-            height: 32px;
-            background: #000000;
-            color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-          }
-
-          .inicio-title {
-            margin: 0;
-            color: #111827;
-            font-size: 18px;
-            line-height: 28px;
-            font-weight: 600;
-            letter-spacing: -0.025em;
-            text-transform: uppercase;
-          }
-
-          .inicio-logout {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #E5E7EB;
-            border-radius: 6px;
-            background: #FFFFFF;
-            color: #6B7280;
-            padding: 8px 16px;
-            font-size: 14px;
-            line-height: 20px;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-          }
-
-          .inicio-logout:hover {
-            color: #DC2626;
-            border-color: #FECACA;
-          }
-
-          .inicio-logout svg {
-            transition: transform 0.2s ease-in-out;
-          }
-
-          .inicio-logout:hover svg {
-            transform: translateX(4px);
-          }
-
-          .inicio-main {
-            width: 100%;
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 48px 24px;
-            flex: 1;
-          }
-
-          .inicio-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            column-gap: 48px;
-            row-gap: 64px;
-          }
-
-          .inicio-section-title {
-            margin: 0 0 24px 0;
-            padding-left: 12px;
-            border-left: 2px solid #000000;
-            color: #6B7280;
-            font-size: 12px;
-            line-height: 16px;
-            font-weight: 600;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-          }
-
-          .inicio-cards {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-          }
-
-          .home-module-card {
-  height: 54px;
-  display: flex;
-  align-items: center;
-  padding: 0 18px !important;
-}
-
-.inicio-card-text {
-  color: #374151;
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-          .inicio-section-title-content {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .inicio-card-content {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-          }
-
-          .home-module-card:hover .inicio-card-text {
-            color: #000000;
-          }
-
-          .inicio-footer {
-            border-top: 1px solid #E5E7EB;
-            padding: 40px 24px;
-            text-align: center;
-          }
-
-          .inicio-footer p {
-            margin: 0;
-            color: #6B7280;
-            font-size: 12px;
-            line-height: 16px;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-          }
-
-          @media (max-width: 768px) {
-            .inicio-grid {
-              grid-template-columns: 1fr;
-              row-gap: 48px;
-            }
-
-            .inicio-cards {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-          }
-        `}
-      </style>
-
-      <div className="inicio-page">
-        <header className="inicio-header">
-          <div className="inicio-header-inner">
-            <div className="inicio-brand">
-              <div className="inicio-logo">NIC</div>
-              <h1 className="inicio-title">IntraNIC</h1>
+    <div className="font-preset flex min-h-svh flex-col bg-background text-foreground">
+      <header className="border-b border-border bg-card">
+        <div className="flex h-14 items-center justify-between px-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+              NIC
             </div>
-
-            <button type="button" onClick={handleLogout} className="inicio-logout">
-              <LogOut size={16} strokeWidth={2} />
-              <span>Cerrar sesion</span>
-            </button>
+            <h1 className="text-base font-semibold tracking-tight">IntraNIC</h1>
           </div>
-        </header>
 
-        <main className="inicio-main">
-          <div className="inicio-grid">
-            {visibleSections.map((section) => (
-              <section key={section.title}>
-                <h2 className="inicio-section-title">
-                  <span className="inicio-section-title-content">
-                    <section.icon size={14} strokeWidth={2} />
-                    <span>{section.title}</span>
-                  </span>
-                </h2>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          >
+            <LogOut size={16} strokeWidth={2} />
+            <span>Cerrar sesion</span>
+          </button>
+        </div>
+      </header>
 
-                <div className="inicio-cards">
-                  {section.items.map((item) => (
-                    <Link key={item.label} to={item.to} className={cardClass}>
-                      <span className="inicio-card-content">
-                        <item.icon size={13} strokeWidth={2} />
-                        <span className="inicio-card-text">{item.label}</span>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </main>
+      <main className="flex-1 bg-muted px-3 py-4">
+        <div className="grid gap-x-6 gap-y-7 xl:grid-cols-2">
+          {visibleSections.map((section) => (
+            <section key={section.title}>
+              <h2 className="mb-3 flex items-center gap-2 border-l-2 border-primary pl-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <section.icon size={14} strokeWidth={2} />
+                <span>{section.title}</span>
+              </h2>
 
-        <footer className="inicio-footer">
-          <p>Uso interno de Nippon Car SRL 2026 - Franco Sanchez</p>
-        </footer>
-      </div>
-    </>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {section.items.map((item) => (
+                  <Link key={item.label} to={item.to} className={cardClass}>
+                    <item.icon size={15} strokeWidth={2} className="shrink-0 text-muted-foreground" />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </main>
+
+      <footer className="flex flex-col gap-1 border-t border-border px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span>IntraNIC - Uso interno Nippon Car</span>
+        <span>Desarrollado por Franco Sanchez</span>
+      </footer>
+    </div>
   );
 }
