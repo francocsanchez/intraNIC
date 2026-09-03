@@ -100,29 +100,29 @@ export default function PromediosConvencionalView() {
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Convencional
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
               Promedio de operaciones por vendedor
             </h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-500">
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Semestre móvil de seis meses. Cada mes excluye el mismo mes de hace seis meses e
               incluye el mes actual seleccionado.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2">
             <label className="space-y-1">
-              <span className="text-sm font-semibold text-gray-900">Mes</span>
+              <span className="text-xs font-medium text-muted-foreground">Mes</span>
               <select
                 value={mes}
                 onChange={(e) => setMes(Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
               >
                 {MESES.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -133,11 +133,11 @@ export default function PromediosConvencionalView() {
             </label>
 
             <label className="space-y-1">
-              <span className="text-sm font-semibold text-gray-900">Año</span>
+              <span className="text-xs font-medium text-muted-foreground">Año</span>
               <select
                 value={anio}
                 onChange={(e) => setAnio(Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
               >
                 {anios.map((item) => (
                   <option key={item} value={item}>
@@ -148,44 +148,43 @@ export default function PromediosConvencionalView() {
             </label>
           </div>
         </div>
-      </section>
-
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <div className="grid border-t border-border grid-cols-2 lg:grid-cols-5">
+        <article className="px-3 py-3">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Vendedores
           </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{cards.totalVendedores}</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{cards.totalVendedores}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="border-l border-border px-3 py-3">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mes actual
           </p>
-          <p className="mt-3 text-3xl font-bold text-[#15aa9a]">{cards.ventasMesActual}</p>
+          <p className="mt-1 text-xl font-semibold text-emerald-600">{cards.ventasMesActual}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="border-t border-border px-3 py-3 lg:border-l lg:border-t-0">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Promedio general
           </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{cards.promedioGeneral}</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{cards.promedioGeneral}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="border-l border-t border-border px-3 py-3 lg:border-t-0">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mejor promedio
           </p>
-          <p className="mt-3 text-3xl font-bold text-[#15aa9a]">{cards.mejorPromedio}</p>
+          <p className="mt-1 text-xl font-semibold text-emerald-600">{cards.mejorPromedio}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="col-span-2 border-t border-border px-3 py-3 lg:col-span-1 lg:border-l lg:border-t-0">
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mejor sucursal
           </p>
-          <p className="mt-3 truncate text-lg font-bold text-gray-900">{mejorSucursal.sucursal}</p>
-          <p className="mt-1 text-sm font-semibold text-[#15aa9a]">Promedio {mejorSucursal.promedio}</p>
+          <p className="mt-1 truncate text-base font-semibold text-foreground">{mejorSucursal.sucursal}</p>
+          <p className="text-sm font-semibold text-emerald-600">Promedio {mejorSucursal.promedio}</p>
         </article>
+        </div>
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">

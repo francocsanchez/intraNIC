@@ -59,43 +59,43 @@ export default function CentralDeudoresView() {
   const tapeTone = viewModel?.riesgoVisual ?? getSituacionTone(null);
 
   return (
-    <div className="w-full px-3 py-3">
-      <div className="mx-auto max-w-[1680px] overflow-hidden rounded-[24px] border border-[#C9B27C]/35 bg-[#F4F1E8] text-[#182126] shadow-[0_30px_80px_rgba(24,33,38,0.08)]">
-        <div className={`h-2 w-full ${tapeTone.chipClassName}`} />
+    <div className="font-preset w-full px-2 py-3">
+      <div className="mx-auto max-w-none overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className={`h-1 w-full ${tapeTone.chipClassName}`} />
 
-        <section className="border-b border-[#C9B27C]/28 px-4 py-3">
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(480px,0.85fr)] xl:items-end">
+        <section className="border-b border-border px-3 py-3">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] xl:items-end">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#6D7A80]">Analisis crediticio</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Analisis crediticio</p>
               <div className="mt-1 flex items-center gap-2">
                 <ShieldAlert size={18} className={tapeTone.accentClassName} />
-                <h1 className="text-[26px] font-semibold tracking-[-0.04em] text-[#182126]">Central de Deudores</h1>
+                <h1 className="text-xl font-semibold tracking-tight text-foreground">Central de Deudores</h1>
               </div>
-              <p className="mt-1 max-w-3xl text-sm text-[#6D7A80]">
+              <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
                 Consulta consolidada de deuda vigente, historial de 24 meses y cheques rechazados por CUIT.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
               <label className="block">
-                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6D7A80]">
+                <span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   CUIT / CUIL / CDI
                 </span>
-                <div className="flex items-center gap-2 rounded-[14px] border border-[#C9B27C]/40 bg-white px-3 py-2 shadow-sm">
-                  <Landmark size={16} className="text-[#6D7A80]" />
+                <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
+                  <Landmark size={16} className="text-muted-foreground" />
                   <input
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
                     placeholder="Ej. 20123456789"
                     inputMode="numeric"
-                    className="w-full bg-transparent text-sm text-[#182126] outline-none placeholder:text-[#98A1A6]"
+                    className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
               </label>
 
               <button
                 type="submit"
-                className="inline-flex h-[42px] items-center justify-center gap-2 self-end rounded-[14px] bg-[#182126] px-4 text-sm font-semibold text-white transition hover:bg-[#27343b]"
+                className="inline-flex h-9 items-center justify-center gap-2 self-end rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
               >
                 <Search size={15} />
                 {isFetching ? "Consultando" : "Consultar"}
@@ -104,7 +104,7 @@ export default function CentralDeudoresView() {
           </div>
 
           {effectiveError ? (
-            <div className="mt-3 flex items-center gap-2 rounded-[14px] border border-[#B42318]/22 bg-[#B42318]/8 px-3 py-2 text-sm text-[#8f1b13]">
+            <div className="mt-3 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               <AlertCircle size={16} />
               <span>{effectiveError}</span>
             </div>

@@ -6,6 +6,7 @@
 - Se inicializo shadcn/ui para Vite con el preset `b1D0dvg8`, aliases para componentes y la utilidad compartida `cn`.
 - Se agregaron los tokens de color, radio y modo oscuro para que los nuevos componentes shadcn adopten el nuevo sistema visual sin modificar las vistas existentes.
 - Se actualizo Tailwind CSS a la version 4 para usar los componentes generados por el preset de shadcn/ui.
+- Se incorporo Nunito Sans para las vistas migradas al preset.
 
 ### Plan de negocio
 - Se rediseño `/gestion/convencional/plan-negocio` con shadcn/ui, indicadores anuales y una grilla mensual con el mes actual destacado.
@@ -13,6 +14,12 @@
 - Se unificaron el encabezado y los indicadores del resumen anual en una sola card.
 - Se elimino el contenedor de la tabla para que la grilla ocupe todo el ancho disponible.
 - Se resaltan en verde los avances iguales o superiores al 100%.
+
+### Vistas operativas
+- Se adaptaron Reventas pendientes, Central de Deudores y Promedio convencional al sistema visual shadcn, con encabezados compactos que unifican filtros y resúmenes.
+- Se mejoraron los indicadores de antigüedad de Reventas pendientes con cantidades centradas y de mayor tamaño.
+- Se organizo el resumen por modelo en una sola fila desplazable para eliminar espacios vacios.
+- Se unificaron los bordes, radios y colores de Reventas pendientes con los tokens del preset shadcn.
 
 ## 2026-09-03
 
