@@ -83,33 +83,33 @@ export default function PedidoMensualView() {
 
   if (error instanceof Error) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar pedido mensual</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+      <div className="font-preset w-full px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar pedido mensual</h1>
+          <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Gestion</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Pedido mensual</h1>
-        <p className="mt-2 max-w-3xl text-sm text-gray-600">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Gestion</p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Pedido mensual</h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
           Carga editable actual por version. El sistema mantiene un solo registro por version.
         </p>
       </section>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px_auto]">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+      <section className="border-y border-border py-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px_auto]">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
             Version
             <select
               value={version}
               onChange={(event) => setVersion(event.target.value)}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             >
               <option value="">Seleccionar version</option>
               {versionesDisponibles.map((item) => (
@@ -120,21 +120,21 @@ export default function PedidoMensualView() {
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
             Cantidad
             <input
               type="number"
               min={0}
               value={cantidad}
               onChange={(event) => setCantidad(event.target.value)}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             />
           </label>
 
           <button
             type="button"
             onClick={() => saveMutation.mutate()}
-            className="inline-flex items-center justify-center gap-2 self-end rounded-2xl bg-[#15aa9a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]"
+            className="inline-flex items-center justify-center gap-2 self-end rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
             <Save size={16} />
             {editingId ? "Guardar cambios" : "Guardar"}
@@ -142,26 +142,26 @@ export default function PedidoMensualView() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Versiones cargadas</h2>
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-3">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">Versiones cargadas</h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 text-left">Version</th>
-                <th className="px-4 py-3 text-center">Cantidad</th>
-                <th className="px-4 py-3 text-center">Acciones</th>
+                <th className="px-3 py-2 text-left">Version</th>
+                <th className="px-3 py-2 text-center">Cantidad</th>
+                <th className="px-3 py-2 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {pedidos.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{item.version.nombre}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{item.cantidad}</td>
-                  <td className="px-4 py-3">
+                <tr key={item._id} className="hover:bg-muted">
+                  <td className="px-3 py-1.5 font-medium text-foreground">{item.version.nombre}</td>
+                  <td className="px-3 py-1.5 text-center text-foreground">{item.cantidad}</td>
+                  <td className="px-3 py-1.5">
                     <div className="flex justify-center gap-2">
                       <button
                         type="button"
@@ -170,7 +170,7 @@ export default function PedidoMensualView() {
                           setVersion(item.version._id);
                           setCantidad(String(item.cantidad));
                         }}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary"
                       >
                         <Pencil size={14} />
                         Editar
@@ -178,7 +178,7 @@ export default function PedidoMensualView() {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(item._id)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+                        className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-2 text-xs font-semibold text-destructive-foreground hover:opacity-90"
                       >
                         <Trash2 size={14} />
                         Eliminar
@@ -189,7 +189,7 @@ export default function PedidoMensualView() {
               ))}
               {!pedidos.length ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={3} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay versiones cargadas en pedido mensual.
                   </td>
                 </tr>

@@ -26,8 +26,10 @@ export default function AdminLayout() {
         pathname === paths.admin.configuracion ||
         pathname === paths.admin.configuracionEnvioAgenda ||
         pathname === paths.admin.unidadesNegocio ||
+        pathname === paths.admin.colores ||
+        pathname === paths.admin.versiones ||
         pathname === paths.admin.planNegocio ||
-        pathname === paths.convencional.pedidoMensual ||
+        pathname === paths.admin.pedidoMensual ||
         pathname === paths.admin.configuracionConvencionalEditar ||
         pathname === paths.admin.configuracionUsadosEditar ||
         pathname === paths.admin.configuracionBelgranoEditar,

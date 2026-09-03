@@ -2,6 +2,11 @@
 
 ## 2026-09-03
 
+### Configuracion administrativa
+- Se alinearon los dialogos de colores, versiones y plan de negocio con los tokens del preset: paneles, controles, acciones y pies compactos, sin colores hexadecimales ni utilidades visuales heredadas.
+
+## 2026-09-03
+
 ### Sistema de diseno
 - Se inicializo shadcn/ui para Vite con el preset `b1D0dvg8`, aliases para componentes y la utilidad compartida `cn`.
 - Se agregaron los tokens de color, radio y modo oscuro para que los nuevos componentes shadcn adopten el nuevo sistema visual sin modificar las vistas existentes.
@@ -16,6 +21,8 @@
 - Se resaltan en verde los avances iguales o superiores al 100%.
 
 ### Vistas operativas
+- Se normalizaron las rutas de Colores, Versiones y Pedido mensual bajo `/admin/configuracion`, y se redujo el padding de sus tablas y tabs al preset.
+- Se movieron los catalogos de Colores y Versiones a AdminLayout y se compactaron sus resumenes, tablas y dialogos junto con Plan de negocio administrativo y Pedido mensual.
 - Se compactaron las filas, encabezados y badges de la tabla de Promedio convencional para mostrar mas registros en pantalla.
 - Se unifico el fondo global de Reventas y Stock Usados al activar el layout del preset en el modulo de administracion.
 - Se unificaron los filtros de Reventas y Stock Usados con una unica especificacion de espaciado, dimensiones y estados del preset.

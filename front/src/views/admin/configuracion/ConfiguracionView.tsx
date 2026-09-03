@@ -47,14 +47,13 @@ export default function ConfiguracionView() {
   const canEditConfiguracion = hasModuleAccess(user, "configuracion");
   const canManagePreventasCatalogs =
     hasModuleAccess(user, "configuracion") &&
-    (hasPathAccess(user, paths.convencional.preventasColores) ||
-      hasPathAccess(user, paths.convencional.preventasVersiones));
+    (hasPathAccess(user, paths.admin.colores) || hasPathAccess(user, paths.admin.versiones));
   const canManagePlanNegocio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.planNegocio);
   const canManagePedidoMensual =
     hasModuleAccess(user, "pedidoMensual") &&
-    hasPathAccess(user, paths.convencional.pedidoMensual);
+    hasPathAccess(user, paths.admin.pedidoMensual);
   const canManageSystemParameters =
     hasSuperAdminRole(user) &&
     (canManagePreventasCatalogs || canManagePlanNegocio || canManagePedidoMensual);
@@ -94,10 +93,10 @@ export default function ConfiguracionView() {
       editPath: paths.admin.configuracionConvencionalEditar,
       catalogos: canManageSystemParameters
         ? [
-            { label: "Colores", to: paths.convencional.preventasColores },
-            { label: "Versiones", to: paths.convencional.preventasVersiones },
+            { label: "Colores", to: paths.admin.colores },
+            { label: "Versiones", to: paths.admin.versiones },
             ...(canManagePlanNegocio ? [{ label: "PN", to: paths.admin.planNegocio }] : []),
-            ...(canManagePedidoMensual ? [{ label: "Pedido mensual", to: paths.convencional.pedidoMensual }] : []),
+            ...(canManagePedidoMensual ? [{ label: "Pedido mensual", to: paths.admin.pedidoMensual }] : []),
           ]
         : [],
     },

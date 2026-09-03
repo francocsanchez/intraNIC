@@ -54,7 +54,7 @@ function VersionModal({
 
   return (
     <Transition appear show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={() => (mutation.isPending ? undefined : onClose())}>
+      <Dialog as="div" className="font-preset relative z-50" onClose={() => (mutation.isPending ? undefined : onClose())}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-200"
@@ -78,11 +78,11 @@ function VersionModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+              <Dialog.Panel className="w-full max-w-xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                <div className="flex items-center justify-between border-b border-border px-3 py-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Catalogo</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Catalogo</p>
+                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
                       {isEditing ? "Editar version" : "Nueva version"}
                     </Dialog.Title>
                   </div>
@@ -91,43 +91,43 @@ function VersionModal({
                     type="button"
                     onClick={onClose}
                     disabled={mutation.isPending}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
-                <div className="space-y-4 p-5">
-                  <label className="block space-y-2">
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Nombre</span>
+                <div className="space-y-3 p-3">
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Nombre</span>
                     <input
                       type="text"
                       value={nombre}
                       onChange={(event) => setNombre(event.target.value)}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-800">
+                  <label className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground">
                     <span>Version activa</span>
                     <input
                       type="checkbox"
                       checked={activo}
                       onChange={(event) => setActivo(event.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                      className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                     />
                   </label>
                 </div>
 
-                <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="text-sm text-gray-500">Guarda los cambios para actualizar el catalogo.</div>
+                <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm text-muted-foreground">Guarda los cambios para actualizar el catalogo.</div>
 
                   <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={onClose}
                       disabled={mutation.isPending}
-                      className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Cancelar
                     </button>
@@ -135,7 +135,7 @@ function VersionModal({
                       type="button"
                       onClick={() => mutation.mutate()}
                       disabled={mutation.isPending}
-                      className="inline-flex items-center justify-center rounded-lg bg-[#15aa9a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#128d80] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {mutation.isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear version"}
                     </button>
@@ -179,10 +179,10 @@ export default function VersionesView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-5 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar versiones</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+      <div className="font-preset w-full px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar versiones</h1>
+          <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -204,17 +204,17 @@ export default function VersionesView() {
   };
 
   return (
-    <div className="w-full space-y-4 px-4 py-5">
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="font-preset w-full space-y-3 px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Catalogo</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Versiones</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Catalogo</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Versiones</h1>
           </div>
           <button
             type="button"
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#15aa9a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#128d80]"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             <Plus size={16} />
             Nueva version
@@ -222,41 +222,41 @@ export default function VersionesView() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total versiones</p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-gray-900">{versiones.length}</p>
+      <section className="grid grid-cols-1 border-y border-border bg-card md:grid-cols-3">
+        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Total versiones</p>
+          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{versiones.length}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Activas</p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-gray-900">{versionesActivas.length}</p>
+        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Activas</p>
+          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{versionesActivas.length}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Inactivas</p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-gray-900">{versionesInactivas.length}</p>
+        <article className="px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Inactivas</p>
+          <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{versionesInactivas.length}</p>
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-5 py-3 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Lista de versiones</h2>
-            <p className="mt-0.5 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Lista de versiones</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
               {visibleSection === "activas"
                 ? "Vista principal con las versiones activas."
                 : "Listado separado de versiones inactivas."}
             </p>
           </div>
 
-          <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+          <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
             <button
               type="button"
               onClick={() => setVisibleSection("activas")}
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "activas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                visibleSection === "activas" ? "bg-card text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               Activas ({versionesActivas.length})
@@ -268,8 +268,8 @@ export default function VersionesView() {
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
                 visibleSection === "inactivas"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900",
+                  ? "bg-card text-foreground"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               Inactivas ({versionesInactivas.length})
@@ -279,28 +279,28 @@ export default function VersionesView() {
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
-                <th className="px-4 py-2.5 text-left">Nombre</th>
-                <th className="px-4 py-2.5 text-center">Estado</th>
-                <th className="px-4 py-2.5 text-center">Acciones</th>
+                <th className="px-3 py-2 text-left">Nombre</th>
+                <th className="px-3 py-2 text-center">Estado</th>
+                <th className="px-3 py-2 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {versionesVisibles.map((version) => (
-                <tr key={version._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-900">
+                <tr key={version._id} className="hover:bg-muted">
+                  <td className="px-3 py-1.5 font-medium text-foreground">
                     <div className="flex items-center gap-3">
-                      <Bookmark size={16} className="text-[#15aa9a]" />
+                      <Bookmark size={16} className="text-muted-foreground" />
                       {version.nombre}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={["inline-flex rounded-full px-3 py-1 text-xs font-semibold", version.activo ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"].join(" ")}>
+                  <td className="px-3 py-1.5 text-center">
+                    <span className={["inline-flex rounded-full px-3 py-1 text-xs font-semibold", version.activo ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"].join(" ")}>
                       {version.activo ? "Activo" : "Inactivo"}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-3 py-1.5">
                     <div className="flex justify-center gap-2">
                       <button
                         type="button"
@@ -313,10 +313,7 @@ export default function VersionesView() {
                         }
                         disabled={statusMutation.isPending}
                         className={[
-                          "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                          version.activo
-                            ? "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                            : "border border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
+                          "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60",
                         ].join(" ")}
                       >
                         <Power size={14} />
@@ -325,7 +322,7 @@ export default function VersionesView() {
                       <button
                         type="button"
                         onClick={() => handleEdit(version)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary"
                       >
                         <Pencil size={14} />
                         Editar
@@ -336,7 +333,7 @@ export default function VersionesView() {
               ))}
               {!versionesVisibles.length ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={3} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     {visibleSection === "activas"
                       ? "No hay versiones activas cargadas."
                       : "No hay versiones inactivas cargadas."}

@@ -348,13 +348,15 @@ export default function Router() {
 
           <Route element={<ModuleProtectedRoute allowedModules={["configuracion"]} />}>
             <Route element={<SuperAdminProtectedRoute />}>
-              <Route element={<NICLayout />}>
-                <Route path={paths.convencional.preventasColores} element={<ColoresView />} />
-                <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.convencional.preventasColores} replace />} />
-                <Route path={paths.convencional.preventasColoresEditarRoute} element={<Navigate to={paths.convencional.preventasColores} replace />} />
-                <Route path={paths.convencional.preventasVersiones} element={<VersionesView />} />
-                <Route path={paths.convencional.preventasVersionesNuevo} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
-                <Route path={paths.convencional.preventasVersionesEditarRoute} element={<Navigate to={paths.convencional.preventasVersiones} replace />} />
+              <Route element={<AdminLayout />}>
+                <Route path={paths.admin.colores} element={<ColoresView />} />
+                <Route path={paths.admin.versiones} element={<VersionesView />} />
+                <Route path={paths.convencional.preventasColores} element={<Navigate to={paths.admin.colores} replace />} />
+                <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.admin.colores} replace />} />
+                <Route path={paths.convencional.preventasColoresEditarRoute} element={<Navigate to={paths.admin.colores} replace />} />
+                <Route path={paths.convencional.preventasVersiones} element={<Navigate to={paths.admin.versiones} replace />} />
+                <Route path={paths.convencional.preventasVersionesNuevo} element={<Navigate to={paths.admin.versiones} replace />} />
+                <Route path={paths.convencional.preventasVersionesEditarRoute} element={<Navigate to={paths.admin.versiones} replace />} />
               </Route>
             </Route>
           </Route>
@@ -409,7 +411,8 @@ export default function Router() {
 
           <Route element={<ModuleProtectedRoute allowedModules={["pedidoMensual"]} />}>
             <Route element={<AdminLayout />}>
-              <Route path={paths.convencional.pedidoMensual} element={<PedidoMensualView />} />
+              <Route path={paths.admin.pedidoMensual} element={<PedidoMensualView />} />
+              <Route path={paths.convencional.pedidoMensual} element={<Navigate to={paths.admin.pedidoMensual} replace />} />
             </Route>
           </Route>
 
