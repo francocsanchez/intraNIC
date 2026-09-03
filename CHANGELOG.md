@@ -16,6 +16,8 @@
 - Se resaltan en verde los avances iguales o superiores al 100%.
 
 ### Vistas operativas
+- Se rediseño Mi Perfil con el preset compacto: navbar y footer semánticos, hero con resumen integrado y datos sin cards anidadas.
+- Se simplificaron los datos principales y el cambio de contraseña de Mi Perfil para eliminar divisores verticales y contenedores redundantes.
 - Se adapto el navbar y footer exclusivos de Administracion al preset, con la leyenda de uso interno y autoria solicitadas.
 - Se adaptaron los flujos de creación y edición de usuarios, incluido el formulario compartido y sus estados de carga, al preset compacto.
 - Se simplifico el bloque de módulos del formulario de usuarios para eliminar cards anidadas y reducir el espaciado.

@@ -1,4 +1,5 @@
 # AGENTS.md
+Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 
 # Instrucciones del proyecto
 
@@ -100,3 +101,9 @@ Luego de cada funcionalidad implementada correctamente, sugerir un mensaje de co
 git add .
 git commit -m "{commitSugerido}"
 ```
+
+## Footer
+
+Siempre el Footer de toda la app debe de la siguiente manera
+Lado Izquiero - IntraNIC - Uso interno Nippon Car
+Lado Derecho - Desarrollado por Franco Sanchez

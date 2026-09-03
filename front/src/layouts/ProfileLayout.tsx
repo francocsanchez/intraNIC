@@ -13,10 +13,11 @@ export default function ProfileLayout() {
 
   return (
     <BaseAppLayout
-      footerLeft={`Copyright ${new Date().getFullYear()} ${footerBrand}`}
-      footerRight="Franco Sanchez"
-      mainClassName="px-4"
-      footerHeightClassName="h-14"
+      footerLeft={`${footerBrand} - Uso interno Nippon Car`}
+      footerRight="Desarrollado por Franco Sanchez"
+      mainClassName="px-2 py-3"
+      footerHeightClassName="h-12"
+      presetNavigation
     />
   );
 }
