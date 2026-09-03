@@ -33,7 +33,7 @@ export default function BaseAppLayout({
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden ${presetNavigation ? "font-preset bg-background" : "bg-gray-50"}`}>
+    <div className={`min-h-screen flex flex-col overflow-x-hidden ${presetNavigation ? "font-preset bg-muted" : "bg-gray-50"}`}>
       <GlobalNavbar centerContent={centerContent} rightContent={rightContent} preset={presetNavigation} />
 
       <main className="flex-1 overflow-x-hidden">

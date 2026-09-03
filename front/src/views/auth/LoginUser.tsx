@@ -73,7 +73,7 @@ export default function LoginUser() {
   };
 
   return (
-    <div className="font-preset flex min-h-svh flex-col bg-background text-foreground">
+    <div className="font-preset flex min-h-svh flex-col bg-muted text-foreground">
       <main className="flex flex-1 items-center justify-center px-3 py-6">
         <div className="w-full max-w-sm">
           <div className="mb-5 flex justify-center gap-8">

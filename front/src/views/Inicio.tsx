@@ -251,7 +251,7 @@ export default function Inicio() {
   };
 
   return (
-    <div className="font-preset flex min-h-svh flex-col bg-background text-foreground">
+    <div className="font-preset flex min-h-svh flex-col bg-muted text-foreground">
       <header className="border-b border-border bg-card">
         <div className="flex h-14 items-center justify-between px-3">
           <div className="flex items-center gap-3">
@@ -272,7 +272,7 @@ export default function Inicio() {
         </div>
       </header>
 
-      <main className="flex-1 bg-muted px-3 py-4">
+      <main className="flex-1 px-3 py-4">
         <div className="grid gap-x-6 gap-y-7 xl:grid-cols-2">
           {visibleSections.map((section) => (
             <section key={section.title}>

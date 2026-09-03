@@ -115,6 +115,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
   return (
     <GlobalNavbar
+      preset
       centerContent={
         <>
           {navItems.map((item) => (
@@ -122,8 +123,8 @@ export default function NavBarNic({ negocio }: NavBarProps) {
               key={item.to}
               to={item.to}
               className={[
-                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
-                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                item.active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
               ].join(" ")}
             >
               <item.icon size={16} strokeWidth={1.75} />
@@ -135,19 +136,19 @@ export default function NavBarNic({ negocio }: NavBarProps) {
       rightContent={
         showGestionMenu ? (
           <Menu as="div" className="relative">
-            <MenuButton className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900">
+            <MenuButton className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
               <BriefcaseBusiness size={16} strokeWidth={1.75} />
               Mi Gestion
               <ChevronDown size={15} strokeWidth={1.75} />
             </MenuButton>
 
-            <MenuItems anchor="bottom end" className="mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none">
+            <MenuItems anchor="bottom end" className="mt-2 w-56 rounded-lg border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none">
               {canViewMisOperaciones ? (
                 <MenuItem>
                   {({ focus }) => (
                     <Link
                       to={misOperacionesPath}
-                      className={`px-4 py-2 text-sm flex items-center gap-2 ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                      className={`flex items-center gap-2 px-3 py-2 text-sm ${focus ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                     >
                       <ClipboardList size={16} strokeWidth={1.5} />
                       Mis operaciones
@@ -161,7 +162,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   {({ focus }) => (
                     <Link
                       to={paths.convencional.misReservas}
-                      className={`px-4 py-2 text-sm flex items-center gap-2 ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                      className={`flex items-center gap-2 px-3 py-2 text-sm ${focus ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                     >
                       <BookMarked size={16} strokeWidth={1.5} />
                       Mis reservas
@@ -175,7 +176,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
                   {({ focus }) => (
                     <Link
                       to={paths.convencional.miListaEspera}
-                      className={`px-4 py-2 text-sm flex items-center gap-2 ${focus ? "bg-gray-50 text-gray-900" : "text-gray-700"}`}
+                      className={`flex items-center gap-2 px-3 py-2 text-sm ${focus ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                     >
                       <Archive size={16} strokeWidth={1.5} />
                       Mi lista de espera

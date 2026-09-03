@@ -59,7 +59,7 @@ export default function CentralDeudoresView() {
   const tapeTone = viewModel?.riesgoVisual ?? getSituacionTone(null);
 
   return (
-    <div className="font-preset w-full px-2 py-3">
+    <div className="font-preset min-h-svh w-full bg-muted px-2 py-3">
       <div className="mx-auto max-w-none overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
         <div className={`h-1 w-full ${tapeTone.chipClassName}`} />
 

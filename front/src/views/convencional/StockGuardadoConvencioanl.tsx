@@ -96,34 +96,34 @@ export default function StockGuardadoConvencioanl() {
 
   if (isLoading) {
     return (
-      <div className="w-full px-4 py-6 space-y-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-8 w-80 animate-pulse rounded bg-gray-200" />
-          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-gray-100" />
+      <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
+          <div className="h-6 w-64 animate-pulse rounded bg-muted" />
+          <div className="mt-2 h-4 w-52 animate-pulse rounded bg-muted" />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_2.5fr_0.9fr]">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
-              <div className="mt-6 h-12 w-full animate-pulse rounded bg-gray-100" />
+            <div key={i} className="rounded-lg border border-border bg-card p-3 shadow-sm">
+              <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+              <div className="mt-4 h-10 w-full animate-pulse rounded bg-muted" />
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-200" />
+            <div key={i} className="h-9 animate-pulse rounded-md bg-muted" />
           ))}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-3 py-3">
+            <div className="h-5 w-40 animate-pulse rounded bg-muted" />
           </div>
-          <div className="p-6 space-y-4">
+          <div className="space-y-3 p-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded bg-gray-100" />
+              <div key={i} className="h-8 animate-pulse rounded bg-muted" />
             ))}
           </div>
         </div>
@@ -133,58 +133,60 @@ export default function StockGuardadoConvencioanl() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el stock</h2>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar el stock</h2>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Convencional</p>
-        <h1 className=" text-2xl font-semibold tracking-tight text-gray-900">Stock Guardado Convencional</h1>
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Convencional</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Stock guardado</h1>
+        </div>
+
+        <div className="grid border-t border-border xl:grid-cols-[1.2fr_2.5fr_0.9fr]">
+          <article className="border-b border-border px-3 py-3 xl:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Nacionales</p>
+
+            <div className="mt-3 grid grid-cols-3 divide-x divide-border">
+              {resumenDinamico.nacionales.map((item) => (
+                <div key={item.modelo} className="px-2 first:pl-0 last:pr-0">
+                  <p className="text-xs text-muted-foreground">{item.modelo}</p>
+                  <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">{item.total}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="border-b border-border px-3 py-3 xl:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Importadas</p>
+
+            <div className="mt-3 grid grid-cols-5 divide-x divide-border">
+              {resumenDinamico.importadas.map((item) => (
+                <div key={item.modelo} className="px-2 first:pl-0 last:pr-0">
+                  <p className="text-xs text-muted-foreground">{item.modelo}</p>
+                  <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">{item.total}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="px-3 py-3">
+            <div className="flex h-full flex-col items-center justify-center">
+              <p className="text-4xl font-semibold tracking-tight text-foreground">{resumen?.total ?? resumenDinamico.total}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Totales</p>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_2.5fr_0.9fr]">
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Nacionales</p>
-
-          <div className="mt-5 grid grid-cols-3 divide-x divide-gray-200">
-            {resumenDinamico.nacionales.map((item) => (
-              <div key={item.modelo} className="px-4 first:pl-0 last:pr-0">
-                <p className="text-sm text-gray-500">{item.modelo}</p>
-                <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{item.total}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Importadas</p>
-
-          <div className="mt-5 grid grid-cols-5 divide-x divide-gray-200">
-            {resumenDinamico.importadas.map((item) => (
-              <div key={item.modelo} className="px-4 first:pl-0 last:pr-0">
-                <p className="text-sm text-gray-500">{item.modelo}</p>
-                <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{item.total}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-6xl font-semibold tracking-tight text-gray-900">{resumen?.total ?? resumenDinamico.total}</p>
-            <p className="mt-2 text-sm text-gray-500">Totales</p>
-          </div>
-        </article>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+      <section className="flex gap-1 overflow-x-auto">
         {filtrosDisponibles.map((filtro) => {
           const activo = modeloActivo === filtro;
 
@@ -194,8 +196,8 @@ export default function StockGuardadoConvencioanl() {
               type="button"
               onClick={() => setModeloActivo(filtro)}
               className={[
-                "h-12 rounded-xl border text-sm font-medium transition-colors",
-                activo ? "border-gray-950 bg-gray-950 text-white shadow-sm" : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
+                "h-9 min-w-28 flex-1 whitespace-nowrap rounded-md border text-xs font-medium transition-colors",
+                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filtro}
@@ -204,25 +206,25 @@ export default function StockGuardadoConvencioanl() {
         })}
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Detalle de unidades</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Detalle de unidades</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {modeloActivo === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por modelo: ${modeloActivo}`}
             </p>
           </div>
 
           <div className="flex flex-col items-stretch gap-3 md:items-end">
-            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+            <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
               {ubicacionesDisponibles.map((ubicacion) => (
                 <button
                   key={ubicacion}
                   type="button"
                   onClick={() => setUbicacionActiva(ubicacion)}
                   className={[
-                    "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                    ubicacionActiva === ubicacion ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                    "flex-1 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                    ubicacionActiva === ubicacion ? "bg-card text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                   ].join(" ")}
                 >
                   {ubicacion}
@@ -230,55 +232,54 @@ export default function StockGuardadoConvencioanl() {
               ))}
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsVisibles.length} registros</div>
+            <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{itemsVisibles.length} registros</div>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="border-b border-border bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelo</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Version</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ubicacion</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Recepcion</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Interno</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modelo</th>
+                <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Version</th>
+                <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Color</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Ubicacion</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Recepcion</th>
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-border">
               {itemsVisibles.map((item) => (
                 <tr
                   key={`${item.interno}-${item.chasis}-${item.fechaRecepcion}`}
                   className={[
-                    "border-b border-gray-100",
-                    item.vendedorReserva === "3MES QUE VIENE" ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50",
+                    item.vendedorReserva === "3MES QUE VIENE" ? "bg-destructive/10 hover:bg-destructive/15" : "hover:bg-muted",
                   ].join(" ")}
                 >
-                  <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-                  <td className="px-4 py-2 text-gray-700">
-                    <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.modelo}</span>
+                  <td className="px-3 py-1.5 font-medium text-foreground">{item.interno}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">
+                    <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">{item.modelo}</span>
                   </td>
 
-                  <td className="min-w-[240px] px-4 py-2 text-center">
-                    <div className="font-medium text-gray-900">{item.version}</div>
-                    <div className="text-xs text-gray-400">{item.chasis}</div>
+                  <td className="min-w-[240px] px-3 py-1.5 text-center">
+                    <div className="font-medium text-foreground">{item.version}</div>
+                    <div className="text-xs text-muted-foreground">{item.chasis}</div>
                   </td>
-                  <td className="px-4 py-2 text-gray-700 text-center">
-                    <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(item.color)}`}>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">
+                    <span className={`inline-block rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
                       {item.color}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">{normalizarUbicacion(item.ubicacion)}</td>
 
-                  <td className="px-4 py-2 text-gray-700">{formatDate(item.fechaRecepcion)}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">{formatDate(item.fechaRecepcion)}</td>
                 </tr>
               ))}
 
               {itemsVisibles.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>
@@ -287,7 +288,7 @@ export default function StockGuardadoConvencioanl() {
           </table>
         </div>
 
-        <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm text-gray-500">
+        <div className="border-t border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
           Mostrando {itemsVisibles.length} unidades
           {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}
           {ubicacionActiva !== "TODAS" ? ` en ${ubicacionActiva}` : ""}.

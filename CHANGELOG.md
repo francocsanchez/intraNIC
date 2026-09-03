@@ -2,10 +2,17 @@
 
 ## 2026-09-03
 
+### Stock convencional
+- Se migro `/convencional/stock/disponible` al preset con navbar, footer y fondo unificados, hero y resumen en una unica superficie, filtros compactos y tabla de alta densidad.
+- Se conservaron exclusivamente los colores que representan datos operativos de la unidad y alertas de reserva.
+- Se migraron `/convencional/stock/reservado` y `/convencional/stock/guardado` con el mismo esquema visual, incluyendo tablas compactas y resumen integrado.
+- Se unifico la fila de filtros de modelo en las tres vistas de stock convencional, con desplazamiento horizontal en pantallas angostas.
+
 ### Inicio
 - Se migro `/` al preset con una portada compacta, accesos por modulo bajo tokens semanticos, header simplificado y footer institucional.
 - Se separaron los accesos de cada modulo para recuperar la lectura de botones independientes, sin fondos de relleno ni huecos visuales.
-- Se aplico un fondo `muted` del preset en la portada para distinguir los accesos `bg-card` sin incorporar tonos fijos.
+- Se establecio `bg-muted` como fondo global de las vistas migradas para distinguir las superficies `bg-card` sin incorporar tonos fijos.
+- Se cubrieron las vistas migradas que no heredan `BaseAppLayout` y Plan de negocio, evitando excepciones de fondo dentro de los modulos existentes.
 
 ### Acceso
 - Se migro `/login` al preset: superficie unica compacta, tipografia Nunito Sans, controles semanticos, fondo unificado y footer institucional.

@@ -83,47 +83,49 @@ export default function StockReservasConvencional() {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  if (isLoading) return <div className="px-4 py-6">Cargando...</div>;
+  if (isLoading) return <div className="font-preset w-full bg-muted px-2 py-3 text-sm text-muted-foreground">Cargando...</div>;
 
   if (isError) {
-    return <div className="px-4 py-6">{error instanceof Error ? error.message : "Error"}</div>;
+    return <div className="font-preset w-full bg-muted px-2 py-3 text-sm text-destructive">{error instanceof Error ? error.message : "Error"}</div>;
   }
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Convencional</p>
-        <h1 className=" text-2xl font-semibold tracking-tight text-gray-900">Stock Reservado Convencional</h1>
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Convencional</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Stock reservado</h1>
+        </div>
+
+        <div className="grid border-t border-border xl:grid-cols-[3fr_1fr]">
+          <article className="border-b border-border px-3 py-3 xl:border-r xl:border-b-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sucursales</p>
+
+            <div
+              className="mt-3 grid divide-x divide-border"
+              style={{
+                gridTemplateColumns: `repeat(${Math.max(Object.keys(data?.resumen?.sucursales ?? {}).length, 1)}, minmax(0,1fr))`,
+              }}
+            >
+              {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => (
+                <div key={sucursal} className="px-2 first:pl-0 last:pr-0">
+                  <p className="text-xs text-muted-foreground">{sucursal}</p>
+                  <p className="text-xl font-semibold text-foreground">{total}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="px-3 py-3">
+            <div className="flex h-full flex-col items-center justify-center">
+              <p className="text-4xl font-semibold text-foreground">{modeloActivo === "TODOS" && ubicacionActiva === "TODAS" ? (data?.resumen.total ?? 0) : totalFiltrado}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Totales</p>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[3fr_1fr]">
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursales</p>
-
-          <div
-            className="mt-5 grid divide-x divide-gray-200"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(Object.keys(data?.resumen?.sucursales ?? {}).length, 1)}, minmax(0,1fr))`,
-            }}
-          >
-            {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => (
-              <div key={sucursal} className="px-4 first:pl-0 last:pr-0">
-                <p className="text-sm text-gray-500">{sucursal}</p>
-                <p className="text-2xl font-semibold text-gray-900">{total}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-6xl font-semibold text-gray-900">{modeloActivo === "TODOS" && ubicacionActiva === "TODAS" ? (data?.resumen.total ?? 0) : totalFiltrado}</p>
-            <p className="text-sm text-gray-500">Totales</p>
-          </div>
-        </article>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+      <section className="flex gap-1 overflow-x-auto">
         {filtrosDisponibles.map((filtro) => {
           const activo = modeloActivo === filtro;
 
@@ -133,8 +135,8 @@ export default function StockReservasConvencional() {
               type="button"
               onClick={() => setModeloActivo(filtro)}
               className={[
-                "h-12 rounded-xl border text-sm font-medium transition-colors",
-                activo ? "border-gray-950 bg-gray-950 text-white shadow-sm" : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
+                "h-9 min-w-28 flex-1 whitespace-nowrap rounded-md border text-xs font-medium transition-colors",
+                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filtro}
@@ -143,16 +145,16 @@ export default function StockReservasConvencional() {
         })}
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+      <section className="border-y border-border py-2">
+        <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
           {ubicacionesDisponibles.map((ubicacion) => (
             <button
               key={ubicacion}
               type="button"
               onClick={() => setUbicacionActiva(ubicacion)}
               className={[
-                "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                ubicacionActiva === ubicacion ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                "flex-1 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                ubicacionActiva === ubicacion ? "bg-card text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {ubicacion}
@@ -162,55 +164,54 @@ export default function StockReservasConvencional() {
       </section>
 
       {sucursalesFiltradas.map(([sucursal, reservas]) => (
-        <section key={sucursal} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <h2 className="text-base font-semibold text-gray-900">{sucursal}</h2>
+        <section key={sucursal} className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="border-b border-border px-3 py-3">
+            <h2 className="text-base font-semibold text-foreground">{sucursal}</h2>
           </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50">
+              <thead className="border-b border-border bg-muted">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Interno</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Modelo</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Version</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Color</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Ubicacion</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Chasis</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Vendedor</th>
-                  <th className="px-4 py-3 text-left text-xs uppercase text-gray-500">Dias</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Interno</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Modelo</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Version</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Color</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Ubicacion</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Chasis</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Vendedor</th>
+                  <th className="px-3 py-2 text-left text-xs uppercase tracking-[0.18em] text-muted-foreground">Dias</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="divide-y divide-border">
                 {reservas.map((item) => (
                   <tr
                     key={`${item.chasis}-${item.interno}-${item.fechaReserva}`}
                     className={[
-                      "border-b border-gray-100",
-                      diasReserva(item.fechaReserva) > 2 ? "bg-red-50 hover:bg-red-100" : "hover:bg-gray-50",
+                      diasReserva(item.fechaReserva) > 2 ? "bg-destructive/10 hover:bg-destructive/15" : "hover:bg-muted",
                     ].join(" ")}
                   >
-                    <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-                    <td className="px-4 py-2 text-gray-700">{item.modelo}</td>
-                    <td className="px-4 py-2 text-gray-700">
+                    <td className="px-3 py-1.5 font-medium text-foreground">{item.interno}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.modelo}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">
                       <div className="font-medium">{item.version}</div>
                     </td>
-                    <td className="px-4 py-2 text-gray-700">
-                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md border border-slate-200 ${textToColor(item.color)}`}>
+                    <td className="px-3 py-1.5 text-muted-foreground">
+                      <span className={`inline-block rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>
                         {item.color}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-gray-700">{normalizarUbicacion(item.ubicacion)}</td>
-                    <td className="px-4 py-2 text-gray-700">{item.chasis}</td>
-                    <td className="px-4 py-2 text-gray-700">{item.vendedorReserva}</td>
-                    <td className="px-4 py-2 text-gray-700">{diasReserva(item.fechaReserva)}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{normalizarUbicacion(item.ubicacion)}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.chasis}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.vendedorReserva}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{diasReserva(item.fechaReserva)}</td>
                   </tr>
                 ))}
 
                 {reservas.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={9} className="px-3 py-8 text-center text-sm text-muted-foreground">
                       No hay unidades para el filtro seleccionado.
                     </td>
                   </tr>
@@ -222,7 +223,7 @@ export default function StockReservasConvencional() {
       ))}
 
       {sucursalesFiltradas.length === 0 && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-500 shadow-sm">
+        <section className="rounded-lg border border-border bg-card p-6 text-center text-sm text-muted-foreground shadow-sm">
           No hay unidades reservadas para el filtro seleccionado.
         </section>
       )}

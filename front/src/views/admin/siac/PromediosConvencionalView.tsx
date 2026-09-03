@@ -86,7 +86,7 @@ export default function PromediosConvencionalView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
+      <div className="font-preset min-h-svh w-full bg-muted px-2 py-3">
         <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-gray-900">
             Error al cargar promedio de operaciones
@@ -100,7 +100,7 @@ export default function PromediosConvencionalView() {
   }
 
   return (
-    <div className="font-preset w-full space-y-3 px-2 py-3">
+    <div className="font-preset min-h-svh w-full space-y-3 bg-muted px-2 py-3">
       <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>

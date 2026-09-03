@@ -55,7 +55,7 @@ export default function PlanNegocioView() {
   ];
 
   return (
-    <div className="font-preset w-full space-y-3 px-2 py-3 text-foreground">
+    <div className="font-preset min-h-full w-full space-y-3 bg-muted px-2 py-3 text-foreground">
       <Card className="border border-border bg-card [--card-spacing:--spacing(2)]">
         <CardContent className="p-0">
           <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-end lg:justify-between lg:p-4">
