@@ -65,7 +65,10 @@ export default function ConfiguracionEnvioAgendaView() {
       return;
     }
 
-    setDrafts(buildDrafts(data.data));
+    const frame = window.requestAnimationFrame(() =>
+      setDrafts(buildDrafts(data.data)),
+    );
+    return () => window.cancelAnimationFrame(frame);
   }, [data]);
 
   const saveMutation = useMutation({
@@ -85,7 +88,10 @@ export default function ConfiguracionEnvioAgendaView() {
 
   const items = data?.data ?? [];
 
-  const setDraft = (sucursalId: string, updater: (current: DraftItem) => DraftItem) => {
+  const setDraft = (
+    sucursalId: string,
+    updater: (current: DraftItem) => DraftItem,
+  ) => {
     setDrafts((current) => {
       const base = current[sucursalId] ?? { emails: [""], activo: true };
       return {
@@ -96,37 +102,48 @@ export default function ConfiguracionEnvioAgendaView() {
   };
 
   if (isLoading) {
-    return <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando configuracion de envio de agenda...</div>;
+    return (
+      <div className="font-preset rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+        Cargando configuracion de envio de agenda...
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
-        {error instanceof Error ? error.message : "Error al cargar la configuracion de envio de agenda"}
+      <div className="font-preset rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
+        {error instanceof Error
+          ? error.message
+          : "Error al cargar la configuracion de envio de agenda"}
       </div>
     );
   }
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex items-center justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Envio de agenda</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Define por sucursal quien recibe el PDF automatico diario de la agenda de entrega.
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Administracion
+          </p>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+            Envio de agenda
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Define por sucursal quien recibe el PDF automatico diario de la
+            agenda de entrega.
           </p>
         </div>
 
         <Link
           to={paths.admin.configuracion}
-          className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:bg-primary/90"
         >
           Volver
         </Link>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         {items.map((item) => {
           const sucursal = item.sucursal;
 
@@ -134,18 +151,28 @@ export default function ConfiguracionEnvioAgendaView() {
             return null;
           }
 
-          const draft = drafts[sucursal._id] ?? { emails: [""], activo: item.activo };
-          const isSaving = saveMutation.isPending && saveMutation.variables?.sucursalId === sucursal._id;
+          const draft = drafts[sucursal._id] ?? {
+            emails: [""],
+            activo: item.activo,
+          };
+          const isSaving =
+            saveMutation.isPending &&
+            saveMutation.variables?.sucursalId === sucursal._id;
 
           return (
-            <article key={sucursal._id} className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <article
+              key={sucursal._id}
+              className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+            >
               <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
                 <div>
                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                     <Building2 size={16} className="text-gray-500" />
                     <span>{sucursal.nombre}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">{sucursal.direccion || "Sin direccion cargada"}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {sucursal.direccion || "Sin direccion cargada"}
+                  </p>
                 </div>
 
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -167,8 +194,13 @@ export default function ConfiguracionEnvioAgendaView() {
               <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Destinatarios</p>
-                    <p className="mt-1 text-sm text-gray-500">Carga manual de emails, sin necesidad de usuarios del sistema.</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                      Destinatarios
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Carga manual de emails, sin necesidad de usuarios del
+                      sistema.
+                    </p>
                   </div>
 
                   <button
@@ -188,9 +220,15 @@ export default function ConfiguracionEnvioAgendaView() {
 
                 <div className="space-y-3">
                   {draft.emails.map((email, index) => (
-                    <div key={`${sucursal._id}-${index}`} className="flex gap-2">
+                    <div
+                      key={`${sucursal._id}-${index}`}
+                      className="flex gap-2"
+                    >
                       <div className="relative flex-1">
-                        <Mail size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Mail
+                          size={14}
+                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
                         <input
                           type="email"
                           value={email}
@@ -198,8 +236,9 @@ export default function ConfiguracionEnvioAgendaView() {
                             const nextValue = event.target.value;
                             setDraft(sucursal._id, (current) => ({
                               ...current,
-                              emails: current.emails.map((entry, currentIndex) =>
-                                currentIndex === index ? nextValue : entry,
+                              emails: current.emails.map(
+                                (entry, currentIndex) =>
+                                  currentIndex === index ? nextValue : entry,
                               ),
                             }));
                           }}
@@ -213,9 +252,12 @@ export default function ConfiguracionEnvioAgendaView() {
                         onClick={() =>
                           setDraft(sucursal._id, (current) => ({
                             ...current,
-                            emails: current.emails.length > 1
-                              ? current.emails.filter((_, currentIndex) => currentIndex !== index)
-                              : [""],
+                            emails:
+                              current.emails.length > 1
+                                ? current.emails.filter(
+                                    (_, currentIndex) => currentIndex !== index,
+                                  )
+                                : [""],
                           }))
                         }
                         className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100"

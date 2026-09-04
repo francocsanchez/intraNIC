@@ -1,5 +1,9 @@
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
-import { changeStatusUsuario, getUsuarios, resetPasswordUserByID } from "@/api/usuarioAPI";
+import {
+  changeStatusUsuario,
+  getUsuarios,
+  resetPasswordUserByID,
+} from "@/api/usuarioAPI";
 import { hasModuleAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -36,7 +40,9 @@ export default function UsuariosView() {
   const queryClient = useQueryClient();
   const canManageUsers = hasModuleAccess(user, "usuarios");
   const [resettingUserId, setResettingUserId] = useState<string | null>(null);
-  const [visibleSection, setVisibleSection] = useState<"habilitados" | "deshabilitados">("habilitados");
+  const [visibleSection, setVisibleSection] = useState<
+    "habilitados" | "deshabilitados"
+  >("habilitados");
 
   const { data, isError, isLoading } = useQuery<Usuario[] | undefined>({
     queryKey: ["usuarios", "listar"],
@@ -66,10 +72,16 @@ export default function UsuariosView() {
   const { mutate: changeStatus } = useMutation({
     mutationFn: (id: string) => changeStatusUsuario(id),
     onError: (error: unknown) => {
-      toast.error(error instanceof Error ? error.message : "Error al cambiar el estado del usuario");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cambiar el estado del usuario",
+      );
     },
     onSuccess: (response: unknown) => {
-      toast.success(getResponseMessage(response, "Estado del usuario actualizado"));
+      toast.success(
+        getResponseMessage(response, "Estado del usuario actualizado"),
+      );
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
     },
   });
@@ -80,10 +92,16 @@ export default function UsuariosView() {
       setResettingUserId(id);
     },
     onError: (error: unknown) => {
-      toast.error(error instanceof Error ? error.message : "Error al enviar la nueva contrasena");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Error al enviar la nueva contrasena",
+      );
     },
     onSuccess: (response: unknown) => {
-      toast.success(getResponseMessage(response, "Nueva contrasena enviada correctamente"));
+      toast.success(
+        getResponseMessage(response, "Nueva contrasena enviada correctamente"),
+      );
       queryClient.invalidateQueries({ queryKey: ["usuarios", "listar"] });
     },
     onSettled: () => {
@@ -96,7 +114,9 @@ export default function UsuariosView() {
   if (isLoading) {
     return (
       <div className="font-preset w-full px-2 py-3">
-        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">Cargando usuarios...</div>
+        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
+          Cargando usuarios...
+        </div>
       </div>
     );
   }
@@ -115,14 +135,21 @@ export default function UsuariosView() {
   const usuariosDeshabilitados = usuarios.filter((u) => !u.enable);
   const activos = usuariosHabilitados.length;
   const deshabilitados = usuariosDeshabilitados.length;
-  const usuariosVisibles = visibleSection === "habilitados" ? usuariosHabilitados : usuariosDeshabilitados;
+  const usuariosVisibles =
+    visibleSection === "habilitados"
+      ? usuariosHabilitados
+      : usuariosDeshabilitados;
 
   return (
     <div className="font-preset w-full space-y-3 px-2 py-3">
       <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Usuarios</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Administracion
+          </p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Usuarios
+          </h1>
         </div>
 
         {canManageUsers ? (
@@ -137,7 +164,9 @@ export default function UsuariosView() {
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-foreground">Lista de usuarios</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
+              Lista de usuarios
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {visibleSection === "habilitados"
                 ? "Vista limpia con solo usuarios habilitados."
@@ -151,7 +180,9 @@ export default function UsuariosView() {
               onClick={() => setVisibleSection("habilitados")}
               className={[
                 "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                visibleSection === "habilitados" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                visibleSection === "habilitados"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Habilitados ({activos})
@@ -176,28 +207,30 @@ export default function UsuariosView() {
           <table className="w-full text-sm">
             <thead className="bg-muted text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-3 py-3 text-left">Usuario</th>
-                <th className="px-3 py-3 text-left">Rol</th>
-                <th className="px-3 py-3 text-left">Unidad negocio</th>
-                <th className="px-3 py-3 text-left">Sucursal predeterminada</th>
-                <th className="px-3 py-3 text-left">Celular</th>
-                <th className="px-3 py-3 text-left">NIC</th>
-                <th className="px-3 py-3 text-left">LIESS</th>
-                <th className="px-3 py-3 text-right">Acciones</th>
+                <th className="px-3 py-2 text-left">Usuario</th>
+                <th className="px-3 py-2 text-left">Rol</th>
+                <th className="px-3 py-2 text-left">Unidad negocio</th>
+                <th className="px-3 py-2 text-left">Sucursal predeterminada</th>
+                <th className="px-3 py-2 text-left">Celular</th>
+                <th className="px-3 py-2 text-left">NIC</th>
+                <th className="px-3 py-2 text-left">LIESS</th>
+                <th className="px-3 py-2 text-right">Acciones</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-border">
               {usuariosVisibles.map((u) => (
                 <tr key={u.email} className="hover:bg-muted">
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-1.5">
                     <div className="font-medium text-foreground">
                       {capitalize(u.lastName)}, {capitalize(u.name)}
                     </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">{u.email}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      {u.email}
+                    </div>
                   </td>
 
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-1.5">
                     <div className="flex flex-wrap gap-2">
                       {u.role.map((r) => (
                         <span
@@ -210,36 +243,42 @@ export default function UsuariosView() {
                     </div>
                   </td>
 
-                  <td className="px-3 py-3 text-foreground">
+                  <td className="px-3 py-1.5 text-foreground">
                     {u.unidadNegocio?.nombre ?? "-"}
                   </td>
 
-                  <td className="px-3 py-3 text-foreground">
+                  <td className="px-3 py-1.5 text-foreground">
                     {u.sucursalPredeterminada?.nombre ?? "-"}
                   </td>
 
-                  <td className="px-3 py-3 text-foreground">{u.celular || "-"}</td>
-
-                  <td className="px-3 py-3 text-foreground">
-                    {u.numberSaleNic ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic) : "-"}
+                  <td className="px-3 py-1.5 text-foreground">
+                    {u.celular || "-"}
                   </td>
 
-                  <td className="px-3 py-3 text-foreground">
-                    {u.numberSaleLiess ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess) : "-"}
+                  <td className="px-3 py-1.5 text-foreground">
+                    {u.numberSaleNic
+                      ? (vendedoresMap[u.numberSaleNic] ?? u.numberSaleNic)
+                      : "-"}
                   </td>
 
-                  <td className="px-3 py-3">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-3 py-1.5 text-foreground">
+                    {u.numberSaleLiess
+                      ? (vendedoresMap[u.numberSaleLiess] ?? u.numberSaleLiess)
+                      : "-"}
+                  </td>
+
+                  <td className="px-3 py-1.5">
+                    <div className="flex justify-end gap-1">
                       {canManageUsers ? (
                         <>
                           <button
                             type="button"
                             onClick={() => changeStatus(u._id)}
                             className={[
-                              "inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition-colors",
+                              "inline-flex h-8 items-center justify-center rounded-md px-2 text-xs font-semibold transition-colors",
                               u.enable
                                 ? "border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
-                                : "border border-emerald-600/30 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                                : "border border-border bg-background text-foreground hover:bg-secondary",
                             ].join(" ")}
                           >
                             {u.enable ? "Deshabilitar" : "Habilitar"}
@@ -249,15 +288,17 @@ export default function UsuariosView() {
                             type="button"
                             onClick={() => resetPasswordUser(u._id)}
                             disabled={resettingUserId === u._id}
-                            className="inline-flex items-center justify-center gap-1 rounded-md border border-amber-500/30 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                            className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary"
                           >
                             <RotateCcw size={14} strokeWidth={1.8} />
-                            {resettingUserId === u._id ? "Enviando..." : "Enviar nueva pass"}
+                            {resettingUserId === u._id
+                              ? "Enviando..."
+                              : "Enviar nueva pass"}
                           </button>
 
                           <Link
                             to={paths.admin.editarUsuario(u._id)}
-                            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+                            className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary"
                           >
                             Editar
                           </Link>
@@ -270,7 +311,10 @@ export default function UsuariosView() {
 
               {usuariosVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                  <td
+                    colSpan={8}
+                    className="px-3 py-10 text-center text-sm text-muted-foreground"
+                  >
                     {visibleSection === "habilitados"
                       ? "No hay usuarios habilitados para mostrar."
                       : "No hay usuarios deshabilitados para mostrar."}

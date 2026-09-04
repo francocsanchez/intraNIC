@@ -21,28 +21,28 @@ export default function StockValorizacionConvencional() {
 
   if (isLoading) {
     return (
-      <div className="w-full space-y-6 px-4 py-6">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-8 w-80 animate-pulse rounded bg-gray-200" />
-          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-gray-100" />
+      <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+        <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
+          <div className="h-7 w-72 animate-pulse rounded-md bg-muted" />
+          <div className="mt-2 h-4 w-64 animate-pulse rounded-md bg-muted" />
         </section>
 
-        <section className="grid grid-cols-2 gap-4 xl:grid-cols-5">
+        <section className="grid grid-cols-2 gap-2 xl:grid-cols-5">
           {Array.from({ length: 5 }).map((_, index) => (
-            <article key={index} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
-              <div className="mt-4 h-10 w-20 animate-pulse rounded bg-gray-100" />
+            <article key={index} className="rounded-lg border border-border bg-card p-3 shadow-sm">
+              <div className="h-3 w-20 animate-pulse rounded-md bg-muted" />
+              <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-muted" />
             </article>
           ))}
         </section>
 
-        <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <div className="h-5 w-48 animate-pulse rounded bg-gray-200" />
+        <section className="rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-3 py-2">
+            <div className="h-4 w-40 animate-pulse rounded-md bg-muted" />
           </div>
-          <div className="space-y-4 p-6">
+          <div className="space-y-2 p-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-10 animate-pulse rounded bg-gray-100" />
+              <div key={index} className="h-8 animate-pulse rounded-md bg-muted" />
             ))}
           </div>
         </section>
@@ -52,10 +52,10 @@ export default function StockValorizacionConvencional() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar la valorizacion</h2>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h2 className="text-base font-semibold text-card-foreground">Error al cargar la valorizacion</h2>
+          <p className="mt-1 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </div>
       </div>
     );
@@ -75,109 +75,93 @@ export default function StockValorizacionConvencional() {
   const faltantes = data?.faltantes ?? [];
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Convencional</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Valorizacion de stock por modelo</h1>
-            <p className="mt-2 text-sm text-gray-500">Resumen consolidado de stock disponible, reservado y guardado agrupado por modelo.</p>
+          <div className="p-3">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Convencional</p>
+            <h1 className="text-xl font-semibold tracking-tight text-card-foreground">Valorizacion de stock por modelo</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Resumen consolidado de stock disponible, reservado y guardado agrupado por modelo.</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 p-3 pt-0 md:pt-3">
             <Link
               to={paths.convencional.stockValorizacionListaPrecios}
-              className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Lista de precios
             </Link>
 
             {faltantes.length ? (
-              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+              <span className="inline-flex h-7 items-center rounded-md border border-border bg-secondary px-2 text-xs font-medium text-secondary-foreground">
                 {resumen.versionesSinPrecio} sin precio
               </span>
             ) : null}
           </div>
         </div>
+
+        <div className="grid grid-cols-2 border-t border-border sm:grid-cols-3 xl:grid-cols-6">
+          {[
+            ["Modelos", resumen.modelos],
+            ["Disponible", resumen.stockDisponible],
+            ["Reservado", resumen.stockReservado],
+            ["Guardado", resumen.stockGuardado],
+            ["Total", resumen.total],
+            ["Valorizacion", formatMoney(resumen.valorizacionTotal)],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-r border-border px-3 py-2 last:border-r-0 xl:border-b-0">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight text-card-foreground">{value}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-6">
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelos</p>
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen.modelos}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Disponible</p>
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen.stockDisponible}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Reservado</p>
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen.stockReservado}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Guardado</p>
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen.stockGuardado}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total</p>
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-gray-900">{resumen.total}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Valorizacion</p>
-          <p className="mt-3 text-2xl font-semibold tracking-tight text-gray-900">{formatMoney(resumen.valorizacionTotal)}</p>
-        </article>
-      </section>
-
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Tabla por modelo</h2>
-          <p className="mt-1 text-sm text-gray-500">Cada fila suma las unidades encontradas en los tres estados del stock convencional y calcula su valorizacion monetaria.</p>
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-2">
+          <h2 className="text-sm font-semibold text-card-foreground">Tabla por modelo</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">Cada fila suma las unidades encontradas en los tres estados del stock convencional y calcula su valorizacion monetaria.</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-border bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelo</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 ">Stock Disponible</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Stock Reservado</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Stock Guardado</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Total</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">$ Valorizacion</th>
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Modelo</th>
+                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Stock Disponible</th>
+                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Stock Reservado</th>
+                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Stock Guardado</th>
+                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Total</th>
+                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">$ Valorizacion</th>
               </tr>
             </thead>
 
             <tbody>
               {rows.map((row) => (
-                <tr key={row.modelo} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{row.modelo}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.stockDisponible}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.stockReservado}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.stockGuardado}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{row.total}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{formatMoney(row.valorizacion)}</td>
+                <tr key={row.modelo} className="border-b border-border last:border-b-0 hover:bg-muted">
+                  <td className="px-3 py-1.5 font-medium text-card-foreground">{row.modelo}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.stockDisponible}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.stockReservado}</td>
+                  <td className="px-3 py-1.5 text-center text-muted-foreground">{row.stockGuardado}</td>
+                  <td className="px-3 py-1.5 text-center font-semibold text-card-foreground">{row.total}</td>
+                  <td className="px-3 py-1.5 text-center font-semibold text-card-foreground">{formatMoney(row.valorizacion)}</td>
                 </tr>
               ))}
 
               {rows.length > 0 ? (
-                <tr className="border-t-2 border-gray-200 bg-gray-50">
-                  <td className="px-4 py-3 font-semibold text-gray-900">Total</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{resumen.stockDisponible}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{resumen.stockReservado}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{resumen.stockGuardado}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{resumen.total}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-gray-900">{formatMoney(resumen.valorizacionTotal)}</td>
+                <tr className="border-t border-border bg-muted">
+                  <td className="px-3 py-2 font-semibold text-card-foreground">Total</td>
+                  <td className="px-3 py-2 text-center font-semibold text-card-foreground">{resumen.stockDisponible}</td>
+                  <td className="px-3 py-2 text-center font-semibold text-card-foreground">{resumen.stockReservado}</td>
+                  <td className="px-3 py-2 text-center font-semibold text-card-foreground">{resumen.stockGuardado}</td>
+                  <td className="px-3 py-2 text-center font-semibold text-card-foreground">{resumen.total}</td>
+                  <td className="px-3 py-2 text-center font-semibold text-card-foreground">{formatMoney(resumen.valorizacionTotal)}</td>
                 </tr>
               ) : null}
 
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay datos para mostrar en la valorizacion.
                   </td>
                 </tr>

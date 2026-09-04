@@ -48,58 +48,79 @@ export default function ConfiguracionHotAlertView() {
       return;
     }
 
-    setEmails(config.emails);
-    setActivo(config.activo);
+    const frame = window.requestAnimationFrame(() => {
+      setEmails(config.emails);
+      setActivo(config.activo);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [data]);
 
   const saveMutation = useMutation({
-    mutationFn: (payload: HotAlertMailConfigPayload) => updateSsiVentasHotAlertConfig(payload),
+    mutationFn: (payload: HotAlertMailConfigPayload) =>
+      updateSsiVentasHotAlertConfig(payload),
     onSuccess: (response) => {
       toast.success(response.message || "Configuracion guardada correctamente");
-      queryClient.invalidateQueries({ queryKey: ["ssi-ventas", "hot-alert-config"] });
+      queryClient.invalidateQueries({
+        queryKey: ["ssi-ventas", "hot-alert-config"],
+      });
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
   if (isLoading) {
-    return <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando configuracion de Hot Alert...</div>;
+    return (
+      <div className="font-preset rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+        Cargando configuracion de Hot Alert...
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
-        {error instanceof Error ? error.message : "Error al cargar la configuracion de Hot Alert"}
+      <div className="font-preset rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
+        {error instanceof Error
+          ? error.message
+          : "Error al cargar la configuracion de Hot Alert"}
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Hot Alert</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Define quien recibe el correo diario de Hot Alert de SSI Ventas a las 20:00.
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Administracion
+          </p>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+            Hot Alert
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Define quien recibe el correo diario de Hot Alert de SSI Ventas a
+            las 20:00.
           </p>
         </div>
 
         <Link
           to={paths.admin.configuracion}
-          className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:bg-primary/90"
         >
           Volver
         </Link>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b border-border px-3 py-3">
           <div>
-            <div className="text-sm font-semibold text-gray-900">Destinatarios</div>
-            <p className="mt-1 text-sm text-gray-500">Carga manual de emails para el envio consolidado diario.</p>
+            <div className="text-sm font-semibold text-foreground">
+              Destinatarios
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Carga manual de emails para el envio consolidado diario.
+            </p>
           </div>
 
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 text-sm font-medium text-foreground">
             <input
               type="checkbox"
               checked={activo}
@@ -109,12 +130,12 @@ export default function ConfiguracionHotAlertView() {
           </label>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-3 px-3 py-3">
           <div className="flex justify-end">
             <button
               type="button"
               onClick={() => setEmails((current) => [...current, ""])}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground hover:bg-secondary"
             >
               <Plus size={14} />
               Agregar email
@@ -125,18 +146,23 @@ export default function ConfiguracionHotAlertView() {
             {emails.map((email, index) => (
               <div key={`hot-alert-email-${index}`} className="flex gap-2">
                 <div className="relative flex-1">
-                  <Mail size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Mail
+                    size={14}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => {
                       const nextValue = event.target.value;
                       setEmails((current) =>
-                        current.map((entry, currentIndex) => (currentIndex === index ? nextValue : entry)),
+                        current.map((entry, currentIndex) =>
+                          currentIndex === index ? nextValue : entry,
+                        ),
                       );
                     }}
                     placeholder="destinatario@empresa.com"
-                    className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+                    className="h-9 w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
@@ -144,10 +170,12 @@ export default function ConfiguracionHotAlertView() {
                   type="button"
                   onClick={() =>
                     setEmails((current) =>
-                      current.filter((_, currentIndex) => currentIndex !== index),
+                      current.filter(
+                        (_, currentIndex) => currentIndex !== index,
+                      ),
                     )
                   }
-                  className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100"
+                  className="inline-flex h-9 items-center justify-center rounded-md border border-destructive/30 bg-background px-3 text-destructive hover:bg-muted"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -156,8 +184,10 @@ export default function ConfiguracionHotAlertView() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-5 py-4">
-          <div className="text-sm text-gray-500">Envio diario consolidado a las 20:00 hs</div>
+        <div className="flex items-center justify-between border-t border-border bg-muted px-3 py-2">
+          <div className="text-sm text-muted-foreground">
+            Envio diario consolidado a las 20:00 hs
+          </div>
 
           <button
             type="button"
@@ -175,7 +205,7 @@ export default function ConfiguracionHotAlertView() {
                 emails: emails.map(normalizeEmail),
               });
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save size={16} />
             {saveMutation.isPending ? "Guardando..." : "Guardar"}

@@ -115,16 +115,7 @@ const formatDate = (value: string | null | undefined) => {
 };
 
 const getStatusPillClass = (status: SsiVentasListItem["status"]) => {
-  switch (status) {
-    case "encuestada":
-      return "bg-emerald-100 text-emerald-700";
-    case "imposibleComunicarse":
-      return "bg-rose-100 text-rose-700";
-    case "enGestion":
-      return "bg-amber-100 text-amber-700";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
+  return status === "pendiente" ? "bg-muted text-muted-foreground" : "bg-secondary text-secondary-foreground";
 };
 
 const getStatusLabel = (status: SsiVentasListItem["status"]) => {
@@ -154,32 +145,23 @@ const getIdentificadorClienteLabel = (value: SsiVentasListItem["identificadorCli
 };
 
 const getIdentificadorClienteClass = (value: SsiVentasListItem["identificadorCliente"] | null | undefined) => {
-  switch (value) {
-    case "promotor":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    case "neutro":
-      return "border-amber-200 bg-amber-50 text-amber-700";
-    case "detractor":
-      return "border-rose-200 bg-rose-50 text-rose-700";
-    default:
-      return "border-gray-200 bg-gray-50 text-gray-500";
-  }
+  return value ? "border-border bg-secondary text-secondary-foreground" : "border-border bg-muted text-muted-foreground";
 };
 
 function StatusIcon({ status }: { status: SsiVentasListItem["status"] }) {
   if (status === "encuestada") {
-    return <BadgeCheck size={15} className="text-emerald-600" />;
+    return <BadgeCheck size={15} className="text-foreground" />;
   }
 
   if (status === "imposibleComunicarse") {
-    return <PhoneOff size={15} className="text-rose-600" />;
+    return <PhoneOff size={15} className="text-muted-foreground" />;
   }
 
   if (status === "enGestion") {
-    return <PhoneOutgoing size={15} className="text-amber-600" />;
+    return <PhoneOutgoing size={15} className="text-foreground" />;
   }
 
-  return <CircleDot size={15} className="text-slate-500" />;
+  return <CircleDot size={15} className="text-muted-foreground" />;
 }
 
 function AdministrativaPickerDialog({
@@ -201,13 +183,12 @@ function AdministrativaPickerDialog({
   const [selected, setSelected] = useState<SsiVentasAdministrativa | null>(currentAdministrativa);
 
   useEffect(() => {
-    if (!open) {
+    const frame = window.requestAnimationFrame(() => {
+      setSelected(open ? currentAdministrativa : null);
       setQuery("");
-      return;
-    }
+    });
 
-    setSelected(currentAdministrativa);
-    setQuery("");
+    return () => window.cancelAnimationFrame(frame);
   }, [currentAdministrativa, open]);
 
   const filteredOptions = useMemo(() => {
@@ -234,7 +215,7 @@ function AdministrativaPickerDialog({
       <Dialog as="div" className="relative z-[60]" onClose={() => (isPending ? undefined : onClose())}>
         <Transition.Child
           as="div"
-          className="fixed inset-0 bg-black/30"
+          className="fixed inset-0 bg-foreground/40"
           enter="ease-out duration-200"
           enterFrom="opacity-0"
           enterTo="opacity-100"
@@ -243,7 +224,7 @@ function AdministrativaPickerDialog({
           leaveTo="opacity-0"
         />
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-2">
           <Transition.Child
             as="div"
             enter="ease-out duration-200"
@@ -253,40 +234,40 @@ function AdministrativaPickerDialog({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="w-full max-w-xl rounded-2xl border border-gray-200 bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+            <Dialog.Panel className="font-preset w-full max-w-xl rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2">
                 <div>
-                  <Dialog.Title className="text-lg font-semibold tracking-tight text-gray-900">Asignar ADM</Dialog.Title>
-                  <p className="mt-1 text-sm text-gray-500">Busca por nombre y selecciona la administrativa correspondiente.</p>
+                  <Dialog.Title className="text-base font-semibold text-popover-foreground">Asignar ADM</Dialog.Title>
+                  <p className="mt-0.5 text-sm text-muted-foreground">Busca por nombre y selecciona la administrativa correspondiente.</p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isPending}
-                  className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-4 px-5 py-5">
+              <div className="space-y-3 px-3 py-3">
                 <Combobox value={selected} onChange={setSelected} disabled={isPending} immediate>
                   <div className="relative">
-                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400" />
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground" />
                     <ComboboxInput
                       aria-label="Buscar administrativa"
                       displayValue={(item: SsiVentasAdministrativa | null) => item?.nombre ?? query}
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="Buscar administrativa"
-                      className="w-full rounded-xl border border-gray-300 px-10 py-2.5 pr-10 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+                      className="h-9 w-full rounded-md border border-input bg-background px-10 pr-10 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:bg-muted"
                     />
-                    <ComboboxButton className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">
+                    <ComboboxButton className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:bg-secondary hover:text-foreground">
                       <ChevronDown size={16} />
                     </ComboboxButton>
 
                     <ComboboxOptions
                       transition
-                      className="absolute left-0 right-0 z-20 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-gray-200 bg-white p-1 shadow-xl transition duration-150 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0"
+                      className="absolute left-0 right-0 z-20 mt-1 max-h-72 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-lg transition duration-150 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0"
                     >
                       {filteredOptions.length ? (
                         filteredOptions.map((option) => (
@@ -294,41 +275,41 @@ function AdministrativaPickerDialog({
                             {({ focus, selected: isSelected }) => (
                               <div
                                 className={[
-                                  "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-700",
-                                  focus ? "bg-gray-50" : "bg-white",
+                                  "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground",
+                                  focus ? "bg-secondary" : "bg-popover",
                                 ].join(" ")}
                               >
                                 <div
                                   className={[
-                                    "flex h-5 w-5 items-center justify-center rounded border text-white transition",
-                                    isSelected ? "border-black bg-black" : "border-gray-300 bg-white",
+                                    "flex h-5 w-5 items-center justify-center rounded border text-primary-foreground transition",
+                                    isSelected ? "border-primary bg-primary" : "border-input bg-background",
                                   ].join(" ")}
                                 >
                                   {isSelected ? <Check size={12} /> : null}
                                 </div>
-                                <div className="font-medium text-gray-900">{option.nombre}</div>
+                                <div className="font-medium text-popover-foreground">{option.nombre}</div>
                               </div>
                             )}
                           </ComboboxOption>
                         ))
                       ) : (
-                        <div className="px-3 py-4 text-sm text-gray-500">No hay usuarios que coincidan con la busqueda.</div>
+                        <div className="px-3 py-3 text-sm text-muted-foreground">No hay usuarios que coincidan con la busqueda.</div>
                       )}
                     </ComboboxOptions>
                   </div>
                 </Combobox>
 
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                  Seleccion actual: <span className="font-medium text-gray-900">{selected?.nombre || "Sin ADM asignada"}</span>
+                <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-secondary-foreground">
+                  Seleccion actual: <span className="font-medium">{selected?.nombre || "Sin ADM asignada"}</span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-gray-200 px-5 py-4">
+              <div className="flex justify-end gap-2 border-t border-border px-3 py-2">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isPending}
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -336,7 +317,7 @@ function AdministrativaPickerDialog({
                   type="button"
                   onClick={submit}
                   disabled={isPending || !selected?._id || selected._id === currentAdministrativa?._id}
-                  className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Guardar ADM
                 </button>
@@ -386,7 +367,7 @@ function SsiVentasAdministrativaDialog({
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  const administrativas = administrativasResponse?.data ?? [];
+  const administrativas = useMemo(() => administrativasResponse?.data ?? [], [administrativasResponse?.data]);
   const detail = detailResponse?.data;
   const currentAdministrativaId = detail?.case.administrativaId ?? "";
   const selectedAdministrativa =
@@ -444,40 +425,44 @@ function SsiVentasDialog({
   });
 
   const detail = data?.data;
-  const administrativas = administrativasResponse?.data ?? [];
+  const administrativas = useMemo(() => administrativasResponse?.data ?? [], [administrativasResponse?.data]);
   const latestSurveyAttempt = useMemo(
     () => detail?.attempts.find((attempt) => attempt.result === "respondio" && attempt.surveyData) ?? null,
     [detail],
   );
 
   useEffect(() => {
-    if (!open) {
-      setNumericAnswers(createEmptyNumericAnswers());
-      setBinaryAnswers(createEmptyBinaryAnswers());
-      setSurveyObservaciones("");
+    const frame = window.requestAnimationFrame(() => {
+      if (!open) {
+        setNumericAnswers(createEmptyNumericAnswers());
+        setBinaryAnswers(createEmptyBinaryAnswers());
+        setSurveyObservaciones("");
+        setNoAnswerObservaciones("");
+        setHotAlert(false);
+        setAdministrativaId("");
+        setIsAdministrativaDialogOpen(false);
+        return;
+      }
+
+      if (latestSurveyAttempt?.surveyData) {
+        setNumericAnswers(latestSurveyAttempt.surveyData.numeric);
+        setBinaryAnswers(latestSurveyAttempt.surveyData.binary);
+        setSurveyObservaciones(latestSurveyAttempt.surveyData.observaciones ?? "");
+        setHotAlert(Boolean(latestSurveyAttempt.surveyData.hotAlert));
+      } else {
+        setNumericAnswers(createEmptyNumericAnswers());
+        setBinaryAnswers(createEmptyBinaryAnswers());
+        setSurveyObservaciones("");
+        setHotAlert(Boolean(detail?.case.hotAlert));
+      }
+
       setNoAnswerObservaciones("");
-      setHotAlert(false);
-      setAdministrativaId("");
+      setAdministrativaId(detail?.case.administrativaId ?? "");
       setIsAdministrativaDialogOpen(false);
-      return;
-    }
+    });
 
-    if (latestSurveyAttempt?.surveyData) {
-      setNumericAnswers(latestSurveyAttempt.surveyData.numeric);
-      setBinaryAnswers(latestSurveyAttempt.surveyData.binary);
-      setSurveyObservaciones(latestSurveyAttempt.surveyData.observaciones ?? "");
-      setHotAlert(Boolean(latestSurveyAttempt.surveyData.hotAlert));
-    } else {
-      setNumericAnswers(createEmptyNumericAnswers());
-      setBinaryAnswers(createEmptyBinaryAnswers());
-      setSurveyObservaciones("");
-      setHotAlert(Boolean(detail?.case.hotAlert));
-    }
-
-    setNoAnswerObservaciones("");
-    setAdministrativaId(detail?.case.administrativaId ?? "");
-    setIsAdministrativaDialogOpen(false);
-  }, [detail?.case.administrativaId, latestSurveyAttempt, open]);
+    return () => window.cancelAnimationFrame(frame);
+  }, [detail?.case.administrativaId, detail?.case.hotAlert, latestSurveyAttempt, open]);
 
   const surveyMutation = useMutation({
     mutationFn: (payload: SsiVentasSurveyPayload) => registerSsiVentasSurvey(operacion!, payload),
@@ -552,7 +537,7 @@ function SsiVentasDialog({
       <Dialog as="div" className="relative z-50" onClose={() => (isPending ? undefined : onClose())}>
           <Transition.Child
             as="div"
-            className="fixed inset-0 bg-black/40"
+            className="fixed inset-0 bg-foreground/40"
             enter="ease-out duration-200"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -562,7 +547,7 @@ function SsiVentasDialog({
           />
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
+            <div className="flex min-h-full items-center justify-center p-2">
               <Transition.Child
                 as="div"
                 enter="ease-out duration-200"
@@ -572,11 +557,11 @@ function SsiVentasDialog({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <Dialog.Panel className="font-preset w-full max-w-6xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Calidad</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Calidad</p>
+                    <Dialog.Title className="mt-0.5 text-lg font-semibold tracking-tight text-popover-foreground">
                       Gestion SSI Ventas
                     </Dialog.Title>
                   </div>
@@ -585,61 +570,61 @@ function SsiVentasDialog({
                     type="button"
                     onClick={onClose}
                     disabled={isPending}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 {isLoading ? (
-                  <div className="p-6 text-sm text-gray-500">Cargando detalle del caso...</div>
+                  <div className="p-3 text-sm text-muted-foreground">Cargando detalle del caso...</div>
                 ) : isError ? (
-                  <div className="p-6 text-sm text-red-600">
+                  <div className="p-3 text-sm text-destructive">
                     {error instanceof Error ? error.message : "No se pudo cargar el detalle SSI"}
                   </div>
                 ) : detail ? (
                   <div className="max-h-[85vh] overflow-y-auto">
-                    <section className="grid grid-cols-1 gap-4 border-b border-gray-200 bg-gray-50 px-6 py-5 lg:grid-cols-4">
-                      <article className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Operacion</div>
-                        <div className="mt-2 text-lg font-semibold text-gray-900">{detail.snapshot.operacion}</div>
-                        <div className="mt-1 text-sm text-gray-500">Entrega: {formatDate(detail.snapshot.fechaEntrega)}</div>
+                    <section className="grid grid-cols-1 border-b border-border lg:grid-cols-4">
+                      <article className="border-b border-r border-border px-3 py-2 lg:border-b-0">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Operacion</div>
+                        <div className="mt-1 text-lg font-semibold text-popover-foreground">{detail.snapshot.operacion}</div>
+                        <div className="mt-0.5 text-sm text-muted-foreground">Entrega: {formatDate(detail.snapshot.fechaEntrega)}</div>
                       </article>
-                      <article className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cliente</div>
-                        <div className="mt-2 text-sm font-semibold text-gray-900">{detail.snapshot.cliente || "-"}</div>
-                        <div className="mt-1 text-sm text-gray-500">Tel: {detail.snapshot.telefonoCliente || "-"}</div>
+                      <article className="border-b border-r border-border px-3 py-2 lg:border-b-0">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Cliente</div>
+                        <div className="mt-1 text-sm font-semibold text-popover-foreground">{detail.snapshot.cliente || "-"}</div>
+                        <div className="mt-0.5 text-sm text-muted-foreground">Tel: {detail.snapshot.telefonoCliente || "-"}</div>
                       </article>
-                      <article className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Vendedor</div>
-                        <div className="mt-2 text-sm font-semibold text-gray-900">{detail.snapshot.vendedor || "-"}</div>
-                        <div className="mt-1 text-sm text-gray-500">Cod: {detail.snapshot.vendedorCodigo ?? "-"}</div>
+                      <article className="border-b border-r border-border px-3 py-2 lg:border-b-0">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Vendedor</div>
+                        <div className="mt-1 text-sm font-semibold text-popover-foreground">{detail.snapshot.vendedor || "-"}</div>
+                        <div className="mt-0.5 text-sm text-muted-foreground">Cod: {detail.snapshot.vendedorCodigo ?? "-"}</div>
                       </article>
-                      <article className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Estado</div>
+                      <article className="px-3 py-2">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Estado</div>
                         <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusPillClass(detail.case.status)}`}>
+                          <span className={`inline-flex rounded-md px-2 py-0.5 text-xs font-medium ${getStatusPillClass(detail.case.status)}`}>
                             {getStatusLabel(detail.case.status)}
                           </span>
                           {detail.case.identificadorCliente ? (
                             <span
-                              className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getIdentificadorClienteClass(detail.case.identificadorCliente)}`}
+                              className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${getIdentificadorClienteClass(detail.case.identificadorCliente)}`}
                             >
                               {getIdentificadorClienteLabel(detail.case.identificadorCliente)}
                             </span>
                           ) : null}
                         </div>
-                        <div className="mt-1 text-sm text-gray-500">
+                        <div className="mt-0.5 text-sm text-muted-foreground">
                           Intentos: {detail.case.attemptsCount} | No atendio: {detail.case.noAnswerCount}/3
                         </div>
                       </article>
                     </section>
 
-                    <section className="border-b border-gray-200 px-6 py-4">
+                    <section className="border-b border-border px-3 py-2">
                       <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-700">ADM</div>
-                          <div className="mt-1 text-sm text-gray-500">
+                          <div className="text-sm font-medium text-foreground">ADM</div>
+                          <div className="mt-0.5 text-sm text-muted-foreground">
                             {selectedAdministrativa?.nombre || detail.case.administrativaNombre || "Sin ADM asignada"}
                           </div>
                         </div>
@@ -648,7 +633,7 @@ function SsiVentasDialog({
                             type="button"
                             onClick={() => setIsAdministrativaDialogOpen(true)}
                             disabled={isPending}
-                            className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <Pencil size={15} />
                             {selectedAdministrativa || detail.case.administrativaNombre ? "Editar ADM" : "Asignar ADM"}
@@ -657,20 +642,20 @@ function SsiVentasDialog({
                       </div>
                     </section>
 
-                    <div className="grid grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-[1.4fr_0.9fr]">
-                      <section className="space-y-6">
-                        <div className="rounded-2xl border border-gray-200 bg-white">
-                          <div className="border-b border-gray-200 px-5 py-4">
-                            <h2 className="text-base font-semibold tracking-tight text-gray-900">Encuesta Convencional</h2>
-                            <p className="mt-1 text-sm text-gray-500">
+                    <div className="grid grid-cols-1 gap-3 px-3 py-3 lg:grid-cols-[1.4fr_0.9fr]">
+                      <section className="space-y-3">
+                        <div className="border border-border">
+                          <div className="border-b border-border px-3 py-2">
+                            <h2 className="text-sm font-semibold text-popover-foreground">Encuesta Convencional</h2>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                               Completa la encuesta si el cliente atendio. Si el caso ya esta cerrado o tu rol no permite responder, se muestra en solo lectura.
                             </p>
                           </div>
 
-                          <div className="space-y-6 p-5">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div className="space-y-3 p-3">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                               {numericQuestions.map((question) => (
-                                <label key={question.key} className="space-y-2 text-sm font-medium text-gray-700">
+                                <label key={question.key} className="space-y-1 text-sm font-medium text-foreground">
                                   <span>{question.label}</span>
                                   <select
                                     value={numericAnswers[question.key]}
@@ -681,7 +666,7 @@ function SsiVentasDialog({
                                         [question.key]: Number(event.target.value),
                                       }))
                                     }
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:bg-gray-100"
+                                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:bg-muted"
                                   >
                                     {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
                                       <option key={value} value={value}>
@@ -693,9 +678,9 @@ function SsiVentasDialog({
                               ))}
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                               {binaryQuestions.map((question) => (
-                                <label key={question.key} className="space-y-2 text-sm font-medium text-gray-700">
+                                <label key={question.key} className="space-y-1 text-sm font-medium text-foreground">
                                   <span>{question.label}</span>
                                   <select
                                     value={binaryAnswers[question.key]}
@@ -706,7 +691,7 @@ function SsiVentasDialog({
                                         [question.key]: event.target.value as SsiVentasBinaryResponse,
                                       }))
                                     }
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:bg-gray-100"
+                                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:bg-muted"
                                   >
                                     {binaryOptions.map((option) => (
                                       <option key={option.value} value={option.value}>
@@ -718,25 +703,25 @@ function SsiVentasDialog({
                               ))}
                             </div>
 
-                            <label className="space-y-2 text-sm font-medium text-gray-700">
+                            <label className="space-y-1 text-sm font-medium text-foreground">
                               <span>Observaciones</span>
                               <textarea
                                 rows={4}
                                 value={surveyObservaciones}
                                 disabled={!canRespondSurvey || isPending}
                                 onChange={(event) => setSurveyObservaciones(event.target.value)}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:bg-gray-100"
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:bg-muted"
                                 placeholder="Comentario del cliente u observaciones del llamado"
                               />
                             </label>
 
-                            <label className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                            <label className="flex items-center gap-3 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground">
                               <input
                                 type="checkbox"
                                 checked={hotAlert}
                                 disabled={!canRespondSurvey || isPending}
                                 onChange={(event) => setHotAlert(event.target.checked)}
-                                className="h-4 w-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500 disabled:cursor-not-allowed"
+                                className="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:cursor-not-allowed"
                               />
                               <span>Hot Alert</span>
                             </label>
@@ -747,7 +732,7 @@ function SsiVentasDialog({
                                   type="button"
                                   onClick={submitSurvey}
                                   disabled={isPending}
-                                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   <BadgeCheck size={16} />
                                   Guardar encuesta
@@ -758,28 +743,28 @@ function SsiVentasDialog({
                         </div>
                       </section>
 
-                      <section className="space-y-6">
-                        <div className="rounded-2xl border border-gray-200 bg-white">
-                          <div className="border-b border-gray-200 px-5 py-4">
-                            <h2 className="text-base font-semibold tracking-tight text-gray-900">Intento no atendido</h2>
-                            <p className="mt-1 text-sm text-gray-500">
+                      <section className="space-y-3">
+                        <div className="border border-border">
+                          <div className="border-b border-border px-3 py-2">
+                            <h2 className="text-sm font-semibold text-popover-foreground">Intento no atendido</h2>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                               Cada marca de no atendio suma un intento. Al tercer intento fallido el caso se cierra automaticamente.
                             </p>
                           </div>
 
-                          <div className="space-y-4 p-5">
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                          <div className="space-y-3 p-3">
+                            <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-secondary-foreground">
                               Acumulado actual: <span className="font-semibold">{detail.case.noAnswerCount}/3</span>
                             </div>
 
-                            <label className="space-y-2 text-sm font-medium text-gray-700">
+                            <label className="space-y-1 text-sm font-medium text-foreground">
                               <span>Observaciones del intento</span>
                               <textarea
                                 rows={4}
                                 value={noAnswerObservaciones}
                                 disabled={!canRespondSurvey || isPending}
                                 onChange={(event) => setNoAnswerObservaciones(event.target.value)}
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:bg-gray-100"
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:bg-muted"
                                 placeholder="Ej: se llamo y no atendio"
                               />
                             </label>
@@ -789,68 +774,68 @@ function SsiVentasDialog({
                                 type="button"
                                 onClick={submitNoAnswer}
                                 disabled={isPending}
-                                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-100 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-secondary px-3 text-sm font-semibold text-secondary-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 <PhoneMissed size={16} />
                                 Marcar no atendio
                               </button>
                             ) : (
-                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                              <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
                                 {canManage ? "Tu rol no tiene permiso para registrar la encuesta o marcar no atendio." : "El caso ya esta cerrado. Solo se muestra el historial."}
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="rounded-2xl border border-gray-200 bg-white">
-                          <div className="border-b border-gray-200 px-5 py-4">
-                            <h2 className="text-base font-semibold tracking-tight text-gray-900">Historial de intentos</h2>
+                        <div className="border border-border">
+                          <div className="border-b border-border px-3 py-2">
+                            <h2 className="text-sm font-semibold text-popover-foreground">Historial de intentos</h2>
                           </div>
 
-                          <div className="space-y-3 p-5">
+                          <div className="space-y-2 p-3">
                             {detail.attempts.length ? (
                               detail.attempts.map((attempt) => (
-                                <article key={attempt._id} className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                                <article key={attempt._id} className="rounded-md border border-border bg-muted px-3 py-2">
                                   <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2">
                                       {attempt.result === "respondio" ? (
-                                        <PhoneOutgoing size={16} className="text-emerald-600" />
+                                        <PhoneOutgoing size={16} className="text-foreground" />
                                       ) : detail.case.status === "imposibleComunicarse" && attempt.attemptNumber === detail.case.attemptsCount ? (
-                                        <PhoneOff size={16} className="text-rose-600" />
+                                        <PhoneOff size={16} className="text-muted-foreground" />
                                       ) : (
-                                        <PhoneMissed size={16} className="text-amber-600" />
+                                        <PhoneMissed size={16} className="text-muted-foreground" />
                                       )}
-                                      <span className="text-sm font-semibold text-gray-900">
+                                      <span className="text-sm font-semibold text-popover-foreground">
                                         Intento {attempt.attemptNumber} - {attempt.result === "respondio" ? "Respondio" : "No atendio"}
                                       </span>
                                     </div>
-                                    <span className="text-xs text-gray-500">{formatDateTime(attempt.createdAt)}</span>
+                                    <span className="text-xs text-muted-foreground">{formatDateTime(attempt.createdAt)}</span>
                                   </div>
-                                  <p className="mt-2 text-sm text-gray-600">
-                                    Usuario: <span className="font-medium text-gray-800">{attempt.createdByName || "-"}</span>
+                                  <p className="mt-1 text-sm text-muted-foreground">
+                                    Usuario: <span className="font-medium text-popover-foreground">{attempt.createdByName || "-"}</span>
                                   </p>
                                   {attempt.identificadorCliente ? (
-                                    <p className="mt-1 text-sm text-gray-600">
+                                    <p className="mt-1 text-sm text-muted-foreground">
                                       Cliente:{" "}
                                       <span
-                                        className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${getIdentificadorClienteClass(attempt.identificadorCliente)}`}
+                                        className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${getIdentificadorClienteClass(attempt.identificadorCliente)}`}
                                       >
                                         {getIdentificadorClienteLabel(attempt.identificadorCliente)}
                                       </span>
                                     </p>
                                   ) : null}
-                                  <p className="mt-1 text-sm text-gray-600">
-                                    Observaciones: <span className="font-medium text-gray-800">{attempt.observaciones?.trim() || "-"}</span>
+                                  <p className="mt-1 text-sm text-muted-foreground">
+                                    Observaciones: <span className="font-medium text-popover-foreground">{attempt.observaciones?.trim() || "-"}</span>
                                   </p>
                                   {attempt.surveyData?.hotAlert ? (
-                                    <p className="mt-1 text-sm text-rose-700">
+                                    <p className="mt-1 text-sm text-secondary-foreground">
                                       Hot Alert: <span className="font-semibold">Si</span>
                                     </p>
                                   ) : null}
                                 </article>
                               ))
                             ) : (
-                              <div className="rounded-xl border border-dashed border-gray-300 px-4 py-8 text-center text-sm text-gray-500">
+                              <div className="rounded-md border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
                                 Todavia no hay intentos registrados para esta operacion.
                               </div>
                             )}
@@ -909,7 +894,7 @@ export default function SsiVentasView() {
     queryFn: () => getSsiVentasList({ page, limit: PAGE_SIZE, deliveryDate }),
   });
 
-  const items = data?.data ?? [];
+  const items = useMemo(() => data?.data ?? [], [data?.data]);
   const pendingItems = useMemo(() => items.filter((item) => item.status === "pendiente"), [items]);
   const inProgressItems = useMemo(() => items.filter((item) => item.status === "enGestion"), [items]);
   const unreachableItems = useMemo(() => items.filter((item) => item.status === "imposibleComunicarse"), [items]);
@@ -941,7 +926,7 @@ export default function SsiVentasView() {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="font-preset rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm">
         Cargando SSI Ventas...
       </div>
     );
@@ -949,19 +934,22 @@ export default function SsiVentasView() {
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset rounded-lg border border-destructive/30 bg-card p-3 text-destructive shadow-sm">
         {error instanceof Error ? error.message : "No se pudo cargar SSI Ventas"}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset space-y-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">SSI Ventas Convencional</h1>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex items-center gap-3 text-sm font-medium text-gray-700">
+          <div className="p-3">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Calidad</p>
+            <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-card-foreground">SSI Ventas Convencional</h1>
+          </div>
+          <div className="flex flex-col gap-2 p-3 pt-0 sm:flex-row sm:items-center lg:pt-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground">
               <span>Fecha</span>
               <input
                 type="date"
@@ -970,7 +958,7 @@ export default function SsiVentasView() {
                   setDeliveryDate(event.target.value);
                   setPage(1);
                 }}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
               />
             </label>
 
@@ -987,7 +975,7 @@ export default function SsiVentasView() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importMutation.isPending}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Upload size={15} />
                   {importMutation.isPending ? "Importando..." : "Importar CSV"}
@@ -999,48 +987,48 @@ export default function SsiVentasView() {
       </section>
 
       {importSummary ? (
-        <section className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900">Ultimo import</p>
-              <p className="truncate text-xs text-gray-500">{importResult?.message}</p>
+              <p className="text-sm font-semibold text-card-foreground">Ultimo import</p>
+              <p className="truncate text-xs text-muted-foreground">{importResult?.message}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 Leidas {importSummary.totalRead}
               </span>
-              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 Importadas {importSummary.imported}
               </span>
-              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 No respondidas {importSummary.ignoredNoRespondida}
               </span>
-              <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 No encontradas {importSummary.notFound}
               </span>
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 Conflictos {importSummary.conflicts}
               </span>
-              <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
+              <span className="inline-flex items-center rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
                 Errores {importSummary.validationErrors}
               </span>
             </div>
           </div>
 
           {importIssues.length ? (
-            <details className="mt-3 rounded-xl border border-gray-200 bg-gray-50">
-              <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-gray-800">
+            <details className="mt-2 rounded-md border border-border bg-muted">
+              <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-foreground">
                 Ver observaciones ({importIssues.length})
               </summary>
-              <div className="space-y-2 border-t border-gray-200 px-3 py-3">
+              <div className="space-y-2 border-t border-border px-3 py-2">
                 {importIssues.map((item) => (
-                  <div key={`${item.rowNumber}-${item.operacion ?? "sin-operacion"}`} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">
-                    <div className="font-medium text-gray-900">
+                  <div key={`${item.rowNumber}-${item.operacion ?? "sin-operacion"}`} className="rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+                    <div className="font-medium text-foreground">
                       Fila {item.rowNumber}
                       {item.operacion ? ` | Op. ${item.operacion}` : ""}
                       {item.contactoNombre ? ` | ${item.contactoNombre}` : ""}
                     </div>
-                    <div className="mt-1 text-gray-600">{item.message}</div>
+                    <div className="mt-1">{item.message}</div>
                   </div>
                 ))}
               </div>
@@ -1049,17 +1037,17 @@ export default function SsiVentasView() {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-2 border-b border-border px-3 py-2 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("pendientes")}
               className={[
-                "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+                "h-9 rounded-md px-3 text-sm font-semibold transition-colors",
                 activeTab === "pendientes"
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               Pendientes ({pendingItems.length})
@@ -1068,10 +1056,10 @@ export default function SsiVentasView() {
               type="button"
               onClick={() => setActiveTab("enGestion")}
               className={[
-                "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+                "h-9 rounded-md px-3 text-sm font-semibold transition-colors",
                 activeTab === "enGestion"
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               En gestion ({inProgressItems.length})
@@ -1080,10 +1068,10 @@ export default function SsiVentasView() {
               type="button"
               onClick={() => setActiveTab("imposibleComunicarse")}
               className={[
-                "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+                "h-9 rounded-md px-3 text-sm font-semibold transition-colors",
                 activeTab === "imposibleComunicarse"
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               Imposible ({unreachableItems.length})
@@ -1092,51 +1080,51 @@ export default function SsiVentasView() {
               type="button"
               onClick={() => setActiveTab("encuestadas")}
               className={[
-                "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+                "h-9 rounded-md px-3 text-sm font-semibold transition-colors",
                 activeTab === "encuestadas"
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               Encuestadas ({surveyedItems.length})
             </button>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-secondary-foreground">
             {visibleItems.length} visibles
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[1120px] w-full text-sm">
-            <thead className="bg-gray-50 text-[11px] uppercase tracking-[0.14em] text-gray-500">
+            <thead className="bg-muted text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               <tr>
-                <th className="px-3 py-2.5 text-left">Accion</th>
-                <th className="px-3 py-2.5 text-left">Estado</th>
-                <th className="px-3 py-2.5 text-left">Intentos</th>
-                <th className="px-3 py-2.5 text-left">Operacion</th>
-                <th className="px-3 py-2.5 text-left">F. Entrega</th>
-                <th className="px-3 py-2.5 text-left">ADM</th>
-                <th className="px-3 py-2.5 text-left">Cliente</th>
-                <th className="px-3 py-2.5 text-left">Telefono</th>
-                <th className="px-3 py-2.5 text-left">Vendedor</th>
-                <th className="px-3 py-2.5 text-left">Modelo</th>
+                <th className="px-3 py-2 text-left">Accion</th>
+                <th className="px-3 py-2 text-left">Estado</th>
+                <th className="px-3 py-2 text-left">Intentos</th>
+                <th className="px-3 py-2 text-left">Operacion</th>
+                <th className="px-3 py-2 text-left">F. Entrega</th>
+                <th className="px-3 py-2 text-left">ADM</th>
+                <th className="px-3 py-2 text-left">Cliente</th>
+                <th className="px-3 py-2 text-left">Telefono</th>
+                <th className="px-3 py-2 text-left">Vendedor</th>
+                <th className="px-3 py-2 text-left">Modelo</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {visibleItems.map((item) => (
                 <tr
                   key={item.operacion}
                   className={[
                     "transition-colors",
-                    item.hotAlert ? "bg-rose-50 hover:bg-rose-100" : "hover:bg-gray-50",
+                    item.hotAlert ? "bg-secondary hover:bg-muted" : "hover:bg-muted",
                   ].join(" ")}
                 >
                   <td className="px-3 py-2">
                     <button
                       type="button"
                       onClick={() => setSelectedOperacion(item.operacion)}
-                      className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-1.5 text-white transition hover:bg-emerald-700"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition hover:bg-primary/90"
                       title={item.canManage ? "Gestionar llamada" : "Ver detalle del caso"}
                     >
                       <PhoneCall size={15} />
@@ -1145,37 +1133,37 @@ export default function SsiVentasView() {
                   <td className="px-3 py-2">
                     <span
                       title={getStatusLabel(item.status)}
-                      className={`inline-flex items-center justify-center rounded-full p-1 ${getStatusPillClass(item.status)}`}
+                      className={`inline-flex items-center justify-center rounded-md p-1 ${getStatusPillClass(item.status)}`}
                     >
                       <StatusIcon status={item.status} />
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-gray-700">
+                  <td className="px-3 py-1.5 text-muted-foreground">
                     {item.status === "enGestion" || item.status === "imposibleComunicarse"
                       ? item.attemptProgressLabel
                       : item.attemptsCount}
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2 whitespace-nowrap">
-                      <span className="font-semibold text-gray-900">{item.operacion}</span>
+                      <span className="font-semibold text-card-foreground">{item.operacion}</span>
                       {item.identificadorCliente ? (
                         <span
-                          className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getIdentificadorClienteClass(item.identificadorCliente)}`}
+                          className={`inline-flex shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${getIdentificadorClienteClass(item.identificadorCliente)}`}
                         >
                           {getIdentificadorClienteLabel(item.identificadorCliente)}
                         </span>
                       ) : null}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-gray-700">{formatDate(item.fechaEntrega)}</td>
-                  <td className="px-3 py-2 text-gray-700">
+                  <td className="px-3 py-1.5 text-muted-foreground">{formatDate(item.fechaEntrega)}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span className="max-w-[120px] truncate">{item.administrativaNombre || "-"}</span>
                       {canEditAdministrativa ? (
                         <button
                           type="button"
                           onClick={() => setSelectedAdministrativaOperacion(item.operacion)}
-                          className="inline-flex items-center justify-center rounded-full border border-gray-300 bg-white p-1.5 text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                           title={item.administrativaNombre ? "Editar ADM" : "Asignar ADM"}
                         >
                           <Pencil size={13} />
@@ -1183,16 +1171,16 @@ export default function SsiVentasView() {
                       ) : null}
                     </div>
                   </td>
-                  <td className="max-w-[220px] truncate px-3 py-2 text-gray-700">{item.cliente || "-"}</td>
-                  <td className="px-3 py-2 text-gray-700">{item.telefonoCliente || "-"}</td>
-                  <td className="max-w-[180px] truncate px-3 py-2 text-gray-700">{item.vendedor || "-"}</td>
-                  <td className="px-3 py-2 text-gray-700">{item.modelo || "-"}</td>
+                  <td className="max-w-[220px] truncate px-3 py-1.5 text-muted-foreground">{item.cliente || "-"}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">{item.telefonoCliente || "-"}</td>
+                  <td className="max-w-[180px] truncate px-3 py-1.5 text-muted-foreground">{item.vendedor || "-"}</td>
+                  <td className="px-3 py-1.5 text-muted-foreground">{item.modelo || "-"}</td>
                 </tr>
               ))}
 
               {!visibleItems.length ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay registros en esta vista.
                   </td>
                 </tr>
@@ -1201,17 +1189,17 @@ export default function SsiVentasView() {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col gap-2 border-t border-border px-3 py-2 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm text-muted-foreground">
             Pagina {pagination?.page ?? 1} de {totalPages}
           </p>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setPage((current) => Math.max(current - 1, 1))}
               disabled={page <= 1}
-              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               Anterior
             </button>
@@ -1220,7 +1208,7 @@ export default function SsiVentasView() {
               type="button"
               onClick={() => setPage((current) => Math.min(current + 1, totalPages))}
               disabled={page >= totalPages}
-              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               Siguiente
             </button>

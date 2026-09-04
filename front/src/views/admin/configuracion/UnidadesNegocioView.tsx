@@ -152,29 +152,29 @@ export default function UnidadesNegocioView() {
   };
 
   if (isLoading) {
-    return <div className="w-full px-4 py-6">Cargando unidades de negocio...</div>;
+    return <div className="font-preset w-full bg-muted px-2 py-3 text-sm text-muted-foreground">Cargando unidades de negocio...</div>;
   }
 
   if (isError) {
-    return <div className="w-full px-4 py-6 text-red-600">Error al cargar unidades de negocio.</div>;
+    return <div className="font-preset w-full bg-muted px-2 py-3 text-sm text-destructive">Error al cargar unidades de negocio.</div>;
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administracion</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Unidades de negocio</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Administracion</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Unidades de negocio</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Administra las unidades que segmentan usuarios, puestos y agenda comercial.
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={handleAdd}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 transition hover:bg-gray-50"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
           >
             <Plus size={14} />
             Agregar unidad
@@ -182,23 +182,23 @@ export default function UnidadesNegocioView() {
 
           <Link
             to={paths.admin.configuracion}
-            className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-gray-900"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:bg-primary/90"
           >
             Volver
           </Link>
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="space-y-4 p-6">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="space-y-3 px-3 py-3">
           {sortedDrafts.length ? (
             sortedDrafts.map((draft, index) => (
               <article
                 key={draft.key}
-                className="grid grid-cols-1 gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 lg:grid-cols-[minmax(0,1fr)_140px_140px_auto]"
+                className="grid grid-cols-1 gap-2 border-t border-border pt-3 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,1fr)_140px_140px_auto]"
               >
                 <div className="space-y-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Nombre
                   </label>
                   <input
@@ -207,13 +207,13 @@ export default function UnidadesNegocioView() {
                     onChange={(event) =>
                       updateDraft(draft.key, (current) => ({ ...current, nombre: event.target.value }))
                     }
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                     placeholder="Ej: Plan NQN"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Orden
                   </label>
                   <div className="flex gap-2">
@@ -221,7 +221,7 @@ export default function UnidadesNegocioView() {
                       type="button"
                       onClick={() => moveDraft(index, -1)}
                       disabled={index === 0}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+                      className="h-9 rounded-md border border-border bg-background px-2 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-50"
                     >
                       Subir
                     </button>
@@ -229,7 +229,7 @@ export default function UnidadesNegocioView() {
                       type="button"
                       onClick={() => moveDraft(index, 1)}
                       disabled={index === sortedDrafts.length - 1}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+                      className="h-9 rounded-md border border-border bg-background px-2 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:opacity-50"
                     >
                       Bajar
                     </button>
@@ -237,17 +237,17 @@ export default function UnidadesNegocioView() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Estado
                   </label>
-                  <label className="inline-flex h-[42px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700">
+                  <label className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground">
                     <input
                       type="checkbox"
                       checked={draft.activo}
                       onChange={(event) =>
                         updateDraft(draft.key, (current) => ({ ...current, activo: event.target.checked }))
                       }
-                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                      className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                     />
                     Activa
                   </label>
@@ -258,7 +258,7 @@ export default function UnidadesNegocioView() {
                     type="button"
                     onClick={() => handleSave(draft)}
                     disabled={createMutation.isPending || updateMutation.isPending}
-                    className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:opacity-60"
+                    className="h-9 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
                   >
                     Guardar
                   </button>
@@ -267,7 +267,7 @@ export default function UnidadesNegocioView() {
                     type="button"
                     onClick={() => handleDelete(draft)}
                     disabled={deleteMutation.isPending}
-                    className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                    className="inline-flex h-9 items-center gap-2 rounded-md border border-destructive/30 bg-background px-3 text-sm font-semibold text-destructive transition hover:bg-muted disabled:opacity-60"
                   >
                     <Trash2 size={14} />
                     {draft._id ? "Desactivar" : "Quitar"}
@@ -276,7 +276,7 @@ export default function UnidadesNegocioView() {
               </article>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-sm text-gray-500">
+            <div className="border-y border-dashed border-border px-3 py-6 text-sm text-muted-foreground">
               No hay unidades de negocio cargadas todavia.
             </div>
           )}

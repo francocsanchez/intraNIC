@@ -2,7 +2,15 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { BarChart3, ChartColumn, Rows3, ShieldAlert, TableProperties, Trophy, UserRound } from "lucide-react";
+import {
+  BarChart3,
+  ChartColumn,
+  Rows3,
+  ShieldAlert,
+  TableProperties,
+  Trophy,
+  UserRound,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AnalisisLayout() {
@@ -14,35 +22,55 @@ export default function AnalisisLayout() {
       label: "Operaciones",
       to: paths.analisis.operaciones,
       icon: ChartColumn,
-      visible: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones),
+      visible: hasModulePathAccess(
+        user,
+        "operaciones",
+        paths.analisis.operaciones,
+      ),
       active: pathname === paths.analisis.operaciones,
     },
     {
       label: "Central de Deudores",
       to: paths.analisis.centralDeudores,
       icon: ShieldAlert,
-      visible: hasModulePathAccess(user, "centralDeudores", paths.analisis.centralDeudores),
+      visible: hasModulePathAccess(
+        user,
+        "centralDeudores",
+        paths.analisis.centralDeudores,
+      ),
       active: pathname === paths.analisis.centralDeudores,
     },
     {
       label: "Analisis Operaciones",
       to: paths.analisis.analisisOperaciones,
       icon: Rows3,
-      visible: hasModulePathAccess(user, "analisisOperaciones", paths.analisis.analisisOperaciones),
+      visible: hasModulePathAccess(
+        user,
+        "analisisOperaciones",
+        paths.analisis.analisisOperaciones,
+      ),
       active: pathname === paths.analisis.analisisOperaciones,
     },
     {
       label: "Analisis Vendedor",
       to: paths.analisis.vendedor,
       icon: UserRound,
-      visible: hasModulePathAccess(user, "analisisVendedor", paths.analisis.vendedor),
+      visible: hasModulePathAccess(
+        user,
+        "analisisVendedor",
+        paths.analisis.vendedor,
+      ),
       active: pathname === paths.analisis.vendedor,
     },
     {
       label: "Saldo de operacion",
       to: paths.analisis.saldoOperacion,
       icon: TableProperties,
-      visible: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion),
+      visible: hasModulePathAccess(
+        user,
+        "saldoOperacion",
+        paths.analisis.saldoOperacion,
+      ),
       active: pathname === paths.analisis.saldoOperacion,
     },
     {
@@ -56,15 +84,19 @@ export default function AnalisisLayout() {
       label: "Promedio",
       to: paths.convencional.promedio,
       icon: BarChart3,
-      visible: hasModulePathAccess(user, "promedio", paths.convencional.promedio),
+      visible: hasModulePathAccess(
+        user,
+        "promedio",
+        paths.convencional.promedio,
+      ),
       active: pathname === paths.convencional.promedio,
     },
   ].filter((item) => item.visible);
 
   return (
     <BaseAppLayout
-      footerLeft="Analisis"
-      footerRight="Franco Sanchez"
+      footerLeft="IntraNIC - Uso interno Nippon Car"
+      footerRight="Desarrollado por Franco Sanchez"
       centerContent={
         <>
           {navItems.map((item) => (
@@ -72,8 +104,10 @@ export default function AnalisisLayout() {
               key={item.to}
               to={item.to}
               className={[
-                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
-                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                item.active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               ].join(" ")}
             >
               <item.icon size={16} strokeWidth={1.75} />
@@ -82,7 +116,8 @@ export default function AnalisisLayout() {
           ))}
         </>
       }
-      mainClassName="px-4 py-6"
+      mainClassName="px-2 py-3"
+      presetNavigation
     />
   );
 }

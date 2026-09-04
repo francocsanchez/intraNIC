@@ -1,9 +1,18 @@
-import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+} from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getVendedoresNic } from "@/api/dms/dmsAPI";
 import { getSucursalesEntrega } from "@/api/entregasAPI";
 import { getUnidadesNegocio } from "@/api/unidadNegocioAPI";
-import { moduleLabels, moduleSections, type ModuleKey } from "@/constants/modules";
+import {
+  moduleLabels,
+  moduleSections,
+  type ModuleKey,
+} from "@/constants/modules";
 import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
 import type { SucursalEntrega, UnidadNegocio } from "@/types/index";
 
@@ -34,18 +43,25 @@ const roleOptions = [
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="text-xs font-medium text-red-600">{message}</p>;
+  return <p className="text-xs font-medium text-destructive">{message}</p>;
 }
 
-export default function UsuarioForm({ register, control, errors, showPasswordField = false }: UsuarioFormProps) {
+export default function UsuarioForm({
+  register,
+  control,
+  errors,
+  showPasswordField = false,
+}: UsuarioFormProps) {
   const { data: vendedoresResponse, isLoading } = useQuery({
     queryKey: ["vendedores"],
     queryFn: getVendedoresNic,
   });
-  const { data: sucursalesResponse, isLoading: isLoadingSucursales } = useQuery({
-    queryKey: ["entregas", "sucursales"],
-    queryFn: getSucursalesEntrega,
-  });
+  const { data: sucursalesResponse, isLoading: isLoadingSucursales } = useQuery(
+    {
+      queryKey: ["entregas", "sucursales"],
+      queryFn: getSucursalesEntrega,
+    },
+  );
   const { data: unidadesResponse, isLoading: isLoadingUnidades } = useQuery({
     queryKey: ["unidades-negocio", "usuarios-form"],
     queryFn: () => getUnidadesNegocio(true),
@@ -59,42 +75,53 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
     <div className="space-y-4">
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-2">
-          <label htmlFor="name" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label
+            htmlFor="name"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
             Nombre
           </label>
           <input
             id="name"
             type="text"
             placeholder="Ej: Franco"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("name", { required: "El nombre es obligatorio" })}
           />
           <FieldError message={errors.name?.message} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="lastName" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label
+            htmlFor="lastName"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
             Apellido
           </label>
           <input
             id="lastName"
             type="text"
             placeholder="Ej: Sanchez"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
-            {...register("lastName", { required: "El apellido es obligatorio" })}
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+            {...register("lastName", {
+              required: "El apellido es obligatorio",
+            })}
           />
           <FieldError message={errors.lastName?.message} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label
+            htmlFor="email"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
             Correo electronico
           </label>
           <input
             id="email"
             type="email"
             placeholder="usuario@nipponcar.com.ar"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("email", {
               required: "El email es obligatorio",
               pattern: { value: /\S+@\S+\.\S+/, message: "Email no valido" },
@@ -112,20 +139,26 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
           </label>
           <select
             id="unidadNegocio"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("unidadNegocio")}
           >
             <option value="">-- Sin asignar --</option>
             {unidadesNegocio.map((unidad) => (
               <option key={unidad._id} value={unidad._id}>
-                {unidad.nombre}{unidad.activo ? "" : " (Inactiva)"}
+                {unidad.nombre}
+                {unidad.activo ? "" : " (Inactiva)"}
               </option>
             ))}
           </select>
           <p className="text-xs text-gray-500">
-            Segmenta la agenda comercial y agrupa usuarios sin reemplazar el campo tecnico `company`.
+            Segmenta la agenda comercial y agrupa usuarios sin reemplazar el
+            campo tecnico `company`.
           </p>
-          {isLoadingUnidades ? <p className="text-xs text-gray-500">Cargando unidades de negocio...</p> : null}
+          {isLoadingUnidades ? (
+            <p className="text-xs text-gray-500">
+              Cargando unidades de negocio...
+            </p>
+          ) : null}
           <FieldError message={errors.unidadNegocio?.message} />
         </div>
 
@@ -138,25 +171,34 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
           </label>
           <select
             id="sucursalPredeterminada"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("sucursalPredeterminada")}
           >
             <option value="">-- Sin asignar --</option>
             {sucursales.map((sucursal) => (
               <option key={sucursal._id} value={sucursal._id}>
-                {sucursal.nombre}{sucursal.activa ? "" : " (Inactiva)"}
+                {sucursal.nombre}
+                {sucursal.activa ? "" : " (Inactiva)"}
               </option>
             ))}
           </select>
           <p className="text-xs text-gray-500">
-            Se usa como sucursal inicial en entregas y pendientes, pero no limita el acceso a otras sucursales.
+            Se usa como sucursal inicial en entregas y pendientes, pero no
+            limita el acceso a otras sucursales.
           </p>
-          {isLoadingSucursales ? <p className="text-xs text-gray-500">Cargando sucursales de entrega...</p> : null}
+          {isLoadingSucursales ? (
+            <p className="text-xs text-gray-500">
+              Cargando sucursales de entrega...
+            </p>
+          ) : null}
           <FieldError message={errors.sucursalPredeterminada?.message} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="celular" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label
+            htmlFor="celular"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
             Celular
           </label>
           <input
@@ -164,35 +206,45 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             type="text"
             inputMode="numeric"
             placeholder="Ej: 1123456789"
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("celular", {
-              setValueAs: (value) => (typeof value === "string" ? value.replace(/\D/g, "") : ""),
+              setValueAs: (value) =>
+                typeof value === "string" ? value.replace(/\D/g, "") : "",
               validate: (value) => {
                 if (!value) return true;
-                if (!/^\d+$/.test(value)) return "El celular solo puede contener numeros";
+                if (!/^\d+$/.test(value))
+                  return "El celular solo puede contener numeros";
                 if (value.startsWith("0")) return "No ingreses el 0 inicial";
-                if (value.startsWith("549")) return "No ingreses el prefijo +549";
-                if (value.startsWith("54")) return "No ingreses el codigo de pais 54";
+                if (value.startsWith("549"))
+                  return "No ingreses el prefijo +549";
+                if (value.startsWith("54"))
+                  return "No ingreses el codigo de pais 54";
                 if (value.startsWith("15")) return "No ingreses el 15";
-                if (value.length < 8 || value.length > 13) return "Ingresa entre 8 y 13 digitos";
+                if (value.length < 8 || value.length > 13)
+                  return "Ingresa entre 8 y 13 digitos";
                 return true;
               },
             })}
           />
-          <p className="text-xs text-gray-500">Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.</p>
+          <p className="text-xs text-gray-500">
+            Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.
+          </p>
           <FieldError message={errors.celular?.message} />
         </div>
 
         {showPasswordField ? (
           <div className="space-y-2">
-            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <label
+              htmlFor="password"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            >
               Contrasena inicial
             </label>
             <input
               id="password"
               type="password"
               placeholder="Minimo 8 caracteres"
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
               {...register("password", {
                 required: "La contrasena es obligatoria",
                 minLength: {
@@ -201,7 +253,10 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
                 },
               })}
             />
-            <p className="text-xs text-gray-500">Esta sera la contrasena con la que el usuario ingresara por primera vez.</p>
+            <p className="text-xs text-gray-500">
+              Esta sera la contrasena con la que el usuario ingresara por
+              primera vez.
+            </p>
             <FieldError message={errors.password?.message} />
           </div>
         ) : null}
@@ -209,14 +264,23 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
 
       <section className="border-t border-border pt-3">
         <div className="pb-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modulos</div>
-          <div className="mt-1 text-xs text-muted-foreground">Marca los modulos que queres habilitar para este usuario.</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Modulos
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Marca los modulos que queres habilitar para este usuario.
+          </div>
         </div>
 
         <div className="space-y-3">
           {moduleSections.map((section) => (
-            <div key={section.title} className="border-t border-border pt-3 first:border-t-0 first:pt-1">
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{section.title}</div>
+            <div
+              key={section.title}
+              className="border-t border-border pt-3 first:border-t-0 first:pt-1"
+            >
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {section.title}
+              </div>
 
               <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
                 {section.modules.map((moduleKey) => (
@@ -226,13 +290,17 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
                     name={`modules.${moduleKey}` as `modules.${ModuleKey}`}
                     render={({ field }) => (
                       <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2 transition-colors hover:bg-muted">
-                        <span className="text-xs font-medium leading-4 text-foreground">{moduleLabels[moduleKey as ModuleKey]}</span>
+                        <span className="text-xs font-medium leading-4 text-foreground">
+                          {moduleLabels[moduleKey as ModuleKey]}
+                        </span>
 
                         <input
                           type="checkbox"
                           checked={Number(field.value ?? 0) === 1}
-                          onChange={(event) => field.onChange(event.target.checked ? 1 : 0)}
-                          className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                          onChange={(event) =>
+                            field.onChange(event.target.checked ? 1 : 0)
+                          }
+                          className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                         />
                       </label>
                     )}
@@ -246,13 +314,16 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="role" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label
+            htmlFor="role"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+          >
             Roles
           </label>
           <select
             id="role"
             multiple
-            className="min-h-[120px] w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+            className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             {...register("role", {
               required: "Debe seleccionar al menos un rol",
             })}
@@ -264,7 +335,9 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             ))}
           </select>
           <FieldError message={errors.role?.message as string | undefined} />
-          <p className="text-xs text-gray-500">Usa Ctrl/Cmd + click para seleccionar multiples opciones.</p>
+          <p className="text-xs text-gray-500">
+            Usa Ctrl/Cmd + click para seleccionar multiples opciones.
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -277,7 +350,7 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
             </label>
             <select
               id="numberSaleNic"
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
               {...register("numberSaleNic", { valueAsNumber: true })}
             >
               <option value={0}>-- Selecciona un vendedor --</option>
@@ -287,7 +360,9 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
                 </option>
               ))}
             </select>
-            {isLoading ? <p className="text-xs text-gray-500">Cargando vendedores...</p> : null}
+            {isLoading ? (
+              <p className="text-xs text-gray-500">Cargando vendedores...</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -301,7 +376,7 @@ export default function UsuarioForm({ register, control, errors, showPasswordFie
               id="numberSaleLiess"
               type="number"
               placeholder="Ej: 0"
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
               {...register("numberSaleLiess", { valueAsNumber: true })}
             />
           </div>

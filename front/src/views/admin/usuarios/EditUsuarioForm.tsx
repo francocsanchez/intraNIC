@@ -1,6 +1,10 @@
 import { updateUsuarioById } from "@/api/usuarioAPI";
 import UsuarioForm from "@/components/usuario/UsuarioForm";
-import { getDefaultModules, normalizeModules, type UserModules } from "@/constants/modules";
+import {
+  getDefaultModules,
+  normalizeModules,
+  type UserModules,
+} from "@/constants/modules";
 import { paths } from "@/routes/paths";
 import type { SucursalEntrega, UnidadNegocio } from "@/types/index";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +33,10 @@ type EditUsuarioFormProps = {
   usuarioId: Usuario["_id"];
 };
 
-export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProps) {
+export default function EditUsuarioForm({
+  data,
+  usuarioId,
+}: EditUsuarioFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -77,8 +84,12 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
     <div className="font-preset w-full space-y-3 px-2 py-3">
       <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Editar usuario</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Administracion
+          </p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Editar usuario
+          </h1>
         </div>
 
         <Link
@@ -91,25 +102,37 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
 
       <section className="grid grid-cols-1 gap-1 border-y border-border bg-card md:grid-cols-4">
         <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Usuario</p>
-          <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Usuario
+          </p>
+          <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
             {data.lastName}, {data.name}
           </p>
         </article>
 
         <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Estado</p>
-          <p className="mt-2 text-lg font-semibold tracking-tight text-gray-900">{data.enable ? "Activo" : "Inactivo"}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Estado
+          </p>
+          <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+            {data.enable ? "Activo" : "Inactivo"}
+          </p>
         </article>
 
         <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Email</p>
-          <p className="mt-2 break-all text-sm font-medium text-gray-900">{data.email}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Email
+          </p>
+          <p className="mt-1 break-all text-sm font-medium text-foreground">
+            {data.email}
+          </p>
         </article>
 
         <article className="px-3 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursal predeterminada</p>
-          <p className="mt-2 text-sm font-medium text-gray-900">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Sucursal predeterminada
+          </p>
+          <p className="mt-1 text-sm font-medium text-foreground">
             {data.sucursalPredeterminada?.nombre ?? "Sin asignar"}
           </p>
         </article>
@@ -121,9 +144,12 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         noValidate
       >
         <div className="border-b border-border px-3 py-3">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Datos del usuario</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Actualiza los datos, la unidad de negocio, la sucursal predeterminada y los modulos habilitados.
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
+            Datos del usuario
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Actualiza los datos, la unidad de negocio, la sucursal
+            predeterminada y los modulos habilitados.
           </p>
         </div>
 
@@ -132,7 +158,9 @@ export default function EditUsuarioForm({ data, usuarioId }: EditUsuarioFormProp
         </div>
 
         <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-500">Revisa los datos antes de guardar la edicion.</div>
+          <div className="text-sm text-muted-foreground">
+            Revisa los datos antes de guardar la edicion.
+          </div>
 
           <input
             type="submit"

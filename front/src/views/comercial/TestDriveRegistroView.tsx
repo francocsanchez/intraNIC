@@ -38,7 +38,7 @@ type TestDriveRegistroViewProps = {
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="text-xs font-medium text-red-600">{message}</p>;
+  return <p className="text-xs font-medium text-destructive">{message}</p>;
 }
 
 function formatDateTime(value: string) {
@@ -201,11 +201,11 @@ function RegistroModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-foreground/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-2">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -215,11 +215,11 @@ function RegistroModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <Dialog.Panel className="font-preset w-full max-w-3xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">{sectionLabel}</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{sectionLabel}</p>
+                    <Dialog.Title className="mt-0.5 text-lg font-semibold tracking-tight text-popover-foreground">
                       {isEditing ? `Editar ${title}` : `Nuevo ${title}`}
                     </Dialog.Title>
                   </div>
@@ -228,21 +228,21 @@ function RegistroModal({
                     type="button"
                     onClick={onClose}
                     disabled={isPending}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit(submitHandler)} noValidate>
-                  <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
-                    <div className="space-y-2 md:col-span-2">
-                      <label htmlFor="unidadId" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
+                    <div className="space-y-1 md:col-span-2">
+                      <label htmlFor="unidadId" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Dominio
                       </label>
                       <select
                         id="unidadId"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("unidadId", { required: "La unidad es obligatoria" })}
                       >
                         <option value="">-- Selecciona una unidad --</option>
@@ -255,112 +255,112 @@ function RegistroModal({
                       <FieldError message={errors.unidadId?.message} />
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="fechaRetiro" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <div className="space-y-1">
+                      <label htmlFor="fechaRetiro" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Fecha de retiro
                       </label>
                       <input
                         id="fechaRetiro"
                         type="date"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("fechaRetiro", { required: "La fecha de retiro es obligatoria" })}
                       />
                       <FieldError message={errors.fechaRetiro?.message} />
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="horaRetiro" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <div className="space-y-1">
+                      <label htmlFor="horaRetiro" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Hora de retiro
                       </label>
                       <input
                         id="horaRetiro"
                         type="time"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("horaRetiro", { required: "La hora de retiro es obligatoria" })}
                       />
                       <FieldError message={errors.horaRetiro?.message} />
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="fechaRegreso" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <div className="space-y-1">
+                      <label htmlFor="fechaRegreso" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Fecha de regreso
                       </label>
                       <input
                         id="fechaRegreso"
                         type="date"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("fechaRegreso", { required: "La fecha de regreso es obligatoria" })}
                       />
                       <FieldError message={errors.fechaRegreso?.message} />
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="horaRegreso" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <div className="space-y-1">
+                      <label htmlFor="horaRegreso" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Hora de regreso
                       </label>
                       <input
                         id="horaRegreso"
                         type="time"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("horaRegreso", { required: "La hora de regreso es obligatoria" })}
                       />
                       <FieldError message={errors.horaRegreso?.message} />
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                      <label htmlFor="observacion" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <div className="space-y-1 md:col-span-2">
+                      <label htmlFor="observacion" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Observacion
                       </label>
                       <textarea
                         id="observacion"
                         rows={3}
                         placeholder="Ej: Reserva para cliente sin usuario, nombre y detalle del turno"
-                        className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+                        className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("observacion")}
                       />
-                      <p className="text-xs text-gray-500">Campo opcional para aclaraciones del cliente o la reserva.</p>
+                      <p className="text-xs text-muted-foreground">Campo opcional para aclaraciones del cliente o la reserva.</p>
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-1 md:col-span-2">
                       <label
                         className={[
-                          "flex items-center justify-between gap-3 rounded-xl border px-4 py-3",
+                          "flex items-center justify-between gap-3 rounded-md border px-3 py-2",
                           canRequestStarlink
-                            ? "border-gray-200 bg-gray-50 hover:bg-gray-100"
-                            : "border-gray-200 bg-gray-100 opacity-70",
+                            ? "border-border bg-secondary hover:bg-muted"
+                            : "border-border bg-muted opacity-70",
                         ].join(" ")}
                       >
-                        <span className="text-sm font-medium text-gray-800">StarLink</span>
+                        <span className="text-sm font-medium text-foreground">StarLink</span>
                         <div className="flex items-center gap-3">
                           {!canRequestStarlink ? (
-                            <span className="text-xs font-medium text-gray-500">No disponible en esta unidad</span>
+                            <span className="text-xs font-medium text-muted-foreground">No disponible en esta unidad</span>
                           ) : null}
                           <input
                             type="checkbox"
                             disabled={!canRequestStarlink}
                             {...register("starlink")}
-                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </div>
                       </label>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-gray-500">La unidad quedara bloqueada durante todo el rango reservado.</div>
-                    <div className="flex gap-3">
+                  <div className="flex flex-col gap-2 border-t border-border bg-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">La unidad quedara bloqueada durante todo el rango reservado.</div>
+                    <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={onClose}
                         disabled={isPending}
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
                         disabled={isPending}
-                        className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear registro"}
                       </button>
@@ -428,8 +428,8 @@ export default function TestDriveRegistroView({
 
   if (isLoading) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm">
           Cargando registros de TestDrive...
         </div>
       </div>
@@ -438,8 +438,8 @@ export default function TestDriveRegistroView({
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 text-destructive shadow-sm">
           {error instanceof Error ? error.message : "Error al cargar los registros de TestDrive"}
         </div>
       </div>
@@ -447,21 +447,21 @@ export default function TestDriveRegistroView({
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">{sectionLabel}</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{title}</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
+          <div className="p-3">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{sectionLabel}</p>
+            <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-card-foreground">{title}</h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Agenda solicitudes de test drive y bloquea la unidad durante todo el periodo reservado.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 p-3 pt-0 lg:pt-3">
             <Link
               to={calendarPath}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
             >
               Mostrar calendario
             </Link>
@@ -469,49 +469,48 @@ export default function TestDriveRegistroView({
             <button
               type="button"
               onClick={handleCreate}
-              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               <Plus size={16} />
               Nuevo registro
             </button>
           </div>
         </div>
+        <div className="grid grid-cols-2 border-t border-border">
+          <div className="border-r border-border px-3 py-2">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Solicitudes</p>
+            <p className="mt-1 text-lg font-semibold text-card-foreground">{items.length}</p>
+          </div>
+          <div className="px-3 py-2">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Con StarLink</p>
+            <p className="mt-1 text-lg font-semibold text-card-foreground">{items.filter((item) => item.starlink).length}</p>
+          </div>
+        </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Solicitudes</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{items.length}</p>
-        </article>
-        <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Con StarLink</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{items.filter((item) => item.starlink).length}</p>
-        </article>
-      </section>
-
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Listado de solicitudes</h2>
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-2">
+          <h2 className="text-sm font-semibold text-card-foreground">Listado de solicitudes</h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[1180px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 text-left">Fecha solicitado</th>
-                <th className="px-4 py-3 text-left">Dominio</th>
-                <th className="px-4 py-3 text-left">Fecha retiro</th>
-                <th className="px-4 py-3 text-left">Hora de retiro</th>
-                <th className="px-4 py-3 text-left">Fecha de regreso</th>
-                <th className="px-4 py-3 text-left">Hora de regreso</th>
-                <th className="px-4 py-3 text-center">StarLink</th>
-                <th className="px-4 py-3 text-left">Observacion</th>
-                <th className="px-4 py-3 text-left">Solicitado</th>
-                <th className="px-4 py-3 text-center">Acciones</th>
+                <th className="px-3 py-2 text-left">Fecha solicitado</th>
+                <th className="px-3 py-2 text-left">Dominio</th>
+                <th className="px-3 py-2 text-left">Fecha retiro</th>
+                <th className="px-3 py-2 text-left">Hora de retiro</th>
+                <th className="px-3 py-2 text-left">Fecha de regreso</th>
+                <th className="px-3 py-2 text-left">Hora de regreso</th>
+                <th className="px-3 py-2 text-center">StarLink</th>
+                <th className="px-3 py-2 text-left">Observacion</th>
+                <th className="px-3 py-2 text-left">Solicitado</th>
+                <th className="px-3 py-2 text-center">Acciones</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {items.map((item) => {
                 const isOwnRecord = normalizeId(item.solicitadoPorId) !== "" && normalizeId(item.solicitadoPorId) === normalizeId(user?._id);
                 const isPastRecord = hasStarted(item.retiroAt);
@@ -537,42 +536,41 @@ export default function TestDriveRegistroView({
                   : "Solo lectura";
 
                 return (
-                  <tr key={item._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-700">{formatDateTime(item.fechaSolicitado)}</td>
-                    <td className="px-4 py-3 text-gray-700">
-                      <div className="font-medium text-gray-900">{item.dominio}</div>
-                      <div className="text-xs text-gray-500">{item.versionNombre}</div>
+                  <tr key={item._id} className="hover:bg-muted">
+                    <td className="px-3 py-1.5 text-muted-foreground">{formatDateTime(item.fechaSolicitado)}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">
+                      <div className="font-medium text-card-foreground">{item.dominio}</div>
+                      <div className="text-xs text-muted-foreground">{item.versionNombre}</div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{item.fechaRetiro}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.horaRetiro}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.fechaRegreso}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.horaRegreso}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.fechaRetiro}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.horaRetiro}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.fechaRegreso}</td>
+                    <td className="px-3 py-1.5 text-center">
                       <span
                         className={[
-                          "inline-flex rounded-full border px-3 py-1 text-xs font-semibold",
+                          "inline-flex min-w-12 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium",
                           item.starlink
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-gray-200 bg-gray-50 text-gray-500",
+                            ? "bg-secondary text-secondary-foreground"
+                            : "bg-muted text-muted-foreground",
                         ].join(" ")}
                       >
                         {item.starlink ? "Si" : "No"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-3 py-1.5 text-muted-foreground">
                       <div className="max-w-[280px] whitespace-pre-wrap break-words text-sm">
                         {item.observacion?.trim() ? item.observacion : "-"}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{item.solicitadoPorNombre}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-1.5 text-muted-foreground">{item.solicitadoPorNombre}</td>
+                    <td className="px-3 py-1.5">
                       {canEdit || canDelete ? (
                         <div className="flex justify-center gap-2">
                           {canEdit ? (
                             <button
                               type="button"
                               onClick={() => handleEdit(item)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                            className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
                             >
                               <Pencil size={14} />
                               Editar
@@ -583,7 +581,7 @@ export default function TestDriveRegistroView({
                             <button
                               type="button"
                               onClick={() => deleteMutation.mutate(item._id)}
-                              className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                            className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
                             >
                               <Trash2 size={14} />
                               Eliminar
@@ -591,7 +589,7 @@ export default function TestDriveRegistroView({
                           ) : null}
                         </div>
                       ) : (
-                        <div className="text-center text-xs font-semibold text-gray-400">{actionMessage}</div>
+                        <div className="text-center text-xs font-medium text-muted-foreground">{actionMessage}</div>
                       )}
                     </td>
                   </tr>
@@ -600,7 +598,7 @@ export default function TestDriveRegistroView({
 
               {!items.length ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay solicitudes de TestDrive registradas.
                   </td>
                 </tr>

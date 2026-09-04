@@ -1,10 +1,27 @@
-import { GridComponent, LegendComponent, TooltipComponent } from "echarts/components";
-import { BarChart, LineChart, PieChart } from "echarts/charts";
-import { init, use as registerECharts, type EChartsCoreOption } from "echarts/core";
+import {
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+} from "echarts/components";
+import { BarChart, LineChart, PieChart, TreemapChart } from "echarts/charts";
+import {
+  init,
+  use as registerECharts,
+  type EChartsCoreOption,
+} from "echarts/core";
 import { SVGRenderer } from "echarts/renderers";
 import { useEffect, useRef } from "react";
 
-registerECharts([BarChart, GridComponent, LegendComponent, LineChart, PieChart, SVGRenderer, TooltipComponent]);
+registerECharts([
+  BarChart,
+  GridComponent,
+  LegendComponent,
+  LineChart,
+  PieChart,
+  SVGRenderer,
+  TooltipComponent,
+  TreemapChart,
+]);
 
 type EChartProps = {
   option: EChartsCoreOption;
@@ -30,5 +47,7 @@ export default function EChart({ option, className = "" }: EChartProps) {
     };
   }, [option]);
 
-  return <div ref={containerRef} className={`h-full w-full ${className}`.trim()} />;
+  return (
+    <div ref={containerRef} className={`h-full w-full ${className}`.trim()} />
+  );
 }

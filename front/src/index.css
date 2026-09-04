@@ -148,6 +148,14 @@
     background-color: var(--card) !important;
   }
 
+  .font-preset .bg-black {
+    background-color: var(--primary) !important;
+  }
+
+  .font-preset .text-white {
+    color: var(--primary-foreground) !important;
+  }
+
   .font-preset .text-gray-400,
   .font-preset .text-gray-500,
   .font-preset .text-gray-600,
@@ -161,7 +169,8 @@
   }
 
   .font-preset .rounded-xl,
-  .font-preset .rounded-2xl {
+  .font-preset .rounded-2xl,
+  .font-preset .rounded-3xl {
     border-radius: var(--radius) !important;
   }
 

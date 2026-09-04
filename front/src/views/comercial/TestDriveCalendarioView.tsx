@@ -139,10 +139,10 @@ function MonthRow({
   const rowHeight = Math.max(72, laneCount * 34 + 12);
 
   return (
-    <div className="grid grid-cols-[220px_minmax(960px,1fr)] border-b border-gray-200">
-      <div className="border-r border-gray-200 bg-white px-4 py-4">
-        <div className="font-semibold text-gray-900">{unidad.dominio}</div>
-        <div className="mt-1 text-xs text-gray-500">{unidad.versionNombre}</div>
+    <div className="grid grid-cols-[220px_minmax(960px,1fr)] border-b border-border">
+      <div className="border-r border-border bg-card px-3 py-2">
+        <div className="font-semibold text-card-foreground">{unidad.dominio}</div>
+        <div className="mt-0.5 text-xs text-muted-foreground">{unidad.versionNombre}</div>
       </div>
 
       <div className="relative overflow-x-auto">
@@ -150,15 +150,13 @@ function MonthRow({
           className="relative min-w-[960px]"
           style={{
             height: `${rowHeight}px`,
-            backgroundImage: "linear-gradient(to right, rgba(229,231,235,0.9) 1px, transparent 1px)",
-            backgroundSize: `${100 / monthDays.length}% 100%`,
           }}
         >
           <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${monthDays.length}, minmax(0, 1fr))` }}>
             {monthDays.map((day) => (
               <div
                 key={day.toISOString()}
-                className={isWeekend(day) ? "h-full bg-slate-50/80" : "h-full bg-white"}
+                className={isWeekend(day) ? "h-full border-r border-border bg-muted" : "h-full border-r border-border bg-background"}
               />
             ))}
           </div>
@@ -168,7 +166,7 @@ function MonthRow({
             return (
               <div
                 key={event._id}
-                className="absolute overflow-hidden rounded-xl border border-gray-300 bg-black px-3 py-2 text-white shadow-sm"
+                className="absolute overflow-hidden rounded-md border border-primary bg-primary px-2 py-1 text-primary-foreground shadow-sm"
                 style={{
                   left: `calc(${(event.startDay / monthDays.length) * 100}% + 4px)`,
                   width: `calc(${(span / monthDays.length) * 100}% - 8px)`,
@@ -181,7 +179,7 @@ function MonthRow({
                   <span className="truncate">
                     {formatTime(new Date(event.retiroAt))} - {formatTime(new Date(event.regresoAt))}
                   </span>
-                  {event.starlink ? <span className="rounded-full bg-white/15 px-2 py-1 text-[10px]">StarLink</span> : null}
+                  {event.starlink ? <span className="rounded-sm bg-primary-foreground/15 px-1.5 py-0.5 text-[10px]">StarLink</span> : null}
                 </div>
                 <div className="mt-1 truncate text-[10px] opacity-95">{event.solicitadoPorNombre}</div>
               </div>
@@ -213,21 +211,21 @@ function MonthView({ units, records, visibleDate }: { units: TestDriveOption[]; 
   }, [units, records]);
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-      <div className="grid grid-cols-[220px_minmax(960px,1fr)] border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
-        <div className="border-r border-gray-200 px-4 py-3">Unidad</div>
+    <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="grid grid-cols-[220px_minmax(960px,1fr)] border-b border-border bg-muted text-xs uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="border-r border-border px-3 py-2">Unidad</div>
         <div className="min-w-[960px]">
           <div className="grid" style={{ gridTemplateColumns: `repeat(${monthDays.length}, minmax(0, 1fr))` }}>
             {monthDays.map((day) => (
               <div
                 key={day.toISOString()}
                 className={[
-                  "border-r border-gray-200 px-2 py-3 text-center",
-                  isWeekend(day) ? "bg-slate-100/80" : "bg-gray-50",
+                  "border-r border-border px-2 py-2 text-center",
+                  isWeekend(day) ? "bg-secondary" : "bg-muted",
                 ].join(" ")}
               >
                 <div className="font-semibold">{formatWeekDay(day)}</div>
-                <div className="mt-1 text-sm font-semibold tracking-normal text-gray-900">{formatDayNumber(day)}</div>
+                <div className="mt-0.5 text-sm font-semibold tracking-normal text-card-foreground">{formatDayNumber(day)}</div>
               </div>
             ))}
           </div>
@@ -281,16 +279,16 @@ function WeekUnitSection({
   });
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-200 px-5 py-4">
-        <div className="font-semibold text-gray-900">{unidad.dominio}</div>
-        <div className="mt-1 text-xs text-gray-500">{unidad.versionNombre}</div>
+    <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-3 py-2">
+        <div className="font-semibold text-card-foreground">{unidad.dominio}</div>
+        <div className="mt-0.5 text-xs text-muted-foreground">{unidad.versionNombre}</div>
       </div>
 
       <div className="grid grid-cols-[72px_minmax(980px,1fr)]">
-        <div className="border-r border-gray-200 bg-gray-50">
+        <div className="border-r border-border bg-muted">
           {Array.from({ length: 24 }).map((_, hour) => (
-            <div key={hour} className="h-9 border-b border-gray-200 px-2 text-[11px] font-medium text-gray-500">
+            <div key={hour} className="h-9 border-b border-border px-2 text-[11px] font-medium text-muted-foreground">
               {String(hour).padStart(2, "0")}:00
             </div>
           ))}
@@ -298,17 +296,17 @@ function WeekUnitSection({
 
         <div className="overflow-x-auto">
           <div className="min-w-[980px]">
-            <div className="grid border-b border-gray-200 bg-gray-50" style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
+            <div className="grid border-b border-border bg-muted" style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
               {weekDays.map((day) => (
                 <div
                   key={day.toISOString()}
                   className={[
-                    "border-r border-gray-200 px-3 py-3 text-center text-xs uppercase tracking-[0.18em] text-gray-500",
-                    isWeekend(day) ? "bg-slate-100/80" : "bg-gray-50",
+                    "border-r border-border px-3 py-2 text-center text-xs uppercase tracking-[0.16em] text-muted-foreground",
+                    isWeekend(day) ? "bg-secondary" : "bg-muted",
                   ].join(" ")}
                 >
                   <div>{formatWeekDay(day)}</div>
-                  <div className="mt-1 text-sm font-semibold tracking-normal text-gray-900">{formatDayNumber(day)}</div>
+                  <div className="mt-0.5 text-sm font-semibold tracking-normal text-card-foreground">{formatDayNumber(day)}</div>
                 </div>
               ))}
             </div>
@@ -317,14 +315,15 @@ function WeekUnitSection({
               className="relative"
               style={{
                 height: `${gridHeight}px`,
-                backgroundImage: "linear-gradient(to right, rgba(229,231,235,0.9) 1px, transparent 1px), linear-gradient(to bottom, rgba(229,231,235,0.55) 1px, transparent 1px)",
-                backgroundSize: `${100 / 7}% 100%, 100% ${slotHeight}px`,
               }}
             >
               <div className="absolute inset-0 grid" style={{ gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
                 {weekDays.map((day) => (
-                  <div key={day.toISOString()} className={isWeekend(day) ? "h-full bg-slate-50/70" : "h-full bg-white"} />
+                  <div key={day.toISOString()} className={isWeekend(day) ? "h-full border-r border-border bg-muted" : "h-full border-r border-border bg-background"} />
                 ))}
+              </div>
+              <div className="absolute inset-0 grid grid-rows-[repeat(48,minmax(0,1fr))]">
+                {Array.from({ length: 48 }).map((_, index) => <div key={index} className="border-b border-border" />)}
               </div>
 
               {eventSegments.map(({ event, segmentStart, segmentEnd, dayIndex }) => {
@@ -336,7 +335,7 @@ function WeekUnitSection({
                 return (
                   <div
                     key={`${event._id}-${dayIndex}-${segmentStart.toISOString()}`}
-                    className="absolute overflow-hidden rounded-xl border border-gray-300 bg-black px-3 py-2 text-white shadow-sm"
+                    className="absolute overflow-hidden rounded-md border border-primary bg-primary px-2 py-1 text-primary-foreground shadow-sm"
                     style={{
                       left: `calc(${(dayIndex / 7) * 100}% + 6px)`,
                       width: `calc(${100 / 7}% - 12px)`,
@@ -384,7 +383,7 @@ function WeekView({ units, records, visibleDate }: { units: TestDriveOption[]; r
   }, [units, records, weekStart, weekEnd]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {units.map((unit) => (
         <WeekUnitSection key={unit._id} unidad={unit} events={recordsByUnit.get(unit._id) ?? []} weekDays={weekDays} />
       ))}
@@ -465,16 +464,16 @@ export default function TestDriveCalendarioView({
 
   if (loadingUnits || loadingRecords) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando calendario de TestDrive...</div>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm">Cargando calendario de TestDrive...</div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card p-3 text-destructive shadow-sm">
           {error instanceof Error ? error.message : "Error al cargar el calendario de TestDrive"}
         </div>
       </div>
@@ -482,21 +481,21 @@ export default function TestDriveCalendarioView({
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">{sectionLabel}</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{title}</h1>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{sectionLabel}</p>
+            <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-card-foreground">{title}</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
               Consulta la ocupacion de las unidades por rango de fechas y horas.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <Link
               to={listPath}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
             >
               <ArrowLeft size={16} />
               Volver al listado
@@ -504,16 +503,16 @@ export default function TestDriveCalendarioView({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setCalendarMode("month")}
               className={[
-                "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
+                "inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition",
                 calendarMode === "month"
-                  ? "bg-black text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               <LayoutGrid size={16} />
@@ -523,10 +522,10 @@ export default function TestDriveCalendarioView({
               type="button"
               onClick={() => setCalendarMode("week")}
               className={[
-                "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
+                "inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition",
                 calendarMode === "week"
-                  ? "bg-black text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900",
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               <Rows3 size={16} />
@@ -534,13 +533,13 @@ export default function TestDriveCalendarioView({
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-              <ListFilter size={15} className="text-gray-500" />
+          <div className="flex flex-wrap gap-2">
+            <div className="inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3">
+              <ListFilter size={15} className="text-muted-foreground" />
               <select
                 value={selectedUnidadId}
                 onChange={(event) => setSelectedUnidadId(event.target.value)}
-                className="bg-transparent text-sm font-medium text-gray-700 outline-none"
+                className="bg-transparent text-sm font-medium text-foreground outline-none"
               >
                 <option value="">Todas las unidades</option>
                 {(optionsResponse?.data ?? []).map((unit) => (
@@ -551,28 +550,28 @@ export default function TestDriveCalendarioView({
               </select>
             </div>
 
-            <div className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 px-1.5 py-1.5">
-              <button type="button" onClick={handlePrev} className="rounded-lg p-1.5 text-gray-600 transition hover:bg-white hover:text-gray-900">
+            <div className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-background px-1">
+              <button type="button" onClick={handlePrev} className="rounded-md p-1.5 text-muted-foreground transition hover:bg-secondary hover:text-foreground">
                 <ChevronLeft size={18} />
               </button>
-              <button type="button" onClick={handleToday} className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-gray-700 transition hover:bg-white hover:text-gray-900">
+              <button type="button" onClick={handleToday} className="rounded-md px-2 text-sm font-semibold text-foreground transition hover:bg-secondary">
                 Hoy
               </button>
-              <button type="button" onClick={handleNext} className="rounded-lg p-1.5 text-gray-600 transition hover:bg-white hover:text-gray-900">
+              <button type="button" onClick={handleNext} className="rounded-md p-1.5 text-muted-foreground transition hover:bg-secondary hover:text-foreground">
                 <ChevronRight size={18} />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-700">
+        <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
           <CalendarDays size={14} />
           {calendarMode === "month" ? formatMonthTitle(visibleDate) : `Semana del ${range.from.toLocaleDateString("es-AR")} al ${range.to.toLocaleDateString("es-AR")}`}
         </div>
       </section>
 
       {units.length === 0 ? (
-        <section className="rounded-3xl border border-gray-200 bg-white p-8 text-sm text-gray-500 shadow-sm">
+        <section className="rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground shadow-sm">
           No hay unidades activas para mostrar en el calendario.
         </section>
       ) : calendarMode === "month" ? (
@@ -582,7 +581,7 @@ export default function TestDriveCalendarioView({
       )}
 
       {!records.length ? (
-        <section className="rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
+        <section className="rounded-lg border border-dashed border-border bg-card p-3 text-sm text-muted-foreground shadow-sm">
           No hay reservas en el rango visible. Las unidades siguen mostrandose para que puedas revisar disponibilidad.
         </section>
       ) : null}

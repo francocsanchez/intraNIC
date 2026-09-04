@@ -49,8 +49,12 @@ export default function CreateUsuarioView() {
     <div className="font-preset w-full space-y-3 px-2 py-3">
       <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Crear usuario</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Administracion
+          </p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Crear usuario
+          </h1>
         </div>
 
         <Link
@@ -67,18 +71,28 @@ export default function CreateUsuarioView() {
         onSubmit={handleSubmit((formData) => mutation.mutate(formData))}
       >
         <div className="border-b border-border px-3 py-3">
-          <h2 className="text-base font-semibold tracking-tight text-foreground">Datos del usuario</h2>
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
+            Datos del usuario
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Completa la informacion principal, la unidad de negocio, la sucursal predeterminada y los modulos habilitados.
+            Completa la informacion principal, la unidad de negocio, la sucursal
+            predeterminada y los modulos habilitados.
           </p>
         </div>
 
         <div className="p-3">
-          <UsuarioForm register={register} control={control} errors={errors} showPasswordField />
+          <UsuarioForm
+            register={register}
+            control={control}
+            errors={errors}
+            showPasswordField
+          />
         </div>
 
         <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-muted-foreground">Los campos obligatorios deben completarse antes de guardar.</div>
+          <div className="text-sm text-muted-foreground">
+            Los campos obligatorios deben completarse antes de guardar.
+          </div>
 
           <input
             type="submit"

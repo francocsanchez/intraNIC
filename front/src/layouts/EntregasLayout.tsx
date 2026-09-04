@@ -40,14 +40,15 @@ export default function EntregasLayout() {
 
   const visibleNavItems = navItems.filter((item) =>
     item.to === paths.entregas.sucursales
-      ? hasSuperAdminRole(user) && hasModulePathAccess(user, moduleByPath[item.to], item.to)
+      ? hasSuperAdminRole(user) &&
+        hasModulePathAccess(user, moduleByPath[item.to], item.to)
       : hasModulePathAccess(user, moduleByPath[item.to], item.to),
   );
 
   return (
     <BaseAppLayout
-      footerLeft={`IntraNIC Entregas`}
-      footerRight={`Franco Sanchez`}
+      footerLeft="IntraNIC - Uso interno Nippon Car"
+      footerRight="Desarrollado por Franco Sanchez"
       centerContent={
         <>
           {visibleNavItems.map((item) => {
@@ -58,8 +59,10 @@ export default function EntregasLayout() {
                 key={item.to}
                 to={item.to}
                 className={[
-                  "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
-                  isActive ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+                  "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 ].join(" ")}
               >
                 <item.icon size={16} strokeWidth={1.75} />
@@ -69,7 +72,8 @@ export default function EntregasLayout() {
           })}
         </>
       }
-      mainClassName="px-4 py-6"
+      mainClassName="px-2 py-3"
+      presetNavigation
     />
   );
 }

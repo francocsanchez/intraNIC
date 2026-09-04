@@ -17,17 +17,8 @@ function formatPromedio(value: number) {
 }
 
 function getPromedioCellClass(value: number) {
-  if (value >= 9) return "bg-emerald-100 text-emerald-800";
-  if (value >= 6) return "bg-amber-100 text-amber-800";
-  if (value === 0) return "bg-gray-100 text-gray-500";
-  return "bg-rose-100 text-rose-700";
-}
-
-function getMesCellClass(value: number) {
-  if (value >= 9) return "text-[#15aa9a] font-semibold";
-  if (value >= 6) return "text-amber-700 font-medium";
-  if (value === 0) return "text-gray-300";
-  return "text-gray-700";
+  if (value === 0) return "bg-muted text-muted-foreground";
+  return "bg-secondary text-secondary-foreground";
 }
 
 function PromedioMesCell({ value }: { value: number }) {
@@ -35,9 +26,9 @@ function PromedioMesCell({ value }: { value: number }) {
     <div className="flex items-center justify-center gap-1.5">
       <span>{formatPromedio(value)}</span>
       {value >= 9 ? (
-        <Check className="h-4 w-4 text-green-600" />
+        <Check className="h-4 w-4 text-foreground" />
       ) : (
-        <X className="h-4 w-4 text-red-600" />
+        <X className="h-4 w-4 text-muted-foreground" />
       )}
     </div>
   );
@@ -74,12 +65,12 @@ export default function PromediosPlanAhorroView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-base font-semibold text-card-foreground">
             Error al cargar promedios de plan de ahorro
           </h1>
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-1 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener la informacion."}
           </p>
         </section>
@@ -88,27 +79,27 @@ export default function PromediosPlanAhorroView() {
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Plan de ahorro
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-card-foreground">
               Promedios de ventas por vendedor
             </h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-500">
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Vista anual con promedio movil de seis meses por vendedor. Se muestran columnas desde enero hasta el ultimo mes visible del ano.
             </p>
           </div>
 
           <label className="space-y-1">
-            <span className="text-sm font-semibold text-gray-900">Ano</span>
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Ano</span>
             <select
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
-              className="w-full min-w-36 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
             >
               {anios.map((item) => (
                 <option key={item} value={item}>
@@ -118,86 +109,57 @@ export default function PromediosPlanAhorroView() {
             </select>
           </label>
         </div>
+        <div className="grid grid-cols-2 border-t border-border lg:grid-cols-4">
+          {[
+            ["Vendedores", cards.totalVendedores],
+            ["Promedio general", formatPromedio(cards.promedioGeneral)],
+            ["Mejor promedio", formatPromedio(cards.mejorPromedio)],
+            ["Mejor sucursal", cards.mejorSucursal],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-r border-border px-3 py-2 last:border-r-0 lg:border-b-0">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+              <p className="mt-1 truncate text-lg font-semibold text-card-foreground">{value}</p>
+              {label === "Mejor sucursal" ? <p className="text-xs text-muted-foreground">Promedio {formatPromedio(cards.mejorSucursalPromedio)}</p> : null}
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Vendedores
-          </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{cards.totalVendedores}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Promedio general
-          </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{formatPromedio(cards.promedioGeneral)}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Mejor promedio
-          </p>
-          <p className="mt-3 text-3xl font-bold text-[#15aa9a]">{formatPromedio(cards.mejorPromedio)}</p>
-        </article>
-
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-            Mejor sucursal
-          </p>
-          <p className="mt-3 truncate text-lg font-bold text-gray-900">{cards.mejorSucursal}</p>
-          <p className="mt-1 text-sm font-semibold text-[#15aa9a]">
-            Promedio {formatPromedio(cards.mejorSucursalPromedio)}
-          </p>
-        </article>
-      </section>
-
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 bg-gradient-to-r from-[#f4fbfa] to-white px-6 py-4">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-3 py-2">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">
+              <h2 className="text-sm font-semibold text-card-foreground">
                 Tabla de promedios
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Promedios de enero a {meses[meses.length - 1]?.label ?? "-"} de {anio}.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span className="rounded-full bg-rose-100 px-2.5 py-1 font-semibold text-rose-700">
-                Bajo
-              </span>
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 font-semibold text-amber-700">
-                Medio
-              </span>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 font-semibold text-emerald-700">
-                Alto
-              </span>
-            </div>
+            <p className="text-xs text-muted-foreground">El promedio parcial se calcula con los meses visibles.</p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[980px] w-full border-separate border-spacing-0 text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
-                <th className="sticky left-0 z-20 border-b border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-0 z-20 border-b border-border bg-muted px-3 py-2 text-left text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   Sucursal
                 </th>
-                <th className="sticky left-[180px] z-20 border-b border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-[180px] z-20 border-b border-border bg-muted px-3 py-2 text-left text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   Vendedor
                 </th>
                 {meses.map((item) => (
                   <th
                     key={item.key}
-                    className="border-b border-gray-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+                    className="border-b border-border px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground"
                   >
                     {item.label}
                   </th>
                 ))}
-                <th className="border-b border-gray-200 bg-[#f8fafc] px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
+                <th className="border-b border-border bg-secondary px-3 py-2 text-center text-xs font-medium uppercase tracking-[0.16em] text-secondary-foreground">
                   Prom
                 </th>
               </tr>
@@ -209,18 +171,18 @@ export default function PromediosPlanAhorroView() {
                   {sucursal.vendedores.map((vendedor, index) => (
                     <tr
                       key={`${sucursal.sucursal}-${vendedor.vendedor}`}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+                      className={index % 2 === 0 ? "bg-card" : "bg-muted/50"}
                     >
                       {index === 0 ? (
                         <td
                           rowSpan={sucursal.vendedores.length + 1}
-                          className="sticky left-0 z-10 border-b border-gray-200 bg-white px-4 py-4 align-middle text-left font-semibold uppercase tracking-[0.08em] text-gray-700"
+                          className="sticky left-0 z-10 border-b border-border bg-card px-3 py-2 align-middle text-left font-semibold uppercase tracking-[0.08em] text-foreground"
                         >
                           <div className="min-w-[180px]">{sucursal.sucursal}</div>
                         </td>
                       ) : null}
 
-                      <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-inherit px-4 py-3 font-medium text-gray-900">
+                      <td className="sticky left-[180px] z-10 border-b border-border bg-inherit px-3 py-1.5 font-medium text-card-foreground">
                         <div className="min-w-[220px]">{vendedor.vendedor}</div>
                       </td>
 
@@ -230,16 +192,16 @@ export default function PromediosPlanAhorroView() {
                         return (
                           <td
                             key={`${vendedor.vendedor}-${mesItem.key}`}
-                            className={`border-b border-gray-200 px-4 py-3 text-center ${getMesCellClass(value)}`}
+                            className={`border-b border-border px-3 py-1.5 text-center ${value === 0 ? "text-muted-foreground" : "text-card-foreground"}`}
                           >
                             <PromedioMesCell value={value} />
                           </td>
                         );
                       })}
 
-                      <td className="border-b border-gray-200 px-4 py-3 text-center">
+                      <td className="border-b border-border px-3 py-1.5 text-center">
                         <span
-                          className={`inline-flex min-w-14 justify-center rounded-md px-2.5 py-1 font-semibold ${getPromedioCellClass(
+                          className={`inline-flex min-w-14 justify-center rounded-md px-2 py-0.5 font-medium ${getPromedioCellClass(
                             vendedor.promedioAnualParcial,
                           )}`}
                         >
@@ -249,8 +211,8 @@ export default function PromediosPlanAhorroView() {
                     </tr>
                   ))}
 
-                  <tr key={`${sucursal.sucursal}-promedio`} className="bg-[#eef9f7]">
-                    <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-[#eef9f7] px-4 py-3 font-semibold uppercase tracking-[0.08em] text-[#0f8f82]">
+                  <tr key={`${sucursal.sucursal}-promedio`} className="bg-secondary">
+                    <td className="sticky left-[180px] z-10 border-b border-border bg-secondary px-3 py-2 font-semibold uppercase tracking-[0.08em] text-secondary-foreground">
                       <div className="min-w-[220px]">Promedio sucursal</div>
                     </td>
 
@@ -260,16 +222,16 @@ export default function PromediosPlanAhorroView() {
                       return (
                         <td
                           key={`${sucursal.sucursal}-${mesItem.key}-promedio`}
-                          className="border-b border-gray-200 px-4 py-3 text-center font-semibold text-[#0f8f82]"
+                          className="border-b border-border px-3 py-2 text-center font-semibold text-secondary-foreground"
                         >
                           <PromedioMesCell value={value} />
                         </td>
                       );
                     })}
 
-                    <td className="border-b border-gray-200 px-4 py-3 text-center">
+                    <td className="border-b border-border px-3 py-2 text-center">
                       <span
-                        className={`inline-flex min-w-14 justify-center rounded-md px-2.5 py-1 font-semibold ${getPromedioCellClass(
+                        className={`inline-flex min-w-14 justify-center rounded-md px-2 py-0.5 font-medium ${getPromedioCellClass(
                           sucursal.promedioAnualParcial,
                         )}`}
                       >
@@ -282,7 +244,7 @@ export default function PromediosPlanAhorroView() {
 
               {!sucursales.length && (
                 <tr>
-                  <td colSpan={meses.length + 3} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={meses.length + 3} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No hay datos para el ano seleccionado.
                   </td>
                 </tr>

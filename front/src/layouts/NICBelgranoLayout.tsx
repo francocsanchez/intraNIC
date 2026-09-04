@@ -14,15 +14,19 @@ export default function NICBelgranoLayout() {
       label: "Disponible",
       to: paths.belgrano.stockDisponible,
       icon: Package,
-      visible: hasModulePathAccess(user, "belgrano", paths.belgrano.stockDisponible),
+      visible: hasModulePathAccess(
+        user,
+        "belgrano",
+        paths.belgrano.stockDisponible,
+      ),
       active: pathname === paths.belgrano.stockDisponible,
     },
   ].filter((item) => item.visible);
 
   return (
     <BaseAppLayout
-      footerLeft="Stock Belgrano"
-      footerRight="Franco Sanchez"
+      footerLeft="IntraNIC - Uso interno Nippon Car"
+      footerRight="Desarrollado por Franco Sanchez"
       centerContent={
         <>
           {navItems.map((item) => (
@@ -30,8 +34,10 @@ export default function NICBelgranoLayout() {
               key={item.to}
               to={item.to}
               className={[
-                "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
-                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+                "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                item.active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               ].join(" ")}
             >
               <item.icon size={16} strokeWidth={1.75} />
@@ -40,7 +46,8 @@ export default function NICBelgranoLayout() {
           ))}
         </>
       }
-      mainClassName="px-4 py-6"
+      mainClassName="px-2 py-3"
+      presetNavigation
     />
   );
 }

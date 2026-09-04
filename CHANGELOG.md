@@ -2,6 +2,26 @@
 
 ## 2026-09-04
 
+### Migracion de preset
+- Se unificaron los layouts base de Analisis, Entregas, Gestion Convencional, Belgrano, Calidad y Analisis de mercado con fondo `muted`, navegacion semantica, espaciado compacto y footer institucional.
+- Se amplio el componente compartido de ECharts para soportar treemap y se agrego una utilidad que resuelve la paleta monocromatica desde los tokens `chart` del preset.
+- Se ajusto TestDrive administrativo con dialogo, formulario, acciones y tabla compacta bajo los tokens semanticos del preset.
+- Se compacto el flujo de Usuarios: listado de alta densidad, resumen de edición y formulario compartido para altas y cambios de datos.
+- Se migraron los parámetros de Hot Alert y Envío de agenda a superficies compactas, campos semánticos y acciones del preset.
+- Se extendió temporalmente la capa de compatibilidad del contexto `font-preset` para que los formularios de configuración que comparten markup heredado respeten los radios y acciones del preset durante la migración final de sus componentes.
+
+### Valorizacion de stock convencional
+- Se migraron `/convencional/stock/valorizacion` y `/convencional/stock/valorizacion/lista-precios` al preset compacto, con hero y resumen integrados, fondo `muted`, superficies semanticas y tablas de alta densidad.
+- Se alinearon la edición por fila, los estados de precio y las acciones de importar, exportar y guardar a los tokens del preset, sin modificar la lógica de consulta, actualización ni archivos Excel.
+
+### Plan de ahorro
+- Se migraron el Registro TestDrive y su calendario mensual/semanal al preset compacto, incluyendo alta, edición, eliminación, modal y controles de agenda.
+- Se ajustó `/gestion/plan-ahorro/promedios` con selector anual, resumen integrado y tabla sticky de alta densidad, retirando colores, gradientes y bordes heredados.
+
+### Calidad
+- Se migró `/calidad/ssi-ventas` al preset compacto, incluyendo listado, importación CSV, filtros por estado, paginación y estados de carga y error.
+- Se unificaron los diálogos de gestión de encuesta y asignación de ADM: campos, historial, acciones y estados usan superficies y tokens semánticos, sin cards anidadas ni colores heredados.
+
 ### Minutas
 - Se migraron el listado, alta, edición, detalle y gestor de grupos de difusión al preset, con fondo unificado, superficies compactas, tablas densas y diálogos semánticos.
 - Se consolidó el formulario en una única superficie con divisores y se alinearon selectores de participantes, grupos y editor enriquecido a los tokens del preset.
