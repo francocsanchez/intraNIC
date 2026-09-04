@@ -1,4 +1,9 @@
-import { createMinuta, getMinutaGroups, getMinutaParticipants, type MinutaPayload } from "@/api/dms/minutasAPI";
+import {
+  createMinuta,
+  getMinutaGroups,
+  getMinutaParticipants,
+  type MinutaPayload,
+} from "@/api/dms/minutasAPI";
 import MinutaForm from "@/components/minutas/MinutaForm";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,12 +15,22 @@ export default function MinutaCreateView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: participantsResponse, isLoading: isLoadingParticipants, isError: isParticipantsError, error: participantsError } = useQuery({
+  const {
+    data: participantsResponse,
+    isLoading: isLoadingParticipants,
+    isError: isParticipantsError,
+    error: participantsError,
+  } = useQuery({
     queryKey: ["minutas", "participants"],
     queryFn: getMinutaParticipants,
   });
 
-  const { data: groupsResponse, isLoading: isLoadingGroups, isError: isGroupsError, error: groupsError } = useQuery({
+  const {
+    data: groupsResponse,
+    isLoading: isLoadingGroups,
+    isError: isGroupsError,
+    error: groupsError,
+  } = useQuery({
     queryKey: ["minutas", "groups"],
     queryFn: getMinutaGroups,
   });
@@ -32,16 +47,18 @@ export default function MinutaCreateView() {
 
   if (isLoadingParticipants || isLoadingGroups) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando formulario de minuta...</div>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+          Cargando formulario de minuta...
+        </div>
       </div>
     );
   }
 
   if (isParticipantsError || isGroupsError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
           {participantsError instanceof Error
             ? participantsError.message
             : groupsError instanceof Error
@@ -53,20 +70,25 @@ export default function MinutaCreateView() {
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">Generar minuta</h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-500">
-              Completá la información de la reunión, cargá los participantes y armá el temario en una pantalla más cómoda.
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Comercial
+            </p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              Generar minuta
+            </h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Completá la información de la reunión, cargá los participantes y
+              armá el temario en una pantalla más cómoda.
             </p>
           </div>
 
           <Link
             to={paths.convencional.minutas}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-secondary"
           >
             <ArrowLeft size={16} />
             Volver al listado

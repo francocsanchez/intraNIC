@@ -47,10 +47,10 @@ export default function PreventasView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar preventas pendientes</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar preventas pendientes</h1>
+          <p className="mt-1 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -70,22 +70,21 @@ export default function PreventasView() {
 
   return (
     <>
-      <div className="w-full space-y-6 px-4 py-6">
-        <section className="rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">SIAC</p>
-              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Preventas pendientes</h1>
-              <p className="mt-2 max-w-3xl text-sm text-gray-600">
+      <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+        <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">SIAC</p>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Preventas pendientes</h1>
+              <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
                 Registra operaciones sin unidad asignada y mantené previsión mensual de demanda.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {canViewResumen ? (
                 <Link
                   to={paths.convencional.preventasResumen}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-[#9fd6cf] bg-white px-4 py-3 text-sm font-semibold text-[#146b61] transition hover:bg-[#f4fbfa]"
+                  className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
                 >
                   <ClipboardList size={16} />
                   Ver resumen
@@ -95,7 +94,7 @@ export default function PreventasView() {
               {canCreatePreventa ? (
                 <Link
                   to={paths.convencional.preventasNueva}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   <Plus size={16} />
                   Nueva preventa
@@ -103,38 +102,20 @@ export default function PreventasView() {
               ) : null}
             </div>
           </div>
+          <div className="grid border-t border-border md:grid-cols-3">
+            {[['Pendientes', preventas.length], ['Con reserva', preventas.filter((item) => typeof item.monto_reserva === 'number' && item.monto_reserva > 0).length], ['Colores multiples', preventas.filter((item) => item.colores.length > 1).length]].map(([label, total]) => <div key={String(label)} className="border-t border-border px-3 py-2 first:border-t-0 md:border-l md:first:border-l-0 md:border-t-0"><p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p><p className="text-2xl font-semibold text-foreground">{total}</p></div>)}
+          </div>
         </section>
-
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Pendientes</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{preventas.length}</p>
-          </article>
-          <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Con reserva</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">
-              {preventas.filter((item) => typeof item.monto_reserva === "number" && item.monto_reserva > 0).length}
-            </p>
-          </article>
-          <article className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Colores múltiples</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">
-              {preventas.filter((item) => item.colores.length > 1).length}
-            </p>
-          </article>
-        </section>
-
-        <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">Listado operativo</h2>
-              <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Listado operativo</h2><p className="mt-1 text-sm text-muted-foreground">
                 Las preventas asignadas se ocultan de esta vista, pero no se eliminan.
               </p>
             </div>
 
             {canViewAsignadas ? (
-              <Link to={paths.convencional.preventasAsignadas} className="text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+              <Link to={paths.convencional.preventasAsignadas} className="text-sm font-semibold text-foreground underline-offset-4 hover:underline">
                 Ver asignadas
               </Link>
             ) : null}
@@ -142,23 +123,23 @@ export default function PreventasView() {
 
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+              <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3 text-left">Mes</th>
-                  <th className="px-4 py-3 text-left">Cliente</th>
-                  <th className="px-4 py-3 text-left">Version</th>
-                  <th className="px-4 py-3 text-left">Colores</th>
-                  <th className="px-4 py-3 text-left">Vendedor</th>
-                  <th className="px-4 py-3 text-left">Nro OP</th>
-                  <th className="px-4 py-3 text-left">Reserva</th>
+                  <th className="px-3 py-2 text-left">Mes</th>
+                  <th className="px-3 py-2 text-left">Cliente</th>
+                  <th className="px-3 py-2 text-left">Version</th>
+                  <th className="px-3 py-2 text-left">Colores</th>
+                  <th className="px-3 py-2 text-left">Vendedor</th>
+                  <th className="px-3 py-2 text-left">Nro OP</th>
+                  <th className="px-3 py-2 text-left">Reserva</th>
                   {canManagePreventaColumns ? <th className="px-4 py-3 text-center">Asignado</th> : null}
                   {canManagePreventaColumns ? <th className="px-4 py-3 text-center">Acciones</th> : null}
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 {preventas.map((preventa) => (
-                  <tr key={preventa._id} className="hover:bg-[#f8fcfc]">
+                  <tr key={preventa._id} className="hover:bg-muted">
                     <td className="px-4 py-3 font-semibold text-gray-900">{preventa.mes_asigna_label}</td>
                     <td className="px-4 py-3 text-gray-700">
                       <div className="font-medium text-gray-900">{preventa.cliente}</div>
@@ -173,12 +154,12 @@ export default function PreventasView() {
                     {canManagePreventaColumns ? (
                       <td className="px-4 py-3 text-center">
                         {canAssignPreventa ? (
-                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#bde2dc] bg-[#eef9f7] px-3 py-2 text-xs font-semibold text-[#146b61]">
+                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-xs font-semibold text-foreground">
                             <input
                               type="checkbox"
                               checked={preventa.asignado}
                               onChange={(event) => assignMutation.mutate({ id: preventa._id, asignado: event.target.checked })}
-                              className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                             />
                             Asignado
                           </label>

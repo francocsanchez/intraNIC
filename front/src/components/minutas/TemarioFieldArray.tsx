@@ -1,17 +1,20 @@
-import { GripVertical, Plus, Trash2 } from "lucide-react";
-import type { Control, FieldErrors, UseFieldArrayAppend, UseFieldArrayRemove, UseFormRegister } from "react-hook-form";
-import { Controller, useFieldArray } from "react-hook-form";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { hasMeaningfulRichText } from "@/utils/richTextSanitize";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import type {
+  Control,
+  FieldErrors,
+  UseFieldArrayAppend,
+  UseFieldArrayRemove,
+  UseFormRegister,
+} from "react-hook-form";
+import { Controller, useFieldArray } from "react-hook-form";
 
 export type MinutaFormValues = {
   fecha: string;
   tema: string;
   participantes: string[];
-  temario: Array<{
-    nombre: string;
-    desarrollo: string;
-  }>;
+  temario: Array<{ nombre: string; desarrollo: string }>;
 };
 
 type TemarioFieldArrayProps = {
@@ -22,8 +25,9 @@ type TemarioFieldArrayProps = {
 };
 
 function TemarioItemError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-xs font-medium text-red-600">{message}</p>;
+  return message ? (
+    <p className="text-xs font-medium text-destructive">{message}</p>
+  ) : null;
 }
 
 export default function TemarioFieldArray({
@@ -36,57 +40,66 @@ export default function TemarioFieldArray({
     control,
     name: "temario",
   });
-
   const appendTema: UseFieldArrayAppend<MinutaFormValues, "temario"> = append;
   const removeTema: UseFieldArrayRemove = remove;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {fields.map((field, index) => (
-        <article key={field.id} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+        <article
+          key={field.id}
+          className="border-t border-border pt-3 first:border-t-0 first:pt-0"
+        >
           <div className="flex items-center justify-between gap-3">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-gray-900">
-              <GripVertical size={15} className="text-gray-400" />
+            <div className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+              <GripVertical size={15} className="text-muted-foreground" />
               Tema {index + 1}
             </div>
-
             <button
               type="button"
               onClick={() => removeTema(index)}
               disabled={disabled || fields.length === 1}
-              className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={13} />
               Quitar
             </button>
           </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-4">
+          <div className="mt-3 grid grid-cols-1 gap-3">
             <div className="space-y-2">
-              <label htmlFor={`temario.${index}.nombre`} className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <label
+                htmlFor={`temario.${index}.nombre`}
+                className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground"
+              >
                 Nombre del tema
               </label>
               <input
                 id={`temario.${index}.nombre`}
                 type="text"
                 disabled={disabled}
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
                 {...register(`temario.${index}.nombre`, {
                   required: "El nombre del tema es obligatorio",
                 })}
               />
-              <TemarioItemError message={errors.temario?.[index]?.nombre?.message} />
+              <TemarioItemError
+                message={errors.temario?.[index]?.nombre?.message}
+              />
             </div>
-
             <div className="space-y-2">
-              <label htmlFor={`temario.${index}.desarrollo`} className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <label
+                htmlFor={`temario.${index}.desarrollo`}
+                className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground"
+              >
                 Desarrollo
               </label>
               <Controller
                 control={control}
                 name={`temario.${index}.desarrollo`}
                 rules={{
-                  validate: (value) => hasMeaningfulRichText(value) || "El desarrollo es obligatorio",
+                  validate: (value) =>
+                    hasMeaningfulRichText(value) ||
+                    "El desarrollo es obligatorio",
                 }}
                 render={({ field }) => (
                   <RichTextEditor
@@ -97,29 +110,26 @@ export default function TemarioFieldArray({
                   />
                 )}
               />
-              <TemarioItemError message={errors.temario?.[index]?.desarrollo?.message} />
+              <TemarioItemError
+                message={errors.temario?.[index]?.desarrollo?.message}
+              />
             </div>
           </div>
         </article>
       ))}
-
       <button
         type="button"
         disabled={disabled}
-        onClick={() =>
-          appendTema({
-            nombre: "",
-            desarrollo: "",
-          })
-        }
-        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={() => appendTema({ nombre: "", desarrollo: "" })}
+        className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Plus size={15} />
         Agregar tema
       </button>
-
       {typeof errors.temario?.message === "string" ? (
-        <p className="text-xs font-medium text-red-600">{errors.temario.message}</p>
+        <p className="text-xs font-medium text-destructive">
+          {errors.temario.message}
+        </p>
       ) : null}
     </div>
   );

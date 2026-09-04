@@ -21,7 +21,10 @@ import {
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { richTextExtensions } from "./richTextConfig";
-import { hasMeaningfulRichText, sanitizeRichTextHtml } from "@/utils/richTextSanitize";
+import {
+  hasMeaningfulRichText,
+  sanitizeRichTextHtml,
+} from "@/utils/richTextSanitize";
 
 type RichTextEditorProps = {
   disabled?: boolean;
@@ -53,8 +56,8 @@ function ToolbarButton({
       title={label}
       className={`inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm transition ${
         active
-          ? "border-gray-900 bg-gray-900 text-white"
-          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-foreground hover:bg-secondary"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
@@ -76,7 +79,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-[220px] px-4 py-3 text-sm text-gray-900 outline-none [&_a]:text-blue-700 [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:my-4 [&_hr]:border-gray-300 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_tbody_td]:border [&_tbody_td]:border-gray-300 [&_tbody_td]:px-3 [&_tbody_td]:py-2 [&_thead_th]:border [&_thead_th]:border-gray-300 [&_thead_th]:bg-gray-100 [&_thead_th]:px-3 [&_thead_th]:py-2 [&_ul]:list-disc [&_ul]:pl-6",
+          "min-h-[180px] px-3 py-2 text-sm text-foreground outline-none [&_a]:text-foreground [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:my-3 [&_hr]:border-border [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_tbody_td]:border [&_tbody_td]:border-border [&_tbody_td]:px-2 [&_tbody_td]:py-1.5 [&_thead_th]:border [&_thead_th]:border-border [&_thead_th]:bg-muted [&_thead_th]:px-2 [&_thead_th]:py-1.5 [&_ul]:list-disc [&_ul]:pl-6",
       },
     },
     onUpdate: ({ editor: currentEditor }) => {
@@ -102,7 +105,10 @@ export default function RichTextEditor({
   const setLink = () => {
     if (!editor) return;
     const previousUrl = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("Ingresá la URL del enlace", previousUrl || "https://");
+    const url = window.prompt(
+      "Ingresá la URL del enlace",
+      previousUrl || "https://",
+    );
 
     if (url === null) return;
 
@@ -112,19 +118,28 @@ export default function RichTextEditor({
       return;
     }
 
-    editor.chain().focus().extendMarkRange("link").setLink({ href: normalizedUrl }).run();
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: normalizedUrl })
+      .run();
   };
 
   const insertTable = () => {
     if (!editor) return;
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
   };
 
   const isTableActive = Boolean(editor?.isActive("table"));
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 bg-gray-50 p-3">
+    <div className="overflow-hidden rounded-md border border-input bg-background">
+      <div className="flex flex-wrap gap-1 border-b border-border bg-muted p-2">
         <ToolbarButton
           label="Negrita"
           disabled={!editor || disabled}
@@ -153,7 +168,9 @@ export default function RichTextEditor({
           label="Título 1"
           disabled={!editor || disabled}
           active={editor?.isActive("heading", { level: 1 })}
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 1 }).run()
+          }
         >
           <Heading1 size={15} />
         </ToolbarButton>
@@ -161,7 +178,9 @@ export default function RichTextEditor({
           label="Título 2"
           disabled={!editor || disabled}
           active={editor?.isActive("heading", { level: 2 })}
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 2 }).run()
+          }
         >
           <Heading2 size={15} />
         </ToolbarButton>
@@ -169,7 +188,9 @@ export default function RichTextEditor({
           label="Título 3"
           disabled={!editor || disabled}
           active={editor?.isActive("heading", { level: 3 })}
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 3 }).run()
+          }
         >
           <Heading3 size={15} />
         </ToolbarButton>
@@ -239,7 +260,7 @@ export default function RichTextEditor({
       </div>
 
       {isTableActive ? (
-        <div className="flex flex-wrap gap-2 border-b border-gray-200 bg-gray-50/80 px-3 pb-3">
+        <div className="flex flex-wrap gap-1 border-b border-border bg-muted px-2 pb-2">
           <ToolbarButton
             label="Agregar columna antes"
             disabled={!editor || disabled}
@@ -299,10 +320,12 @@ export default function RichTextEditor({
         </div>
       ) : null}
 
-      <div className="relative bg-white">
+      <div className="relative bg-background">
         <EditorContent editor={editor} />
         {!hasMeaningfulRichText(value) ? (
-          <div className="pointer-events-none absolute left-0 top-0 px-4 py-3 text-sm text-gray-400">{placeholder}</div>
+          <div className="pointer-events-none absolute left-0 top-0 px-3 py-2 text-sm text-muted-foreground">
+            {placeholder}
+          </div>
         ) : null}
       </div>
     </div>

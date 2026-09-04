@@ -22,11 +22,7 @@ const PRIORIDAD_ORDER: Record<PedidoUnidadPrioridad, number> = {
   normal: 2,
 };
 
-const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
-  normal: "bg-gray-100 text-gray-700",
-  media: "bg-yellow-100 text-yellow-800",
-  urgente: "bg-red-100 text-red-700",
-};
+const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = { normal: "bg-muted text-muted-foreground", media: "bg-secondary text-secondary-foreground", urgente: "bg-destructive text-destructive-foreground" };
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString);
@@ -95,10 +91,7 @@ export default function PedidoUnidadesPreviasView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar la lista previa</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3"><section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm"><h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar la lista previa</h1><p className="mt-1 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -130,20 +123,17 @@ export default function PedidoUnidadesPreviasView() {
   };
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3"><section className="rounded-lg border border-border bg-card text-card-foreground shadow-sm"><div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Lista previa de pedido de unidades</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Lista previa de pedido de unidades</h1><p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Carga internos para dejarlos disponibles antes de consolidar el pedido final.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <Link
               to={paths.administracion.pedidoUnidadesRegistros}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
             >
               <List size={16} strokeWidth={1.75} />
               Ver registros de pedidos
@@ -152,7 +142,7 @@ export default function PedidoUnidadesPreviasView() {
             {canOpenPedidoUnidades && (
               <Link
                 to={paths.convencional.pedidoUnidades}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 <ClipboardList size={16} strokeWidth={1.75} />
                 Ir a Pedido de Unidades
@@ -163,9 +153,7 @@ export default function PedidoUnidadesPreviasView() {
       </section>
 
       {canAddPrevia && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+        <section className="rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm"><div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_auto]"><label className="flex flex-col gap-1 text-sm font-medium text-foreground">
               Interno
               <input
                 type="number"
@@ -179,7 +167,7 @@ export default function PedidoUnidadesPreviasView() {
                   }
                 }}
                 placeholder="Ej: 66439"
-                className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
               />
             </label>
 
@@ -187,7 +175,7 @@ export default function PedidoUnidadesPreviasView() {
               type="button"
               onClick={handleAdd}
               disabled={createMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181] disabled:cursor-not-allowed disabled:bg-[#8fd2ca]"
+              className="inline-flex items-center justify-center gap-2 self-end rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Plus size={16} strokeWidth={2} />
               Agregar
@@ -196,21 +184,19 @@ export default function PedidoUnidadesPreviasView() {
         </section>
       )}
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm"><div className="flex flex-col gap-2 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Unidades cargadas</h2>
-            <p className="mt-1 text-sm text-gray-500">Registros disponibles para seleccionar desde Pedido de Unidades.</p>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Unidades cargadas</h2><p className="mt-1 text-sm text-muted-foreground">Registros disponibles para seleccionar desde Pedido de Unidades.</p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          <div className="text-sm text-muted-foreground">
             {data.length} registros
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[1120px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Interno</th>
                 <th className="px-4 py-3 text-left">Cliente</th>
@@ -224,9 +210,9 @@ export default function PedidoUnidadesPreviasView() {
                 <th className="px-4 py-3 text-center">Accion</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {orderedData.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
+                <tr key={item._id} className="hover:bg-muted">
                   <td className="px-4 py-3 font-semibold text-gray-900">{item.interno}</td>
                   <td className="px-4 py-3 text-gray-700">{item.clienteNombre}</td>
                   <td className="px-4 py-3 text-gray-700">{item.vendedorNombre}</td>

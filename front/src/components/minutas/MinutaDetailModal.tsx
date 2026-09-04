@@ -16,7 +16,7 @@ export default function MinutaDetailModal({
 }: MinutaDetailModalProps) {
   return (
     <Transition appear show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50 font-preset" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-200"
@@ -26,11 +26,10 @@ export default function MinutaDetailModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-foreground/40" />
         </Transition.Child>
-
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-2">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -40,68 +39,92 @@ export default function MinutaDetailModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+                <div className="flex items-center justify-between border-b border-border px-3 py-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                      Comercial
+                    </p>
+                    <Dialog.Title className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                       Detalle de minuta
                     </Dialog.Title>
                   </div>
-
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                    className="rounded-md border border-border bg-background p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   >
                     <X size={18} />
                   </button>
                 </div>
-
                 {item ? (
-                  <div className="space-y-6 p-6">
-                    <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      <article className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Fecha</p>
-                        <p className="mt-2 text-sm font-semibold text-gray-900">{item.fechaLabel}</p>
+                  <div className="space-y-3 px-3 py-3">
+                    <section className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                      <article className="border-l-2 border-border px-3 py-1">
+                        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Fecha
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                          {item.fechaLabel}
+                        </p>
                       </article>
-                      <article className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Moderador</p>
-                        <p className="mt-2 text-sm font-semibold text-gray-900">
+                      <article className="border-l-2 border-border px-3 py-1">
+                        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Moderador
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
                           {item.moderador.lastName}, {item.moderador.name}
                         </p>
                       </article>
-                      <article className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Participantes</p>
-                        <p className="mt-2 text-sm font-semibold text-gray-900">{item.participantesCount}</p>
+                      <article className="border-l-2 border-border px-3 py-1">
+                        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                          Participantes
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                          {item.participantesCount}
+                        </p>
                       </article>
                     </section>
-
-                    <section className="rounded-2xl border border-gray-200 bg-white p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Tema</p>
-                      <p className="mt-2 text-base font-semibold text-gray-900">{item.tema}</p>
+                    <section className="border-t border-border pt-3">
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                        Tema
+                      </p>
+                      <p className="mt-1 text-base font-semibold text-foreground">
+                        {item.tema}
+                      </p>
                     </section>
-
-                    <section className="rounded-2xl border border-gray-200 bg-white p-5">
-                      <h3 className="text-sm font-semibold text-gray-900">Participantes</h3>
-                      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <section className="border-t border-border pt-3">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        Participantes
+                      </h3>
+                      <div className="mt-2 grid grid-cols-1 gap-1 md:grid-cols-2">
                         {item.participantes.map((participant, index) => (
-                          <div key={participant._id} className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                            {index + 1}. {participant.lastName}, {participant.name}
+                          <div
+                            key={participant._id}
+                            className="border-b border-border px-2 py-1.5 text-sm text-muted-foreground"
+                          >
+                            {index + 1}. {participant.lastName},{" "}
+                            {participant.name}
                           </div>
                         ))}
                       </div>
                     </section>
-
-                    <section className="rounded-2xl border border-gray-200 bg-white p-5">
-                      <h3 className="text-sm font-semibold text-gray-900">Temario y desarrollo</h3>
-                      <div className="mt-4 space-y-4">
+                    <section className="border-t border-border pt-3">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        Temario y desarrollo
+                      </h3>
+                      <div className="mt-2 space-y-3">
                         {item.temario.map((topic) => (
-                          <article key={`${item._id}-${topic.orden}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                            <div className="text-sm font-semibold text-gray-900">
+                          <article
+                            key={`${item._id}-${topic.orden}`}
+                            className="border-b border-border pb-3"
+                          >
+                            <div className="text-sm font-semibold text-foreground">
                               {topic.orden}. {topic.nombre}
                             </div>
-                            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{topic.desarrollo}</p>
+                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                              {topic.desarrollo}
+                            </p>
                           </article>
                         ))}
                       </div>

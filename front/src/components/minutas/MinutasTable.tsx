@@ -30,38 +30,44 @@ export default function MinutasTable({
   sendingId,
 }: MinutasTableProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-200 px-6 py-4">
-        <h2 className="text-base font-semibold tracking-tight text-gray-900">Listado de minutas</h2>
+    <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+      <div className="border-b border-border px-3 py-2">
+        <h2 className="text-base font-semibold tracking-tight text-foreground">
+          Listado de minutas
+        </h2>
       </div>
-
       <div className="overflow-x-auto">
-        <table className="min-w-[1080px] w-full text-sm">
-          <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+        <table className="min-w-[980px] w-full text-sm">
+          <thead className="bg-muted text-xs uppercase tracking-[0.16em] text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 text-left">Fecha</th>
-              <th className="px-4 py-3 text-left">Tema</th>
-              <th className="px-4 py-3 text-left">Moderador</th>
-              <th className="px-4 py-3 text-center">Participantes</th>
-              <th className="px-4 py-3 text-center">Temas</th>
-              <th className="px-4 py-3 text-center">Acciones</th>
+              <th className="px-3 py-2 text-left">Fecha</th>
+              <th className="px-3 py-2 text-left">Tema</th>
+              <th className="px-3 py-2 text-left">Moderador</th>
+              <th className="px-3 py-2 text-center">Participantes</th>
+              <th className="px-3 py-2 text-center">Temas</th>
+              <th className="px-3 py-2 text-center">Acciones</th>
             </tr>
           </thead>
-
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {items.map((item) => (
-              <tr key={item._id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-gray-700">{item.fechaLabel}</td>
-                <td className="px-4 py-3 text-gray-700">
-                  <div className="font-medium text-gray-900">{item.tema}</div>
+              <tr key={item._id} className="hover:bg-muted">
+                <td className="px-3 py-1.5 text-muted-foreground">
+                  {item.fechaLabel}
                 </td>
-                <td className="px-4 py-3 text-gray-700">
+                <td className="px-3 py-1.5">
+                  <div className="font-medium text-foreground">{item.tema}</div>
+                </td>
+                <td className="px-3 py-1.5 text-muted-foreground">
                   {item.moderador.lastName}, {item.moderador.name}
                 </td>
-                <td className="px-4 py-3 text-center text-gray-700">{item.participantesCount}</td>
-                <td className="px-4 py-3 text-center text-gray-700">{item.temasCount}</td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center gap-2">
+                <td className="px-3 py-1.5 text-center text-muted-foreground">
+                  {item.participantesCount}
+                </td>
+                <td className="px-3 py-1.5 text-center text-muted-foreground">
+                  {item.temasCount}
+                </td>
+                <td className="px-3 py-1.5">
+                  <div className="flex justify-center gap-1">
                     <MinutaPdfButton
                       loading={downloadingId === item._id}
                       onClick={() => onDownloadPdf(item)}
@@ -70,7 +76,7 @@ export default function MinutasTable({
                       <button
                         type="button"
                         onClick={() => onEdit(item)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                        className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
                       >
                         <Pencil size={14} />
                         Editar
@@ -81,7 +87,7 @@ export default function MinutasTable({
                         type="button"
                         onClick={() => onSend(item)}
                         disabled={sendingId === item._id}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Mail size={14} />
                         {sendingId === item._id ? "Enviando..." : "Enviar"}
@@ -92,7 +98,7 @@ export default function MinutasTable({
                         type="button"
                         onClick={() => onDelete(item)}
                         disabled={deletingId === item._id}
-                        className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <Trash2 size={14} />
                         {deletingId === item._id ? "Eliminando..." : "Eliminar"}
@@ -102,10 +108,12 @@ export default function MinutasTable({
                 </td>
               </tr>
             ))}
-
             {!items.length ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td
+                  colSpan={6}
+                  className="px-3 py-8 text-center text-sm text-muted-foreground"
+                >
                   Todavía no hay minutas registradas.
                 </td>
               </tr>

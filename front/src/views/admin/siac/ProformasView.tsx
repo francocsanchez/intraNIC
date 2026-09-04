@@ -55,30 +55,25 @@ export default function ProformasView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el módulo de proformas</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+      <div className="font-preset w-full bg-muted px-2 py-3"><section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
+          <h1 className="text-lg font-semibold text-foreground">No se pudo cargar el módulo de proformas</h1><p className="mt-1 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3"><section className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Administración</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Proformas</h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administración</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Proformas</h1><p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Generá proformas comerciales, guardalas en el sistema y exportalas con el formato definido.
             </p>
           </div>
 
           <Link
             to={paths.convencional.proformasNueva}
-            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-900"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             <Plus size={16} />
             Nueva proforma
@@ -86,15 +81,13 @@ export default function ProformasView() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm"><div className="flex flex-col gap-2 border-b border-border px-3 py-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Listado de proformas</h2>
-            <p className="mt-1 text-sm text-gray-500">Mostrando hasta 30 registros por página.</p>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Listado de proformas</h2><p className="mt-1 text-sm text-muted-foreground">Mostrando hasta 30 registros por página.</p>
           </div>
 
           {proformas.length ? (
-            <div className="inline-flex items-center gap-2 self-start rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600">
+            <div className="inline-flex items-center gap-2 self-start text-xs font-semibold text-muted-foreground">
               Página {currentPage} de {totalPages}
             </div>
           ) : null}
@@ -102,7 +95,7 @@ export default function ProformasView() {
 
         <div className="overflow-x-auto">
           <table className="min-w-[980px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">N°</th>
                 <th className="px-4 py-3 text-left">Fecha</th>
@@ -114,9 +107,9 @@ export default function ProformasView() {
                 <th className="px-4 py-3 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {visibleProformas.map((proforma: Proforma) => (
-                <tr key={proforma._id} className="hover:bg-gray-50">
+                <tr key={proforma._id} className="hover:bg-muted">
                   <td className="px-4 py-3 font-semibold text-gray-900">{proforma.numeroProforma}</td>
                   <td className="px-4 py-3 text-gray-700">{formatDateAr(proforma.fecha)}</td>
                   <td className="px-4 py-3 text-gray-700">{proforma.senores}</td>

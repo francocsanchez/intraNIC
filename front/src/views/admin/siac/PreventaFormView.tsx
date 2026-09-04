@@ -93,13 +93,12 @@ function PreventaFormContent({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
+      <div className="flex items-center justify-between border-b border-border px-3 py-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Preventas</p>
-          <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Preventas</p><Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
             {isEditing ? "Editar preventa" : "Nueva preventa"}
           </Dialog.Title>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Registra la necesidad comercial y el mes esperado de asignacion para la unidad.
           </p>
         </div>
@@ -108,20 +107,19 @@ function PreventaFormContent({
           type="button"
           onClick={onClose}
           disabled={saveMutation.isPending}
-          className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-border bg-background p-2 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           <X size={18} />
         </button>
       </div>
 
-      <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-6">
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+      <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-3"><div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
           <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-4">
             Vendedor
             <select
               value={form.vendedor}
               onChange={(event) => setForm((current) => ({ ...current, vendedor: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Seleccionar vendedor</option>
               {vendedores.map((vendedor) => (
@@ -192,13 +190,13 @@ function PreventaFormContent({
             />
           </label>
 
-          <div className="rounded-3xl border border-gray-200 bg-[#f8fbfd] p-4 xl:col-span-12">
+          <div className="rounded-md border border-border bg-muted p-3 xl:col-span-12">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-gray-900">Colores</h2>
                 <p className="mt-1 text-xs text-gray-500">Podes seleccionar varios colores posibles para una misma unidad.</p>
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#146b61] shadow-sm">
+              <span className="rounded-md bg-background px-2 py-0.5 text-xs font-semibold text-foreground">
                 {form.colores.length} seleccionados
               </span>
             </div>
@@ -212,7 +210,7 @@ function PreventaFormContent({
                     key={color._id}
                     className={[
                       "flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition",
-                      checked ? "border-[#15aa9a] bg-[#eef9f7] text-[#146b61]" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                      checked ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
                   >
                     <input
@@ -226,7 +224,7 @@ function PreventaFormContent({
                             : [...current.colores, color._id],
                         }))
                       }
-                      className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                      className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                     />
                     {color.nombre}
                   </label>
@@ -248,8 +246,7 @@ function PreventaFormContent({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-gray-500">Guarda los cambios para actualizar el listado operativo.</div>
+      <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between"><div className="text-sm text-muted-foreground">Guarda los cambios para actualizar el listado operativo.</div>
 
         <div className="flex gap-3">
           <button
@@ -264,7 +261,7 @@ function PreventaFormContent({
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#15aa9a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#128d80] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save size={16} />
             {saveMutation.isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear preventa"}
@@ -343,11 +340,11 @@ export function PreventaModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-foreground/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-2">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -357,7 +354,7 @@ export function PreventaModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+              <Dialog.Panel className="font-preset w-full max-w-5xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
                 {loading ? (
                   <div className="p-10">
                     <Loading />

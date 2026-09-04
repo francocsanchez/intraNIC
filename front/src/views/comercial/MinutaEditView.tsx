@@ -30,7 +30,12 @@ export default function MinutaEditView() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: minutaResponse, isLoading: isLoadingMinuta, isError: isMinutaError, error: minutaError } = useQuery({
+  const {
+    data: minutaResponse,
+    isLoading: isLoadingMinuta,
+    isError: isMinutaError,
+    error: minutaError,
+  } = useQuery({
     queryKey: ["minutas", id],
     queryFn: () => getMinutaById(id),
     enabled: Boolean(id),
@@ -69,23 +74,25 @@ export default function MinutaEditView() {
 
   if (isLoadingMinuta || isLoadingParticipants || isLoadingGroups) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando formulario de edición...</div>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+          Cargando formulario de edición...
+        </div>
       </div>
     );
   }
 
   if (isMinutaError || isParticipantsError || isGroupsError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
           {minutaError instanceof Error
             ? minutaError.message
             : participantsError instanceof Error
               ? participantsError.message
               : groupsError instanceof Error
                 ? groupsError.message
-              : "Error al cargar la minuta"}
+                : "Error al cargar la minuta"}
         </div>
       </div>
     );
@@ -95,8 +102,10 @@ export default function MinutaEditView() {
 
   if (!minuta) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">No se encontró la minuta solicitada.</div>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+          No se encontró la minuta solicitada.
+        </div>
       </div>
     );
   }
@@ -105,16 +114,20 @@ export default function MinutaEditView() {
 
   if (!isOwner) {
     return (
-      <div className="w-full space-y-6 px-4 py-6">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">Editar minuta</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                Comercial
+              </p>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+                Editar minuta
+              </h1>
             </div>
             <Link
               to={paths.convencional.minutas}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-secondary"
             >
               <ArrowLeft size={16} />
               Volver al listado
@@ -122,7 +135,7 @@ export default function MinutaEditView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-amber-200 bg-white p-6 text-amber-700 shadow-sm">
+        <section className="rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
           Solo el usuario que creó la minuta puede editarla.
         </section>
       </div>
@@ -131,16 +144,20 @@ export default function MinutaEditView() {
 
   if (minuta.sentAt) {
     return (
-      <div className="w-full space-y-6 px-4 py-6">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">Editar minuta</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                Comercial
+              </p>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+                Editar minuta
+              </h1>
             </div>
             <Link
               to={paths.convencional.minutas}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-secondary"
             >
               <ArrowLeft size={16} />
               Volver al listado
@@ -148,7 +165,7 @@ export default function MinutaEditView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-amber-200 bg-white p-6 text-amber-700 shadow-sm">
+        <section className="rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
           La minuta ya fue enviada por email y ya no puede editarse.
         </section>
       </div>
@@ -156,20 +173,25 @@ export default function MinutaEditView() {
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">Editar minuta</h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-500">
-              Actualizá la información de la reunión antes de enviarla por email.
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Comercial
+            </p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              Editar minuta
+            </h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Actualizá la información de la reunión antes de enviarla por
+              email.
             </p>
           </div>
 
           <Link
             to={paths.convencional.minutas}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-secondary"
           >
             <ArrowLeft size={16} />
             Volver al listado

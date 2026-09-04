@@ -77,7 +77,11 @@ export default function MinutasView() {
       downloadBlob(blob, `minuta-${item.fechaLabel.replace(/\//g, "-")}.pdf`);
       toast.success("PDF generado correctamente");
     } catch (downloadError) {
-      toast.error(downloadError instanceof Error ? downloadError.message : "Error al generar el PDF");
+      toast.error(
+        downloadError instanceof Error
+          ? downloadError.message
+          : "Error al generar el PDF",
+      );
     } finally {
       setDownloadingId(null);
     }
@@ -90,7 +94,11 @@ export default function MinutasView() {
       toast.success(response.message || "Minuta enviada correctamente");
       queryClient.invalidateQueries({ queryKey: ["minutas"] });
     } catch (sendError) {
-      toast.error(sendError instanceof Error ? sendError.message : "Error al enviar la minuta por email");
+      toast.error(
+        sendError instanceof Error
+          ? sendError.message
+          : "Error al enviar la minuta por email",
+      );
     } finally {
       setSendingId(null);
     }
@@ -98,39 +106,48 @@ export default function MinutasView() {
 
   if (isLoading) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando módulo de minutas...</div>
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
+          Cargando módulo de minutas...
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
-          {error instanceof Error ? error.message : "Error al cargar el módulo de minutas"}
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <div className="rounded-lg border border-destructive/30 bg-card px-3 py-3 text-sm text-destructive shadow-sm">
+          {error instanceof Error
+            ? error.message
+            : "Error al cargar el módulo de minutas"}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="font-preset w-full space-y-3 bg-muted px-2 py-3">
+      <section className="rounded-lg border border-border bg-card px-3 py-3 text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Comercial</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Minutas</h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
-              Generá minutas internas de reuniones comerciales, administralas desde el sistema y exportalas en PDF.
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Comercial
+            </p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              Minutas
+            </h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Generá minutas internas de reuniones comerciales, administralas
+              desde el sistema y exportalas en PDF.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => navigate(paths.convencional.minutasNueva)}
-              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+              className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               <Plus size={16} />
               Generar minuta
@@ -138,7 +155,7 @@ export default function MinutasView() {
             <button
               type="button"
               onClick={() => setGroupManagerOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
             >
               <Users size={16} />
               Crear grupo de difusion
@@ -162,22 +179,32 @@ export default function MinutasView() {
       />
 
       {!items.length ? (
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <article className="rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
+        <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <article className="rounded-lg border border-dashed border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
             <div className="flex items-start gap-3">
-              <FileText size={20} className="mt-0.5 text-gray-400" />
+              <FileText size={18} className="mt-0.5 text-muted-foreground" />
               <div>
-                <div className="font-semibold text-gray-700">Sin minutas todavía</div>
-                <p className="mt-1">La primera minuta se puede crear desde el botón principal del módulo.</p>
+                <div className="font-semibold text-foreground">
+                  Sin minutas todavía
+                </div>
+                <p className="mt-1">
+                  La primera minuta se puede crear desde el botón principal del
+                  módulo.
+                </p>
               </div>
             </div>
           </article>
-          <article className="rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
+          <article className="rounded-lg border border-dashed border-border bg-card px-3 py-3 text-sm text-muted-foreground shadow-sm">
             <div className="flex items-start gap-3">
-              <Users size={20} className="mt-0.5 text-gray-400" />
+              <Users size={18} className="mt-0.5 text-muted-foreground" />
               <div>
-                <div className="font-semibold text-gray-700">Participantes reutilizables</div>
-                <p className="mt-1">El selector trabaja con usuarios activos del sistema para evitar carga manual duplicada.</p>
+                <div className="font-semibold text-foreground">
+                  Participantes reutilizables
+                </div>
+                <p className="mt-1">
+                  El selector trabaja con usuarios activos del sistema para
+                  evitar carga manual duplicada.
+                </p>
               </div>
             </div>
           </article>

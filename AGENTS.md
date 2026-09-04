@@ -121,5 +121,10 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Los dialogos de vistas migradas deben usar directamente tokens del preset en panel, campos, acciones y pie; no depender de adaptadores de compatibilidad ni conservar colores heredados dentro del modal.
 - Los graficos de vistas migradas deben usar ECharts y una paleta resuelta desde los tokens semanticos del preset; no incorporar paletas hardcodeadas ni colores heredados.
 - Las vistas de Stock Usados deben compartir el mismo hero integrado, grilla de filtros, tabla compacta y badges de color mediante `StockUsadosView` cuando la fuente de datos lo permita.
+- Los flujos de altas y edicion de Preventas y Proformas deben aplicar los tokens del preset tanto en la vista como en sus formularios y dialogos.
+- En formularios de Proformas, las unidades repetibles se separan con divisores dentro de una unica superficie, sin cards anidadas.
+- Los campos que pertenecen a la misma fila funcional deben usar el mismo ancho en escritorio, salvo que su contenido requiera expresamente otra proporcion.
+- Las variantes de stock de una misma compania deben reutilizar una vista parametrizada y el mismo layout del preset para evitar divergencias visuales.
 - Las pantallas publicas migradas, incluido `/login`, deben usar `font-preset`, `bg-muted` y una unica superficie `bg-card`; no usan navbar y conservan el footer institucional indicado arriba.
 - La portada autenticada (`/`) se considera una vista migrada: sus accesos se agrupan en superficies compactas del preset y no puede conservar CSS inline, colores hexadecimales ni tipografias heredadas.
+- El flujo de Minutas debe mantener el preset de forma consistente en listado, alta, edición, detalle, grupos de difusión, selectores y editor enriquecido; los formularios se organizan en una única superficie con divisores, sin cards anidadas.

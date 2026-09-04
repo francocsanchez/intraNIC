@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-04
+
+### Minutas
+- Se migraron el listado, alta, edición, detalle y gestor de grupos de difusión al preset, con fondo unificado, superficies compactas, tablas densas y diálogos semánticos.
+- Se consolidó el formulario en una única superficie con divisores y se alinearon selectores de participantes, grupos y editor enriquecido a los tokens del preset.
+
 ## 2026-09-03
 
 ### Preventas
@@ -12,6 +18,15 @@
 - Se migraron `/usados/stock/disponible`, `/usados/stock/reservado` y `/usados/stock/guardado` al preset con heroes integrados, filtros y tablas compactas, badges de color unificados y dialogos semanticos.
 - Se actualizo el layout de Usados con el fondo, navbar y footer institucional del preset.
 - `/usados/mis-operaciones` utiliza el mismo componente de operaciones con ECharts, superficies compactas y tokens semanticos del preset.
+
+### Stock LIESS
+- Se migraron `/liess/stock/nuevos` y `/liess/stock/usados` al preset con resumen integrado, filtros compactos, tablas densas, navbar y footer institucionales.
+
+### Preventas y administracion
+- Se ajustaron Preventas, Lista previa, Facturas de anticipo y Proformas al preset compacto, con encabezados integrados, controles semanticos y tablas de alta densidad.
+- Se actualizaron los formularios y dialogos de Preventas y Nueva proforma para usar los bordes, fondos y acciones del nuevo sistema visual.
+- Se compacto Nueva proforma eliminando cards por unidad y se migro el detalle de proforma al preset con resumen integrado y tabla de alta densidad.
+- Se unifico el ancho de Señores, Cliente y CUIT en el formulario de Nueva proforma.
 
 ### Stock convencional
 - Se migro `/convencional/stock/disponible` al preset con navbar, footer y fondo unificados, hero y resumen en una unica superficie, filtros compactos y tabla de alta densidad.
