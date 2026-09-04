@@ -34,7 +34,7 @@ const getHeatmapStyle = (value: number, min: number, max: number) => {
   if (max <= min) {
     return {
       backgroundColor: "rgb(254, 243, 199)",
-      color: "#111827",
+      color: "oklch(0.145 0 0)",
     };
   }
 
@@ -45,7 +45,7 @@ const getHeatmapStyle = (value: number, min: number, max: number) => {
 
   return {
     backgroundColor: `hsl(${hue} ${saturation}% ${lightness}%)`,
-    color: ratio > 0.58 ? "#ffffff" : "#111827",
+    color: ratio > 0.58 ? "oklch(1 0 0)" : "oklch(0.145 0 0)",
   };
 };
 
@@ -104,11 +104,11 @@ export default function PatentamientosComparisonTable({
   };
 
   return (
-    <section className="print-comparison-card overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
-      <div className="border-b border-gray-200 px-3 py-2">
-        <h2 className="text-base font-semibold tracking-tight text-gray-900">{data.title}</h2>
+    <section className="print-comparison-card overflow-hidden rounded-lg border border-input bg-card shadow-sm">
+      <div className="border-b border-border px-3 py-2">
+        <h2 className="text-base font-semibold tracking-tight text-foreground">{data.title}</h2>
         {isZonaNicTable ? (
-          <div className="print-comparison-legend mt-2 space-y-1 text-[11px] leading-snug text-gray-400">
+          <div className="print-comparison-legend mt-2 space-y-1 text-primary leading-snug text-muted-foreground">
             {ZONA_NIC_LEGEND.map((item) => (
               <p key={item}>{item}</p>
             ))}
@@ -117,26 +117,26 @@ export default function PatentamientosComparisonTable({
       </div>
 
       <div className="print-comparison-scroll overflow-x-auto">
-        <table className="print-comparison-table min-w-full border-collapse text-[12px]">
-          <thead className="bg-black text-white">
+        <table className="print-comparison-table min-w-full border-collapse text-primary">
+          <thead className="bg-primary text-primary-foreground">
             <tr>
-              <th className="border border-gray-300 px-2 py-1.5 text-left font-semibold">{data.entityLabel}</th>
+              <th className="border border-input px-2 py-1.5 text-left font-semibold">{data.entityLabel}</th>
               {data.months.map((month) => (
                 <Fragment key={`${data.title}-${month.key}-${month.year}-group`}>
-                  <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">
+                  <th className="border border-input px-2 py-1.5 text-center font-semibold">
                     {month.label}
                   </th>
                   {showMonthlyParticipation ? (
                     <th
-                      className="border border-gray-300 px-2 py-1.5 text-center font-semibold"
+                      className="border border-input px-2 py-1.5 text-center font-semibold"
                     >
                       %
                     </th>
                   ) : null}
                 </Fragment>
               ))}
-              <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">Total</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-center font-semibold">%</th>
+              <th className="border border-input px-2 py-1.5 text-center font-semibold">Total</th>
+              <th className="border border-input px-2 py-1.5 text-center font-semibold">%</th>
             </tr>
           </thead>
 
@@ -144,10 +144,10 @@ export default function PatentamientosComparisonTable({
             {data.rows.length ? (
               <>
                 {data.rows.map((row, index) => (
-                  <tr key={`${data.title}-${row.label}`} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
+                  <tr key={`${data.title}-${row.label}`} className={index % 2 === 0 ? "bg-card" : "bg-secondary"}>
                     <td
-                      className={`border border-gray-200 px-2 py-1.5 text-left font-medium text-gray-900 ${
-                        isToyotaRow(row.label) ? "bg-red-100" : ""
+                      className={`border border-border px-2 py-1.5 text-left font-medium text-foreground ${
+                        isToyotaRow(row.label) ? "bg-destructive/10" : ""
                       }`}
                     >
                       {row.label}
@@ -155,16 +155,16 @@ export default function PatentamientosComparisonTable({
                     {data.months.map((month, monthIndex) => (
                       <Fragment key={`${row.label}-${month.key}-group`}>
                         <td
-                          className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
-                            isToyotaRow(row.label) ? "bg-red-100" : ""
+                          className={`border border-border px-2 py-1.5 text-center text-muted-foreground ${
+                            isToyotaRow(row.label) ? "bg-destructive/10" : ""
                           }`}
                         >
                           {formatInteger(row.months[month.key] ?? 0)}
                         </td>
                         {showMonthlyParticipation ? (
                           <td
-                            className={`border border-gray-200 px-2 py-1.5 text-center text-gray-700 ${
-                              isToyotaRow(row.label) ? "bg-red-100" : ""
+                            className={`border border-border px-2 py-1.5 text-center text-muted-foreground ${
+                              isToyotaRow(row.label) ? "bg-destructive/10" : ""
                             }`}
                           >
                             <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
@@ -174,11 +174,11 @@ export default function PatentamientosComparisonTable({
                                   const trendDirection = getMonthlyTrendDirection(row.months, monthIndex);
 
                                   if (trendDirection === "up") {
-                                    return <ArrowUp size={12} className="text-emerald-600" aria-hidden="true" />;
+                                    return <ArrowUp size={12} className="text-foreground" aria-hidden="true" />;
                                   }
 
                                   if (trendDirection === "down") {
-                                    return <ArrowDown size={12} className="text-red-600" aria-hidden="true" />;
+                                    return <ArrowDown size={12} className="text-destructive" aria-hidden="true" />;
                                   }
 
                                   return null;
@@ -190,15 +190,15 @@ export default function PatentamientosComparisonTable({
                       </Fragment>
                     ))}
                     <td
-                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-gray-900 ${
-                        isToyotaRow(row.label) ? "bg-red-100" : ""
+                      className={`border border-border px-2 py-1.5 text-center font-bold text-foreground ${
+                        isToyotaRow(row.label) ? "bg-destructive/10" : ""
                       }`}
                     >
                       {formatInteger(row.total)}
                     </td>
                     <td
-                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold ${
-                        isToyotaRow(row.label) ? "border-red-300" : ""
+                      className={`border border-border px-2 py-1.5 text-center font-bold ${
+                        isToyotaRow(row.label) ? "border-destructive/30" : ""
                       }`}
                       style={getHeatmapStyle(row.percentage, minPercentage, maxPercentage)}
                     >
@@ -207,26 +207,26 @@ export default function PatentamientosComparisonTable({
                   </tr>
                 ))}
 
-                <tr className="bg-gray-100">
-                  <td className="border border-gray-300 px-2 py-1.5 text-left font-bold text-gray-900">
+                <tr className="bg-muted">
+                  <td className="border border-input px-2 py-1.5 text-left font-bold text-foreground">
                     {data.totalRow.label}
                   </td>
                   {data.months.map((month) => (
                     <Fragment key={`total-${month.key}-group`}>
-                      <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                      <td className="border border-input px-2 py-1.5 text-center font-bold text-foreground">
                         {formatInteger(data.totalRow.months[month.key] ?? 0)}
                       </td>
                       {showMonthlyParticipation ? (
-                        <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                        <td className="border border-input px-2 py-1.5 text-center font-bold text-foreground">
                           {formatPercentage(data.totalRow.months[month.key] > 0 ? 100 : 0)}
                         </td>
                       ) : null}
                     </Fragment>
                   ))}
-                  <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                  <td className="border border-input px-2 py-1.5 text-center font-bold text-foreground">
                     {formatInteger(data.totalRow.total)}
                   </td>
-                  <td className="border border-gray-300 px-2 py-1.5 text-center font-bold text-gray-900">
+                  <td className="border border-input px-2 py-1.5 text-center font-bold text-foreground">
                     {formatPercentage(data.totalRow.percentage)}
                   </td>
                 </tr>
@@ -235,7 +235,7 @@ export default function PatentamientosComparisonTable({
               <tr>
                 <td
                   colSpan={data.months.length * (showMonthlyParticipation ? 2 : 1) + 3}
-                  className="border border-gray-200 px-3 py-6 text-center text-sm text-gray-500"
+                  className="border border-border px-3 py-6 text-center text-sm text-muted-foreground"
                 >
                   No hay informacion importada para esta comparativa en el ano seleccionado.
                 </td>

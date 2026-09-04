@@ -31,43 +31,43 @@ function ColorFormContent({ colorId, initialActivo, initialNombre, isEditing }: 
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({ queryKey: ["colores"] });
-      navigate(paths.convencional.preventasColores);
+      navigate(paths.admin.colores);
     },
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">{isEditing ? "Editar color" : "Nuevo color"}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">{isEditing ? "Editar color" : "Nuevo color"}</h1>
           </div>
-          <Link to={paths.convencional.preventasColores} className="inline-flex items-center gap-2 text-sm font-semibold text-[#15aa9a] hover:text-[#128d80]">
+          <Link to={paths.admin.colores} className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary">
             <ArrowLeft size={16} />
             Volver
           </Link>
         </div>
       </section>
 
-      <section className="max-w-2xl rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="max-w-2xl rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="space-y-5">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
             Nombre
             <input
               type="text"
               value={nombre}
               onChange={(event) => setNombre(event.target.value)}
-              className="rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 outline-none focus:border-ring"
             />
           </label>
 
-          <label className="inline-flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700">
+          <label className="inline-flex items-center gap-3 rounded-lg border border-border bg-muted px-4 py-3 text-sm font-medium text-muted-foreground">
             <input
               type="checkbox"
               checked={activo}
               onChange={(event) => setActivo(event.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
             />
             Color activo
           </label>
@@ -75,7 +75,7 @@ function ColorFormContent({ colorId, initialActivo, initialNombre, isEditing }: 
           <button
             type="button"
             onClick={() => mutation.mutate()}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[#15aa9a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#128d80]"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-secondary"
           >
             <Save size={16} />
             Guardar
@@ -100,9 +100,9 @@ export default function ColorFormView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Error al cargar color</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-foreground">Error al cargar color</h1>
+          <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -113,9 +113,9 @@ export default function ColorFormView() {
   if (isEditing && !item) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">Color no encontrado</h1>
-          <p className="mt-2 text-sm text-red-600">No fue posible cargar el color solicitado.</p>
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold text-foreground">Color no encontrado</h1>
+          <p className="mt-2 text-sm text-destructive">No fue posible cargar el color solicitado.</p>
         </section>
       </div>
     );

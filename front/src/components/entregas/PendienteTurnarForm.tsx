@@ -32,7 +32,7 @@ type PendienteTurnarFormProps = {
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="text-xs font-medium text-red-600">{message}</p>;
+  return <p className="text-xs font-medium text-destructive">{message}</p>;
 }
 
 export default function PendienteTurnarForm({
@@ -164,17 +164,17 @@ export default function PendienteTurnarForm({
     <Transition appear show={open} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={() => (pending ? undefined : onClose())}>
         <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-150" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-foreground/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-2">
             <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <Dialog.Panel className="w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <Dialog.Panel className="font-preset w-full max-w-5xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Entregas</p>
+                    <Dialog.Title className="mt-0.5 text-lg font-semibold tracking-tight text-popover-foreground">
                       {isEditing ? "Editar pendiente de turnar" : "Nuevo pendiente de turnar"}
                     </Dialog.Title>
                   </div>
@@ -183,24 +183,24 @@ export default function PendienteTurnarForm({
                     type="button"
                     onClick={onClose}
                     disabled={pending}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                  <div className="grid grid-cols-1 gap-6 p-6">
+                  <div className="grid grid-cols-1 gap-3 p-3">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
                       <div className="space-y-2">
-                        <label htmlFor="pendiente-interno" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        <label htmlFor="pendiente-interno" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Interno
                         </label>
                         <input
                           id="pendiente-interno"
                           type="number"
                           inputMode="numeric"
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                           {...register("interno", {
                             required: "El interno es obligatorio",
                             valueAsNumber: true,
@@ -218,7 +218,7 @@ export default function PendienteTurnarForm({
                           type="button"
                           onClick={handleLookup}
                           disabled={lookupLoading}
-                          className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:opacity-60"
+                          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
                         >
                           <Search size={16} />
                           {lookupLoading ? "Buscando..." : "Buscar en SIAC"}
@@ -230,12 +230,12 @@ export default function PendienteTurnarForm({
 
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                       <div className="space-y-2 md:col-span-2">
-                        <label htmlFor="pendiente-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        <label htmlFor="pendiente-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Sucursal
                         </label>
                         <select
                           id="pendiente-sucursal"
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
                         >
                           <option value="">-- Selecciona una sucursal --</option>
@@ -249,65 +249,65 @@ export default function PendienteTurnarForm({
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                          <span className="text-sm font-medium text-gray-800">Equipado?</span>
+                        <label className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+                          <span className="text-sm font-medium text-foreground">Equipado?</span>
                           <input
                             type="checkbox"
                             {...register("equipado")}
-                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                            className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
                           />
                         </label>
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                          <span className="text-sm font-medium text-gray-800">Entrega usado?</span>
+                        <label className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+                          <span className="text-sm font-medium text-foreground">Entrega usado?</span>
                           <input
                             type="checkbox"
                             {...register("entregaUsado")}
-                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                            className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
                           />
                         </label>
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <label className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                          <span className="text-sm font-medium text-gray-800">Siniestro?</span>
+                        <label className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3">
+                          <span className="text-sm font-medium text-foreground">Siniestro?</span>
                           <input
                             type="checkbox"
                             {...register("siniestro")}
-                            className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                            className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
                           />
                         </label>
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
-                        <label htmlFor="pendiente-observaciones" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        <label htmlFor="pendiente-observaciones" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Observaciones
                         </label>
                         <textarea
                           id="pendiente-observaciones"
                           rows={4}
-                          className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none focus:border-gray-500"
+                          className="w-full resize-none rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                           {...register("observaciones")}
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                  <div className="flex justify-end gap-2 border-t border-border bg-muted px-3 py-2">
                     <button
                       type="button"
                       onClick={onClose}
                       disabled={pending}
-                      className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 disabled:opacity-60"
+                      className="rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={pending}
-                      className="rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:opacity-60"
+                      className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
                     >
                       {pending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear pendiente"}
                     </button>

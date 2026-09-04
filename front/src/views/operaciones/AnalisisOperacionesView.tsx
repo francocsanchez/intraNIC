@@ -16,19 +16,9 @@ import type {
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, CalendarRange, FileText, Inbox, Rows3 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import {
-  Bar,
-  ComposedChart,
-  CartesianGrid,
-  LabelList,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import type { EChartsCoreOption } from "echarts/core";
+import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { toast } from "sonner";
 
 const MONTH_OPTIONS = [
@@ -83,8 +73,21 @@ const TABLE_COLUMNS: TableColumn[] = [
 ];
 
 const monthShortNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const CHART_COLORS = ["#128c80", "#1d4ed8", "#f59e0b", "#dc2626", "#7c3aed", "#059669", "#ea580c", "#475569"];
 const IVA_RATE = 0.21;
+
+type ChartPoint = Record<string, string | number | null | undefined>;
+type ChartSeries = { key: string; label: string; type?: "bar" | "line"; yAxisIndex?: number };
+
+function AnalyticsChart({ data, xKey, series }: { data: ChartPoint[]; xKey: string; series: ChartSeries[] }) {
+  const option = useMemo<EChartsCoreOption>(() => ({
+    color: getPresetChartColors(), grid: { top: 30, right: series.some((item) => item.yAxisIndex) ? 54 : 18, bottom: 40, left: 42 }, legend: { bottom: 0 },
+    tooltip: { trigger: "axis", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" } },
+    xAxis: { type: "category", data: data.map((item) => String(item[xKey] ?? "")), axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 } },
+    yAxis: series.some((item) => item.yAxisIndex) ? [{ type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } }, { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { show: false } }] : { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
+    series: series.map((item) => ({ type: item.type ?? "bar", name: item.label, yAxisIndex: item.yAxisIndex, data: data.map((point) => Number(point[item.key] ?? 0)), smooth: item.type === "line", barMaxWidth: 30, symbolSize: 5 })),
+  }), [data, series, xKey]);
+  return <EChart option={option} />;
+}
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -159,28 +162,20 @@ const formatPercentageDetailed = (value: number | null) => {
   return `${value.toFixed(value >= 10 ? 1 : 2)}%`;
 };
 
-const formatBarLabelPercentage = (value: number | null) => {
-  if (value === null || Number.isNaN(value)) {
-    return "";
-  }
-
-  return `${Math.round(value)}%`;
-};
-
 const getDescuentoCellClassName = (value: number | null) => {
   if (value === null || Number.isNaN(value)) {
     return "";
   }
 
   if (value > 9) {
-    return "bg-red-100/70 text-red-700";
+    return "bg-destructive/10/70 text-destructive";
   }
 
   if (value >= 6) {
-    return "bg-amber-100/70 text-amber-700";
+    return "bg-secondary/70 text-secondary-foreground";
   }
 
-  return "bg-emerald-100/70 text-emerald-700";
+  return "bg-secondary/70 text-secondary-foreground";
 };
 
 const formatCellValue = (row: AnalisisOperacionesPreventaItem, column: Exclude<TableColumn, { kind: "action" }>) => {
@@ -339,7 +334,7 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-secondary/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -353,10 +348,10 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="border-b border-gray-200 px-5 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#128c80]">Analisis</p>
-                  <Dialog.Title className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+              <Dialog.Panel className="w-full max-w-3xl overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+                <div className="border-b border-border px-5 py-4">
+                  <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">Analisis</p>
+                  <Dialog.Title className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                     Forma de pago {numero ? `OP ${numero}` : ""}
                   </Dialog.Title>
                 </div>
@@ -365,84 +360,84 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                   {isLoading ? (
                     <div className="space-y-3">
                       {Array.from({ length: 7 }).map((_, index) => (
-                        <div key={index} className="h-10 animate-pulse rounded-xl bg-gray-100" />
+                        <div key={index} className="h-10 animate-pulse rounded-lg bg-muted" />
                       ))}
                     </div>
                   ) : errorMessage ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                       {errorMessage}
                     </div>
                   ) : (
                     <div className="space-y-5">
                       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 md:col-span-2">
-                          <span className="text-sm font-medium text-gray-600">Vendedor</span>
-                          <span className="text-sm font-semibold text-gray-900">{detalle?.vendedor ?? "-"}</span>
+                        <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3 md:col-span-2">
+                          <span className="text-sm font-medium text-muted-foreground">Vendedor</span>
+                          <span className="text-sm font-semibold text-foreground">{detalle?.vendedor ?? "-"}</span>
                         </div>
                         {items.map((item) => (
                           <div
                             key={item.label}
-                            className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                            className="flex items-center justify-between rounded-lg border border-border bg-muted px-4 py-3"
                           >
-                            <span className="text-sm font-medium text-gray-600">{item.label}</span>
-                            <span className="text-sm font-semibold text-gray-900">{formatMoney(item.value)}</span>
+                            <span className="text-sm font-medium text-muted-foreground">{item.label}</span>
+                            <span className="text-sm font-semibold text-foreground">{formatMoney(item.value)}</span>
                           </div>
                         ))}
                       </div>
 
-                      <section className="rounded-2xl border border-gray-200 bg-white">
-                        <div className="border-b border-gray-200 px-4 py-3">
-                          <h3 className="text-sm font-semibold text-gray-900">Detalle de cheques</h3>
-                          <p className="mt-1 text-xs text-gray-500">
+                      <section className="rounded-lg border border-border bg-card">
+                        <div className="border-b border-border px-4 py-3">
+                          <h3 className="text-sm font-semibold text-foreground">Detalle de cheques</h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
                             Interes por cheque, tasa anual aplicada y resumen total del capital financiado.
                           </p>
                         </div>
 
                         {cheques.length === 0 ? (
-                          <div className="px-4 py-6 text-sm text-gray-500">
+                          <div className="px-4 py-6 text-sm text-muted-foreground">
                             Esta operación no tiene cheques asociados para mostrar.
                           </div>
                         ) : (
                           <div className="space-y-4 p-4">
                             <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                              <div className="rounded-lg border border-border bg-muted px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                   Capital financiado
                                 </p>
-                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                <p className="mt-1 text-base font-semibold text-foreground">
                                   {formatMoney(totalCapitalCheques)}
                                 </p>
                               </div>
-                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                              <div className="rounded-lg border border-border bg-muted px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                   Interes total
                                 </p>
-                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                <p className="mt-1 text-base font-semibold text-foreground">
                                   {formatMoney(totalInteresCheques)}
                                 </p>
                               </div>
-                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                              <div className="rounded-lg border border-border bg-muted px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                   Tasa anual
                                 </p>
-                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                <p className="mt-1 text-base font-semibold text-foreground">
                                   {formatPercentageDetailed(tasaAnualCheques)}
                                 </p>
                               </div>
-                              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                              <div className="rounded-lg border border-border bg-muted px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                   Total cheques
                                 </p>
-                                <p className="mt-1 text-base font-semibold text-gray-900">
+                                <p className="mt-1 text-base font-semibold text-foreground">
                                   {formatMoney(totalImporteCheques)}
                                 </p>
                               </div>
                             </div>
 
                             <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                              <thead className="bg-gray-50">
-                                <tr className="text-left text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                            <table className="min-w-full divide-y divide-border">
+                              <thead className="bg-muted">
+                                <tr className="text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                   <th className="px-4 py-3">Cheque</th>
                                   <th className="px-4 py-3">Fecha</th>
                                   <th className="px-4 py-3 text-right">Capital</th>
@@ -451,23 +446,23 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                                   <th className="px-4 py-3 text-right">Importe</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-gray-100 bg-white">
+                              <tbody className="divide-y divide-border bg-card">
                                 {chequesDetallados.map((cheque) => (
                                   <tr key={`${cheque.renglon ?? "sin-renglon"}-${cheque.fecha ?? "sin-fecha"}`}>
-                                    <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                                    <td className="px-4 py-3 text-sm font-medium text-foreground">
                                       {cheque.renglon !== null ? `Cheque ${cheque.renglon}` : "-"}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{formatDate(cheque.fecha)}</td>
-                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                    <td className="px-4 py-3 text-sm text-muted-foreground">{formatDate(cheque.fecha)}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-foreground">
                                       {formatMoney(cheque.capital)}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                    <td className="px-4 py-3 text-right text-sm text-foreground">
                                       {formatMoney(cheque.interes)}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-sm text-gray-800">
+                                    <td className="px-4 py-3 text-right text-sm text-foreground">
                                       {formatPercentageDetailed(cheque.tasaAnual)}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                                    <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                                       {formatMoney(cheque.importeTotal)}
                                     </td>
                                   </tr>
@@ -482,11 +477,11 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                   )}
                 </div>
 
-                <div className="border-t border-gray-200 px-5 py-4">
+                <div className="border-t border-border px-5 py-4">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
+                    className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-muted"
                   >
                     Cerrar
                   </button>
@@ -611,12 +606,12 @@ export default function AnalisisOperacionesView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-[28px] border border-red-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3 text-red-600">
+        <section className="rounded-[28px] border border-destructive/30 bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 text-destructive">
             <AlertCircle size={18} />
-            <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Analisis Operaciones</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Analisis Operaciones</h1>
           </div>
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-2 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener los registros solicitados."}
           </p>
         </section>
@@ -668,17 +663,17 @@ export default function AnalisisOperacionesView() {
 
   return (
     <div className="w-full space-y-4 px-4 py-4">
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="analisis-operaciones-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <label htmlFor="analisis-operaciones-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Ano
             </label>
             <select
               id="analisis-operaciones-anio"
               value={anio}
               onChange={(event) => setAnio(Number(event.target.value))}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             >
               {yearOptions.map((option) => (
                 <option key={option} value={option}>
@@ -689,14 +684,14 @@ export default function AnalisisOperacionesView() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="analisis-operaciones-mes" className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <label htmlFor="analisis-operaciones-mes" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Mes
             </label>
             <select
               id="analisis-operaciones-mes"
               value={mes}
               onChange={(event) => setMes(Number(event.target.value))}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             >
               {MONTH_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -709,35 +704,35 @@ export default function AnalisisOperacionesView() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.9fr)]">
-        <article className="min-w-0 rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="flex h-full flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
              
-              <h1 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Analisis Operaciones</h1>
+              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Analisis Operaciones</h1>
          
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <article className="rounded-lg bg-[#e4f3fa] px-3 py-2">
+              <article className="rounded-lg bg-secondary px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-white p-2 text-[#15aa9a] shadow-sm">
+                  <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
                     <Rows3 size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Registros</p>
-                    <p className="text-lg font-bold text-gray-900">{data.data.length}</p>
+                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Registros</p>
+                    <p className="text-lg font-bold text-foreground">{data.data.length}</p>
                   </div>
                 </div>
               </article>
 
-              <article className="rounded-lg bg-[#e4f3fa] px-3 py-2">
+              <article className="rounded-lg bg-secondary px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-white p-2 text-[#15aa9a] shadow-sm">
+                  <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
                     <CalendarRange size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Periodo</p>
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Periodo</p>
+                    <p className="text-sm font-bold text-foreground">
                       {currentMonthLabel} {anio}
                     </p>
                   </div>
@@ -747,41 +742,41 @@ export default function AnalisisOperacionesView() {
           </div>
         </article>
 
-        <article className="min-w-0 rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="flex h-full flex-col">
          
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">PROM DESC.</h2>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">PROM DESC.</h2>
         
 
             <div className="mt-4 grid flex-1 grid-cols-1 gap-3 xl:grid-cols-2">
               {promedioDescuentoPorModelo.length || promedioDescuentoPorSucursal.length ? (
                 <>
-                  <div className="rounded-lg bg-[#e4f3fa] px-3 py-2.5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Modelos</p>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-800">
+                  <div className="rounded-lg bg-secondary px-3 py-2.5">
+                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Modelos</p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground">
                       {promedioDescuentoPorModelo.map((item) => (
                         <div key={item.nombre} className="inline-flex items-center gap-1.5">
-                          <span className="font-semibold uppercase text-gray-700">{item.nombre}</span>
-                          <span className="font-bold text-[#128c80]">{formatPercentage(item.promedio)}</span>
+                          <span className="font-semibold uppercase text-muted-foreground">{item.nombre}</span>
+                          <span className="font-bold text-primary">{formatPercentage(item.promedio)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="rounded-lg bg-[#e4f3fa] px-3 py-2.5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Sucursales</p>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-800">
+                  <div className="rounded-lg bg-secondary px-3 py-2.5">
+                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Sucursales</p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground">
                       {promedioDescuentoPorSucursal.map((item) => (
                         <div key={item.nombre} className="inline-flex items-center gap-1.5">
-                          <span className="font-semibold uppercase text-gray-700">{item.nombre}</span>
-                          <span className="font-bold text-[#128c80]">{formatPercentage(item.promedio)}</span>
+                          <span className="font-semibold uppercase text-muted-foreground">{item.nombre}</span>
+                          <span className="font-bold text-primary">{formatPercentage(item.promedio)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="inline-flex items-center rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-600">
+                <div className="inline-flex items-center rounded-lg bg-secondary px-3 py-2 text-sm text-muted-foreground">
                   Sin datos para calcular promedio.
                 </div>
               )}
@@ -791,36 +786,36 @@ export default function AnalisisOperacionesView() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="flex h-full flex-col">
-            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Financiacion</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Financiacion</h2>
             
 
             <div className="mt-4 grid flex-1 grid-cols-2 gap-3 xl:grid-cols-4">
-              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con credito</p>
-                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
+              <div className="rounded-lg bg-secondary px-3 py-3">
+                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con credito</p>
+                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesCredito ?? 0)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Cant. con usado</p>
-                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
+              <div className="rounded-lg bg-secondary px-3 py-3">
+                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con usado</p>
+                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesUsado ?? 0)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">% Toma</p>
-                <p className="mt-1 text-xl font-bold text-gray-900 xl:text-2xl">
+              <div className="rounded-lg bg-secondary px-3 py-3">
+                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Toma</p>
+                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
                   {isResumenFinanciacionLoading ? "..." : formatPercentageCompact(porcentajeToma)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-[#e4f3fa] px-3 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Promedio valor de usado</p>
-                <p className="mt-1 text-sm font-bold text-gray-900 xl:text-lg">
+              <div className="rounded-lg bg-secondary px-3 py-3">
+                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Promedio valor de usado</p>
+                <p className="mt-1 text-sm font-bold text-foreground xl:text-lg">
                   {isResumenFinanciacionLoading
                     ? "..."
                     : formatMoney(resumenFinanciacionData?.data.promedioValorUsado ?? null)}
@@ -830,26 +825,26 @@ export default function AnalisisOperacionesView() {
           </div>
         </article>
 
-        <article className="rounded-xl border border-[#c7e7e2] bg-white p-4 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="flex h-full flex-col">
-            <h2 className="text-xl font-semibold tracking-tight text-gray-900">PROM CREDITO</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">PROM CREDITO</h2>
            
 
             <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
               {isResumenFinanciacionLoading ? (
-                <div className="h-24 w-full animate-pulse rounded-xl bg-gray-100" />
+                <div className="h-24 w-full animate-pulse rounded-lg bg-muted" />
               ) : resumenFinanciacionData?.data.promedioCreditoPorModelo.length ? (
                 resumenFinanciacionData.data.promedioCreditoPorModelo.map((item) => (
                   <div
                     key={item.modelo}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-800"
+                    className="inline-flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-sm text-foreground"
                   >
-                    <span className="font-semibold uppercase text-gray-700">{item.modelo}</span>
-                    <span className="font-bold text-[#128c80]">{formatMoney(item.promedioCredito)}</span>
+                    <span className="font-semibold uppercase text-muted-foreground">{item.modelo}</span>
+                    <span className="font-bold text-primary">{formatMoney(item.promedioCredito)}</span>
                   </div>
                 ))
               ) : (
-                <div className="inline-flex items-center rounded-lg bg-[#e4f3fa] px-3 py-2 text-sm text-gray-600">
+                <div className="inline-flex items-center rounded-lg bg-secondary px-3 py-2 text-sm text-muted-foreground">
                   Sin operaciones con credito en el periodo.
                 </div>
               )}
@@ -859,302 +854,119 @@ export default function AnalisisOperacionesView() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-2 border-b border-gray-200 pb-3">
-            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Usados Anualizado</h2>
-            <p className="text-xs text-gray-600">Cantidad de usados por mes y valor promedio de usado durante {anio}.</p>
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-border pb-3">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Usados Anualizado</h2>
+            <p className="text-xs text-muted-foreground">Cantidad de usados por mes y valor promedio de usado durante {anio}.</p>
           </div>
 
           <div className="mt-4 h-[320px] min-w-0">
             {isUsadosMensualLoading ? (
-              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={usadosChartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4b5563" }} />
-                  <YAxis
-                    yAxisId="left"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    allowDecimals={false}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => formatMoney(Number(value)) as string}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 16,
-                      borderColor: "#cfe7ee",
-                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                    }}
-                    formatter={(value, name) =>
-                      name === "Cantidad usados"
-                        ? [value, name]
-                        : [formatMoney(Number(value)), name]
-                    }
-                    labelFormatter={(label) => `Mes: ${label}`}
-                  />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="cantidadUsados" name="Cantidad usados" fill="#128c80" radius={[6, 6, 0, 0]}>
-                    <LabelList
-                      dataKey="porcentajeToma"
-                      position="insideTop"
-                      offset={10}
-                      fill="#ffffff"
-                      fontSize={11}
-                      fontWeight={700}
-                      formatter={(value) =>
-                        formatBarLabelPercentage(
-                          value === null || value === undefined || value === ""
-                            ? null
-                            : Number(value),
-                        )
-                      }
-                    />
-                  </Bar>
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="promedioValorUsado"
-                    name="Promedio valor usado"
-                    stroke="#1d4ed8"
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                    connectNulls
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
+              <AnalyticsChart data={usadosChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadUsados", label: "Cantidad usados" }, { key: "promedioValorUsado", label: "Promedio valor usado", type: "line", yAxisIndex: 1 }]} />
             )}
           </div>
         </article>
 
-        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-2 border-b border-gray-200 pb-3">
-            <h2 className="text-xl font-semibold tracking-tight text-gray-900">Monto Promedio de Credito</h2>
-            <p className="text-xs text-gray-600">Promedio mensual de credito bancario durante {anio}.</p>
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="flex flex-col gap-2 border-b border-border pb-3">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Monto Promedio de Credito</h2>
+            <p className="text-xs text-muted-foreground">Promedio mensual de credito bancario durante {anio}.</p>
           </div>
 
           <div className="mt-4 h-[320px] min-w-0">
             {isCreditoMensualLoading ? (
-              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={creditoChartData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4b5563" }} />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => formatMoney(Number(value)) as string}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 16,
-                      borderColor: "#cfe7ee",
-                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                    }}
-                    formatter={(value) => [formatMoney(Number(value)), "Promedio credito"]}
-                    labelFormatter={(label) => `Mes: ${label}`}
-                  />
-                  <Legend />
-                  <Bar
-                    dataKey="promedioCredito"
-                    name="Promedio credito"
-                    fill="#f59e0b"
-                    radius={[6, 6, 0, 0]}
-                  >
-                    <LabelList
-                      dataKey="porcentajeCredito"
-                      position="insideTop"
-                      offset={10}
-                      fill="#ffffff"
-                      fontSize={11}
-                      fontWeight={700}
-                      formatter={(value) =>
-                        formatBarLabelPercentage(
-                          value === null || value === undefined || value === ""
-                            ? null
-                            : Number(value),
-                        )
-                      }
-                    />
-                  </Bar>
-                </ComposedChart>
-              </ResponsiveContainer>
+              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito" }]} />
             )}
           </div>
         </article>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Por Mes</h2>
-              <p className="mt-1 text-xs text-gray-600">
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Descuento Por Mes</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Evolucion mensual del porcentaje de descuento por modelo durante {anio}.
               </p>
             </div>
 
-            <div className="inline-flex w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
+            <div className="inline-flex w-fit rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
               {chartModels.length} modelos
             </div>
           </div>
 
           <div className="mt-4 h-[340px] min-w-0">
             {isDescuentoMensualLoading ? (
-              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : !chartModels.length ? (
-              <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#b7d8e3] bg-[#f8fcff] text-sm text-gray-500">
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted text-sm text-muted-foreground">
                 Sin datos de descuento por modelo en {anio}.
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartDataModelos} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="mes"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#4b5563" }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 16,
-                      borderColor: "#cfe7ee",
-                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                    }}
-                    formatter={(value, name) => [`${value}%`, name]}
-                    labelFormatter={(label) => `Mes: ${label}`}
-                  />
-                  <Legend />
-                  {chartModels.map((model, index) => (
-                    <Line
-                      key={model}
-                      type="monotone"
-                      dataKey={model}
-                      name={model}
-                      stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                      strokeWidth={2.5}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                      connectNulls
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
+              <AnalyticsChart data={chartDataModelos as ChartPoint[]} xKey="mes" series={chartModels.map((model) => ({ key: model, label: model, type: "line" as const }))} />
             )}
           </div>
         </article>
 
-        <article className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Descuento Anual Sucursal</h2>
-              <p className="mt-1 text-xs text-gray-600">
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Descuento Anual Sucursal</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Evolucion mensual del porcentaje de descuento por sucursal durante {anio}.
               </p>
             </div>
 
-            <div className="inline-flex w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
+            <div className="inline-flex w-fit rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
               {chartSucursales.length} sucursales
             </div>
           </div>
 
           <div className="mt-4 h-[340px] min-w-0">
             {isDescuentoMensualLoading ? (
-              <div className="h-full animate-pulse rounded-xl bg-gray-100" />
+              <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : !chartSucursales.length ? (
-              <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#b7d8e3] bg-[#f8fcff] text-sm text-gray-500">
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted text-sm text-muted-foreground">
                 Sin datos de descuento por sucursal en {anio}.
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartDataSucursales} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="mes"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#4b5563" }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 16,
-                      borderColor: "#cfe7ee",
-                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-                    }}
-                    formatter={(value, name) => [`${value}%`, name]}
-                    labelFormatter={(label) => `Mes: ${label}`}
-                  />
-                  <Legend />
-                  {chartSucursales.map((sucursal, index) => (
-                    <Line
-                      key={sucursal}
-                      type="monotone"
-                      dataKey={sucursal}
-                      name={sucursal}
-                      stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                      strokeWidth={2.5}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                      connectNulls
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
+              <AnalyticsChart data={chartDataSucursales as ChartPoint[]} xKey="mes" series={chartSucursales.map((sucursal) => ({ key: sucursal, label: sucursal, type: "line" as const }))} />
             )}
           </div>
         </article>
       </section>
 
       {!data.data.length ? (
-        <section className="rounded-xl border border-dashed border-[#b7d8e3] bg-white px-5 py-10 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#e4f3fa] text-[#15aa9a]">
+        <section className="rounded-lg border border-dashed border-border bg-card px-5 py-10 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-primary">
             <Inbox size={20} />
           </div>
-          <h2 className="mt-3 text-lg font-semibold text-gray-900">No hay registros para mostrar</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="mt-3 text-lg font-semibold text-foreground">No hay registros para mostrar</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Proba cambiar el ano o el mes para ampliar el resultado.
           </p>
         </section>
       ) : (
-        <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-4 py-3">
-            <p className="text-sm font-medium text-gray-600">
+        <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-4 py-3">
+            <p className="text-sm font-medium text-muted-foreground">
               {data.data.length} registros encontrados para {currentMonthLabel.toLowerCase()} de {anio}.
             </p>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-xs">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border text-xs">
+              <thead className="bg-muted">
                 <tr>
                   {TABLE_COLUMNS.map((column) => (
                     <th
                       key={column.key}
-                      className="whitespace-nowrap px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500"
+                      className="whitespace-nowrap px-2 py-1.5 text-left text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                     >
                       {column.label}
                     </th>
@@ -1162,9 +974,9 @@ export default function AnalisisOperacionesView() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-100 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {data.data.map((row) => (
-                  <tr key={`${row.numero ?? "sin-numero"}-${row.fecha ?? "sin-fecha"}-${row.modelo}`} className="hover:bg-gray-50/70">
+                  <tr key={`${row.numero ?? "sin-numero"}-${row.fecha ?? "sin-fecha"}-${row.modelo}`} className="hover:bg-muted/70">
                     {TABLE_COLUMNS.map((column) => (
                       (() => {
                         const descuentoValue =
@@ -1180,7 +992,7 @@ export default function AnalisisOperacionesView() {
                         return (
                       <td
                         key={`${row.numero ?? "sin-numero"}-${row.fecha ?? "sin-fecha"}-${String(column.key)}`}
-                        className={`whitespace-nowrap px-2 py-1.5 text-xs text-gray-700 ${colorClassName}`}
+                        className={`whitespace-nowrap px-2 py-1.5 text-xs text-muted-foreground ${colorClassName}`}
                       >
                         {column.kind === "action" ? (
                           column.key === "formaPago" ? (
@@ -1188,7 +1000,7 @@ export default function AnalisisOperacionesView() {
                               <button
                                 type="button"
                                 onClick={() => setNumeroFormaPago(row.numero)}
-                                className="inline-flex rounded-full bg-gray-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-gray-700"
+                                className="inline-flex rounded-full bg-primary px-3 py-1 text-primary font-semibold uppercase tracking-[0.12em] text-primary-foreground transition hover:bg-muted"
                               >
                                 Ver
                               </button>
@@ -1197,7 +1009,7 @@ export default function AnalisisOperacionesView() {
                             )
                           ) : row.fechaFactura ? (
                             <span
-                              className="inline-flex items-center justify-center text-[#128c80]"
+                              className="inline-flex items-center justify-center text-primary"
                               title="Operacion facturada"
                             >
                               <FileText size={14} />

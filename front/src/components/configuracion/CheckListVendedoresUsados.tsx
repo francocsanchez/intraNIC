@@ -34,12 +34,12 @@ export default function CheckListVendedoresUsados({
   register,
 }: CheckListVendedoresProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-200">
-        <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="px-5 py-4 border-b border-border">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {title}
         </div>
-        <div className="text-xs text-gray-500 mt-1">{subtitle}</div>
+        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
       </div>
 
       <div className="max-h-56 overflow-y-auto p-2">
@@ -49,7 +49,7 @@ export default function CheckListVendedoresUsados({
           return (
             <label
               key={codigo}
-              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-gray-50"
+              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-muted"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <input
@@ -57,14 +57,14 @@ export default function CheckListVendedoresUsados({
                   value={codigo}
                   defaultChecked={(vendedores ?? []).map(String).includes(codigo)}
                   {...register(name)}
-                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20"
+                  className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
                 />
-                <span className="text-sm text-gray-900 truncate">
+                <span className="text-sm text-foreground truncate">
                   {v.vendedor}
                 </span>
               </div>
 
-              <span className="text-[11px] font-semibold text-gray-400">
+              <span className="text-primary font-semibold text-muted-foreground">
                 {v.codigo}
               </span>
             </label>

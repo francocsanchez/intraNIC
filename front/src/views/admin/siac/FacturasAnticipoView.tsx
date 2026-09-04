@@ -156,8 +156,8 @@ export default function FacturasAnticipoView() {
 
         {data.length === 0 ? (
           <div className="px-6 py-12 text-center">
-            <h3 className="text-base font-semibold text-gray-900">Todavia no hay operaciones cargadas</h3>
-            <p className="mt-2 text-sm text-gray-500">Ingresa un numero OP para comenzar a registrar facturas de anticipo.</p>
+            <h3 className="text-base font-semibold text-foreground">Todavia no hay operaciones cargadas</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Ingresa un numero OP para comenzar a registrar facturas de anticipo.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -178,16 +178,16 @@ export default function FacturasAnticipoView() {
               <tbody className="divide-y divide-border">
                 {data.map((item) => (
                   <tr key={item._id} className="hover:bg-muted">
-                    <td className="px-4 py-3 font-semibold text-gray-900">{item.numeroOp}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.version}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.chasis}</td>
-                    <td className="px-4 py-3 text-gray-700">{item.usuarioCarga}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDateTime(item.fechaCarga)}</td>
+                    <td className="px-4 py-3 font-semibold text-foreground">{item.numeroOp}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.cliente}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.version}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.vendedor}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.chasis}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.usuarioCarga}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(item.fechaCarga)}</td>
                     <td className="px-4 py-3">
                       {item.estaFacturada ? (
-                        <span className="inline-flex rounded-xl border border-red-200 bg-red-100 px-3 py-2 text-xs font-semibold text-red-700">
+                        <span className="inline-flex rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">
                           Anular factura de anticipo
                         </span>
                       ) : null}
@@ -202,7 +202,7 @@ export default function FacturasAnticipoView() {
                           deleteMutation.mutate(item._id);
                         }}
                         disabled={deleteMutation.isPending}
-                        className="inline-flex items-center justify-center rounded-lg border border-red-200 p-2 text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center rounded-lg border border-destructive/30 p-2 text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={`Eliminar operacion ${item.numeroOp}`}
                       >
                         <Trash2 size={16} strokeWidth={1.9} />

@@ -56,7 +56,7 @@ function ToolbarButton({
       title={label}
       className={`inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm transition ${
         active
-          ? "border-primary bg-primary text-primary-foreground"
+          ? "border-border bg-primary text-primary-foreground"
           : "border-border bg-background text-foreground hover:bg-secondary"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >

@@ -48,9 +48,9 @@ type PedidoUnidadDateGroup = {
 };
 
 const prioridadBadgeClass: Record<PedidoUnidadPrioridad, string> = {
-  normal: "bg-gray-100 text-gray-700",
-  media: "bg-yellow-100 text-yellow-800",
-  urgente: "bg-red-100 text-red-700",
+  normal: "bg-muted text-muted-foreground",
+  media: "bg-secondary text-secondary-foreground",
+  urgente: "bg-destructive/10 text-destructive",
 };
 
 const REGISTRO_ESTADO_FILTERS: Array<{ value: RegistroEstadoFilter; label: string }> = [
@@ -81,7 +81,7 @@ function getRegistroEstadoBadge(estado: string | null | undefined) {
   if (normalized === "ENTREGADA") {
     return {
       label: "ENTREGADA",
-      className: "bg-emerald-100 text-emerald-700",
+      className: "bg-secondary text-secondary-foreground",
       Icon: House,
     };
   }
@@ -89,7 +89,7 @@ function getRegistroEstadoBadge(estado: string | null | undefined) {
   if (normalized === "EN VIAJE") {
     return {
       label: "EN VIAJE",
-      className: "bg-amber-100 text-amber-700",
+      className: "bg-secondary text-secondary-foreground",
       Icon: Truck,
     };
   }
@@ -97,7 +97,7 @@ function getRegistroEstadoBadge(estado: string | null | undefined) {
   if (normalized === "PENDIENTE") {
     return {
       label: "PENDIENTE",
-      className: "bg-gray-100 text-gray-600",
+      className: "bg-muted text-muted-foreground",
       Icon: Clock3,
     };
   }
@@ -456,11 +456,11 @@ export default function PedidoUnidadesView() {
   if (hasActiveError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Error al cargar pedidos de unidades
           </h1>
-          <p className="mt-2 text-sm text-red-600">{activeError instanceof Error ? activeError.message : "Error desconocido"}</p>
+          <p className="mt-2 text-sm text-destructive">{activeError instanceof Error ? activeError.message : "Error desconocido"}</p>
         </section>
       </div>
     );
@@ -573,13 +573,13 @@ export default function PedidoUnidadesView() {
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Solicitar unidades
             </h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Registra pedidos consolidados de hasta 8 unidades y consulta el historial en un listado paginado.
             </p>
           </div>
@@ -588,7 +588,7 @@ export default function PedidoUnidadesView() {
             {canOpenListaPrevia ? (
               <Link
                 to={paths.administracion.pedidoUnidadesListaPrevia}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
               >
                 <ClipboardList size={16} strokeWidth={1.75} />
                 Lista previa
@@ -598,7 +598,7 @@ export default function PedidoUnidadesView() {
             {canOpenAsignaciones && (
               <Link
                 to={paths.convencional.asignaciones}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
               >
                 <CalendarDays size={16} strokeWidth={1.75} />
                 Volver a asignaciones
@@ -608,7 +608,7 @@ export default function PedidoUnidadesView() {
             <button
               type="button"
               onClick={() => setViewMode("registros")}
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted"
             >
               <List size={16} strokeWidth={1.75} />
               Ver registros de pedidos
@@ -623,8 +623,8 @@ export default function PedidoUnidadesView() {
             type="button"
             onClick={() => setViewMode("carga")}
             className={[
-              "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-              effectiveViewMode === "carga" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+              "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+              effectiveViewMode === "carga" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground border border-border hover:bg-muted",
             ].join(" ")}
           >
             Nueva carga
@@ -635,8 +635,8 @@ export default function PedidoUnidadesView() {
           type="button"
           onClick={() => setViewMode("registros")}
           className={[
-            "rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-            effectiveViewMode === "registros" ? "bg-[#15aa9a] text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+            "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+            effectiveViewMode === "registros" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground border border-border hover:bg-muted",
           ].join(" ")}
         >
           Registros
@@ -645,32 +645,32 @@ export default function PedidoUnidadesView() {
 
       {effectiveViewMode === "carga" && canManagePedidos ? (
         <section>
-          <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <article className="rounded-lg border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-base font-semibold tracking-tight text-gray-900">Nuevo pedido</h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <h2 className="text-base font-semibold tracking-tight text-foreground">Nuevo pedido</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Carga internos uno por uno y consolida cuando el pedido este completo.
                 </p>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+              <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
                 {items.length}/{MAX_UNIDADES} unidades
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)_auto]">
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+              <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
                 Fecha del pedido
                 <input
                   type="date"
                   value={fecha}
                   onChange={(event) => setFecha(event.target.value)}
-                  className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 />
               </label>
 
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+              <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
                 Interno
                 <input
                   type="number"
@@ -684,7 +684,7 @@ export default function PedidoUnidadesView() {
                     }
                   }}
                   placeholder="Ej: 66439"
-                  className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 />
               </label>
 
@@ -692,7 +692,7 @@ export default function PedidoUnidadesView() {
                 type="button"
                 onClick={handleAddInterno}
                 disabled={addInternoMutation.isPending || !canAddMore}
-                className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181] disabled:cursor-not-allowed disabled:bg-[#8fd2ca]"
+                className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
               >
                 <Plus size={16} strokeWidth={2} />
                 Agregar
@@ -700,11 +700,11 @@ export default function PedidoUnidadesView() {
             </div>
 
             {canOpenListaPrevia ? (
-              <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <div className="mt-6 rounded-lg border border-border bg-muted p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900">Seleccionar desde lista previa</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h3 className="text-sm font-semibold text-foreground">Seleccionar desde lista previa</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Puedes mezclar unidades previas con carga manual en el mismo pedido.
                     </p>
                   </div>
@@ -713,16 +713,16 @@ export default function PedidoUnidadesView() {
                     type="button"
                     onClick={handleAddSelectedPrevias}
                     disabled={!selectedPrevias.length || !canAddMore}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
                   >
                     <Plus size={16} strokeWidth={2} />
                     Agregar seleccionadas
                   </button>
                 </div>
 
-                <div className="mt-4 max-h-64 overflow-auto rounded-2xl border border-gray-200 bg-white">
+                <div className="mt-4 max-h-64 overflow-auto rounded-lg border border-border bg-card">
                   <table className="min-w-[1320px] w-full text-sm">
-                    <thead className="sticky top-0 bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                    <thead className="sticky top-0 bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3 text-center">Sel.</th>
                         <th className="px-4 py-3 text-left">Interno</th>
@@ -736,20 +736,20 @@ export default function PedidoUnidadesView() {
                         <th className="px-4 py-3 text-left">Adm</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-border">
                       {previasOrdenadas.map((previa) => {
                         const alreadyAdded = items.some((item) => item.interno === previa.interno);
                         const checked = selectedPrevias.includes(previa.interno);
 
                         return (
-                          <tr key={previa._id} className={alreadyAdded ? "bg-gray-50 text-gray-400" : "hover:bg-gray-50"}>
+                          <tr key={previa._id} className={alreadyAdded ? "bg-muted text-muted-foreground" : "hover:bg-muted"}>
                             <td className="px-4 py-3 text-center">
                               <input
                                 type="checkbox"
                                 checked={checked}
                                 disabled={alreadyAdded}
                                 onChange={() => handleTogglePreviaSelection(previa.interno)}
-                                className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a] disabled:cursor-not-allowed"
+                                className="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:cursor-not-allowed"
                               />
                             </td>
                             <td className="px-4 py-3 font-semibold">{previa.interno}</td>
@@ -768,15 +768,15 @@ export default function PedidoUnidadesView() {
                                 {previa.prioridad}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-700">{formatDateTime(previa.createdAt)}</td>
-                            <td className="px-4 py-3 text-gray-700">{previa.usuario}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{formatDateTime(previa.createdAt)}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{previa.usuario}</td>
                           </tr>
                         );
                       })}
 
                       {!previasData.length ? (
                         <tr>
-                          <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
+                          <td colSpan={10} className="px-6 py-8 text-center text-sm text-muted-foreground">
                             Todavia no hay unidades en la lista previa.
                           </td>
                         </tr>
@@ -787,10 +787,10 @@ export default function PedidoUnidadesView() {
               </div>
             ) : null}
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
+            <div className="mt-6 overflow-hidden rounded-lg border border-border">
               <div className="overflow-x-auto">
                 <table className="min-w-[980px] w-full text-sm">
-                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                  <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 text-left">Interno</th>
                       <th className="px-4 py-3 text-left">Version</th>
@@ -806,16 +806,16 @@ export default function PedidoUnidadesView() {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-100 bg-white">
+                  <tbody className="divide-y divide-border bg-card">
                     {itemsOrdenados.map((item) => (
-                      <tr key={item.interno} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-semibold text-gray-900">{item.interno}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.version}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.order}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                        <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                      <tr key={item.interno} className="hover:bg-muted">
+                        <td className="px-4 py-3 font-semibold text-foreground">{item.interno}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.version}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.order}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.modelo}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.cliente}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.vendedor}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
                         <td className="px-4 py-3">
                           {canManagePriority ? (
                             <select
@@ -845,7 +845,7 @@ export default function PedidoUnidadesView() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-gray-700">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -853,14 +853,14 @@ export default function PedidoUnidadesView() {
                             type="checkbox"
                             checked={item.PDI}
                             onChange={() => handleTogglePDI(item.interno)}
-                            className="h-4 w-4 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+                            className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                           />
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.interno)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100"
+                            className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10"
                           >
                             <Trash2 size={14} strokeWidth={1.8} />
                             Quitar
@@ -871,7 +871,7 @@ export default function PedidoUnidadesView() {
 
                     {!items.length && (
                       <tr>
-                        <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
+                        <td colSpan={11} className="px-6 py-10 text-center text-sm text-muted-foreground">
                           Todavia no agregaste internos al pedido.
                         </td>
                       </tr>
@@ -881,8 +881,8 @@ export default function PedidoUnidadesView() {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-gray-500">
+            <div className="mt-6 flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-muted-foreground">
                 El registro guardara la fecha seleccionada y el usuario autenticado que consolida el pedido.
               </div>
 
@@ -891,7 +891,7 @@ export default function PedidoUnidadesView() {
                   type="button"
                   onClick={handleSavePedido}
                   disabled={savePedidoMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
                 >
                   <ClipboardList size={16} strokeWidth={2} />
                   Consolidar carga
@@ -901,33 +901,33 @@ export default function PedidoUnidadesView() {
           </article>
         </section>
       ) : (
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           {canManagePedidos ? (
             <>
-              <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-3 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="text-base font-semibold tracking-tight text-gray-900">
+                  <h2 className="text-base font-semibold tracking-tight text-foreground">
                     Registros de pedidos
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Historial paginado con vista resumida por fecha y detalle expandible.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
                   {pedidosResponse?.pagination?.totalRecords ?? totalRecords} registros
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Estado de unidad</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Estado de unidad</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Filtra los detalles visibles de esta pagina segun el estado actual informado en dealers.
                   </p>
                 </div>
 
-                <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+                <div className="inline-flex w-full rounded-lg bg-muted p-1 md:w-auto">
                   {REGISTRO_ESTADO_FILTERS.map((filter) => (
                     <button
                       key={filter.value}
@@ -936,8 +936,8 @@ export default function PedidoUnidadesView() {
                       className={[
                         "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
                         registroEstadoFilter === filter.value
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900",
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
                       ].join(" ")}
                     >
                       {filter.label} ({pedidoEstadoCounts[filter.value]})
@@ -948,7 +948,7 @@ export default function PedidoUnidadesView() {
 
               <div className="overflow-x-auto">
                 <table className="min-w-[980px] w-full text-sm">
-                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                  <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 text-left">Fecha</th>
                       <th className="px-4 py-3 text-center">Registros</th>
@@ -960,28 +960,28 @@ export default function PedidoUnidadesView() {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-border">
                     {pedidosAgrupadosFiltrados.map((grupo) => {
                       const expanded = expandedFecha === grupo.fecha;
                       const registrosLabel = grupo.pedidos.length === 1 ? "registro" : "registros";
 
                       return (
                         <Fragment key={grupo.fecha}>
-                          <tr key={`resumen-${grupo.fecha}`} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 font-semibold text-gray-900">{formatDate(grupo.fecha)}</td>
-                            <td className="px-4 py-3 text-center text-gray-700">
+                          <tr key={`resumen-${grupo.fecha}`} className="hover:bg-muted">
+                            <td className="px-4 py-3 font-semibold text-foreground">{formatDate(grupo.fecha)}</td>
+                            <td className="px-4 py-3 text-center text-muted-foreground">
                               {grupo.pedidos.length} {registrosLabel}
                             </td>
-                            <td className="px-4 py-3 text-gray-700">{grupo.usuarios.join(", ")}</td>
-                            <td className="px-4 py-3 text-center text-gray-700">{grupo.totalUnidades}</td>
-                            <td className="px-4 py-3 text-center text-gray-700">{grupo.totalConPDI}</td>
-                            <td className="px-4 py-3 text-gray-700">{formatDateTime(grupo.latestCreatedAt)}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{grupo.usuarios.join(", ")}</td>
+                            <td className="px-4 py-3 text-center text-muted-foreground">{grupo.totalUnidades}</td>
+                            <td className="px-4 py-3 text-center text-muted-foreground">{grupo.totalConPDI}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{formatDateTime(grupo.latestCreatedAt)}</td>
                             <td className="px-4 py-3 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <button
                                   type="button"
                                   onClick={() => setExpandedFecha(expanded ? null : grupo.fecha)}
-                                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                                  className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted"
                                 >
                                   {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                   {expanded ? "Ocultar" : "Expandir"}
@@ -990,7 +990,7 @@ export default function PedidoUnidadesView() {
                                 <button
                                   type="button"
                                   onClick={() => handleDownloadGrupo(grupo)}
-                                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                                  className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted"
                                 >
                                   <Download size={14} />
                                   Descargar
@@ -1000,12 +1000,12 @@ export default function PedidoUnidadesView() {
                           </tr>
 
                           {expanded ? (
-                            <tr key={`detalle-${grupo.fecha}`} className="bg-gray-50">
+                            <tr key={`detalle-${grupo.fecha}`} className="bg-muted">
                               <td colSpan={7} className="px-4 py-4">
-                                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                                <div className="overflow-hidden rounded-lg border border-border bg-card">
                                   <div className="overflow-x-auto">
                                     <table className="min-w-[1320px] w-full text-sm">
-                                      <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                                      <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                                         <tr>
                                           <th className="px-4 py-3 text-left">Interno</th>
                                           <th className="px-4 py-3 text-left">Version</th>
@@ -1021,7 +1021,7 @@ export default function PedidoUnidadesView() {
                                           <th className="px-4 py-3 text-left">ADM</th>
                                         </tr>
                                       </thead>
-                                      <tbody className="divide-y divide-gray-100">
+                                      <tbody className="divide-y divide-border">
                                         {grupo.detalleItems.map(({ pedido, item }) => {
                                           const unidadArribada = Boolean(estadoPedidos[String(item.interno)]);
                                           const estadoBadge = getRegistroEstadoBadge(item.estadoUnidad);
@@ -1031,18 +1031,18 @@ export default function PedidoUnidadesView() {
                                             key={`${pedido._id}-${item.interno}`}
                                             className={[
                                               unidadArribada
-                                                ? "bg-emerald-50 hover:bg-emerald-100"
-                                                : "hover:bg-gray-50",
+                                                ? "bg-secondary hover:bg-secondary"
+                                                : "hover:bg-muted",
                                             ].join(" ")}
                                           >
-                                            <td className="px-4 py-3 font-medium text-gray-900">
+                                            <td className="px-4 py-3 font-medium text-foreground">
                                               <span>{item.interno}</span>
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700">{item.version}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.order}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.cliente}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.vendedor}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.version}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.order}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.cliente}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.vendedor}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
                                             <td className="px-4 py-3">
                                               {estadoBadge ? (
                                                 <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", estadoBadge.className].join(" ")}>
@@ -1050,7 +1050,7 @@ export default function PedidoUnidadesView() {
                                                   {estadoBadge.label}
                                                 </span>
                                               ) : (
-                                                <span className="text-gray-500">-</span>
+                                                <span className="text-muted-foreground">-</span>
                                               )}
                                             </td>
                                             <td className="px-4 py-3">
@@ -1063,21 +1063,21 @@ export default function PedidoUnidadesView() {
                                                 {item.prioridad}
                                               </span>
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700">
+                                            <td className="px-4 py-3 text-muted-foreground">
                                               {item.listaPreviaCreatedAt ? formatDateTime(item.listaPreviaCreatedAt) : "-"}
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                               <span
                                                 className={[
                                                   "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                                                  unidadArribada ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600",
+                                                  unidadArribada ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground",
                                                 ].join(" ")}
                                               >
                                                 {unidadArribada ? "Si" : "No"}
                                               </span>
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700">{formatDateTime(pedido.createdAt)}</td>
-                                            <td className="px-4 py-3 text-gray-700">{item.listaPreviaUsuario ?? "-"}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{formatDateTime(pedido.createdAt)}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{item.listaPreviaUsuario ?? "-"}</td>
                                           </tr>
                                         )})}
                                       </tbody>
@@ -1093,7 +1093,7 @@ export default function PedidoUnidadesView() {
 
                     {!pedidosAgrupadosFiltrados.length ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                        <td colSpan={7} className="px-6 py-12 text-center text-sm text-muted-foreground">
                           {pedidos.length
                             ? "No hay registros en esta pagina para el filtro seleccionado."
                             : "Todavia no hay pedidos de unidades registrados."}
@@ -1106,18 +1106,18 @@ export default function PedidoUnidadesView() {
             </>
           ) : (
             <>
-              <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-3 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="text-base font-semibold tracking-tight text-gray-900">
+                  <h2 className="text-base font-semibold tracking-tight text-foreground">
                     Registro de unidades pedidas
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Consulta cada unidad consolidada, la fecha del pedido y el momento exacto en que se registro.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <label className="flex min-w-[240px] flex-col gap-2 text-sm font-medium text-gray-700">
+                  <label className="flex min-w-[240px] flex-col gap-2 text-sm font-medium text-muted-foreground">
                     Buscar por interno
                     <input
                       type="text"
@@ -1131,33 +1131,33 @@ export default function PedidoUnidadesView() {
                         }
                       }}
                       placeholder="Ej: 65799"
-                      className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                      className="rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
                     />
                   </label>
 
                   <button
                     type="button"
                     onClick={handleBuscarRegistro}
-                    className="inline-flex items-center justify-center gap-2 self-end rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
+                    className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary"
                   >
                     Buscar
                   </button>
 
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                  <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
                     {totalRecords} unidades
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Estado de unidad</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Estado de unidad</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Filtra los registros visibles de esta pagina segun el estado actual informado en dealers.
                   </p>
                 </div>
 
-                <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 md:w-auto">
+                <div className="inline-flex w-full rounded-lg bg-muted p-1 md:w-auto">
                   {REGISTRO_ESTADO_FILTERS.map((filter) => (
                     <button
                       key={filter.value}
@@ -1166,8 +1166,8 @@ export default function PedidoUnidadesView() {
                       className={[
                         "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
                         registroEstadoFilter === filter.value
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900",
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
                       ].join(" ")}
                     >
                       {filter.label} ({registroEstadoCounts[filter.value]})
@@ -1178,7 +1178,7 @@ export default function PedidoUnidadesView() {
 
               <div className="overflow-x-auto">
                 <table className="min-w-[1240px] w-full text-sm">
-                  <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                  <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 text-left">Interno</th>
                       <th className="px-4 py-3 text-center">Llegó</th>
@@ -1194,7 +1194,7 @@ export default function PedidoUnidadesView() {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-border">
                     {registrosFiltrados.map((registro) => {
                       const unidadArribada = Boolean(estadoRegistros[String(registro.interno)]);
                       const estadoBadge = getRegistroEstadoBadge(registro.estadoUnidad);
@@ -1202,26 +1202,26 @@ export default function PedidoUnidadesView() {
                       return (
                       <tr
                         key={`${registro.pedidoId}-${registro.interno}`}
-                        className={unidadArribada ? "bg-emerald-50 hover:bg-emerald-100" : "hover:bg-gray-50"}
+                        className={unidadArribada ? "bg-secondary hover:bg-secondary" : "hover:bg-muted"}
                       >
-                        <td className="px-4 py-3 font-semibold text-gray-900">{registro.interno}</td>
+                        <td className="px-4 py-3 font-semibold text-foreground">{registro.interno}</td>
                         <td className="px-4 py-3 text-center">
                           {unidadArribada ? (
-                            <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            <span className="inline-flex rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
                               Si
                             </span>
                           ) : (
-                            <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                            <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
                               No
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-gray-700">{formatDate(registro.fecha)}</td>
-                        <td className="px-4 py-3 text-gray-700">{formatDateTime(registro.createdAt)}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.cliente}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.version}</td>
-                        <td className="px-4 py-3 text-gray-700">{registro.chasis ?? "-"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{formatDate(registro.fecha)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{formatDateTime(registro.createdAt)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{registro.cliente}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{registro.vendedor}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{registro.version}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{registro.chasis ?? "-"}</td>
                         <td className="px-4 py-3">
                           {estadoBadge ? (
                             <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", estadoBadge.className].join(" ")}>
@@ -1229,7 +1229,7 @@ export default function PedidoUnidadesView() {
                               {estadoBadge.label}
                             </span>
                           ) : (
-                            <span className="text-gray-500">-</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -1242,13 +1242,13 @@ export default function PedidoUnidadesView() {
                             {registro.prioridad}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-gray-700">{registro.listaPreviaUsuario ?? "-"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{registro.listaPreviaUsuario ?? "-"}</td>
                       </tr>
                     )})}
 
                     {!registrosFiltrados.length ? (
                       <tr>
-                        <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                        <td colSpan={10} className="px-6 py-12 text-center text-sm text-muted-foreground">
                           {registros.length
                             ? "No hay unidades en esta pagina para el filtro seleccionado."
                             : registroInterno
@@ -1263,8 +1263,8 @@ export default function PedidoUnidadesView() {
             </>
           )}
 
-          <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-gray-500">
+          <div className="flex flex-col gap-3 border-t border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm text-muted-foreground">
               Pagina {pagination?.page ?? 1} de {totalPages}
             </p>
 
@@ -1273,7 +1273,7 @@ export default function PedidoUnidadesView() {
                 type="button"
                 onClick={() => setPage((current) => Math.max(current - 1, 1))}
                 disabled={page <= 1}
-                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Anterior
               </button>
@@ -1282,7 +1282,7 @@ export default function PedidoUnidadesView() {
                 type="button"
                 onClick={() => setPage((current) => Math.min(current + 1, totalPages))}
                 disabled={page >= totalPages}
-                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Siguiente
               </button>

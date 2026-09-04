@@ -77,7 +77,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="name"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Nombre
           </label>
@@ -94,7 +94,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="lastName"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Apellido
           </label>
@@ -113,7 +113,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="email"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Correo electronico
           </label>
@@ -133,7 +133,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="unidadNegocio"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Unidad de negocio
           </label>
@@ -150,12 +150,12 @@ export default function UsuarioForm({
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Segmenta la agenda comercial y agrupa usuarios sin reemplazar el
             campo tecnico `company`.
           </p>
           {isLoadingUnidades ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Cargando unidades de negocio...
             </p>
           ) : null}
@@ -165,7 +165,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="sucursalPredeterminada"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Sucursal predeterminada
           </label>
@@ -182,12 +182,12 @@ export default function UsuarioForm({
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Se usa como sucursal inicial en entregas y pendientes, pero no
             limita el acceso a otras sucursales.
           </p>
           {isLoadingSucursales ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Cargando sucursales de entrega...
             </p>
           ) : null}
@@ -197,7 +197,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="celular"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Celular
           </label>
@@ -226,7 +226,7 @@ export default function UsuarioForm({
               },
             })}
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.
           </p>
           <FieldError message={errors.celular?.message} />
@@ -236,7 +236,7 @@ export default function UsuarioForm({
           <div className="space-y-2">
             <label
               htmlFor="password"
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
             >
               Contrasena inicial
             </label>
@@ -253,7 +253,7 @@ export default function UsuarioForm({
                 },
               })}
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Esta sera la contrasena con la que el usuario ingresara por
               primera vez.
             </p>
@@ -278,7 +278,7 @@ export default function UsuarioForm({
               key={section.title}
               className="border-t border-border pt-3 first:border-t-0 first:pt-1"
             >
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="mb-2 text-primary font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 {section.title}
               </div>
 
@@ -316,7 +316,7 @@ export default function UsuarioForm({
         <div className="space-y-2">
           <label
             htmlFor="role"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Roles
           </label>
@@ -335,7 +335,7 @@ export default function UsuarioForm({
             ))}
           </select>
           <FieldError message={errors.role?.message as string | undefined} />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Usa Ctrl/Cmd + click para seleccionar multiples opciones.
           </p>
         </div>
@@ -344,7 +344,7 @@ export default function UsuarioForm({
           <div className="space-y-2">
             <label
               htmlFor="numberSaleNic"
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
             >
               Vendedor NIC
             </label>
@@ -361,14 +361,14 @@ export default function UsuarioForm({
               ))}
             </select>
             {isLoading ? (
-              <p className="text-xs text-gray-500">Cargando vendedores...</p>
+              <p className="text-xs text-muted-foreground">Cargando vendedores...</p>
             ) : null}
           </div>
 
           <div className="space-y-2">
             <label
               htmlFor="numberSaleLiess"
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
             >
               Vendedor Liess
             </label>

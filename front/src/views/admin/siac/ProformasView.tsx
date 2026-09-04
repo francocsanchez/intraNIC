@@ -110,20 +110,20 @@ export default function ProformasView() {
             <tbody className="divide-y divide-border">
               {visibleProformas.map((proforma: Proforma) => (
                 <tr key={proforma._id} className="hover:bg-muted">
-                  <td className="px-4 py-3 font-semibold text-gray-900">{proforma.numeroProforma}</td>
-                  <td className="px-4 py-3 text-gray-700">{formatDateAr(proforma.fecha)}</td>
-                  <td className="px-4 py-3 text-gray-700">{proforma.senores}</td>
-                  <td className="px-4 py-3 text-gray-700">{proforma.cliente || "-"}</td>
-                  <td className="px-4 py-3 text-gray-700">{proforma.asesorComercial}</td>
-                  <td className="px-4 py-3 text-gray-700">{proforma.unidades.length}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                  <td className="px-4 py-3 font-semibold text-foreground">{proforma.numeroProforma}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDateAr(proforma.fecha)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{proforma.senores}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{proforma.cliente || "-"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{proforma.asesorComercial}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{proforma.unidades.length}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-foreground">
                     {proforma.totalNeto.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
                       <Link
                     to={paths.convencional.proformasDetalle(proforma._id)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted"
                       >
                         <Eye size={14} />
                         Ver
@@ -131,7 +131,7 @@ export default function ProformasView() {
                       <button
                         type="button"
                         onClick={() => exportMutation.mutate({ id: proforma._id, numero: proforma.numeroProforma })}
-                        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted"
                       >
                         <FileDown size={14} />
                         PDF
@@ -143,9 +143,9 @@ export default function ProformasView() {
 
               {!proformas.length ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     <div className="flex flex-col items-center gap-3">
-                      <FileText size={28} className="text-gray-300" />
+                      <FileText size={28} className="text-muted-foreground" />
                       Todavía no hay proformas registradas.
                     </div>
                   </td>
@@ -156,8 +156,8 @@ export default function ProformasView() {
         </div>
 
         {proformas.length > PAGE_SIZE ? (
-          <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-500">
+          <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
               Mostrando {(currentPage - 1) * PAGE_SIZE + 1} a {Math.min(currentPage * PAGE_SIZE, proformas.length)} de {proformas.length} proformas
             </p>
 
@@ -166,7 +166,7 @@ export default function ProformasView() {
                 type="button"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={currentPage === 1}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ChevronLeft size={16} />
                 Anterior
@@ -175,7 +175,7 @@ export default function ProformasView() {
                 type="button"
                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 disabled={currentPage === totalPages}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Siguiente
                 <ChevronRight size={16} />

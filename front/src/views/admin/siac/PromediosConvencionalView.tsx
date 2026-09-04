@@ -30,15 +30,15 @@ const EMPTY_PROMEDIO_VENDEDORES: NonNullable<
 >["vendedores"] = [];
 
 function getPromedioCellClass(value: number) {
-  if (value >= 11) return "bg-emerald-100 text-emerald-800";
-  if (value >= 6) return "bg-amber-100 text-amber-800";
-  return "bg-rose-100 text-rose-700";
+  if (value >= 11) return "bg-secondary text-primary";
+  if (value >= 6) return "bg-secondary text-secondary-foreground";
+  return "bg-secondary text-secondary-foreground";
 }
 
 function getMesCellClass(value: number) {
-  if (value >= 15) return "text-[#15aa9a] font-semibold";
-  if (value === 0) return "text-gray-300";
-  return "text-gray-700";
+  if (value >= 15) return "text-primary font-semibold";
+  if (value === 0) return "text-muted-foreground";
+  return "text-muted-foreground";
 }
 
 export default function PromediosConvencionalView() {
@@ -87,11 +87,11 @@ export default function PromediosConvencionalView() {
   if (isError) {
     return (
       <div className="font-preset min-h-svh w-full bg-muted px-2 py-3">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Error al cargar promedio de operaciones
           </h1>
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-2 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener la información."}
           </p>
         </section>
@@ -104,7 +104,7 @@ export default function PromediosConvencionalView() {
       <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Convencional
             </p>
             <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
@@ -150,64 +150,64 @@ export default function PromediosConvencionalView() {
         </div>
         <div className="grid border-t border-border grid-cols-2 lg:grid-cols-5">
         <article className="px-3 py-3">
-          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Vendedores
           </p>
           <p className="mt-1 text-xl font-semibold text-foreground">{cards.totalVendedores}</p>
         </article>
 
         <article className="border-l border-border px-3 py-3">
-          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mes actual
           </p>
-          <p className="mt-1 text-xl font-semibold text-emerald-600">{cards.ventasMesActual}</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{cards.ventasMesActual}</p>
         </article>
 
         <article className="border-t border-border px-3 py-3 lg:border-l lg:border-t-0">
-          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Promedio general
           </p>
           <p className="mt-1 text-xl font-semibold text-foreground">{cards.promedioGeneral}</p>
         </article>
 
         <article className="border-l border-t border-border px-3 py-3 lg:border-t-0">
-          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mejor promedio
           </p>
-          <p className="mt-1 text-xl font-semibold text-emerald-600">{cards.mejorPromedio}</p>
+          <p className="mt-1 text-xl font-semibold text-foreground">{cards.mejorPromedio}</p>
         </article>
 
         <article className="col-span-2 border-t border-border px-3 py-3 lg:col-span-1 lg:border-l lg:border-t-0">
-          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">
             Mejor sucursal
           </p>
           <p className="mt-1 truncate text-base font-semibold text-foreground">{mejorSucursal.sucursal}</p>
-          <p className="text-sm font-semibold text-emerald-600">Promedio {mejorSucursal.promedio}</p>
+          <p className="text-sm font-semibold text-foreground">Promedio {mejorSucursal.promedio}</p>
         </article>
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 bg-gradient-to-r from-[#f4fbfa] to-white px-6 py-4">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border bg-gradient-to-r from-[oklch(0.97 0 0)] to-white px-6 py-4">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
                 Tabla de promedios
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Cierre en {mesSeleccionadoLabel.toLowerCase()} de {anio}. Ventana móvil de los
                 últimos 6 meses.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span className="rounded-full bg-rose-100 px-2.5 py-1 font-semibold text-rose-700">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="rounded-full bg-secondary px-2.5 py-1 font-semibold text-secondary-foreground">
                 Bajo
               </span>
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 font-semibold text-amber-700">
+              <span className="rounded-full bg-secondary px-2.5 py-1 font-semibold text-secondary-foreground">
                 Medio
               </span>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 font-semibold text-emerald-700">
+              <span className="rounded-full bg-secondary px-2.5 py-1 font-semibold text-secondary-foreground">
                 Alto
               </span>
             </div>
@@ -216,26 +216,26 @@ export default function PromediosConvencionalView() {
 
         <div className="overflow-x-auto">
           <table className="min-w-[1080px] w-full border-separate border-spacing-0 text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
-                <th className="sticky left-0 z-20 border-b border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-0 z-20 border-b border-border bg-muted px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Sucursal
                 </th>
-                <th className="sticky left-[180px] z-20 border-b border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <th className="sticky left-[180px] z-20 border-b border-border bg-muted px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Vendedor
                 </th>
                 {meses.map((item) => (
                   <th
                     key={item.key}
-                    className="border-b border-gray-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"
+                    className="border-b border-border px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
                   >
                     {item.label}
                   </th>
                 ))}
-                <th className="border-b border-gray-200 bg-[#f4fbfa] px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
+                <th className="border-b border-border bg-secondary px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Mes
                 </th>
-                <th className="border-b border-gray-200 bg-[#f8fafc] px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">
+                <th className="border-b border-border bg-secondary px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Prom
                 </th>
               </tr>
@@ -247,18 +247,18 @@ export default function PromediosConvencionalView() {
                   {sucursal.vendedores.map((vendedor, index) => (
                     <tr
                       key={`${sucursal.sucursal}-${vendedor.vendedor}`}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+                      className={index % 2 === 0 ? "bg-card" : "bg-muted/50"}
                     >
                       {index === 0 ? (
                         <td
                           rowSpan={sucursal.vendedores.length + 1}
-                          className="sticky left-0 z-10 border-b border-gray-200 bg-white px-3 py-2 align-middle text-left font-semibold uppercase tracking-[0.08em] text-gray-700"
+                          className="sticky left-0 z-10 border-b border-border bg-card px-3 py-2 align-middle text-left font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                         >
                           <div className="min-w-[180px]">{sucursal.sucursal}</div>
                         </td>
                       ) : null}
 
-                      <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-inherit px-3 py-1.5 font-medium text-gray-900">
+                      <td className="sticky left-[180px] z-10 border-b border-border bg-inherit px-3 py-1.5 font-medium text-foreground">
                         <div className="min-w-[220px]">{vendedor.vendedor}</div>
                       </td>
 
@@ -268,18 +268,18 @@ export default function PromediosConvencionalView() {
                         return (
                           <td
                             key={`${vendedor.vendedor}-${mesItem.key}`}
-                            className={`border-b border-gray-200 px-3 py-1.5 text-center ${getMesCellClass(value)}`}
+                            className={`border-b border-border px-3 py-1.5 text-center ${getMesCellClass(value)}`}
                           >
                             {value}
                           </td>
                         );
                       })}
 
-                      <td className="border-b border-gray-200 bg-[#f4fbfa] px-3 py-1.5 text-center font-semibold text-[#0f8f82]">
+                      <td className="border-b border-border bg-secondary px-3 py-1.5 text-center font-semibold text-primary">
                         {vendedor.ventasMesActual}
                       </td>
 
-                      <td className="border-b border-gray-200 px-3 py-1.5 text-center">
+                      <td className="border-b border-border px-3 py-1.5 text-center">
                         <span
                           className={`inline-flex min-w-10 justify-center rounded-md px-2 py-0.5 font-semibold ${getPromedioCellClass(
                             vendedor.promedio,
@@ -291,8 +291,8 @@ export default function PromediosConvencionalView() {
                     </tr>
                   ))}
 
-                  <tr key={`${sucursal.sucursal}-promedio`} className="bg-[#eef9f7]">
-                    <td className="sticky left-[180px] z-10 border-b border-gray-200 bg-[#eef9f7] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-[#0f8f82]">
+                  <tr key={`${sucursal.sucursal}-promedio`} className="bg-secondary">
+                    <td className="sticky left-[180px] z-10 border-b border-border bg-secondary px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-primary">
                       <div className="min-w-[220px]">Promedio sucursal</div>
                     </td>
 
@@ -302,18 +302,18 @@ export default function PromediosConvencionalView() {
                       return (
                         <td
                           key={`${sucursal.sucursal}-${mesItem.key}-promedio`}
-                          className="border-b border-gray-200 px-3 py-1.5 text-center font-semibold text-[#0f8f82]"
+                          className="border-b border-border px-3 py-1.5 text-center font-semibold text-primary"
                         >
                           {value}
                         </td>
                       );
                     })}
 
-                    <td className="border-b border-gray-200 bg-[#dcf4f0] px-3 py-1.5 text-center font-bold text-[#0a766b]">
+                    <td className="border-b border-border bg-secondary px-3 py-1.5 text-center font-bold text-primary">
                       {sucursal.ventasMesActual}
                     </td>
 
-                    <td className="border-b border-gray-200 px-3 py-1.5 text-center">
+                    <td className="border-b border-border px-3 py-1.5 text-center">
                       <span
                         className={`inline-flex min-w-10 justify-center rounded-md px-2 py-0.5 font-semibold ${getPromedioCellClass(
                           sucursal.promedio,
@@ -330,7 +330,7 @@ export default function PromediosConvencionalView() {
                 <tr>
                   <td
                     colSpan={meses.length + 4}
-                    className="px-6 py-12 text-center text-sm text-gray-500"
+                    className="px-6 py-12 text-center text-sm text-muted-foreground"
                   >
                     No hay datos para el período seleccionado.
                   </td>

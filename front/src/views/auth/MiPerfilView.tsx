@@ -169,7 +169,7 @@ export default function MiPerfilView() {
                   })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
                 />
-                {errors.newPassword ? <p className="text-xs text-red-500">{errors.newPassword.message}</p> : null}
+                {errors.newPassword ? <p className="text-xs text-destructive">{errors.newPassword.message}</p> : null}
               </div>
 
               <div className="space-y-2">
@@ -186,7 +186,7 @@ export default function MiPerfilView() {
                   })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
                 />
-                {errors.confirmPassword ? <p className="text-xs text-red-500">{errors.confirmPassword.message}</p> : null}
+                {errors.confirmPassword ? <p className="text-xs text-destructive">{errors.confirmPassword.message}</p> : null}
               </div>
 
               <button

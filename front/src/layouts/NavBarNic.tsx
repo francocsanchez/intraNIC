@@ -34,12 +34,12 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const canViewRegistroTestDrive = isConvencional && hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive);
   const isCommercialPath =
     isConvencional &&
-    (pathname.startsWith("/convencional/proformas") ||
-      pathname.startsWith("/convencional/minutas") ||
-      pathname.startsWith("/gestion/convencional/test-drive"));
+    (pathname.startsWith(`${paths.convencional.proformas}`) ||
+      pathname.startsWith(`${paths.convencional.minutas}`) ||
+      pathname.startsWith(`${paths.convencional.registroTestDrive}`));
   const isGestionPath = isConvencional
-    ? pathname.startsWith("/convencional/") || pathname.startsWith("/gestion/convencional/")
-    : pathname.startsWith("/usados/");
+    ? pathname.startsWith("/stock/convencional/") || pathname.startsWith("/gestion/convencional/")
+    : pathname.startsWith("/stock/usados/");
   const showGestionMenu =
     isGestionPath &&
     !isCommercialPath &&
@@ -83,7 +83,7 @@ export default function NavBarNic({ negocio }: NavBarProps) {
         pathname === paths.convencional.preventas ||
         pathname === paths.convencional.preventasAsignadas ||
         pathname === paths.convencional.preventasNueva ||
-        pathname.startsWith("/gestion/convencional/preventas/"),
+        pathname.startsWith(`${paths.convencional.preventas}/`),
     },
   ].filter((item) => item.visible);
 
@@ -93,14 +93,20 @@ export default function NavBarNic({ negocio }: NavBarProps) {
       to: paths.convencional.proformas,
       icon: FileText,
       visible: canViewProformas,
-      active: pathname === paths.convencional.proformas || pathname === paths.convencional.proformasNueva || pathname.startsWith("/convencional/proformas/"),
+      active:
+        pathname === paths.convencional.proformas ||
+        pathname === paths.convencional.proformasNueva ||
+        pathname.startsWith(`${paths.convencional.proformas}/`),
     },
     {
       label: "Minutas",
       to: paths.convencional.minutas,
       icon: ClipboardList,
       visible: canViewMinutas,
-      active: pathname === paths.convencional.minutas || pathname === paths.convencional.minutasNueva || pathname.startsWith("/convencional/minutas/"),
+      active:
+        pathname === paths.convencional.minutas ||
+        pathname === paths.convencional.minutasNueva ||
+        pathname.startsWith(`${paths.convencional.minutas}/`),
     },
     {
       label: "Registro TestDrive",

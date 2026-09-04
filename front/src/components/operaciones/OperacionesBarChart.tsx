@@ -1,13 +1,7 @@
-import {
-  CartesianGrid,
-  LabelList,
-  Legend,
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import type { EChartsCoreOption } from "echarts/core";
+import { useMemo } from "react";
+import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 
 export type OperacionesChartDimension = "mes" | "dia" | "modelo" | "sucursal" | "vendedor";
 export type OperacionesChartCompare = "none" | "anio";
@@ -40,8 +34,6 @@ const COMPARE_LABELS: Record<OperacionesChartCompare, string> = {
   anio: "Ano",
 };
 
-const SERIES_COLORS = ["#15aa9a", "#7c7c7c", "#0f766e", "#94a3b8", "#16a34a", "#f59e0b"];
-
 export default function OperacionesBarChart({
   data,
   dimension,
@@ -51,23 +43,80 @@ export default function OperacionesBarChart({
   onCompareByChange,
 }: OperacionesBarChartProps) {
   const chartWidth = Math.max(data.length * 88, 720);
-  const effectiveSeriesKeys = compareBy === "anio" ? seriesKeys : ["total"];
+  const option = useMemo<EChartsCoreOption>(() => {
+    const colors = getPresetChartColors();
+    const effectiveSeriesKeys = compareBy === "anio" ? seriesKeys : ["total"];
+
+    return {
+      color: colors,
+      grid: { top: 24, right: 20, bottom: data.length > 6 ? 72 : 40, left: 44 },
+      legend: compareBy === "anio" ? { bottom: 0, textStyle: { color: "inherit" } } : undefined,
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "var(--popover)",
+        borderColor: "var(--border)",
+        textStyle: { color: "var(--popover-foreground)" },
+        formatter: (items: unknown) => {
+          const rows = Array.isArray(items) ? items : [];
+          const label = rows[0] && typeof rows[0] === "object" && "axisValueLabel" in rows[0]
+            ? String(rows[0].axisValueLabel)
+            : "";
+          const values = rows.map((item) => {
+            const point = item as { marker?: string; seriesName?: string; value?: number };
+            const name = compareBy === "anio" ? point.seriesName : "Total";
+            return `${point.marker ?? ""}${name}: ${point.value ?? 0} operaciones`;
+          });
+          return [`${DIMENSION_LABELS[dimension]}: ${label}`, ...values].join("<br />");
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: data.map((point) => point.label),
+        axisLine: { lineStyle: { color: "var(--border)" } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: "var(--muted-foreground)",
+          fontSize: 11,
+          rotate: data.length > 6 ? 35 : 0,
+          interval: 0,
+        },
+      },
+      yAxis: {
+        type: "value",
+        minInterval: 1,
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: "var(--muted-foreground)", fontSize: 11 },
+        splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } },
+      },
+      series: effectiveSeriesKeys.map((seriesKey) => ({
+        type: "line",
+        name: compareBy === "anio" ? seriesKey : "Total",
+        data: data.map((point) => point[seriesKey] ?? 0),
+        smooth: true,
+        connectNulls: true,
+        symbolSize: 6,
+        lineStyle: { width: 2 },
+        label: { show: true, position: "top", color: "var(--foreground)", fontSize: 10 },
+      })),
+    };
+  }, [compareBy, data, dimension, seriesKeys]);
 
   return (
-    <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="border border-border bg-card p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+          <h2 className="text-base font-semibold text-foreground">
             Operaciones por {DIMENSION_LABELS[dimension].toLowerCase()}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="text-xs text-muted-foreground">
             La linea se recompone segun la dimension elegida y puede comparar por ano.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Dimension
             </span>
             <select
@@ -75,7 +124,7 @@ export default function OperacionesBarChart({
               onChange={(event) =>
                 onDimensionChange(event.target.value as OperacionesChartDimension)
               }
-              className="rounded-md border border-[#d6e7ed] bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="mes">Mes</option>
               <option value="dia">Dia</option>
@@ -86,7 +135,7 @@ export default function OperacionesBarChart({
           </label>
 
           <label className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Comparar
             </span>
             <select
@@ -94,79 +143,22 @@ export default function OperacionesBarChart({
               onChange={(event) =>
                 onCompareByChange(event.target.value as OperacionesChartCompare)
               }
-              className="rounded-md border border-[#d6e7ed] bg-white px-2.5 py-1.5 text-xs text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="none">{COMPARE_LABELS.none}</option>
               <option value="anio">{COMPARE_LABELS.anio}</option>
             </select>
           </label>
 
-          <span className="w-fit rounded-full bg-[#e4f3fa] px-3 py-1 text-xs font-semibold text-[#128c80]">
+          <span className="w-fit rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
             {data.length} puntos
           </span>
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto pb-2">
-        <div style={{ width: `${chartWidth}px`, minWidth: "100%" }}>
-          <LineChart
-            width={chartWidth}
-            height={360}
-            data={data}
-            margin={{ top: 20, right: 16, left: 0, bottom: 20 }}
-          >
-            <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="label"
-              angle={data.length > 6 ? -35 : 0}
-              textAnchor={data.length > 6 ? "end" : "middle"}
-              height={data.length > 6 ? 88 : 40}
-              axisLine={false}
-              tickLine={false}
-              interval={0}
-              tick={{ fontSize: 12, fill: "#4b5563" }}
-            />
-            <YAxis
-              allowDecimals={false}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: "#6b7280" }}
-            />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 16,
-                borderColor: "#cfe7ee",
-                boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-              }}
-              formatter={(value, name) => [`${value} operaciones`, compareBy === "anio" ? name : "Total"]}
-              labelFormatter={(label) => `${DIMENSION_LABELS[dimension]}: ${label}`}
-            />
-            {compareBy === "anio" ? <Legend /> : null}
-
-            {effectiveSeriesKeys.map((seriesKey, index) => (
-              <Line
-                key={seriesKey}
-                type="monotone"
-                dataKey={seriesKey}
-                name={seriesKey}
-                stroke={SERIES_COLORS[index % SERIES_COLORS.length]}
-                strokeWidth={2.5}
-                dot={{
-                  r: 3,
-                  fill: SERIES_COLORS[index % SERIES_COLORS.length],
-                  stroke: SERIES_COLORS[index % SERIES_COLORS.length],
-                }}
-                activeDot={{
-                  r: 5,
-                  fill: SERIES_COLORS[index % SERIES_COLORS.length],
-                  stroke: SERIES_COLORS[index % SERIES_COLORS.length],
-                }}
-                connectNulls
-              >
-                <LabelList dataKey={seriesKey} position="top" fill="#0f172a" fontSize={11} />
-              </Line>
-            ))}
-          </LineChart>
+      <div className="mt-3 overflow-x-auto">
+        <div className="h-[320px]" style={{ width: `${chartWidth}px`, minWidth: "100%" }}>
+          <EChart option={option} />
         </div>
       </div>
     </section>

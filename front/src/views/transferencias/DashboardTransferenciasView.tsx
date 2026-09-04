@@ -61,9 +61,9 @@ export default function DashboardTransferenciasView() {
   if (firstError instanceof Error) {
     return (
       <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Dashboard Transferencias</h1>
-          <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Dashboard Transferencias</h1>
+          <p className="mt-2 text-sm text-destructive">{firstError.message}</p>
         </section>
       </div>
     );
@@ -72,9 +72,9 @@ export default function DashboardTransferenciasView() {
   if (yearsQuery.isSuccess && !hasAvailableYears) {
     return (
       <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Dashboard Transferencias</h1>
-          <p className="mt-2 text-sm text-gray-500">
+        <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Dashboard Transferencias</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Todavia no hay anos disponibles para analizar. Ejecuta la actualizacion desde Act. Registros para habilitar el dashboard.
           </p>
         </section>
@@ -86,26 +86,26 @@ export default function DashboardTransferenciasView() {
     <div className="w-full space-y-6 px-1 py-1">
       <section className="print-hidden px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Transferencias</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard Transferencias</h1>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-[#15aa9a] hover:text-[#0f766e]"
+              className="inline-flex items-center gap-2 rounded-md border border-input bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-border hover:text-primary"
             >
               <Printer size={16} />
               Imprimir PDF
             </button>
 
-            <label htmlFor="transferencias-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+            <label htmlFor="transferencias-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Ano
             </label>
             <select
               id="transferencias-year"
               value={selectedYear ?? ""}
               onChange={(event) => setUserSelectedYear(Number(event.target.value))}
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
             >
               {(yearsQuery.data?.years ?? []).map((year) => (
                 <option key={year} value={year}>
@@ -119,8 +119,8 @@ export default function DashboardTransferenciasView() {
 
       <section className="dashboard-print-area space-y-4">
         <div className="print-hidden flex items-center gap-2">
-          <LayoutGrid size={18} className="text-[#128c80]" />
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Vista General</h2>
+          <LayoutGrid size={18} className="text-primary" />
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Vista General</h2>
         </div>
 
         {generalZonaNic.data ? <TransferenciasGeneralSection data={generalZonaNic.data} onPageChange={setPage} /> : null}

@@ -276,7 +276,7 @@ export default function Inicio() {
         <div className="grid gap-x-6 gap-y-7 xl:grid-cols-2">
           {visibleSections.map((section) => (
             <section key={section.title}>
-              <h2 className="mb-3 flex items-center gap-2 border-l-2 border-primary pl-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <h2 className="mb-3 flex items-center gap-2 border-l-2 border-border pl-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 <section.icon size={14} strokeWidth={2} />
                 <span>{section.title}</span>
               </h2>

@@ -88,7 +88,7 @@ function PlanNegocioModal({ open, onClose, item, selectedYear }: PlanNegocioModa
     <Transition appear show={open} as={Fragment}>
       <Dialog as="div" className="font-preset relative z-50" onClose={() => (mutation.isPending ? undefined : onClose())}>
         <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-150" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-secondary/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">

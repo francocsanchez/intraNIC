@@ -226,11 +226,11 @@ export default function RegistroAsignacionesView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Error al cargar registro de asignaciones
           </h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+          <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -248,13 +248,13 @@ export default function RegistroAsignacionesView() {
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Registro asignaciones
             </h1>
-            <p className="mt-1 max-w-3xl text-sm text-gray-500">
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Registra movimientos de asignacion y desasignacion con pocos campos
               y consulta el historial paginado.
             </p>
@@ -263,7 +263,7 @@ export default function RegistroAsignacionesView() {
           <div className="flex flex-wrap gap-3">
             <Link
             to={paths.convencional.registroAsignacionesResumen}
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted"
             >
               <List size={16} strokeWidth={1.75} />
               Ver resumen
@@ -273,34 +273,34 @@ export default function RegistroAsignacionesView() {
       </section>
 
       <section>
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
                 {editingId ? "Editar registro" : "Nuevo registro"}
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Busca la operacion para completar automaticamente los datos de la unidad.
               </p>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+            <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
               {editingId ? "Modo edicion" : "Carga rapida"}
             </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)_220px]">
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+            <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Fecha
               <input
                 type="date"
                 value={fecha}
                 onChange={(event) => setFecha(event.target.value)}
-                className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                className="rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
               />
             </label>
 
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+            <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Operacion
               <div className="flex gap-3">
                 <input
@@ -323,14 +323,14 @@ export default function RegistroAsignacionesView() {
                     }
                   }}
                   placeholder="Ej: 145236"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="w-full rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 />
 
                 <button
                   type="button"
                   onClick={handleBuscarOperacion}
                   disabled={searchMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#15aa9a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#129181] disabled:cursor-not-allowed disabled:bg-[#8fd2ca]"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
                 >
                   <Search size={16} strokeWidth={2} />
                   Buscar
@@ -338,14 +338,14 @@ export default function RegistroAsignacionesView() {
               </div>
             </label>
 
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+            <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Tipo
               <select
                 value={tipo}
                 onChange={(event) =>
                   setTipo(event.target.value as "Asignado" | "Desasignado" | "")
                 }
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                className="rounded-lg border border-input bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
               >
                 <option value="">Seleccionar</option>
                 <option value="Asignado">Asignado</option>
@@ -354,21 +354,21 @@ export default function RegistroAsignacionesView() {
             </label>
           </div>
 
-          <label className="mt-4 flex flex-col gap-2 text-sm font-medium text-gray-700">
+          <label className="mt-4 flex flex-col gap-2 text-sm font-medium text-muted-foreground">
             Observaciones
             <textarea
               rows={3}
               value={observaciones}
               onChange={(event) => setObservaciones(event.target.value)}
               placeholder="Detalle opcional"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
             />
           </label>
 
-          <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
+          <div className="mt-6 overflow-hidden rounded-lg border border-border">
             <div className="overflow-x-auto">
               <table className="min-w-[820px] w-full text-sm">
-                <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 text-left">Operacion</th>
                     <th className="px-4 py-3 text-left">Interno</th>
@@ -380,37 +380,37 @@ export default function RegistroAsignacionesView() {
                     <th className="px-4 py-3 text-left">Vendedor</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-border bg-card">
                   {infoOperacion ? (
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-semibold text-gray-900">
+                    <tr className="hover:bg-muted">
+                      <td className="px-4 py-3 font-semibold text-foreground">
                         {infoOperacion.operacion}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.interno}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.cliente}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.modelo}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.version}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.chasis}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.sucursal}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {infoOperacion.vendedor}
                       </td>
                     </tr>
                   ) : (
                     <tr>
-                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-muted-foreground">
                         Busca una operacion para completar automaticamente la ficha.
                       </td>
                     </tr>
@@ -420,8 +420,8 @@ export default function RegistroAsignacionesView() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-gray-500">
+          <div className="mt-6 flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-muted-foreground">
               El registro guarda la fecha elegida y el usuario autenticado que realiza la carga.
             </div>
 
@@ -430,7 +430,7 @@ export default function RegistroAsignacionesView() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-input bg-card px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
                 >
                   Cancelar edicion
                 </button>
@@ -440,7 +440,7 @@ export default function RegistroAsignacionesView() {
                 type="button"
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
               >
                 {editingId ? (
                   <Save size={16} strokeWidth={2} />
@@ -454,13 +454,13 @@ export default function RegistroAsignacionesView() {
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
               Historial de registros
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Cada fila se puede editar o eliminar. La paginacion se activa de a 30 registros.
             </p>
           </div>
@@ -473,35 +473,35 @@ export default function RegistroAsignacionesView() {
                   setPage(1);
                   setSearchParams({});
                 }}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
               >
                 <Filter size={15} strokeWidth={1.75} />
                 Limpiar filtros
               </button>
             ) : null}
 
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+            <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
               {pagination?.total ?? 0} registros
             </div>
           </div>
         </div>
 
         {hayFiltrosActivos ? (
-          <div className="flex flex-wrap gap-2 border-b border-gray-200 px-6 py-4">
+          <div className="flex flex-wrap gap-2 border-b border-border px-6 py-4">
             {tipoFiltro ? (
-              <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+              <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground">
                 Tipo: {tipoFiltro}
               </span>
             ) : null}
 
             {modeloFiltro ? (
-              <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-sm font-medium text-sky-700">
+              <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-sm font-medium text-primary">
                 Modelo: {modeloFiltro}
               </span>
             ) : null}
 
             {nombreMesFiltro ? (
-              <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium capitalize text-amber-700">
+              <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-sm font-medium capitalize text-secondary-foreground">
                 Periodo: {nombreMesFiltro}
               </span>
             ) : null}
@@ -510,7 +510,7 @@ export default function RegistroAsignacionesView() {
 
         <div className="overflow-x-auto">
           <table className="min-w-[1460px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Fecha</th>
                 <th className="px-4 py-3 text-left">Tipo</th>
@@ -526,10 +526,10 @@ export default function RegistroAsignacionesView() {
                 <th className="px-4 py-3 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {registros.map((registro) => (
-                <tr key={registro._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-semibold text-gray-900">
+                <tr key={registro._id} className="hover:bg-muted">
+                  <td className="px-4 py-3 font-semibold text-foreground">
                     {formatDate(registro.fecha)}
                   </td>
                   <td className="px-4 py-3">
@@ -537,22 +537,22 @@ export default function RegistroAsignacionesView() {
                       className={[
                         "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
                         registro.tipo === "Asignado"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-rose-100 text-rose-700",
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-secondary text-secondary-foreground",
                       ].join(" ")}
                     >
                       {registro.tipo}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{registro.operacion}</td>
-                  <td className="px-4 py-3 text-gray-700">{registro.interno}</td>
-                  <td className="min-w-[280px] px-4 py-3 text-gray-700">{registro.cliente}</td>
-                  <td className="px-4 py-3 text-gray-700">{registro.modelo}</td>
-                  <td className="min-w-[260px] px-4 py-3 text-gray-700">{registro.version}</td>
-                  <td className="px-4 py-3 text-gray-700">{registro.chasis}</td>
-                  <td className="px-4 py-3 text-gray-700">{registro.sucursal}</td>
-                  <td className="px-4 py-3 text-gray-700">{registro.vendedor}</td>
-                  <td className="px-4 py-3 text-gray-700">
+                  <td className="px-4 py-3 text-muted-foreground">{registro.operacion}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{registro.interno}</td>
+                  <td className="min-w-[280px] px-4 py-3 text-muted-foreground">{registro.cliente}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{registro.modelo}</td>
+                  <td className="min-w-[260px] px-4 py-3 text-muted-foreground">{registro.version}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{registro.chasis}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{registro.sucursal}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{registro.vendedor}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
                     {registro.observaciones?.trim() || "-"}
                   </td>
                   <td className="px-4 py-3">
@@ -560,7 +560,7 @@ export default function RegistroAsignacionesView() {
                       <button
                         type="button"
                         onClick={() => handleEdit(registro)}
-                        className="inline-flex items-center gap-2 rounded-lg bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-muted"
                       >
                         <Pencil size={14} strokeWidth={1.8} />
                         Editar
@@ -569,7 +569,7 @@ export default function RegistroAsignacionesView() {
                         type="button"
                         onClick={() => handleDelete(registro)}
                         disabled={deleteMutation.isPending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Trash2 size={14} strokeWidth={1.8} />
                         Eliminar
@@ -581,7 +581,7 @@ export default function RegistroAsignacionesView() {
 
               {!registros.length ? (
                 <tr>
-                  <td colSpan={12} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={12} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     {hayFiltrosActivos
                       ? "No hay registros para los filtros seleccionados."
                       : "Todavia no hay registros de asignaciones cargados."}
@@ -592,8 +592,8 @@ export default function RegistroAsignacionesView() {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col gap-3 border-t border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm text-muted-foreground">
             Pagina {pagination?.page ?? 1} de {totalPages}
           </p>
 
@@ -602,7 +602,7 @@ export default function RegistroAsignacionesView() {
               type="button"
               onClick={() => setPage((current) => Math.max(current - 1, 1))}
               disabled={page <= 1}
-              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               Anterior
             </button>
@@ -613,7 +613,7 @@ export default function RegistroAsignacionesView() {
                 setPage((current) => Math.min(current + 1, totalPages))
               }
               disabled={page >= totalPages}
-              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               Siguiente
             </button>

@@ -19,14 +19,14 @@ type RankingVendedorItem = RankingBaseItem & {
 const CURRENT_YEAR = new Date().getFullYear();
 
 function getPodiumStyle(index: number) {
-  if (index === 0) return "border-amber-200 bg-amber-50";
-  if (index === 1) return "border-slate-200 bg-slate-50";
-  if (index === 2) return "border-orange-200 bg-orange-50";
-  return "border-gray-200 bg-white";
+  if (index === 0) return "border-border bg-secondary";
+  if (index === 1) return "border-border bg-muted";
+  if (index === 2) return "border-border bg-secondary";
+  return "border-border bg-card";
 }
 
 function getBarColor(index: number) {
-  const colors = ["#15aa9a", "#43bbb0", "#6ccbc2", "#95dbd4", "#beeae6", "#d8f3ef"];
+  const colors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)", "var(--chart-1)"];
   return colors[index % colors.length];
 }
 
@@ -42,13 +42,13 @@ function RankingList({
   variant?: "base" | "vendedor";
 }) {
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">{title}</h2>
-          <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+          <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-medium text-gray-600">
+        <div className="rounded-lg bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">
           Top {items.length}
         </div>
       </div>
@@ -59,26 +59,26 @@ function RankingList({
           return (
             <div
               key={`${item.nombre}-${index}`}
-              className={`rounded-xl border px-4 py-3 ${getPodiumStyle(index)}`}
+              className={`rounded-lg border px-4 py-3 ${getPodiumStyle(index)}`}
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-gray-700 ring-1 ring-gray-200">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-card text-xs font-bold text-muted-foreground ring-1 ring-border">
                       {index + 1}
                     </span>
-                    <p className="truncate font-semibold text-gray-900">{item.nombre}</p>
+                    <p className="truncate font-semibold text-foreground">{item.nombre}</p>
                   </div>
                   {variant === "vendedor" && (
-                    <p className="mt-1 pl-9 text-xs text-gray-500">
+                    <p className="mt-1 pl-9 text-xs text-muted-foreground">
                       {vendedorItem.sucursal} · Prom. {vendedorItem.promedioMensual}/mes
                     </p>
                   )}
                 </div>
 
                 <div className="shrink-0 text-right">
-                  <p className="text-2xl font-bold text-gray-900">{item.total}</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-gray-500">ventas</p>
+                  <p className="text-2xl font-bold text-foreground">{item.total}</p>
+                  <p className="text-primary uppercase tracking-[0.16em] text-muted-foreground">ventas</p>
                 </div>
               </div>
             </div>
@@ -86,7 +86,7 @@ function RankingList({
         })}
 
         {!items.length && (
-          <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-sm text-gray-500">
+          <div className="rounded-lg border border-dashed border-border bg-muted px-4 py-10 text-center text-sm text-muted-foreground">
             Sin datos disponibles.
           </div>
         )}
@@ -122,11 +122,11 @@ export default function RankingConvencionalView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Error al cargar ranking de operaciones
           </h1>
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-2 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener la información."}
           </p>
         </section>
@@ -136,26 +136,26 @@ export default function RankingConvencionalView() {
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Convencional
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
               Ranking de ventas
             </h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-500">
+            <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
               Ranking anual con foco en vendedores, modelos, sucursales y desempeño de Hilux.
             </p>
           </div>
 
           <label className="space-y-1">
-            <span className="text-sm font-semibold text-gray-900">Año</span>
+            <span className="text-sm font-semibold text-foreground">Año</span>
             <select
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
-              className="w-full min-w-36 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="w-full min-w-36 rounded-lg border border-input bg-card px-4 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
             >
               {anios.map((item) => (
                 <option key={item} value={item}>
@@ -168,122 +168,122 @@ export default function RankingConvencionalView() {
       </section>
 
       <section className="grid grid-cols-2 gap-4 xl:grid-cols-5">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <Trophy size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Operaciones</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{totales?.operaciones ?? 0}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Operaciones</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{totales?.operaciones ?? 0}</p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <Users size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Vendedores</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{totales?.vendedores ?? 0}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Vendedores</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{totales?.vendedores ?? 0}</p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <CarFront size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Modelos</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{totales?.modelos ?? 0}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modelos</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{totales?.modelos ?? 0}</p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <Building2 size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Sucursales</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{totales?.sucursales ?? 0}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sucursales</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{totales?.sucursales ?? 0}</p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <Medal size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Hilux</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{totales?.hilux ?? 0}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Hilux</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">{totales?.hilux ?? 0}</p>
             </div>
           </div>
         </article>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-5">
-        <article className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Top vendedor</p>
-          <p className="mt-3 text-xl font-bold text-gray-900">{destacados?.topVendedorDelAno?.nombre ?? "-"}</p>
-          <p className="mt-1 text-sm text-gray-600">{destacados?.topVendedorDelAno?.sucursal ?? "-"}</p>
-          <p className="mt-4 text-3xl font-bold text-amber-700">{destacados?.topVendedorDelAno?.total ?? 0}</p>
+        <article className="rounded-lg border border-border bg-card p-3 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground">Top vendedor</p>
+          <p className="mt-3 text-xl font-bold text-foreground">{destacados?.topVendedorDelAno?.nombre ?? "-"}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{destacados?.topVendedorDelAno?.sucursal ?? "-"}</p>
+          <p className="mt-4 text-3xl font-bold text-secondary-foreground">{destacados?.topVendedorDelAno?.total ?? 0}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Top modelo</p>
-          <p className="mt-3 text-xl font-bold text-gray-900">{destacados?.topModeloDelAno?.nombre ?? "-"}</p>
-          <p className="mt-4 text-3xl font-bold text-[#15aa9a]">{destacados?.topModeloDelAno?.total ?? 0}</p>
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Top modelo</p>
+          <p className="mt-3 text-xl font-bold text-foreground">{destacados?.topModeloDelAno?.nombre ?? "-"}</p>
+          <p className="mt-4 text-3xl font-bold text-primary">{destacados?.topModeloDelAno?.total ?? 0}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Top sucursal</p>
-          <p className="mt-3 text-xl font-bold text-gray-900">{destacados?.topSucursalDelAno?.nombre ?? "-"}</p>
-          <p className="mt-4 text-3xl font-bold text-[#15aa9a]">{destacados?.topSucursalDelAno?.total ?? 0}</p>
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Top sucursal</p>
+          <p className="mt-3 text-xl font-bold text-foreground">{destacados?.topSucursalDelAno?.nombre ?? "-"}</p>
+          <p className="mt-4 text-3xl font-bold text-primary">{destacados?.topSucursalDelAno?.total ?? 0}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Top Hilux</p>
-          <p className="mt-3 text-xl font-bold text-gray-900">{destacados?.topHiluxDelAno?.nombre ?? "-"}</p>
-          <p className="mt-1 text-sm text-gray-600">{destacados?.topHiluxDelAno?.sucursal ?? "-"}</p>
-          <p className="mt-4 text-3xl font-bold text-[#15aa9a]">{destacados?.topHiluxDelAno?.total ?? 0}</p>
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Top Hilux</p>
+          <p className="mt-3 text-xl font-bold text-foreground">{destacados?.topHiluxDelAno?.nombre ?? "-"}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{destacados?.topHiluxDelAno?.sucursal ?? "-"}</p>
+          <p className="mt-4 text-3xl font-bold text-primary">{destacados?.topHiluxDelAno?.total ?? 0}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Mejor promedio</p>
-          <p className="mt-3 text-xl font-bold text-gray-900">{destacados?.mejorPromedioAnual?.nombre ?? "-"}</p>
-          <p className="mt-1 text-sm text-gray-600">{destacados?.mejorPromedioAnual?.sucursal ?? "-"}</p>
-          <p className="mt-4 text-3xl font-bold text-[#15aa9a]">{destacados?.mejorPromedioAnual?.promedioMensual ?? 0}</p>
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mejor promedio</p>
+          <p className="mt-3 text-xl font-bold text-foreground">{destacados?.mejorPromedioAnual?.nombre ?? "-"}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{destacados?.mejorPromedioAnual?.sucursal ?? "-"}</p>
+          <p className="mt-4 text-3xl font-bold text-primary">{destacados?.mejorPromedioAnual?.promedioMensual ?? 0}</p>
         </article>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[#eef9f7] p-3 text-[#15aa9a]">
+          <div className="rounded-lg bg-secondary p-3 text-primary">
             <CalendarRange size={20} />
           </div>
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Ventas por mes</h2>
-            <p className="mt-1 text-sm text-gray-500">Distribución anual de operaciones para {anio}.</p>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Ventas por mes</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Distribución anual de operaciones para {anio}.</p>
           </div>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-12">
           {ventasPorMes.map((item, index) => (
-            <div key={item.mes} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+            <div key={item.mes} className="rounded-lg border border-border bg-muted p-3">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
-                  <p className="mt-2 text-2xl font-bold text-gray-900">{item.total}</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.18em] text-muted-foreground">{item.label}</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{item.total}</p>
                 </div>
-                <div className="flex h-14 w-6 items-end overflow-hidden rounded-full bg-white ring-1 ring-gray-200">
+                <div className="flex h-14 w-6 items-end overflow-hidden rounded-full bg-card ring-1 ring-border">
                   <div
                     className="w-full rounded-full"
                     style={{
@@ -326,19 +326,19 @@ export default function RankingConvencionalView() {
         />
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
             Ventas acumuladas por vendedor
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Ranking completo anual con sucursal, total, promedio mensual y ventas Hilux.
           </p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-6 py-3 text-left">#</th>
                 <th className="px-6 py-3 text-left">Vendedor</th>
@@ -349,21 +349,21 @@ export default function RankingConvencionalView() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {acumuladas.map((item, index) => (
-                <tr key={`${item.nombre}-${item.sucursal}-${index}`} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 font-medium text-gray-500">{index + 1}</td>
-                  <td className="px-6 py-3 font-semibold text-gray-900">{item.nombre}</td>
-                  <td className="px-6 py-3 text-gray-700">{item.sucursal}</td>
-                  <td className="px-6 py-3 text-center font-semibold text-gray-900">{item.total}</td>
-                  <td className="px-6 py-3 text-center text-[#15aa9a]">{item.promedioMensual}</td>
+                <tr key={`${item.nombre}-${item.sucursal}-${index}`} className="hover:bg-muted">
+                  <td className="px-6 py-3 font-medium text-muted-foreground">{index + 1}</td>
+                  <td className="px-6 py-3 font-semibold text-foreground">{item.nombre}</td>
+                  <td className="px-6 py-3 text-muted-foreground">{item.sucursal}</td>
+                  <td className="px-6 py-3 text-center font-semibold text-foreground">{item.total}</td>
+                  <td className="px-6 py-3 text-center text-primary">{item.promedioMensual}</td>
                   <td className="px-6 py-3 text-center">{item.hilux}</td>
                 </tr>
               ))}
 
               {!acumuladas.length && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     No hay datos para el año seleccionado.
                   </td>
                 </tr>

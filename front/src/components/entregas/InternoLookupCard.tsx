@@ -32,15 +32,15 @@ export default function InternoLookupCard({
 }: InternoLookupCardProps) {
   if (loading) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-        <p className="text-sm text-gray-500">Buscando informacion del interno...</p>
+      <div className="rounded-md border border-border bg-card px-3 py-2">
+        <p className="text-sm text-muted-foreground">Buscando informacion del interno...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div className="rounded-md border border-destructive/30 bg-background px-3 py-2 text-sm text-destructive">
         {error}
       </div>
     );
@@ -48,20 +48,20 @@ export default function InternoLookupCard({
 
   if (!data) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-500">
+      <div className="rounded-md border border-dashed border-border bg-card px-3 py-2 text-sm text-muted-foreground">
         Busca un interno para ver la informacion actualizada desde SIAC.
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-      <div className="flex items-start justify-between gap-4 border-b border-gray-200 pb-2">
+    <div className="rounded-md border border-border bg-card px-3 py-2">
+      <div className="flex items-start justify-between gap-4 border-b border-border pb-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Datos SIAC</p>
-          <h3 className="mt-0.5 text-base font-semibold text-gray-900">Interno {data.interno}</h3>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Datos SIAC</p>
+          <h3 className="mt-0.5 text-base font-semibold text-card-foreground">Interno {data.interno}</h3>
         </div>
-        <span className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
+        <span className="rounded-md border border-border bg-secondary px-2 py-0.5 text-primary font-medium text-secondary-foreground">
           {data.operacion ? `Op. ${data.operacion}` : data.grupo && data.orden ? `[${data.grupo} | ${data.orden}]` : data.tipoOperacion}
         </span>
       </div>
@@ -70,12 +70,12 @@ export default function InternoLookupCard({
         {detailRows(data).map((row) => (
           <div
             key={row.label}
-            className="grid grid-cols-[120px_1fr] items-start gap-2 border-b border-gray-100 py-1 last:border-b-0"
+            className="grid grid-cols-[120px_1fr] items-start gap-2 border-b border-border py-1 last:border-b-0"
           >
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            <span className="text-primary font-medium uppercase tracking-wide text-muted-foreground">
               {row.label}
             </span>
-            <span className="text-sm leading-tight text-gray-900">{row.value}</span>
+            <span className="text-sm leading-tight text-card-foreground">{row.value}</span>
           </div>
         ))}
       </div>

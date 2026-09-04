@@ -149,13 +149,13 @@ export default function ProformaFormView() {
             />
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-12">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-12">
             Observaciones
             <textarea
               value={observaciones}
               onChange={(event) => setObservaciones(event.target.value)}
               rows={4}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
               placeholder="Opcional"
             />
           </label>
@@ -193,7 +193,7 @@ export default function ProformaFormView() {
               </div>
 
               <div className="grid grid-cols-1 gap-2 xl:grid-cols-12">
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-6">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-6">
                   Versión
                   <select
                     value={unidad.version}
@@ -202,7 +202,7 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, version: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Seleccionar versión</option>
                     {versiones.map((version) => (
@@ -213,7 +213,7 @@ export default function ProformaFormView() {
                   </select>
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-2">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-2">
                   Cantidad
                   <input
                     type="number"
@@ -224,11 +224,11 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, cantidad: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-2">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-2">
                   IVA unidad
                   <input
                     type="number"
@@ -240,12 +240,12 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, ivaUnidad: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Ej. 10.5"
                   />
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-2">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-2">
                   Total unidad
                   <input
                     type="number"
@@ -257,11 +257,11 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, totalUnidad: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-2">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-2">
                   Descuento unidad
                   <input
                     type="number"
@@ -273,11 +273,11 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, descuentoUnidad: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-5">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-5">
                   Total patentamiento
                   <input
                     type="number"
@@ -289,11 +289,11 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, totalPatentamiento: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-5">
+                <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-5">
                   Total flete
                   <input
                     type="number"
@@ -305,7 +305,7 @@ export default function ProformaFormView() {
                         current.map((item, itemIndex) => (itemIndex === index ? { ...item, totalFlete: event.target.value } : item)),
                       )
                     }
-                    className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+                    className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                 </label>
               </div>
@@ -344,19 +344,19 @@ export default function ProformaFormView() {
             <tbody className="divide-y divide-border">
               {resumen.rows.map((row, index) => (
                 <tr key={`${row.detalle}-${index}`} className="hover:bg-muted">
-                  <td className="px-4 py-3 text-gray-700">{row.detalle}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{row.cantidad}</td>
-                  <td className="px-4 py-3 text-center text-gray-700">{formatPercentAr(row.iva)}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{formatCurrencyAr(row.neto)}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{formatCurrencyAr(row.total)}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-900">{formatCurrencyAr(row.totales)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{row.detalle}</td>
+                  <td className="px-4 py-3 text-center text-muted-foreground">{row.cantidad}</td>
+                  <td className="px-4 py-3 text-center text-muted-foreground">{formatPercentAr(row.iva)}</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrencyAr(row.neto)}</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrencyAr(row.total)}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-foreground">{formatCurrencyAr(row.totales)}</td>
                 </tr>
               ))}
-              <tr className="bg-gray-50">
-                <td colSpan={5} className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+              <tr className="bg-muted">
+                <td colSpan={5} className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                   TOTAL NETO
                 </td>
-                <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">{formatCurrencyAr(resumen.totalNeto)}</td>
+                <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">{formatCurrencyAr(resumen.totalNeto)}</td>
               </tr>
             </tbody>
           </table>

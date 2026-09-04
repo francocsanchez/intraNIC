@@ -213,12 +213,12 @@ export default function PedidoUnidadesPreviasView() {
             <tbody className="divide-y divide-border">
               {orderedData.map((item) => (
                 <tr key={item._id} className="hover:bg-muted">
-                  <td className="px-4 py-3 font-semibold text-gray-900">{item.interno}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.clienteNombre}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.vendedorNombre}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.chasis ?? "-"}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.version}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.modelo}</td>
+                  <td className="px-4 py-3 font-semibold text-foreground">{item.interno}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.clienteNombre}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.vendedorNombre}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.version}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.modelo}</td>
                   <td className="px-4 py-3">
                     {canManagePriority ? (
                       <select
@@ -251,15 +251,15 @@ export default function PedidoUnidadesPreviasView() {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{item.usuario}</td>
-                  <td className="px-4 py-3 text-gray-700">{formatDateTime(item.createdAt)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.usuario}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDateTime(item.createdAt)}</td>
                   <td className="px-4 py-3 text-center">
                     {canDeletePrevia ? (
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(item._id)}
                         disabled={deleteMutation.isPending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         <Trash2 size={14} strokeWidth={1.8} />
                         Eliminar
@@ -271,7 +271,7 @@ export default function PedidoUnidadesPreviasView() {
 
               {!data.length ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     Todavia no hay unidades en la lista previa.
                   </td>
                 </tr>

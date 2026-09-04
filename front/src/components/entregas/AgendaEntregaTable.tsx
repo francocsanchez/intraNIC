@@ -118,53 +118,53 @@ export default function AgendaEntregaTable({
   };
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-200 px-4 py-2">
-        <h2 className="text-sm font-semibold tracking-tight text-gray-900">Agendas programadas</h2>
+    <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-3 py-2">
+        <h2 className="text-sm font-semibold text-card-foreground">Agendas programadas</h2>
       </div>
 
       <div className="overflow-x-auto">
         <table className="min-w-[980px] w-full border-collapse text-xs">
-          <thead className="bg-[#B7B7B7] text-[11px] font-bold uppercase text-black">
+          <thead className="bg-muted text-primary font-medium uppercase text-muted-foreground">
             <tr>
-              <th className="px-3 py-3 text-center">Hora</th>
-              <th className="px-3 py-3 text-center">Interno</th>
-              <th className="px-3 py-3 text-center">Datos</th>
-              <th className="px-3 py-3 text-center">Vendedor</th>
-              <th className="px-3 py-3 text-center">Operacion</th>
-              <th className="px-3 py-3 text-center">Observaciones</th>
-              <th className="px-3 py-3 text-center">Entregada por</th>
-              {canManage ? <th className="px-3 py-3 text-center">Acciones</th> : null}
+              <th className="px-3 py-2 text-center">Hora</th>
+              <th className="px-3 py-2 text-center">Interno</th>
+              <th className="px-3 py-2 text-center">Datos</th>
+              <th className="px-3 py-2 text-center">Vendedor</th>
+              <th className="px-3 py-2 text-center">Operacion</th>
+              <th className="px-3 py-2 text-center">Observaciones</th>
+              <th className="px-3 py-2 text-center">Entregada por</th>
+              {canManage ? <th className="px-3 py-2 text-center">Acciones</th> : null}
             </tr>
           </thead>
           <tbody>
             {displayRows.map((row, index) => {
               if (isBlockedRow(row)) {
                 return (
-                  <tr key={`blocked-${row.horaAgenda}-${index}`} className="border-b border-gray-400 align-middle bg-gray-200 text-gray-600">
-                    <td className="px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none">
+                  <tr key={`blocked-${row.horaAgenda}-${index}`} className="border-b border-border align-middle bg-muted text-muted-foreground">
+                    <td className="px-3 py-3 text-center align-middle text-primary font-bold leading-none">
                       <div className="flex items-center justify-center">{row.horaAgenda}</div>
                     </td>
-                    <td className="bg-gray-300 px-3 py-3 text-center align-middle text-[1rem] font-bold leading-none">
+                    <td className="bg-muted px-3 py-3 text-center align-middle text-primary font-bold leading-none">
                       <div className="flex items-center justify-center uppercase tracking-wide">
                         Bloqueado
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-[12px] font-semibold uppercase leading-tight">
+                      <div className="text-primary font-semibold uppercase leading-tight">
                         Horario bloqueado
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight">
+                    <td className="px-3 py-3 text-center align-middle text-primary uppercase leading-tight">
                       <div className="flex items-center justify-center">-</div>
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none">
+                    <td className="px-3 py-3 text-center align-middle text-primary font-semibold leading-none">
                       <div className="flex items-center justify-center">-</div>
                     </td>
-                    <td className="px-3 py-3 align-middle text-[11px] font-medium leading-tight">
-                      <div className="min-w-[160px] uppercase text-gray-600">No disponible para agendar</div>
+                    <td className="px-3 py-3 align-middle text-primary font-medium leading-tight">
+                      <div className="min-w-[160px] uppercase text-muted-foreground">No disponible para agendar</div>
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[11px] font-medium uppercase leading-tight">
+                    <td className="px-3 py-3 text-center align-middle text-primary font-medium uppercase leading-tight">
                       -
                     </td>
                     {canManage ? <td className="px-3 py-3 align-middle" /> : null}
@@ -174,30 +174,30 @@ export default function AgendaEntregaTable({
 
               if (isEmptyRow(row)) {
                 return (
-                  <tr key={`empty-${row.horaAgenda}-${index}`} className="border-b border-gray-400 align-middle bg-white">
-                    <td className="px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none text-black">
+                  <tr key={`empty-${row.horaAgenda}-${index}`} className="border-b border-border align-middle bg-card">
+                    <td className="px-3 py-3 text-center align-middle text-primary font-bold leading-none text-foreground">
                       <div className="flex items-center justify-center">{row.horaAgenda}</div>
                     </td>
-                    <td className="bg-[#F3F3F3] px-3 py-3 text-center align-middle text-[1.15rem] font-bold leading-none text-black">
+                    <td className="bg-secondary px-3 py-3 text-center align-middle text-primary font-bold leading-none text-foreground">
                       <div className="min-h-[20px]" />
                     </td>
-                    <td className="px-4 py-3 text-black">
+                    <td className="px-4 py-3 text-foreground">
                       <div className="space-y-0.5">
-                        <div className="min-h-[14px] border-b border-dotted border-gray-400 pb-0.5" />
+                        <div className="min-h-[14px] border-b border-dotted border-border pb-0.5" />
                         <div className="min-h-[14px]" />
                         <div className="min-h-[14px]" />
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight text-black">
+                    <td className="px-3 py-3 text-center align-middle text-primary uppercase leading-tight text-foreground">
                       <div className="min-h-[20px]" />
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none text-black">
+                    <td className="px-3 py-3 text-center align-middle text-primary font-semibold leading-none text-foreground">
                       <div className="min-h-[20px]" />
                     </td>
-                    <td className="px-3 py-3 align-middle text-[11px] leading-tight text-gray-700">
+                    <td className="px-3 py-3 align-middle text-primary leading-tight text-muted-foreground">
                       <div className="min-w-[160px] min-h-[20px]" />
                     </td>
-                    <td className="px-3 py-3 text-center align-middle text-[11px] leading-tight text-gray-700">
+                    <td className="px-3 py-3 text-center align-middle text-primary leading-tight text-muted-foreground">
                       <div className="min-h-[20px]" />
                     </td>
                     {canManage ? <td className="px-3 py-3 align-middle" /> : null}
@@ -215,49 +215,49 @@ export default function AgendaEntregaTable({
               return (
                 <tr
                   key={item._id}
-                  className={`border-b border-gray-400 align-middle ${
-                    reserva ? "bg-yellow-100" : entregada ? "bg-green-100" : "bg-white"
+                  className={`border-b border-border align-middle ${
+                    reserva || entregada ? "bg-secondary" : "bg-card"
                   }`}
                 >
                   <td
-                    className={`px-3 py-3 text-center align-middle text-[1.1rem] font-bold leading-none text-black ${
-                      reserva ? "bg-yellow-100" : entregada ? "bg-green-100" : "bg-white"
+                    className={`px-3 py-3 text-center align-middle text-primary font-bold leading-none text-foreground ${
+                    reserva || entregada ? "bg-secondary" : "bg-card"
                     }`}
                   >
                     <div className="flex items-center justify-center">{item.horaAgenda}</div>
                   </td>
                   <td
-                    className={`px-3 py-3 text-center align-middle text-[1.15rem] font-bold leading-none text-black ${
-                      reserva ? "bg-yellow-200" : entregada ? "bg-green-200" : "bg-[#F3F3F3]"
+                    className={`px-3 py-3 text-center align-middle text-primary font-bold leading-none text-foreground ${
+                    reserva || entregada ? "bg-secondary" : "bg-muted"
                     }`}
                   >
                     <div className="flex flex-col items-center justify-center gap-1">
                       <div>{reserva ? "RESERVA" : item.interno}</div>
                       {reserva ? (
-                        <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-800">
+                        <div className="text-primary font-semibold uppercase tracking-wide text-secondary-foreground">
                           Lugar reservado
                         </div>
                       ) : (
                         <>
                           {canToggleEquipado ? (
-                            <label className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                            <label className="inline-flex items-center gap-1 text-primary font-semibold uppercase tracking-wide text-muted-foreground">
                               <input
                                 type="checkbox"
                                 checked={item.equipado}
                                 disabled={equipadoPending || entregada}
                                 onChange={(event) => onToggleEquipado(item, event.target.checked)}
-                                className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:opacity-50"
+                                className="h-4 w-4 rounded border-input text-foreground focus:ring-ring disabled:opacity-50"
                               />
                               <span>Equipado</span>
                             </label>
                           ) : item.equipado ? (
-                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                            <div className="inline-flex items-center gap-1 text-primary font-semibold uppercase tracking-wide text-muted-foreground">
                               <Package size={12} />
                               Equipado
                             </div>
                           ) : null}
                           {item.entregaUsado ? (
-                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+                            <div className="inline-flex items-center gap-1 text-primary font-semibold uppercase tracking-wide text-muted-foreground">
                               <CarFront size={12} />
                               Entrega usado
                             </div>
@@ -266,38 +266,38 @@ export default function AgendaEntregaTable({
                       )}
                       </div>
                     </td>
-                  <td className="px-4 py-3 text-black">
+                  <td className="px-4 py-3 text-foreground">
                     {reserva ? (
                       <div className="space-y-1">
-                        <div className="border-b border-dotted border-yellow-400 pb-0.5 text-[12px] font-bold uppercase leading-tight text-amber-900">
+                        <div className="border-b border-dotted border-border pb-0.5 text-primary font-bold uppercase leading-tight text-secondary-foreground">
                           Reserva
                         </div>
-                        <div className="text-[12px] font-medium leading-tight text-amber-900">
+                        <div className="text-primary font-medium leading-tight text-secondary-foreground">
                           {item.observaciones?.trim() || "-"}
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-0.5">
-                        <div className="border-b border-dotted border-gray-400 pb-0.5 text-[12px] font-medium uppercase leading-tight">
+                        <div className="border-b border-dotted border-border pb-0.5 text-primary font-medium uppercase leading-tight">
                           {datos.cliente}
                         </div>
-                        <div className="text-[12px] font-semibold uppercase leading-tight text-gray-700">
+                        <div className="text-primary font-semibold uppercase leading-tight text-muted-foreground">
                           {datos.versionModelo}
                         </div>
-                        <div className="flex flex-wrap items-center gap-1 text-[12px] font-bold uppercase leading-tight">
+                        <div className="flex flex-wrap items-center gap-1 text-primary font-bold uppercase leading-tight">
                           <span>{datos.identificador}</span>
                           <span>/</span>
-                          <span className="text-gray-700">COLOR:</span>
+                          <span className="text-muted-foreground">COLOR:</span>
                           <span
-                            className={`inline-flex items-center rounded-md border border-slate-200 px-1.5 py-0.5 text-[12px] font-bold leading-none ${
-                              datos.colorClass ?? "bg-gray-100 text-gray-700"
+                            className={`inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-primary font-bold leading-none ${
+                              datos.colorClass ?? "bg-muted text-muted-foreground"
                             }`}
                           >
                             {datos.color}
                           </span>
                         </div>
                         {item.siacSyncError ? (
-                          <div className="inline-flex items-center gap-1 pt-0.5 text-[10px] font-semibold uppercase text-amber-700">
+                          <div className="inline-flex items-center gap-1 pt-0.5 text-primary font-semibold uppercase text-secondary-foreground">
                             <AlertTriangle size={10} />
                             {item.siacSyncMessage || "Sin SIAC"}
                           </div>
@@ -305,39 +305,39 @@ export default function AgendaEntregaTable({
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-3 text-center align-middle text-[0.95rem] uppercase leading-tight text-black">
+                  <td className="px-3 py-3 text-center align-middle text-primary uppercase leading-tight text-foreground">
                     <div className="flex items-center justify-center">
                       {reserva ? "-" : (item.siac?.vendedor || "-")}
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-center align-middle text-[1.05rem] font-semibold leading-none text-black">
+                  <td className="px-3 py-3 text-center align-middle text-primary font-semibold leading-none text-foreground">
                     <div className="flex items-center justify-center">
                       {reserva ? "-" : formatOperacion(item)}
                     </div>
                   </td>
-                  <td className="px-3 py-3 align-middle text-[11px] leading-tight text-gray-700">
+                  <td className="px-3 py-3 align-middle text-primary leading-tight text-muted-foreground">
                     <div className="line-clamp-3 min-w-[160px]">
                       {reserva ? "-" : item.observaciones?.trim() || "-"}
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-center align-middle text-[11px] leading-tight text-gray-700">
+                  <td className="px-3 py-3 text-center align-middle text-primary leading-tight text-muted-foreground">
                     {entregada ? (
                       <div className="flex min-w-[170px] flex-col items-center justify-center gap-1">
                         {canToggleEntregadaPor ? (
-                          <label className="inline-flex items-center gap-2 font-semibold text-gray-800">
+                          <label className="inline-flex items-center gap-2 font-semibold text-foreground">
                             <input
                               type="checkbox"
                               checked={item.entregadaPorMarcada}
                               disabled={togglePending}
                               onChange={(event) => onToggleEntregadaPor(item, event.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black/20 disabled:opacity-50"
+                              className="h-4 w-4 rounded border-input text-foreground focus:ring-ring disabled:opacity-50"
                             />
                             <span>Entregada por</span>
                           </label>
                         ) : (
-                          <span className="font-semibold uppercase tracking-wide text-gray-700">Entregada por</span>
+                          <span className="font-semibold uppercase tracking-wide text-muted-foreground">Entregada por</span>
                         )}
-                        <div className="text-center font-medium text-gray-700">
+                        <div className="text-center font-medium text-muted-foreground">
                           {item.entregadaPorMarcada ? item.entregadaPorNombre || "-" : "-"}
                         </div>
                       </div>
@@ -348,17 +348,17 @@ export default function AgendaEntregaTable({
                   {canManage ? (
                     <td className="px-3 py-3 align-middle">
                       {entregada ? (
-                        <div className="text-center text-[11px] font-semibold uppercase tracking-wide text-green-800">
+                        <div className="text-center text-primary font-semibold uppercase tracking-wide text-secondary-foreground">
                           Entregado
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-2 whitespace-nowrap text-[12px]">
+                        <div className="flex items-center justify-center gap-2 whitespace-nowrap text-primary">
                           {reserva ? (
                             <>
                               <button
                                 type="button"
                                 onClick={() => onConvertReservation(item)}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-[12px] font-semibold text-amber-900 transition hover:bg-amber-100"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-secondary px-3.5 py-2 text-primary font-semibold text-secondary-foreground transition hover:bg-secondary"
                               >
                                 <CalendarPlus size={13} />
                                 Agendar turno
@@ -366,7 +366,7 @@ export default function AgendaEntregaTable({
                               <button
                                 type="button"
                                 onClick={() => onEdit(item)}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-primary font-semibold text-muted-foreground transition hover:bg-muted"
                               >
                                 <Pencil size={13} />
                                 Editar
@@ -374,7 +374,7 @@ export default function AgendaEntregaTable({
                               <button
                                 type="button"
                                 onClick={() => onDelete(item)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3.5 py-2 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-3.5 py-2 text-primary font-semibold text-destructive transition hover:bg-destructive/10"
                               >
                                 <Trash2 size={13} />
                                 Eliminar
@@ -385,7 +385,7 @@ export default function AgendaEntregaTable({
                               <button
                                 type="button"
                                 onClick={() => onEdit(item)}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-gray-700 transition hover:bg-gray-50"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-primary font-semibold text-muted-foreground transition hover:bg-muted"
                               >
                                 <Pencil size={13} />
                                 Editar
@@ -393,7 +393,7 @@ export default function AgendaEntregaTable({
                               <button
                                 type="button"
                                 onClick={() => onDelete(item)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3.5 py-2 text-[12px] font-semibold text-red-700 transition hover:bg-red-100"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-3.5 py-2 text-primary font-semibold text-destructive transition hover:bg-destructive/10"
                               >
                                 <Trash2 size={13} />
                                 Eliminar

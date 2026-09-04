@@ -21,7 +21,7 @@ const formatPromedioVenta = (value: number) => value.toFixed(1);
 const formatMesesStock = (total: number, promedioVenta: number) =>
   promedioVenta > 0 ? (total / promedioVenta).toFixed(1) : "0.0";
 const getMesesStockAlertClass = (value: number) =>
-  value >= 2.5 ? "bg-red-100 text-red-700" : "text-gray-900";
+  value >= 2.5 ? "bg-destructive/10 text-destructive" : "text-foreground";
 const MODEL_COLUMN_WIDTH = 144;
 const VERSION_COLUMN_WIDTH = 320;
 
@@ -54,7 +54,7 @@ function AnalisisStockDetailModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-secondary/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -68,20 +68,20 @@ function AnalisisStockDetailModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+              <Dialog.Panel className="w-full max-w-5xl overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+                <div className="flex items-center justify-between border-b border-border px-5 py-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Detalle de stock</p>
-                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Detalle de stock</p>
+                    <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
                       {detail?.modelo ?? "-"} | {detail?.version ?? "-"}
                     </Dialog.Title>
-                    <p className="mt-1 text-sm text-gray-500">Periodo: {detail?.monthLabel ?? "-"}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Periodo: {detail?.monthLabel ?? "-"}</p>
                   </div>
 
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                    className="rounded-lg border border-border p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   >
                     <X size={18} />
                   </button>
@@ -89,7 +89,7 @@ function AnalisisStockDetailModal({
 
                 <div className="overflow-x-auto p-5">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+                    <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3 text-left">Interno</th>
                         <th className="px-4 py-3 text-left">Nro. fab</th>
@@ -97,17 +97,17 @@ function AnalisisStockDetailModal({
                         <th className="px-4 py-3 text-left">Fecha recepcion</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-border">
                       {(detail?.units ?? []).map((unit) => (
-                        <tr key={`${unit.interno}-${unit.nrofab}-${unit.fechaRecepcion}`} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-gray-900">{unit.interno}</td>
-                          <td className="px-4 py-3 text-gray-700">{unit.nrofab}</td>
-                          <td className="px-4 py-3 text-gray-700">
-                            <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(unit.color)}`}>
+                        <tr key={`${unit.interno}-${unit.nrofab}-${unit.fechaRecepcion}`} className="hover:bg-muted">
+                          <td className="px-4 py-3 text-foreground">{unit.interno}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{unit.nrofab}</td>
+                          <td className="px-4 py-3 text-muted-foreground">
+                            <span className={`inline-block rounded-md border border-border px-2 py-1 text-xs font-medium ${textToColor(unit.color)}`}>
                               {unit.color}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-700">{unit.fechaRecepcion}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{unit.fechaRecepcion}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -145,9 +145,9 @@ export default function AnalisisStockView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Analisis de stock</h1>
-          <p className="mt-2 text-sm text-red-600">{error.message}</p>
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Analisis de stock</h1>
+          <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
       </div>
     );
@@ -318,8 +318,8 @@ export default function AnalisisStockView() {
               margin: 0;
               padding: 0;
               font-family: Arial, sans-serif;
-              color: #0f172a;
-              background: #ffffff;
+              color: oklch(0.145 0 0);
+              background: oklch(1 0 0);
             }
 
             body {
@@ -335,14 +335,14 @@ export default function AnalisisStockView() {
             .stock-summary {
               display: grid;
               grid-template-columns: repeat(8, minmax(0, 1fr));
-              border: 1px solid #dbe4ee;
+              border: 1px solid oklch(0.922 0 0);
               margin: 0 0 6px 0;
             }
 
             .stock-summary-secondary {
               display: grid;
               grid-template-columns: repeat(2, minmax(0, 1fr));
-              border: 1px solid #dbe4ee;
+              border: 1px solid oklch(0.922 0 0);
               border-top: 0;
               margin: -6px 0 6px 0;
             }
@@ -353,7 +353,7 @@ export default function AnalisisStockView() {
             }
 
             .stock-card + .stock-card {
-              border-left: 1px solid #dbe4ee;
+              border-left: 1px solid oklch(0.922 0 0);
             }
 
             .stock-card-wide {
@@ -364,7 +364,7 @@ export default function AnalisisStockView() {
               font-size: 8px;
               letter-spacing: 0.08em;
               text-transform: uppercase;
-              color: #64748b;
+              color: oklch(0.556 0 0);
               line-height: 1;
             }
 
@@ -384,8 +384,8 @@ export default function AnalisisStockView() {
             }
 
             thead th {
-              border-bottom: 1.5px solid #0f172a;
-              color: #475569;
+              border-bottom: 1.5px solid oklch(0.145 0 0);
+              color: oklch(0.556 0 0);
               font-size: 9px;
               letter-spacing: 0.08em;
               text-transform: uppercase;
@@ -409,14 +409,14 @@ export default function AnalisisStockView() {
             }
 
             tbody td {
-              border-bottom: 0.5px solid #dbe4ee;
+              border-bottom: 0.5px solid oklch(0.922 0 0);
               padding: 1px 2px;
               vertical-align: middle;
             }
 
             td.model {
               font-weight: 700;
-              border-top: 2px solid #0f172a;
+              border-top: 2px solid oklch(0.145 0 0);
               white-space: normal;
               word-break: break-word;
             }
@@ -431,7 +431,7 @@ export default function AnalisisStockView() {
             }
 
             td.ped {
-              background: #f3f4f6;
+              background: oklch(0.97 0 0);
             }
 
             td.total,
@@ -441,21 +441,21 @@ export default function AnalisisStockView() {
             }
 
             td.model-total {
-              border-top: 2px solid #0f172a;
+              border-top: 2px solid oklch(0.145 0 0);
             }
 
             tr.group-start td.version,
             tr.group-start td.number {
-              border-top: 2px solid #0f172a;
+              border-top: 2px solid oklch(0.145 0 0);
             }
 
             tr.totals td {
-              background: #f3f4f6;
+              background: oklch(0.97 0 0);
               font-weight: 700;
             }
 
             .danger {
-              color: #b91c1c;
+              color: oklch(0.577 0.245 27.325);
               font-weight: 700;
             }
           </style>
@@ -555,7 +555,7 @@ export default function AnalisisStockView() {
           }
 
           html, body {
-            background: #fff !important;
+            background: oklch(1 0 0) !important;
           }
 
           body * {
@@ -630,12 +630,12 @@ export default function AnalisisStockView() {
         }
       `}</style>
 
-      <section className="print:hidden rounded-3xl border border-[#cbe7e2] bg-[#e4f3fa] p-6 shadow-sm">
+      <section className="print:hidden rounded-lg border border-border bg-secondary p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#17897d]">Gestion</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Analisis de stock</h1>
-            <p className="mt-2 max-w-3xl text-sm text-gray-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Gestion</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Analisis de stock</h1>
+            <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
               Matriz de unidades agrupadas por modelo y version, distribuidas por mes de recepcion calculado desde SIAC.
             </p>
           </div>
@@ -644,14 +644,14 @@ export default function AnalisisStockView() {
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-muted-foreground transition hover:bg-muted"
             >
               <Printer size={16} />
               Imprimir
             </button>
             <Link
               to={paths.convencional.analisisStockDiccionarioVersiones}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#15aa9a]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0f766e] transition hover:bg-[#f3fbfa]"
+              className="inline-flex items-center gap-2 rounded-lg border border-border/20 bg-card px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-secondary"
             >
               <GitMerge size={16} />
               Diccionario de versiones
@@ -660,8 +660,8 @@ export default function AnalisisStockView() {
         </div>
       </section>
 
-      <section className="print:hidden overflow-hidden rounded-[1.6rem] border border-gray-200 bg-white shadow-sm">
-        <div className="px-6 pt-5 text-xs font-semibold uppercase tracking-[0.28em] text-[#5b7197]">
+      <section className="print:hidden overflow-hidden rounded-[1.6rem] border border-border bg-card shadow-sm">
+        <div className="px-6 pt-5 text-xs font-semibold uppercase tracking-[0.28em] text-primary">
           Meses de stock
         </div>
         <div className="grid grid-cols-2 px-6 py-4 md:grid-cols-4 xl:grid-cols-8">
@@ -670,11 +670,11 @@ export default function AnalisisStockView() {
               key={group.modelo}
               className={[
                 "min-w-0 px-3 py-1",
-                index > 0 ? "border-l border-gray-200" : "",
+                index > 0 ? "border-l border-border" : "",
               ].join(" ")}
             >
-              <p className="truncate text-[11px] uppercase text-[#5b7197]">{group.modelo}</p>
-              <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">
+              <p className="truncate text-primary uppercase text-primary">{group.modelo}</p>
+              <p className="mt-2 text-primary font-semibold leading-none tracking-tight text-primary">
                 {formatMesesStock(group.total, group.promedioVenta)}
               </p>
             </div>
@@ -683,25 +683,25 @@ export default function AnalisisStockView() {
       </section>
 
       <section className="print:hidden grid gap-4 md:grid-cols-2">
-        <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">Unidades</p>
-          <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">{totalUnidades}</p>
+        <article className="rounded-[1.4rem] border border-border bg-card px-6 py-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Unidades</p>
+          <p className="mt-2 text-primary font-semibold leading-none tracking-tight text-primary">{totalUnidades}</p>
         </article>
-        <article className="rounded-[1.4rem] border border-gray-200 bg-white px-6 py-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5b7197]">M. stock negocio</p>
-          <p className="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-[#0f172a]">
+        <article className="rounded-[1.4rem] border border-border bg-card px-6 py-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">M. stock negocio</p>
+          <p className="mt-2 text-primary font-semibold leading-none tracking-tight text-primary">
             {formatPromedioVenta(totalMesesStockNegocio)}
           </p>
         </article>
       </section>
 
-      <section className="analisis-stock-print overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
-        <div className="print-title border-b border-gray-200 px-6 py-4 print:border-b print:px-0 print:py-1">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">Analisis stock / meses</h2>
+      <section className="analisis-stock-print overflow-hidden rounded-lg border border-border bg-card shadow-sm print:rounded-none print:border-0 print:shadow-none">
+        <div className="print-title border-b border-border px-6 py-4 print:border-b print:px-0 print:py-1">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">Analisis stock / meses</h2>
         </div>
 
         <div className="overflow-hidden print:overflow-visible">
-          <table className="print-table w-full table-fixed text-[11px] print:text-[10px]">
+          <table className="print-table w-full table-fixed text-primary print:text-primary">
             <colgroup>
               <col className="print-col-model" style={{ width: `${MODEL_COLUMN_WIDTH}px` }} />
               <col className="print-col-version" style={{ width: `${VERSION_COLUMN_WIDTH}px` }} />
@@ -714,16 +714,16 @@ export default function AnalisisStockView() {
               <col className="print-col-mstock" style={{ width: "5.25rem" }} />
               <col className="print-col-total-modelo" style={{ width: "6.25rem" }} />
             </colgroup>
-            <thead className="bg-gray-50 text-[10px] uppercase tracking-[0.16em] text-gray-500 print:text-[9px] print:tracking-[0.08em]">
+            <thead className="bg-muted text-primary uppercase tracking-[0.16em] text-muted-foreground print:text-primary print:tracking-[0.08em]">
               <tr>
                 <th
-                  className="sticky left-0 z-20 bg-gray-50 px-1 py-0.5 text-left print:static print:w-[9%] print:px-1 print:py-0.5"
+                  className="sticky left-0 z-20 bg-muted px-1 py-0.5 text-left print:static print:w-[9%] print:px-1 print:py-0.5"
                   style={{ width: MODEL_COLUMN_WIDTH }}
                 >
                   Modelo
                 </th>
                 <th
-                  className="sticky z-20 bg-gray-50 px-1 py-0.5 text-left print:static print:w-[23%] print:px-1 print:py-0.5"
+                  className="sticky z-20 bg-muted px-1 py-0.5 text-left print:static print:w-[23%] print:px-1 print:py-0.5"
                   style={{ left: MODEL_COLUMN_WIDTH, width: VERSION_COLUMN_WIDTH }}
                 >
                   Version
@@ -733,21 +733,21 @@ export default function AnalisisStockView() {
                     {month.label}
                   </th>
                 ))}
-                <th className="bg-gray-100 px-1 py-0.5 text-center print:px-0.5 print:py-0.5">PED</th>
+                <th className="bg-muted px-1 py-0.5 text-center print:px-0.5 print:py-0.5">PED</th>
                 <th className="px-1 py-0.5 text-center print:px-0.5 print:py-0.5">Total</th>
                 <th className="px-1 py-0.5 text-center print:px-0.5 print:py-0.5">P. VTA</th>
                 <th className="px-1 py-0.5 text-center print:px-0.5 print:py-0.5">M. STOCK</th>
                 <th className="px-1 py-0.5 text-center print:px-0.5 print:py-0.5">Total modelo</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {groupsWithTotals.map((group) =>
                 group.rows.map((row, rowIndex) => (
-                  <tr key={`${group.modelo}-${row.version}`} className="hover:bg-gray-50">
+                  <tr key={`${group.modelo}-${row.version}`} className="hover:bg-muted">
                     {rowIndex === 0 ? (
                       <td
                         rowSpan={group.rows.length}
-                        className="print-model-cell sticky left-0 z-10 border-r border-t-4 border-t-gray-900 border-gray-100 bg-white px-1 py-0.5 align-middle font-bold text-gray-900 print:static print:px-1 print:py-0.5"
+                        className="print-model-cell sticky left-0 z-10 border-r border-t-4 border-t-foreground border-border bg-card px-1 py-0.5 align-middle font-bold text-foreground print:static print:px-1 print:py-0.5"
                         style={{ width: MODEL_COLUMN_WIDTH }}
                       >
                         {group.modelo}
@@ -755,8 +755,8 @@ export default function AnalisisStockView() {
                     ) : null}
                     <td
                       className={[
-                        "print-version-cell sticky z-10 border-r border-gray-100 bg-white px-1 py-0.5 text-gray-700 print:static print:px-1 print:py-0.5",
-                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                        "print-version-cell sticky z-10 border-r border-border bg-card px-1 py-0.5 text-muted-foreground print:static print:px-1 print:py-0.5",
+                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                       ].join(" ")}
                       style={{ left: MODEL_COLUMN_WIDTH, width: VERSION_COLUMN_WIDTH }}
                     >
@@ -766,8 +766,8 @@ export default function AnalisisStockView() {
                       <td
                         key={`${group.modelo}-${row.version}-${month.key}`}
                         className={[
-                          "px-1 py-0.5 text-center text-gray-700 print:px-0.5 print:py-0.5",
-                          rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                          "px-1 py-0.5 text-center text-muted-foreground print:px-0.5 print:py-0.5",
+                          rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                         ].join(" ")}
                       >
                         {(() => {
@@ -790,7 +790,7 @@ export default function AnalisisStockView() {
                                     units,
                                   })
                                 }
-                                className="inline-flex min-w-[1.8rem] items-center justify-center rounded-md bg-[#e4f3fa] px-1 py-0.5 font-semibold text-[#0f766e] transition hover:bg-[#cbe7e2] print:hidden"
+                                className="inline-flex min-w-[1.8rem] items-center justify-center rounded-md bg-secondary px-1 py-0.5 font-semibold text-primary transition hover:bg-secondary print:hidden"
                               >
                                 {value}
                               </button>
@@ -802,8 +802,8 @@ export default function AnalisisStockView() {
                     ))}
                     <td
                       className={[
-                        "bg-gray-50 px-1 py-0.5 text-center text-gray-700 print:px-0.5 print:py-0.5",
-                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                        "bg-muted px-1 py-0.5 text-center text-muted-foreground print:px-0.5 print:py-0.5",
+                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                       ].join(" ")}
                     >
                       <div className="flex min-w-[112px] items-center justify-center gap-1 print:hidden">
@@ -818,7 +818,7 @@ export default function AnalisisStockView() {
                               [`${group.modelo}::${row.versionKey}`]: event.target.value,
                             }))
                           }
-                          className="w-12 rounded-md border border-gray-300 px-1 py-0.5 text-center text-xs outline-none transition-colors focus:border-[#15aa9a]"
+                          className="w-12 rounded-md border border-input px-1 py-0.5 text-center text-xs outline-none transition-colors focus:border-ring"
                         />
                         <button
                           type="button"
@@ -830,7 +830,7 @@ export default function AnalisisStockView() {
                             })
                           }
                           disabled={savePedMutation.isPending}
-                          className="rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="rounded-md border border-border bg-card px-1.5 py-0.5 text-primary font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Guardar
                         </button>
@@ -839,16 +839,16 @@ export default function AnalisisStockView() {
                     </td>
                     <td
                       className={[
-                        "px-1 py-0.5 text-center font-semibold text-gray-900 print:px-0.5 print:py-0.5",
-                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                        "px-1 py-0.5 text-center font-semibold text-foreground print:px-0.5 print:py-0.5",
+                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                       ].join(" ")}
                     >
                       {row.total}
                     </td>
                     <td
                       className={[
-                        "px-1 py-0.5 text-center font-semibold text-gray-900 print:px-0.5 print:py-0.5",
-                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                        "px-1 py-0.5 text-center font-semibold text-foreground print:px-0.5 print:py-0.5",
+                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                       ].join(" ")}
                     >
                       {formatPromedioVenta(row.promedioVenta)}
@@ -857,7 +857,7 @@ export default function AnalisisStockView() {
                       className={[
                         "px-1 py-0.5 text-center font-semibold print:px-0.5 print:py-0.5",
                         getMesesStockAlertClass(row.total / (row.promedioVenta > 0 ? row.promedioVenta : Number.POSITIVE_INFINITY)),
-                        rowIndex === 0 ? "border-t-4 border-t-gray-900" : "",
+                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
                       ].join(" ")}
                     >
                       {formatMesesStock(row.total, row.promedioVenta)}
@@ -865,7 +865,7 @@ export default function AnalisisStockView() {
                     {rowIndex === 0 ? (
                       <td
                         rowSpan={group.rows.length}
-                        className="border-t-4 border-t-gray-900 px-1 py-0.5 text-center align-middle font-bold text-gray-900 print:px-0.5 print:py-0.5"
+                        className="border-t-4 border-t-foreground px-1 py-0.5 text-center align-middle font-bold text-foreground print:px-0.5 print:py-0.5"
                       >
                         {group.total}
                       </td>
@@ -876,34 +876,34 @@ export default function AnalisisStockView() {
 
               {!groups.length ? (
                 <tr>
-                  <td colSpan={months.length + 7} className="px-4 py-8 text-center text-sm text-gray-500 print:px-1 print:py-2">
+                  <td colSpan={months.length + 7} className="px-4 py-8 text-center text-sm text-muted-foreground print:px-1 print:py-2">
                     No hay unidades para analizar en este momento.
                   </td>
                 </tr>
               ) : null}
 
               {groups.length && totalsWithPed ? (
-                <tr className="bg-gray-100">
+                <tr className="bg-muted">
                   <td
-                    className="print-model-cell sticky left-0 z-10 border-r border-gray-200 bg-gray-100 px-1 py-0.5 font-bold text-gray-900 print:static print:px-1 print:py-0.5"
+                    className="print-model-cell sticky left-0 z-10 border-r border-border bg-muted px-1 py-0.5 font-bold text-foreground print:static print:px-1 print:py-0.5"
                     style={{ width: MODEL_COLUMN_WIDTH }}
                   >
                     {totalsWithPed.modelo}
                   </td>
                   <td
-                    className="print-version-cell sticky z-10 border-r border-gray-200 bg-gray-100 px-1 py-0.5 font-bold text-gray-900 print:static print:px-1 print:py-0.5"
+                    className="print-version-cell sticky z-10 border-r border-border bg-muted px-1 py-0.5 font-bold text-foreground print:static print:px-1 print:py-0.5"
                     style={{ left: MODEL_COLUMN_WIDTH, width: VERSION_COLUMN_WIDTH }}
                   >
                     Total general
                   </td>
                   {months.map((month) => (
-                    <td key={`total-${month.key}`} className="px-1 py-0.5 text-center font-bold text-gray-900 print:px-0.5 print:py-0.5">
+                    <td key={`total-${month.key}`} className="px-1 py-0.5 text-center font-bold text-foreground print:px-0.5 print:py-0.5">
                       {totalsWithPed.countsByMonth[month.key] ?? 0}
                     </td>
                   ))}
-                  <td className="bg-gray-200 px-1 py-0.5 text-center font-bold text-gray-900 print:px-0.5 print:py-0.5">{totalsWithPed.ped}</td>
-                  <td className="px-1 py-0.5 text-center font-bold text-gray-900 print:px-0.5 print:py-0.5">{totalsWithPed.total}</td>
-                  <td className="px-1 py-0.5 text-center font-bold text-gray-900 print:px-0.5 print:py-0.5">
+                  <td className="bg-muted px-1 py-0.5 text-center font-bold text-foreground print:px-0.5 print:py-0.5">{totalsWithPed.ped}</td>
+                  <td className="px-1 py-0.5 text-center font-bold text-foreground print:px-0.5 print:py-0.5">{totalsWithPed.total}</td>
+                  <td className="px-1 py-0.5 text-center font-bold text-foreground print:px-0.5 print:py-0.5">
                     {formatPromedioVenta(totalsWithPed.promedioVenta)}
                   </td>
                   <td
@@ -917,7 +917,7 @@ export default function AnalisisStockView() {
                   >
                     {formatMesesStock(totalsWithPed.total, totalsWithPed.promedioVenta)}
                   </td>
-                  <td className="px-1 py-0.5 text-center font-bold text-gray-900 print:px-0.5 print:py-0.5">{totalsWithPed.total}</td>
+                  <td className="px-1 py-0.5 text-center font-bold text-foreground print:px-0.5 print:py-0.5">{totalsWithPed.total}</td>
                 </tr>
               ) : null}
             </tbody>

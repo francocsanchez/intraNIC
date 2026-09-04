@@ -166,7 +166,7 @@ function MonthRow({
             return (
               <div
                 key={event._id}
-                className="absolute overflow-hidden rounded-md border border-primary bg-primary px-2 py-1 text-primary-foreground shadow-sm"
+                className="absolute overflow-hidden rounded-md border border-border bg-primary px-2 py-1 text-primary-foreground shadow-sm"
                 style={{
                   left: `calc(${(event.startDay / monthDays.length) * 100}% + 4px)`,
                   width: `calc(${(span / monthDays.length) * 100}% - 8px)`,
@@ -175,13 +175,13 @@ function MonthRow({
                 }}
                 title={`${event.solicitadoPorNombre} | ${formatShortDateTime(new Date(event.retiroAt))} - ${formatShortDateTime(new Date(event.regresoAt))}`}
               >
-                <div className="flex items-center justify-between gap-3 text-[11px] font-medium leading-none">
+                <div className="flex items-center justify-between gap-3 text-primary font-medium leading-none">
                   <span className="truncate">
                     {formatTime(new Date(event.retiroAt))} - {formatTime(new Date(event.regresoAt))}
                   </span>
-                  {event.starlink ? <span className="rounded-sm bg-primary-foreground/15 px-1.5 py-0.5 text-[10px]">StarLink</span> : null}
+                  {event.starlink ? <span className="rounded-sm bg-secondary-foreground/15 px-1.5 py-0.5 text-primary">StarLink</span> : null}
                 </div>
-                <div className="mt-1 truncate text-[10px] opacity-95">{event.solicitadoPorNombre}</div>
+                <div className="mt-1 truncate text-primary opacity-95">{event.solicitadoPorNombre}</div>
               </div>
             );
           })}
@@ -288,7 +288,7 @@ function WeekUnitSection({
       <div className="grid grid-cols-[72px_minmax(980px,1fr)]">
         <div className="border-r border-border bg-muted">
           {Array.from({ length: 24 }).map((_, hour) => (
-            <div key={hour} className="h-9 border-b border-border px-2 text-[11px] font-medium text-muted-foreground">
+            <div key={hour} className="h-9 border-b border-border px-2 text-primary font-medium text-muted-foreground">
               {String(hour).padStart(2, "0")}:00
             </div>
           ))}
@@ -335,7 +335,7 @@ function WeekUnitSection({
                 return (
                   <div
                     key={`${event._id}-${dayIndex}-${segmentStart.toISOString()}`}
-                    className="absolute overflow-hidden rounded-md border border-primary bg-primary px-2 py-1 text-primary-foreground shadow-sm"
+                    className="absolute overflow-hidden rounded-md border border-border bg-primary px-2 py-1 text-primary-foreground shadow-sm"
                     style={{
                       left: `calc(${(dayIndex / 7) * 100}% + 6px)`,
                       width: `calc(${100 / 7}% - 12px)`,
@@ -344,11 +344,11 @@ function WeekUnitSection({
                     }}
                     title={`${event.dominio} | ${event.solicitadoPorNombre} | ${formatShortDateTime(new Date(event.retiroAt))} - ${formatShortDateTime(new Date(event.regresoAt))}`}
                   >
-                    <div className="text-[11px] font-semibold">
+                    <div className="text-primary font-semibold">
                       {formatTime(segmentStart)} - {formatTime(segmentEnd)}
                     </div>
-                    <div className="mt-1 truncate text-[10px]">{event.solicitadoPorNombre}</div>
-                    {event.starlink ? <div className="mt-2 text-[10px] font-semibold">StarLink</div> : null}
+                    <div className="mt-1 truncate text-primary">{event.solicitadoPorNombre}</div>
+                    {event.starlink ? <div className="mt-2 text-primary font-semibold">StarLink</div> : null}
                   </div>
                 );
               })}

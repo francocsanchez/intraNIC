@@ -24,17 +24,17 @@ export default function AgendaEntregaFilters({
   };
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+    <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,320px)_minmax(220px,280px)]">
         <div className="space-y-1">
-          <label htmlFor="agenda-sucursal" className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label htmlFor="agenda-sucursal" className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Sucursal
           </label>
           <select
             id="agenda-sucursal"
             value={sucursalId}
             onChange={(event) => onChange({ fecha, sucursalId: event.target.value })}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-900 outline-none focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">-- Selecciona una sucursal --</option>
             {sucursales.map((sucursal) => (
@@ -46,14 +46,14 @@ export default function AgendaEntregaFilters({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="agenda-fecha" className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label htmlFor="agenda-fecha" className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Fecha
           </label>
           <div className="grid grid-cols-[40px_1fr_40px] gap-2">
             <button
               type="button"
               onClick={() => shiftDate(-1)}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground"
               aria-label="Dia anterior"
             >
               <ChevronLeft size={16} />
@@ -63,12 +63,12 @@ export default function AgendaEntregaFilters({
               type="date"
               value={fecha}
               onChange={(event) => onChange({ fecha: event.target.value, sucursalId })}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-900 outline-none focus:border-gray-500"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
             />
             <button
               type="button"
               onClick={() => shiftDate(1)}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground"
               aria-label="Dia siguiente"
             >
               <ChevronRight size={16} />

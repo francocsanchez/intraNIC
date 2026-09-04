@@ -49,7 +49,7 @@ export default function StockReservasUsados() {
           <div className="min-w-0 px-3 py-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sucursales</p>
             <div className="mt-2 flex overflow-x-auto border-y border-border">
-              {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => <div key={sucursal} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0"><p className="truncate text-[10px] text-muted-foreground">{sucursal}</p><p className="text-sm font-semibold text-foreground">{total}</p></div>)}
+              {Object.entries(data?.resumen.sucursales ?? {}).map(([sucursal, total]) => <div key={sucursal} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0"><p className="truncate text-primary text-muted-foreground">{sucursal}</p><p className="text-sm font-semibold text-foreground">{total}</p></div>)}
               {!Object.keys(data?.resumen.sucursales ?? {}).length && <p className="w-full px-2 py-2 text-center text-sm text-muted-foreground">Sin sucursales</p>}
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function StockReservasUsados() {
       </section>
 
       <section className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8">
-        {filtrosDisponibles.map((filtro) => { const activo = marcaActiva === filtro; return <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>{filtro}</button>; })}
+        {filtrosDisponibles.map((filtro) => { const activo = marcaActiva === filtro; return <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>{filtro}</button>; })}
       </section>
 
       {sucursalesFiltradas.map(([sucursal, reservas]) => (

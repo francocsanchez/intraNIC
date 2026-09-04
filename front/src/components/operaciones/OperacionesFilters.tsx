@@ -48,10 +48,10 @@ function ToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-sm border px-2 py-0.5 text-[11px] leading-5 transition ${
+      className={`rounded-sm border px-2 py-0.5 text-primary leading-5 transition ${
         active
-          ? "border-[#15aa9a] bg-[#15aa9a] text-white"
-          : "border-[#d6e7ed] bg-white text-gray-700 hover:border-[#15aa9a] hover:text-[#128c80]"
+          ? "border-border bg-primary text-primary-foreground"
+          : "border-border bg-card text-muted-foreground hover:border-border hover:text-primary"
       }`}
     >
       {label}
@@ -79,20 +79,20 @@ function CompactCheckboxGroup({
   };
 
   return (
-    <div className="rounded-lg border border-[#d8e9ef] bg-white px-2 py-2">
+    <div className="rounded-lg border border-border bg-card px-2 py-2">
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">{title}</span>
-        <span className="text-[11px] text-[#128c80]">{selectedValues.length ? selectedValues.length : "Todos"}</span>
+        <span className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</span>
+        <span className="text-primary text-primary">{selectedValues.length ? selectedValues.length : "Todos"}</span>
       </div>
 
       <div className="max-h-24 space-y-1 overflow-y-auto pr-1">
         {options.map((option) => (
-          <label key={option.value} className="flex items-center gap-2 px-1 py-0.5 text-xs text-gray-700">
+          <label key={option.value} className="flex items-center gap-2 px-1 py-0.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={selectedValues.includes(option.value)}
               onChange={() => toggleValue(option.value)}
-              className="h-3.5 w-3.5 rounded border-gray-300 text-[#15aa9a] focus:ring-[#15aa9a]"
+              className="h-3.5 w-3.5 rounded border-input text-primary focus:ring-ring"
             />
             <span className="truncate">{option.label}</span>
           </label>
@@ -143,7 +143,7 @@ export default function OperacionesFilters({
   };
 
   return (
-    <section className="rounded-xl border border-[#cfe7ee] bg-[#eef8fb] p-2.5 shadow-sm">
+    <section className="rounded-lg border border-border bg-secondary p-2.5 shadow-sm">
       <div className="flex flex-col gap-2">
         <div className="overflow-x-auto">
           <div className="flex min-w-max items-center gap-1">

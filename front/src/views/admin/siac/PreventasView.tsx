@@ -140,16 +140,16 @@ export default function PreventasView() {
               <tbody className="divide-y divide-border">
                 {preventas.map((preventa) => (
                   <tr key={preventa._id} className="hover:bg-muted">
-                    <td className="px-4 py-3 font-semibold text-gray-900">{preventa.mes_asigna_label}</td>
-                    <td className="px-4 py-3 text-gray-700">
-                      <div className="font-medium text-gray-900">{preventa.cliente}</div>
-                      <div className="text-xs text-gray-500">{preventa.observaciones || "Sin observaciones"}</div>
+                    <td className="px-4 py-3 font-semibold text-foreground">{preventa.mes_asigna_label}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      <div className="font-medium text-foreground">{preventa.cliente}</div>
+                      <div className="text-xs text-muted-foreground">{preventa.observaciones || "Sin observaciones"}</div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{preventa.version.nombre}</td>
-                    <td className="px-4 py-3 text-gray-700">{preventa.colores.map((color) => color.nombre).join(", ") || "Sin color"}</td>
-                    <td className="px-4 py-3 text-gray-700">{preventa.vendedorNombre}</td>
-                    <td className="px-4 py-3 text-gray-700">{preventa.numero_op ?? "-"}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatCurrency(preventa.monto_reserva)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{preventa.version.nombre}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{preventa.colores.map((color) => color.nombre).join(", ") || "Sin color"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{preventa.vendedorNombre}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{preventa.numero_op ?? "-"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatCurrency(preventa.monto_reserva)}</td>
 
                     {canManagePreventaColumns ? (
                       <td className="px-4 py-3 text-center">
@@ -168,8 +168,8 @@ export default function PreventasView() {
                             className={[
                               "inline-flex rounded-full border px-3 py-2 text-xs font-semibold",
                               preventa.asignado
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-gray-200 bg-gray-50 text-gray-500",
+                                ? "border-border bg-secondary text-secondary-foreground"
+                                : "border-border bg-muted text-muted-foreground",
                             ].join(" ")}
                           >
                             {preventa.asignado ? "Asignado" : "Pendiente"}
@@ -185,7 +185,7 @@ export default function PreventasView() {
                             {canEditPreventa ? (
                               <Link
                                 to={paths.convencional.preventasEditar(preventa._id)}
-                                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted"
                               >
                                 <Pencil size={14} />
                                 Editar
@@ -196,7 +196,7 @@ export default function PreventasView() {
                               <button
                                 type="button"
                                 onClick={() => deleteMutation.mutate(preventa._id)}
-                                className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                                className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
                               >
                                 <Trash2 size={14} />
                                 Eliminar
@@ -204,7 +204,7 @@ export default function PreventasView() {
                             ) : null}
                           </div>
                         ) : (
-                          <div className="text-center text-xs font-semibold text-gray-400">Solo lectura</div>
+                          <div className="text-center text-xs font-semibold text-muted-foreground">Solo lectura</div>
                         )}
                       </td>
                     ) : null}
@@ -213,7 +213,7 @@ export default function PreventasView() {
 
                 {!preventas.length ? (
                   <tr>
-                    <td colSpan={canManagePreventaColumns ? 9 : 7} className="px-6 py-12 text-center text-sm text-gray-500">
+                    <td colSpan={canManagePreventaColumns ? 9 : 7} className="px-6 py-12 text-center text-sm text-muted-foreground">
                       No hay preventas pendientes. Las que marques como asignadas quedarán disponibles en la vista histórica.
                     </td>
                   </tr>

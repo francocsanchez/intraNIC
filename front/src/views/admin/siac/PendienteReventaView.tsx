@@ -31,9 +31,9 @@ function formatDate(value?: string) {
 }
 
 function getRowClassByDias(dias: number) {
-  if (dias >= 90) return "bg-red-50 hover:bg-red-100";
-  if (dias >= 60) return "bg-amber-50 hover:bg-amber-100";
-  return "bg-emerald-50 hover:bg-emerald-100";
+  if (dias >= 90) return "bg-destructive/10 hover:bg-destructive/10";
+  if (dias >= 60) return "bg-secondary hover:bg-secondary";
+  return "bg-secondary hover:bg-secondary";
 }
 
 export default function PendienteReventaView() {
@@ -143,7 +143,7 @@ export default function PendienteReventaView() {
     <div className="font-preset w-full space-y-3 px-2 py-3">
       <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
         <div className="flex items-center justify-between gap-3 px-3 py-3">
-          <div><p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Convencional</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Reventas pendientes de facturacion</h1></div>
+          <div><p className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">Convencional</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Reventas pendientes de facturacion</h1></div>
           <span className="rounded-full bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">{items.length} registros</span>
         </div>
         <div className="grid border-t border-border xl:grid-cols-[2.6fr_1.1fr]">
@@ -160,7 +160,7 @@ export default function PendienteReventaView() {
           <div className="mt-3 flex overflow-x-auto border-y border-border">
             {resumenDinamico.map((item) => (
               <div key={item.modelo} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0">
-                <p className="truncate text-[10px] text-muted-foreground">{item.modelo}</p>
+                <p className="truncate text-primary text-muted-foreground">{item.modelo}</p>
                 <p className="text-sm font-semibold text-foreground">{item.total}</p>
               </div>
             ))}
@@ -176,16 +176,16 @@ export default function PendienteReventaView() {
 
         <article className="grid grid-cols-3 border-t border-border xl:border-t-0 xl:border-l">
             <div className="flex min-h-28 flex-col items-center justify-center px-3 py-3 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-destructive">Mayor a 90 dias</p>
+              <p className="text-primary font-medium uppercase tracking-[0.14em] text-destructive">Mayor a 90 dias</p>
               <p className="mt-2 text-4xl font-semibold tracking-tight text-destructive">{resumenDias.mayorA90}</p>
             </div>
             <div className="flex min-h-28 flex-col items-center justify-center border-l border-border px-3 py-3 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-amber-600">Entre 60 y 90</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-amber-700">{resumenDias.entre60y89}</p>
+              <p className="text-primary font-medium uppercase tracking-[0.14em] text-primary">Entre 60 y 90</p>
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-secondary-foreground">{resumenDias.entre60y89}</p>
             </div>
             <div className="flex min-h-28 flex-col items-center justify-center border-l border-border px-3 py-3 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-emerald-600">Menor a 60 dias</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-emerald-700">{resumenDias.menorA30}</p>
+              <p className="text-primary font-medium uppercase tracking-[0.14em] text-foreground">Menor a 60 dias</p>
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-secondary-foreground">{resumenDias.menorA30}</p>
             </div>
         </article>
         </div>
@@ -202,7 +202,7 @@ export default function PendienteReventaView() {
               onClick={() => setModeloActivo(filtro)}
               className={[
                 "h-9 rounded-md border text-xs font-medium transition-colors",
-                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+                activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filtro}

@@ -269,9 +269,9 @@ export default function DashboardPatentamientosView() {
   if (firstError instanceof Error) {
     return (
       <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar Dashboard Patentamientos</h1>
-          <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Dashboard Patentamientos</h1>
+          <p className="mt-2 text-sm text-destructive">{firstError.message}</p>
         </section>
       </div>
     );
@@ -280,9 +280,9 @@ export default function DashboardPatentamientosView() {
   if (yearsQuery.isSuccess && !hasAvailableYears) {
     return (
       <div className="w-full px-1 py-1">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
-          <p className="mt-2 text-sm text-gray-500">
+        <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Dashboard Patentamientos</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Todavia no hay anos disponibles para analizar. Ejecuta la actualizacion desde Act. Registros para habilitar el dashboard.
           </p>
         </section>
@@ -294,13 +294,13 @@ export default function DashboardPatentamientosView() {
     <div className="w-full space-y-6 px-1 py-1">
       <section className="print-hidden px-1 py-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Dashboard Patentamientos</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard Patentamientos</h1>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-[#15aa9a] hover:text-[#0f766e]"
+              className="inline-flex items-center gap-2 rounded-md border border-input bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-border hover:text-primary"
             >
               <Printer size={16} />
               Imprimir PDF
@@ -308,14 +308,14 @@ export default function DashboardPatentamientosView() {
 
             {isGeneralSection ? (
               <>
-                <label htmlFor="patentamientos-month" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                <label htmlFor="patentamientos-month" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Mes
                 </label>
                 <select
                   id="patentamientos-month"
                   value={selectedMonth ?? ""}
                   onChange={(event) => setSelectedMonth(event.target.value ? Number(event.target.value) : null)}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 >
                   {monthOptions.map((month) => (
                     <option key={month.value || "all"} value={month.value}>
@@ -328,14 +328,14 @@ export default function DashboardPatentamientosView() {
 
             {isMarcasSection || isPickupSection || isSw4Section || isCCrossSection || isYCrossSection || isYarisSection || isLocalidadSection ? (
               <>
-                <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   C/ Plan
                 </label>
                 <select
                   id="patentamientos-plan-filter"
                   value={planFilter}
                   onChange={(event) => setPlanFilter(event.target.value as PatentamientosPlanFilter)}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 >
                   <option value="with-plan">Si</option>
                   <option value="without-plan">No</option>
@@ -345,7 +345,7 @@ export default function DashboardPatentamientosView() {
 
             {isLocalidadSection ? (
               <>
-                <label htmlFor="patentamientos-province" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                <label htmlFor="patentamientos-province" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Provincia
                 </label>
                 <select
@@ -355,7 +355,7 @@ export default function DashboardPatentamientosView() {
                     setSelectedProvince(event.target.value);
                     setSelectedLocality("");
                   }}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+                  className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
                 >
                   <option value="">Todas</option>
                   {(locationOptionsQuery.data?.provinces ?? []).map((province) => (
@@ -365,7 +365,7 @@ export default function DashboardPatentamientosView() {
                   ))}
                 </select>
 
-                <label htmlFor="patentamientos-locality" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                <label htmlFor="patentamientos-locality" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Localidad
                 </label>
                 <select
@@ -373,7 +373,7 @@ export default function DashboardPatentamientosView() {
                   value={selectedLocality}
                   onChange={(event) => setSelectedLocality(event.target.value)}
                   disabled={!selectedProvince}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 focus:border-[#15aa9a]"
+                  className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground focus:border-ring"
                 >
                   <option value="">{selectedProvince ? "Todas" : "Elegi provincia"}</option>
                   {(locationOptionsQuery.data?.localities ?? []).map((locality) => (
@@ -385,14 +385,14 @@ export default function DashboardPatentamientosView() {
               </>
             ) : null}
 
-            <label htmlFor="patentamientos-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+            <label htmlFor="patentamientos-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Ano
             </label>
             <select
               id="patentamientos-year"
               value={selectedYear ?? ""}
               onChange={(event) => setUserSelectedYear(Number(event.target.value))}
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-[#15aa9a]"
+              className="rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring"
             >
               {(yearsQuery.data?.years ?? []).map((year) => (
                 <option key={year} value={year}>
@@ -408,9 +408,9 @@ export default function DashboardPatentamientosView() {
         <div className="print-hidden flex items-center gap-2">
           {(() => {
             const SectionIcon = sectionContent[activeSection].icon;
-            return <SectionIcon size={18} className="text-[#128c80]" />;
+            return <SectionIcon size={18} className="text-primary" />;
           })()}
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">{sectionContent[activeSection].heading}</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{sectionContent[activeSection].heading}</h2>
         </div>
 
         {isGeneralSection && generalZonaNic.data && selectedYear !== null ? (
@@ -469,15 +469,15 @@ export default function DashboardPatentamientosView() {
 
         {isLocalidadSection && locationAnalysis.data ? (
           <>
-            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm">
+            <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
               Analisis aplicado sobre{" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-foreground">
                 {locationAnalysis.data.filters.province ?? "todas las provincias"}
               </span>
               {locationAnalysis.data.filters.locality ? (
                 <>
                   {" / "}
-                  <span className="font-semibold text-gray-900">{locationAnalysis.data.filters.locality}</span>
+                  <span className="font-semibold text-foreground">{locationAnalysis.data.filters.locality}</span>
                 </>
               ) : null}
               .
@@ -495,8 +495,8 @@ export default function DashboardPatentamientosView() {
       {isMarcasSection ? (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <LineChart size={18} className="text-[#128c80]" />
-            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Evolucion Toyota PAIS vs Zona NIC</h2>
+            <LineChart size={18} className="text-primary" />
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">Evolucion Toyota PAIS vs Zona NIC</h2>
           </div>
           {toyotaEvolution.data ? <PatentamientosToyotaEvolutionChart data={toyotaEvolution.data} /> : null}
         </section>

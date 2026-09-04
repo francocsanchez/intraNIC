@@ -179,9 +179,9 @@ export default function OperacionesDashboardView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-[28px] border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar operaciones</h1>
-          <p className="mt-2 text-sm text-red-600">
+        <section className="rounded-[28px] border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar operaciones</h1>
+          <p className="mt-2 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener la informacion del dashboard."}
           </p>
         </section>
@@ -195,49 +195,49 @@ export default function OperacionesDashboardView() {
 
   return (
     <div className="w-full space-y-3 px-4 py-4">
-      <section className="rounded-xl border border-[#c7e7e2] bg-white p-3 shadow-sm">
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#128c80]">Modulo operativo</p>
-            <h1 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">Dashboard de operaciones</h1>
-            <p className="mt-1 max-w-3xl text-xs text-gray-600">
+            <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">Modulo operativo</p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Dashboard de operaciones</h1>
+            <p className="mt-1 max-w-3xl text-xs text-muted-foreground">
               Supervisa asignaciones por vendedor, cruza sucursales, modelos, dias y anios para detectar tendencias visuales.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <article className="rounded-lg bg-[#e4f3fa] px-3 py-2">
+            <article className="rounded-lg bg-secondary px-3 py-2">
               <div className="flex items-center gap-2">
-                <div className="rounded-lg bg-white p-2 text-[#15aa9a] shadow-sm">
+                <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
                   <BarChart3 size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Operaciones</p>
-                  <p className="text-lg font-bold text-gray-900">{data.operaciones.length}</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Operaciones</p>
+                  <p className="text-lg font-bold text-foreground">{data.operaciones.length}</p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-lg bg-[#e4f3fa] px-3 py-2">
+            <article className="rounded-lg bg-secondary px-3 py-2">
               <div className="flex items-center gap-2">
-                <div className="rounded-lg bg-white p-2 text-[#15aa9a] shadow-sm">
+                <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
                   <Filter size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Puntos</p>
-                  <p className="text-lg font-bold text-gray-900">{chartState.data.length}</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Puntos</p>
+                  <p className="text-lg font-bold text-foreground">{chartState.data.length}</p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-lg bg-[#e4f3fa] px-3 py-2">
+            <article className="rounded-lg bg-secondary px-3 py-2">
               <div className="flex items-center gap-2">
-                <div className="rounded-lg bg-white p-2 text-[#15aa9a] shadow-sm">
+                <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
                   <Inbox size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500">Series</p>
-                  <p className="text-lg font-bold text-gray-900">{chartState.seriesKeys.length}</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Series</p>
+                  <p className="text-lg font-bold text-foreground">{chartState.seriesKeys.length}</p>
                 </div>
               </div>
             </article>
@@ -263,12 +263,12 @@ export default function OperacionesDashboardView() {
       />
 
       {!data.operaciones.length ? (
-        <section className="rounded-xl border border-dashed border-[#b7d8e3] bg-white px-5 py-10 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#e4f3fa] text-[#15aa9a]">
+        <section className="rounded-lg border border-dashed border-border bg-card px-5 py-10 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-primary">
             <Inbox size={20} />
           </div>
-          <h2 className="mt-3 text-lg font-semibold text-gray-900">No hay operaciones para mostrar</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="mt-3 text-lg font-semibold text-foreground">No hay operaciones para mostrar</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Proba cambiar los anios o quitar algunos filtros para ampliar el resultado.
           </p>
         </section>

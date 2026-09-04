@@ -205,7 +205,7 @@ export default function ConfiguracionView() {
 
                   <span
                     className={[
-                      "rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                      "rounded-full px-2.5 py-1 text-primary font-semibold",
                       sistema.activo
                         ? "border border-border bg-background text-foreground"
                         : "border border-destructive/30 bg-background text-destructive",
@@ -233,7 +233,7 @@ export default function ConfiguracionView() {
                 {sistema.bloques.map((bloque) => (
                   <div key={bloque.label}>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      <div className="text-primary font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                         {bloque.label}
                       </div>
                       {bloque.values.length > 0 ? (
@@ -262,7 +262,7 @@ export default function ConfiguracionView() {
 
                 {sistema.catalogos.length ? (
                   <div>
-                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="mb-2 text-primary font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                       Parametros de sistema
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -287,13 +287,13 @@ export default function ConfiguracionView() {
         <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Sistema
               </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                 Envío de agenda
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Configura por sucursal los destinatarios del PDF automático de
                 la agenda de entrega.
               </p>
@@ -301,7 +301,7 @@ export default function ConfiguracionView() {
 
             <Link
               to={paths.admin.configuracionEnvioAgenda}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
             >
               Administrar envíos
             </Link>
@@ -313,13 +313,13 @@ export default function ConfiguracionView() {
         <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Calidad
               </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                 Hot Alert
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Configura los destinatarios del correo diario consolidado de Hot
                 Alert de SSI Ventas.
               </p>
@@ -327,7 +327,7 @@ export default function ConfiguracionView() {
 
             <Link
               to={paths.admin.configuracionHotAlert}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
             >
               Administrar envios
             </Link>
@@ -339,13 +339,13 @@ export default function ConfiguracionView() {
         <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Comercial
               </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                 Unidades de negocio
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Define las unidades que segmentan la agenda comercial y la
                 asignacion de usuarios.
               </p>
@@ -353,7 +353,7 @@ export default function ConfiguracionView() {
 
             <Link
               to={paths.admin.unidadesNegocio}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
             >
               Administrar unidades
             </Link>

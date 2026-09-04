@@ -74,7 +74,7 @@ export default function MinutaGroupsMultiSelect({
                       className={`flex cursor-pointer items-start gap-3 rounded-sm px-2 py-2 text-sm ${focus ? "bg-muted text-foreground" : "text-foreground"}`}
                     >
                       <div
-                        className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded-sm border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-input bg-background"}`}
+                        className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded-sm border ${selected ? "border-border bg-primary text-primary-foreground" : "border-input bg-background"}`}
                       >
                         {selected ? <Check size={12} /> : null}
                       </div>

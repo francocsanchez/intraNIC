@@ -1,4 +1,3 @@
-import { textToColor } from "@/helpers/colores";
 import type { AgendaEntrega, SucursalEntrega } from "@/types/index";
 
 const escapeHtml = (value: string) =>
@@ -9,57 +8,9 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-const classColorMap: Record<string, string> = {
-  "bg-red-50": "#fef2f2",
-  "text-red-600": "#dc2626",
-  "bg-slate-100": "#f1f5f9",
-  "text-slate-600": "#475569",
-  "bg-slate-200": "#e2e8f0",
-  "text-slate-700": "#334155",
-  "bg-slate-300": "#cbd5e1",
-  "text-slate-800": "#1e293b",
-  "bg-rose-200": "#fecdd3",
-  "text-rose-700": "#be123c",
-  "bg-blue-50": "#eff6ff",
-  "text-blue-600": "#2563eb",
-  "bg-blue-100": "#dbeafe",
-  "text-blue-800": "#1e40af",
-  "bg-gray-100": "#f3f4f6",
-  "text-gray-700": "#374151",
-  "bg-gray-200": "#e5e7eb",
-  "bg-orange-50": "#fff7ed",
-  "text-orange-600": "#ea580c",
-  "bg-amber-50": "#fffbeb",
-  "text-amber-600": "#d97706",
-  "text-amber-700": "#b45309",
-  "bg-amber-100": "#fef3c7",
-  "text-amber-800": "#92400e",
-  "bg-stone-100": "#f5f5f4",
-  "text-stone-700": "#44403c",
-  "bg-green-50": "#f0fdf4",
-  "text-green-600": "#16a34a",
-  "bg-green-100": "#dcfce7",
-  "text-green-800": "#166534",
-  "bg-neutral-50": "#fafafa",
-  "text-neutral-700": "#404040",
-};
-
 const getInlineBadgeStyle = (colorName: string | null | undefined) => {
-  const classes = textToColor(colorName);
-
-  if (!classes) {
-    return "background:#f3f4f6;color:#374151;border:1px solid #cbd5e1;";
-  }
-
-  const tokens = classes.split(/\s+/);
-  const background = tokens.find((token) => token.startsWith("bg-"));
-  const text = tokens.find((token) => token.startsWith("text-"));
-
-  return [
-    background ? `background:${classColorMap[background] ?? "#f3f4f6"};` : "background:#f3f4f6;",
-    text ? `color:${classColorMap[text] ?? "#374151"};` : "color:#374151;",
-    "border:1px solid #cbd5e1;",
-  ].join("");
+  void colorName;
+  return "background:oklch(0.97 0 0);color:oklch(0.145 0 0);border:1px solid oklch(0.922 0 0);";
 };
 
 const escapeSvgText = (value: string) =>
@@ -117,8 +68,8 @@ const buildAgendaSvg = (params: {
     return acc;
   }, []);
   const totalTableHeight = headerHeight + TIME_SLOT_OPTIONS.length * rowHeight;
-  const borderColor = "#9ca3af";
-  const tableHeaderBg = "#b7b7b7";
+  const borderColor = "oklch(0.708 0 0)";
+  const tableHeaderBg = "oklch(0.922 0 0)";
 
   const enabledTimeSlots = new Set(params.horariosHabilitados);
   const displayRows: AgendaPrintRow[] = TIME_SLOT_OPTIONS.flatMap((timeSlot): AgendaPrintRow[] => {
@@ -151,13 +102,13 @@ const buildAgendaSvg = (params: {
       fill?: string;
     },
   ) =>
-    `<text x="${x}" y="${y}" font-family="Arial, Helvetica, sans-serif" font-size="${options?.size ?? 8}" font-weight="${options?.weight ?? "400"}" text-anchor="${options?.anchor ?? "start"}" fill="${options?.fill ?? "#111827"}">${escapeSvgText(value)}</text>`;
+    `<text x="${x}" y="${y}" font-family="Arial, Helvetica, sans-serif" font-size="${options?.size ?? 8}" font-weight="${options?.weight ?? "400"}" text-anchor="${options?.anchor ?? "start"}" fill="${options?.fill ?? "oklch(0.145 0 0)"}">${escapeSvgText(value)}</text>`;
 
   const svgParts: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidth}" height="${pageHeight}" viewBox="0 0 ${pageWidth} ${pageHeight}">`,
-    rect(0, 0, pageWidth, pageHeight, "#ffffff"),
+    rect(0, 0, pageWidth, pageHeight, "oklch(1 0 0)"),
     text(marginX, 30, "Agenda de entrega", { size: 18, weight: "700" }),
-    text(marginX, 45, "Vista diaria lista para impresion", { size: 10, fill: "#4b5563" }),
+    text(marginX, 45, "Vista diaria lista para impresion", { size: 10, fill: "oklch(0.556 0 0)" }),
     text(pageWidth - marginX, 24, `Fecha: ${params.fecha || "-"}`, { size: 10, weight: "700", anchor: "end" }),
     text(pageWidth - marginX, 38, `Sucursal: ${params.sucursal}`, { size: 10, weight: "700", anchor: "end" }),
     text(pageWidth - marginX, 52, `Turnos: ${params.items.length}`, { size: 10, weight: "700", anchor: "end" }),
@@ -173,29 +124,29 @@ const buildAgendaSvg = (params: {
     const y = tableTop + headerHeight + rowIndex * rowHeight;
 
     if ("tipo" in row && row.tipo === "vacio") {
-      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#ffffff"));
-      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#f3f4f6"));
-      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#f9fafb"));
+      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "oklch(1 0 0)"));
+      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "oklch(0.97 0 0)"));
+      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "oklch(0.97 0 0)"));
       svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
       return;
     }
 
     if ("tipo" in row && row.tipo === "bloqueado") {
-      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "#e5e7eb"));
-      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "#d1d5db"));
-      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#d1d5db"));
+      svgParts.push(rect(marginX, y, tableWidth, rowHeight, "oklch(0.922 0 0)"));
+      svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, "oklch(0.922 0 0)"));
+      svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "oklch(0.922 0 0)"));
       svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, row.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
-      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 18, "BLOQUEADO", { size: 9, weight: "700", anchor: "middle", fill: "#4b5563" }));
-      svgParts.push(text(xPositions[3] + 8, y + 13, "HORARIO BLOQUEADO", { size: 8, weight: "700", fill: "#4b5563" }));
-      svgParts.push(text(xPositions[3] + 8, y + 25, "NO DISPONIBLE PARA AGENDAR", { size: 7, weight: "700", fill: "#4b5563" }));
+      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 18, "BLOQUEADO", { size: 9, weight: "700", anchor: "middle", fill: "oklch(0.556 0 0)" }));
+      svgParts.push(text(xPositions[3] + 8, y + 13, "HORARIO BLOQUEADO", { size: 8, weight: "700", fill: "oklch(0.556 0 0)" }));
+      svgParts.push(text(xPositions[3] + 8, y + 25, "NO DISPONIBLE PARA AGENDAR", { size: 7, weight: "700", fill: "oklch(0.556 0 0)" }));
       return;
     }
 
     const item = row as AgendaEntrega;
     const reserva = item.tipoRegistro === "reserva";
     const entregada = item.siac?.estado === 35 || item.siac?.estado === 40;
-    const rowBg = reserva ? "#fef3c7" : entregada ? "#dcfce7" : "#ffffff";
-    const internoBg = reserva ? "#fde68a" : entregada ? "#bbf7d0" : "#f3f4f6";
+    const rowBg = reserva ? "oklch(0.97 0 0)" : entregada ? "oklch(0.97 0 0)" : "oklch(1 0 0)";
+    const internoBg = reserva ? "oklch(0.922 0 0)" : entregada ? "oklch(0.922 0 0)" : "oklch(0.97 0 0)";
     const cliente = truncateText(item.siac?.cliente || (reserva ? "Reserva" : "-"), 62);
     const modelo = truncateText([item.siac?.modelo, item.siac?.version].filter(Boolean).join(" ") || (reserva ? "" : "-"), 56);
     const identificado = truncateText((item.siac?.chasis ?? item.siac?.serie ?? item.siac?.nroFabricacion ?? "-").trim(), 28);
@@ -203,30 +154,30 @@ const buildAgendaSvg = (params: {
     const observacion = truncateText(item.observaciones?.trim() || "", 28);
     const vendedor = truncateText(item.siac?.vendedor || "-", 20);
     const colorStyle = getInlineBadgeStyle(item.siac?.color);
-    const badgeFill = stripCssStyle(colorStyle, "background", "#f3f4f6");
-    const badgeText = stripCssStyle(colorStyle, "color", "#374151");
+    const badgeFill = stripCssStyle(colorStyle, "background", "oklch(0.97 0 0)");
+    const badgeText = stripCssStyle(colorStyle, "color", "oklch(0.556 0 0)");
 
     svgParts.push(rect(marginX, y, tableWidth, rowHeight, rowBg));
     svgParts.push(rect(xPositions[1], y, colWidths[1], rowHeight, internoBg));
-    svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "#ffffff"));
+    svgParts.push(rect(xPositions[2], y, colWidths[2], rowHeight, "oklch(1 0 0)"));
     svgParts.push(text(xPositions[0] + colWidths[0] / 2, y + 20, item.horaAgenda, { size: 10, weight: "700", anchor: "middle" }));
-    svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 13, reserva ? "RESERVA" : String(item.interno), { size: 9, weight: "700", anchor: "middle", fill: "#111827" }));
-    svgParts.push(text(xPositions[2] + colWidths[2] / 2, y + 18, reserva ? "-" : vendedor, { size: 8, weight: "700", anchor: "middle", fill: "#374151" }));
+    svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 13, reserva ? "RESERVA" : String(item.interno), { size: 9, weight: "700", anchor: "middle", fill: "oklch(0.145 0 0)" }));
+    svgParts.push(text(xPositions[2] + colWidths[2] / 2, y + 18, reserva ? "-" : vendedor, { size: 8, weight: "700", anchor: "middle", fill: "oklch(0.556 0 0)" }));
 
     if (reserva) {
-      svgParts.push(text(xPositions[3] + 8, y + 12, "RESERVA", { size: 9, weight: "700", fill: "#92400e" }));
-      svgParts.push(text(xPositions[3] + 8, y + 25, truncateText(item.observaciones?.trim() || "-", 56), { size: 8, weight: "400", fill: "#92400e" }));
+      svgParts.push(text(xPositions[3] + 8, y + 12, "RESERVA", { size: 9, weight: "700", fill: "oklch(0.205 0 0)" }));
+      svgParts.push(text(xPositions[3] + 8, y + 25, truncateText(item.observaciones?.trim() || "-", 56), { size: 8, weight: "400", fill: "oklch(0.205 0 0)" }));
     } else {
       svgParts.push(text(xPositions[3] + 8, y + 9, cliente, { size: 7, weight: "700" }));
-      svgParts.push(text(xPositions[3] + 8, y + 20, modelo || "-", { size: 9.5, weight: "700", fill: "#374151" }));
+      svgParts.push(text(xPositions[3] + 8, y + 20, modelo || "-", { size: 9.5, weight: "700", fill: "oklch(0.556 0 0)" }));
       svgParts.push(text(xPositions[3] + 8, y + 31, `${identificado} / COLOR:`, { size: 9, weight: "700" }));
 
       const badgeX = xPositions[3] + 144;
-      svgParts.push(`<rect x="${badgeX}" y="${y + 19}" width="74" height="14" rx="3" ry="3" fill="${badgeFill}" stroke="#cbd5e1" stroke-width="1" />`);
+      svgParts.push(`<rect x="${badgeX}" y="${y + 19}" width="74" height="14" rx="3" ry="3" fill="${badgeFill}" stroke="oklch(0.922 0 0)" stroke-width="1" />`);
       svgParts.push(text(badgeX + 37, y + 29.5, color, { size: 8.5, weight: "700", anchor: "middle", fill: badgeText }));
 
       if (observacion) {
-        svgParts.push(text(xPositions[3] + 226, y + 30, `Obs: ${observacion}`, { size: 6.5, fill: "#4b5563" }));
+        svgParts.push(text(xPositions[3] + 226, y + 30, `Obs: ${observacion}`, { size: 6.5, fill: "oklch(0.556 0 0)" }));
       }
     }
 
@@ -234,7 +185,7 @@ const buildAgendaSvg = (params: {
     if (!reserva && item.equipado) flags.push("EQUIPADO");
     if (!reserva && item.entregaUsado) flags.push("ENTREGA USADO");
     flags.forEach((flag, flagIndex) => {
-      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 24 + flagIndex * 8, flag, { size: 7.5, weight: "700", anchor: "middle", fill: "#374151" }));
+      svgParts.push(text(xPositions[1] + colWidths[1] / 2, y + 24 + flagIndex * 8, flag, { size: 7.5, weight: "700", anchor: "middle", fill: "oklch(0.556 0 0)" }));
     });
   });
 
@@ -312,7 +263,7 @@ export function openAgendaEntregaPrintView(params: {
             margin: 0;
             width: 210mm;
             min-height: 297mm;
-            background: #ffffff;
+            background: oklch(1 0 0);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }

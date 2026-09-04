@@ -130,7 +130,9 @@ export default function AgendaEntregaView() {
   }, [canToggleEquipado, filters.sucursalId]);
 
   useEffect(() => {
-    if (!filters.sucursalId && (preferredSucursalId || activeSucursales[0]?._id)) {
+    if (filters.sucursalId || (!preferredSucursalId && !activeSucursales[0]?._id)) return;
+
+    const frame = window.requestAnimationFrame(() => {
       setFilters((current) => ({
         ...current,
         sucursalId:
@@ -138,7 +140,9 @@ export default function AgendaEntregaView() {
           activeSucursales[0]?._id ??
           "",
       }));
-    }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [activeSucursales, filters.sucursalId, preferredSucursalId]);
 
   const closeTurnoModal = () => {
@@ -287,7 +291,7 @@ export default function AgendaEntregaView() {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="font-preset rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm">
         Cargando agenda de entrega...
       </div>
     );
@@ -295,23 +299,23 @@ export default function AgendaEntregaView() {
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="font-preset rounded-lg border border-destructive/30 bg-card p-3 text-destructive shadow-sm">
         {error instanceof Error ? error.message : "Error al cargar la agenda de entrega"}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="font-preset space-y-3">
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Agenda de entrega</h1>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Entregas</p>
+            <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-card-foreground">Agenda de entrega</h1>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-2">
+            <div className="flex h-9 items-center gap-2 rounded-md border border-input bg-background px-2">
               <input
                 type="text"
                 inputMode="numeric"
@@ -326,13 +330,13 @@ export default function AgendaEntregaView() {
                   }
                 }}
                 placeholder="Buscar interno"
-                className="w-32 border-none bg-transparent px-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+                className="w-32 border-none bg-transparent px-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
               <button
                 type="button"
                 onClick={() => searchMutation.mutate()}
                 disabled={searchMutation.isPending}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-secondary text-secondary-foreground transition hover:bg-muted disabled:opacity-60"
                 aria-label="Buscar turno por interno"
               >
                 <Search size={16} />
@@ -342,7 +346,7 @@ export default function AgendaEntregaView() {
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
             >
               <FileSpreadsheet size={16} />
               Imprimir agenda
@@ -353,7 +357,7 @@ export default function AgendaEntregaView() {
                 <button
                   type="button"
                   onClick={handleCreateReserva}
-                  className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+                  className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-sm font-semibold text-secondary-foreground transition hover:bg-muted"
                 >
                   <CalendarPlus size={16} />
                   Nueva reserva
@@ -361,7 +365,7 @@ export default function AgendaEntregaView() {
                 <button
                   type="button"
                   onClick={handleCreateTurno}
-                  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+                  className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                 >
                   <Plus size={16} />
                   Nuevo turno
@@ -395,7 +399,7 @@ export default function AgendaEntregaView() {
           canManage={canManageAgenda}
         />
       ) : (
-        <section className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500 shadow-sm">
+        <section className="rounded-lg border border-dashed border-border bg-card px-3 py-8 text-center text-sm text-muted-foreground shadow-sm">
           Selecciona una sucursal para ver la agenda individual.
         </section>
       )}
@@ -429,11 +433,11 @@ export default function AgendaEntregaView() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/40" />
+            <div className="fixed inset-0 bg-foreground/40" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
+            <div className="flex min-h-full items-center justify-center p-2">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-200"
@@ -443,11 +447,11 @@ export default function AgendaEntregaView() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-                  <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
+                  <div className="flex items-center justify-between border-b border-border px-3 py-2">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
-                      <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Entregas</p>
+                      <Dialog.Title className="mt-0.5 text-lg font-semibold tracking-tight text-popover-foreground">
                         Busqueda de turno por interno
                       </Dialog.Title>
                     </div>
@@ -456,74 +460,74 @@ export default function AgendaEntregaView() {
                       type="button"
                       onClick={handleCloseSearchDialog}
                       disabled={searchMutation.isPending}
-                      className="rounded-lg border border-gray-200 p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
                     >
                       <X size={18} />
                     </button>
                   </div>
 
-                  <div className="space-y-6 p-6">
+                  <div className="space-y-3 p-3">
                     {searchLookupError ? (
-                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      <div className="rounded-md border border-destructive/30 bg-background px-3 py-2 text-sm text-destructive">
                         {searchLookupError}
                       </div>
                     ) : searchedAgenda ? (
                       <>
-                        <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+                        <div className="border border-border bg-secondary px-3 py-3">
                           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Turno asignado</p>
-                              <h3 className="mt-1 text-lg font-semibold text-gray-900">
+                              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Turno asignado</p>
+                              <h3 className="mt-0.5 text-lg font-semibold text-popover-foreground">
                                 Interno {searchedAgenda.interno}
                               </h3>
-                              <p className="mt-1 text-sm text-gray-600">Resultado encontrado en toda la agenda.</p>
+                              <p className="mt-0.5 text-sm text-muted-foreground">Resultado encontrado en todas las sucursales y fechas.</p>
                             </div>
-                            <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700">
+                            <span className="rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-foreground">
                               Operacion {searchedAgendaOperacion}
                             </span>
                           </div>
 
-                          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Sucursal de entrega</p>
-                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.sucursal?.nombre || "-"}</p>
+                          <div className="mt-3 grid grid-cols-1 gap-px border border-border bg-border md:grid-cols-3">
+                            <div className="bg-popover px-3 py-2">
+                              <p className="text-primary font-medium uppercase tracking-wide text-muted-foreground">Sucursal de entrega</p>
+                              <p className="mt-0.5 text-sm font-semibold text-popover-foreground">{searchedAgenda.sucursal?.nombre || "-"}</p>
                             </div>
-                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Fecha de entrega</p>
-                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.fechaAgenda}</p>
+                            <div className="bg-popover px-3 py-2">
+                              <p className="text-primary font-medium uppercase tracking-wide text-muted-foreground">Fecha de entrega</p>
+                              <p className="mt-0.5 text-sm font-semibold text-popover-foreground">{searchedAgenda.fechaAgenda}</p>
                             </div>
-                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">Hora de entrega</p>
-                              <p className="mt-1 text-sm font-semibold text-blue-950">{searchedAgenda.horaAgenda}</p>
+                            <div className="bg-popover px-3 py-2">
+                              <p className="text-primary font-medium uppercase tracking-wide text-muted-foreground">Hora de entrega</p>
+                              <p className="mt-0.5 text-sm font-semibold text-popover-foreground">{searchedAgenda.horaAgenda}</p>
                             </div>
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Tipo</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.tipoOperacion || searchedAgenda.siac?.tipoOperacion || "-"}</p>
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Tipo</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">{searchedAgenda.tipoOperacion || searchedAgenda.siac?.tipoOperacion || "-"}</p>
                             </div>
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Entregada por</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Entregada por</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">
                                 {searchedAgenda.entregadaPorMarcada ? searchedAgenda.entregadaPorNombre || "-" : "-"}
                               </p>
                             </div>
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Equipado</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.equipado ? "Si" : "No"}</p>
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Equipado</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">{searchedAgenda.equipado ? "Si" : "No"}</p>
                             </div>
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Entrega usado</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.entregaUsado ? "Si" : "No"}</p>
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Entrega usado</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">{searchedAgenda.entregaUsado ? "Si" : "No"}</p>
                             </div>
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Siniestro</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.siniestro ? "Si" : "No"}</p>
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Siniestro</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">{searchedAgenda.siniestro ? "Si" : "No"}</p>
                             </div>
-                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Observaciones</p>
-                              <p className="mt-1 text-sm font-medium text-gray-900">{searchedAgenda.observaciones?.trim() || "-"}</p>
+                            <div className="rounded-lg border border-border bg-card px-4 py-3">
+                              <p className="text-primary font-semibold uppercase tracking-wide text-muted-foreground">Observaciones</p>
+                              <p className="mt-1 text-sm font-medium text-foreground">{searchedAgenda.observaciones?.trim() || "-"}</p>
                             </div>
                           </div>
 
@@ -532,7 +536,7 @@ export default function AgendaEntregaView() {
                               <button
                                 type="button"
                                 onClick={handleOpenSearchedAgenda}
-                                className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-secondary"
                               >
                                 Ver en agenda
                               </button>
@@ -543,12 +547,12 @@ export default function AgendaEntregaView() {
                         <InternoLookupCard data={searchedAgenda.siac ?? null} error={searchedAgenda.siacSyncError ? searchedAgenda.siacSyncMessage : ""} />
                       </>
                     ) : (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Resultado</p>
-                        <h3 className="mt-1 text-lg font-semibold text-amber-900">
+                      <div className="rounded-lg border border-border bg-secondary px-4 py-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary-foreground">Resultado</p>
+                        <h3 className="mt-1 text-lg font-semibold text-secondary-foreground">
                           {searchedInterno ? `Interno ${searchedInterno}` : "Interno"}: turno sin asignar
                         </h3>
-                        <p className="mt-1 text-sm text-amber-800">
+                        <p className="mt-1 text-sm text-secondary-foreground">
                           No existe un turno cargado en agenda para ese interno.
                         </p>
                       </div>

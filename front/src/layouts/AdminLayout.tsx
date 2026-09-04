@@ -15,7 +15,10 @@ export default function AdminLayout() {
       to: paths.admin.usuarios,
       icon: UserCog,
       visible: hasModulePathAccess(user, "usuarios", paths.admin.usuarios),
-      active: pathname === paths.admin.usuarios || pathname === paths.admin.crearUsuario || pathname.startsWith("/admin/usuarios/editar/"),
+      active:
+        pathname === paths.admin.usuarios ||
+        pathname === paths.admin.crearUsuario ||
+        pathname.startsWith(`${paths.admin.usuarios}/`),
     },
     {
       label: "Configuracion",

@@ -76,33 +76,33 @@ export default function StockIngresoUsados() {
   if (isLoading || configLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-8 w-80 animate-pulse rounded bg-gray-200" />
-          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-gray-100" />
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="h-8 w-80 animate-pulse rounded bg-muted" />
+          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-muted" />
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
-              <div className="mt-6 h-12 w-full animate-pulse rounded bg-gray-100" />
+            <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">
+              <div className="h-5 w-28 animate-pulse rounded bg-muted" />
+              <div className="mt-6 h-12 w-full animate-pulse rounded bg-muted" />
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-200" />
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-6 py-4">
+            <div className="h-5 w-40 animate-pulse rounded bg-muted" />
           </div>
           <div className="space-y-4 p-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded bg-gray-100" />
+              <div key={i} className="h-10 animate-pulse rounded bg-muted" />
             ))}
           </div>
         </div>
@@ -113,9 +113,9 @@ export default function StockIngresoUsados() {
   if (isError || configError) {
     return (
       <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el stock de usados</h2>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
+        <div className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar el stock de usados</h2>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ export default function StockIngresoUsados() {
           <div className="mt-3 flex overflow-x-auto border-y border-border">
             {resumenMarcas.map((item) => (
               <div key={item.marca} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0">
-                <p className="truncate text-[10px] text-muted-foreground">{item.marca}</p>
+                <p className="truncate text-primary text-muted-foreground">{item.marca}</p>
                 <p className="text-sm font-semibold text-foreground">{item.total}</p>
               </div>
             ))}
@@ -171,7 +171,7 @@ export default function StockIngresoUsados() {
               onClick={() => setMarcaActiva(filtro)}
               className={[
                 "h-9 rounded-md border text-xs font-medium transition-colors",
-                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+                activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filtro}
@@ -180,58 +180,58 @@ export default function StockIngresoUsados() {
         })}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Detalle de unidades</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Detalle de unidades</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {marcaActiva === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por marca: ${marcaActiva}`}
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsFiltrados.length} registros</div>
+          <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{itemsFiltrados.length} registros</div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-border bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Versión</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Año</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Km</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Precio venta</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Ultimo dueño</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Observaciones</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Interno</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Marca</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Versión</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Color</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Año</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Km</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Precio venta</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Ultimo dueño</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Observaciones</th>
               </tr>
             </thead>
 
             <tbody>
               {itemsFiltrados.map((item) => (
-                <tr key={`${item.interno}-${item.marca}-${item.version}`} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-                  <td className="px-4 py-2 text-gray-700">
-                    <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
+                <tr key={`${item.interno}-${item.marca}-${item.version}`} className="border-b hover:bg-muted">
+                  <td className="px-4 py-2 font-medium text-foreground">{item.interno}</td>
+                  <td className="px-4 py-2 text-muted-foreground">
+                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.marca}</span>
                   </td>
                   <td className="min-w-[240px] px-4 py-2 text-center">
-                    <div className="font-medium text-gray-900">{item.version}</div>
+                    <div className="font-medium text-foreground">{item.version}</div>
                   </td>
-                  <td className="px-4 py-2 text-center text-gray-700">
-                    <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
+                  <td className="px-4 py-2 text-center text-muted-foreground">
+                    <span className={`inline-block rounded-md border border-border px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
                       {item.color}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{item.anio}</td>
-                  <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.km ?? 0)}</td>
-                  <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta ?? undefined)}</td>
-                  <td className="px-4 py-2 text-gray-700 uppercase">{item.ultimoDueno}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{item.anio}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.km ?? 0)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{formatCurrency(item.precioVenta ?? undefined)}</td>
+                  <td className="px-4 py-2 text-muted-foreground uppercase">{item.ultimoDueno}</td>
                   <td className="px-4 py-2 text-center">
                     {item.observaciones ? (
                       <button
                         onClick={() => setItemSeleccionado(item)}
-                        className="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-700"
+                        className="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:bg-muted"
                       >
                         Ver
                       </button>
@@ -244,7 +244,7 @@ export default function StockIngresoUsados() {
 
               {itemsFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-6 py-10 text-center text-sm text-muted-foreground">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>
@@ -253,7 +253,7 @@ export default function StockIngresoUsados() {
           </table>
         </div>
 
-        <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm text-gray-500">
+        <div className="border-t border-border bg-muted px-6 py-4 text-sm text-muted-foreground">
           Mostrando {itemsFiltrados.length} unidades
           {marcaActiva !== "TODOS" ? ` de ${marcaActiva}` : ""}.
         </div>
@@ -261,12 +261,12 @@ export default function StockIngresoUsados() {
 
       <Transition appear show={!!itemSeleccionado} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setItemSeleccionado(null)}>
-          <div className="fixed inset-0 bg-black/40" />
+          <div className="fixed inset-0 bg-secondary/40" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Dialog.Panel className="bg-white p-6 rounded-xl max-w-md w-full">
+            <Dialog.Panel className="bg-card p-6 rounded-lg max-w-md w-full">
               <Dialog.Title className="font-semibold">Observaciones</Dialog.Title>
               <p className="mt-4">{itemSeleccionado?.observaciones || "Sin observaciones"}</p>
-              <button onClick={() => setItemSeleccionado(null)} className="mt-4 bg-gray-900 text-white px-4 py-2 rounded">
+              <button onClick={() => setItemSeleccionado(null)} className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded">
                 Cerrar
               </button>
             </Dialog.Panel>

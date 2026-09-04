@@ -2,7 +2,14 @@
 
 ## 2026-09-04
 
+### Rutas por seccion
+- Se reorganizaron las rutas del frontend para que cada seccion use su propio prefijo visible: `Sistema` bajo `/sistema`, `Comercial` bajo `/comercial`, `Plan de ahorro` bajo `/plan-ahorro` y `Stock de unidades` bajo `/stock`.
+- Se movio `Act. Registros` al espacio de `Sistema` con la ruta `/sistema/registros` y se actualizaron los layouts y detecciones de navegacion que dependian de prefijos anteriores.
+
 ### Migracion de preset
+- Se estabilizo el wrapper comun de ECharts: conserva una unica instancia por grafico, resuelve los tokens de paleta para SVG y desactiva los estados visuales de hover que volvían transparente la serie enfocada.
+- Se retiraron las referencias activas a `recharts`, se eliminó la dependencia y se migraron los gráficos restantes de operaciones, asignaciones, patentamientos y transferencias al wrapper común de ECharts con la paleta `--chart-*`.
+- Se normalizaron los residuos visuales detectados en `front/src`: no quedan clases cromáticas heredadas, valores hexadecimales, radios grandes heredados ni adaptadores de color del diseño anterior.
 - Se unificaron los layouts base de Analisis, Entregas, Gestion Convencional, Belgrano, Calidad y Analisis de mercado con fondo `muted`, navegacion semantica, espaciado compacto y footer institucional.
 - Se amplio el componente compartido de ECharts para soportar treemap y se agrego una utilidad que resuelve la paleta monocromatica desde los tokens `chart` del preset.
 - Se ajusto TestDrive administrativo con dialogo, formulario, acciones y tabla compacta bajo los tokens semanticos del preset.
@@ -21,6 +28,10 @@
 ### Calidad
 - Se migró `/calidad/ssi-ventas` al preset compacto, incluyendo listado, importación CSV, filtros por estado, paginación y estados de carga y error.
 - Se unificaron los diálogos de gestión de encuesta y asignación de ADM: campos, historial, acciones y estados usan superficies y tokens semánticos, sin cards anidadas ni colores heredados.
+
+### Entregas
+- Se actualizaron Agenda de entrega y Pendientes de turnar con heroes compactos, filtros semánticos, acciones consistentes y tablas de alta densidad.
+- La búsqueda por interno conserva la consulta global y presenta en un diálogo el turno encontrado con sucursal, fecha y hora, o el estado `turno sin asignar`.
 
 ### Minutas
 - Se migraron el listado, alta, edición, detalle y gestor de grupos de difusión al preset, con fondo unificado, superficies compactas, tablas densas y diálogos semánticos.

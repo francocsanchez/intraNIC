@@ -66,7 +66,7 @@ export default function CentralDeudoresView() {
         <section className="border-b border-border px-3 py-3">
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] xl:items-end">
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Analisis crediticio</p>
+              <p className="text-primary font-medium uppercase tracking-[0.2em] text-muted-foreground">Analisis crediticio</p>
               <div className="mt-1 flex items-center gap-2">
                 <ShieldAlert size={18} className={tapeTone.accentClassName} />
                 <h1 className="text-xl font-semibold tracking-tight text-foreground">Central de Deudores</h1>
@@ -78,7 +78,7 @@ export default function CentralDeudoresView() {
 
             <form onSubmit={handleSubmit} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
               <label className="block">
-                <span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="mb-1 block text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   CUIT / CUIL / CDI
                 </span>
                 <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
@@ -138,37 +138,37 @@ export default function CentralDeudoresView() {
             <article className={`rounded-lg border bg-card px-3 py-3 shadow-sm ${viewModel.riesgoVisual.borderClassName}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Titular</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.22em] text-muted-foreground">Titular</p>
                   <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{viewModel.denominacion}</h2>
                   <p className="text-xs text-muted-foreground">{viewModel.identificacion}</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${viewModel.riesgoVisual.chipClassName}`}>
+                <span className={`rounded-full px-3 py-1 text-primary font-semibold ${viewModel.riesgoVisual.chipClassName}`}>
                   {viewModel.resumen.peorSituacionLabel}
                 </span>
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className={`rounded-md border px-3 py-2 ${viewModel.riesgoVisual.borderClassName} ${viewModel.riesgoVisual.softClassName}`}>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Deuda vigente</p>
+                  <p className="text-primary uppercase tracking-[0.18em] text-muted-foreground">Deuda vigente</p>
                   <p className="mt-1 text-lg font-semibold text-foreground">{formatCentralDeudoresMoney(viewModel.resumen.totalDeuda)}</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Periodo</p>
+                  <p className="text-primary uppercase tracking-[0.18em] text-muted-foreground">Periodo</p>
                   <p className="mt-1 text-lg font-semibold text-foreground">{formatPeriodo(viewModel.resumen.periodoActual)}</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Entidades</p>
+                  <p className="text-primary uppercase tracking-[0.18em] text-muted-foreground">Entidades</p>
                   <p className="mt-1 text-lg font-semibold text-foreground">{viewModel.resumen.cantidadEntidades}</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Cheques</p>
+                  <p className="text-primary uppercase tracking-[0.18em] text-muted-foreground">Cheques</p>
                   <p className="mt-1 text-lg font-semibold text-foreground">{viewModel.resumen.cantidadChequesRechazados}</p>
                 </div>
               </div>
 
               {viewModel.erroresParciales.length ? (
                 <div className="mt-3 space-y-1 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-destructive">Datos parciales</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.18em] text-destructive">Datos parciales</p>
                   {viewModel.erroresParciales.map((item) => (
                     <p key={item} className="text-xs text-destructive">{item}</p>
                   ))}
@@ -178,7 +178,7 @@ export default function CentralDeudoresView() {
               <section className="mt-3 border-t border-border pt-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Cheques rechazados</p>
+                    <p className="text-primary font-semibold uppercase tracking-[0.22em] text-muted-foreground">Cheques rechazados</p>
                     <h3 className="text-base font-semibold tracking-tight text-foreground">Detalle por causal</h3>
                   </div>
                   <span className="text-xs text-muted-foreground">{viewModel.resumen.cantidadChequesRechazados} cheques</span>
@@ -194,7 +194,7 @@ export default function CentralDeudoresView() {
                       <div key={causal.causal} className="rounded-md border border-border bg-muted px-3 py-3">
                         <div className="flex items-center justify-between gap-2">
                           <h4 className="text-sm font-semibold text-foreground">{causal.causal}</h4>
-                          <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-primary-foreground">
+                          <span className="rounded-full bg-primary px-2.5 py-1 text-primary font-semibold text-primary-foreground">
                             {causal.cantidadCheques}
                           </span>
                         </div>
@@ -232,7 +232,7 @@ export default function CentralDeudoresView() {
             <article className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
               <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Deuda actual</p>
+                  <p className="text-primary font-semibold uppercase tracking-[0.22em] text-muted-foreground">Deuda actual</p>
                   <h2 className="text-base font-semibold tracking-tight text-foreground">Entidades informantes</h2>
                 </div>
                 <span className="text-xs text-muted-foreground">{formatPeriodo(viewModel.deudaActual.periodo)}</span>
@@ -260,7 +260,7 @@ export default function CentralDeudoresView() {
                                 <span>Situacion 1 desde {formatCentralDeudoresDate(entidad.fechaSit1)}</span>
                               </div>
                             </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone.chipClassName}`}>
+                            <span className={`rounded-full px-2.5 py-1 text-primary font-semibold ${tone.chipClassName}`}>
                               S{entidad.situacion}
                             </span>
                           </div>
@@ -268,7 +268,7 @@ export default function CentralDeudoresView() {
                           {flags.length ? (
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {flags.map((flag) => (
-                                <span key={flag.key} className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                <span key={flag.key} className="rounded-full border border-border bg-card px-2 py-0.5 text-primary font-medium text-muted-foreground">
                                   {flag.label}
                                 </span>
                               ))}
@@ -288,7 +288,7 @@ export default function CentralDeudoresView() {
 
             <article className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
               <div className="border-b border-border pb-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Historicas</p>
+                <p className="text-primary font-semibold uppercase tracking-[0.22em] text-muted-foreground">Historicas</p>
                 <h2 className="text-base font-semibold tracking-tight text-foreground">Ultimos 24 meses</h2>
               </div>
 
@@ -306,7 +306,7 @@ export default function CentralDeudoresView() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-semibold text-foreground">{formatPeriodo(periodo.periodo)}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${periodo.riesgoVisual.chipClassName}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-primary font-semibold ${periodo.riesgoVisual.chipClassName}`}>
                             {periodo.peorSituacionLabel}
                           </span>
                         </div>

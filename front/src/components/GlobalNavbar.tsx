@@ -30,41 +30,41 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
   };
 
   return (
-    <header className={preset ? "border-b border-border bg-card" : "border-b border-gray-200 bg-white backdrop-blur-sm"}>
+    <header className={preset ? "border-b border-border bg-card" : "border-b border-border bg-card backdrop-blur-sm"}>
       <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:px-4">
         <Link
           to={paths.home}
           onClick={() => setMobileMenuOpen(false)}
           className="flex min-w-0 items-center gap-3 shrink-0"
         >
-          <div className={preset ? "flex h-8 w-8 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground" : "flex h-8 w-8 items-center justify-center bg-black text-[11px] font-bold text-white"}>
+          <div className={preset ? "flex h-8 w-8 items-center justify-center rounded-md bg-primary font-bold text-primary-foreground" : "flex h-8 w-8 items-center justify-center bg-primary font-bold text-primary-foreground"}>
             NIC
           </div>
-          <span className={`truncate text-base font-semibold uppercase tracking-tight ${preset ? "text-foreground" : "text-gray-900"} sm:text-lg`}>
+          <span className={`truncate text-base font-semibold uppercase tracking-tight ${preset ? "text-foreground" : "text-foreground"} sm:text-lg`}>
             IntraNIC
           </span>
         </Link>
 
         <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
-          {centerContent ? <nav className={`flex items-center gap-2 text-sm font-medium ${preset ? "text-muted-foreground" : "text-gray-600"}`}>{centerContent}</nav> : null}
+          {centerContent ? <nav className={`flex items-center gap-2 text-sm font-medium ${preset ? "text-muted-foreground" : "text-muted-foreground"}`}>{centerContent}</nav> : null}
         </div>
 
         <div className="hidden items-center gap-3 shrink-0 md:flex">
           {rightContent}
 
           <Menu as="div" className="relative">
-            <MenuButton className={preset ? "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted" : "inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900"}>
+            <MenuButton className={preset ? "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted" : "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground transition hover:border-input hover:text-foreground"}>
               <UserRound size={16} strokeWidth={1.75} />
               Mi perfil
               <ChevronDown size={15} strokeWidth={1.75} />
             </MenuButton>
 
-            <MenuItems anchor="bottom end" className={preset ? "mt-2 w-44 rounded-md border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none" : "mt-2 w-44 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none"}>
+            <MenuItems anchor="bottom end" className={preset ? "mt-2 w-44 rounded-md border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none" : "mt-2 w-44 rounded-lg border border-border bg-card shadow-lg focus:outline-none"}>
               <MenuItem>
                 {({ focus }) => (
                   <Link
                     to={paths.miPerfil}
-                    className={`px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-gray-50 text-gray-900" : "text-gray-700")}`}
+                    className={`px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-muted text-foreground" : "text-muted-foreground")}`}
                   >
                     <UserRound size={16} strokeWidth={1.5} />
                     Mi perfil
@@ -77,7 +77,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className={`w-full px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-gray-50 text-gray-900" : "text-gray-700")}`}
+                    className={`w-full px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-muted text-foreground" : "text-muted-foreground")}`}
                   >
                     <LogOut size={16} strokeWidth={1.5} />
                     Cerrar sesion
@@ -91,7 +91,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
         <button
           type="button"
           onClick={() => setMobileMenuOpen((current) => !current)}
-          className={preset ? "inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition hover:bg-muted md:hidden" : "inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-700 transition hover:border-gray-300 hover:text-gray-900 md:hidden"}
+          className={preset ? "inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition hover:bg-muted md:hidden" : "inline-flex items-center justify-center rounded-lg border border-border bg-card p-2 text-muted-foreground transition hover:border-input hover:text-foreground md:hidden"}
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
         >
@@ -100,7 +100,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
       </div>
 
       {mobileMenuOpen ? (
-        <div className={preset ? "border-t border-border bg-card md:hidden" : "border-t border-gray-200 bg-white md:hidden"}>
+        <div className={preset ? "border-t border-border bg-card md:hidden" : "border-t border-border bg-card md:hidden"}>
           <div className="mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6">
             {centerContent ? (
               <nav
@@ -110,7 +110,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
                     setMobileMenuOpen(false);
                   }
                 }}
-                className="flex flex-col gap-1 text-sm font-medium text-gray-700 [&>a]:rounded-lg [&>a]:px-3 [&>a]:py-2 [&>a]:transition [&>a:hover]:bg-gray-50 [&>a:hover]:text-gray-900"
+                className="flex flex-col gap-1 text-sm font-medium text-muted-foreground [&>a]:rounded-lg [&>a]:px-3 [&>a]:py-2 [&>a]:transition [&>a:hover]:bg-muted [&>a:hover]:text-foreground"
               >
                 {centerContent}
               </nav>
@@ -122,10 +122,10 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+            <div className="flex flex-col gap-2 border-t border-border pt-3">
               <Link
                 to={paths.miPerfil}
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 <UserRound size={16} strokeWidth={1.5} />
                 Mi perfil
@@ -134,7 +134,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 <LogOut size={16} strokeWidth={1.5} />
                 Cerrar sesion

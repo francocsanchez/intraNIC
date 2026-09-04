@@ -83,33 +83,33 @@ export default function StockDisponibleBelgrano() {
   if (isLoading || configLoading || authLoading) {
     return (
       <div className="w-full space-y-6 px-4 py-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-8 w-80 animate-pulse rounded bg-gray-200" />
-          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-gray-100" />
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="h-8 w-80 animate-pulse rounded bg-muted" />
+          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-muted" />
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
-              <div className="mt-6 h-12 w-full animate-pulse rounded bg-gray-100" />
+            <div key={i} className="rounded-lg border border-border bg-card p-6 shadow-sm">
+              <div className="h-5 w-28 animate-pulse rounded bg-muted" />
+              <div className="mt-6 h-12 w-full animate-pulse rounded bg-muted" />
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-200" />
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <div className="h-5 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="rounded-lg border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-6 py-4">
+            <div className="h-5 w-40 animate-pulse rounded bg-muted" />
           </div>
           <div className="space-y-4 p-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded bg-gray-100" />
+              <div key={i} className="h-10 animate-pulse rounded bg-muted" />
             ))}
           </div>
         </div>
@@ -120,9 +120,9 @@ export default function StockDisponibleBelgrano() {
   if (isError || configError) {
     return (
       <div className="w-full px-4 py-6">
-        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Error al cargar el stock de Belgrano</h2>
-          <p className="mt-2 text-sm text-red-600">{error instanceof Error ? error.message : "Error desconocido"}</p>
+        <div className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar el stock de Belgrano</h2>
+          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
         </div>
       </div>
     );
@@ -134,36 +134,36 @@ export default function StockDisponibleBelgrano() {
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Belgrano</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Stock Disponible Belgrano</h1>
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Belgrano</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Stock Disponible Belgrano</h1>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.6fr_0.9fr]">
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Cantidad por marcas</p>
+        <article className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Cantidad por marcas</p>
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {resumenMarcas.map((item) => (
-              <div key={item.marca} className="rounded-lg bg-gray-50 px-2 py-2 text-center">
-                <p className="truncate text-[10px] text-gray-500">{item.marca}</p>
-                <p className="text-sm font-semibold text-gray-900">{item.total}</p>
+              <div key={item.marca} className="rounded-lg bg-muted px-2 py-2 text-center">
+                <p className="truncate text-primary text-muted-foreground">{item.marca}</p>
+                <p className="text-sm font-semibold text-foreground">{item.total}</p>
               </div>
             ))}
 
             {!resumenMarcas.length && (
-              <div className="col-span-full rounded-lg bg-gray-50 px-2 py-2 text-center">
-                <p className="text-xs text-gray-500">Sin marcas</p>
-                <p className="text-sm font-semibold text-gray-900">0</p>
+              <div className="col-span-full rounded-lg bg-muted px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Sin marcas</p>
+                <p className="text-sm font-semibold text-foreground">0</p>
               </div>
             )}
           </div>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-6xl font-semibold tracking-tight text-gray-900">{resumen?.total ?? items.length}</p>
-            <p className="mt-2 text-sm text-gray-500">Totales</p>
+            <p className="text-6xl font-semibold tracking-tight text-foreground">{resumen?.total ?? items.length}</p>
+            <p className="mt-2 text-sm text-muted-foreground">Totales</p>
           </div>
         </article>
       </section>
@@ -178,8 +178,8 @@ export default function StockDisponibleBelgrano() {
               type="button"
               onClick={() => setMarcaActiva(filtro)}
               className={[
-                "h-12 rounded-xl border text-sm font-medium transition-colors",
-                activo ? "border-gray-950 bg-gray-950 text-white shadow-sm" : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
+                "h-12 rounded-lg border text-sm font-medium transition-colors",
+                activo ? "border-border bg-primary text-primary-foreground shadow-sm" : "border-border bg-muted text-muted-foreground hover:bg-muted",
               ].join(" ")}
             >
               {filtro}
@@ -188,60 +188,60 @@ export default function StockDisponibleBelgrano() {
         })}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-gray-900">Detalle de unidades</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Detalle de unidades</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {marcaActiva === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por marca: ${marcaActiva}`}
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">{itemsFiltrados.length} registros</div>
+          <div className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{itemsFiltrados.length} registros</div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-border bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Interno</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Dominio</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Marca</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">VersiÃ³n</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Color</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">AÃ±o</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Km</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">RecepciÃ³n</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Precio venta</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Interno</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Dominio</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Marca</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">VersiÃ³n</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Color</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">AÃ±o</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Km</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">RecepciÃ³n</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Precio venta</th>
               </tr>
             </thead>
 
             <tbody>
               {itemsFiltrados.map((item) => (
-                <tr key={`${item.interno}-${item.marca}-${item.fechaRecepcion}`} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2 font-medium text-gray-900">{item.interno}</td>
-                  <td className="px-4 py-2 text-gray-700">{item.dominio || "-"}</td>
-                  <td className="px-4 py-2 text-gray-700">
-                    <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">{item.marca}</span>
+                <tr key={`${item.interno}-${item.marca}-${item.fechaRecepcion}`} className="border-b hover:bg-muted">
+                  <td className="px-4 py-2 font-medium text-foreground">{item.interno}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{item.dominio || "-"}</td>
+                  <td className="px-4 py-2 text-muted-foreground">
+                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">{item.marca}</span>
                   </td>
                   <td className="min-w-[240px] px-4 py-2 text-center">
-                    <div className="font-medium text-gray-900">{item.version}</div>
+                    <div className="font-medium text-foreground">{item.version}</div>
                   </td>
-                  <td className="px-4 py-2 text-center text-gray-700">
-                    <span className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
+                  <td className="px-4 py-2 text-center text-muted-foreground">
+                    <span className={`inline-block rounded-md border border-border px-2 py-1 text-xs font-medium ${textToColor(item.color)}`}>
                       {item.color}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-700">{item.anio}</td>
-                  <td className="px-4 py-2 text-gray-700">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td>
-                  <td className="px-4 py-2 text-gray-700">{diasEnStock(item.fechaRecepcion)}</td>
-                  <td className="px-4 py-2 text-gray-700">{formatCurrency(item.precioVenta)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{item.anio}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{diasEnStock(item.fechaRecepcion)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{formatCurrency(item.precioVenta)}</td>
                 </tr>
               ))}
 
               {itemsFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-6 py-10 text-center text-sm text-muted-foreground">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>
@@ -250,7 +250,7 @@ export default function StockDisponibleBelgrano() {
           </table>
         </div>
 
-        <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm text-gray-500">
+        <div className="border-t border-border bg-muted px-6 py-4 text-sm text-muted-foreground">
           Mostrando {itemsFiltrados.length} unidades
           {marcaActiva !== "TODOS" ? ` de ${marcaActiva}` : ""}.
         </div>

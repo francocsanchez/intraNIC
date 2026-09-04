@@ -53,11 +53,11 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  success: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  partial: "border-amber-200 bg-amber-50 text-amber-700",
-  failed: "border-red-200 bg-red-50 text-red-700",
-  skipped: "border-slate-200 bg-slate-50 text-slate-700",
-  running: "border-sky-200 bg-sky-50 text-sky-700",
+  success: "border-border bg-secondary text-secondary-foreground",
+  partial: "border-border bg-secondary text-secondary-foreground",
+  failed: "border-destructive/30 bg-destructive/10 text-destructive",
+  skipped: "border-border bg-muted text-secondary-foreground",
+  running: "border-border bg-secondary text-primary",
 };
 
 const getScheduleSortValue = (scheduleLabel: string) => {
@@ -185,7 +185,7 @@ const JobsControlTable = ({
             <tr key={row.jobKey} className={index % 2 === 0 ? "bg-card" : "bg-muted/50"}>
               <td className="border border-border px-2 py-2 align-top text-foreground">
                 <div className="font-semibold">{row.title}</div>
-                <div className="mt-0.5 text-xs text-gray-500">{row.scheduleLabel}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">{row.scheduleLabel}</div>
               </td>
               <td className="border border-border px-2 py-2 align-top text-foreground">{formatDateTime(row.lastExecutionAt)}</td>
               <td className="border border-border px-2 py-2 align-top">
@@ -199,13 +199,13 @@ const JobsControlTable = ({
                     type="button"
                     onClick={() => onRun(row.jobKey)}
                     disabled={row.isRunning || isMutating}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Play size={14} />
                     {row.isRunning || isMutating ? "Ejecutando..." : "Ejecutar"}
                   </button>
                 ) : (
-                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-600">
+                  <span className="inline-flex rounded-full border border-border bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">
                     Evento
                   </span>
                 )}
@@ -236,10 +236,10 @@ const JobsLogTable = ({
       <thead className="bg-muted text-muted-foreground">
         <tr>
           <th className="border border-border px-2 py-1.5 text-left font-semibold">Fecha de procesado</th>
-          <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Cron</th>
-          <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Resultado</th>
-          <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Alertas</th>
-          <th className="border border-gray-200 px-2 py-1.5 text-left font-semibold">Estado</th>
+          <th className="border border-border px-2 py-1.5 text-left font-semibold">Cron</th>
+          <th className="border border-border px-2 py-1.5 text-left font-semibold">Resultado</th>
+          <th className="border border-border px-2 py-1.5 text-left font-semibold">Alertas</th>
+          <th className="border border-border px-2 py-1.5 text-left font-semibold">Estado</th>
         </tr>
       </thead>
       <tbody>
@@ -248,12 +248,12 @@ const JobsLogTable = ({
             const status = getStatusInfo({ isRunning: row.isRunning, lastStatus: row.status });
 
             return (
-              <tr key={row.id} className={index % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
-                <td className="border border-gray-200 px-2 py-1.5 align-top text-gray-700">{formatDateTime(row.processedAt)}</td>
-                <td className="border border-gray-200 px-2 py-1.5 align-top text-gray-900">{row.title}</td>
-                <td className="border border-gray-200 px-2 py-1.5 align-top leading-5 text-gray-700">{row.result}</td>
-                <td className="border border-gray-200 px-2 py-1.5 align-top leading-5 text-gray-700">{row.alerts}</td>
-                <td className="border border-gray-200 px-2 py-1.5 align-top">
+              <tr key={row.id} className={index % 2 === 0 ? "bg-card" : "bg-secondary"}>
+                <td className="border border-border px-2 py-1.5 align-top text-muted-foreground">{formatDateTime(row.processedAt)}</td>
+                <td className="border border-border px-2 py-1.5 align-top text-foreground">{row.title}</td>
+                <td className="border border-border px-2 py-1.5 align-top leading-5 text-muted-foreground">{row.result}</td>
+                <td className="border border-border px-2 py-1.5 align-top leading-5 text-muted-foreground">{row.alerts}</td>
+                <td className="border border-border px-2 py-1.5 align-top">
                   <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${status.style}`}>
                     {status.label}
                   </span>
@@ -263,7 +263,7 @@ const JobsLogTable = ({
           })
         ) : (
           <tr>
-            <td colSpan={5} className="border border-gray-200 px-2 py-6 text-center text-sm text-gray-500">
+            <td colSpan={5} className="border border-border px-2 py-6 text-center text-sm text-muted-foreground">
               Todavia no hay ejecuciones registradas.
             </td>
           </tr>
@@ -272,7 +272,7 @@ const JobsLogTable = ({
     </table>
 
     {totalPages > 1 ? (
-      <div className="mt-3 flex items-center justify-between gap-3 px-1 text-xs text-gray-600">
+      <div className="mt-3 flex items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
         <span>
           Pagina {page} de {totalPages}
         </span>
@@ -282,7 +282,7 @@ const JobsLogTable = ({
             type="button"
             onClick={onPrevPage}
             disabled={page === 1}
-            className="rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             Anterior
           </button>
@@ -290,7 +290,7 @@ const JobsLogTable = ({
             type="button"
             onClick={onNextPage}
             disabled={page === totalPages}
-            className="rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             Siguiente
           </button>
@@ -459,7 +459,7 @@ export default function PatentamientosRegistrosView() {
           </div>
 
           {controlRows.some((row) => row.isRunning) ? (
-            <div className="inline-flex items-center gap-2 text-sm font-medium text-sky-700">
+            <div className="inline-flex items-center gap-2 text-sm font-medium text-primary">
               <RefreshCcw size={14} className="animate-spin" />
               Actualizando automaticamente
             </div>

@@ -61,12 +61,12 @@ export default function SucursalesEntregaView() {
   const canManageSucursales = hasSuperAdminRole(user);
 
   if (isLoading) {
-    return <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">Cargando sucursales de entrega...</div>;
+    return <div className="rounded-lg border border-border bg-card p-6 shadow-sm">Cargando sucursales de entrega...</div>;
   }
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white p-6 text-red-600 shadow-sm">
+      <div className="rounded-lg border border-destructive/30 bg-card p-6 text-destructive shadow-sm">
         {error instanceof Error ? error.message : "Error al cargar sucursales de entrega"}
       </div>
     );
@@ -74,10 +74,10 @@ export default function SucursalesEntregaView() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card p-6 shadow-sm">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Entregas</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Sucursales de entrega</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Entregas</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Sucursales de entrega</h1>
         </div>
         {canManageSucursales ? (
           <button
@@ -86,7 +86,7 @@ export default function SucursalesEntregaView() {
               setEditingItem(null);
               setModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             <Plus size={16} />
             Nueva sucursal
@@ -94,10 +94,10 @@ export default function SucursalesEntregaView() {
         ) : null}
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-6 py-3 text-left">Sucursal</th>
                 <th className="px-6 py-3 text-left">Direccion</th>
@@ -106,18 +106,18 @@ export default function SucursalesEntregaView() {
                 {canManageSucursales ? <th className="px-6 py-3 text-right">Acciones</th> : null}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {items.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
+                <tr key={item._id} className="hover:bg-muted">
                   <td className="px-6 py-3">
-                    <div className="flex items-center gap-2 font-medium text-gray-900">
-                      <Building2 size={16} className="text-gray-500" />
+                    <div className="flex items-center gap-2 font-medium text-foreground">
+                      <Building2 size={16} className="text-muted-foreground" />
                       <span>{item.nombre}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-3 text-gray-700">{item.direccion || "-"}</td>
-                  <td className="px-6 py-3 text-gray-700">{item.activa ? "Activa" : "Inactiva"}</td>
-                  <td className="px-6 py-3 text-gray-700">{item.observaciones || "-"}</td>
+                  <td className="px-6 py-3 text-muted-foreground">{item.direccion || "-"}</td>
+                  <td className="px-6 py-3 text-muted-foreground">{item.activa ? "Activa" : "Inactiva"}</td>
+                  <td className="px-6 py-3 text-muted-foreground">{item.observaciones || "-"}</td>
                   {canManageSucursales ? (
                     <td className="px-6 py-3">
                       <div className="flex justify-end gap-2">
@@ -127,7 +127,7 @@ export default function SucursalesEntregaView() {
                             setEditingItem(item);
                             setModalOpen(true);
                           }}
-                          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 transition hover:bg-gray-50"
+                          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted"
                         >
                           <Pencil size={14} />
                           Editar
@@ -135,7 +135,7 @@ export default function SucursalesEntregaView() {
                         <button
                           type="button"
                           onClick={() => deleteMutation.mutate(item._id)}
-                          className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                          className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
                         >
                           <Trash2 size={14} />
                           Eliminar
@@ -148,7 +148,7 @@ export default function SucursalesEntregaView() {
 
               {!items.length ? (
                 <tr>
-                  <td colSpan={canManageSucursales ? 5 : 4} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={canManageSucursales ? 5 : 4} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     No hay sucursales de entrega cargadas.
                   </td>
                 </tr>

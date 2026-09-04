@@ -6,18 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Clock3 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Bar,
-  BarChart,
-  Cell,
-  LabelList,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import type { EChartsCoreOption } from "echarts/core";
+import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { textToColor } from "@/helpers/colores";
 import { getAsignaciones } from "@/api/dms/dmsAPI";
 import { paths } from "@/routes/paths";
@@ -41,17 +32,6 @@ const MESES = [
   { label: "OCTUBRE", value: 10 },
   { label: "NOVIEMBRE", value: 11 },
   { label: "DICIEMBRE", value: 12 },
-];
-
-const CHART_COLORS = [
-  "#15aa9a",
-  "#52beb2",
-  "#8fd2ca",
-  "#b7e3dd",
-  "#d9f1ef",
-  "#7fc9e7",
-  "#a9dbef",
-  "#cfeaf6",
 ];
 
 type FiltroEstado = "todos" | "recibidos" | "pendientes";
@@ -133,17 +113,31 @@ export default function AsignacionesView() {
   const totalRecibidos = resumen?.recibidos ?? 0;
   const totalPendientes = resumen?.pendientes ?? 0;
   const mesActivo = MESES.find((item) => item.value === mes)?.label ?? "";
+  const chartColors = getPresetChartColors();
+  const recepcionesOption = useMemo<EChartsCoreOption>(() => ({
+    color: chartColors,
+    grid: { top: 24, right: 16, bottom: 30, left: 38 },
+    tooltip: { trigger: "axis", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" } },
+    xAxis: { type: "category", data: recepcionesPorDia.map((item) => item.fechaCorta), axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 } },
+    yAxis: { type: "value", minInterval: 1, axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
+    series: [{ type: "bar", name: "Recibidas", data: recepcionesPorDia.map((item) => item.cantidad), barMaxWidth: 42, label: { show: true, position: "top", color: "var(--foreground)", fontSize: 11 } }],
+  }), [chartColors, recepcionesPorDia]);
+  const estadoOption = useMemo<EChartsCoreOption>(() => ({
+    color: chartColors,
+    tooltip: { trigger: "item", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" }, formatter: "{b}: {c}" },
+    series: [{ type: "pie", radius: ["54%", "78%"], avoidLabelOverlap: true, label: { show: false }, data: estadoRecepcion }],
+  }), [chartColors, estadoRecepcion]);
 
   if (isLoading || pedidosLoading) return <Loading />;
 
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">
+        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Error al cargar asignación de recepción
           </h1>
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-2 text-sm text-destructive">
             No fue posible obtener la información.
           </p>
         </section>
@@ -153,13 +147,13 @@ export default function AsignacionesView() {
 
   return (
     <div className="w-full space-y-6 px-4 py-6">
-      <section className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="min-w-0 rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Asignación de recepción
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Seguimiento de unidades recibidas y pendientes por mes.
             </p>
           </div>
@@ -168,7 +162,7 @@ export default function AsignacionesView() {
             {canManagePedidos ? (
               <Link
               to={paths.convencional.pedidoUnidades}
-                className="rounded-lg bg-[#15aa9a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#129181]"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary"
               >
                 Solicitar unidades
               </Link>
@@ -176,7 +170,7 @@ export default function AsignacionesView() {
 
             <label
               htmlFor="anio"
-              className="text-sm font-semibold text-gray-900"
+              className="text-sm font-semibold text-foreground"
             >
               Seleccione un año
             </label>
@@ -185,7 +179,7 @@ export default function AsignacionesView() {
               id="anio"
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition-colors focus:border-gray-500"
+              className="rounded-lg border border-input bg-card px-4 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
             >
               {ANIOS.map((item) => (
                 <option key={item} value={item}>
@@ -207,10 +201,10 @@ export default function AsignacionesView() {
               type="button"
               onClick={() => setMes(item.value)}
               className={[
-                "h-12 rounded-xl border text-sm font-semibold transition-colors",
+                "h-12 rounded-lg border text-sm font-semibold transition-colors",
                 activo
-                  ? "border-gray-950 bg-gray-950 text-white shadow-sm"
-                  : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  ? "border-border bg-primary text-primary-foreground shadow-sm"
+                  : "border-border bg-muted text-muted-foreground hover:bg-muted",
               ].join(" ")}
             >
               {item.label}
@@ -220,99 +214,49 @@ export default function AsignacionesView() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Total unidades
           </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{totalUnidades}</p>
+          <p className="mt-3 text-3xl font-bold text-foreground">{totalUnidades}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Recibidas
           </p>
-          <p className="mt-3 text-3xl font-bold text-[#15aa9a]">{totalRecibidos}</p>
+          <p className="mt-3 text-3xl font-bold text-primary">{totalRecibidos}</p>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Pendientes
           </p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{totalPendientes}</p>
+          <p className="mt-3 text-3xl font-bold text-foreground">{totalPendientes}</p>
         </article>
       </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
             Recepciones por día
           </h2>
 
-          <div className="mt-6 h-72 min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={recepcionesPorDia}>
-                <XAxis dataKey="fechaCorta" axisLine={false} tickLine={false} />
-                <YAxis
-                  allowDecimals={false}
-                  axisLine={false}
-                  tickLine={false}
-                  width={30}
-                />
-                <Tooltip formatter={(value) => [Number(value ?? 0), "Recibidas"]} />
-                <Bar
-                  dataKey="cantidad"
-                  radius={[6, 6, 0, 0]}
-                  fill="#15aa9a"
-                  maxBarSize={42}
-                >
-                  <LabelList
-                    dataKey="cantidad"
-                    position="top"
-                    style={{ fill: "#374151", fontSize: 12 }}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <div className="mt-3 h-72 min-w-0"><EChart option={recepcionesOption} /></div>
         </article>
 
-        <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold tracking-tight text-gray-900">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
             Estado de recepción
           </h2>
 
-          <div className="relative mt-6 h-72 min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={estadoRecepcion}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={60}
-                  outerRadius={95}
-                  paddingAngle={3}
-                >
-                  {estadoRecepcion.map((entry, index: number) => (
-                    <Cell
-                      key={`${entry.name}-${index}`}
-                      fill={CHART_COLORS[index % CHART_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-
-                <Tooltip
-                  formatter={(value, _name, props) => [
-                    Number(value ?? 0),
-                    props?.payload?.name ?? "Estado",
-                  ]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="relative mt-3 h-72 min-w-0">
+            <EChart option={estadoOption} />
 
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <p className="text-3xl font-bold text-gray-900">{totalUnidades}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-500">
+                <p className="text-3xl font-bold text-foreground">{totalUnidades}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
                   Total
                 </p>
               </div>
@@ -321,12 +265,10 @@ export default function AsignacionesView() {
 
           <div className="mt-4 flex flex-wrap justify-center gap-4">
             {estadoRecepcion.map((item, index: number) => (
-              <div key={item.name} className="flex items-center gap-2 text-sm text-gray-700">
+              <div key={item.name} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span
                   className="h-3 w-3 rounded-full"
-                  style={{
-                    backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
-                  }}
+                  style={{ backgroundColor: chartColors[index % chartColors.length] }}
                 />
                 <span>
                   {item.name}: {item.value}
@@ -337,26 +279,26 @@ export default function AsignacionesView() {
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-base font-semibold tracking-tight text-gray-900">
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
                 Unidades del mes
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {totalUnidades} unidades registradas en {mesActivo.toLowerCase()} de {anio}.
               </p>
             </div>
 
-            <div className="inline-flex w-full rounded-lg bg-gray-100 p-1 lg:w-auto">
+            <div className="inline-flex w-full rounded-lg bg-muted p-1 lg:w-auto">
               <button
                 type="button"
                 onClick={() => setFiltroEstado("todos")}
                 className={[
                   "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
-                  filtroEstado === "todos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  filtroEstado === "todos" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
                 Todos ({totalUnidades})
@@ -367,7 +309,7 @@ export default function AsignacionesView() {
                 onClick={() => setFiltroEstado("recibidos")}
                 className={[
                   "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
-                  filtroEstado === "recibidos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  filtroEstado === "recibidos" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
                 Recibidos ({totalRecibidos})
@@ -378,7 +320,7 @@ export default function AsignacionesView() {
                 onClick={() => setFiltroEstado("pendientes")}
                 className={[
                   "flex-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors lg:flex-none",
-                  filtroEstado === "pendientes" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
+                  filtroEstado === "pendientes" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
                 Pendientes ({totalPendientes})
@@ -389,7 +331,7 @@ export default function AsignacionesView() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="bg-muted text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-6 py-3 text-left">#</th>
                 <th className="px-6 py-3 text-left">Interno</th>
@@ -405,13 +347,13 @@ export default function AsignacionesView() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {registrosFiltrados.map((item: AsignacionRecepcionItem, index: number) => {
                 const recibido = Boolean(item.fechaRecepcionRemito);
                 const fuePedido = Boolean(pedidoStatus[String(item.interno)]);
 
                 return (
-                  <tr key={`${item.interno}-${item.nrofab}`} className="hover:bg-gray-50">
+                  <tr key={`${item.interno}-${item.nrofab}`} className="hover:bg-muted">
                     <td className="px-6 py-3">{index + 1}</td>
                     <td className="px-6 py-3 font-medium">{item.interno}</td>
                     <td className="px-6 py-3">{item.nrofab}</td>
@@ -419,7 +361,7 @@ export default function AsignacionesView() {
                     <td className="px-6 py-3">{item.chasis ?? "-"}</td>
                     <td className="px-4 py-4">
                       <div
-                        className={`inline-block rounded-md border border-slate-200 px-2 py-1 text-xs font-medium ${textToColor(
+                        className={`inline-block rounded-md border border-border px-2 py-1 text-xs font-medium ${textToColor(
                           item.color
                         )}`}
                       >
@@ -436,11 +378,11 @@ export default function AsignacionesView() {
                     <td className="px-6 py-3">
                       <div className="flex justify-center">
                         {fuePedido ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-primary">
                             Si
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
                             No
                           </span>
                         )}
@@ -449,12 +391,12 @@ export default function AsignacionesView() {
                     <td className="px-6 py-3">
                       <div className="flex justify-center">
                         {recibido ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
                             <Check size={14} strokeWidth={2.5} />
                             Recibido
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
                             <Clock3 size={14} strokeWidth={2.5} />
                             Pendiente
                           </span>
@@ -467,7 +409,7 @@ export default function AsignacionesView() {
 
               {!registrosFiltrados.length && (
                 <tr>
-                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-muted-foreground">
                     No hay unidades para el filtro seleccionado.
                   </td>
                 </tr>

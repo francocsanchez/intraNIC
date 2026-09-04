@@ -282,7 +282,7 @@ function AdministrativaPickerDialog({
                                 <div
                                   className={[
                                     "flex h-5 w-5 items-center justify-center rounded border text-primary-foreground transition",
-                                    isSelected ? "border-primary bg-primary" : "border-input bg-background",
+                                    isSelected ? "border-border bg-secondary" : "border-input bg-background",
                                   ].join(" ")}
                                 >
                                   {isSelected ? <Check size={12} /> : null}
@@ -1097,7 +1097,7 @@ export default function SsiVentasView() {
 
         <div className="overflow-x-auto">
           <table className="min-w-[1120px] w-full text-sm">
-            <thead className="bg-muted text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            <thead className="bg-muted text-primary uppercase tracking-[0.14em] text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Accion</th>
                 <th className="px-3 py-2 text-left">Estado</th>
@@ -1148,7 +1148,7 @@ export default function SsiVentasView() {
                       <span className="font-semibold text-card-foreground">{item.operacion}</span>
                       {item.identificadorCliente ? (
                         <span
-                          className={`inline-flex shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${getIdentificadorClienteClass(item.identificadorCliente)}`}
+                          className={`inline-flex shrink-0 rounded-md border px-2 py-0.5 text-primary font-medium ${getIdentificadorClienteClass(item.identificadorCliente)}`}
                         >
                           {getIdentificadorClienteLabel(item.identificadorCliente)}
                         </span>

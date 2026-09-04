@@ -86,6 +86,7 @@ El backend no cuenta con un script de tests automatizados definido actualmente. 
 - Para nuevas vistas o componentes visuales, usar `shadcn/ui` desde `front/src/components/ui` y los tokens definidos en `front/src/index.css`. No migrar ni reemplazar estilos existentes salvo que la tarea lo solicite expresamente.
 - El sistema shadcn esta configurado para Vite en `front/components.json`; antes de agregar componentes con el CLI, verificar que se creen bajo `front/src/components/ui`.
 - Mantener la separacion por dominio funcional: por ejemplo, las entregas usan `front/src/views/entregas`, `front/src/components/entregas` y las rutas bajo `/api/entregas`.
+- Las rutas del frontend deben usar prefijos que representen la seccion funcional visible para el usuario: `Sistema` bajo `/sistema`, `Comercial` bajo `/comercial`, `Plan de ahorro` bajo `/plan-ahorro`, `Stock de unidades` bajo `/stock`, `Analisis` bajo `/analisis`, `Entregas` bajo `/entregas`, `Calidad` bajo `/calidad` y las secciones de gestion bajo `/gestion/...`.
 - Validar permisos tanto en el frontend como en el backend cuando una funcionalidad este restringida por rol, modulo o compania.
 - Conservar el estilo TypeScript y evitar cambios ajenos a la funcionalidad solicitada.
 
@@ -132,3 +133,4 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - La Valorizacion de Stock Convencional debe conservar hero y resumen en una unica superficie, tablas densas y la misma especificacion del preset para carga por fila, estados e importacion/exportacion de precios.
 - Los flujos compartidos de Plan de Ahorro y Comercial, como Registro TestDrive, se mantienen en un unico componente y deben usar el preset directamente en listado, calendario, formularios y dialogos para evitar variantes visuales por negocio.
 - SSI Ventas debe conservar el preset en toda la gestión del caso, incluida importación, filtros, tabla, encuesta, historial y asignación de ADM; los estados se comunican con etiquetas y estructura, no con paletas heredadas.
+- Entregas debe mantener una única especificación visual para Agenda, Pendientes, Sucursales y Registros; la búsqueda de interno siempre consulta todas las fechas y sucursales y su diálogo muestra sucursal, fecha y hora de entrega o `turno sin asignar`.

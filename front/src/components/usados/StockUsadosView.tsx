@@ -76,7 +76,7 @@ export default function StockUsadosView({ queryKey, queryFn, title, subtitle = "
             <div className="mt-2 flex overflow-x-auto border-y border-border">
               {resumenMarcas.map((item) => (
                 <div key={item.marca} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0">
-                  <p className="truncate text-[10px] text-muted-foreground">{item.marca}</p>
+                  <p className="truncate text-primary text-muted-foreground">{item.marca}</p>
                   <p className="text-sm font-semibold text-foreground">{item.total}</p>
                 </div>
               ))}
@@ -93,7 +93,7 @@ export default function StockUsadosView({ queryKey, queryFn, title, subtitle = "
       <section className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8">
         {marcasDisponibles.map((filtro) => {
           const activo = marcaActiva === filtro;
-          return <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>{filtro}</button>;
+          return <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>{filtro}</button>;
         })}
       </section>
 
@@ -149,7 +149,7 @@ export default function StockUsadosView({ queryKey, queryFn, title, subtitle = "
                     <button type="button" onClick={() => setItemSeleccionado(null)} className="rounded-md border border-border bg-background p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><X size={18} /></button>
                   </div>
                   <div className="px-3 py-3 text-sm text-foreground">{itemSeleccionado?.observaciones || "Sin observaciones"}</div>
-                  <div className="flex justify-end border-t border-border bg-muted px-3 py-2"><button type="button" onClick={() => setItemSeleccionado(null)} className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Cerrar</button></div>
+                  <div className="flex justify-end border-t border-border bg-primary px-3 py-2"><button type="button" onClick={() => setItemSeleccionado(null)} className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Cerrar</button></div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

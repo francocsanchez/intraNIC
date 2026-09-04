@@ -12,17 +12,17 @@ export default function PendientesTurnarFilters({
   onChange,
 }: PendientesTurnarFiltersProps) {
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+    <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,320px)_160px]">
         <div className="space-y-1">
-          <label htmlFor="pendientes-sucursal" className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+          <label htmlFor="pendientes-sucursal" className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Sucursal
           </label>
           <select
             id="pendientes-sucursal"
             value={sucursalId}
             onChange={(event) => onChange({ sucursalId: event.target.value })}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-900 outline-none focus:border-gray-500"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">-- Selecciona una sucursal --</option>
             {sucursales.map((sucursal) => (
@@ -37,7 +37,7 @@ export default function PendientesTurnarFilters({
           <button
             type="button"
             onClick={() => onChange({ sucursalId: "" })}
-            className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+            className="inline-flex h-9 w-full items-center justify-center rounded-md border border-border bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-secondary"
           >
             Limpiar filtro
           </button>

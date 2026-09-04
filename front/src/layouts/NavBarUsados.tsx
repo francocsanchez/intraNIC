@@ -45,7 +45,7 @@ export default function NavBarUsados() {
               to={item.to}
               className={[
                 "inline-flex items-center gap-2 rounded-md px-3 py-2 transition",
-                item.active ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900",
+                item.active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               <item.icon size={16} strokeWidth={1.75} />

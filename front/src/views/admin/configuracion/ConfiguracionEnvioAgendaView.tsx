@@ -164,18 +164,18 @@ export default function ConfiguracionEnvioAgendaView() {
               key={sucursal._id}
               className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
             >
-              <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+              <div className="flex items-center justify-between border-b border-border px-5 py-4">
                 <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                    <Building2 size={16} className="text-gray-500" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Building2 size={16} className="text-muted-foreground" />
                     <span>{sucursal.nombre}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {sucursal.direccion || "Sin direccion cargada"}
                   </p>
                 </div>
 
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <input
                     type="checkbox"
                     checked={draft.activo}
@@ -194,10 +194,10 @@ export default function ConfiguracionEnvioAgendaView() {
               <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    <p className="text-primary font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                       Destinatarios
                     </p>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Carga manual de emails, sin necesidad de usuarios del
                       sistema.
                     </p>
@@ -211,7 +211,7 @@ export default function ConfiguracionEnvioAgendaView() {
                         emails: [...current.emails, ""],
                       }))
                     }
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50"
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted"
                   >
                     <Plus size={14} />
                     Agregar email
@@ -227,7 +227,7 @@ export default function ConfiguracionEnvioAgendaView() {
                       <div className="relative flex-1">
                         <Mail
                           size={14}
-                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         />
                         <input
                           type="email"
@@ -243,7 +243,7 @@ export default function ConfiguracionEnvioAgendaView() {
                             }));
                           }}
                           placeholder="destinatario@empresa.com"
-                          className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+                          className="w-full rounded-lg border border-border bg-card py-2.5 pl-9 pr-3 text-sm text-foreground outline-none transition focus:border-border"
                         />
                       </div>
 
@@ -260,7 +260,7 @@ export default function ConfiguracionEnvioAgendaView() {
                                 : [""],
                           }))
                         }
-                        className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100"
+                        className="inline-flex items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10 px-3 text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -269,8 +269,8 @@ export default function ConfiguracionEnvioAgendaView() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-5 py-4">
-                <div className="text-sm text-gray-500">
+              <div className="flex items-center justify-between border-t border-border bg-muted px-5 py-4">
+                <div className="text-sm text-muted-foreground">
                   Estado sucursal: {sucursal.activa ? "Activa" : "Inactiva"}
                 </div>
 
@@ -293,7 +293,7 @@ export default function ConfiguracionEnvioAgendaView() {
                       },
                     });
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Save size={16} />
                   {isSaving ? "Guardando..." : "Guardar"}

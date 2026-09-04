@@ -47,7 +47,7 @@ export default function CalidadLayout() {
                 className={({ isActive }) =>
                   `inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold transition ${
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-border bg-primary text-primary-foreground"
                       : "border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`
                 }

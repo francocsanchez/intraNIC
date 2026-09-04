@@ -122,7 +122,7 @@ function buildMonthlyDiscountByModel(rows: MisOperacionesResponse["data"]) {
 export default function MisOperacionesView() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const negocio = pathname.startsWith("/usados/") ? "usados" : "convencional";
+  const negocio = pathname.startsWith("/stock/usados/") ? "usados" : "convencional";
 
   const anioActual = new Date().getFullYear();
   const [anio, setAnio] = useState<number>(anioActual);
@@ -248,7 +248,7 @@ export default function MisOperacionesView() {
               onClick={() => setMes(item.value)}
               className={[
                 "h-9 min-w-24 flex-1 whitespace-nowrap rounded-md border text-xs font-semibold transition-colors",
-                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+                activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {item.label}

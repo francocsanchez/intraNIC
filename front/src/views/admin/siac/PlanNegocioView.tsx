@@ -80,14 +80,14 @@ export default function PlanNegocioView() {
             {metrics.map((metric, index) => (
               <div key={metric.label} className={`flex items-center gap-3 px-3 py-3 ${index > 0 ? "xl:border-l xl:border-border" : ""} ${index > 1 ? "sm:border-t sm:border-border xl:border-t-0" : ""} ${index % 2 === 1 ? "sm:border-l sm:border-border xl:border-l" : ""}`}>
                 <div className={`flex h-8 w-8 items-center justify-center rounded-md ${metric.accent}`}><metric.icon size={16} /></div>
-                <div><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{metric.label}</p><p className="text-xl font-semibold tracking-tight text-foreground">{metric.value}</p></div>
+                <div><p className="text-primary font-medium uppercase tracking-[0.14em] text-muted-foreground">{metric.label}</p><p className="text-xl font-semibold tracking-tight text-foreground">{metric.value}</p></div>
               </div>
             ))}
           </div>
 
           <div className="flex items-center gap-3 border-t border-border px-3 py-2">
             <span className="shrink-0 text-xs font-medium text-muted-foreground">Progreso anual</span>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressWidth}%` }} /></div>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-secondary transition-all duration-500" style={{ width: `${progressWidth}%` }} /></div>
             <span className="text-xs font-semibold text-foreground">{totalAvance}%</span>
           </div>
         </CardContent>
@@ -107,14 +107,14 @@ export default function PlanNegocioView() {
                 <tr key={row.modelo} className="transition-colors hover:bg-secondary">
                   <td className="sticky left-0 z-10 bg-card px-3 py-2.5 font-semibold text-foreground">{row.modelo}</td><td className="px-3 py-2.5 text-center font-semibold text-foreground">{row.objetivo}</td>
                   {MONTH_COLUMNS.map(([key]) => <td key={key} className={`px-3 py-2.5 text-center text-muted-foreground ${currentMonthKey === key ? "bg-secondary font-semibold text-foreground" : ""}`}>{row[key]}</td>)}
-                  <td className={`px-3 py-2.5 text-center font-semibold ${row.avance >= 100 ? "text-emerald-600" : "text-foreground"}`}>{row.avance}%</td><td className="px-3 py-2.5 text-center font-semibold text-foreground">{row.restante}</td><td className="px-3 py-2.5 text-center font-semibold text-foreground">{row.xMes}</td>
+                  <td className={`px-3 py-2.5 text-center font-semibold ${row.avance >= 100 ? "text-foreground" : "text-foreground"}`}>{row.avance}%</td><td className="px-3 py-2.5 text-center font-semibold text-foreground">{row.restante}</td><td className="px-3 py-2.5 text-center font-semibold text-foreground">{row.xMes}</td>
                 </tr>
               ))}
               {total ? (
                 <tr className="bg-primary text-primary-foreground">
-                  <td className="sticky left-0 z-10 bg-primary px-3 py-2.5 font-bold">{total.modelo}</td><td className="px-3 py-2.5 text-center font-bold">{total.objetivo}</td>
+                  <td className="sticky left-0 z-10 bg-secondary px-3 py-2.5 font-bold">{total.modelo}</td><td className="px-3 py-2.5 text-center font-bold">{total.objetivo}</td>
                   {MONTH_COLUMNS.map(([key]) => <td key={key} className="px-3 py-2.5 text-center font-bold">{total[key]}</td>)}
-                  <td className={`px-3 py-2.5 text-center font-bold ${total.avance >= 100 ? "text-emerald-300" : ""}`}>{total.avance}%</td><td className="px-3 py-2.5 text-center font-bold">{total.restante}</td><td className="px-3 py-2.5 text-center font-bold">{total.xMes}</td>
+                  <td className={`px-3 py-2.5 text-center font-bold ${total.avance >= 100 ? "text-primary" : ""}`}>{total.avance}%</td><td className="px-3 py-2.5 text-center font-bold">{total.restante}</td><td className="px-3 py-2.5 text-center font-bold">{total.xMes}</td>
                 </tr>
               ) : null}
               {!rows.length ? <tr><td colSpan={16} className="px-4 py-14 text-center text-sm text-muted-foreground">No hay objetivos o asignaciones para {anio}.</td></tr> : null}

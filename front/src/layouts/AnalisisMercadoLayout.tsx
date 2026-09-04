@@ -116,7 +116,7 @@ export default function AnalisisMercadoLayout() {
           >
             {sidebarCollapsed ? null : (
               <div className="px-1">
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   Modulo unificado
                 </p>
                 <h1 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
@@ -151,7 +151,7 @@ export default function AnalisisMercadoLayout() {
           <div className="mt-4 space-y-2">
             <Link
               to={paths.home}
-              className={`inline-flex w-full items-center rounded-md border border-border bg-background text-[13px] font-medium text-foreground transition hover:bg-secondary ${
+              className={`inline-flex w-full items-center rounded-md border border-border bg-background text-primary font-medium text-foreground transition hover:bg-secondary ${
                 sidebarCollapsed
                   ? "justify-center px-2 py-2.5"
                   : "justify-center gap-2 px-3 py-2.5"
@@ -169,7 +169,7 @@ export default function AnalisisMercadoLayout() {
               <div key={group.title} className="space-y-1.5">
                 {sidebarCollapsed ? null : (
                   <div className="px-1 pt-1">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                    <p className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                       {group.title}
                     </p>
                   </div>
@@ -180,13 +180,13 @@ export default function AnalisisMercadoLayout() {
                     key={`${group.title}-${section.key}`}
                     to={section.to}
                     className={({ isActive }) =>
-                      `group flex w-full items-center rounded-md border text-[13px] font-medium transition ${
+                      `group flex w-full items-center rounded-md border text-primary font-medium transition ${
                         sidebarCollapsed
                           ? "justify-center px-2 py-2.5"
                           : "px-3 py-2.5"
                       } ${
                         isActive
-                          ? "border-primary bg-primary text-primary-foreground"
+                          ? "border-border bg-primary text-primary-foreground"
                           : "border-transparent text-muted-foreground hover:border-border hover:bg-secondary hover:text-foreground"
                       }`
                     }

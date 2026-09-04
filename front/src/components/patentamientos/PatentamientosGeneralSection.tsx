@@ -1,6 +1,9 @@
 import type { PatentamientosDashboardGeneral } from "@/services/patentamientosDashboardService";
 import { ArrowLeft, ArrowRight, Trophy, TrendingUp } from "lucide-react";
-import { Bar, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { EChartsCoreOption } from "echarts/core";
+import { useMemo } from "react";
+import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 
 type PatentamientosGeneralSectionProps = {
   data: PatentamientosDashboardGeneral;
@@ -16,50 +19,6 @@ const formatPercentage = (value: number) =>
     maximumFractionDigits: 1,
   })}%`;
 
-function PatentamientosTrendTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: Array<{ payload?: { total?: number; ownTotal?: number; toyotaTotal?: number; marketCoverage?: number } }>;
-  label?: string | number;
-}) {
-  if (!active || !payload?.length) {
-    return null;
-  }
-
-  const point = payload[0]?.payload as
-    | {
-      total?: number;
-      ownTotal?: number;
-      toyotaTotal?: number;
-      marketCoverage?: number;
-    }
-    | undefined;
-
-  const total = Math.round(Number(point?.total ?? 0));
-  const ownTotal = Math.round(Number(point?.ownTotal ?? 0));
-  const toyotaTotal = Math.round(Number(point?.toyotaTotal ?? 0));
-  const marketCoverage = Number(
-    point?.marketCoverage ?? (toyotaTotal > 0 ? (ownTotal / toyotaTotal) * 100 : 0),
-  );
-
-  return (
-    <div
-      className="rounded-2xl border border-[#cfe7ee] bg-white px-4 py-3 text-sm shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
-    >
-      <p className="mb-2 font-semibold text-slate-900">{label}</p>
-      <div className="space-y-1 text-slate-700">
-        <p>Patentamientos: {formatInteger(total)}</p>
-        <p>Patentamientos propios: {formatInteger(ownTotal)}</p>
-        <p>Patentamientos Toyota: {formatInteger(toyotaTotal)}</p>
-        <p>Cobertura Toyota: {formatPercentage(marketCoverage)}</p>
-      </div>
-    </div>
-  );
-}
-
 function DashboardCard({
   children,
   className = "",
@@ -68,7 +27,7 @@ function DashboardCard({
   className?: string;
 }) {
   return (
-    <div className={`rounded-[24px] border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] ${className}`}>
+    <div className={`rounded-[24px] border border-border bg-card shadow-[0_8px_30px_rgba(15,23,42,0.06)] ${className}`}>
       {children}
     </div>
   );
@@ -89,6 +48,18 @@ export default function PatentamientosGeneralSection({
   const averageTrendValue = hasTrend
     ? data.trend.reduce((sum, point) => sum + point.total, 0) / data.trend.length
     : 0;
+  const trendOption = useMemo<EChartsCoreOption>(() => ({
+    color: getPresetChartColors(),
+    grid: { top: 24, right: 18, bottom: 34, left: 46 },
+    tooltip: { trigger: "axis", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" } },
+    xAxis: { type: "category", data: data.trend.map((point) => point.label), axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 } },
+    yAxis: { type: "value", axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
+    series: [
+      { type: "bar", name: "Patentamientos propios", data: data.trend.map((point) => point.ownTotal), barMaxWidth: 32 },
+      { type: "line", name: "Patentamientos Toyota", smooth: true, data: data.trend.map((point) => point.toyotaTotal), lineStyle: { width: 2 }, symbolSize: 5 },
+      { type: "line", name: "Patentamientos", smooth: true, data: data.trend.map((point) => point.total), lineStyle: { width: 2 }, symbolSize: 5, markLine: { symbol: "none", lineStyle: { type: "dashed", color: "var(--muted-foreground)" }, data: [{ yAxis: averageTrendValue, label: { formatter: `Promedio ${formatInteger(Math.round(averageTrendValue))}` } }] } },
+    ],
+  }), [averageTrendValue, data.trend]);
 
   return (
     <div className="space-y-6">
@@ -97,15 +68,15 @@ export default function PatentamientosGeneralSection({
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total patentamientos</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Total patentamientos</p>
               <div className="mt-4 flex items-end gap-2">
-                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                <h3 className="text-3xl font-semibold tracking-tight text-muted-foreground">
                   {formatInteger(data.summary.totalPatentamientos)}
                 </h3>
               </div>
-              <p className="mt-2 text-sm text-slate-500">Acumulado del anio seleccionado en Zona NIC.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Acumulado del anio seleccionado en Zona NIC.</p>
             </div>
-            <div className="rounded-2xl bg-[#ecfdf8] p-3 text-[#128c80]">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <TrendingUp size={20} />
             </div>
           </div>
@@ -114,15 +85,15 @@ export default function PatentamientosGeneralSection({
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Patentamientos propios</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Patentamientos propios</p>
               <div className="mt-4 flex items-end gap-2">
-                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                <h3 className="text-3xl font-semibold tracking-tight text-muted-foreground">
                   {formatInteger(data.summary.ownPatentamientos)}
                 </h3>
               </div>
-              <p className="mt-2 text-sm text-slate-500">{ownUnitsDescription}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{ownUnitsDescription}</p>
             </div>
-            <div className="rounded-2xl bg-sky-50 p-3 text-sky-700">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <TrendingUp size={20} />
             </div>
           </div>
@@ -131,17 +102,17 @@ export default function PatentamientosGeneralSection({
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Patentamientos Toyota</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Patentamientos Toyota</p>
               <div className="mt-4 flex flex-wrap items-end gap-2">
-                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                <h3 className="text-3xl font-semibold tracking-tight text-muted-foreground">
                   {formatInteger(data.summary.toyotaPatentamientos)}
                 </h3>
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Total Toyota acumulado del anio seleccionado en Zona NIC.
               </p>
             </div>
-            <div className="rounded-2xl bg-red-50 p-3 text-red-600">
+            <div className="rounded-lg bg-destructive/10 p-3 text-destructive">
               <TrendingUp size={20} />
             </div>
           </div>
@@ -150,17 +121,17 @@ export default function PatentamientosGeneralSection({
         <DashboardCard className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Cobertura Toyota</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Cobertura Toyota</p>
               <div className="mt-4 flex flex-wrap items-end gap-2">
-                <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+                <h3 className="text-3xl font-semibold tracking-tight text-muted-foreground">
                   {formatPercentage(data.summary.marketCoverage)}
                 </h3>
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {`${formatInteger(data.summary.ownPatentamientos)} propios sobre ${formatInteger(data.summary.toyotaPatentamientos)} patentamientos Toyota.`}
               </p>
             </div>
-            <div className="rounded-2xl bg-amber-50 p-3 text-amber-600">
+            <div className="rounded-lg bg-secondary p-3 text-primary">
               <Trophy size={20} />
             </div>
           </div>
@@ -169,10 +140,10 @@ export default function PatentamientosGeneralSection({
 
       <section className="grid grid-cols-1 gap-4">
         <DashboardCard className="overflow-hidden">
-          <div className="border-b border-slate-200 px-5 py-4">
+          <div className="border-b border-border px-5 py-4">
             <div>
-              <h3 className="text-lg font-semibold tracking-tight text-slate-950">Tendencia de patentamientos</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-semibold tracking-tight text-muted-foreground">Tendencia de patentamientos</h3>
+              <p className="text-sm text-muted-foreground">
                 {selectedMonthLabel && selectedMonthLabel !== "Todos"
                   ? `Inscripciones por dia de ${selectedMonthLabel} en Zona NIC.`
                   : "Evolucion mensual de patentamientos de Zona NIC."}
@@ -181,63 +152,12 @@ export default function PatentamientosGeneralSection({
           </div>
 
           <div className="px-5 py-6">
-            <div className="rounded-[24px] bg-[radial-gradient(circle_at_top,_rgba(21,170,154,0.1),_transparent_50%),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)] p-4">
-              <div className="h-72 rounded-[18px] bg-white/60 p-2">
+            <div className="rounded-[24px] bg-secondary p-4">
+              <div className="h-72 rounded-[18px] bg-card/60 p-2">
                 {hasTrend ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={data.trend} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
-                      <CartesianGrid stroke="#dbeafe" strokeDasharray="3 3" />
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#475569" }} />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        tickFormatter={(value) => formatInteger(Number(value))}
-                      />
-                      <Tooltip content={<PatentamientosTrendTooltip />} />
-                      <ReferenceLine
-                        y={averageTrendValue}
-                        stroke="#0f766e"
-                        strokeDasharray="6 6"
-                        strokeWidth={2}
-                        ifOverflow="extendDomain"
-                        label={{
-                          value: `Promedio ${formatInteger(Math.round(averageTrendValue))}`,
-                          position: "insideTopRight",
-                          fill: "#0f766e",
-                          fontSize: 12,
-                        }}
-                      />
-                      <Bar
-                        dataKey="ownTotal"
-                        name="ownTotal"
-                        fill="#7dd3fc"
-                        stroke="#38bdf8"
-                        radius={[8, 8, 0, 0]}
-                        maxBarSize={32}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="toyotaTotal"
-                        name="toyotaTotal"
-                        stroke="#dc2626"
-                        strokeWidth={3}
-                        dot={{ r: 3, fill: "#dc2626", stroke: "#dc2626" }}
-                        activeDot={{ r: 5, fill: "#dc2626", stroke: "#dc2626" }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="total"
-                        name="total"
-                        stroke="#15aa9a"
-                        strokeWidth={3}
-                        dot={{ r: 4, fill: "#15aa9a", stroke: "#15aa9a" }}
-                        activeDot={{ r: 6, fill: "#15aa9a", stroke: "#15aa9a" }}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  <EChart option={trendOption} />
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white px-6 text-center text-sm text-slate-500">
+                  <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-card px-6 text-center text-sm text-muted-foreground">
                     {selectedMonthLabel && selectedMonthLabel !== "Todos"
                       ? `No hay informacion suficiente para graficar las inscripciones diarias de ${selectedMonthLabel}.`
                       : "No hay informacion suficiente para graficar la tendencia mensual de Zona NIC."}
@@ -251,10 +171,10 @@ export default function PatentamientosGeneralSection({
 
       <section className="grid grid-cols-1 gap-4">
         <DashboardCard className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
-              <h3 className="text-lg font-semibold tracking-tight text-slate-950">Top modelos</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-lg font-semibold tracking-tight text-muted-foreground">Top modelos</h3>
+              <p className="text-sm text-muted-foreground">
                 Ranking de modelos de Zona NIC ordenado de mayor a menor.
               </p>
             </div>
@@ -263,28 +183,28 @@ export default function PatentamientosGeneralSection({
           <div className="overflow-x-auto px-4 py-3">
             <table className="min-w-full text-left">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Rank</th>
-                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Marca</th>
-                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Modelo</th>
-                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Unidades</th>
-                  <th className="pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Share</th>
+                <tr className="border-b border-border">
+                  <th className="pb-2 text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Rank</th>
+                  <th className="pb-2 text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Marca</th>
+                  <th className="pb-2 text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Modelo</th>
+                  <th className="pb-2 text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Unidades</th>
+                  <th className="pb-2 text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Share</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {hasTopModels ? (
                   data.topModels.map((model) => (
-                    <tr key={`${model.rank}-${model.brand}-${model.model}`} className="transition hover:bg-slate-50">
-                      <td className="py-2.5 text-xs text-slate-500">{String(model.rank).padStart(2, "0")}</td>
-                      <td className="py-2.5 text-xs text-slate-700">{model.brand}</td>
-                      <td className="py-2.5 text-xs font-semibold text-slate-950">{model.model}</td>
-                      <td className="py-2.5 text-xs text-slate-700">{formatInteger(model.total)}</td>
-                      <td className="py-2.5 text-xs font-semibold text-[#128c80]">{formatPercentage(model.percentage)}</td>
+                    <tr key={`${model.rank}-${model.brand}-${model.model}`} className="transition hover:bg-muted">
+                      <td className="py-2.5 text-xs text-muted-foreground">{String(model.rank).padStart(2, "0")}</td>
+                      <td className="py-2.5 text-xs text-secondary-foreground">{model.brand}</td>
+                      <td className="py-2.5 text-xs font-semibold text-muted-foreground">{model.model}</td>
+                      <td className="py-2.5 text-xs text-secondary-foreground">{formatInteger(model.total)}</td>
+                      <td className="py-2.5 text-xs font-semibold text-primary">{formatPercentage(model.percentage)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
+                    <td colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
                       No hay modelos disponibles para el anio seleccionado.
                     </td>
                   </tr>
@@ -293,15 +213,15 @@ export default function PatentamientosGeneralSection({
             </table>
           </div>
 
-          <div className="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">
+          <div className="flex flex-col gap-2 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-muted-foreground">
               {topModelsPagination.total > 0
                 ? `Mostrando ${data.topModels.length} de ${formatInteger(topModelsPagination.total)} modelos.`
                 : "No hay modelos disponibles para paginar."}
             </p>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-slate-700">
+              <span className="text-xs font-semibold text-secondary-foreground">
                 Pagina {topModelsPagination.page} de {Math.max(topModelsPagination.totalPages, 1)}
               </span>
 
@@ -310,7 +230,7 @@ export default function PatentamientosGeneralSection({
                   type="button"
                   onClick={() => onTopModelsPageChange?.(topModelsPagination.page - 1)}
                   disabled={topModelsPagination.page <= 1}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-secondary-foreground transition hover:border-border hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowLeft size={16} />
                   Anterior
@@ -320,7 +240,7 @@ export default function PatentamientosGeneralSection({
                   type="button"
                   onClick={() => onTopModelsPageChange?.(topModelsPagination.page + 1)}
                   disabled={topModelsPagination.totalPages === 0 || topModelsPagination.page >= topModelsPagination.totalPages}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-secondary-foreground transition hover:border-border hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Siguiente
                   <ArrowRight size={16} />

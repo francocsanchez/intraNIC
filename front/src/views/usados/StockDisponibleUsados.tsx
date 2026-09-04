@@ -91,7 +91,7 @@ export default function StockDisponibleUsados() {
             <div className="mt-2 flex overflow-x-auto border-y border-border">
               {resumenMarcas.map((item) => (
                 <div key={item.marca} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0">
-                  <p className="truncate text-[10px] text-muted-foreground">{item.marca}</p>
+                  <p className="truncate text-primary text-muted-foreground">{item.marca}</p>
                   <p className="text-sm font-semibold text-foreground">{item.total}</p>
                 </div>
               ))}
@@ -109,7 +109,7 @@ export default function StockDisponibleUsados() {
         {marcasDisponibles.map((filtro) => {
           const activo = marcaActiva === filtro;
           return (
-            <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+            <button key={filtro} type="button" onClick={() => setMarcaActiva(filtro)} className={`h-9 rounded-md border text-xs font-medium transition-colors ${activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               {filtro}
             </button>
           );

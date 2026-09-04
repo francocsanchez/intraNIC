@@ -198,7 +198,7 @@ export default function UnidadesNegocioView() {
                 className="grid grid-cols-1 gap-2 border-t border-border pt-3 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,1fr)_140px_140px_auto]"
               >
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  <label className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Nombre
                   </label>
                   <input
@@ -213,7 +213,7 @@ export default function UnidadesNegocioView() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  <label className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Orden
                   </label>
                   <div className="flex gap-2">
@@ -237,7 +237,7 @@ export default function UnidadesNegocioView() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  <label className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
                     Estado
                   </label>
                   <label className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground">

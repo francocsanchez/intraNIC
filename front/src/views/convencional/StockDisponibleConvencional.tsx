@@ -221,7 +221,7 @@ export default function StockDisponibleConvencional() {
               onClick={() => setModeloActivo(filtro)}
               className={[
                 "h-9 min-w-28 flex-1 whitespace-nowrap rounded-md border text-xs font-medium transition-colors",
-                activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+                activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filtro}

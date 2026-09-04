@@ -114,7 +114,7 @@ function PreventaFormContent({
       </div>
 
       <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-3"><div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-4">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-4">
             Vendedor
             <select
               value={form.vendedor}
@@ -130,46 +130,46 @@ function PreventaFormContent({
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-4">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-4">
             Numero OP
             <input
               type="number"
               value={form.numero_op}
               onChange={(event) => setForm((current) => ({ ...current, numero_op: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
               placeholder="Opcional"
             />
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-4">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-4">
             Monto reserva
             <input
               type="number"
               min={0}
               value={form.monto_reserva}
               onChange={(event) => setForm((current) => ({ ...current, monto_reserva: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
               placeholder="Opcional"
             />
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-6">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-6">
             Cliente
             <input
               type="text"
               value={form.cliente}
               onChange={(event) => setForm((current) => ({ ...current, cliente: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
               placeholder="Nombre del cliente"
             />
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-3">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-3">
             Version
             <select
               value={form.version}
               onChange={(event) => setForm((current) => ({ ...current, version: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
             >
               <option value="">Seleccionar version</option>
               {versiones.map((version) => (
@@ -180,21 +180,21 @@ function PreventaFormContent({
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-3">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-3">
             Mes de asignacion
             <input
               type="month"
               value={form.mes_asigna}
               onChange={(event) => setForm((current) => ({ ...current, mes_asigna: event.target.value }))}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
             />
           </label>
 
           <div className="rounded-md border border-border bg-muted p-3 xl:col-span-12">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">Colores</h2>
-                <p className="mt-1 text-xs text-gray-500">Podes seleccionar varios colores posibles para una misma unidad.</p>
+                <h2 className="text-sm font-semibold text-foreground">Colores</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Podes seleccionar varios colores posibles para una misma unidad.</p>
               </div>
               <span className="rounded-md bg-background px-2 py-0.5 text-xs font-semibold text-foreground">
                 {form.colores.length} seleccionados
@@ -209,8 +209,8 @@ function PreventaFormContent({
                   <label
                     key={color._id}
                     className={[
-                      "flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition",
-                      checked ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
+                      "flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition",
+                      checked ? "border-border bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
                     ].join(" ")}
                   >
                     <input
@@ -233,13 +233,13 @@ function PreventaFormContent({
             </div>
           </div>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 xl:col-span-12">
+          <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-12">
             Observaciones
             <textarea
               value={form.observaciones}
               onChange={(event) => setForm((current) => ({ ...current, observaciones: event.target.value }))}
               rows={5}
-              className="rounded-2xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#15aa9a]"
+              className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
               placeholder="Contexto comercial, prioridad, preferencia de color, etc."
             />
           </label>
@@ -253,7 +253,7 @@ function PreventaFormContent({
             type="button"
             onClick={onClose}
             disabled={saveMutation.isPending}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancelar
           </button>
@@ -361,13 +361,13 @@ export function PreventaModal({
                   </div>
                 ) : firstError instanceof Error ? (
                   <div className="p-6">
-                    <h1 className="text-lg font-semibold text-gray-900">No se pudo cargar el formulario de preventa</h1>
-                    <p className="mt-2 text-sm text-red-600">{firstError.message}</p>
+                    <h1 className="text-lg font-semibold text-foreground">No se pudo cargar el formulario de preventa</h1>
+                    <p className="mt-2 text-sm text-destructive">{firstError.message}</p>
                   </div>
                 ) : isEditing && !preventa ? (
                   <div className="p-6">
-                    <h1 className="text-lg font-semibold text-gray-900">Preventa no encontrada</h1>
-                    <p className="mt-2 text-sm text-red-600">No fue posible cargar la preventa solicitada.</p>
+                    <h1 className="text-lg font-semibold text-foreground">Preventa no encontrada</h1>
+                    <p className="mt-2 text-sm text-destructive">No fue posible cargar la preventa solicitada.</p>
                   </div>
                 ) : (
                   <PreventaFormContent
