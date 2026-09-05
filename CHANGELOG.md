@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-05
+
+### Stock Belgrano y navegacion
+- Se compacto `GlobalNavbar` a la altura comun `min-h-14`, incluyendo la navegacion de Analisis de operaciones.
+- Se aplico una paleta suave solicitada a `/analisis/operaciones-preventa`: barras azules y linea negra para usados anualizados, barras rojas para credito y lineas diferenciadas para descuentos por modelo y sucursal.
+- Los cuatro graficos de operaciones preventa ahora resaltan la serie sobre la que se hace hover, atenuando las restantes sin afectar los demas graficos de la aplicacion.
+- El resaltado seguro al hover se extendio al wrapper comun de ECharts, por lo que todos los graficos del proyecto enfatizan la serie activa sin perder color ni desaparecer.
+- El wrapper ahora preserva el color base de cada serie durante `emphasis` y `blur`, corrigiendo la desaparicion de la barra o linea activa al hacer hover.
+- Se compactaron los resumenes de `/analisis/operaciones-preventa`: tarjetas, etiquetas y metricas reducen padding y escala tipografica para aumentar la densidad visual.
+- Usados anualizados muestra el valor sobre cada barra; los importes de usados y credito ahora se presentan en pesos argentinos con separadores locales y dos decimales en ejes y tooltips.
+- Se alinearon los graficos de `/analisis/vendedor`: usados anualizados replica etiquetas, barras azules y linea negra; credito usa barras rojas, importes ARS y dos decimales; descuento promedio usa barra violeta y linea negra.
+- El tooltip y eje de Descuento promedio en Vendedor ahora muestran porcentajes con dos decimales y formato local.
+- Se compacto el resumen de Vendedor y el grafico anual ahora diferencia cada modelo con un color suave y muestra el total mensual sobre sus barras apiladas.
+- Se corrigio la serie transparente de total mensual para que la etiqueta acumulada sea visible sobre cada barra apilada.
+- Los graficos de descuento por modelo y sucursal de Operaciones Preventa ahora muestran porcentajes con dos decimales y formato local en tooltip y eje.
+- Se alineo `/stock/belgrano/disponible` al patron de stock disponible: hero y resumen integrados, filtros compactos, tabla densa y badges uniformes de marca y color.
+- Se unifico la marca de Inicio y todos los navbars mediante `AppBrand`: mismo bloque NIC, texto `IntraNIC`, dimensiones y posicion de inicio en cada modulo.
+- Se incorporaron botones de accion reutilizables para eliminar, editar y ejecutar acciones operativas; las acciones de tablas se normalizaron al mismo formato compacto y semantico en todos los modulos.
+
 ## 2026-09-04
 
 ### Rutas por seccion

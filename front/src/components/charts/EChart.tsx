@@ -28,6 +28,7 @@ registerECharts([
 type EChartProps = {
   option: EChartsCoreOption;
   className?: string;
+  enableHoverEmphasis?: boolean;
 };
 
 function resolveChartOption<T>(value: T): T {
@@ -48,11 +49,16 @@ function resolveChartOption<T>(value: T): T {
   return value;
 }
 
-function stabilizeInteractiveOption(option: EChartsCoreOption): EChartsCoreOption {
+function getOptionObject(value: unknown) {
+  return value && typeof value === "object" ? value as Record<string, unknown> : {};
+}
+
+function stabilizeInteractiveOption(option: EChartsCoreOption, enableHoverEmphasis: boolean): EChartsCoreOption {
   const resolved = resolveChartOption(option);
   const series = (Array.isArray(resolved.series)
     ? resolved.series
     : [resolved.series].filter(Boolean)) as Array<Record<string, unknown>>;
+  const palette = Array.isArray(resolved.color) ? resolved.color : [];
 
   return {
     ...resolved,
@@ -65,15 +71,42 @@ function stabilizeInteractiveOption(option: EChartsCoreOption): EChartsCoreOptio
       confine: true,
       transitionDuration: 0,
     },
-    series: series.map((item) => ({
-      ...item,
-      emphasis: { ...(item.emphasis as object | undefined), disabled: true },
-      blur: { ...(item.blur as object | undefined), opacity: 1 },
-    })),
+    series: series.map((item, index) => {
+      if (enableHoverEmphasis) {
+        const emphasis = getOptionObject(item.emphasis);
+        const blur = getOptionObject(item.blur);
+        const itemStyle = getOptionObject(item.itemStyle);
+        const lineStyle = getOptionObject(item.lineStyle);
+        const color = itemStyle.color ?? palette[index % palette.length];
+        const lineColor = lineStyle.color ?? color;
+
+        return {
+          ...item,
+          emphasis: {
+            ...emphasis,
+            disabled: false,
+            focus: emphasis.focus ?? "series",
+            itemStyle: { ...getOptionObject(emphasis.itemStyle), ...(color ? { color } : {}), opacity: 1 },
+            lineStyle: { ...getOptionObject(emphasis.lineStyle), ...(lineColor ? { color: lineColor } : {}), opacity: 1 },
+          },
+          blur: {
+            ...blur,
+            itemStyle: { ...getOptionObject(blur.itemStyle), ...(color ? { color } : {}), opacity: 0.35 },
+            lineStyle: { ...getOptionObject(blur.lineStyle), ...(lineColor ? { color: lineColor } : {}), opacity: 0.35 },
+          },
+        };
+      }
+
+      return {
+        ...item,
+        emphasis: { ...(item.emphasis as object | undefined), disabled: true },
+        blur: { ...(item.blur as object | undefined), opacity: 1 },
+      };
+    }),
   } as EChartsCoreOption;
 }
 
-export default function EChart({ option, className = "" }: EChartProps) {
+export default function EChart({ option, className = "", enableHoverEmphasis = true }: EChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
 
@@ -101,8 +134,8 @@ export default function EChart({ option, className = "" }: EChartProps) {
     if (!chart || chart.isDisposed()) return;
 
     // ECharts cannot reliably resolve CSS custom properties inside SVG attributes.
-    chart.setOption(stabilizeInteractiveOption(option), { notMerge: true });
-  }, [option]);
+    chart.setOption(stabilizeInteractiveOption(option, enableHoverEmphasis), { notMerge: true });
+  }, [enableHoverEmphasis, option]);
 
   return (
     <div ref={containerRef} className={`h-full w-full ${className}`.trim()} />

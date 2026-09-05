@@ -170,7 +170,7 @@ export default function PedidoMensualView() {
                           setVersion(item.version._id);
                           setCantidad(String(item.cantidad));
                         }}
-                        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary"
+                        className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Pencil size={14} />
                         Editar
@@ -178,7 +178,7 @@ export default function PedidoMensualView() {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(item._id)}
-                        className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-2 text-xs font-semibold text-destructive-foreground hover:opacity-90"
+                        className="inline-flex h-6 items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Trash2 size={14} />
                         Eliminar

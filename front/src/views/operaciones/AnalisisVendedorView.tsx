@@ -44,18 +44,74 @@ const TABLE_COLUMNS: VendorTableColumn[] = [
 ];
 
 type ChartPoint = Record<string, string | number | null | undefined>;
-type ChartSeries = { key: string; label: string; type?: "bar" | "line"; stack?: string; yAxisIndex?: number; markLine?: number };
+type ChartSeries = {
+  key: string;
+  label: string;
+  type?: "bar" | "line";
+  stack?: string;
+  yAxisIndex?: number;
+  markLine?: number;
+  color?: string;
+  showValueLabel?: boolean;
+  valueFormatter?: (value: number) => string;
+  showInLegend?: boolean;
+  hideVisual?: boolean;
+};
+
+const SOFT_BLUE = "oklch(0.69 0.1 245)";
+const SOFT_RED = "oklch(0.68 0.11 25)";
+const SOFT_VIOLET = "oklch(0.65 0.1 300)";
+const SOFT_MODEL_COLORS = [
+  "oklch(0.68 0.1 245)", "oklch(0.69 0.09 155)", "oklch(0.72 0.1 75)",
+  "oklch(0.66 0.09 320)", "oklch(0.64 0.09 25)", "oklch(0.68 0.08 205)",
+  "oklch(0.7 0.08 120)", "oklch(0.63 0.08 45)", "oklch(0.65 0.08 285)",
+] as const;
+
+const formatChartCurrency = (value: number) => new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value);
+
+const formatChartInteger = (value: number) => new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 0,
+}).format(value);
+
+const formatChartPercentage = (value: number) => `${new Intl.NumberFormat("es-AR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value)}%`;
 
 function AnalyticsChart({ data, xKey, series }: { data: ChartPoint[]; xKey: string; series: ChartSeries[] }) {
-  const option = useMemo<EChartsCoreOption>(() => ({
+  const option = useMemo<EChartsCoreOption>(() => {
+    const axisFormatter = (axisIndex: number) => series.find((item) => item.yAxisIndex === axisIndex)?.valueFormatter;
+    const primaryAxisFormatter = series.find((item) => item.yAxisIndex === undefined)?.valueFormatter;
+
+    return {
     color: getPresetChartColors(),
     grid: { top: 30, right: series.some((item) => item.yAxisIndex) ? 54 : 18, bottom: 40, left: 42 },
-    legend: { bottom: 0 },
+    legend: { bottom: 0, data: series.filter((item) => item.showInLegend !== false).map((item) => item.label) },
     tooltip: { trigger: "axis", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" } },
     xAxis: { type: "category", data: data.map((item) => String(item[xKey] ?? "")), axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 } },
-    yAxis: series.some((item) => item.yAxisIndex) ? [{ type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } }, { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { show: false } }] : { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
-    series: series.map((item) => ({ type: item.type ?? "bar", name: item.label, stack: item.stack, yAxisIndex: item.yAxisIndex, data: data.map((point) => Number(point[item.key] ?? 0)), smooth: item.type === "line", barMaxWidth: 30, symbolSize: 5, label: item.type === "bar" ? { show: true, position: "top", color: "var(--foreground)", fontSize: 10 } : undefined, markLine: item.markLine === undefined ? undefined : { symbol: "none", lineStyle: { type: "dashed", color: "var(--destructive)" }, data: [{ yAxis: item.markLine }] } })),
-  }), [data, series, xKey]);
+    yAxis: series.some((item) => item.yAxisIndex) ? [{ type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: primaryAxisFormatter }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } }, { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: axisFormatter(1) }, splitLine: { show: false } }] : { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: primaryAxisFormatter }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
+    series: series.map((item) => ({
+      type: item.type ?? "bar",
+      name: item.label,
+      stack: item.stack,
+      yAxisIndex: item.yAxisIndex,
+      data: data.map((point) => Number(point[item.key] ?? 0)),
+      smooth: item.type === "line",
+      barMaxWidth: 30,
+      symbolSize: item.hideVisual ? 1 : 5,
+      itemStyle: item.color ? { color: item.color } : undefined,
+      lineStyle: item.type === "line" && item.color ? { color: item.color, width: 2, opacity: item.hideVisual ? 0 : 1 } : undefined,
+      label: item.showValueLabel ? { show: true, position: "top", color: "var(--foreground)", fontSize: 10, formatter: ({ value }: { value: number }) => item.valueFormatter?.(value) ?? String(value) } : undefined,
+      tooltip: item.hideVisual ? { show: false } : item.valueFormatter ? { valueFormatter: item.valueFormatter } : undefined,
+      markLine: item.markLine === undefined ? undefined : { symbol: "none", lineStyle: { type: "dashed", color: "var(--destructive)" }, data: [{ yAxis: item.markLine }] },
+    })),
+    };
+  }, [data, series, xKey]);
   return <EChart option={option} />;
 }
 
@@ -67,8 +123,8 @@ const formatMoney = (value: number | null) => {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 };
 
@@ -316,11 +372,11 @@ export default function AnalisisVendedorView() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.73fr)]">
-        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-3 shadow-sm">
           <div className="flex flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">Modulo analitico</p>
-              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Analisis vendedor anual</h1>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Modulo analitico</p>
+              <h1 className="mt-1 text-base font-semibold tracking-tight text-foreground">Analisis vendedor anual</h1>
              
             </div>
 
@@ -337,39 +393,39 @@ export default function AnalisisVendedorView() {
                 Sin operaciones para {data.context.vendedorLabel} en {anio}.
               </div>
             ) : (
-              <AnalyticsChart data={data.chartData as ChartPoint[]} xKey="label" series={data.context.modelos.map((modelo) => ({ key: modelo, label: modelo, stack: "modelos", markLine: 12 }))} />
+              <AnalyticsChart data={data.chartData as ChartPoint[]} xKey="label" series={[...data.context.modelos.map((modelo, index) => ({ key: modelo, label: modelo, stack: "modelos", markLine: 12, color: SOFT_MODEL_COLORS[index % SOFT_MODEL_COLORS.length] })), { key: "total", label: "Total mensual", type: "line", color: "transparent", showValueLabel: true, valueFormatter: formatChartInteger, showInLegend: false, hideVisual: true }]} />
             )}
           </div>
         </article>
 
-        <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-3 shadow-sm">
           <div className="flex h-full flex-col">
-            <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">Resumen</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Indicadores</h2>
-            <div className="mt-4 grid flex-1 grid-cols-2 gap-3 content-start">
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant operaciones</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{data?.summary.totalOperaciones ?? 0}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Resumen</p>
+            <h2 className="mt-1 text-base font-semibold tracking-tight text-foreground">Indicadores</h2>
+            <div className="mt-2 grid flex-1 grid-cols-2 gap-2 content-start">
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant operaciones</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{data?.summary.totalOperaciones ?? 0}</p>
               </div>
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant con credito</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{data?.summary.cantidadOperacionesCredito ?? 0}</p>
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant con credito</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{data?.summary.cantidadOperacionesCredito ?? 0}</p>
               </div>
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant con usado</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{data?.summary.cantidadOperacionesUsado ?? 0}</p>
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant con usado</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{data?.summary.cantidadOperacionesUsado ?? 0}</p>
               </div>
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Toma</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeToma ?? null)}</p>
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Toma</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeToma ?? null)}</p>
               </div>
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Vendedor</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeVendedor ?? null)}</p>
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Vendedor</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeVendedor ?? null)}</p>
               </div>
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Vendedor sucursal</p>
-                <p className="mt-1 text-xl font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeVendedorSucursal ?? null)}</p>
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Vendedor sucursal</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{formatPercentageCompact(data?.summary.porcentajeVendedorSucursal ?? null)}</p>
               </div>
             </div>
           </div>
@@ -387,7 +443,7 @@ export default function AnalisisVendedorView() {
             {isLoading || !data ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={usadosChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadUsados", label: "Cantidad usados" }, { key: "promedioValorUsado", label: "Promedio valor usado", type: "line", yAxisIndex: 1 }]} />
+              <AnalyticsChart data={usadosChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadUsados", label: "Cantidad usados", color: SOFT_BLUE, showValueLabel: true, valueFormatter: formatChartInteger }, { key: "promedioValorUsado", label: "Promedio valor usado", type: "line", yAxisIndex: 1, color: "var(--foreground)", valueFormatter: formatChartCurrency }]} />
             )}
           </div>
         </article>
@@ -402,7 +458,7 @@ export default function AnalisisVendedorView() {
             {isLoading || !data ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito" }]} />
+              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito", color: SOFT_RED, valueFormatter: formatChartCurrency }]} />
             )}
           </div>
         </article>
@@ -417,7 +473,7 @@ export default function AnalisisVendedorView() {
             {isLoading || !data ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={descuentoChartData as ChartPoint[]} xKey="mes" series={[{ key: "descuentoPromedio", label: "Descuento promedio", markLine: 8 }, { key: "descuentoPromedioHilux", label: "Descuento promedio Hilux", type: "line" }]} />
+              <AnalyticsChart data={descuentoChartData as ChartPoint[]} xKey="mes" series={[{ key: "descuentoPromedio", label: "Descuento promedio", markLine: 8, color: SOFT_VIOLET, valueFormatter: formatChartPercentage }, { key: "descuentoPromedioHilux", label: "Descuento promedio Hilux", type: "line", color: "var(--foreground)", valueFormatter: formatChartPercentage }]} />
             )}
           </div>
         </article>

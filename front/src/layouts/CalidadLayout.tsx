@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import AppBrand from "@/components/AppBrand";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { ChevronLeft, PhoneCall } from "lucide-react";
@@ -26,17 +27,12 @@ export default function CalidadLayout() {
       <header className="border-b border-border bg-card">
         <div className="flex w-full flex-col gap-3 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <Link
-              to={paths.home}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
-            >
+            <AppBrand />
+            <Link to={paths.home} className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary">
               <ChevronLeft size={16} />
               Volver
             </Link>
-
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              Calidad
-            </h1>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Calidad</h1>
           </div>
 
           <nav className="flex flex-wrap gap-2">

@@ -1,5 +1,6 @@
 import type { PendienteTurnar } from "@/types/index";
 import { textToColor } from "@/helpers/colores";
+import { ActionButton, DeleteActionButton, EditActionButton } from "@/components/ui/action-button";
 import { CalendarPlus, CarFront, Package, Pencil, ShieldAlert, Trash2, AlertTriangle } from "lucide-react";
 
 type PendientesTurnarTableProps = {
@@ -128,30 +129,24 @@ export default function PendientesTurnarTable({
                     {canManage ? (
                       <td className="px-3 py-3 align-middle">
                         <div className="flex items-center justify-center gap-2 whitespace-nowrap text-primary">
-                          <button
-                            type="button"
+                          <ActionButton
                             onClick={() => onSchedule(item)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-secondary px-3.5 py-2 text-primary font-semibold text-secondary-foreground transition hover:bg-secondary"
                           >
                             <CalendarPlus size={13} />
                             Turnar
-                          </button>
-                          <button
-                            type="button"
+                          </ActionButton>
+                          <EditActionButton
                             onClick={() => onEdit(item)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-primary font-semibold text-muted-foreground transition hover:bg-muted"
                           >
                             <Pencil size={13} />
                             Editar
-                          </button>
-                          <button
-                            type="button"
+                          </EditActionButton>
+                          <DeleteActionButton
                             onClick={() => onDelete(item)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-3.5 py-2 text-primary font-semibold text-destructive transition hover:bg-destructive/10"
                           >
                             <Trash2 size={13} />
                             Eliminar
-                          </button>
+                          </DeleteActionButton>
                         </div>
                       </td>
                     ) : null}

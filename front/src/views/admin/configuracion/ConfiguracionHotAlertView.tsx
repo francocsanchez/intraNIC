@@ -135,7 +135,7 @@ export default function ConfiguracionHotAlertView() {
             <button
               type="button"
               onClick={() => setEmails((current) => [...current, ""])}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground hover:bg-secondary"
+              className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Plus size={14} />
               Agregar email

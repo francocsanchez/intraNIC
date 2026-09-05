@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import AppBrand from "@/components/AppBrand";
 import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -254,12 +255,7 @@ export default function Inicio() {
     <div className="font-preset flex min-h-svh flex-col bg-muted text-foreground">
       <header className="border-b border-border bg-card">
         <div className="flex h-14 items-center justify-between px-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-              NIC
-            </div>
-            <h1 className="text-base font-semibold tracking-tight">IntraNIC</h1>
-          </div>
+          <AppBrand />
 
           <button
             type="button"

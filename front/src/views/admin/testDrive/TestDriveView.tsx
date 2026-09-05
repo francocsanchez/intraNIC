@@ -604,7 +604,7 @@ export default function TestDriveView() {
                       <button
                         type="button"
                         onClick={() => handleEdit(item)}
-                        className="inline-flex h-8 items-center justify-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
+                        className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Pencil size={14} />
                         Editar

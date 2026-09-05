@@ -59,7 +59,7 @@ export default function TemarioFieldArray({
               type="button"
               onClick={() => removeTema(index)}
               disabled={disabled || fields.length === 1}
-              className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-6 items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={13} />
               Quitar

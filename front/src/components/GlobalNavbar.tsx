@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
+import AppBrand from "./AppBrand";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDown, LogOut, Menu as MenuIcon, UserRound, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -31,19 +32,8 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
 
   return (
     <header className={preset ? "border-b border-border bg-card" : "border-b border-border bg-card backdrop-blur-sm"}>
-      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:px-4">
-        <Link
-          to={paths.home}
-          onClick={() => setMobileMenuOpen(false)}
-          className="flex min-w-0 items-center gap-3 shrink-0"
-        >
-          <div className={preset ? "flex h-8 w-8 items-center justify-center rounded-md bg-primary font-bold text-primary-foreground" : "flex h-8 w-8 items-center justify-center bg-primary font-bold text-primary-foreground"}>
-            NIC
-          </div>
-          <span className={`truncate text-base font-semibold uppercase tracking-tight ${preset ? "text-foreground" : "text-foreground"} sm:text-lg`}>
-            IntraNIC
-          </span>
-        </Link>
+      <div className="flex min-h-14 w-full items-center justify-between gap-3 px-3">
+        <AppBrand onClick={() => setMobileMenuOpen(false)} />
 
         <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
           {centerContent ? <nav className={`flex items-center gap-2 text-sm font-medium ${preset ? "text-muted-foreground" : "text-muted-foreground"}`}>{centerContent}</nav> : null}

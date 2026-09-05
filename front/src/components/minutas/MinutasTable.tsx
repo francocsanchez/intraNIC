@@ -1,4 +1,5 @@
 import MinutaPdfButton from "@/components/minutas/MinutaPdfButton";
+import { ActionButton, DeleteActionButton, EditActionButton } from "@/components/ui/action-button";
 import type { Minuta } from "@/types/index";
 import { Mail, Pencil, Trash2 } from "lucide-react";
 
@@ -73,36 +74,30 @@ export default function MinutasTable({
                       onClick={() => onDownloadPdf(item)}
                     />
                     {canEdit(item) ? (
-                      <button
-                        type="button"
+                      <EditActionButton
                         onClick={() => onEdit(item)}
-                        className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
                       >
                         <Pencil size={14} />
                         Editar
-                      </button>
+                      </EditActionButton>
                     ) : null}
                     {canSend(item) ? (
-                      <button
-                        type="button"
+                      <ActionButton
                         onClick={() => onSend(item)}
                         disabled={sendingId === item._id}
-                        className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Mail size={14} />
                         {sendingId === item._id ? "Enviando..." : "Enviar"}
-                      </button>
+                      </ActionButton>
                     ) : null}
                     {canDelete(item) ? (
-                      <button
-                        type="button"
+                      <DeleteActionButton
                         onClick={() => onDelete(item)}
                         disabled={deletingId === item._id}
-                        className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <Trash2 size={14} />
                         {deletingId === item._id ? "Eliminando..." : "Eliminar"}
-                      </button>
+                      </DeleteActionButton>
                     ) : null}
                   </div>
                 </td>

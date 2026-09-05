@@ -76,17 +76,80 @@ const monthShortNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago",
 const IVA_RATE = 0.21;
 
 type ChartPoint = Record<string, string | number | null | undefined>;
-type ChartSeries = { key: string; label: string; type?: "bar" | "line"; yAxisIndex?: number };
+type ChartSeries = {
+  key: string;
+  label: string;
+  type?: "bar" | "line";
+  yAxisIndex?: number;
+  color?: string;
+  showValueLabel?: boolean;
+  valueFormatter?: (value: number) => string;
+};
+
+// Soft chart colors were requested for the preventa operations analysis only.
+const SOFT_BLUE = "oklch(0.69 0.1 245)";
+const SOFT_RED = "oklch(0.68 0.11 25)";
+const SOFT_LINE_COLORS = [
+  "oklch(0.66 0.1 245)",
+  "oklch(0.68 0.09 155)",
+  "oklch(0.72 0.1 75)",
+  "oklch(0.66 0.09 320)",
+  "oklch(0.68 0.08 205)",
+  "oklch(0.7 0.08 120)",
+  "oklch(0.62 0.08 35)",
+] as const;
+
+const formatChartCurrency = (value: number) => new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value);
+
+const formatChartInteger = (value: number) => new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 0,
+}).format(value);
+
+const formatChartPercentage = (value: number) => `${new Intl.NumberFormat("es-AR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value)}%`;
 
 function AnalyticsChart({ data, xKey, series }: { data: ChartPoint[]; xKey: string; series: ChartSeries[] }) {
-  const option = useMemo<EChartsCoreOption>(() => ({
+  const option = useMemo<EChartsCoreOption>(() => {
+    const axisFormatter = (axisIndex: number) => series.find((item) => item.yAxisIndex === axisIndex)?.valueFormatter;
+    const primaryAxisFormatter = series.find((item) => item.yAxisIndex === undefined)?.valueFormatter;
+
+    return {
     color: getPresetChartColors(), grid: { top: 30, right: series.some((item) => item.yAxisIndex) ? 54 : 18, bottom: 40, left: 42 }, legend: { bottom: 0 },
     tooltip: { trigger: "axis", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" } },
     xAxis: { type: "category", data: data.map((item) => String(item[xKey] ?? "")), axisTick: { show: false }, axisLabel: { color: "var(--muted-foreground)", fontSize: 11 } },
-    yAxis: series.some((item) => item.yAxisIndex) ? [{ type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } }, { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { show: false } }] : { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11 }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
-    series: series.map((item) => ({ type: item.type ?? "bar", name: item.label, yAxisIndex: item.yAxisIndex, data: data.map((point) => Number(point[item.key] ?? 0)), smooth: item.type === "line", barMaxWidth: 30, symbolSize: 5 })),
-  }), [data, series, xKey]);
-  return <EChart option={option} />;
+    yAxis: series.some((item) => item.yAxisIndex) ? [{ type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: primaryAxisFormatter }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } }, { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: axisFormatter(1) }, splitLine: { show: false } }] : { type: "value", axisLabel: { color: "var(--muted-foreground)", fontSize: 11, formatter: primaryAxisFormatter }, splitLine: { lineStyle: { color: "var(--border)", type: "dashed" } } },
+    series: series.map((item) => ({
+      type: item.type ?? "bar",
+      name: item.label,
+      yAxisIndex: item.yAxisIndex,
+      data: data.map((point) => Number(point[item.key] ?? 0)),
+      smooth: item.type === "line",
+      barMaxWidth: 30,
+      symbolSize: 5,
+      itemStyle: item.color ? { color: item.color } : undefined,
+      lineStyle: item.type === "line" && item.color ? { color: item.color, width: 2 } : undefined,
+      label: item.showValueLabel ? { show: true, position: "top", color: "var(--foreground)", fontSize: 11, formatter: ({ value }: { value: number }) => item.valueFormatter?.(value) ?? String(value) } : undefined,
+      tooltip: item.valueFormatter ? { valueFormatter: item.valueFormatter } : undefined,
+      emphasis: {
+        focus: "series",
+        itemStyle: { opacity: 1 },
+        lineStyle: { opacity: 1, width: item.type === "line" ? 3 : undefined },
+      },
+      blur: {
+        itemStyle: { opacity: 0.2 },
+        lineStyle: { opacity: 0.2 },
+      },
+    })),
+    };
+  }, [data, series, xKey]);
+  return <EChart option={option} enableHoverEmphasis />;
 }
 
 const formatDate = (value: string | null) => {
@@ -703,36 +766,36 @@ export default function AnalisisOperacionesView() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.9fr)]">
-        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
-          <div className="flex h-full flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.9fr)]">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-3 shadow-sm">
+          <div className="flex h-full flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
             <div>
              
-              <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Analisis Operaciones</h1>
+              <h1 className="text-base font-semibold tracking-tight text-foreground">Analisis Operaciones</h1>
          
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <article className="rounded-lg bg-secondary px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
-                    <Rows3 size={14} />
+              <article className="rounded-md bg-secondary px-2 py-1.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="rounded-md bg-card p-1.5 text-primary shadow-sm">
+                    <Rows3 size={13} />
                   </div>
                   <div>
-                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Registros</p>
-                    <p className="text-lg font-bold text-foreground">{data.data.length}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Registros</p>
+                    <p className="text-base font-bold text-foreground">{data.data.length}</p>
                   </div>
                 </div>
               </article>
 
-              <article className="rounded-lg bg-secondary px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-card p-2 text-primary shadow-sm">
-                    <CalendarRange size={14} />
+              <article className="rounded-md bg-secondary px-2 py-1.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="rounded-md bg-card p-1.5 text-primary shadow-sm">
+                    <CalendarRange size={13} />
                   </div>
                   <div>
-                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Periodo</p>
-                    <p className="text-sm font-bold text-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Periodo</p>
+                    <p className="text-xs font-bold text-foreground">
                       {currentMonthLabel} {anio}
                     </p>
                   </div>
@@ -742,17 +805,17 @@ export default function AnalisisOperacionesView() {
           </div>
         </article>
 
-        <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+        <article className="min-w-0 rounded-lg border border-border bg-card p-3 shadow-sm">
           <div className="flex h-full flex-col">
          
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">PROM DESC.</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">PROM DESC.</h2>
         
 
-            <div className="mt-4 grid flex-1 grid-cols-1 gap-3 xl:grid-cols-2">
+            <div className="mt-2 grid flex-1 grid-cols-1 gap-2 xl:grid-cols-2">
               {promedioDescuentoPorModelo.length || promedioDescuentoPorSucursal.length ? (
                 <>
-                  <div className="rounded-lg bg-secondary px-3 py-2.5">
-                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Modelos</p>
+                  <div className="rounded-md bg-secondary px-2 py-1.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Modelos</p>
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground">
                       {promedioDescuentoPorModelo.map((item) => (
                         <div key={item.nombre} className="inline-flex items-center gap-1.5">
@@ -763,8 +826,8 @@ export default function AnalisisOperacionesView() {
                     </div>
                   </div>
 
-                  <div className="rounded-lg bg-secondary px-3 py-2.5">
-                    <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Sucursales</p>
+                  <div className="rounded-md bg-secondary px-2 py-1.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Sucursales</p>
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground">
                       {promedioDescuentoPorSucursal.map((item) => (
                         <div key={item.nombre} className="inline-flex items-center gap-1.5">
@@ -785,37 +848,37 @@ export default function AnalisisOperacionesView() {
         </article>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+        <article className="rounded-lg border border-border bg-card p-3 shadow-sm">
           <div className="flex h-full flex-col">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Financiacion</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Financiacion</h2>
             
 
-            <div className="mt-4 grid flex-1 grid-cols-2 gap-3 xl:grid-cols-4">
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con credito</p>
-                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
+            <div className="mt-2 grid flex-1 grid-cols-2 gap-2 xl:grid-cols-4">
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con credito</p>
+                <p className="mt-1 text-lg font-bold text-foreground">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesCredito ?? 0)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con usado</p>
-                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Cant. con usado</p>
+                <p className="mt-1 text-lg font-bold text-foreground">
                   {isResumenFinanciacionLoading ? "..." : (resumenFinanciacionData?.data.cantidadOperacionesUsado ?? 0)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Toma</p>
-                <p className="mt-1 text-xl font-bold text-foreground xl:text-2xl">
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">% Toma</p>
+                <p className="mt-1 text-lg font-bold text-foreground">
                   {isResumenFinanciacionLoading ? "..." : formatPercentageCompact(porcentajeToma)}
                 </p>
               </div>
 
-              <div className="rounded-lg bg-secondary px-3 py-3">
-                <p className="text-primary font-semibold uppercase tracking-[0.12em] text-muted-foreground">Promedio valor de usado</p>
-                <p className="mt-1 text-sm font-bold text-foreground xl:text-lg">
+              <div className="rounded-md bg-secondary px-2 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Promedio valor de usado</p>
+                <p className="mt-1 text-sm font-bold text-foreground">
                   {isResumenFinanciacionLoading
                     ? "..."
                     : formatMoney(resumenFinanciacionData?.data.promedioValorUsado ?? null)}
@@ -825,19 +888,19 @@ export default function AnalisisOperacionesView() {
           </div>
         </article>
 
-        <article className="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <article className="rounded-lg border border-border bg-card p-3 shadow-sm">
           <div className="flex h-full flex-col">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">PROM CREDITO</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">PROM CREDITO</h2>
            
 
-            <div className="mt-4 flex flex-1 flex-wrap content-start gap-2">
+            <div className="mt-2 flex flex-1 flex-wrap content-start gap-1.5">
               {isResumenFinanciacionLoading ? (
                 <div className="h-24 w-full animate-pulse rounded-lg bg-muted" />
               ) : resumenFinanciacionData?.data.promedioCreditoPorModelo.length ? (
                 resumenFinanciacionData.data.promedioCreditoPorModelo.map((item) => (
                   <div
                     key={item.modelo}
-                    className="inline-flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-sm text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-2 py-1.5 text-xs text-foreground"
                   >
                     <span className="font-semibold uppercase text-muted-foreground">{item.modelo}</span>
                     <span className="font-bold text-primary">{formatMoney(item.promedioCredito)}</span>
@@ -864,7 +927,7 @@ export default function AnalisisOperacionesView() {
             {isUsadosMensualLoading ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={usadosChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadUsados", label: "Cantidad usados" }, { key: "promedioValorUsado", label: "Promedio valor usado", type: "line", yAxisIndex: 1 }]} />
+              <AnalyticsChart data={usadosChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadUsados", label: "Cantidad usados", color: SOFT_BLUE, showValueLabel: true, valueFormatter: formatChartInteger }, { key: "promedioValorUsado", label: "Promedio valor usado", type: "line", yAxisIndex: 1, color: "var(--foreground)", valueFormatter: formatChartCurrency }]} />
             )}
           </div>
         </article>
@@ -879,7 +942,7 @@ export default function AnalisisOperacionesView() {
             {isCreditoMensualLoading ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito" }]} />
+              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito", color: SOFT_RED, valueFormatter: formatChartCurrency }]} />
             )}
           </div>
         </article>
@@ -908,7 +971,7 @@ export default function AnalisisOperacionesView() {
                 Sin datos de descuento por modelo en {anio}.
               </div>
             ) : (
-              <AnalyticsChart data={chartDataModelos as ChartPoint[]} xKey="mes" series={chartModels.map((model) => ({ key: model, label: model, type: "line" as const }))} />
+              <AnalyticsChart data={chartDataModelos as ChartPoint[]} xKey="mes" series={chartModels.map((model, index) => ({ key: model, label: model, type: "line" as const, color: SOFT_LINE_COLORS[index % SOFT_LINE_COLORS.length], valueFormatter: formatChartPercentage }))} />
             )}
           </div>
         </article>
@@ -935,7 +998,7 @@ export default function AnalisisOperacionesView() {
                 Sin datos de descuento por sucursal en {anio}.
               </div>
             ) : (
-              <AnalyticsChart data={chartDataSucursales as ChartPoint[]} xKey="mes" series={chartSucursales.map((sucursal) => ({ key: sucursal, label: sucursal, type: "line" as const }))} />
+              <AnalyticsChart data={chartDataSucursales as ChartPoint[]} xKey="mes" series={chartSucursales.map((sucursal, index) => ({ key: sucursal, label: sucursal, type: "line" as const, color: SOFT_LINE_COLORS[index % SOFT_LINE_COLORS.length], valueFormatter: formatChartPercentage }))} />
             )}
           </div>
         </article>

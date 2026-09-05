@@ -860,7 +860,7 @@ export default function PedidoUnidadesView() {
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.interno)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10"
+                            className="inline-flex h-6 items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <Trash2 size={14} strokeWidth={1.8} />
                             Quitar

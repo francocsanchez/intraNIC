@@ -321,7 +321,7 @@ export default function MinutaGroupManagerModal({
                                   setEditingGroup(group);
                                   setIsCreating(false);
                                 }}
-                                className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground hover:bg-secondary"
+                                className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <Pencil size={14} />
                                 Editar
@@ -330,7 +330,7 @@ export default function MinutaGroupManagerModal({
                                 type="button"
                                 onClick={() => handleDelete(group)}
                                 disabled={deleteMutation.isPending}
-                                className="inline-flex h-8 items-center gap-2 rounded-md border border-destructive/30 bg-background px-2 text-xs font-semibold text-destructive hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex h-6 items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <Trash2 size={14} />
                                 Eliminar
