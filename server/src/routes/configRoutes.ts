@@ -2,9 +2,16 @@ import { Router } from "express";
 import { ConfigController } from "../controllers/ConfigController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
+import { ColorUnidadController } from "../controllers/ColorUnidadController";
+import { requireSuperAdmin } from "../middleware/requireSuperAdmin";
 
 const router = Router();
 router.use(authenticate);
+
+router.get("/colores-unidades/badges", ColorUnidadController.badges);
+router.get("/colores-unidades", requireSuperAdmin, ColorUnidadController.list);
+router.post("/colores-unidades", requireSuperAdmin, ColorUnidadController.save);
+router.put("/colores-unidades/:id", requireSuperAdmin, ColorUnidadController.save);
 
 /**
  *
