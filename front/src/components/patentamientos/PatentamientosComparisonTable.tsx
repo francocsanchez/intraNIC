@@ -30,22 +30,26 @@ const normalizeText = (value: string) =>
 
 const isToyotaRow = (label: string) => normalizeText(label).startsWith("TOYOTA");
 
+// Escala de negocio solicitada: menor participacion en rojo suave y mayor en verde suave.
+const SOFT_HEATMAP_RED_HUE = 8;
+const SOFT_HEATMAP_GREEN_HUE = 142;
+const SOFT_HEATMAP_SATURATION = 58;
+const SOFT_HEATMAP_LIGHTNESS = 86;
+
 const getHeatmapStyle = (value: number, min: number, max: number) => {
   if (max <= min) {
     return {
-      backgroundColor: "rgb(254, 243, 199)",
-      color: "oklch(0.145 0 0)",
+      backgroundColor: "var(--secondary)",
+      color: "var(--secondary-foreground)",
     };
   }
 
   const ratio = (value - min) / (max - min);
-  const hue = Math.round(ratio * 120);
-  const saturation = 75;
-  const lightness = 58 - ratio * 16;
+  const hue = SOFT_HEATMAP_RED_HUE + ratio * (SOFT_HEATMAP_GREEN_HUE - SOFT_HEATMAP_RED_HUE);
 
   return {
-    backgroundColor: `hsl(${hue} ${saturation}% ${lightness}%)`,
-    color: ratio > 0.58 ? "oklch(1 0 0)" : "oklch(0.145 0 0)",
+    backgroundColor: `hsl(${hue} ${SOFT_HEATMAP_SATURATION}% ${SOFT_HEATMAP_LIGHTNESS}%)`,
+    color: "var(--foreground)",
   };
 };
 

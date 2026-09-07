@@ -10,10 +10,9 @@ import Loading from "./Loading";
 type GlobalNavbarProps = {
   centerContent?: ReactNode;
   rightContent?: ReactNode;
-  preset?: boolean;
 };
 
-export default function GlobalNavbar({ centerContent, rightContent, preset = false }: GlobalNavbarProps) {
+export default function GlobalNavbar({ centerContent, rightContent }: GlobalNavbarProps) {
   const navigate = useNavigate();
   const { user, isLoading, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,30 +30,30 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
   };
 
   return (
-    <header className={preset ? "border-b border-border bg-card" : "border-b border-border bg-card backdrop-blur-sm"}>
+    <header className="border-b border-border bg-card">
       <div className="flex min-h-14 w-full items-center justify-between gap-3 px-3">
         <AppBrand onClick={() => setMobileMenuOpen(false)} />
 
         <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
-          {centerContent ? <nav className={`flex items-center gap-2 text-sm font-medium ${preset ? "text-muted-foreground" : "text-muted-foreground"}`}>{centerContent}</nav> : null}
+          {centerContent ? <nav className="flex items-center gap-2 text-sm font-medium text-muted-foreground">{centerContent}</nav> : null}
         </div>
 
         <div className="hidden items-center gap-3 shrink-0 md:flex">
           {rightContent}
 
           <Menu as="div" className="relative">
-            <MenuButton className={preset ? "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted" : "inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground transition hover:border-input hover:text-foreground"}>
+            <MenuButton className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted">
               <UserRound size={16} strokeWidth={1.75} />
               Mi perfil
               <ChevronDown size={15} strokeWidth={1.75} />
             </MenuButton>
 
-            <MenuItems anchor="bottom end" className={preset ? "mt-2 w-44 rounded-md border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none" : "mt-2 w-44 rounded-lg border border-border bg-card shadow-lg focus:outline-none"}>
+            <MenuItems anchor="bottom end" className="mt-2 w-44 rounded-md border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none">
               <MenuItem>
                 {({ focus }) => (
                   <Link
                     to={paths.miPerfil}
-                    className={`px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-muted text-foreground" : "text-muted-foreground")}`}
+                    className={`px-3 py-2 text-sm flex items-center gap-2 ${focus ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                   >
                     <UserRound size={16} strokeWidth={1.5} />
                     Mi perfil
@@ -67,7 +66,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className={`w-full px-3 py-2 text-sm flex items-center gap-2 ${preset ? (focus ? "bg-muted text-foreground" : "text-muted-foreground") : (focus ? "bg-muted text-foreground" : "text-muted-foreground")}`}
+                    className={`w-full px-3 py-2 text-sm flex items-center gap-2 ${focus ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                   >
                     <LogOut size={16} strokeWidth={1.5} />
                     Cerrar sesion
@@ -81,7 +80,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
         <button
           type="button"
           onClick={() => setMobileMenuOpen((current) => !current)}
-          className={preset ? "inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition hover:bg-muted md:hidden" : "inline-flex items-center justify-center rounded-lg border border-border bg-card p-2 text-muted-foreground transition hover:border-input hover:text-foreground md:hidden"}
+          className="inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-foreground transition hover:bg-muted md:hidden"
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
         >
@@ -90,7 +89,7 @@ export default function GlobalNavbar({ centerContent, rightContent, preset = fal
       </div>
 
       {mobileMenuOpen ? (
-        <div className={preset ? "border-t border-border bg-card md:hidden" : "border-t border-border bg-card md:hidden"}>
+        <div className="border-t border-border bg-card md:hidden">
           <div className="mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6">
             {centerContent ? (
               <nav

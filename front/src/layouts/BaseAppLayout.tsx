@@ -12,7 +12,6 @@ type BaseAppLayoutProps = {
   footerRight: ReactNode;
   mainClassName?: string;
   footerHeightClassName?: string;
-  presetNavigation?: boolean;
 };
 
 export default function BaseAppLayout({
@@ -22,7 +21,6 @@ export default function BaseAppLayout({
   footerRight,
   mainClassName = "px-2 py-3",
   footerHeightClassName = "h-12",
-  presetNavigation = true,
 }: BaseAppLayoutProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
 
@@ -34,12 +32,11 @@ export default function BaseAppLayout({
 
   return (
     <div
-      className={`min-h-screen flex flex-col overflow-x-hidden ${presetNavigation ? "font-preset bg-muted" : "bg-muted"}`}
+      className="font-preset min-h-screen flex flex-col overflow-x-hidden bg-muted"
     >
       <GlobalNavbar
         centerContent={centerContent}
         rightContent={rightContent}
-        preset={presetNavigation}
       />
 
       <main className="flex-1 overflow-x-hidden">

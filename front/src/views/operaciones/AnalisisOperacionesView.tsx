@@ -544,7 +544,7 @@ function FormaPagoModal({ detalle, errorMessage, numero, onClose, open, isLoadin
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-muted"
+                    className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                   >
                     Cerrar
                   </button>
@@ -669,7 +669,7 @@ export default function AnalisisOperacionesView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-[28px] border border-destructive/30 bg-card p-6 shadow-sm">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
           <div className="flex items-center gap-3 text-destructive">
             <AlertCircle size={18} />
             <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Analisis Operaciones</h1>
@@ -1063,7 +1063,7 @@ export default function AnalisisOperacionesView() {
                               <button
                                 type="button"
                                 onClick={() => setNumeroFormaPago(row.numero)}
-                                className="inline-flex rounded-full bg-primary px-3 py-1 text-primary font-semibold uppercase tracking-[0.12em] text-primary-foreground transition hover:bg-muted"
+                                className="inline-flex rounded-full bg-primary px-3 py-1 text-primary font-semibold uppercase tracking-[0.12em] text-primary-foreground transition hover:bg-primary/90"
                               >
                                 Ver
                               </button>

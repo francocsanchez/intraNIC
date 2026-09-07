@@ -165,7 +165,7 @@ export default function SaldoOperacionView() {
   if (isError || filtersQuery.isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-[28px] border border-destructive/30 bg-card p-6 shadow-sm">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
           <div className="flex items-center gap-3 text-destructive">
             <AlertCircle size={18} />
             <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Saldo de operacion</h1>

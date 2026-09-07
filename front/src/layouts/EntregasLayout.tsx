@@ -73,7 +73,6 @@ export default function EntregasLayout() {
         </>
       }
       mainClassName="px-2 py-3"
-      presetNavigation
     />
   );
 }

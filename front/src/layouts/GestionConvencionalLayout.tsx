@@ -108,7 +108,6 @@ export default function GestionConvencionalLayout() {
         </>
       }
       mainClassName="px-2 py-3"
-      presetNavigation
     />
   );
 }

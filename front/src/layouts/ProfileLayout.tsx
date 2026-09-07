@@ -17,7 +17,6 @@ export default function ProfileLayout() {
       footerRight="Desarrollado por Franco Sanchez"
       mainClassName="px-2 py-3"
       footerHeightClassName="h-12"
-      presetNavigation
     />
   );
 }

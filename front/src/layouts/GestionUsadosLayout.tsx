@@ -55,7 +55,6 @@ export default function GestionUsadosLayout() {
         </>
       }
       mainClassName="px-2 py-3"
-      presetNavigation
     />
   );
 }

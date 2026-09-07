@@ -121,7 +121,6 @@ export default function NavBarNic({ negocio }: NavBarProps) {
 
   return (
     <GlobalNavbar
-      preset
       centerContent={
         <>
           {navItems.map((item) => (

@@ -66,7 +66,6 @@ export default function AdminModuleLayout() {
         </>
       }
       mainClassName="px-2 py-3"
-      presetNavigation
     />
   );
 }

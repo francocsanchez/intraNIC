@@ -47,7 +47,6 @@ export default function NICBelgranoLayout() {
         </>
       }
       mainClassName="px-2 py-3"
-      presetNavigation
     />
   );
 }

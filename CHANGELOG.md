@@ -2,6 +2,19 @@
 
 ## 2026-09-07
 
+### Auditoria de preset
+- Se corrigio la navegacion de Stock Usados para usar explicitamente el preset comun.
+- Se normalizaron superficies, radios, espaciado y sombreado heredados en los paneles de Patentamientos y Analisis de operaciones, vendedor, saldo y resumen.
+- La escala de intensidad de la tabla comparativa de Patentamientos ahora usa tonos suaves y tokens semanticos, sin la paleta intensa heredada.
+- Se corrigieron todos los hovers primarios locales detectados para conservar `bg-primary/90` y el contraste del texto.
+- Se eliminaron los layouts no enrutados de Patentamientos, Transferencias y Stock Usados, junto con la variante de compatibilidad sin preset de `GlobalNavbar` y `BaseAppLayout`.
+
+### Patentamientos
+- La columna `%` de todas las tablas comparativas de Marcas, Hilux, SW4, C. Cross, Y. Cross, Yaris y Localidad ahora usa una escala relativa suave: menor participacion en rojo y mayor participacion en verde.
+- Se aumento moderadamente la intensidad de esa escala para hacer mas evidente el peso relativo de cada fila.
+- El treemap de `/analisis/patentamientos/dashboard/inscripcion-unidades` ahora ocupa toda el area disponible, sin padding interno.
+- Se compacto la tabla consolidada por dealer: tipografia, encabezado y celdas reducen su altura sin cambiar datos ni columnas.
+
 ### Stock Convencional
 - Se unifico la ubicacion del filtro de unidades en Disponible y Guardado con Reservado: ahora se muestra debajo del filtro de modelo y antes del detalle.
 - Se incorporaron colores suaves consistentes por modelo en Operaciones anualizadas y Distribucion por modelo de `/stock/convencional/mis-operaciones`.

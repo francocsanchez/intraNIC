@@ -263,7 +263,7 @@ export default function RegistroAsignacionesView() {
           <div className="flex flex-wrap gap-3">
             <Link
             to={paths.convencional.registroAsignacionesResumen}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <List size={16} strokeWidth={1.75} />
               Ver resumen
@@ -440,7 +440,7 @@ export default function RegistroAsignacionesView() {
                 type="button"
                 onClick={handleSave}
                 disabled={saveMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
               >
                 {editingId ? (
                   <Save size={16} strokeWidth={2} />

@@ -12,7 +12,7 @@ export default function OperacionesResumenTable({
   modelos,
 }: OperacionesResumenTableProps) {
   return (
-    <section className="rounded-[28px] border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">Resumen por vendedor y modelo</h2>

@@ -179,7 +179,7 @@ export default function OperacionesDashboardView() {
   if (isError) {
     return (
       <div className="w-full px-4 py-6">
-        <section className="rounded-[28px] border border-destructive/30 bg-card p-6 shadow-sm">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar operaciones</h1>
           <p className="mt-2 text-sm text-destructive">
             {error instanceof Error ? error.message : "No fue posible obtener la informacion del dashboard."}

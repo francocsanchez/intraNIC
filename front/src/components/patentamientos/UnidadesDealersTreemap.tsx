@@ -32,7 +32,7 @@ export default function UnidadesDealersTreemap({ year }: { year: number | null }
       },
       backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" },
     },
-    series: [{ type: "treemap", data, roam: false, breadcrumb: { show: false }, label: { show: true, color: "var(--foreground)", formatter: "{b}\n{c}", fontSize: 11 }, itemStyle: { borderColor: "var(--background)", borderWidth: 2, gapWidth: 2 } }],
+    series: [{ type: "treemap", data, roam: false, left: 0, top: 0, right: 0, bottom: 0, breadcrumb: { show: false }, label: { show: true, color: "var(--foreground)", formatter: "{b}\n{c}", fontSize: 11 }, itemStyle: { borderColor: "var(--background)", borderWidth: 2, gapWidth: 2 } }],
   }), [data, total]);
 
   return (
@@ -41,7 +41,7 @@ export default function UnidadesDealersTreemap({ year }: { year: number | null }
         <h2 className="text-base font-semibold text-foreground">Participacion por dealer</h2>
         <p className="text-xs text-muted-foreground">Peso relativo de cada concesionario sobre el total de unidades Toyota.</p>
       </div>
-      <div className="flex h-[300px] items-center justify-center p-3">
+      <div className="flex h-[300px] items-center justify-center">
         {treemapQuery.isLoading ? <Loading /> : data.length ? <EChart option={option} /> : <p className="text-center text-sm text-muted-foreground">No hay datos de unidades disponibles.</p>}
       </div>
     </section>

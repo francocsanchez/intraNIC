@@ -608,7 +608,7 @@ export default function PedidoUnidadesView() {
             <button
               type="button"
               onClick={() => setViewMode("registros")}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <List size={16} strokeWidth={1.75} />
               Ver registros de pedidos
@@ -713,7 +713,7 @@ export default function PedidoUnidadesView() {
                     type="button"
                     onClick={handleAddSelectedPrevias}
                     disabled={!selectedPrevias.length || !canAddMore}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
                   >
                     <Plus size={16} strokeWidth={2} />
                     Agregar seleccionadas
@@ -891,7 +891,7 @@ export default function PedidoUnidadesView() {
                   type="button"
                   onClick={handleSavePedido}
                   disabled={savePedidoMutation.isPending}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
                 >
                   <ClipboardList size={16} strokeWidth={2} />
                   Consolidar carga

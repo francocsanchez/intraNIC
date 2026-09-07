@@ -27,7 +27,7 @@ function DashboardCard({
   className?: string;
 }) {
   return (
-    <div className={`rounded-[24px] border border-border bg-card shadow-[0_8px_30px_rgba(15,23,42,0.06)] ${className}`}>
+    <div className={`rounded-lg border border-border bg-card shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -152,8 +152,8 @@ export default function PatentamientosGeneralSection({
           </div>
 
           <div className="px-5 py-6">
-            <div className="rounded-[24px] bg-secondary p-4">
-              <div className="h-72 rounded-[18px] bg-card/60 p-2">
+            <div className="rounded-lg border border-border bg-muted p-2">
+              <div className="h-72 rounded-md bg-card p-2">
                 {hasTrend ? (
                   <EChart option={trendOption} />
                 ) : (
