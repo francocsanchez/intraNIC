@@ -116,6 +116,7 @@ export default function ConfiguracionView() {
       catalogos: canManageSystemParameters
         ? [
             { label: "Colores", to: paths.admin.colores },
+            { label: "Colores de unidades", to: paths.admin.coloresUnidades },
             { label: "Versiones", to: paths.admin.versiones },
             ...(canManagePlanNegocio
               ? [{ label: "PN", to: paths.admin.planNegocio }]

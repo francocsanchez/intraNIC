@@ -28,6 +28,7 @@ const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
 const EditConfiguracionBelgranoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionBelgranoView"));
 const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/UnidadesNegocioView"));
+const ColoresUnidadesView = lazy(() => import("./views/admin/configuracion/ColoresUnidadesView"));
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
 const CrearUsuarioView = lazy(() => import("./views/admin/usuarios/CrearUsuarioView"));
@@ -350,6 +351,7 @@ export default function Router() {
             <Route element={<SuperAdminProtectedRoute />}>
               <Route element={<AdminLayout />}>
                 <Route path={paths.admin.colores} element={<ColoresView />} />
+                <Route path={paths.admin.coloresUnidades} element={<ColoresUnidadesView />} />
                 <Route path={paths.admin.versiones} element={<VersionesView />} />
                 <Route path={paths.convencional.preventasColores} element={<Navigate to={paths.admin.colores} replace />} />
                 <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.admin.colores} replace />} />

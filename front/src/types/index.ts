@@ -1460,6 +1460,7 @@ export type RegistroAsignacionResumenResponse = z.infer<
 export const catalogoSchema = z.object({
   _id: z.string(),
   nombre: z.string(),
+  hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   activo: z.boolean(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),

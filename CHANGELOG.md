@@ -2,6 +2,10 @@
 
 ## 2026-09-07
 
+### Colores de unidades
+- Se incorporó el catálogo independiente `Colores de unidades`, separado del catálogo de Preventas, para definir el color hexadecimal con selector y vista previa de cada unidad.
+- Los badges de color de Convencional, Usados, Belgrano, LIESS, análisis, operaciones y Entregas ahora resuelven esa configuración centralizada y preservan un estilo neutro cuando no hay asignación.
+
 ### Auditoria de preset
 - Se corrigio la navegacion de Stock Usados para usar explicitamente el preset comun.
 - Se normalizaron superficies, radios, espaciado y sombreado heredados en los paneles de Patentamientos y Analisis de operaciones, vendedor, saldo y resumen.

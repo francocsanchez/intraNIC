@@ -6,6 +6,7 @@ export async function authenticateUser(formData: UserLoginForm) {
   try {
     const { data } = await api.post("/usuarios/login", formData);
     localStorage.setItem("AUTH_TOKEN", data.token);
+    window.dispatchEvent(new Event("auth-token-changed"));
     return data;
   } catch (error) {
     if (isAxiosError(error)) {

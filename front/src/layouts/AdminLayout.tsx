@@ -30,6 +30,7 @@ export default function AdminLayout() {
         pathname === paths.admin.configuracionEnvioAgenda ||
         pathname === paths.admin.unidadesNegocio ||
         pathname === paths.admin.colores ||
+        pathname === paths.admin.coloresUnidades ||
         pathname === paths.admin.versiones ||
         pathname === paths.admin.planNegocio ||
         pathname === paths.admin.pedidoMensual ||

@@ -27,6 +27,7 @@ export const paths = {
     configuracionUsadosEditar: "/sistema/configuracion/usados/editar",
     configuracionBelgranoEditar: "/sistema/configuracion/belgrano/editar",
     colores: "/sistema/configuracion/colores",
+    coloresUnidades: "/sistema/configuracion/colores-unidades",
     versiones: "/sistema/configuracion/versiones",
     planNegocio: "/sistema/configuracion/plan-negocio",
     pedidoMensual: "/sistema/configuracion/pedido-mensual",
