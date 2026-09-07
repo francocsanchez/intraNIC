@@ -216,7 +216,7 @@ function DictionaryModal({
                       type="button"
                       onClick={() => mutation.mutate()}
                       disabled={mutation.isPending}
-                      className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {mutation.isPending ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear version"}
                     </button>
@@ -362,7 +362,7 @@ export default function AnalisisStockVersionesView() {
           <button
             type="button"
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-secondary"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             <Plus size={16} />
             Nueva unificacion

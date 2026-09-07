@@ -692,7 +692,7 @@ export default function PedidoUnidadesView() {
                 type="button"
                 onClick={handleAddInterno}
                 disabled={addInternoMutation.isPending || !canAddMore}
-                className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
+                className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
               >
                 <Plus size={16} strokeWidth={2} />
                 Agregar
@@ -1138,7 +1138,7 @@ export default function PedidoUnidadesView() {
                   <button
                     type="button"
                     onClick={handleBuscarRegistro}
-                    className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary"
+                    className="inline-flex items-center justify-center gap-2 self-end rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     Buscar
                   </button>

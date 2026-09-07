@@ -75,7 +75,7 @@ function ColorFormContent({ colorId, initialActivo, initialNombre, isEditing }: 
           <button
             type="button"
             onClick={() => mutation.mutate()}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-secondary"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             <Save size={16} />
             Guardar

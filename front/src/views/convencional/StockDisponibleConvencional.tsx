@@ -230,6 +230,24 @@ export default function StockDisponibleConvencional() {
         })}
       </section>
 
+      <section className="border-y border-border py-2">
+        <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
+          {ubicacionesDisponibles.map((ubicacion) => (
+            <button
+              key={ubicacion}
+              type="button"
+              onClick={() => setUbicacionActiva(ubicacion)}
+              className={[
+                "flex-1 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
+                ubicacionSeleccionada === ubicacion ? "bg-card text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              ].join(" ")}
+            >
+              {ubicacion}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
           <div>
@@ -237,24 +255,6 @@ export default function StockDisponibleConvencional() {
             <p className="mt-1 text-sm text-muted-foreground">
               {modeloActivo === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por modelo: ${modeloActivo}`}
             </p>
-          </div>
-
-          <div className="flex flex-col items-stretch gap-3 md:items-end">
-            <div className="inline-flex w-full rounded-md bg-muted p-1 md:w-auto">
-              {ubicacionesDisponibles.map((ubicacion) => (
-                <button
-                  key={ubicacion}
-                  type="button"
-                  onClick={() => setUbicacionActiva(ubicacion)}
-                  className={[
-                    "flex-1 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors md:flex-none",
-                    ubicacionSeleccionada === ubicacion ? "bg-card text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-                  ].join(" ")}
-                >
-                  {ubicacion}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 

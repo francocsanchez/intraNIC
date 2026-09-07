@@ -17,6 +17,7 @@ type PendFacDetail = {
 
 const MODEL_COLUMN_WIDTH = 144;
 const VERSION_COLUMN_WIDTH = 320;
+const formatTableCount = (value: number | null | undefined) => (value ? String(value) : "");
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob);
@@ -50,7 +51,7 @@ function PendFacDetailModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-secondary/40" />
+          <div className="fixed inset-0 bg-foreground/20" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -64,8 +65,8 @@ function PendFacDetailModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-7xl overflow-hidden rounded-lg border border-border bg-card shadow-xl">
-                <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+              <Dialog.Panel className="w-full max-w-7xl overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                <div className="flex items-start justify-between gap-4 border-b border-border px-3 py-2">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Detalle Pend Fac</p>
                     <Dialog.Title className="mt-1 text-xl font-semibold tracking-tight text-foreground">
@@ -83,7 +84,7 @@ function PendFacDetailModal({
                   </button>
                 </div>
 
-                <div className="overflow-x-auto p-5">
+                <div className="overflow-x-auto p-3">
                   <table className="min-w-full text-sm">
                     <thead className="bg-muted text-xs uppercase tracking-[0.16em] text-muted-foreground">
                       <tr>
@@ -154,8 +155,8 @@ export default function PendFacView() {
 
   if (isError) {
     return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-lg border border-destructive/30 bg-card p-6 shadow-sm">
+      <div className="font-preset w-full bg-muted px-2 py-3">
+        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Pend Fac</h1>
           <p className="mt-2 text-sm text-destructive">{error.message}</p>
         </section>
@@ -177,13 +178,13 @@ export default function PendFacView() {
   };
 
   return (
-    <div className="w-full max-w-none space-y-6 px-3 py-6">
-      <section className="rounded-lg border border-border bg-secondary p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div className="font-preset w-full max-w-none space-y-3 bg-muted px-2 py-3">
+      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col gap-3 px-3 py-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Gestion</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Pend Fac</h1>
-            <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Gestion convencional</p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Pendiente de Facturar</h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
               Matriz de operaciones pendientes de factura agrupadas por modelo, version y ubicacion.
             </p>
           </div>
@@ -193,40 +194,37 @@ export default function PendFacView() {
               type="button"
               onClick={() => exportMutation.mutate()}
               disabled={exportMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Download size={16} />
               {exportMutation.isPending ? "Exportando..." : "Exportar detalle a Excel"}
             </button>
+          </div>
+        </div>
 
-            <article className="rounded-[1.4rem] border border-border bg-card px-6 py-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Unidades</p>
-              <p className="mt-2 text-primary font-semibold leading-none tracking-tight text-primary">{totalUnidades}</p>
-            </article>
+        <div className="grid border-t border-border grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          {locations.map((location) => (
+            <div key={location.key} className="border-b border-border px-3 py-2 md:border-r xl:border-b-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{location.label}</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+                {totals?.countsByLocation[location.key] ?? 0}
+              </p>
+            </div>
+          ))}
+          <div className="border-b border-border px-3 py-2 md:border-r xl:border-b-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Unidades</p>
+            <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">{totalUnidades}</p>
           </div>
         </div>
       </section>
 
-      <section className="rounded-[1.4rem] border border-border bg-card px-6 py-4 shadow-sm">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-          {locations.map((location) => (
-            <article key={location.key} className="rounded-lg border border-border bg-muted px-4 py-3">
-              <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">{location.label}</p>
-              <p className="mt-2 text-2xl font-semibold tracking-tight text-primary">
-                {totals?.countsByLocation[location.key] ?? 0}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="border-b border-border px-6 py-4">
+        <div className="border-b border-border px-3 py-2">
           <h2 className="text-base font-semibold tracking-tight text-foreground">Pend Fac / ubicaciones</h2>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed text-primary">
+          <table className="w-full table-fixed text-sm text-foreground">
             <colgroup>
               <col style={{ width: `${MODEL_COLUMN_WIDTH}px` }} />
               <col style={{ width: `${VERSION_COLUMN_WIDTH}px` }} />
@@ -235,7 +233,7 @@ export default function PendFacView() {
               ))}
               <col style={{ width: "6rem" }} />
             </colgroup>
-            <thead className="bg-muted text-primary uppercase tracking-[0.16em] text-muted-foreground">
+            <thead className="bg-muted text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <tr>
                 <th
                   className="sticky left-0 z-20 bg-muted px-1 py-0.5 text-left"
@@ -264,7 +262,7 @@ export default function PendFacView() {
                     {rowIndex === 0 ? (
                       <td
                         rowSpan={group.rows.length}
-                        className="sticky left-0 z-10 border-r border-t-4 border-t-foreground border-border bg-card px-1 py-0.5 align-middle font-bold text-foreground"
+                        className="sticky left-0 z-10 border-r border-t border-border bg-card px-1 py-0.5 align-middle font-bold text-foreground"
                         style={{ width: MODEL_COLUMN_WIDTH }}
                       >
                         {group.modelo}
@@ -273,7 +271,7 @@ export default function PendFacView() {
                     <td
                       className={[
                         "sticky z-10 border-r border-border bg-card px-1 py-0.5 text-muted-foreground",
-                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
+                        rowIndex === 0 ? "border-t border-border" : "",
                       ].join(" ")}
                       style={{ left: MODEL_COLUMN_WIDTH, width: VERSION_COLUMN_WIDTH }}
                     >
@@ -288,7 +286,7 @@ export default function PendFacView() {
                           key={`${group.modelo}-${row.versionKey}-${location.key}`}
                           className={[
                             "px-1 py-0.5 text-center text-muted-foreground",
-                            rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
+                            rowIndex === 0 ? "border-t border-border" : "",
                           ].join(" ")}
                         >
                           {value > 0 ? (
@@ -302,20 +300,18 @@ export default function PendFacView() {
                                   units,
                                 })
                               }
-                              className="min-w-[2.25rem] rounded-lg bg-secondary px-2 py-1 font-semibold text-primary transition hover:bg-secondary"
+                              className="min-w-[2.25rem] rounded-md bg-muted px-2 py-1 font-semibold text-foreground transition hover:bg-secondary"
                             >
                               {value}
                             </button>
-                          ) : (
-                            0
-                          )}
+                          ) : null}
                         </td>
                       );
                     })}
                     <td
                       className={[
                         "px-1 py-0.5 text-center font-semibold text-foreground",
-                        rowIndex === 0 ? "border-t-4 border-t-foreground" : "",
+                        rowIndex === 0 ? "border-t border-border" : "",
                       ].join(" ")}
                     >
                       {row.total > 0 ? (
@@ -333,9 +329,7 @@ export default function PendFacView() {
                         >
                           {row.total}
                         </button>
-                      ) : (
-                        0
-                      )}
+                      ) : null}
                     </td>
                   </tr>
                 )),
@@ -348,10 +342,10 @@ export default function PendFacView() {
                   </td>
                   {locations.map((location) => (
                     <td key={`total-${location.key}`} className="px-1 py-1 text-center">
-                      {totals.countsByLocation[location.key] ?? 0}
+                      {formatTableCount(totals.countsByLocation[location.key])}
                     </td>
                   ))}
-                  <td className="px-1 py-1 text-center">{totals.total}</td>
+                  <td className="px-1 py-1 text-center">{formatTableCount(totals.total)}</td>
                 </tr>
               ) : null}
             </tbody>

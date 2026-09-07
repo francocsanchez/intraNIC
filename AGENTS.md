@@ -115,9 +115,12 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Todo navbar debe reutilizar `AppBrand`: bloque `NIC` de `h-8 w-8`, texto `IntraNIC` sin mayusculas forzadas y alineacion izquierda con `px-3`. No duplicar marcas locales ni variar su posicion entre modulos.
 - Los navbars del preset usan la altura compacta `min-h-14`; no aumentar su altura por titulos o enlaces de dos lineas.
 - Toda accion de interfaz debe usar los componentes de `front/src/components/ui/action-button.tsx`: `DeleteActionButton` para eliminar, `EditActionButton` para editar y `ActionButton` para acciones operativas. Mantener la altura compacta, borde y estados semanticos; no crear clases locales para estas acciones.
+- Toda accion con `bg-primary text-primary-foreground` debe conservar contraste al hover mediante `hover:bg-primary/90`; nunca usar `hover:bg-secondary`, ya que vuelve claro el fondo y oculta el texto.
 - Los layouts migrados deben usar el mismo fondo global `bg-muted`; no mezclar fondos heredados como `bg-gray-50` entre modulos del preset. Las superficies y controles se diferencian con `bg-card` y `bg-background`, respectivamente.
 - Toda vista migrada que no herede un layout con el preset debe declarar `bg-muted` en su contenedor raiz para conservar el mismo fondo global.
 - Mantener el espaciado compacto y unificar titulo, resumen e indicadores en una sola superficie cuando correspondan a la misma vista.
+- Las matrices de Gestion Convencional, incluido Analisis de stock y Pend Fac, usan hero integrado `bg-card`, indicadores separados con divisores `border-border` y separadores de grupos de tabla de un solo pixel; no usan `bg-secondary`, radios grandes ni bordes gruesos heredados.
+- En las matrices de Analisis de stock y Pend Fac, los conteos igual a cero se presentan como celdas vacias; no reemplazar valores editables de PED.
 - Las vistas con el mismo patron funcional deben reutilizar exactamente las mismas decisiones visuales del preset. En particular, los filtros de resumen usan `grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8`, botones `h-9 rounded-md border text-xs`, estado activo `border-primary bg-primary text-primary-foreground` e inactivo `border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground`.
 - En tablas de alta densidad, priorizar filas compactas: encabezados con `py-2`, celdas con `py-1.5` y badges con `py-0.5`, sin afectar columnas sticky ni datos legibles.
 - En tarjetas de indicadores, priorizar `p-2` o `p-3`, titulos `text-base`, etiquetas `text-[11px]` y metricas hasta `text-lg`; no usar escalas grandes salvo que el usuario lo solicite.
@@ -126,6 +129,9 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Los dialogos de vistas migradas deben usar directamente tokens del preset en panel, campos, acciones y pie; no depender de adaptadores de compatibilidad ni conservar colores heredados dentro del modal.
 - Los graficos de vistas migradas deben usar ECharts y una paleta resuelta desde los tokens semanticos del preset; no incorporar paletas hardcodeadas ni colores heredados.
 - Cuando se soliciten colores de negocio para un grafico, definirlos de forma local y documentada en la vista, con tonos suaves y aplicarlos por serie sin alterar la paleta de otros reportes.
+- Los colores solicitados para estados, graficos y badges deben ser siempre claros, de alta luminosidad y baja saturacion; evitar tonos intensos que compitan con los datos.
+- En `/stock/convencional/mis-operaciones`, Operaciones anualizadas y Distribucion por modelo usan la misma paleta suave local por modelo; la linea TOTAL conserva `foreground`.
+- En `/gestion/convencional/asignaciones`, el estado de recepcion usa verde claro para Recibido y amarillo claro para Pendiente de forma consistente en grafico, leyenda y tabla; tanto Pedido como Estado se representan solo con iconos cuando existen.
 - Los formatos de valores en ECharts se configuran por serie: etiquetas numéricas solo donde se soliciten y montos con `Intl.NumberFormat("es-AR")`, moneda ARS y dos decimales, sin aplicar moneda a cantidades.
 - Los informes `/analisis/operaciones-preventa` y `/analisis/vendedor` comparten para Usados anualizados barras azules suaves, linea `foreground` y etiquetas de cantidad; Credito usa barras rojas suaves y formato ARS. Descuento promedio de Vendedor usa barra violeta suave y linea `foreground`.
 - El grafico anual de Vendedor usa un color suave distinto por modelo y muestra el total mensual sobre cada barra apilada mediante una serie visual sin leyenda.
@@ -134,10 +140,12 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Los descuentos por modelo y por sucursal de Operaciones Preventa se formatean por serie con porcentaje argentino a dos decimales (`xx,xx%`) en tooltip y eje.
 - Todo grafico ECharts debe resaltar la serie activa al hover: conservar explicitamente su color base y opacidad total, con `blur` suave para las restantes. El wrapper comun aplica este comportamiento seguro por defecto, evitando el estado automatico que volvía blancas o invisibles las series.
 - Las vistas de Stock Usados deben compartir el mismo hero integrado, grilla de filtros, tabla compacta y badges de color mediante `StockUsadosView` cuando la fuente de datos lo permita.
+- Stock Ingresos Usados conserva sus columnas especificas, pero debe replicar exactamente la estructura visual de `StockUsadosView`: carga y errores sobre `bg-muted`, hero integrado, filtros densos, filas `py-1.5`, badges uniformes y dialogo con tokens `popover`.
 - Los flujos de altas y edicion de Preventas y Proformas deben aplicar los tokens del preset tanto en la vista como en sus formularios y dialogos.
 - En formularios de Proformas, las unidades repetibles se separan con divisores dentro de una unica superficie, sin cards anidadas.
 - Los campos que pertenecen a la misma fila funcional deben usar el mismo ancho en escritorio, salvo que su contenido requiera expresamente otra proporcion.
 - Las variantes de stock de una misma compania deben reutilizar una vista parametrizada y el mismo layout del preset para evitar divergencias visuales.
+- En Stock Convencional, Disponible, Reservado y Guardado ubican el filtro de unidades por ubicacion en una franja propia, inmediatamente despues del filtro de modelo y antes del detalle.
 - Stock disponible Belgrano debe respetar la misma especificacion de Stock Usados: hero integrado con resumen por marca y total, filtros compactos, tabla densa y badges uniformes.
 - Las pantallas publicas migradas, incluido `/login`, deben usar `font-preset`, `bg-muted` y una unica superficie `bg-card`; no usan navbar y conservan el footer institucional indicado arriba.
 - La portada autenticada (`/`) se considera una vista migrada: sus accesos se agrupan en superficies compactas del preset y no puede conservar CSS inline, colores hexadecimales ni tipografias heredadas.

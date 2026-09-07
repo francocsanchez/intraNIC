@@ -536,7 +536,7 @@ export default function AgendaEntregaView() {
                               <button
                                 type="button"
                                 onClick={handleOpenSearchedAgenda}
-                                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-secondary"
+                                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                               >
                                 Ver en agenda
                               </button>

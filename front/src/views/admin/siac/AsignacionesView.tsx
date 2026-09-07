@@ -37,6 +37,16 @@ const MESES = [
 type FiltroEstado = "todos" | "recibidos" | "pendientes";
 
 const EMPTY_ASIGNACIONES: GetAsignacionRecepcionResponse["data"] = [];
+const RECEPCION_COLORS = {
+  recibido: "oklch(0.88 0.08 155)",
+  pendiente: "oklch(0.91 0.1 85)",
+};
+
+function getRecepcionColor(estado?: string) {
+  return estado?.toLocaleLowerCase("es-AR").includes("recib")
+    ? RECEPCION_COLORS.recibido
+    : RECEPCION_COLORS.pendiente;
+}
 
 function formatShortDate(dateString?: string | null) {
   if (!dateString) return "-";
@@ -123,10 +133,10 @@ export default function AsignacionesView() {
     series: [{ type: "bar", name: "Recibidas", data: recepcionesPorDia.map((item) => item.cantidad), barMaxWidth: 42, label: { show: true, position: "top", color: "var(--foreground)", fontSize: 11 } }],
   }), [chartColors, recepcionesPorDia]);
   const estadoOption = useMemo<EChartsCoreOption>(() => ({
-    color: chartColors,
+    color: [RECEPCION_COLORS.recibido, RECEPCION_COLORS.pendiente],
     tooltip: { trigger: "item", backgroundColor: "var(--popover)", borderColor: "var(--border)", textStyle: { color: "var(--popover-foreground)" }, formatter: "{b}: {c}" },
-    series: [{ type: "pie", radius: ["54%", "78%"], avoidLabelOverlap: true, label: { show: false }, data: estadoRecepcion }],
-  }), [chartColors, estadoRecepcion]);
+    series: [{ type: "pie", radius: ["54%", "78%"], avoidLabelOverlap: true, label: { show: false }, data: estadoRecepcion.map((item) => ({ ...item, itemStyle: { color: getRecepcionColor(item.name) } })) }],
+  }), [estadoRecepcion]);
 
   if (isLoading || pedidosLoading) return <Loading />;
 
@@ -162,7 +172,7 @@ export default function AsignacionesView() {
             {canManagePedidos ? (
               <Link
               to={paths.convencional.pedidoUnidades}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-secondary"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Solicitar unidades
               </Link>
@@ -264,11 +274,11 @@ export default function AsignacionesView() {
           </div>
 
           <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {estadoRecepcion.map((item, index: number) => (
+            {estadoRecepcion.map((item) => (
               <div key={item.name} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span
                   className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: chartColors[index % chartColors.length] }}
+                  style={{ backgroundColor: getRecepcionColor(item.name) }}
                 />
                 <span>
                   {item.name}: {item.value}
@@ -375,30 +385,32 @@ export default function AsignacionesView() {
                     <td className="px-6 py-3 text-center">
                       {item.opera == 0 ? "-" : item.sucursal}
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-6 py-3 text-center">
                       <div className="flex justify-center">
                         {fuePedido ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-primary">
-                            Si
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-                            No
-                          </span>
-                        )}
+                          <Check size={16} strokeWidth={2.5} className="text-primary" aria-label="Pedido registrado" />
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-6 py-3">
                       <div className="flex justify-center">
                         {recibido ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
+                          <span
+                            className="inline-flex size-7 items-center justify-center rounded-full border border-border text-foreground"
+                            style={{ backgroundColor: RECEPCION_COLORS.recibido }}
+                            aria-label="Recibido"
+                            title="Recibido"
+                          >
                             <Check size={14} strokeWidth={2.5} />
-                            Recibido
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
+                          <span
+                            className="inline-flex size-7 items-center justify-center rounded-full border border-border text-foreground"
+                            style={{ backgroundColor: RECEPCION_COLORS.pendiente }}
+                            aria-label="Pendiente"
+                            title="Pendiente"
+                          >
                             <Clock3 size={14} strokeWidth={2.5} />
-                            Pendiente
                           </span>
                         )}
                       </div>

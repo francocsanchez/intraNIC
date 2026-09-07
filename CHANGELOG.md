@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-07
+
+### Stock Convencional
+- Se unifico la ubicacion del filtro de unidades en Disponible y Guardado con Reservado: ahora se muestra debajo del filtro de modelo y antes del detalle.
+- Se incorporaron colores suaves consistentes por modelo en Operaciones anualizadas y Distribucion por modelo de `/stock/convencional/mis-operaciones`.
+
+### Asignaciones
+- Estado de recepcion ahora diferencia Recibido en verde suave y Pendiente en amarillo suave en su grafico, leyenda y tabla mensual; Pedido muestra un check solo para unidades solicitadas.
+- Se aclararon los colores de estado y la tabla mensual ahora muestra solamente el check o reloj, sin etiquetas de texto visibles.
+
+### Acciones primarias
+- Se corrigio el hover de botones y badges primarios locales para conservar fondo oscuro y texto legible, en lugar de cambiar a un fondo claro.
+
+### Gestion Convencional
+- Se migraron Analisis de stock y Pend Fac al hero integrado y compacto del preset, eliminando fondos secundarios, radios grandes, tarjetas de resumen separadas y divisores gruesos heredados.
+- Las celdas de conteo en cero de ambas matrices ahora se muestran vacias para priorizar los datos con unidades.
+
+### Stock Usados
+- Se alineo Stock Ingresos con No reparado: hero, filtros, tabla densa, badges, estados de carga/error y dialogo de observaciones ahora comparten el preset.
+
 ## 2026-09-05
 
 ### Stock Belgrano y navegacion

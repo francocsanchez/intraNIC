@@ -28,6 +28,16 @@ const MESES = [
 
 const MONTH_SHORT_LABELS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
 
+// Colores suaves locales para identificar los modelos en Stock Convencional.
+const SOFT_MODEL_PALETTE = [
+  "oklch(0.72 0.09 245)",
+  "oklch(0.74 0.08 155)",
+  "oklch(0.75 0.09 65)",
+  "oklch(0.7 0.08 20)",
+  "oklch(0.73 0.07 305)",
+  "oklch(0.72 0.06 195)",
+];
+
 function getPresetChartPalette() {
   const styles = getComputedStyle(document.documentElement);
   return ["--foreground", "--muted-foreground", "--chart-3", "--chart-4", "--chart-5"].map((token) => styles.getPropertyValue(token).trim());
@@ -167,18 +177,19 @@ export default function MisOperacionesView() {
   const nombreUsuario = buildFullName(user?.name, user?.lastName);
   const mesActivo = MESES.find((item) => item.value === mes)?.label ?? "";
   const chartPalette = useMemo(() => getPresetChartPalette(), []);
+  const modelChartPalette = negocio === "convencional" ? SOFT_MODEL_PALETTE : chartPalette;
   const annualChartOption = useMemo<EChartsCoreOption>(() => ({
-    color: chartPalette,
+    color: modelChartPalette,
     tooltip: { trigger: "axis" },
     legend: { bottom: 0, textStyle: { color: chartPalette[1] } },
     grid: { top: 20, right: 12, bottom: 36, left: 36 },
     xAxis: { type: "category", data: annualChart.data.map((item) => String(item.mes)), axisLine: { lineStyle: { color: chartPalette[1] } }, axisTick: { show: false }, axisLabel: { color: chartPalette[1] } },
     yAxis: { type: "value", minInterval: 1, axisLine: { show: false }, splitLine: { lineStyle: { color: chartPalette[1], opacity: 0.2 } }, axisLabel: { color: chartPalette[1] } },
     series: [
-      ...annualChart.modelKeys.map((key, index) => ({ type: "bar" as const, name: key === "otros" ? "OTROS" : key, stack: "modelos", barMaxWidth: 28, data: annualChart.data.map((item) => Number(item[key] ?? 0)), itemStyle: { color: chartPalette[index % chartPalette.length] } })),
+      ...annualChart.modelKeys.map((key, index) => ({ type: "bar" as const, name: key === "otros" ? "OTROS" : key, stack: "modelos", barMaxWidth: 28, data: annualChart.data.map((item) => Number(item[key] ?? 0)), itemStyle: { color: modelChartPalette[index % modelChartPalette.length] } })),
       { type: "line" as const, name: "TOTAL", data: annualChart.data.map((item) => Number(item.total)), smooth: true, symbolSize: 6, lineStyle: { width: 2, color: chartPalette[0] }, itemStyle: { color: chartPalette[0] }, label: { show: true, position: "top", color: chartPalette[0], fontSize: 11 } },
     ],
-  }), [annualChart, chartPalette]);
+  }), [annualChart, chartPalette, modelChartPalette]);
   const dailyChartOption = useMemo<EChartsCoreOption>(() => ({
     color: [chartPalette[0]],
     tooltip: { trigger: "axis" },
@@ -188,10 +199,10 @@ export default function MisOperacionesView() {
     series: [{ type: "bar", name: "Ventas", barMaxWidth: 32, data: ventasPorDia.map((item) => item.total), label: { show: true, position: "top", color: chartPalette[0], fontSize: 11 }, itemStyle: { color: chartPalette[0], borderRadius: [3, 3, 0, 0] } }],
   }), [chartPalette, ventasPorDia]);
   const modelChartOption = useMemo<EChartsCoreOption>(() => ({
-    color: chartPalette,
+    color: modelChartPalette,
     tooltip: { trigger: "item", formatter: "{b}: {c}" },
-    series: [{ type: "pie", radius: ["48%", "72%"], label: { color: chartPalette[1] }, data: distribucionPorModelo.map((item) => ({ name: item.modelo, value: item.total })) }],
-  }), [chartPalette, distribucionPorModelo]);
+    series: [{ type: "pie", radius: ["48%", "72%"], label: { color: chartPalette[1] }, data: distribucionPorModelo.map((item, index) => ({ name: item.modelo, value: item.total, itemStyle: { color: modelChartPalette[index % modelChartPalette.length] } })) }],
+  }), [chartPalette, distribucionPorModelo, modelChartPalette]);
 
   if (isLoading) return <Loading />;
 
