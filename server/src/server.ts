@@ -34,6 +34,7 @@ import planNegocioRoutes from "./routes/planNegocioRoutes";
 import unidadNegocioRoutes from "./routes/unidadNegocioRoutes";
 import centralDeudoresRoutes from "./routes/centralDeudoresRoutes";
 import ssiVentasRoutes from "./routes/ssiVentasRoutes";
+import solicitudCambioColorRoutes from "./routes/solicitudCambioColorRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -62,6 +63,7 @@ app.use("/api/dms/pedido-mensual", pedidoMensualRoutes);
 app.use("/api/dms/proformas", proformaRoutes);
 app.use("/api/dms/minutas", minutaRoutes);
 app.use("/api/dms/plan-negocio", planNegocioRoutes);
+app.use("/api/dms/solicitudes-cambio-color", solicitudCambioColorRoutes);
 app.use("/api/unidades-negocio", unidadNegocioRoutes);
 app.use("/api/facturas-anticipo", facturaAnticipoRoutes);
 app.use("/api/operaciones", operacionesRoutes);

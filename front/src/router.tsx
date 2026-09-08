@@ -68,6 +68,7 @@ const RegistroAsignacionesResumenView = lazy(() => import("./views/admin/siac/Re
 const AnalisisStockView = lazy(() => import("./views/admin/siac/AnalisisStockView"));
 const AnalisisStockVersionesView = lazy(() => import("./views/admin/siac/AnalisisStockVersionesView"));
 const PendFacView = lazy(() => import("./views/admin/siac/PendFacView"));
+const SolicitudCambioColorView = lazy(() => import("./views/admin/siac/SolicitudCambioColorView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
 const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
@@ -437,6 +438,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["pendFac"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.pendFac} element={<PendFacView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["solicitudCambioColor"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.solicitudCambioColor} element={<SolicitudCambioColorView />} />
             </Route>
           </Route>
 

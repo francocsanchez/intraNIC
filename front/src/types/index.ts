@@ -2523,6 +2523,41 @@ export const hotAlertMailConfigResponseSchema = z.object({
   message: z.string().optional().default(""),
 });
 
+export const solicitudCambioColorAuditSchema = z.object({
+  _id: z.string(),
+  action: z.enum(["created", "destinationUpdated", "requestedChanged", "completedChanged", "rejected"]),
+  actorId: z.string(),
+  actorName: z.string(),
+  before: z.record(z.string(), z.unknown()),
+  after: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+});
+
+export const solicitudCambioColorSchema = z.object({
+  _id: z.string(),
+  interno: z.number(),
+  versionOrigen: z.string(),
+  colorOrigen: z.string(),
+  versionDestino: catalogoSchema.pick({ _id: true, nombre: true }),
+  colorDestino: catalogoSchema.pick({ _id: true, nombre: true }),
+  colorDestino2: catalogoSchema.pick({ _id: true, nombre: true }).nullable(),
+  observaciones: z.string(),
+  solicitadoPor: z.object({ codigo: z.number(), nombre: z.string() }),
+  solicitudPedida: z.boolean(),
+  solicitudCompletada: z.boolean(),
+  solicitudRechazada: z.boolean(),
+  tieneChasis: z.boolean(),
+  createdBy: z.string(),
+  createdByName: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  audit: z.array(solicitudCambioColorAuditSchema),
+});
+
+export const solicitudCambioColorListResponseSchema = z.object({ data: z.array(solicitudCambioColorSchema) });
+export const solicitudCambioColorResponseSchema = z.object({ message: z.string(), data: solicitudCambioColorSchema });
+export const solicitudCambioColorUnidadResponseSchema = z.object({ data: z.object({ interno: z.number(), version: z.string(), color: z.string() }) });
+
 export type SsiVentasStatus = z.infer<typeof ssiVentasStatusSchema>;
 export type SsiVentasClosedReason = z.infer<typeof ssiVentasClosedReasonSchema>;
 export type SsiVentasBinaryResponse = z.infer<typeof ssiVentasBinaryResponseSchema>;
@@ -2544,3 +2579,5 @@ export type SsiVentasImportRowResult = z.infer<typeof ssiVentasImportRowResultSc
 export type SsiVentasImportResponse = z.infer<typeof ssiVentasImportResponseSchema>;
 export type HotAlertMailConfig = z.infer<typeof hotAlertMailConfigSchema>;
 export type HotAlertMailConfigResponse = z.infer<typeof hotAlertMailConfigResponseSchema>;
+export type SolicitudCambioColor = z.infer<typeof solicitudCambioColorSchema>;
+export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;

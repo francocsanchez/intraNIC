@@ -45,6 +45,29 @@
   --radius-lg: var(--radius);
 }
 
+/* Solicitudes de cambio de color: estados centrados y acciones alineadas. */
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] th:nth-child(6),
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] th:nth-child(7),
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] td:nth-child(6),
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] td:nth-child(7) {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] td:nth-child(6) input,
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] td:nth-child(7) input {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] th:last-child,
+.font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] td:last-child {
+  padding-right: 0.75rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
 @layer base {
   :root {
     --background: oklch(1 0 0);

@@ -129,3 +129,11 @@ export function hasSystemConfigToggleAccess(user: AuthUser) {
   const normalizedRoles = getNormalizedRoles(user);
   return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
 }
+
+export function hasSolicitudCambioColorEstadoAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("stock");
+}

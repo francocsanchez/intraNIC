@@ -88,6 +88,7 @@ export const paths = {
     analisisStock: "/gestion/convencional/analisis-stock",
     analisisStockDiccionarioVersiones: "/gestion/convencional/analisis-stock/diccionario-versiones",
     pendFac: "/gestion/convencional/pend-fac",
+    solicitudCambioColor: "/gestion/convencional/solicitud-cambio-color",
     preventas: "/comercial/preventas",
     preventasResumen: "/comercial/preventas/resumen",
     preventasAsignadas: "/comercial/preventas/asignadas",

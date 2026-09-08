@@ -16,6 +16,7 @@ export const moduleKeys = [
   "pedidoUnidades",
   "analisisStock",
   "pendFac",
+  "solicitudCambioColor",
   "noReparado",
   "pendienteDocumentacion",
   "ingresos",

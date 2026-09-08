@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-08
+
+### Gestion de stock convencional · Sol. cambio color
+- Se incorporo el modulo `Sol. cambio color` con permiso independiente, acceso desde Gestion Convencional y proteccion de API y ruta.
+- Permite consultar internos 0 km, conservar su version y color de origen, seleccionar el destino desde los catalogos activos y editar el destino posteriormente.
+- El listado permite filtrar solicitudes, marcar el pedido y la completitud en secuencia, y consultar un historial inmutable con usuario, fecha y valores anteriores/nuevos de cada accion.
+- El acceso al modulo ahora tambien aparece en la portada, dentro de Gestion de stock convencional, cuando el permiso esta habilitado.
+- Los checks de solicitud pedida y completada ahora solo pueden modificarse por usuarios con rol Stock o SuperAdmin.
+- Se retiró el filtro redundante “Todas”; el listado inicial sigue mostrando todas las solicitudes y los filtros de estado se pueden activar o desactivar.
+- Las solicitudes ahora admiten un segundo color de destino opcional y el campo persistente `Observaciones / N° OP.`, ambos visibles en la tabla y registrados en el historial.
+- Se incorporó el rechazo final de solicitudes para roles Stock y SuperAdmin, con auditoría y bloqueo posterior de edición/estados.
+- Las solicitudes ahora se bloquean para internos con chasis; la tabla alerta cuando un interno ya cargado adquiere chasis.
+- La vista inicial de Sol. cambio color ahora abre directamente sobre solicitudes pendientes.
+- El buscador de vendedores de Sol. cambio color requiere tres caracteres antes de filtrar, evitando renderizar el listado completo.
+
 ## 2026-09-07
 
 ### Colores de unidades

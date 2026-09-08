@@ -5,6 +5,7 @@ import { paths } from "@/routes/paths";
 import {
   BarChart3,
   ClipboardList,
+  Palette,
   FileStack,
   Package,
   Wrench,
@@ -74,6 +75,13 @@ export default function GestionConvencionalLayout() {
       active:
         pathname === paths.convencional.analisisStock ||
         pathname === paths.convencional.analisisStockDiccionarioVersiones,
+    },
+    {
+      label: "Sol. cambio color",
+      to: paths.convencional.solicitudCambioColor,
+      icon: Palette,
+      visible: hasModulePathAccess(user, "solicitudCambioColor", paths.convencional.solicitudCambioColor),
+      active: pathname === paths.convencional.solicitudCambioColor,
     },
     {
       label: "Pend. fac",
