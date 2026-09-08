@@ -14,6 +14,7 @@
 - Las solicitudes ahora se bloquean para internos con chasis; la tabla alerta cuando un interno ya cargado adquiere chasis.
 - La vista inicial de Sol. cambio color ahora abre directamente sobre solicitudes pendientes.
 - El buscador de vendedores de Sol. cambio color requiere tres caracteres antes de filtrar, evitando renderizar el listado completo.
+- El historial de solicitudes ahora usa un diálogo amplio y presenta los valores anteriores y nuevos como campos individuales y legibles.
 
 ## 2026-09-07
 
