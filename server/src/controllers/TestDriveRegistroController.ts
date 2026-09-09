@@ -301,15 +301,7 @@ export class TestDriveRegistroController {
         .lean();
 
       const sortedData = data.sort((a: any, b: any) => {
-        const dominioA = String(a.unidadId?.dominio ?? "").localeCompare(String(b.unidadId?.dominio ?? ""), "es", {
-          sensitivity: "base",
-        });
-
-        if (dominioA !== 0) {
-          return dominioA;
-        }
-
-        const retiroDiff = new Date(a.retiroAt).getTime() - new Date(b.retiroAt).getTime();
+        const retiroDiff = new Date(b.retiroAt).getTime() - new Date(a.retiroAt).getTime();
         if (retiroDiff !== 0) {
           return retiroDiff;
         }

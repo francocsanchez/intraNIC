@@ -167,3 +167,4 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Las solicitudes de cambio de color con chasis asignado no pueden crearse; las existentes se alertan en tabla. Solo `stock` y `superAdmin` pueden rechazarlas, dejando el rechazo como estado final auditado.
 - La vista inicial de `Sol. cambio color` muestra solo solicitudes pendientes; los filtros permiten acceder al resto de estados.
 - El Combobox de vendedores en `Sol. cambio color` requiere al menos tres caracteres antes de filtrar, para preservar la fluidez con listados extensos.
+- El Registro TestDrive compartido de Comercial y Plan de ahorro ordena por retiro descendente, permite filtrar por patente y separa por defecto los turnos por ocurrir del historial cuya fecha de devolución ya pasó.

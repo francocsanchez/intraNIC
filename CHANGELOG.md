@@ -2,6 +2,10 @@
 
 ## 2026-09-09
 
+### Registro TestDrive · Comercial y Plan de ahorro
+- Se ordenaron los registros por fecha de retiro descendente y se agregó el filtro por patente de la unidad.
+- El listado incorpora las pestañas `Por ocurrir` y `Ocurridos`; abre en las reservas cuya fecha de devolución aún no pasó y separa el historial ya finalizado.
+
 ### Gestion de stock convencional · Prediccion de asignaciones
 - Se incorporo el modulo independiente de Prediccion de asignaciones, con acceso por permiso, ruta y navegacion dentro de Gestion convencional.
 - La consulta identifica operaciones 0 km activas, no facturadas y no entregadas, y propone la unidad disponible mas antigua de igual modelo, version y color cuando su ORDER es anterior al interno asignado.

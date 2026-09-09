@@ -59,6 +59,12 @@ function hasStarted(value: string) {
   return parsed.getTime() <= Date.now();
 }
 
+function hasOccurred(fechaRegreso: string) {
+  const today = new Date();
+  const todayKey = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, "0"), String(today.getDate()).padStart(2, "0")].join("-");
+  return fechaRegreso < todayKey;
+}
+
 function normalizeId(value: unknown) {
   return typeof value === "string" ? value.trim() : String(value ?? "").trim();
 }
@@ -387,6 +393,8 @@ export default function TestDriveRegistroView({
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TestDriveRegistro | null>(null);
+  const [activeTab, setActiveTab] = useState<"upcoming" | "occurred">("upcoming");
+  const [dominioFilter, setDominioFilter] = useState("");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [queryKeyPrefix, "listar"],
@@ -408,8 +416,22 @@ export default function TestDriveRegistroView({
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
 
-  const items = data?.data ?? [];
+  const items = useMemo(
+    () => [...(data?.data ?? [])].sort((a, b) => new Date(b.retiroAt).getTime() - new Date(a.retiroAt).getTime()),
+    [data?.data],
+  );
   const options = useMemo(() => optionsResponse?.data ?? [], [optionsResponse]);
+  const visibleItems = useMemo(() => {
+    const normalizedDominio = dominioFilter.trim().toLocaleLowerCase("es-AR");
+
+    return items.filter((item) => {
+      const matchesTab = activeTab === "occurred" ? hasOccurred(item.fechaRegreso) : !hasOccurred(item.fechaRegreso);
+      const matchesDominio = !normalizedDominio || item.dominio.toLocaleLowerCase("es-AR").includes(normalizedDominio);
+      return matchesTab && matchesDominio;
+    });
+  }, [activeTab, dominioFilter, items]);
+  const upcomingCount = useMemo(() => items.filter((item) => !hasOccurred(item.fechaRegreso)).length, [items]);
+  const occurredCount = items.length - upcomingCount;
 
   const handleCreate = () => {
     setEditingItem(null);
@@ -489,8 +511,48 @@ export default function TestDriveRegistroView({
       </section>
 
       <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="border-b border-border px-3 py-2">
-          <h2 className="text-sm font-semibold text-card-foreground">Listado de solicitudes</h2>
+        <div className="flex flex-col gap-2 border-b border-border px-3 py-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex gap-1" role="tablist" aria-label="Estado de solicitudes de TestDrive">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "upcoming"}
+              onClick={() => setActiveTab("upcoming")}
+              className={[
+                "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
+                activeTab === "upcoming"
+                  ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+              ].join(" ")}
+            >
+              Por ocurrir ({upcomingCount})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "occurred"}
+              onClick={() => setActiveTab("occurred")}
+              className={[
+                "h-9 rounded-md border px-3 text-xs font-medium transition-colors",
+                activeTab === "occurred"
+                  ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
+              ].join(" ")}
+            >
+              Ocurridos ({occurredCount})
+            </button>
+          </div>
+          <div className="w-full md:max-w-56">
+            <label htmlFor="test-drive-dominio-filter" className="sr-only">Filtrar por patente</label>
+            <input
+              id="test-drive-dominio-filter"
+              type="search"
+              value={dominioFilter}
+              onChange={(event) => setDominioFilter(event.target.value)}
+              placeholder="Filtrar por patente"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -511,7 +573,7 @@ export default function TestDriveRegistroView({
             </thead>
 
             <tbody className="divide-y divide-border">
-              {items.map((item) => {
+              {visibleItems.map((item) => {
                 const isOwnRecord = normalizeId(item.solicitadoPorId) !== "" && normalizeId(item.solicitadoPorId) === normalizeId(user?._id);
                 const isPastRecord = hasStarted(item.retiroAt);
                 const isSuperAdmin = hasSuperAdminRole(user);
@@ -596,10 +658,14 @@ export default function TestDriveRegistroView({
                 );
               })}
 
-              {!items.length ? (
+              {!visibleItems.length ? (
                 <tr>
                   <td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">
-                    No hay solicitudes de TestDrive registradas.
+                    {dominioFilter.trim()
+                      ? "No hay solicitudes de TestDrive para esa patente."
+                      : activeTab === "upcoming"
+                        ? "No hay solicitudes de TestDrive por ocurrir."
+                        : "No hay solicitudes de TestDrive ocurridas."}
                   </td>
                 </tr>
               ) : null}
