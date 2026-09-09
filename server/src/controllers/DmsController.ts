@@ -80,6 +80,7 @@ type PrediccionAsignacionRow = {
   ubicacionPosible: string | null;
   colorStockPosible: string | null;
   versionStockPosible: string | null;
+  criterioPrioridad: "ubicacion" | "produccion";
 };
 
 type PendFacUnit = {

@@ -1699,6 +1699,7 @@ export const prediccionAsignacionItemSchema = z.object({
   ubicacionPosible: z.string(),
   colorStockPosible: z.string(),
   versionStockPosible: z.string(),
+  criterioPrioridad: z.enum(["ubicacion", "produccion"]),
 });
 
 export const prediccionAsignacionesResponseSchema = z.object({

@@ -81,9 +81,9 @@ export default function PrediccionAsignacionesView() {
                 <th className="px-3 py-2">Interno</th>
                 <th className="px-3 py-2">Mes produccion</th>
                 <th className="px-3 py-2">Ubicacion</th>
-                <th className="border-l-4 border-l-primary/60 px-3 py-2">Mes produccion</th>
+                <th className="border-l-4 border-l-primary/60 px-3 py-2">Ubicacion</th>
                 <th className="px-3 py-2">Posible Interno</th>
-                <th className="px-3 py-2">Ubicacion</th>
+                <th className="px-3 py-2">Mes produccion</th>
                 <th className="px-3 py-2">Color posible</th>
                 <th className="px-3 py-2">Version posible</th>
               </tr>
@@ -99,9 +99,9 @@ export default function PrediccionAsignacionesView() {
                   <td className="px-3 py-1.5 text-muted-foreground">{prediction.stockActual}</td>
                   <td className="px-3 py-1.5 text-muted-foreground">{prediction.produccionActual}</td>
                   <td className="px-3 py-1.5 text-muted-foreground">{prediction.ubicacionActual}</td>
-                  <td className="border-l-4 border-l-primary/60 px-3 py-1.5 font-medium text-foreground">{prediction.ubicacionPosible}</td>
+                  <td className={`border-l-4 border-l-primary/60 px-3 py-1.5 font-medium ${prediction.criterioPrioridad === "ubicacion" ? "bg-emerald-100/70 text-emerald-950" : "text-foreground"}`}>{prediction.ubicacionPosible}</td>
                   <td className="px-3 py-1.5 text-muted-foreground">{prediction.stockPosibleReasignacion}</td>
-                  <td className="px-3 py-1.5 text-muted-foreground">{prediction.produccionPosible}</td>
+                  <td className={`px-3 py-1.5 ${prediction.criterioPrioridad === "produccion" ? "bg-emerald-100/70 font-semibold text-emerald-950" : "text-muted-foreground"}`}>{prediction.produccionPosible}</td>
                   <td className="px-3 py-1.5"><ColorBadge color={prediction.colorStockPosible} /></td>
                   <td className="px-3 py-1.5 text-muted-foreground">{prediction.versionStockPosible}</td>
                 </tr>

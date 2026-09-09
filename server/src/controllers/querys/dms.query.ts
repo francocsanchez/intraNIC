@@ -376,6 +376,10 @@ WITH operacionesAsignadas AS (
     disponible.ubicacionPosible,
     disponible.colorStockPosible,
     disponible.versionStockPosible,
+    CASE
+      WHEN disponible.prioridadUbicacionPosible < operacion.prioridadUbicacionActual THEN 'ubicacion'
+      ELSE 'produccion'
+    END AS criterioPrioridad,
     ROW_NUMBER() OVER (
       PARTITION BY operacion.codigoOp
       ORDER BY
@@ -408,7 +412,8 @@ SELECT
   produccionPosible,
   ubicacionPosible,
   colorStockPosible,
-  versionStockPosible
+  versionStockPosible,
+  criterioPrioridad
 FROM coincidencias
 WHERE posicion = 1
 ORDER BY versionAsignada, codigoOp
