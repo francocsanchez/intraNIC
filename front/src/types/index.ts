@@ -1685,6 +1685,26 @@ export const analisisStockMonthSchema = z.object({
   year: z.number(),
 });
 
+export const prediccionAsignacionItemSchema = z.object({
+  codigoOp: z.coerce.number(),
+  cliente: z.string(),
+  vendedor: z.string(),
+  versionAsignada: z.string(),
+  colorAsignado: z.string(),
+  stockActual: z.coerce.number(),
+  produccionActual: z.string(),
+  ubicacionActual: z.string(),
+  stockPosibleReasignacion: z.coerce.number(),
+  produccionPosible: z.string(),
+  ubicacionPosible: z.string(),
+  colorStockPosible: z.string(),
+  versionStockPosible: z.string(),
+});
+
+export const prediccionAsignacionesResponseSchema = z.object({
+  data: z.array(prediccionAsignacionItemSchema),
+});
+
 export const analisisStockDictionaryItemSchema = z.object({
   _id: z.string(),
   modelo: z.string(),
@@ -1906,6 +1926,8 @@ export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
 export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
 export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
 export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;
+export type PrediccionAsignacionItem = z.infer<typeof prediccionAsignacionItemSchema>;
+export type PrediccionAsignacionesResponse = z.infer<typeof prediccionAsignacionesResponseSchema>;
 export type AnalisisStockDictionaryItem = z.infer<typeof analisisStockDictionaryItemSchema>;
 export type AnalisisStockVersionesDisponiblesItem = z.infer<typeof analisisStockVersionesDisponiblesItemSchema>;
 export type AnalisisStockRow = z.infer<typeof analisisStockRowSchema>;

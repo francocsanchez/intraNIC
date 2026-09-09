@@ -44,6 +44,7 @@ La logica vigente es:
 - `facturasAnticipo`
 - `segUnidadesFabrica`
 - `asignaciones`
+- `prediccionAsignaciones`
 - `planNegocio`
 - `registroAsignaciones`
 - `pedidoMensual`
@@ -219,6 +220,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `facturasAnticipo`: facturas de anticipo
 - `segUnidadesFabrica`: seguimiento de unidades de fabrica
 - `asignaciones`: asignaciones
+- `prediccionAsignaciones`: prediccion de asignaciones para rotar stock 0 km disponible
 - `planNegocio`: plan de negocio
 - `registroAsignaciones`: registro y resumen de asignaciones
 - `pedidoMensual`: pedido mensual

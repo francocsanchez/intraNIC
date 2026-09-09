@@ -31,6 +31,12 @@ router.get("/vendedores/activos", authorizeModules("configuracion", "preventas")
 router.get("/asignaciones/:mes/:anio", authorizeModules("asignaciones"), authorizeRoleAccess("convencional.asignaciones"), DmsController.getAsignacion);
 
 router.get(
+  "/prediccion-asignaciones",
+  authorizeModules("prediccionAsignaciones"),
+  DmsController.getPrediccionAsignaciones,
+);
+
+router.get(
   "/analisis-stock",
   authorizeModules("analisisStock"),
   authorizeRoleAccess("convencional.analisisStock"),

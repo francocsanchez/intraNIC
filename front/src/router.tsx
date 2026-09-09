@@ -49,6 +49,7 @@ const StockValorizacionConvencional = lazy(() => import("./views/convencional/St
 const StockValorizacionListaPreciosView = lazy(() => import("./views/convencional/StockValorizacionListaPreciosView"));
 const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
 const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
+const PrediccionAsignacionesView = lazy(() => import("./views/admin/siac/PrediccionAsignacionesView"));
 const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
 const StockDisponibleBelgrano = lazy(() => import("./views/belgrano/StockDisponibleBelgrano"));
 const StockGuardadoUsados = lazy(() => import("./views/usados/StockGuardadoUsados"));
@@ -402,6 +403,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["asignaciones"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["prediccionAsignaciones"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.prediccionAsignaciones} element={<PrediccionAsignacionesView />} />
             </Route>
           </Route>
 

@@ -7,6 +7,7 @@ import {
   getAsignacionRecepcion,
   getFacturaReventasNic,
   getPendFacConvencional,
+  getPrediccionAsignaciones,
   getStockConsolidadoNic,
   getVendedoresActivosNic,
   getVendedoresNic,
@@ -63,6 +64,22 @@ type PendFacRow = {
   ubicacion: string | null;
   opera: number | string | null;
   diasAsignado: number | string | null;
+};
+
+type PrediccionAsignacionRow = {
+  codigoOp: number | string;
+  cliente: string | null;
+  vendedor: string | null;
+  versionAsignada: string | null;
+  colorAsignado: string | null;
+  stockActual: number | string;
+  produccionActual: string | null;
+  ubicacionActual: string | null;
+  stockPosibleReasignacion: number | string;
+  produccionPosible: string | null;
+  ubicacionPosible: string | null;
+  colorStockPosible: string | null;
+  versionStockPosible: string | null;
 };
 
 type PendFacUnit = {
@@ -1046,6 +1063,21 @@ export class DmsController {
       logError("DmsController.getPendFac");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getPrediccionAsignaciones = async (_req: Request, res: Response) => {
+    try {
+      const data = await sequelizeNIC.query<PrediccionAsignacionRow>(
+        getPrediccionAsignaciones(),
+        { type: QueryTypes.SELECT },
+      );
+
+      return res.status(200).json({ data });
+    } catch (error) {
+      logError("DmsController.getPrediccionAsignaciones");
+      console.error(error);
+      return res.status(500).json({ message: "Error al consultar las predicciones de asignacion" });
     }
   };
 

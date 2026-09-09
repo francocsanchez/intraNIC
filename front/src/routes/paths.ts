@@ -82,6 +82,7 @@ export const paths = {
     ranking: "/analisis/ranking-convencional",
     promedio: "/analisis/promedio-convencional",
     asignaciones: "/gestion/convencional/asignaciones",
+    prediccionAsignaciones: "/gestion/convencional/prediccion-asignaciones",
     planNegocio: "/gestion/convencional/plan-negocio",
     registroAsignaciones: "/gestion/convencional/registro-asignaciones",
     registroAsignacionesResumen: "/gestion/convencional/registro-asignaciones/resumen",

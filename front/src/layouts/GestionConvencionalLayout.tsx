@@ -29,6 +29,17 @@ export default function GestionConvencionalLayout() {
       active: pathname === paths.convencional.asignaciones,
     },
     {
+      label: "Prediccion asign.",
+      to: paths.convencional.prediccionAsignaciones,
+      icon: Wrench,
+      visible: hasModulePathAccess(
+        user,
+        "prediccionAsignaciones",
+        paths.convencional.prediccionAsignaciones,
+      ),
+      active: pathname === paths.convencional.prediccionAsignaciones,
+    },
+    {
       label: "Plan de negocio",
       to: paths.convencional.planNegocio,
       icon: BarChart3,

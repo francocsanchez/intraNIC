@@ -7,6 +7,8 @@ Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una im
 
 `intraNIC` es una aplicacion interna de Nippon Car / LIESS para la gestion operativa de stock, preventas, pedidos, asignaciones, proformas, entregas, patentamientos, transferencias y reportes.
 
+Gestion de stock convencional incluye el modulo `Prediccion de asignaciones`, una consulta de NIPPON CAR para sugerir stock 0 km de igual modelo, version y color en operaciones activas, no facturadas y no entregadas. La seleccion prioriza ubicacion y luego antiguedad; admite el mismo mes solo con una ubicacion superior. La tabla densa muestra cliente, vendedor, produccion `MM/AAAA` y ubicacion de ambos internos; separa el stock actual del posible con un divisor vertical grueso. Es informativo y no ejecuta re-asignaciones.
+
 El repositorio contiene dos aplicaciones independientes:
 
 - `front/`: SPA construida con React 19, TypeScript, Vite, Tailwind CSS, React Router y TanStack Query.

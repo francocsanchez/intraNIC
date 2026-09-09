@@ -151,6 +151,7 @@ export default function Inicio() {
       icon: Settings2,
       items: [
         { label: "Asignaciones", to: paths.convencional.asignaciones, enabled: hasModulePathAccess(user, "asignaciones", paths.convencional.asignaciones), icon: Wrench },
+        { label: "Prediccion asign.", to: paths.convencional.prediccionAsignaciones, enabled: hasModulePathAccess(user, "prediccionAsignaciones", paths.convencional.prediccionAsignaciones), icon: Wrench },
         { label: "Plan de negocio", to: paths.convencional.planNegocio, enabled: hasModulePathAccess(user, "planNegocio", paths.convencional.planNegocio), icon: BarChart3 },
         {
           label: "Registro asignaciones",

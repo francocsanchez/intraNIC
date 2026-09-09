@@ -10,6 +10,7 @@ export const moduleKeys = [
   "listaPrevia",
   "facturasAnticipo",
   "asignaciones",
+  "prediccionAsignaciones",
   "planNegocio",
   "registroAsignaciones",
   "pedidoMensual",

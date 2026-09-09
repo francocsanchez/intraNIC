@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-09
+
+### Gestion de stock convencional · Prediccion de asignaciones
+- Se incorporo el modulo independiente de Prediccion de asignaciones, con acceso por permiso, ruta y navegacion dentro de Gestion convencional.
+- La consulta identifica operaciones 0 km activas, no facturadas y no entregadas, y propone la unidad disponible mas antigua de igual modelo, version y color cuando su ORDER es anterior al interno asignado.
+- La vista presenta las coincidencias con operacion, unidades, versiones y colores para evaluar la re-asignacion sin modificar datos operativos.
+- Junto a cada interno se informa su mes y ano de produccion, extraidos del ORDER en formato `MM/AAAA`.
+- Un divisor vertical grueso separa visualmente los datos del stock actual de la posible re-asignacion.
+- Se agregaron Cliente y Vendedor de la operacion al lado actual de la tabla.
+- La tabla se compacto a tipografia de datos e incorpora la ubicacion operativa de ambos internos: Produccion, Furlong, Stock concesionario u otro estado disponible.
+- La prediccion ahora normaliza las nueve prioridades de ubicacion y elige primero la unidad de mejor disponibilidad; una alternativa del mismo mes solo aparece cuando mejora la ubicacion del interno asignado.
+
 ## 2026-09-08
 
 ### Gestion de stock convencional · Sol. cambio color
