@@ -411,7 +411,7 @@ SELECT
   versionStockPosible
 FROM coincidencias
 WHERE posicion = 1
-ORDER BY codigoOp
+ORDER BY versionAsignada, codigoOp
 `;
 
 export const getAnalisisStockConvencional = () => `

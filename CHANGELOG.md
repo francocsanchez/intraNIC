@@ -11,6 +11,7 @@
 - Se agregaron Cliente y Vendedor de la operacion al lado actual de la tabla.
 - La tabla se compacto a tipografia de datos e incorpora la ubicacion operativa de ambos internos: Produccion, Furlong, Stock concesionario u otro estado disponible.
 - La prediccion ahora normaliza las nueve prioridades de ubicacion y elige primero la unidad de mejor disponibilidad; una alternativa del mismo mes solo aparece cuando mejora la ubicacion del interno asignado.
+- Las operaciones se ordenan por version asignada y luego por codigo de OP para mantener agrupadas las coincidencias comparables.
 
 ## 2026-09-08
 
