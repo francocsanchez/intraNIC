@@ -2559,6 +2559,7 @@ export const solicitudCambioColorAuditSchema = z.object({
 export const solicitudCambioColorSchema = z.object({
   _id: z.string(),
   interno: z.number(),
+  nrofab: z.string(),
   versionOrigen: z.string(),
   colorOrigen: z.string(),
   versionDestino: catalogoSchema.pick({ _id: true, nombre: true }),

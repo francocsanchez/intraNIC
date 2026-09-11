@@ -10,7 +10,7 @@ import { logError } from "../utils/logError";
 import { getVendedoresActivosNic } from "./querys/dms.query";
 import { hasSuperAdminRole, normalizeRoles } from "../constants/roleAccess";
 
-type UnidadRow = { interno: number; version: string; color: string; chasis: string };
+type UnidadRow = { interno: number; nrofab: string; version: string; color: string; chasis: string };
 const text = (value: unknown) => typeof value === "string" ? value.trim() : "";
 const positiveInteger = (value: unknown) => {
   const parsed = Number(value);
@@ -32,21 +32,21 @@ const findVendedor = async (codigo: number) => {
   return rows.find((row) => Number(row.codigo) === codigo) ?? null;
 };
 
-const findChasisByInternos = async (internos: number[]) => {
-  if (!internos.length) return new Map<number, string>();
-  const rows = await sequelizeNIC.query<Pick<UnidadRow, "interno" | "chasis">>(unidadesCambioColorChasisQuery(), { type: QueryTypes.SELECT, replacements: { internos } });
-  return new Map(rows.map((row) => [Number(row.interno), text(row.chasis)]));
+const findUnidadSnapshotsByInternos = async (internos: number[]) => {
+  if (!internos.length) return new Map<number, { chasis: string; nrofab: string }>();
+  const rows = await sequelizeNIC.query<Pick<UnidadRow, "interno" | "chasis" | "nrofab">>(unidadesCambioColorChasisQuery(), { type: QueryTypes.SELECT, replacements: { internos } });
+  return new Map(rows.map((row) => [Number(row.interno), { chasis: text(row.chasis), nrofab: text(row.nrofab) }]));
 };
 
-const format = (item: any, chasis = "") => ({
-  _id: String(item._id), interno: item.interno, versionOrigen: item.versionOrigen, colorOrigen: item.colorOrigen,
+const format = (item: any, snapshot: { chasis: string; nrofab: string } = { chasis: "", nrofab: "" }) => ({
+  _id: String(item._id), interno: item.interno, nrofab: item.nrofab ?? snapshot.nrofab ?? "", versionOrigen: (item.nrofab ?? snapshot.nrofab) ? `${item.versionOrigen} · N° fab: ${item.nrofab ?? snapshot.nrofab}` : item.versionOrigen, colorOrigen: item.colorOrigen,
   versionDestino: { _id: String(item.versionDestinoId), nombre: item.versionDestinoNombre },
   colorDestino: { _id: String(item.colorDestinoId), nombre: item.colorDestinoNombre },
   colorDestino2: item.colorDestino2Id ? { _id: String(item.colorDestino2Id), nombre: item.colorDestino2Nombre ?? "" } : null,
   observaciones: item.observaciones ?? "",
   solicitadoPor: { codigo: item.solicitadoPorCodigo, nombre: item.solicitadoPorNombre },
   solicitudPedida: Boolean(item.solicitudPedida), solicitudCompletada: Boolean(item.solicitudCompletada),
-  solicitudRechazada: Boolean(item.solicitudRechazada), tieneChasis: Boolean(chasis),
+  solicitudRechazada: Boolean(item.solicitudRechazada), tieneChasis: Boolean(snapshot.chasis),
   createdBy: String(item.createdBy), createdByName: item.createdByName, createdAt: item.createdAt, updatedAt: item.updatedAt,
   audit: (item.audit ?? []).map((entry: any) => ({ _id: String(entry._id), action: entry.action, actorId: String(entry.actorId), actorName: entry.actorName, before: entry.before ?? {}, after: entry.after ?? {}, createdAt: entry.createdAt })),
 });
@@ -92,8 +92,8 @@ export class SolicitudCambioColorController {
       }
       if (estado === "rechazadas") filter.solicitudRechazada = true;
       const data = await SolicitudCambioColor.find(filter).sort({ createdAt: -1 }).lean();
-      const chasisByInterno = await findChasisByInternos([...new Set(data.map((item) => item.interno))]);
-      return res.json({ data: data.map((item) => format(item, chasisByInterno.get(item.interno) ?? "")) });
+      const snapshotsByInterno = await findUnidadSnapshotsByInternos([...new Set(data.map((item) => item.interno))]);
+      return res.json({ data: data.map((item) => format(item, snapshotsByInterno.get(item.interno))) });
     } catch (error) { logError("SolicitudCambioColorController.list"); console.error(error); return res.status(500).json({ message: "Error al listar las solicitudes" }); }
   };
 
@@ -104,7 +104,7 @@ export class SolicitudCambioColorController {
       const unidad = await findUnidad(interno);
       if (!unidad) return res.status(404).json({ error: "No se encontro una unidad 0 km para el interno indicado" });
       if (unidad.chasis) return res.status(400).json({ error: "La unidad ya fue pagada y no se puede cambiar porque tiene chasis asignado" });
-      return res.json({ data: unidad });
+      return res.json({ data: { ...unidad, version: unidad.nrofab ? `${unidad.version} · N° fab: ${unidad.nrofab}` : unidad.version } });
     } catch (error) { logError("SolicitudCambioColorController.unidad"); console.error(error); return res.status(500).json({ message: "Error al consultar el interno" }); }
   };
 
@@ -121,8 +121,8 @@ export class SolicitudCambioColorController {
       if ("error" in destination) return res.status(400).json({ error: destination.error });
       if (!vendedor) return res.status(400).json({ error: "El vendedor seleccionado no esta activo" });
       const name = actorName(req.user);
-      const after = { interno, solicitadoPor: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, versionDestino: destination.data.versionDestinoNombre, colorDestino: destination.data.colorDestinoNombre, colorDestino2: destination.data.colorDestino2Nombre, observaciones: destination.data.observaciones, solicitudPedida: false, solicitudCompletada: false, solicitudRechazada: false };
-      const data = await SolicitudCambioColor.create({ interno, solicitadoPorCodigo, solicitadoPorNombre: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, ...destination.data, createdBy: req.user._id, createdByName: name, audit: [{ action: solicitudCambioColorAuditAction.CREATED, actorId: req.user._id, actorName: name, before: {}, after }] });
+      const after = { interno, nrofab: unidad.nrofab, solicitadoPor: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, versionDestino: destination.data.versionDestinoNombre, colorDestino: destination.data.colorDestinoNombre, colorDestino2: destination.data.colorDestino2Nombre, observaciones: destination.data.observaciones, solicitudPedida: false, solicitudCompletada: false, solicitudRechazada: false };
+      const data = await SolicitudCambioColor.create({ interno, nrofab: unidad.nrofab, solicitadoPorCodigo, solicitadoPorNombre: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, ...destination.data, createdBy: req.user._id, createdByName: name, audit: [{ action: solicitudCambioColorAuditAction.CREATED, actorId: req.user._id, actorName: name, before: {}, after }] });
       return res.status(201).json({ message: "Solicitud creada correctamente", data: format(data.toObject()) });
     } catch (error) { logError("SolicitudCambioColorController.create"); console.error(error); return res.status(500).json({ message: "Error al crear la solicitud" }); }
   };
