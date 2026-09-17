@@ -10,6 +10,8 @@
 - La carga de cada gasto ahora se realiza mediante un diálogo, mientras el formulario principal conserva una tabla compacta de comprobantes agregados.
 - Las empresas se registran al confirmar cada gasto en el diálogo y se recuperan automáticamente al completar su CUIT.
 - Se unificó la dimensión de las acciones de detalle y el PDF ahora identifica al empleado y ordena los gastos de la fecha más antigua a la más reciente.
+- El PDF de rendiciones incorpora el membrete institucional de Nippon Car, alineado al utilizado en las proformas.
+- El membrete de rendiciones se simplificó a un banner gris claro, sin datos legales, para reducir consumo de tinta.
 
 ## 2026-09-17
 

@@ -173,3 +173,5 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - En `Rend. Gastos`, cada comprobante se carga desde un diálogo; la pantalla principal muestra el resumen y una tabla compacta de gastos ya agregados.
 - El diálogo de `Rend. Gastos` persiste la empresa canónica al confirmar el comprobante y consulta el nombre al completar los 11 dígitos del CUIT.
 - El PDF de `Rend. Gastos` etiqueta al creador como empleado y ordena los gastos por fecha ascendente.
+- El PDF de `Rend. Gastos` reutiliza el membrete institucional de Proformas, incluyendo logo y datos legales de Nippon Car.
+- El membrete de `Rend. Gastos` usa solo un banner gris claro, sin datos legales, para una impresión de bajo consumo.
