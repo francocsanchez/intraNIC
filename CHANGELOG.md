@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-17
+
+### Gestion de stock convencional · Sol. cambio color
+- El rechazo de solicitudes ahora se restringe exclusivamente a los roles Stock, Gerente y SuperAdmin.
+
 ## 2026-09-09
 
 ### Registro TestDrive · Comercial y Plan de ahorro

@@ -137,3 +137,12 @@ export function hasSolicitudCambioColorEstadoAccess(user: AuthUser) {
 
   return getNormalizedRoles(user).includes("stock");
 }
+
+export function hasSolicitudCambioColorRejectAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const normalizedRoles = getNormalizedRoles(user);
+  return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
+}

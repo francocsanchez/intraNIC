@@ -134,7 +134,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - Permite crear, editar y seguir solicitudes de cambio de version, hasta dos colores de destino y observaciones/N° OP. para unidades 0 km.
 - Todos los usuarios habilitados pueden crear y editar solicitudes; solo los roles `stock` y `superAdmin` pueden modificar sus estados. Cada accion queda registrada con usuario, fecha y valores antes/despues.
 - El flujo es secuencial: una solicitud solo se completa despues de marcarse como pedida.
-- Solo los roles `stock` y `superAdmin` pueden rechazar una solicitud; el rechazo es final, registra el motivo operativo y bloquea ediciones y cambios de estado.
+- Solo los roles `stock`, `gerente` y `superAdmin` pueden rechazar una solicitud; el rechazo es final, registra el motivo operativo y bloquea ediciones y cambios de estado.
 - No se permiten nuevas solicitudes para internos con chasis asignado. Las solicitudes existentes muestran una alerta cuando la unidad adquiere un chasis.
 
 ### Gestion de stock usados

@@ -10,6 +10,7 @@ import {
   hasRegistroTestDriveActionAccess,
   hasSystemConfigToggleAccess,
   hasSolicitudCambioColorEstadoAccess,
+  hasSolicitudCambioColorRejectAccess,
   hasSuperAdminRole,
 } from "@/constants/roleAccess";
 
@@ -96,5 +97,6 @@ export {
   hasRegistroTestDriveActionAccess,
   hasSystemConfigToggleAccess,
   hasSolicitudCambioColorEstadoAccess,
+  hasSolicitudCambioColorRejectAccess,
   hasSuperAdminRole,
 };

@@ -19,6 +19,11 @@ const positiveInteger = (value: unknown) => {
 const actorName = (user: NonNullable<Request["user"]>) => `${user.name} ${user.lastName}`.trim();
 const canUpdateEstado = (roles: unknown) =>
   hasSuperAdminRole(roles) || normalizeRoles(roles).includes("stock");
+const canRejectSolicitud = (roles: unknown) => {
+  if (hasSuperAdminRole(roles)) return true;
+  const normalizedRoles = normalizeRoles(roles);
+  return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
+};
 
 const findUnidad = async (interno: number) => {
   const rows = await sequelizeNIC.query<UnidadRow>(unidadCambioColorQuery(), {
@@ -168,7 +173,7 @@ export class SolicitudCambioColorController {
   static reject = async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: "Usuario no autenticado" });
-      if (!canUpdateEstado(req.user.role)) return res.status(403).json({ error: "Solo usuarios de Stock o superadministradores pueden rechazar solicitudes" });
+      if (!canRejectSolicitud(req.user.role)) return res.status(403).json({ error: "Solo usuarios de Stock, Gerencia o superadministradores pueden rechazar solicitudes" });
       const item = await SolicitudCambioColor.findById(req.params.id);
       if (!item) return res.status(404).json({ error: "Solicitud no encontrada" });
       if (item.solicitudRechazada) return res.status(400).json({ error: "La solicitud ya fue rechazada" });
