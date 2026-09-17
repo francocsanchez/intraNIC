@@ -178,10 +178,21 @@ export class SolicitudCambioColorController {
       if (!item) return res.status(404).json({ error: "Solicitud no encontrada" });
       if (item.solicitudRechazada) return res.status(400).json({ error: "La solicitud ya fue rechazada" });
       if (item.solicitudCompletada) return res.status(400).json({ error: "No se puede rechazar una solicitud completada" });
-      item.solicitudRechazada = true;
-      item.audit.push({ action: solicitudCambioColorAuditAction.REJECTED, actorId: new mongoose.Types.ObjectId(req.user._id), actorName: actorName(req.user), before: { solicitudRechazada: false }, after: { solicitudRechazada: true, motivo: "No se pudo completar la operacion" }, createdAt: new Date() });
-      await item.save();
-      return res.json({ message: "Solicitud rechazada correctamente", data: format(item.toObject()) });
+      const auditEntry = {
+        action: solicitudCambioColorAuditAction.REJECTED,
+        actorId: req.user._id,
+        actorName: actorName(req.user),
+        before: { solicitudRechazada: false },
+        after: { solicitudRechazada: true, motivo: "No se pudo completar la operacion" },
+        createdAt: new Date(),
+      };
+      const updated = await SolicitudCambioColor.findOneAndUpdate(
+        { _id: item._id, solicitudRechazada: { $ne: true }, solicitudCompletada: { $ne: true } },
+        { $set: { solicitudRechazada: true }, $push: { audit: auditEntry } },
+        { new: true },
+      );
+      if (!updated) return res.status(409).json({ error: "La solicitud cambió de estado. Actualiza la lista e intenta nuevamente" });
+      return res.json({ message: "Solicitud rechazada correctamente", data: format(updated.toObject()) });
     } catch (error) { logError("SolicitudCambioColorController.reject"); console.error(error); return res.status(500).json({ message: "Error al rechazar la solicitud" }); }
   };
 }

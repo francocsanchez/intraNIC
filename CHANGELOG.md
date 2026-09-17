@@ -2,8 +2,17 @@
 
 ## 2026-09-17
 
+### Comercial — Rend. Gastos
+
+- Se incorporó el módulo universal y privado `Rend. Gastos` para registrar rendiciones de viaje, con detalle de comprobantes, saldo automático y consulta exclusiva del usuario creador.
+- Se agregó el catálogo canónico de empresas por CUIT, que completa y protege el nombre ya registrado para normalizar futuras cargas.
+- Se habilitó la exportación bajo demanda a PDF A4 con tabla de gastos, resumen de importes y espacio de firma para supervisor.
+
+## 2026-09-17
+
 ### Gestion de stock convencional · Sol. cambio color
 - El rechazo de solicitudes ahora se restringe exclusivamente a los roles Stock, Gerente y SuperAdmin.
+- El rechazo se persiste mediante una actualización atómica, compatible con solicitudes existentes y con protección ante cambios simultáneos de estado.
 
 ## 2026-09-09
 
