@@ -2079,6 +2079,33 @@ export type MinutaGrupo = z.infer<typeof minutaGrupoSchema>;
 export type MinutaGroupsListResponse = z.infer<typeof minutaGroupsListResponseSchema>;
 export type MinutaGroupResponse = z.infer<typeof minutaGroupResponseSchema>;
 
+export const rendicionGastoItemSchema = z.object({
+  fecha: z.string(),
+  fechaLabel: z.string(),
+  empresaNombre: z.string(),
+  empresaCuit: z.string(),
+  descripcion: z.string(),
+  monto: z.number(),
+});
+export const rendicionGastoSchema = z.object({
+  _id: z.string(),
+  motivo: z.string(),
+  montoRetirado: z.number(),
+  totalGastado: z.number(),
+  saldo: z.number(),
+  saldoLabel: z.string(),
+  gastos: z.array(rendicionGastoItemSchema),
+  createdBy: z.string(),
+  createdAt: z.string(),
+  createdAtLabel: z.string(),
+});
+export const rendicionGastoListResponseSchema = z.object({ data: z.array(rendicionGastoSchema) });
+export const rendicionGastoResponseSchema = z.object({ data: rendicionGastoSchema, message: z.string().optional() });
+export const empresaGastoResponseSchema = z.object({ data: z.object({ cuit: z.string(), nombre: z.string() }).nullable() });
+export type RendicionGasto = z.infer<typeof rendicionGastoSchema>;
+export type RendicionGastoListResponse = z.infer<typeof rendicionGastoListResponseSchema>;
+export type RendicionGastoResponse = z.infer<typeof rendicionGastoResponseSchema>;
+
 export const unidadNegocioSchema = z.object({
   _id: z.string(),
   nombre: z.string(),

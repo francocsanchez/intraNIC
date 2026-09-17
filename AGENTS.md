@@ -170,3 +170,6 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - El Registro TestDrive compartido de Comercial y Plan de ahorro ordena por retiro descendente, permite filtrar por patente y separa por defecto los turnos por ocurrir del historial cuya fecha de devolución ya pasó.
 - `Rend. Gastos` vive en `/comercial/rendiciones-gastos`, está disponible para todo usuario autenticado sin depender de módulos ni roles y cada rendición solo puede ser consultada o exportada por su creador, incluido el caso `superAdmin`.
 - Las rendiciones de gastos son inmutables, guardan importes en centavos, resuelven empresas por CUIT canónico de 11 dígitos y exportan un PDF A4 con firma de supervisor.
+- En `Rend. Gastos`, cada comprobante se carga desde un diálogo; la pantalla principal muestra el resumen y una tabla compacta de gastos ya agregados.
+- El diálogo de `Rend. Gastos` persiste la empresa canónica al confirmar el comprobante y consulta el nombre al completar los 11 dígitos del CUIT.
+- El PDF de `Rend. Gastos` etiqueta al creador como empleado y ordena los gastos por fecha ascendente.

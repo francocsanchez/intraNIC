@@ -244,6 +244,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `configuracion`: configuracion del sistema
 - `testDrive`: ABM de unidades para test drive
 - `minutas`: modulo de minutas
+- `rendicionesGastos`: módulo universal y privado para rendiciones de gastos de viaje
 
 ## Roles
 Estado actual de definicion funcional:
@@ -483,3 +484,10 @@ Hasta nuevo aviso:
 - los roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion`, `stock`, `coordinador`, `entrega` y `accesorios`
 - no se deben asumir otros `role` fuera de esa lista hasta definir formalmente una nueva etapa
 - `superAdmin` siempre debe tener acceso total
+
+## Acceso específico de `Rend. Gastos`
+
+- Ruta principal: `/comercial/rendiciones-gastos`.
+- No depende de `modules`, de compañía ni de rol: todo usuario autenticado y habilitado puede acceder, crear y exportar sus propias rendiciones.
+- El listado, detalle y PDF se resuelven exclusivamente contra el usuario creador. Esta restricción también aplica a `superAdmin`.
+- Las rendiciones son inmutables: no existen acciones ni endpoints de edición o eliminación.

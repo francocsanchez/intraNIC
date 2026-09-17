@@ -7,6 +7,9 @@
 - Se incorporó el módulo universal y privado `Rend. Gastos` para registrar rendiciones de viaje, con detalle de comprobantes, saldo automático y consulta exclusiva del usuario creador.
 - Se agregó el catálogo canónico de empresas por CUIT, que completa y protege el nombre ya registrado para normalizar futuras cargas.
 - Se habilitó la exportación bajo demanda a PDF A4 con tabla de gastos, resumen de importes y espacio de firma para supervisor.
+- La carga de cada gasto ahora se realiza mediante un diálogo, mientras el formulario principal conserva una tabla compacta de comprobantes agregados.
+- Las empresas se registran al confirmar cada gasto en el diálogo y se recuperan automáticamente al completar su CUIT.
+- Se unificó la dimensión de las acciones de detalle y el PDF ahora identifica al empleado y ordena los gastos de la fecha más antigua a la más reciente.
 
 ## 2026-09-17
 

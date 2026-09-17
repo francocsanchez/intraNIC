@@ -1,0 +1,9 @@
+import { createRendicionGasto, type RendicionGastoPayload } from "@/api/rendicionesGastosAPI";
+import RendicionGastoForm from "@/components/rendiciones-gastos/RendicionGastoForm";
+import { paths } from "@/routes/paths";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+export default function RendicionGastoCreateView() { const navigate = useNavigate(); const queryClient = useQueryClient(); const mutation = useMutation({ mutationFn: createRendicionGasto, onSuccess: (response) => { toast.success(response.message || "Rendición guardada correctamente"); queryClient.invalidateQueries({ queryKey: ["rendiciones-gastos"] }); navigate(paths.convencional.rendicionesGastosDetalle(response.data._id)); }, onError: (error: Error) => toast.error(error.message) }); return <div className="font-preset space-y-3 bg-muted p-3"><section className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 md:flex-row md:justify-between"><div><p className="text-xs font-medium uppercase tracking-[.16em] text-muted-foreground">Comercial</p><h1 className="mt-1 text-xl font-semibold">Nueva rendición de gastos</h1><p className="mt-1 text-sm text-muted-foreground">Ingresá los comprobantes y revisá el saldo antes de guardar.</p></div><Link className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold hover:bg-secondary" to={paths.convencional.rendicionesGastos}><ArrowLeft size={16} />Volver</Link></section><RendicionGastoForm onSubmit={(payload: RendicionGastoPayload) => mutation.mutate(payload)} onCancel={() => navigate(paths.convencional.rendicionesGastos)} pending={mutation.isPending} /></div>; }

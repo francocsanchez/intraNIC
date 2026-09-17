@@ -3,7 +3,7 @@ import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Archive, BookMarked, BriefcaseBusiness, Calculator, CarFront, ChevronDown, ClipboardList, FileText, Package } from "lucide-react";
+import { Archive, BookMarked, BriefcaseBusiness, Calculator, CarFront, ChevronDown, ClipboardList, FileText, Package, ReceiptText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 type NavBarProps = {
@@ -32,11 +32,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
   const canViewProformas = isConvencional && hasModulePathAccess(user, "proformas", paths.convencional.proformas);
   const canViewMinutas = isConvencional && hasModulePathAccess(user, "minutas", paths.convencional.minutas);
   const canViewRegistroTestDrive = isConvencional && hasModulePathAccess(user, "registroTestDriveConvencional", paths.convencional.registroTestDrive);
+  const canViewRendicionesGastos = isConvencional && Boolean(user);
   const isCommercialPath =
     isConvencional &&
     (pathname.startsWith(`${paths.convencional.proformas}`) ||
       pathname.startsWith(`${paths.convencional.minutas}`) ||
-      pathname.startsWith(`${paths.convencional.registroTestDrive}`));
+      pathname.startsWith(`${paths.convencional.registroTestDrive}`) ||
+      pathname.startsWith(`${paths.convencional.rendicionesGastos}`));
   const isGestionPath = isConvencional
     ? pathname.startsWith("/stock/convencional/") || pathname.startsWith("/gestion/convencional/")
     : pathname.startsWith("/stock/usados/");
@@ -114,6 +116,13 @@ export default function NavBarNic({ negocio }: NavBarProps) {
       icon: CarFront,
       visible: canViewRegistroTestDrive,
       active: pathname === paths.convencional.registroTestDrive || pathname === paths.convencional.registroTestDriveCalendario,
+    },
+    {
+      label: "Rend. Gastos",
+      to: paths.convencional.rendicionesGastos,
+      icon: ReceiptText,
+      visible: canViewRendicionesGastos,
+      active: pathname === paths.convencional.rendicionesGastos || pathname.startsWith(`${paths.convencional.rendicionesGastos}/`),
     },
   ].filter((item) => item.visible);
 

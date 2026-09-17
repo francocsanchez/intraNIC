@@ -86,6 +86,9 @@ const MinutaCreateView = lazy(() => import("./views/comercial/MinutaCreateView")
 const MinutaEditView = lazy(() => import("./views/comercial/MinutaEditView"));
 const TestDriveRegistroView = lazy(() => import("./views/comercial/TestDriveRegistroView"));
 const TestDriveCalendarioView = lazy(() => import("./views/comercial/TestDriveCalendarioView"));
+const RendicionesGastosView = lazy(() => import("./views/comercial/RendicionesGastosView"));
+const RendicionGastoCreateView = lazy(() => import("./views/comercial/RendicionGastoCreateView"));
+const RendicionGastoDetailView = lazy(() => import("./views/comercial/RendicionGastoDetailView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
@@ -404,6 +407,12 @@ export default function Router() {
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.asignaciones} element={<AsignacionesView />} />
             </Route>
+          </Route>
+
+          <Route element={<NICLayout />}>
+            <Route path={paths.convencional.rendicionesGastos} element={<RendicionesGastosView />} />
+            <Route path={paths.convencional.rendicionesGastosNueva} element={<RendicionGastoCreateView />} />
+            <Route path={paths.convencional.rendicionesGastosDetalleRoute} element={<RendicionGastoDetailView />} />
           </Route>
 
           <Route element={<ModuleProtectedRoute allowedModules={["prediccionAsignaciones"]} />}>
