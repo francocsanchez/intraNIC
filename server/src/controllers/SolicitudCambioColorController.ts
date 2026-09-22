@@ -163,10 +163,26 @@ export class SolicitudCambioColorController {
       if (field === "solicitudCompletada" && value && !item.solicitudPedida) return res.status(400).json({ error: "Primero debe marcar la solicitud como pedida" });
       if (field === "solicitudPedida" && !value && item.solicitudCompletada) return res.status(400).json({ error: "No se puede desmarcar una solicitud completada" });
       if (item[field] === value) return res.json({ message: "El estado no tiene cambios", data: format(item.toObject()) });
-      const before = { [field]: item[field] }; item[field] = value;
-      item.audit.push({ action: field === "solicitudPedida" ? solicitudCambioColorAuditAction.REQUESTED_CHANGED : solicitudCambioColorAuditAction.COMPLETED_CHANGED, actorId: new mongoose.Types.ObjectId(req.user._id), actorName: actorName(req.user), before, after: { [field]: value }, createdAt: new Date() });
-      await item.save();
-      return res.json({ message: "Estado actualizado correctamente", data: format(item.toObject()) });
+      const auditEntry = {
+        action: field === "solicitudPedida" ? solicitudCambioColorAuditAction.REQUESTED_CHANGED : solicitudCambioColorAuditAction.COMPLETED_CHANGED,
+        actorId: req.user._id,
+        actorName: actorName(req.user),
+        before: { [field]: item[field] },
+        after: { [field]: value },
+        createdAt: new Date(),
+      };
+      const updated = await SolicitudCambioColor.findOneAndUpdate(
+        {
+          _id: item._id,
+          solicitudRechazada: { $ne: true },
+          ...(field === "solicitudCompletada" && value ? { solicitudPedida: true } : {}),
+          ...(field === "solicitudPedida" && !value ? { solicitudCompletada: { $ne: true } } : {}),
+        },
+        { $set: { [field]: value }, $push: { audit: auditEntry } },
+        { new: true },
+      );
+      if (!updated) return res.status(409).json({ error: "La solicitud cambió de estado. Actualiza la lista e intenta nuevamente" });
+      return res.json({ message: "Estado actualizado correctamente", data: format(updated.toObject()) });
     } catch (error) { logError("SolicitudCambioColorController.updateEstado"); console.error(error); return res.status(500).json({ message: "Error al actualizar el estado" }); }
   };
 

@@ -18,6 +18,7 @@
 ### Gestion de stock convencional · Sol. cambio color
 - El rechazo de solicitudes ahora se restringe exclusivamente a los roles Stock, Gerente y SuperAdmin.
 - El rechazo se persiste mediante una actualización atómica, compatible con solicitudes existentes y con protección ante cambios simultáneos de estado.
+- Los estados Pedida y Completada ahora también se actualizan de forma atómica, evitando fallas de auditoría para usuarios Stock y preservando su secuencia obligatoria.
 
 ## 2026-09-09
 
