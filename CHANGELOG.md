@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-23
+
+### Entregas
+
+- La búsqueda de turnos por interno ahora consulta la agenda completa sin depender del día, sucursal ni del formato histórico del interno, y conserva el modal con el detalle de entrega encontrado.
+- El resultado global se entrega aunque la sucursal encontrada no esté asignada al usuario, incluyendo internos históricos con ceros a la izquierda.
+
 ## 2026-09-17
 
 ### Comercial — Rend. Gastos

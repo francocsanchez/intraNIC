@@ -562,8 +562,24 @@ export class AgendaEntregaController {
     }
 
     try {
-      // La busqueda por interno no depende de los filtros diarios de la agenda.
-      const agenda = await AgendaEntrega.findOne({ tipoRegistro: "turno", interno })
+      // This read is global: it never scopes results to the authenticated user's branch.
+      // $convert also matches historical string internals, including values with leading zeroes.
+      const agenda = await AgendaEntrega.findOne({
+        tipoRegistro: "turno",
+        $expr: {
+          $eq: [
+            {
+              $convert: {
+                input: "$interno",
+                to: "long",
+                onError: null,
+                onNull: null,
+              },
+            },
+            interno,
+          ],
+        },
+      })
         .sort({ fechaAgenda: 1, horaAgenda: 1 })
         .populate("sucursal", "nombre direccion activa")
         .lean();
