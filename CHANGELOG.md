@@ -6,6 +6,7 @@
 
 - La búsqueda de turnos por interno ahora consulta la agenda completa sin depender del día, sucursal ni del formato histórico del interno, y conserva el modal con el detalle de entrega encontrado.
 - El resultado global se entrega aunque la sucursal encontrada no esté asignada al usuario, incluyendo internos históricos con ceros a la izquierda.
+- El filtro Interno de Registros ahora consulta solo al confirmar con Buscar o Enter, eliminando las recargas por cada dígito ingresado.
 
 ## 2026-09-17
 

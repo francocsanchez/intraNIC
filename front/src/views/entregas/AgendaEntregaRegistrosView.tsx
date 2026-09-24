@@ -1,6 +1,8 @@
 import { getAgendaEntregaLogs } from "@/api/entregasAPI";
 import AgendaEntregaLogsTable from "@/components/entregas/AgendaEntregaLogsTable";
+import { ActionButton } from "@/components/ui/action-button";
 import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 export default function AgendaEntregaRegistrosView() {
@@ -11,6 +13,11 @@ export default function AgendaEntregaRegistrosView() {
     to: "",
     page: 1,
   });
+  const [internoInput, setInternoInput] = useState("");
+
+  const applyInternoFilter = () => {
+    setFilters((current) => ({ ...current, interno: internoInput, page: 1 }));
+  };
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["entregas", "logs", filters],
@@ -54,13 +61,26 @@ export default function AgendaEntregaRegistrosView() {
 
       <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
         <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
-          <input
-            type="text"
-            placeholder="Interno"
-            value={filters.interno}
-            onChange={(event) => setFilters((current) => ({ ...current, interno: event.target.value, page: 1 }))}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-          />
+          <form
+            className="flex gap-1"
+            onSubmit={(event) => {
+              event.preventDefault();
+              applyInternoFilter();
+            }}
+          >
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Interno"
+              value={internoInput}
+              onChange={(event) => setInternoInput(event.target.value.replace(/\D/g, ""))}
+              className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+            />
+            <ActionButton type="submit" className="h-9 px-3" aria-label="Buscar por interno">
+              <Search size={15} />
+              Buscar
+            </ActionButton>
+          </form>
           <input
             type="text"
             placeholder="Usuario"
@@ -82,7 +102,10 @@ export default function AgendaEntregaRegistrosView() {
           />
           <button
             type="button"
-            onClick={() => setFilters({ interno: "", usuario: "", from: "", to: "", page: 1 })}
+            onClick={() => {
+              setInternoInput("");
+              setFilters({ interno: "", usuario: "", from: "", to: "", page: 1 });
+            }}
             className="h-9 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
           >
             Limpiar filtros
