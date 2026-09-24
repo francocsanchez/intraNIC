@@ -128,7 +128,7 @@ export default function StockDisponibleUsados() {
           <table className="min-w-full text-sm">
             <thead className="bg-muted text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
-                {['Interno', 'Dominio', 'Marca', 'Version', 'Color', 'Ano', 'Km', 'Recepcion', 'Precio venta'].map((heading) => <th key={heading} className="px-3 py-2 text-left">{heading}</th>)}
+                {['Interno', 'Dominio', 'Marca', 'Version', 'Color', 'Ano', 'Km', 'Recepcion', 'Precio venta', 'Observaciones'].map((heading) => <th key={heading} className="px-3 py-2 text-left">{heading}</th>)}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -143,9 +143,10 @@ export default function StockDisponibleUsados() {
                   <td className="px-3 py-1.5 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td>
                   <td className="px-3 py-1.5 text-muted-foreground">{diasEnStock(item.fechaRecepcion)}</td>
                   <td className="px-3 py-1.5 text-muted-foreground">{formatCurrency(item.precioVenta)}</td>
+                  <td className="min-w-64 whitespace-pre-wrap px-3 py-1.5 text-muted-foreground">{item.observaciones?.trim() || "-"}</td>
                 </tr>
               ))}
-              {!itemsFiltrados.length && <tr><td colSpan={9} className="px-3 py-8 text-center text-sm text-muted-foreground">No hay unidades para el filtro seleccionado.</td></tr>}
+              {!itemsFiltrados.length && <tr><td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">No hay unidades para el filtro seleccionado.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-24
+
+### Stock Usados
+
+- Stock disponible ahora muestra las observaciones de cada unidad directamente en una columna de la tabla.
+
 ## 2026-09-23
 
 ### Entregas

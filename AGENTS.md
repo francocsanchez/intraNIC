@@ -147,6 +147,7 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - Los descuentos por modelo y por sucursal de Operaciones Preventa se formatean por serie con porcentaje argentino a dos decimales (`xx,xx%`) en tooltip y eje.
 - Todo grafico ECharts debe resaltar la serie activa al hover: conservar explicitamente su color base y opacidad total, con `blur` suave para las restantes. El wrapper comun aplica este comportamiento seguro por defecto, evitando el estado automatico que volvía blancas o invisibles las series.
 - Las vistas de Stock Usados deben compartir el mismo hero integrado, grilla de filtros, tabla compacta y badges de color mediante `StockUsadosView` cuando la fuente de datos lo permita.
+- En `/stock/usados/disponible`, las observaciones se muestran directamente en una columna de la tabla; no se ocultan tras un botón o diálogo.
 - Stock Ingresos Usados conserva sus columnas especificas, pero debe replicar exactamente la estructura visual de `StockUsadosView`: carga y errores sobre `bg-muted`, hero integrado, filtros densos, filas `py-1.5`, badges uniformes y dialogo con tokens `popover`.
 - Los flujos de altas y edicion de Preventas y Proformas deben aplicar los tokens del preset tanto en la vista como en sus formularios y dialogos.
 - En formularios de Proformas, las unidades repetibles se separan con divisores dentro de una unica superficie, sin cards anidadas.
