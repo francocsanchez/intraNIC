@@ -229,6 +229,9 @@ export default function AnalisisStockView() {
   const totalMesesStockNegocio = totalsWithPed
     ? Number((totalsWithPed.promedioVenta > 0 ? totalsWithPed.total / totalsWithPed.promedioVenta : 0).toFixed(1))
     : 0;
+  const totalMesesStockFisico = totals
+    ? Number((totals.promedioVenta > 0 ? totalUnidades / totals.promedioVenta : 0).toFixed(1))
+    : 0;
   const handlePrint = () => {
     if (!totalsWithPed) {
       toast.error("No se pudo preparar la impresion");
@@ -294,7 +297,15 @@ export default function AnalisisStockView() {
         <div class="stock-card-value">${totalUnidades}</div>
       </div>
       <div class="stock-card stock-card-wide">
+        <div class="stock-card-label">Unidades + PED</div>
+        <div class="stock-card-value">${totalsWithPed.total}</div>
+      </div>
+      <div class="stock-card stock-card-wide">
         <div class="stock-card-label">M. stock negocio</div>
+        <div class="stock-card-value">${formatPromedioVenta(totalMesesStockFisico)}</div>
+      </div>
+      <div class="stock-card stock-card-wide">
+        <div class="stock-card-label">M. stock negocio + PED</div>
         <div class="stock-card-value">${formatPromedioVenta(totalMesesStockNegocio)}</div>
       </div>
     `;
@@ -342,7 +353,7 @@ export default function AnalisisStockView() {
 
             .stock-summary-secondary {
               display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr));
+              grid-template-columns: repeat(4, minmax(0, 1fr));
               border: 1px solid oklch(0.922 0 0);
               border-top: 0;
               margin: -6px 0 6px 0;
@@ -680,7 +691,17 @@ export default function AnalisisStockView() {
             <p className="mt-1 text-lg font-semibold leading-none tracking-tight text-foreground">{totalUnidades}</p>
           </div>
           <div className="min-w-0 border-b border-border px-3 py-2 md:border-l xl:border-b-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Unidades + PED</p>
+            <p className="mt-1 text-lg font-semibold leading-none tracking-tight text-foreground">{totalsWithPed?.total ?? 0}</p>
+          </div>
+          <div className="min-w-0 border-b border-border px-3 py-2 md:border-l xl:border-b-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">M. stock negocio</p>
+            <p className="mt-1 text-lg font-semibold leading-none tracking-tight text-foreground">
+              {formatPromedioVenta(totalMesesStockFisico)}
+            </p>
+          </div>
+          <div className="min-w-0 border-b border-border px-3 py-2 md:border-l xl:border-b-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">M. stock negocio + PED</p>
             <p className="mt-1 text-lg font-semibold leading-none tracking-tight text-foreground">
               {formatPromedioVenta(totalMesesStockNegocio)}
             </p>

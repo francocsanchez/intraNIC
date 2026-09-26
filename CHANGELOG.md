@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-26
+
+### Gestion de stock convencional · Analisis de stock
+
+- Se incorporaron los indicadores `Unidades + PED` y `M. stock negocio + PED` para diferenciar el stock físico de la proyección que incluye unidades pedidas.
+- El indicador `M. stock negocio` ahora refleja exclusivamente las unidades físicas, manteniendo ambos cálculos visibles también en la impresión.
+
 ## 2026-09-24
 
 ### Stock Usados

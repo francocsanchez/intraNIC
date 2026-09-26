@@ -9,6 +9,8 @@ Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una im
 
 Gestion de stock convencional incluye el modulo `Prediccion de asignaciones`, una consulta de NIPPON CAR para sugerir stock 0 km de igual modelo, version y color en operaciones activas, no facturadas y no entregadas. La seleccion prioriza ubicacion y luego antiguedad; admite el mismo mes solo con una ubicacion superior y ordena las operaciones por version. La tabla densa muestra cliente, vendedor, produccion `MM/AAAA` y ubicacion de ambos internos; resalta en verde el criterio prioritario y separa el stock actual del posible con un divisor vertical grueso. Es informativo y no ejecuta re-asignaciones.
 
+`Analisis de stock` diferencia el stock físico de la proyección con pedidos: los indicadores muestran `Unidades`, `Unidades + PED`, `M. stock negocio` y `M. stock negocio + PED`; la misma distinción debe conservarse en la impresión.
+
 El repositorio contiene dos aplicaciones independientes:
 
 - `front/`: SPA construida con React 19, TypeScript, Vite, Tailwind CSS, React Router y TanStack Query.
