@@ -927,6 +927,7 @@ export const saldoOperacionItemSchema = z.object({
   codigoOperacion: z.number().nullable(),
   clienteNombre: z.string(),
   vendedor: z.string(),
+  sucursal: z.string(),
   numeroFabrica: z.string(),
   pcioVenta: z.number().nullable(),
   bonifVenta: z.number().nullable(),
@@ -945,8 +946,9 @@ export const saldoOperacionItemSchema = z.object({
 const saldoOperacionPaginationSchema = z.object({
   page: z.number(),
   limit: z.number(),
-  total: z.number(),
-  totalPages: z.number(),
+  total: z.number().nullable(),
+  totalPages: z.number().nullable(),
+  hasNextPage: z.boolean(),
 });
 
 export const saldoOperacionResponseSchema = z.object({
@@ -954,10 +956,11 @@ export const saldoOperacionResponseSchema = z.object({
     section: z.enum(["conSaldo", "canceladas"]),
     estado: z.string().nullable(),
     ubicacion: z.string().nullable(),
+    sucursal: z.string().nullable(),
   }),
   data: z.array(saldoOperacionItemSchema),
   meta: z.object({
-    total: z.number(),
+    total: z.number().nullable(),
     saldosPorModelo: z
       .array(
         z.object({
@@ -975,7 +978,21 @@ export const saldoOperacionFiltersResponseSchema = z.object({
   meta: z.object({
     estados: z.array(z.string()),
     ubicaciones: z.array(z.string()),
+    sucursales: z.array(z.string()),
   }),
+});
+
+export const saldoOperacionSaldosPorModeloResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      modelo: z.string(),
+      saldo: z.number(),
+    }),
+  ),
+});
+
+export const saldoOperacionTotalResponseSchema = z.object({
+  total: z.number(),
 });
 
 export const saldoOperacionCanceladaResponseSchema = z.object({

@@ -8,6 +8,7 @@ import { startSaldoOperacionCleanupJob } from "./jobs/saldoOperacionCleanup.job"
 import { startTransferenciasImportJob } from "./jobs/transferenciasImport.job";
 import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
 import { startVinChasisExportJob } from "./jobs/vinChasisExport.job";
+import { OperacionesDashboardService } from "./services/operacionesDashboard.service";
 
 const port = process.env.PORT || 4002;
 
@@ -27,4 +28,10 @@ server.listen(Number(port), "0.0.0.0", () => {
   startTransferenciasImportJob();
   startUnidadesDealersJob();
   startVinChasisExportJob();
+
+  setTimeout(() => {
+    void OperacionesDashboardService.prewarmSaldoOperacion().catch((error) => {
+      console.error("No se pudo precalentar Saldo de operacion", error);
+    });
+  }, 5_000);
 });

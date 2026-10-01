@@ -9,6 +9,8 @@ import {
   analisisOperacionesPreventaResponseSchema,
   saldoOperacionCanceladaResponseSchema,
   saldoOperacionFiltersResponseSchema,
+  saldoOperacionSaldosPorModeloResponseSchema,
+  saldoOperacionTotalResponseSchema,
   saldoOperacionResponseSchema,
   operacionesDashboardResponseSchema,
   type AnalisisVendedorFiltersResponse,
@@ -22,6 +24,8 @@ import {
   type OperacionesDashboardResponse,
   type SaldoOperacionCanceladaResponse,
   type SaldoOperacionFiltersResponse,
+  type SaldoOperacionSaldosPorModeloResponse,
+  type SaldoOperacionTotalResponse,
   type SaldoOperacionResponse,
   analisisOperacionesPreventaUsadosMensualResponseSchema,
 } from "@/types/index";
@@ -49,6 +53,7 @@ type SaldoOperacionParams = {
   section?: "conSaldo" | "canceladas";
   estado?: string;
   ubicacion?: string;
+  sucursal?: string;
   page?: number;
   limit?: number;
 };
@@ -256,6 +261,7 @@ export async function getAnalisisVendedor(
 
 export async function getSaldoOperacion(
   params: SaldoOperacionParams = {},
+  signal?: AbortSignal,
 ): Promise<SaldoOperacionResponse> {
   try {
     const { data } = await api.get("/operaciones/saldo-operacion", {
@@ -263,9 +269,11 @@ export async function getSaldoOperacion(
         section: params.section ?? "conSaldo",
         estado: params.estado?.trim() ? params.estado : undefined,
         ubicacion: params.ubicacion?.trim() ? params.ubicacion : undefined,
+        sucursal: params.sucursal?.trim() ? params.sucursal : undefined,
         page: params.page ?? 1,
         limit: params.limit ?? 100,
       },
+      signal,
     });
 
     const parsed = saldoOperacionResponseSchema.safeParse(data);
@@ -331,5 +339,58 @@ export async function getSaldoOperacionFilters(): Promise<SaldoOperacionFiltersR
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener filtros de Saldo de operacion"));
+  }
+}
+
+export async function getSaldoOperacionSaldosPorModelo(
+  ubicacion?: string,
+  sucursal?: string,
+  signal?: AbortSignal,
+): Promise<SaldoOperacionSaldosPorModeloResponse> {
+  try {
+    const { data } = await api.get("/operaciones/saldo-operacion/saldos-por-modelo", {
+      params: {
+        ubicacion: ubicacion?.trim() ? ubicacion : undefined,
+        sucursal: sucursal?.trim() ? sucursal : undefined,
+      },
+      signal,
+    });
+    const parsed = saldoOperacionSaldosPorModeloResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener saldos por modelo"));
+  }
+}
+
+export async function getSaldoOperacionTotal(
+  params: SaldoOperacionParams = {},
+  signal?: AbortSignal,
+): Promise<SaldoOperacionTotalResponse> {
+  try {
+    const { data } = await api.get("/operaciones/saldo-operacion/total", {
+      params: {
+        section: params.section ?? "conSaldo",
+        estado: params.estado?.trim() ? params.estado : undefined,
+        ubicacion: params.ubicacion?.trim() ? params.ubicacion : undefined,
+        sucursal: params.sucursal?.trim() ? params.sucursal : undefined,
+      },
+      signal,
+    });
+    const parsed = saldoOperacionTotalResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el total de registros"));
   }
 }

@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-10-01
+
+### Analisis · Saldo de operacion
+
+- Se eliminó una consulta SQL duplicada por carga al obtener el total de registros dentro de la misma consulta paginada.
+- Los filtros visibles, las cancelaciones y el resumen por modelo usan cachés breves e invalidadas al modificar una cancelación; además se dejó de consultar el catálogo de estados que la interfaz no usa, reduciendo consultas repetidas a SIAC y MongoDB.
+- Marcar una operación como cancelada o con saldo actualiza la tabla y los totales en pantalla sin esperar una recarga completa; las demás páginas se refrescan al volver a utilizarlas.
+- La tabla deja de esperar el cálculo global de saldos por modelo y los filtros: ambos se cargan en segundo plano, para mostrar la primera página apenas responde SIAC.
+- Se agregó filtro por sucursal y su columna se muestra inmediatamente a la izquierda de Vendedor, tanto en la grilla como en la exportación Excel.
+- Se ocultó Número de fábrica de la tabla para ganar densidad visual —sin quitarlo del Excel— y se compactaron los filtros e indicadores por modelo.
+- Los filtros superiores se ordenaron como Sucursal, cantidad de registros, sección Con saldo/Canceladas y estados operativos; el contador se presenta en una sola línea.
+- El listado ya no excluye operaciones facturadas; solo se excluyen las operaciones entregadas.
+- La carga inicial evita el cruce costoso con movimientos de pedido cuando no se filtró por estado operativo; ese cruce se realiza únicamente al seleccionar una ubicación.
+- El conteo total se desacopló de la primera página: la tabla se muestra sin esperar el recorrido completo y el contador se actualiza luego en segundo plano.
+- Los filtros y saldos por modelo se difieren hasta mostrar la tabla; el resumen presenta un spinner mientras se calcula para no competir con la primera carga.
+- Los cambios de estado operativo ahora cancelan las solicitudes de saldo, total y resumen que quedaron obsoletas; la búsqueda de ubicación usa la igualdad directa del interno para aprovechar índices de SQL Server.
+- La primera página sin filtros pagina `csqUnidades` antes de resolver operación, modelo y sucursal, limitando esos cruces a las filas visibles.
+- La misma paginación temprana se extendió a los filtros de ubicación y sucursal: los candidatos se acotan desde `movnped` u operaciones SIAC antes de armar el detalle de la tabla.
+- El contador general sin filtros dejó de cruzar operación y sucursal, porque esos datos no intervienen en el total; se conserva la carga diferida de indicadores y tarjetas.
+- Al iniciar el servidor se precalienta la primera página y los datos secundarios del tablero. La respuesta inicial, total y saldos por modelo usan cachés de 30 segundos e invalidación al modificar cancelaciones, eliminando la espera de la primera consulta fría de SQL.
+
 ## 2026-09-26
 
 ### Gestion de stock convencional · Analisis de stock

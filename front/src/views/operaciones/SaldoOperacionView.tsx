@@ -3,11 +3,13 @@ import {
   exportSaldoOperacion,
   getSaldoOperacion,
   getSaldoOperacionFilters,
+  getSaldoOperacionSaldosPorModelo,
+  getSaldoOperacionTotal,
   updateSaldoOperacionCancelada,
 } from "@/services/operacionesService";
-import type { SaldoOperacionItem } from "@/types/index";
+import type { SaldoOperacionItem, SaldoOperacionResponse } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, DollarSign, Download, Inbox } from "lucide-react";
+import { AlertCircle, DollarSign, Download, Inbox, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -85,25 +87,54 @@ export default function SaldoOperacionView() {
   const queryClient = useQueryClient();
   const [section, setSection] = useState<SaldoOperacionSection>("conSaldo");
   const [ubicacion, setUbicacion] = useState<string>(UBICACION_TODAS);
+  const [sucursal, setSucursal] = useState<string>(UBICACION_TODAS);
   const [page, setPage] = useState(1);
   const [updatingOperacion, setUpdatingOperacion] = useState<number | null>(null);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["saldo-operacion", section, ubicacion, sucursal, page],
+    queryFn: ({ signal }) =>
+      getSaldoOperacion({
+        section,
+        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
+        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
+        page,
+        limit: PAGE_SIZE,
+      }, signal),
+    refetchOnWindowFocus: false,
+  });
 
   const filtersQuery = useQuery({
     queryKey: ["saldo-operacion-filtros"],
     queryFn: () => getSaldoOperacionFilters(),
+    enabled: Boolean(data),
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["saldo-operacion", section, ubicacion, page],
-    queryFn: () =>
-      getSaldoOperacion({
+  const saldosPorModeloQuery = useQuery({
+    queryKey: ["saldo-operacion-saldos-por-modelo", ubicacion, sucursal],
+    queryFn: ({ signal }) =>
+      getSaldoOperacionSaldosPorModelo(
+        ubicacion === UBICACION_TODAS ? undefined : ubicacion,
+        sucursal === UBICACION_TODAS ? undefined : sucursal,
+        signal,
+      ),
+    enabled: section === "conSaldo" && Boolean(data),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const totalQuery = useQuery({
+    queryKey: ["saldo-operacion-total", section, ubicacion, sucursal],
+    queryFn: ({ signal }) =>
+      getSaldoOperacionTotal({
         section,
         ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
-        page,
-        limit: PAGE_SIZE,
-      }),
+        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
+      }, signal),
+    enabled: Boolean(data),
+    staleTime: 30_000,
     refetchOnWindowFocus: false,
   });
 
@@ -120,9 +151,50 @@ export default function SaldoOperacionView() {
     onMutate: ({ codigoOperacion }) => {
       setUpdatingOperacion(codigoOperacion);
     },
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       toast.success(response.message);
-      queryClient.invalidateQueries({ queryKey: ["saldo-operacion"] });
+      queryClient.setQueryData<SaldoOperacionResponse>(
+        ["saldo-operacion", section, ubicacion, sucursal, page],
+        (current) => {
+          if (!current) {
+            return current;
+          }
+
+          const updatedRow = current.data.find((item) => item.codigoOperacion === variables.codigoOperacion);
+          if (!updatedRow) {
+            return current;
+          }
+
+          const saldo = calculateSaldo(updatedRow.total, updatedRow.senas, updatedRow.usado, updatedRow.creditoBanco) ?? 0;
+          const saldosPorModelo = current.meta.saldosPorModelo
+            .map((item) =>
+              section === "conSaldo" && item.modelo === (updatedRow.modeloGeneral.trim() || "SIN MODELO")
+                ? { ...item, saldo: item.saldo - saldo }
+                : item,
+            )
+            .filter((item) => item.saldo > 0);
+
+          return {
+            ...current,
+            data: current.data.filter((item) => item.codigoOperacion !== variables.codigoOperacion),
+            meta: {
+              ...current.meta,
+              total: current.meta.total === null ? null : Math.max(0, current.meta.total - 1),
+              saldosPorModelo,
+            },
+            pagination: {
+              ...current.pagination,
+              total: current.pagination.total === null ? null : Math.max(0, current.pagination.total - 1),
+              totalPages:
+                current.pagination.total === null
+                  ? null
+                  : Math.max(1, Math.ceil(Math.max(0, current.pagination.total - 1) / current.pagination.limit)),
+            },
+          };
+        },
+      );
+      queryClient.invalidateQueries({ queryKey: ["saldo-operacion"], refetchType: "inactive" });
+      queryClient.invalidateQueries({ queryKey: ["saldo-operacion-saldos-por-modelo"] });
     },
     onError: (mutationError: Error) => {
       toast.error(mutationError.message);
@@ -137,6 +209,7 @@ export default function SaldoOperacionView() {
       exportSaldoOperacion({
         section,
         ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
+        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
       }),
     onSuccess: (blob) => {
       const today = new Date().toISOString().slice(0, 10);
@@ -160,9 +233,9 @@ export default function SaldoOperacionView() {
     }
   }, [filtersQuery.error]);
 
-  if (isLoading || filtersQuery.isLoading) return <Loading />;
+  if (isLoading) return <Loading />;
 
-  if (isError || filtersQuery.isError) {
+  if (isError) {
     return (
       <div className="w-full px-4 py-6">
         <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
@@ -171,50 +244,47 @@ export default function SaldoOperacionView() {
             <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Saldo de operacion</h1>
           </div>
           <p className="mt-2 text-sm text-destructive">
-            {error instanceof Error
-              ? error.message
-              : filtersQuery.error instanceof Error
-                ? filtersQuery.error.message
-                : "No fue posible obtener los registros solicitados."}
+            {error instanceof Error ? error.message : "No fue posible obtener los registros solicitados."}
           </p>
         </section>
       </div>
     );
   }
 
-  if (!data || !filtersQuery.data) return <Loading />;
+  if (!data) return <Loading />;
 
-  const saldosPorModelo =
-    data.meta.saldosPorModelo.length > 0
-      ? data.meta.saldosPorModelo
-      : Array.from(
-          data.data.reduce(
-            (accumulator, row) => {
-              if (section !== "conSaldo") {
-                return accumulator;
-              }
+  const totalRegistros = totalQuery.data?.total ?? data.pagination.total;
+  const totalPages = totalRegistros === null ? null : Math.max(1, Math.ceil(totalRegistros / data.pagination.limit));
 
-              const saldo = calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco);
-
-              if (saldo === null || saldo <= 0) {
-                return accumulator;
-              }
-
-              const modelo = row.modeloGeneral.trim() || "SIN MODELO";
-              accumulator.set(modelo, (accumulator.get(modelo) ?? 0) + saldo);
-              return accumulator;
-            },
-            new Map<string, number>(),
-          ),
-        )
-          .map(([modelo, saldo]) => ({ modelo, saldo }))
-          .sort((a, b) => b.saldo - a.saldo || a.modelo.localeCompare(b.modelo, "es"));
+  const saldosPorModelo = saldosPorModeloQuery.data?.data ?? [];
 
   return (
-    <div className="w-full space-y-4 px-4 py-4">
-      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-lg bg-muted p-1">
+    <div className="w-full space-y-3 px-4 py-3">
+      <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={sucursal}
+            onChange={(event) => {
+              setSucursal(event.target.value);
+              setPage(1);
+            }}
+            aria-label="Filtrar por sucursal"
+            className="h-8 min-w-40 rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value={UBICACION_TODAS}>Todas las sucursales</option>
+            {(filtersQuery.data?.meta.sucursales ?? []).map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex h-8 items-center gap-1 rounded-md bg-muted px-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Registros</p>
+            <p className="text-sm font-semibold leading-none tabular-nums text-foreground">{totalRegistros ?? "…"}</p>
+          </div>
+
+          <div className="inline-flex rounded-md bg-muted p-0.5">
             <button
               type="button"
               onClick={() => {
@@ -222,7 +292,7 @@ export default function SaldoOperacionView() {
                 setPage(1);
               }}
               className={[
-                "rounded-md px-3 py-1.5 text-primary font-semibold uppercase tracking-wide transition-colors",
+                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
                 section === "conSaldo" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
@@ -235,7 +305,7 @@ export default function SaldoOperacionView() {
                 setPage(1);
               }}
               className={[
-                "rounded-md px-3 py-1.5 text-primary font-semibold uppercase tracking-wide transition-colors",
+                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
                 section === "canceladas" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
@@ -243,12 +313,7 @@ export default function SaldoOperacionView() {
             </button>
           </div>
 
-          <div className="rounded-lg bg-muted px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Registros</p>
-            <p className="mt-0.5 text-xl font-semibold tracking-tight text-foreground">{data.pagination.total}</p>
-          </div>
-
-          <div className="flex flex-wrap rounded-lg bg-muted p-1">
+          <div className="flex flex-wrap rounded-md bg-muted p-0.5">
             <button
               type="button"
               onClick={() => {
@@ -256,13 +321,13 @@ export default function SaldoOperacionView() {
                 setPage(1);
               }}
               className={[
-                "rounded-md px-3 py-1.5 text-primary font-semibold uppercase tracking-wide transition-colors",
+                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
                 ubicacion === UBICACION_TODAS ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
               Todas
             </button>
-            {filtersQuery.data.meta.ubicaciones.map((item) => (
+            {(filtersQuery.data?.meta.ubicaciones ?? []).map((item) => (
               <button
                 key={item}
                 type="button"
@@ -271,7 +336,7 @@ export default function SaldoOperacionView() {
                   setPage(1);
                 }}
                 className={[
-                  "rounded-md px-3 py-1.5 text-primary font-semibold uppercase tracking-wide transition-colors",
+                  "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
                   ubicacion === item ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
@@ -286,28 +351,40 @@ export default function SaldoOperacionView() {
             disabled={exportMutation.isPending}
             title={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
             aria-label={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
-            className="inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download size={14} />
           </button>
         </div>
       </section>
 
-      {section === "conSaldo" && saldosPorModelo.length ? (
-        <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold text-foreground">Saldos restantes a cobrar por modelo</h2>
-            <span className="text-primary text-muted-foreground">{saldosPorModelo.length} modelos</span>
+      {section === "conSaldo" ? (
+        <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <h2 className="text-xs font-semibold text-foreground">Saldos restantes a cobrar por modelo</h2>
+            {saldosPorModeloQuery.isFetching ? (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <LoaderCircle className="size-3 animate-spin" /> Calculando
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">{saldosPorModelo.length} modelos</span>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            {saldosPorModelo.map((item) => (
-              <div key={item.modelo} className="rounded-lg border border-border bg-muted px-3 py-2">
-                <p className="truncate text-primary font-semibold uppercase tracking-[0.14em] text-muted-foreground">{item.modelo}</p>
-                <p className="mt-1 text-lg font-semibold tracking-tight text-destructive">{formatMoney(item.saldo)}</p>
-              </div>
-            ))}
-          </div>
+          {saldosPorModeloQuery.isFetching ? (
+            <div className="flex h-12 items-center justify-center rounded-md border border-border bg-muted text-xs text-muted-foreground">
+              <LoaderCircle className="mr-2 size-4 animate-spin" /> Calculando saldos por modelo...
+            </div>
+          ) : saldosPorModelo.length ? (
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
+              {saldosPorModelo.map((item) => (
+                <div key={item.modelo} className="rounded-md border border-border bg-muted px-2 py-1">
+                  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{item.modelo}</p>
+                  <p className="text-base font-semibold leading-tight tracking-tight text-destructive">{formatMoney(item.saldo)}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
@@ -327,8 +404,9 @@ export default function SaldoOperacionView() {
         <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <div className="border-b border-border px-3 py-2">
             <p className="text-sm font-medium text-muted-foreground">
-              {data.pagination.total} registros encontrados en {section === "conSaldo" ? "Con saldo" : "Canceladas"}
+              {totalRegistros === null ? "Registros" : `${totalRegistros} registros encontrados`} en {section === "conSaldo" ? "Con saldo" : "Canceladas"}
               {ubicacion !== UBICACION_TODAS ? ` para ${ubicacion}.` : "."}
+              {sucursal !== UBICACION_TODAS ? ` Sucursal: ${sucursal}.` : ""}
             </p>
           </div>
 
@@ -343,7 +421,7 @@ export default function SaldoOperacionView() {
                     Operacion
                   </th>
                   <th
-                    colSpan={8}
+                    colSpan={10}
                     className="border-b border-border px-2 py-1 text-right text-primary font-semibold uppercase tracking-[0.14em] text-muted-foreground"
                   >
                     Resumen economico
@@ -354,9 +432,6 @@ export default function SaldoOperacionView() {
                     OP
                   </th>
                   <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Numero Fabrica
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                     Version
                   </th>
                   <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
@@ -364,6 +439,9 @@ export default function SaldoOperacionView() {
                   </th>
                   <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                     Cliente
+                  </th>
+                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                    Sucursal
                   </th>
                   <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                     Vendedor
@@ -410,10 +488,10 @@ export default function SaldoOperacionView() {
                   return (
                     <tr key={buildRowKey(row)} className="hover:bg-muted/70">
                       <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.codigoOperacion ?? "-"}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 font-medium text-foreground">{row.numeroFabrica}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.version || "-"}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.modeloGeneral || "-"}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.clienteNombre}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.sucursal}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.vendedor}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.pcioVenta)}</td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.bonifVenta)}</td>
@@ -476,10 +554,10 @@ export default function SaldoOperacionView() {
         </section>
       )}
 
-      {data.pagination.totalPages > 1 ? (
+      {data.pagination.page > 1 || data.pagination.hasNextPage ? (
         <section className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
           <p className="text-sm text-muted-foreground">
-            Pagina {data.pagination.page} de {data.pagination.totalPages}
+            Pagina {data.pagination.page}{totalPages === null ? "" : ` de ${totalPages}`}
           </p>
 
           <div className="flex gap-2">
@@ -493,8 +571,8 @@ export default function SaldoOperacionView() {
             </button>
             <button
               type="button"
-              onClick={() => setPage((current) => Math.min(data.pagination.totalPages, current + 1))}
-              disabled={data.pagination.page >= data.pagination.totalPages}
+              onClick={() => setPage((current) => current + 1)}
+              disabled={!data.pagination.hasNextPage}
               className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               Siguiente

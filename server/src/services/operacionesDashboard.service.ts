@@ -22,9 +22,11 @@ import {
   analisisOperacionesPreventaUsadosMensualQuery,
   operacionesDashboardQuery,
   saldoOperacionCountQuery,
-  saldoOperacionEstadosQuery,
+  saldoOperacionFastPageQuery,
+  saldoOperacionFastCountQuery,
   saldoOperacionQuery,
   saldoOperacionSaldosPorModeloQuery,
+  saldoOperacionSucursalesQuery,
   saldoOperacionUbicacionesQuery,
 } from "../controllers/querys/operaciones.query";
 
@@ -224,6 +226,7 @@ type AnalisisOperacionPreventaItem = {
 type AnalisisOperacionPreventaFormaPagoRow = {
   numero: number | string | null;
   vendedor: string | null;
+  sucursal: string | null;
   usados: number | null;
   contado: number | null;
   cheque: number | null;
@@ -361,6 +364,7 @@ type SaldoOperacionRow = {
   codigo_operacion: number | string | null;
   cliente_nombre: string | null;
   vendedor: string | null;
+  sucursal: string | null;
   numero_fabrica: string | null;
   pcio_venta: number | string | null;
   bonif_venta: number | string | null;
@@ -378,6 +382,7 @@ type SaldoOperacionItem = {
   codigoOperacion: number | null;
   clienteNombre: string;
   vendedor: string;
+  sucursal: string;
   numeroFabrica: string;
   pcioVenta: number | null;
   bonifVenta: number | null;
@@ -410,17 +415,19 @@ type SaldoOperacionResponse = {
     section: SaldoOperacionSection;
     estado: string | null;
     ubicacion: string | null;
+    sucursal: string | null;
   };
   data: SaldoOperacionItem[];
   meta: {
-    total: number;
+    total: number | null;
     saldosPorModelo: SaldoOperacionSaldoModeloItem[];
   };
   pagination: {
     page: number;
     limit: number;
-    total: number;
-    totalPages: number;
+    total: number | null;
+    totalPages: number | null;
+    hasNextPage: boolean;
   };
 };
 
@@ -428,6 +435,7 @@ type SaldoOperacionFiltersResponse = {
   meta: {
     estados: string[];
     ubicaciones: string[];
+    sucursales: string[];
   };
 };
 
@@ -555,6 +563,25 @@ const MONTH_LABELS = [
 ] as const;
 
 export class OperacionesDashboardService {
+  private static saldoOperacionCanceladasCache: { expiresAt: number; codigos: number[] } | null = null;
+  private static saldoOperacionFiltersCache: { expiresAt: number; value: SaldoOperacionFiltersResponse } | null = null;
+  private static saldoOperacionSaldosCache = new Map<
+    string,
+    { expiresAt: number; value: SaldoOperacionSaldoModeloItem[] }
+  >();
+  private static saldoOperacionPageCache = new Map<
+    string,
+    { expiresAt: number; value: SaldoOperacionResponse }
+  >();
+  private static saldoOperacionTotalCache = new Map<string, { expiresAt: number; value: number }>();
+
+  private static clearSaldoOperacionCache() {
+    this.saldoOperacionCanceladasCache = null;
+    this.saldoOperacionSaldosCache.clear();
+    this.saldoOperacionPageCache.clear();
+    this.saldoOperacionTotalCache.clear();
+  }
+
   static async getAnalisisVendedorFilters(): Promise<AnalisisVendedorFiltersResponse> {
     const vendedores = await sequelizeNIC.query<{ vendedor: string; codigo: number }>(getVendedoresActivosNuevoNic(), {
       type: QueryTypes.SELECT,
@@ -1239,74 +1266,85 @@ export class OperacionesDashboardService {
   }
 
   private static async getSaldoOperacionCanceladasCodigos() {
-    const rows = await SaldoOperacionCancelada.find({}, { codigoOperacion: 1 }).lean();
+    if (this.saldoOperacionCanceladasCache && this.saldoOperacionCanceladasCache.expiresAt > Date.now()) {
+      return this.saldoOperacionCanceladasCache.codigos;
+    }
 
-    return Array.from(
+    const rows = await SaldoOperacionCancelada.find({}, { codigoOperacion: 1 }).lean();
+    const codigos = Array.from(
       new Set(
         rows
           .map((item) => Number(item.codigoOperacion))
           .filter((item) => Number.isInteger(item) && item > 0),
       ),
     ).sort((a, b) => a - b);
+
+    this.saldoOperacionCanceladasCache = {
+      codigos,
+      expiresAt: Date.now() + 30_000,
+    };
+
+    return codigos;
   }
 
   private static async getSaldoOperacionRows(params: {
     section: SaldoOperacionSection;
     estado: string | null;
     ubicacion: string | null;
+    sucursal: string | null;
     page?: number;
     limit?: number;
     paginated: boolean;
+    codigosCancelados?: number[];
   }) {
     const normalizedEstado = normalizeNullableString(params.estado);
     const normalizedUbicacion = normalizeNullableString(params.ubicacion);
+    const normalizedSucursal = normalizeNullableString(params.sucursal);
     const section = normalizeSaldoOperacionSection(params.section);
-    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
+    const codigosCancelados = params.codigosCancelados ?? (await this.getSaldoOperacionCanceladasCodigos());
     const cancelacionClause = buildSaldoOperacionCancelacionClause(codigosCancelados, section);
     const replacements = {
       estado: normalizedEstado ?? undefined,
       ubicacion: normalizedUbicacion ?? undefined,
+      sucursal: normalizedSucursal ?? undefined,
       offset: params.paginated ? (((params.page ?? 1) - 1) * (params.limit ?? 100)) : 0,
-      limit: params.limit ?? 100,
+      limit: params.paginated ? (params.limit ?? 100) + 1 : params.limit ?? 100,
     };
 
-    const [rows, countRows] = await Promise.all([
-      sequelizeNIC.query<SaldoOperacionRow>(
-        saldoOperacionQuery(
-          Boolean(normalizedEstado),
-          Boolean(normalizedUbicacion),
-          cancelacionClause,
-          params.paginated,
-        ),
-        {
-          type: QueryTypes.SELECT,
-          replacements,
-        },
-      ),
-      sequelizeNIC.query<{ total: number | string | null }>(
-        saldoOperacionCountQuery(
-          Boolean(normalizedEstado),
-          Boolean(normalizedUbicacion),
-          cancelacionClause,
-        ),
-        {
-          type: QueryTypes.SELECT,
-          replacements: {
-            estado: normalizedEstado ?? undefined,
-            ubicacion: normalizedUbicacion ?? undefined,
-          },
-        },
-      ),
-    ]);
+    const canUseFastPageQuery = params.paginated && !normalizedEstado;
+    const useUbicacionJoin =
+      normalizedUbicacion !== null && normalizedUbicacion !== "STOCK CONCESIONARIO";
+    const rows = await sequelizeNIC.query<SaldoOperacionRow>(
+      canUseFastPageQuery
+        ? saldoOperacionFastPageQuery(
+            cancelacionClause,
+            Boolean(normalizedUbicacion),
+            useUbicacionJoin,
+            Boolean(normalizedSucursal),
+          )
+        : saldoOperacionQuery(
+            Boolean(normalizedEstado),
+            Boolean(normalizedUbicacion),
+            Boolean(normalizedSucursal),
+            cancelacionClause,
+            params.paginated,
+          ),
+      {
+        type: QueryTypes.SELECT,
+        replacements,
+      },
+    );
 
     const canceladasSet = new Set(codigosCancelados);
-    const data = rows.map((row) => {
+    const pageRows = params.paginated ? rows.slice(0, params.limit ?? 100) : rows;
+    const data = pageRows.map((row) => {
       const codigoOperacion = normalizeNullableNumber(row.codigo_operacion);
 
       return {
         codigoOperacion,
         clienteNombre: normalizeNullableString(row.cliente_nombre) ?? "-",
         vendedor: normalizeNullableString(row.vendedor) ?? "-",
+        sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
         numeroFabrica: normalizeNullableString(row.numero_fabrica) ?? "-",
         pcioVenta: normalizeNullableNumber(row.pcio_venta),
         bonifVenta: normalizeNullableNumber(row.bonif_venta),
@@ -1330,111 +1368,216 @@ export class OperacionesDashboardService {
       section,
       estado: normalizedEstado,
       ubicacion: normalizedUbicacion,
+      sucursal: normalizedSucursal,
       data,
-      total: normalizeNullableNumber(countRows[0]?.total) ?? 0,
+      hasNextPage: params.paginated && rows.length > (params.limit ?? 100),
     };
   }
 
-  private static async getSaldoOperacionSaldosPorModelo(params: {
+  private static async fetchSaldoOperacionSaldosPorModelo(params: {
     ubicacion: string | null;
+    sucursal: string | null;
+    codigosCancelados: number[];
   }): Promise<SaldoOperacionSaldoModeloItem[]> {
     const normalizedUbicacion = normalizeNullableString(params.ubicacion);
-    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
-    const cancelacionClause = buildSaldoOperacionCancelacionClause(codigosCancelados, "conSaldo");
+    const normalizedSucursal = normalizeNullableString(params.sucursal);
+    const cacheKey = `${normalizedUbicacion ?? "__TODAS__"}::${normalizedSucursal ?? "__TODAS__"}`;
+    const cached = this.saldoOperacionSaldosCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
+    const cancelacionClause = buildSaldoOperacionCancelacionClause(params.codigosCancelados, "conSaldo");
 
     const rows = await sequelizeNIC.query<SaldoOperacionSaldoModeloRow>(
-      saldoOperacionSaldosPorModeloQuery(Boolean(normalizedUbicacion), cancelacionClause),
+      saldoOperacionSaldosPorModeloQuery(Boolean(normalizedUbicacion), Boolean(normalizedSucursal), cancelacionClause),
       {
         type: QueryTypes.SELECT,
         replacements: {
           ubicacion: normalizedUbicacion ?? undefined,
+          sucursal: normalizedSucursal ?? undefined,
         },
       },
     );
 
-    return rows
+    const value = rows
       .map((row) => ({
         modelo: normalizeNullableString(row.modelo_general) ?? "SIN MODELO",
         saldo: normalizeNullableNumber(row.saldo_total) ?? 0,
       }))
       .filter((row) => row.saldo > 0);
+
+    this.saldoOperacionSaldosCache.set(cacheKey, {
+      value,
+      expiresAt: Date.now() + 30_000,
+    });
+
+    return value;
   }
 
   static async getSaldoOperacion(
     section: string | null,
     estado: string | null,
     ubicacion: string | null,
+    sucursal: string | null,
     page: number,
     limit: number,
   ): Promise<SaldoOperacionResponse> {
     const safePage = Number.isInteger(page) && page > 0 ? page : 1;
     const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 200) : 100;
-    const [result, saldosPorModelo] = await Promise.all([
-      this.getSaldoOperacionRows({
-        section: normalizeSaldoOperacionSection(section),
-        estado,
-        ubicacion,
-        page: safePage,
-        limit: safeLimit,
-        paginated: true,
-      }),
-      this.getSaldoOperacionSaldosPorModelo({
-        ubicacion,
-      }),
-    ]);
-    const totalPages = Math.max(1, Math.ceil(result.total / safeLimit));
+    const cacheKey = [
+      normalizeSaldoOperacionSection(section),
+      normalizeNullableString(estado) ?? "__TODOS__",
+      normalizeNullableString(ubicacion) ?? "__TODAS__",
+      normalizeNullableString(sucursal) ?? "__TODAS__",
+      safePage,
+      safeLimit,
+    ].join("::");
+    const cached = this.saldoOperacionPageCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
 
-    return {
+    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
+    const result = await this.getSaldoOperacionRows({
+      section: normalizeSaldoOperacionSection(section),
+      estado,
+      ubicacion,
+      sucursal,
+      page: safePage,
+      limit: safeLimit,
+      paginated: true,
+      codigosCancelados,
+    });
+    const value = {
       filters: {
         section: result.section,
         estado: result.estado,
         ubicacion: result.ubicacion,
+        sucursal: result.sucursal,
       },
       data: result.data,
       meta: {
-        total: result.total,
-        saldosPorModelo,
+        total: null,
+        saldosPorModelo: [],
       },
       pagination: {
         page: safePage,
         limit: safeLimit,
-        total: result.total,
-        totalPages,
+        total: null,
+        totalPages: null,
+        hasNextPage: result.hasNextPage,
       },
     };
+    this.saldoOperacionPageCache.set(cacheKey, {
+      value,
+      expiresAt: Date.now() + 30_000,
+    });
+
+    return value;
+  }
+
+  static async getSaldoOperacionTotal(
+    section: string | null,
+    estado: string | null,
+    ubicacion: string | null,
+    sucursal: string | null,
+  ): Promise<number> {
+    const normalizedEstado = normalizeNullableString(estado);
+    const normalizedUbicacion = normalizeNullableString(ubicacion);
+    const normalizedSucursal = normalizeNullableString(sucursal);
+    const cacheKey = [
+      normalizeSaldoOperacionSection(section),
+      normalizedEstado ?? "__TODOS__",
+      normalizedUbicacion ?? "__TODAS__",
+      normalizedSucursal ?? "__TODAS__",
+    ].join("::");
+    const cached = this.saldoOperacionTotalCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
+    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
+    const rows = await sequelizeNIC.query<{ total: number | string | null }>(
+      !normalizedEstado && !normalizedUbicacion && !normalizedSucursal
+        ? saldoOperacionFastCountQuery(
+            buildSaldoOperacionCancelacionClause(codigosCancelados, normalizeSaldoOperacionSection(section)),
+          )
+        : saldoOperacionCountQuery(
+            Boolean(normalizedEstado),
+            Boolean(normalizedUbicacion),
+            Boolean(normalizedSucursal),
+            buildSaldoOperacionCancelacionClause(codigosCancelados, normalizeSaldoOperacionSection(section)),
+          ),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          estado: normalizedEstado ?? undefined,
+          ubicacion: normalizedUbicacion ?? undefined,
+          sucursal: normalizedSucursal ?? undefined,
+        },
+      },
+    );
+
+    const value = normalizeNullableNumber(rows[0]?.total) ?? 0;
+    this.saldoOperacionTotalCache.set(cacheKey, {
+      value,
+      expiresAt: Date.now() + 30_000,
+    });
+    return value;
+  }
+
+  static async getSaldoOperacionSaldosPorModelo(
+    ubicacion: string | null,
+    sucursal: string | null,
+  ): Promise<SaldoOperacionSaldoModeloItem[]> {
+    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
+    return this.fetchSaldoOperacionSaldosPorModelo({ ubicacion, sucursal, codigosCancelados });
   }
 
   static async getSaldoOperacionFilters(): Promise<SaldoOperacionFiltersResponse> {
-    const [estadoRows, ubicacionRows] = await Promise.all([
-      sequelizeNIC.query<{ estado: string | null }>(
-        saldoOperacionEstadosQuery(),
-        {
-          type: QueryTypes.SELECT,
-        },
-      ),
-      sequelizeNIC.query<{ ubicacion: string | null }>(
-        saldoOperacionUbicacionesQuery(),
-        {
-          type: QueryTypes.SELECT,
-        },
-      ),
-    ]);
+    if (this.saldoOperacionFiltersCache && this.saldoOperacionFiltersCache.expiresAt > Date.now()) {
+      return this.saldoOperacionFiltersCache.value;
+    }
 
-    const estados = estadoRows
-      .map((item) => normalizeNullableString(item.estado) ?? "Sin estado")
-      .filter((item, index, array) => array.indexOf(item) === index)
-      .sort((a, b) => a.localeCompare(b, "es"));
+    const [ubicacionRows, sucursalRows] = await Promise.all([
+      sequelizeNIC.query<{ ubicacion: string | null }>(saldoOperacionUbicacionesQuery(), { type: QueryTypes.SELECT }),
+      sequelizeNIC.query<{ sucursal: string | null }>(saldoOperacionSucursalesQuery(), { type: QueryTypes.SELECT }),
+    ]);
     const ubicaciones = ubicacionRows
       .map((item) => normalizeNullableString(item.ubicacion) ?? "STOCK CONCESIONARIO")
       .filter((item, index, array) => array.indexOf(item) === index)
       .sort((a, b) => a.localeCompare(b, "es"));
+    const sucursales = sucursalRows
+      .map((item) => normalizeNullableString(item.sucursal) ?? "SIN SUCURSAL")
+      .filter((item, index, array) => array.indexOf(item) === index)
+      .sort((a, b) => a.localeCompare(b, "es"));
 
-    return {
+    const value = {
       meta: {
-        estados,
+        estados: [],
         ubicaciones,
+        sucursales,
       },
     };
+
+    this.saldoOperacionFiltersCache = {
+      value,
+      expiresAt: Date.now() + 10 * 60_000,
+    };
+
+    return value;
+  }
+
+  static async prewarmSaldoOperacion() {
+    await Promise.all([
+      this.getSaldoOperacion("conSaldo", null, null, null, 1, 60),
+      this.getSaldoOperacionFilters(),
+    ]);
+    await Promise.all([
+      this.getSaldoOperacionTotal("conSaldo", null, null, null),
+      this.getSaldoOperacionSaldosPorModelo(null, null),
+    ]);
   }
 
   static async updateSaldoOperacionCancelada(
@@ -1445,6 +1588,7 @@ export class OperacionesDashboardService {
   ): Promise<SaldoOperacionCanceladaResponse> {
     if (!cancelada) {
       await SaldoOperacionCancelada.deleteOne({ codigoOperacion });
+      this.clearSaldoOperacionCache();
 
       return {
         message: "Operacion marcada nuevamente como con saldo",
@@ -1479,6 +1623,8 @@ export class OperacionesDashboardService {
       throw new Error("No fue posible actualizar la operacion");
     }
 
+    this.clearSaldoOperacionCache();
+
     return {
       message: "Operacion marcada como cancelada",
       data: serializeSaldoOperacionCancelada({
@@ -1496,11 +1642,13 @@ export class OperacionesDashboardService {
     section: string | null,
     estado: string | null,
     ubicacion: string | null,
+    sucursal: string | null,
   ) {
     return this.getSaldoOperacionRows({
       section: normalizeSaldoOperacionSection(section),
       estado,
       ubicacion,
+      sucursal,
       paginated: false,
     });
   }
@@ -1549,6 +1697,7 @@ export class OperacionesDashboardService {
     const deleteResult = await SaldoOperacionCancelada.deleteMany({
       codigoOperacion: { $in: codigosFacturados },
     });
+    this.clearSaldoOperacionCache();
 
     return {
       codigosRevisados: codigos.length,

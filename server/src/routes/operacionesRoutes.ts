@@ -53,6 +53,16 @@ router.get(
   OperacionesController.getSaldoOperacionFilters,
 );
 router.get(
+  "/saldo-operacion/saldos-por-modelo",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.getSaldoOperacionSaldosPorModelo,
+);
+router.get(
+  "/saldo-operacion/total",
+  authorizeModules("saldoOperacion"),
+  OperacionesController.getSaldoOperacionTotal,
+);
+router.get(
   "/saldo-operacion/export",
   authorizeModules("saldoOperacion"),
   OperacionesController.exportSaldoOperacion,

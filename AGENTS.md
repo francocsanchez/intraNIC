@@ -1,6 +1,21 @@
 # AGENTS.md
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 
+Las consultas costosas de `Saldo de operacion` deben evitar ejecuciones duplicadas por carga; los cachés breves de filtros, cancelaciones y resumen por modelo se invalidan al cambiar una cancelación.
+La primera página de `Saldo de operacion` no debe bloquearse por indicadores globales ni filtros secundarios; estas consultas se cargan de forma independiente.
+`Saldo de operacion` muestra y exporta la sucursal a la izquierda del vendedor, y permite filtrarla sin afectar la carga inicial de la tabla.
+En `Saldo de operacion`, Número de fábrica se conserva en la exportación Excel pero no se muestra en la tabla; los filtros y tarjetas de resumen priorizan una altura compacta.
+El orden de filtros superiores de `Saldo de operacion` es Sucursal, cantidad de registros, sección y estados operativos; el contador se muestra en una sola línea.
+`Saldo de operacion` excluye únicamente operaciones entregadas (estado con prefijo `ENT`); las facturadas permanecen visibles.
+La consulta inicial de `Saldo de operacion` no debe consultar movimientos de pedido para resolver ubicación; solo lo hace si el usuario selecciona un estado operativo.
+La primera página de `Saldo de operacion` no bloquea por el conteo global: la paginación usa la existencia de una fila adicional y el total se consulta luego en segundo plano.
+Los filtros secundarios y saldos por modelo de `Saldo de operacion` se solicitan después de la primera tabla; el bloque de saldos muestra un spinner durante su cálculo.
+Al cambiar filtros de `Saldo de operacion`, las solicitudes anteriores deben cancelarse mediante `AbortSignal`; las búsquedas de interno en SQL no aplican funciones sobre la columna indexable.
+En la primera página sin filtros de `Saldo de operacion`, la paginación de `csqUnidades` se ejecuta antes de los cruces de operación, modelo y sucursal.
+Los filtros de ubicación y sucursal de `Saldo de operacion` también deben reducir el conjunto antes de resolver los datos de detalle: ubicación parte de los internos de `movnped` y sucursal de las operaciones SIAC, preservando los mismos resultados funcionales.
+El conteo global sin filtros de `Saldo de operacion` consulta solamente `csqUnidades`; no debe cruzar operación, modelo ni sucursal cuando esos datos no intervienen en el resultado.
+Al iniciar el servidor se precalienta la primera página, filtros, total y saldos por modelo de `Saldo de operacion`; los cachés de respuesta duran como máximo 30 segundos y se invalidan al cambiar una cancelación.
+
 # Instrucciones del proyecto
 
 ## Descripcion

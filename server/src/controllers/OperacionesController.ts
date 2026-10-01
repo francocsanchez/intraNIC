@@ -245,11 +245,12 @@ export class OperacionesController {
     const section = parseOptionalString(req.query.section);
     const estado = parseOptionalString(req.query.estado);
     const ubicacion = parseOptionalString(req.query.ubicacion);
+    const sucursal = parseOptionalString(req.query.sucursal);
     const page = parsePositiveInt(req.query.page) ?? 1;
     const limit = parsePositiveInt(req.query.limit) ?? 100;
 
     try {
-      const response = await OperacionesDashboardService.getSaldoOperacion(section, estado, ubicacion, page, limit);
+      const response = await OperacionesDashboardService.getSaldoOperacion(section, estado, ubicacion, sucursal, page, limit);
       return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getSaldoOperacion");
@@ -264,6 +265,36 @@ export class OperacionesController {
       return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getSaldoOperacionFilters");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getSaldoOperacionSaldosPorModelo = async (req: Request, res: Response) => {
+    const ubicacion = parseOptionalString(req.query.ubicacion);
+    const sucursal = parseOptionalString(req.query.sucursal);
+
+    try {
+      const data = await OperacionesDashboardService.getSaldoOperacionSaldosPorModelo(ubicacion, sucursal);
+      return res.status(200).json({ data });
+    } catch (error) {
+      logError("OperacionesController.getSaldoOperacionSaldosPorModelo");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getSaldoOperacionTotal = async (req: Request, res: Response) => {
+    const section = parseOptionalString(req.query.section);
+    const estado = parseOptionalString(req.query.estado);
+    const ubicacion = parseOptionalString(req.query.ubicacion);
+    const sucursal = parseOptionalString(req.query.sucursal);
+
+    try {
+      const total = await OperacionesDashboardService.getSaldoOperacionTotal(section, estado, ubicacion, sucursal);
+      return res.status(200).json({ total });
+    } catch (error) {
+      logError("OperacionesController.getSaldoOperacionTotal");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }
@@ -313,15 +344,17 @@ export class OperacionesController {
     const section = parseOptionalString(req.query.section);
     const estado = parseOptionalString(req.query.estado);
     const ubicacion = parseOptionalString(req.query.ubicacion);
+    const sucursal = parseOptionalString(req.query.sucursal);
 
     try {
-      const response = await OperacionesDashboardService.exportSaldoOperacion(section, estado, ubicacion);
+      const response = await OperacionesDashboardService.exportSaldoOperacion(section, estado, ubicacion, sucursal);
       const rows = response.data.map((item) => ({
         op: item.codigoOperacion ?? "",
         numero_fabrica: item.numeroFabrica,
         version: item.version,
         modelo: item.modeloGeneral,
         cliente: item.clienteNombre,
+        sucursal: item.sucursal,
         vendedor: item.vendedor,
         estado_unidad: ubicacion ?? "",
         estado_operacion: item.estado,
