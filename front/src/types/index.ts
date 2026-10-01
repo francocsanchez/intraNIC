@@ -1031,6 +1031,8 @@ export type AnalisisOperacionesPreventaCreditoMensualResponse = z.infer<
 export type SaldoOperacionItem = z.infer<typeof saldoOperacionItemSchema>;
 export type SaldoOperacionResponse = z.infer<typeof saldoOperacionResponseSchema>;
 export type SaldoOperacionFiltersResponse = z.infer<typeof saldoOperacionFiltersResponseSchema>;
+export type SaldoOperacionSaldosPorModeloResponse = z.infer<typeof saldoOperacionSaldosPorModeloResponseSchema>;
+export type SaldoOperacionTotalResponse = z.infer<typeof saldoOperacionTotalResponseSchema>;
 export type SaldoOperacionCanceladaResponse = z.infer<typeof saldoOperacionCanceladaResponseSchema>;
 
 export const analisisVendedorFilterOptionSchema = z.object({
