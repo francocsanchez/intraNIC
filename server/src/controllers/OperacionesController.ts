@@ -275,8 +275,8 @@ export class OperacionesController {
     const sucursal = parseOptionalString(req.query.sucursal);
 
     try {
-      const data = await OperacionesDashboardService.getSaldoOperacionSaldosPorModelo(ubicacion, sucursal);
-      return res.status(200).json({ data });
+      const response = await OperacionesDashboardService.getSaldoOperacionSaldosPorModelo(ubicacion, sucursal);
+      return res.status(200).json(response);
     } catch (error) {
       logError("OperacionesController.getSaldoOperacionSaldosPorModelo");
       console.error(error);

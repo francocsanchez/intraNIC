@@ -15,6 +15,8 @@ En la primera página sin filtros de `Saldo de operacion`, la paginación de `cs
 Los filtros de ubicación y sucursal de `Saldo de operacion` también deben reducir el conjunto antes de resolver los datos de detalle: ubicación parte de los internos de `movnped` y sucursal de las operaciones SIAC, preservando los mismos resultados funcionales.
 El conteo global sin filtros de `Saldo de operacion` consulta solamente `csqUnidades`; no debe cruzar operación, modelo ni sucursal cuando esos datos no intervienen en el resultado.
 Al iniciar el servidor se precalienta la primera página, filtros, total y saldos por modelo de `Saldo de operacion`; los cachés de respuesta duran como máximo 30 segundos y se invalidan al cambiar una cancelación.
+En `Saldo de operacion`, la grilla se presenta por saldo ascendente y el resumen de operaciones no canceladas incluye los totales globales de Crédito y Usado, respetando sucursal y ubicación activas.
+Los cards de Crédito y Usado de `Saldo de operacion` permanecen visibles también en la pestaña Canceladas, pero conservan el cálculo sobre las operaciones no canceladas.
 
 # Instrucciones del proyecto
 

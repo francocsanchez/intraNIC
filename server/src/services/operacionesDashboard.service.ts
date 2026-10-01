@@ -401,11 +401,19 @@ type SaldoOperacionItem = {
 type SaldoOperacionSaldoModeloRow = {
   modelo_general: string | null;
   saldo_total: number | string | null;
+  credito_total_general: number | string | null;
+  usado_total_general: number | string | null;
 };
 
 type SaldoOperacionSaldoModeloItem = {
   modelo: string;
   saldo: number;
+};
+
+type SaldoOperacionSaldosPorModeloResponse = {
+  data: SaldoOperacionSaldoModeloItem[];
+  creditoTotal: number;
+  usadoTotal: number;
 };
 
 type SaldoOperacionSection = "conSaldo" | "canceladas";
@@ -567,7 +575,7 @@ export class OperacionesDashboardService {
   private static saldoOperacionFiltersCache: { expiresAt: number; value: SaldoOperacionFiltersResponse } | null = null;
   private static saldoOperacionSaldosCache = new Map<
     string,
-    { expiresAt: number; value: SaldoOperacionSaldoModeloItem[] }
+    { expiresAt: number; value: SaldoOperacionSaldosPorModeloResponse }
   >();
   private static saldoOperacionPageCache = new Map<
     string,
@@ -1378,7 +1386,7 @@ export class OperacionesDashboardService {
     ubicacion: string | null;
     sucursal: string | null;
     codigosCancelados: number[];
-  }): Promise<SaldoOperacionSaldoModeloItem[]> {
+  }): Promise<SaldoOperacionSaldosPorModeloResponse> {
     const normalizedUbicacion = normalizeNullableString(params.ubicacion);
     const normalizedSucursal = normalizeNullableString(params.sucursal);
     const cacheKey = `${normalizedUbicacion ?? "__TODAS__"}::${normalizedSucursal ?? "__TODAS__"}`;
@@ -1400,12 +1408,17 @@ export class OperacionesDashboardService {
       },
     );
 
-    const value = rows
+    const data = rows
       .map((row) => ({
         modelo: normalizeNullableString(row.modelo_general) ?? "SIN MODELO",
         saldo: normalizeNullableNumber(row.saldo_total) ?? 0,
       }))
       .filter((row) => row.saldo > 0);
+    const value = {
+      data,
+      creditoTotal: normalizeNullableNumber(rows[0]?.credito_total_general) ?? 0,
+      usadoTotal: normalizeNullableNumber(rows[0]?.usado_total_general) ?? 0,
+    };
 
     this.saldoOperacionSaldosCache.set(cacheKey, {
       value,
@@ -1530,7 +1543,7 @@ export class OperacionesDashboardService {
   static async getSaldoOperacionSaldosPorModelo(
     ubicacion: string | null,
     sucursal: string | null,
-  ): Promise<SaldoOperacionSaldoModeloItem[]> {
+  ): Promise<SaldoOperacionSaldosPorModeloResponse> {
     const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
     return this.fetchSaldoOperacionSaldosPorModelo({ ubicacion, sucursal, codigosCancelados });
   }

@@ -866,6 +866,7 @@ export const saldoOperacionSaldosPorModeloQuery = (
   hasSucursalFilter: boolean,
   cancelacionClause: string,
 ) => `
+WITH saldos_por_modelo AS (
 SELECT
     CASE
         WHEN LTRIM(RTRIM(ISNULL(famiauto_modelo.fam_nombre, ''))) <> '' THEN LTRIM(RTRIM(famiauto_modelo.fam_nombre))
@@ -881,7 +882,9 @@ SELECT
         - ISNULL(csq.Senas, 0)
         - ISNULL(csq.Usado, 0)
         - ISNULL(csq.total_Cred_banco, 0)
-    ) AS saldo_total
+    ) AS saldo_total,
+    SUM(ISNULL(csq.total_Cred_banco, 0)) AS credito_total,
+    SUM(ISNULL(csq.Usado, 0)) AS usado_total
 ${saldoOperacionBaseFrom(hasUbicacionFilter)}
     ${hasUbicacionFilter ? `AND ${saldoOperacionUbicacionCase} = :ubicacion` : ""}
     ${hasSucursalFilter ? "AND LTRIM(RTRIM(ISNULL(sucursal_operacion.suc_nombre, 'SIN SUCURSAL'))) = :sucursal" : ""}
@@ -892,17 +895,14 @@ GROUP BY
         WHEN LTRIM(RTRIM(ISNULL(csq.Modelo_General, ''))) <> '' THEN LTRIM(RTRIM(csq.Modelo_General))
         ELSE 'SIN MODELO'
     END
-HAVING
-    SUM(
-        (
-            ISNULL(csq.Pcio_Venta, 0)
-            + ISNULL(csq.gestoria, 0)
-            - ISNULL(csq.Bonif_Venta, 0)
-        )
-        - ISNULL(csq.Senas, 0)
-        - ISNULL(csq.Usado, 0)
-        - ISNULL(csq.total_Cred_banco, 0)
-    ) > 0
+)
+SELECT
+    modelo_general,
+    saldo_total,
+    SUM(credito_total) OVER () AS credito_total_general,
+    SUM(usado_total) OVER () AS usado_total_general
+FROM
+    saldos_por_modelo
 ORDER BY
     saldo_total DESC,
     modelo_general ASC;

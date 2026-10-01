@@ -20,6 +20,8 @@
 - La misma paginación temprana se extendió a los filtros de ubicación y sucursal: los candidatos se acotan desde `movnped` u operaciones SIAC antes de armar el detalle de la tabla.
 - El contador general sin filtros dejó de cruzar operación y sucursal, porque esos datos no intervienen en el total; se conserva la carga diferida de indicadores y tarjetas.
 - Al iniciar el servidor se precalienta la primera página y los datos secundarios del tablero. La respuesta inicial, total y saldos por modelo usan cachés de 30 segundos e invalidación al modificar cancelaciones, eliminando la espera de la primera consulta fría de SQL.
+- La tabla se ordena por saldo ascendente y el resumen incorpora tarjetas de Crédito y Usado, calculadas sobre todas las operaciones no canceladas y filtradas del tablero.
+- Las tarjetas de Crédito y Usado también permanecen disponibles al consultar Canceladas, sin alterar su criterio de operaciones con saldo.
 
 ## 2026-09-26
 

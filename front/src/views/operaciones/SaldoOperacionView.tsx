@@ -120,7 +120,7 @@ export default function SaldoOperacionView() {
         sucursal === UBICACION_TODAS ? undefined : sucursal,
         signal,
       ),
-    enabled: section === "conSaldo" && Boolean(data),
+    enabled: Boolean(data),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
   });
@@ -257,6 +257,13 @@ export default function SaldoOperacionView() {
   const totalPages = totalRegistros === null ? null : Math.max(1, Math.ceil(totalRegistros / data.pagination.limit));
 
   const saldosPorModelo = saldosPorModeloQuery.data?.data ?? [];
+  const creditoTotal = saldosPorModeloQuery.data?.creditoTotal ?? null;
+  const usadoTotal = saldosPorModeloQuery.data?.usadoTotal ?? null;
+  const rowsOrdenadasPorSaldo = [...data.data].sort((left, right) => {
+    const saldoLeft = calculateSaldo(left.total, left.senas, left.usado, left.creditoBanco) ?? Number.POSITIVE_INFINITY;
+    const saldoRight = calculateSaldo(right.total, right.senas, right.usado, right.creditoBanco) ?? Number.POSITIVE_INFINITY;
+    return saldoLeft - saldoRight;
+  });
 
   return (
     <div className="w-full space-y-3 px-4 py-3">
@@ -358,35 +365,45 @@ export default function SaldoOperacionView() {
         </div>
       </section>
 
-      {section === "conSaldo" ? (
-        <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <h2 className="text-xs font-semibold text-foreground">Saldos restantes a cobrar por modelo</h2>
-            {saldosPorModeloQuery.isFetching ? (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <LoaderCircle className="size-3 animate-spin" /> Calculando
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground">{saldosPorModelo.length} modelos</span>
-            )}
-          </div>
-
+      <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <h2 className="text-xs font-semibold text-foreground">
+            {section === "conSaldo" ? "Saldos restantes a cobrar por modelo" : "Créditos y usados de operaciones con saldo"}
+          </h2>
           {saldosPorModeloQuery.isFetching ? (
-            <div className="flex h-12 items-center justify-center rounded-md border border-border bg-muted text-xs text-muted-foreground">
-              <LoaderCircle className="mr-2 size-4 animate-spin" /> Calculando saldos por modelo...
-            </div>
-          ) : saldosPorModelo.length ? (
-            <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
-              {saldosPorModelo.map((item) => (
-                <div key={item.modelo} className="rounded-md border border-border bg-muted px-2 py-1">
-                  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{item.modelo}</p>
-                  <p className="text-base font-semibold leading-tight tracking-tight text-destructive">{formatMoney(item.saldo)}</p>
-                </div>
-              ))}
-            </div>
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <LoaderCircle className="size-3 animate-spin" /> Calculando
+            </span>
+          ) : section === "conSaldo" ? (
+            <span className="text-xs text-muted-foreground">{saldosPorModelo.length} modelos</span>
           ) : null}
-        </section>
-      ) : null}
+        </div>
+
+        {saldosPorModeloQuery.isFetching ? (
+          <div className="flex h-12 items-center justify-center rounded-md border border-border bg-muted text-xs text-muted-foreground">
+            <LoaderCircle className="mr-2 size-4 animate-spin" /> Calculando resumen de operaciones...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-md border border-border bg-muted px-2 py-1">
+              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Créditos</p>
+              <p className="text-base font-semibold leading-tight tracking-tight text-foreground">{formatMoney(creditoTotal)}</p>
+            </div>
+            <div className="rounded-md border border-border bg-muted px-2 py-1">
+              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Usados</p>
+              <p className="text-base font-semibold leading-tight tracking-tight text-foreground">{formatMoney(usadoTotal)}</p>
+            </div>
+            {section === "conSaldo"
+              ? saldosPorModelo.map((item) => (
+                  <div key={item.modelo} className="rounded-md border border-border bg-muted px-2 py-1">
+                    <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{item.modelo}</p>
+                    <p className="text-base font-semibold leading-tight tracking-tight text-destructive">{formatMoney(item.saldo)}</p>
+                  </div>
+                ))
+              : null}
+          </div>
+        )}
+      </section>
 
       {!data.data.length ? (
         <section className="rounded-lg border border-dashed border-border bg-card px-5 py-10 text-center shadow-sm">
@@ -480,7 +497,7 @@ export default function SaldoOperacionView() {
               </thead>
 
               <tbody className="divide-y divide-border bg-card">
-                {data.data.map((row) => {
+                {rowsOrdenadasPorSaldo.map((row) => {
                   const isUpdating = updatingOperacion === row.codigoOperacion;
                   const nextCancelada = !row.cancelada;
                   const saldo = calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco);

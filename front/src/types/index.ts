@@ -989,6 +989,8 @@ export const saldoOperacionSaldosPorModeloResponseSchema = z.object({
       saldo: z.number(),
     }),
   ),
+  creditoTotal: z.number(),
+  usadoTotal: z.number(),
 });
 
 export const saldoOperacionTotalResponseSchema = z.object({
