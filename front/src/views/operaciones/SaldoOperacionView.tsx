@@ -1,602 +1,71 @@
 import Loading from "@/components/Loading";
+import { Button } from "@/components/ui/button";
 import {
-  exportSaldoOperacion,
-  getSaldoOperacion,
-  getSaldoOperacionFilters,
-  getSaldoOperacionSaldosPorModelo,
-  getSaldoOperacionTotal,
-  updateSaldoOperacionCancelada,
+  exportSaldoOperacionSnapshot,
+  getSaldoOperacionSnapshot,
+  getSaldoOperacionSnapshotFilters,
+  getSaldoOperacionSnapshotSummary,
+  updateSaldoOperacionSnapshotCancelacion,
 } from "@/services/operacionesService";
-import type { SaldoOperacionItem, SaldoOperacionResponse } from "@/types/index";
+import type { SaldoOperacionSnapshotItem } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, DollarSign, Download, Inbox, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, LoaderCircle } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-const UBICACION_TODAS = "__TODAS__";
 const PAGE_SIZE = 60;
+const ALL = "__TODAS__";
+type Section = "conSaldo" | "canceladas";
 
-type SaldoOperacionSection = "conSaldo" | "canceladas";
-
-const formatMoney = (value: number | null) => {
-  if (value === null || Number.isNaN(value)) {
-    return "-";
-  }
-
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const calculateSaldo = (
-  total: number | null,
-  abonado: number | null,
-  usado: number | null,
-  creditoBanco: number | null,
-) => {
-  if (total === null) {
-    return null;
-  }
-
-  return total - (abonado ?? 0) - (usado ?? 0) - (creditoBanco ?? 0);
-};
-
-const getSaldoColorClass = (saldo: number | null) => {
-  if (saldo === null) {
-    return "text-muted-foreground";
-  }
-
-  return saldo <= 0 ? "text-secondary-foreground" : "text-destructive";
-};
-
-const getDiasAsignadaBadgeClass = (diasAsignada: number | null) => {
-  if (diasAsignada === null) {
-    return "bg-muted text-muted-foreground";
-  }
-
-  if (diasAsignada < 10) {
-    return "bg-secondary text-primary";
-  }
-
-  if (diasAsignada <= 15) {
-    return "bg-secondary text-secondary-foreground";
-  }
-
-  return "bg-destructive/10 text-destructive";
-};
-
-const downloadBlob = (blob: Blob, filename: string) => {
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
-};
-
-function buildRowKey(row: SaldoOperacionItem) {
-  return [row.codigoOperacion ?? "sin-operacion", row.numeroFabrica].join("-");
-}
+const money = (value: number | null) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
+const download = (blob: Blob, name: string) => { const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = name; link.click(); URL.revokeObjectURL(url); };
 
 export default function SaldoOperacionView() {
   const queryClient = useQueryClient();
-  const [section, setSection] = useState<SaldoOperacionSection>("conSaldo");
-  const [ubicacion, setUbicacion] = useState<string>(UBICACION_TODAS);
-  const [sucursal, setSucursal] = useState<string>(UBICACION_TODAS);
+  const [section, setSection] = useState<Section>("conSaldo");
+  const [sucursal, setSucursal] = useState(ALL);
+  const [ubicacion, setUbicacion] = useState(ALL);
   const [page, setPage] = useState(1);
-  const [updatingOperacion, setUpdatingOperacion] = useState<number | null>(null);
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["saldo-operacion", section, ubicacion, sucursal, page],
-    queryFn: ({ signal }) =>
-      getSaldoOperacion({
-        section,
-        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
-        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
-        page,
-        limit: PAGE_SIZE,
-      }, signal),
-    refetchOnWindowFocus: false,
+  const [pending, setPending] = useState<SaldoOperacionSnapshotItem | null>(null);
+  const [fechaCancelacion, setFechaCancelacion] = useState("");
+  const params = { section, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, page, limit: PAGE_SIZE };
+  const table = useQuery({ queryKey: ["saldo-operacion-snapshot", params], queryFn: ({ signal }) => getSaldoOperacionSnapshot(params, signal), refetchOnWindowFocus: false });
+  const filters = useQuery({ queryKey: ["saldo-operacion-snapshot-filters"], queryFn: getSaldoOperacionSnapshotFilters, staleTime: 60_000 });
+  const summary = useQuery({ queryKey: ["saldo-operacion-snapshot-summary", sucursal, ubicacion], queryFn: ({ signal }) => getSaldoOperacionSnapshotSummary({ sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion }, signal), staleTime: 30_000 });
+  const update = useMutation({
+    mutationFn: () => pending ? updateSaldoOperacionSnapshotCancelacion(pending.codigoOperacion, fechaCancelacion) : Promise.reject(new Error("No hay operacion seleccionada")),
+    onSuccess: () => { toast.success("Fecha de cancelacion actualizada"); setPending(null); queryClient.invalidateQueries({ queryKey: ["saldo-operacion-snapshot"] }); },
+    onError: (error: Error) => toast.error(error.message),
   });
+  const exporter = useMutation({ mutationFn: () => exportSaldoOperacionSnapshot(params), onSuccess: (blob) => { download(blob, `saldo-operacion-${new Date().toISOString().slice(0, 10)}.xlsx`); toast.success("Excel exportado"); }, onError: (error: Error) => toast.error(error.message) });
 
-  const filtersQuery = useQuery({
-    queryKey: ["saldo-operacion-filtros"],
-    queryFn: () => getSaldoOperacionFilters(),
-    enabled: Boolean(data),
-    staleTime: 1000 * 60 * 10,
-    refetchOnWindowFocus: false,
-  });
+  if (table.isLoading) return <Loading />;
+  if (table.isError) return <div className="p-4 text-destructive">{table.error.message}</div>;
+  const rows = table.data?.data ?? [];
+  const pagination = table.data?.pagination;
 
-  const saldosPorModeloQuery = useQuery({
-    queryKey: ["saldo-operacion-saldos-por-modelo", ubicacion, sucursal],
-    queryFn: ({ signal }) =>
-      getSaldoOperacionSaldosPorModelo(
-        ubicacion === UBICACION_TODAS ? undefined : ubicacion,
-        sucursal === UBICACION_TODAS ? undefined : sucursal,
-        signal,
-      ),
-    enabled: Boolean(data),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  });
-
-  const totalQuery = useQuery({
-    queryKey: ["saldo-operacion-total", section, ubicacion, sucursal],
-    queryFn: ({ signal }) =>
-      getSaldoOperacionTotal({
-        section,
-        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
-        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
-      }, signal),
-    enabled: Boolean(data),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({
-      codigoOperacion,
-      cancelada,
-      numeroFabrica,
-    }: {
-      codigoOperacion: number;
-      cancelada: boolean;
-      numeroFabrica: string;
-    }) => updateSaldoOperacionCancelada(codigoOperacion, { cancelada, numeroFabrica }),
-    onMutate: ({ codigoOperacion }) => {
-      setUpdatingOperacion(codigoOperacion);
-    },
-    onSuccess: (response, variables) => {
-      toast.success(response.message);
-      queryClient.setQueryData<SaldoOperacionResponse>(
-        ["saldo-operacion", section, ubicacion, sucursal, page],
-        (current) => {
-          if (!current) {
-            return current;
-          }
-
-          const updatedRow = current.data.find((item) => item.codigoOperacion === variables.codigoOperacion);
-          if (!updatedRow) {
-            return current;
-          }
-
-          const saldo = calculateSaldo(updatedRow.total, updatedRow.senas, updatedRow.usado, updatedRow.creditoBanco) ?? 0;
-          const saldosPorModelo = current.meta.saldosPorModelo
-            .map((item) =>
-              section === "conSaldo" && item.modelo === (updatedRow.modeloGeneral.trim() || "SIN MODELO")
-                ? { ...item, saldo: item.saldo - saldo }
-                : item,
-            )
-            .filter((item) => item.saldo > 0);
-
-          return {
-            ...current,
-            data: current.data.filter((item) => item.codigoOperacion !== variables.codigoOperacion),
-            meta: {
-              ...current.meta,
-              total: current.meta.total === null ? null : Math.max(0, current.meta.total - 1),
-              saldosPorModelo,
-            },
-            pagination: {
-              ...current.pagination,
-              total: current.pagination.total === null ? null : Math.max(0, current.pagination.total - 1),
-              totalPages:
-                current.pagination.total === null
-                  ? null
-                  : Math.max(1, Math.ceil(Math.max(0, current.pagination.total - 1) / current.pagination.limit)),
-            },
-          };
-        },
-      );
-      queryClient.invalidateQueries({ queryKey: ["saldo-operacion"], refetchType: "inactive" });
-      queryClient.invalidateQueries({ queryKey: ["saldo-operacion-saldos-por-modelo"] });
-    },
-    onError: (mutationError: Error) => {
-      toast.error(mutationError.message);
-    },
-    onSettled: () => {
-      setUpdatingOperacion(null);
-    },
-  });
-
-  const exportMutation = useMutation({
-    mutationFn: () =>
-      exportSaldoOperacion({
-        section,
-        ubicacion: ubicacion === UBICACION_TODAS ? undefined : ubicacion,
-        sucursal: sucursal === UBICACION_TODAS ? undefined : sucursal,
-      }),
-    onSuccess: (blob) => {
-      const today = new Date().toISOString().slice(0, 10);
-      downloadBlob(blob, `saldo-operacion-${today}.xlsx`);
-      toast.success("Excel exportado correctamente");
-    },
-    onError: (mutationError: Error) => {
-      toast.error(mutationError.message);
-    },
-  });
-
-  useEffect(() => {
-    if (error instanceof Error) {
-      toast.error(error.message);
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (filtersQuery.error instanceof Error) {
-      toast.error(filtersQuery.error.message);
-    }
-  }, [filtersQuery.error]);
-
-  if (isLoading) return <Loading />;
-
-  if (isError) {
-    return (
-      <div className="w-full px-4 py-6">
-        <section className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
-          <div className="flex items-center gap-3 text-destructive">
-            <AlertCircle size={18} />
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar Saldo de operacion</h1>
-          </div>
-          <p className="mt-2 text-sm text-destructive">
-            {error instanceof Error ? error.message : "No fue posible obtener los registros solicitados."}
-          </p>
-        </section>
+  return <div className="space-y-3 bg-muted p-2 font-preset">
+    <section className="space-y-2 rounded-md border border-border bg-card p-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <select aria-label="Sucursal" value={sucursal} onChange={(event) => { setSucursal(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las sucursales</option>{filters.data?.meta.sucursales.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+        <span className="whitespace-nowrap text-xs text-muted-foreground">Can. Registros: <b className="text-foreground">{pagination?.total ?? 0}</b></span>
+        <div className="flex rounded-md border border-border p-0.5"><Button size="sm" variant={section === "conSaldo" ? "default" : "ghost"} onClick={() => { setSection("conSaldo"); setPage(1); }}>Con saldo</Button><Button size="sm" variant={section === "canceladas" ? "default" : "ghost"} onClick={() => { setSection("canceladas"); setPage(1); }}>Canceladas</Button></div>
+        <div className="flex flex-1 flex-wrap gap-1">{[ALL, ...(filters.data?.meta.ubicaciones ?? [])].map((item) => <Button key={item} size="sm" variant={ubicacion === item ? "default" : "outline"} onClick={() => { setUbicacion(item); setPage(1); }}>{item === ALL ? "Todas" : item}</Button>)}</div>
+        <Button size="sm" variant="outline" disabled={exporter.isPending} onClick={() => exporter.mutate()}><Download /> Exportar</Button>
       </div>
-    );
-  }
+    </section>
 
-  if (!data) return <Loading />;
+    <section className="rounded-md border border-border bg-card p-2">
+      <div className="mb-1 flex items-center justify-between text-[11px]"><span>Saldos restantes a cobrar por modelo</span>{summary.isFetching && <LoaderCircle className="size-3 animate-spin" />}</div>
+      <div className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-6">
+        {summary.data?.data.map((item) => <div key={item.modelo} className="rounded-md border border-border bg-muted p-2"><div className="text-[11px] tracking-wide">{item.modelo}</div><div className="text-base text-destructive">{money(item.saldo)}</div></div>)}
+        <div className="rounded-md border border-border bg-muted p-2"><div className="text-[11px]">Crédito no cancelado</div><div className="text-base text-destructive">{money(summary.data?.creditoTotal ?? 0)}</div></div>
+        <div className="rounded-md border border-border bg-muted p-2"><div className="text-[11px]">Usado no cancelado</div><div className="text-base text-destructive">{money(summary.data?.usadoTotal ?? 0)}</div></div>
+      </div>
+    </section>
 
-  const totalRegistros = totalQuery.data?.total ?? data.pagination.total;
-  const totalPages = totalRegistros === null ? null : Math.max(1, Math.ceil(totalRegistros / data.pagination.limit));
-
-  const saldosPorModelo = saldosPorModeloQuery.data?.data ?? [];
-  const creditoTotal = saldosPorModeloQuery.data?.creditoTotal ?? null;
-  const usadoTotal = saldosPorModeloQuery.data?.usadoTotal ?? null;
-  const rowsOrdenadasPorSaldo = [...data.data].sort((left, right) => {
-    const saldoLeft = calculateSaldo(left.total, left.senas, left.usado, left.creditoBanco) ?? Number.POSITIVE_INFINITY;
-    const saldoRight = calculateSaldo(right.total, right.senas, right.usado, right.creditoBanco) ?? Number.POSITIVE_INFINITY;
-    return saldoLeft - saldoRight;
-  });
-
-  return (
-    <div className="w-full space-y-3 px-4 py-3">
-      <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={sucursal}
-            onChange={(event) => {
-              setSucursal(event.target.value);
-              setPage(1);
-            }}
-            aria-label="Filtrar por sucursal"
-            className="h-8 min-w-40 rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value={UBICACION_TODAS}>Todas las sucursales</option>
-            {(filtersQuery.data?.meta.sucursales ?? []).map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex h-8 items-center gap-1 rounded-md bg-muted px-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Registros</p>
-            <p className="text-sm font-semibold leading-none tabular-nums text-foreground">{totalRegistros ?? "…"}</p>
-          </div>
-
-          <div className="inline-flex rounded-md bg-muted p-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setSection("conSaldo");
-                setPage(1);
-              }}
-              className={[
-                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
-                section === "conSaldo" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
-            >
-              Con saldo
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSection("canceladas");
-                setPage(1);
-              }}
-              className={[
-                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
-                section === "canceladas" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
-            >
-              Canceladas
-            </button>
-          </div>
-
-          <div className="flex flex-wrap rounded-md bg-muted p-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setUbicacion(UBICACION_TODAS);
-                setPage(1);
-              }}
-              className={[
-                "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
-                ubicacion === UBICACION_TODAS ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
-            >
-              Todas
-            </button>
-            {(filtersQuery.data?.meta.ubicaciones ?? []).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => {
-                  setUbicacion(item);
-                  setPage(1);
-                }}
-                className={[
-                  "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
-                  ubicacion === item ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                ].join(" ")}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => exportMutation.mutate()}
-            disabled={exportMutation.isPending}
-            title={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
-            aria-label={exportMutation.isPending ? "Exportando..." : "Exportar Excel"}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Download size={14} />
-          </button>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-border bg-card p-2 shadow-sm">
-        <div className="mb-1 flex items-center justify-between gap-2">
-          <h2 className="text-xs font-semibold text-foreground">
-            {section === "conSaldo" ? "Saldos restantes a cobrar por modelo" : "Créditos y usados de operaciones con saldo"}
-          </h2>
-          {saldosPorModeloQuery.isFetching ? (
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <LoaderCircle className="size-3 animate-spin" /> Calculando
-            </span>
-          ) : section === "conSaldo" ? (
-            <span className="text-xs text-muted-foreground">{saldosPorModelo.length} modelos</span>
-          ) : null}
-        </div>
-
-        {saldosPorModeloQuery.isFetching ? (
-          <div className="flex h-12 items-center justify-center rounded-md border border-border bg-muted text-xs text-muted-foreground">
-            <LoaderCircle className="mr-2 size-4 animate-spin" /> Calculando resumen de operaciones...
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-md border border-border bg-muted px-2 py-1">
-              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Créditos</p>
-              <p className="text-base font-semibold leading-tight tracking-tight text-foreground">{formatMoney(creditoTotal)}</p>
-            </div>
-            <div className="rounded-md border border-border bg-muted px-2 py-1">
-              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Usados</p>
-              <p className="text-base font-semibold leading-tight tracking-tight text-foreground">{formatMoney(usadoTotal)}</p>
-            </div>
-            {section === "conSaldo"
-              ? saldosPorModelo.map((item) => (
-                  <div key={item.modelo} className="rounded-md border border-border bg-muted px-2 py-1">
-                    <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{item.modelo}</p>
-                    <p className="text-base font-semibold leading-tight tracking-tight text-destructive">{formatMoney(item.saldo)}</p>
-                  </div>
-                ))
-              : null}
-          </div>
-        )}
-      </section>
-
-      {!data.data.length ? (
-        <section className="rounded-lg border border-dashed border-border bg-card px-5 py-10 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-primary">
-            <Inbox size={20} />
-          </div>
-          <h2 className="mt-3 text-lg font-semibold text-foreground">No hay registros para mostrar</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {section === "conSaldo"
-              ? "Proba cambiar los filtros para ampliar el resultado."
-              : "No hay operaciones marcadas como canceladas para estos filtros."}
-          </p>
-        </section>
-      ) : (
-        <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-          <div className="border-b border-border px-3 py-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              {totalRegistros === null ? "Registros" : `${totalRegistros} registros encontrados`} en {section === "conSaldo" ? "Con saldo" : "Canceladas"}
-              {ubicacion !== UBICACION_TODAS ? ` para ${ubicacion}.` : "."}
-              {sucursal !== UBICACION_TODAS ? ` Sucursal: ${sucursal}.` : ""}
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border text-xs">
-              <thead className="bg-muted">
-                <tr>
-                  <th
-                    colSpan={6}
-                    className="border-b border-border px-2 py-1 text-left text-primary font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                  >
-                    Operacion
-                  </th>
-                  <th
-                    colSpan={10}
-                    className="border-b border-border px-2 py-1 text-right text-primary font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                  >
-                    Resumen economico
-                  </th>
-                </tr>
-                <tr>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    OP
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Version
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Modelo
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Cliente
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Sucursal
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-left text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Vendedor
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Uni
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Desc
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Ges
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Total
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Abonado
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Usado
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Credito
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    $ Saldo
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Dias
-                  </th>
-                  <th className="whitespace-nowrap px-2 py-2 text-right text-primary font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                    Accion
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-border bg-card">
-                {rowsOrdenadasPorSaldo.map((row) => {
-                  const isUpdating = updatingOperacion === row.codigoOperacion;
-                  const nextCancelada = !row.cancelada;
-                  const saldo = calculateSaldo(row.total, row.senas, row.usado, row.creditoBanco);
-
-                  return (
-                    <tr key={buildRowKey(row)} className="hover:bg-muted/70">
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.codigoOperacion ?? "-"}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.version || "-"}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.modeloGeneral || "-"}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.clienteNombre}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.sucursal}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-muted-foreground">{row.vendedor}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.pcioVenta)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.bonifVenta)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.gestoria)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold text-foreground">{formatMoney(row.total)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.senas)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.usado)}</td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums text-muted-foreground">{formatMoney(row.creditoBanco)}</td>
-                      <td
-                        className={[
-                          "whitespace-nowrap px-2 py-1.5 text-right tabular-nums font-semibold",
-                          getSaldoColorClass(saldo),
-                        ].join(" ")}
-                      >
-                        {formatMoney(saldo)}
-                      </td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right">
-                        <span
-                          className={[
-                            "inline-flex min-w-[42px] items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tabular-nums",
-                            getDiasAsignadaBadgeClass(row.diasAsignada),
-                          ].join(" ")}
-                        >
-                          {row.diasAsignada ?? "-"}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-2 py-1.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!row.codigoOperacion) {
-                              return;
-                            }
-
-                            updateMutation.mutate({
-                              codigoOperacion: row.codigoOperacion,
-                              cancelada: nextCancelada,
-                              numeroFabrica: row.numeroFabrica,
-                            });
-                          }}
-                          disabled={isUpdating || !row.codigoOperacion}
-                          title={nextCancelada ? "Marcar como cancelada por pago total" : "Volver a con saldo"}
-                          aria-label={nextCancelada ? "Marcar como cancelada por pago total" : "Volver a con saldo"}
-                          className={[
-                            "inline-flex items-center justify-center rounded-lg border p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                            nextCancelada
-                              ? "border-border bg-secondary text-secondary-foreground hover:bg-secondary"
-                              : "border-border bg-secondary text-secondary-foreground hover:bg-secondary",
-                          ].join(" ")}
-                        >
-                          {isUpdating ? <span className="text-primary font-semibold">...</span> : <DollarSign size={16} strokeWidth={2} />}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {data.pagination.page > 1 || data.pagination.hasNextPage ? (
-        <section className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
-          <p className="text-sm text-muted-foreground">
-            Pagina {data.pagination.page}{totalPages === null ? "" : ` de ${totalPages}`}
-          </p>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-              disabled={data.pagination.page <= 1}
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              onClick={() => setPage((current) => current + 1)}
-              disabled={!data.pagination.hasNextPage}
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Siguiente
-            </button>
-          </div>
-        </section>
-      ) : null}
-    </div>
-  );
+    <section className="overflow-x-auto rounded-md border border-border bg-card"><table className="w-full min-w-[1450px] text-xs"><thead className="border-b border-border bg-muted text-left"><tr>{["OP", "Cliente", "Sucursal", "Vendedor", "Usuario operación", "Modelo", "Versión", "Ubicación", "Estado", "F. asignación", "Días asignada", "F. cancelación", "Días cancelación", "Saldo"].map((label) => <th key={label} className="px-2 py-2 font-medium">{label}</th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.codigoOperacion} className="border-b border-border last:border-0"><td className="px-2 py-1.5">{row.codigoOperacion}</td><td className="px-2 py-1.5">{row.clienteNombre}</td><td className="px-2 py-1.5">{row.sucursal}</td><td className="px-2 py-1.5">{row.vendedor}</td><td className="px-2 py-1.5">{row.nombreUsuarioOperacion || row.usuarioOperacion}</td><td className="px-2 py-1.5">{row.modeloGeneral}</td><td className="px-2 py-1.5">{row.version}</td><td className="px-2 py-1.5">{row.ubicacion}</td><td className="px-2 py-1.5">{row.estado}</td><td className="px-2 py-1.5">{row.fechaAsignacion ?? "-"}</td><td className="px-2 py-1.5">{row.diasAsignada ?? "-"}</td><td className="px-2 py-1.5"><Button size="xs" variant="outline" onClick={() => { setPending(row); setFechaCancelacion(row.fechaCancelacion ?? new Date().toISOString().slice(0, 10)); }}>{row.fechaCancelacion ?? "Ingresar fecha"}</Button></td><td className="px-2 py-1.5">{row.diasHastaCancelacion ?? "-"}</td><td className="px-2 py-1.5 font-medium text-destructive">{money(row.saldo)}</td></tr>)}</tbody></table>{!rows.length && <p className="p-6 text-center text-sm text-muted-foreground">No hay operaciones para los filtros seleccionados.</p>}</section>
+    <div className="flex items-center justify-end gap-2"><Button size="sm" variant="outline" disabled={!pagination || pagination.page <= 1} onClick={() => setPage((value) => value - 1)}>Anterior</Button><span className="text-xs">Página {pagination?.page ?? 1} de {pagination?.totalPages ?? 1}</span><Button size="sm" variant="outline" disabled={!pagination?.hasNextPage} onClick={() => setPage((value) => value + 1)}>Siguiente</Button></div>
+    {pending && <div className="fixed inset-0 z-50 bg-foreground/30 p-4" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><div className="rounded-md border border-border bg-card p-4" style={{ width: "min(28rem, calc(100vw - 2rem))", height: "fit-content", flex: "none" }}><h2 className="text-base font-semibold">Confirmar cancelación</h2><div className="mt-3 space-y-2 text-sm"><p>OP: <b>{pending.codigoOperacion}</b></p><p>F. asignación: <b>{pending.fechaAsignacion ?? "Sin asignación"}</b></p><label className="grid gap-1">F. cancelación<input type="date" value={fechaCancelacion} onChange={(event) => setFechaCancelacion(event.target.value)} className="h-8 rounded-md border border-border bg-background px-2" /></label><p>Días hasta cancelación: <b>{pending.fechaAsignacion && fechaCancelacion ? Math.round((Date.parse(`${fechaCancelacion}T00:00:00Z`) - Date.parse(`${pending.fechaAsignacion}T00:00:00Z`)) / 86_400_000) : "-"}</b></p></div><div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={() => setPending(null)}>Cancelar</Button><Button disabled={update.isPending || !fechaCancelacion || !pending.fechaAsignacion} onClick={() => update.mutate()}>{update.isPending ? "Guardando..." : "Confirmar"}</Button></div></div></div>}
+  </div>;
 }

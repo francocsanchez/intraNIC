@@ -1,9 +1,26 @@
 # Changelog
 
+## 2026-10-02
+
+### Saldo de operación
+
+- Se reconstruyó el tablero sobre snapshots Mongo sincronizados desde SIAC al iniciar el servidor y cada dos minutos.
+- Se agregaron filtros por sucursal y ubicación, resumen, exportación Excel, fecha de cancelación con días calendario y permiso independiente.
+- Las operaciones entregadas se conservan como historial en Mongo y se ocultan de ambas secciones.
+
+## 2026-10-02
+
+### Analisis
+
+- Se retiró temporalmente el tablero Saldo de operación, sus rutas, permisos, endpoints, consultas, acciones, job heredado y el historial Mongo asociado para reemplazarlo por una nueva arquitectura de snapshot.
+
 ## 2026-10-01
 
 ### Analisis · Saldo de operacion
 
+- Las cancelaciones ahora guardan de forma permanente la fecha de asignación de SIAC, la fecha de cancelación y los días calendario transcurridos. La fecha se confirma antes de guardar, puede corregirse desde Canceladas y no se admite si la operación no tiene asignación válida o si es anterior a ella.
+- Canceladas incorpora las columnas F. Asignación, F. Cancelación y Días hasta cancelación; los registros históricos sin fecha permanecen visibles como pendientes de completar. Se retiró el retorno a Con saldo y la limpieza programada que eliminaba historiales al facturar.
+- La exportación Excel incluye las fechas y los días de cancelación junto a la información existente.
 - Se eliminó una consulta SQL duplicada por carga al obtener el total de registros dentro de la misma consulta paginada.
 - Los filtros visibles, las cancelaciones y el resumen por modelo usan cachés breves e invalidadas al modificar una cancelación; además se dejó de consultar el catálogo de estados que la interfaz no usa, reduciendo consultas repetidas a SIAC y MongoDB.
 - Marcar una operación como cancelada o con saldo actualiza la tabla y los totales en pantalla sin esperar una recarga completa; las demás páginas se refrescan al volver a utilizarlas.
@@ -43,6 +60,25 @@
 - La búsqueda de turnos por interno ahora consulta la agenda completa sin depender del día, sucursal ni del formato histórico del interno, y conserva el modal con el detalle de entrega encontrado.
 - El resultado global se entrega aunque la sucursal encontrada no esté asignada al usuario, incluyendo internos históricos con ceros a la izquierda.
 - El filtro Interno de Registros ahora consulta solo al confirmar con Buscar o Enter, eliminando las recargas por cada dígito ingresado.
+
+## 2026-09-28
+
+### Gestion de stock convencional · Rep. Siniestros
+- Se incorporó el módulo independiente `Rep. Siniestros`, con permiso, acceso desde Inicio y Gestión Convencional, ruta protegida y endpoints propios.
+- Permite validar internos 0 km, buscar y seleccionar una Nota de Pedido SIAC por número, visualizar sus coincidencias y artículos, y crear el caso en estado Pendiente.
+- Los casos guardan una fotografía de la unidad, cabecera, artículos y auditoría; la creación y los cambios vuelven a validar SIAC, bloquean duplicados activos por interno y operación, y conservan la eliminación como un evento auditado.
+- Se prepararon los campos de pedido, arribo y retiro por artículo para las próximas etapas, sin habilitar todavía esos cambios en la interfaz.
+- La selección de Notas de Pedido muestra ahora el nombre de sucursal y cada caso pendiente incluye una vista de detalle con la unidad, cabecera y artículos persistidos.
+- La respuesta de búsqueda conserva compatibilidad con servidores que todavía devuelven el código numérico de sucursal, evitando que se descarte toda la lista durante una actualización.
+- El detalle permite ahora marcar o desmarcar individualmente cada repuesto como pedido, persistiendo el cambio y su auditoría.
+- Se agregaron los checks individuales de Arribado y Retirado. El flujo exige Pedido → Arribado → Retirado y completa automáticamente el caso al retirar el último artículo.
+- El listado incorpora los filtros Pendientes, Pedidos, Arribados y Retirados, y expone los conteos de cada etapa por nota.
+- Las notas ahora pueden aparecer en varios filtros: cada vista lista únicamente los repuestos que están en esa etapa y muestra los porcentajes de progreso sobre el total.
+- Se eliminó la columna de repuestos por etapa del listado para dedicar ese espacio al avance de Pedido, Arribado y Retirado.
+- Los porcentajes de avance se calculan sobre los repuestos habilitados en la etapa anterior: los retiros se miden sobre los arribos y los arribos sobre los pedidos.
+- La tabla muestra únicamente el avance de la etapa seleccionada, evitando mezclar las cuatro métricas en una misma fila.
+- El filtro por interno dejó de recargar por cada dígito; aplica la búsqueda únicamente con el botón Buscar o al presionar Enter.
+- Las notas dejan de mostrarse en una etapa cuando completan su avance en ella; por ejemplo, un Pedido `10/10` ya no aparece en el filtro Pedidos.
 
 ## 2026-09-17
 

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc && node scripts/copy-runtime-assets.js",
+    "saldo-operacion:drop-history": "node scripts/drop-saldo-operacion-canceladas.js",
     "start": "node dist/index.js",
     "pdf:install-browsers": "playwright install chromium"
   },

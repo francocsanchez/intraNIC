@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
-import SaldoOperacionCancelada from "../models/SaldoOperacionCancelada";
-import { getOperacionesFacturadasByCodigoQuery, getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
+import { getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
 import {
   analisisVendedorCreditoMensualQuery,
   analisisVendedorDescuentoMensualQuery,
@@ -21,13 +20,6 @@ import {
   analisisOperacionesPreventaResumenFinanciacionQuery,
   analisisOperacionesPreventaUsadosMensualQuery,
   operacionesDashboardQuery,
-  saldoOperacionCountQuery,
-  saldoOperacionFastPageQuery,
-  saldoOperacionFastCountQuery,
-  saldoOperacionQuery,
-  saldoOperacionSaldosPorModeloQuery,
-  saldoOperacionSucursalesQuery,
-  saldoOperacionUbicacionesQuery,
 } from "../controllers/querys/operaciones.query";
 
 type OperacionesDashboardFilters = {
@@ -40,6 +32,40 @@ type OperacionesDashboardFilters = {
 
 export const OPERACIONES_ANALISIS_TIPO_VALUES = ["Cero"] as const;
 export type OperacionesAnalisisTipo = (typeof OPERACIONES_ANALISIS_TIPO_VALUES)[number];
+
+const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
+  fechaAsignacion instanceof Date ? fechaAsignacion.toISOString() : fechaAsignacion;
+
+const serializeNullableDate = (value: string | Date | null) => {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : value;
+};
+
+const normalizeNullableString = (value: unknown) => {
+  if (value === null || value === undefined) return null;
+  const normalized = String(value).trim();
+  return normalized.length ? normalized : null;
+};
+
+const normalizeNullableNumber = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const normalizeBoolean = (value: unknown) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return normalized === "1" || normalized === "true";
+};
+
+const getDayFromFechaAsignacion = (fechaAsignacion: string | Date) => {
+  if (fechaAsignacion instanceof Date) return fechaAsignacion.getDate();
+  const match = fechaAsignacion.match(/^\d{4}-\d{2}-(\d{2})/);
+  if (match) return Number(match[1]);
+  return new Date(fechaAsignacion).getDate();
+};
 
 type OperacionesAnalisisPreventaFilters = {
   anio: number;
@@ -360,201 +386,6 @@ type AnalisisOperacionPreventaCreditoMensualResponse = {
   }>;
 };
 
-type SaldoOperacionRow = {
-  codigo_operacion: number | string | null;
-  cliente_nombre: string | null;
-  vendedor: string | null;
-  sucursal: string | null;
-  numero_fabrica: string | null;
-  pcio_venta: number | string | null;
-  bonif_venta: number | string | null;
-  gestoria: number | string | null;
-  senas: number | string | null;
-  usado: number | string | null;
-  credito_banco: number | string | null;
-  version: string | null;
-  modelo_general: string | null;
-  dias_asignada: number | string | null;
-  estado: string | null;
-};
-
-type SaldoOperacionItem = {
-  codigoOperacion: number | null;
-  clienteNombre: string;
-  vendedor: string;
-  sucursal: string;
-  numeroFabrica: string;
-  pcioVenta: number | null;
-  bonifVenta: number | null;
-  gestoria: number | null;
-  total: number | null;
-  senas: number | null;
-  usado: number | null;
-  creditoBanco: number | null;
-  version: string;
-  modeloGeneral: string;
-  diasAsignada: number | null;
-  estado: string;
-  cancelada: boolean;
-};
-
-type SaldoOperacionSaldoModeloRow = {
-  modelo_general: string | null;
-  saldo_total: number | string | null;
-  credito_total_general: number | string | null;
-  usado_total_general: number | string | null;
-};
-
-type SaldoOperacionSaldoModeloItem = {
-  modelo: string;
-  saldo: number;
-};
-
-type SaldoOperacionSaldosPorModeloResponse = {
-  data: SaldoOperacionSaldoModeloItem[];
-  creditoTotal: number;
-  usadoTotal: number;
-};
-
-type SaldoOperacionSection = "conSaldo" | "canceladas";
-
-type SaldoOperacionResponse = {
-  filters: {
-    section: SaldoOperacionSection;
-    estado: string | null;
-    ubicacion: string | null;
-    sucursal: string | null;
-  };
-  data: SaldoOperacionItem[];
-  meta: {
-    total: number | null;
-    saldosPorModelo: SaldoOperacionSaldoModeloItem[];
-  };
-  pagination: {
-    page: number;
-    limit: number;
-    total: number | null;
-    totalPages: number | null;
-    hasNextPage: boolean;
-  };
-};
-
-type SaldoOperacionFiltersResponse = {
-  meta: {
-    estados: string[];
-    ubicaciones: string[];
-    sucursales: string[];
-  };
-};
-
-type SaldoOperacionCanceladaResponse = {
-  message: string;
-  data: {
-    codigoOperacion: number;
-    numeroFabrica: string;
-    cancelada: boolean;
-    updatedBy: string | null;
-    updatedByName: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-};
-
-type OperacionFacturadaRow = {
-  opera: string | number | null;
-};
-
-const serializeFechaAsignacion = (fechaAsignacion: string | Date) =>
-  fechaAsignacion instanceof Date ? fechaAsignacion.toISOString() : fechaAsignacion;
-
-const serializeNullableDate = (value: string | Date | null) => {
-  if (!value) {
-    return null;
-  }
-
-  return value instanceof Date ? value.toISOString() : value;
-};
-
-const normalizeNullableString = (value: unknown) => {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  const normalized = String(value).trim();
-  return normalized.length > 0 ? normalized : null;
-};
-
-const normalizeNullableNumber = (value: unknown) => {
-  if (value === null || value === undefined || value === "") {
-    return null;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const normalizeBoolean = (value: unknown) => {
-  if (typeof value === "boolean") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return value !== 0;
-  }
-
-  const normalized = String(value ?? "").trim().toLowerCase();
-  return normalized === "1" || normalized === "true";
-};
-
-const normalizeSaldoOperacionSection = (value: string | null | undefined): SaldoOperacionSection =>
-  String(value ?? "").trim().toLowerCase() === "canceladas" ? "canceladas" : "conSaldo";
-
-const buildCodigoOperacionCsv = (codigos: number[]) => codigos.join(", ");
-
-const buildSaldoOperacionCancelacionClause = (
-  codigosCancelados: number[],
-  section: SaldoOperacionSection,
-) => {
-  if (section === "canceladas") {
-    return codigosCancelados.length ? `AND csq.Codigo_operacion IN (${buildCodigoOperacionCsv(codigosCancelados)})` : "AND 1 = 0";
-  }
-
-  return codigosCancelados.length ? `AND csq.Codigo_operacion NOT IN (${buildCodigoOperacionCsv(codigosCancelados)})` : "";
-};
-
-const serializeSaldoOperacionCancelada = (item: {
-  codigoOperacion: number;
-  numeroFabrica: string;
-  updatedBy?: mongoose.Types.ObjectId | string | null;
-  updatedByName?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}) => ({
-  codigoOperacion: item.codigoOperacion,
-  numeroFabrica: item.numeroFabrica,
-  cancelada: true,
-  updatedBy: item.updatedBy ? String(item.updatedBy) : null,
-  updatedByName: item.updatedByName?.trim() ?? "",
-  createdAt: item.createdAt.toISOString(),
-  updatedAt: item.updatedAt.toISOString(),
-});
-
-const getDayFromFechaAsignacion = (fechaAsignacion: string | Date) => {
-  if (fechaAsignacion instanceof Date) {
-    const day = fechaAsignacion.getDate();
-    return Number.isInteger(day) ? day : NaN;
-  }
-
-  const match = fechaAsignacion.match(/^\d{4}-\d{2}-(\d{2})/);
-
-  if (match) {
-    return Number(match[1]);
-  }
-
-  const parsed = new Date(fechaAsignacion).getDate();
-  return Number.isInteger(parsed) ? parsed : NaN;
-};
-
 const MONTH_LABELS = [
   "Enero",
   "Febrero",
@@ -571,25 +402,6 @@ const MONTH_LABELS = [
 ] as const;
 
 export class OperacionesDashboardService {
-  private static saldoOperacionCanceladasCache: { expiresAt: number; codigos: number[] } | null = null;
-  private static saldoOperacionFiltersCache: { expiresAt: number; value: SaldoOperacionFiltersResponse } | null = null;
-  private static saldoOperacionSaldosCache = new Map<
-    string,
-    { expiresAt: number; value: SaldoOperacionSaldosPorModeloResponse }
-  >();
-  private static saldoOperacionPageCache = new Map<
-    string,
-    { expiresAt: number; value: SaldoOperacionResponse }
-  >();
-  private static saldoOperacionTotalCache = new Map<string, { expiresAt: number; value: number }>();
-
-  private static clearSaldoOperacionCache() {
-    this.saldoOperacionCanceladasCache = null;
-    this.saldoOperacionSaldosCache.clear();
-    this.saldoOperacionPageCache.clear();
-    this.saldoOperacionTotalCache.clear();
-  }
-
   static async getAnalisisVendedorFilters(): Promise<AnalisisVendedorFiltersResponse> {
     const vendedores = await sequelizeNIC.query<{ vendedor: string; codigo: number }>(getVendedoresActivosNuevoNic(), {
       type: QueryTypes.SELECT,
@@ -1273,449 +1085,4 @@ export class OperacionesDashboardService {
     };
   }
 
-  private static async getSaldoOperacionCanceladasCodigos() {
-    if (this.saldoOperacionCanceladasCache && this.saldoOperacionCanceladasCache.expiresAt > Date.now()) {
-      return this.saldoOperacionCanceladasCache.codigos;
-    }
-
-    const rows = await SaldoOperacionCancelada.find({}, { codigoOperacion: 1 }).lean();
-    const codigos = Array.from(
-      new Set(
-        rows
-          .map((item) => Number(item.codigoOperacion))
-          .filter((item) => Number.isInteger(item) && item > 0),
-      ),
-    ).sort((a, b) => a - b);
-
-    this.saldoOperacionCanceladasCache = {
-      codigos,
-      expiresAt: Date.now() + 30_000,
-    };
-
-    return codigos;
-  }
-
-  private static async getSaldoOperacionRows(params: {
-    section: SaldoOperacionSection;
-    estado: string | null;
-    ubicacion: string | null;
-    sucursal: string | null;
-    page?: number;
-    limit?: number;
-    paginated: boolean;
-    codigosCancelados?: number[];
-  }) {
-    const normalizedEstado = normalizeNullableString(params.estado);
-    const normalizedUbicacion = normalizeNullableString(params.ubicacion);
-    const normalizedSucursal = normalizeNullableString(params.sucursal);
-    const section = normalizeSaldoOperacionSection(params.section);
-    const codigosCancelados = params.codigosCancelados ?? (await this.getSaldoOperacionCanceladasCodigos());
-    const cancelacionClause = buildSaldoOperacionCancelacionClause(codigosCancelados, section);
-    const replacements = {
-      estado: normalizedEstado ?? undefined,
-      ubicacion: normalizedUbicacion ?? undefined,
-      sucursal: normalizedSucursal ?? undefined,
-      offset: params.paginated ? (((params.page ?? 1) - 1) * (params.limit ?? 100)) : 0,
-      limit: params.paginated ? (params.limit ?? 100) + 1 : params.limit ?? 100,
-    };
-
-    const canUseFastPageQuery = params.paginated && !normalizedEstado;
-    const useUbicacionJoin =
-      normalizedUbicacion !== null && normalizedUbicacion !== "STOCK CONCESIONARIO";
-    const rows = await sequelizeNIC.query<SaldoOperacionRow>(
-      canUseFastPageQuery
-        ? saldoOperacionFastPageQuery(
-            cancelacionClause,
-            Boolean(normalizedUbicacion),
-            useUbicacionJoin,
-            Boolean(normalizedSucursal),
-          )
-        : saldoOperacionQuery(
-            Boolean(normalizedEstado),
-            Boolean(normalizedUbicacion),
-            Boolean(normalizedSucursal),
-            cancelacionClause,
-            params.paginated,
-          ),
-      {
-        type: QueryTypes.SELECT,
-        replacements,
-      },
-    );
-
-    const canceladasSet = new Set(codigosCancelados);
-    const pageRows = params.paginated ? rows.slice(0, params.limit ?? 100) : rows;
-    const data = pageRows.map((row) => {
-      const codigoOperacion = normalizeNullableNumber(row.codigo_operacion);
-
-      return {
-        codigoOperacion,
-        clienteNombre: normalizeNullableString(row.cliente_nombre) ?? "-",
-        vendedor: normalizeNullableString(row.vendedor) ?? "-",
-        sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
-        numeroFabrica: normalizeNullableString(row.numero_fabrica) ?? "-",
-        pcioVenta: normalizeNullableNumber(row.pcio_venta),
-        bonifVenta: normalizeNullableNumber(row.bonif_venta),
-        gestoria: normalizeNullableNumber(row.gestoria),
-        total:
-          (normalizeNullableNumber(row.pcio_venta) ?? 0) +
-          (normalizeNullableNumber(row.gestoria) ?? 0) -
-          (normalizeNullableNumber(row.bonif_venta) ?? 0),
-        senas: normalizeNullableNumber(row.senas),
-        usado: normalizeNullableNumber(row.usado),
-        creditoBanco: normalizeNullableNumber(row.credito_banco),
-        version: normalizeNullableString(row.version) ?? "",
-        modeloGeneral: normalizeNullableString(row.modelo_general) ?? "",
-        diasAsignada: normalizeNullableNumber(row.dias_asignada),
-        estado: normalizeNullableString(row.estado) ?? "Sin estado",
-        cancelada: codigoOperacion !== null ? canceladasSet.has(codigoOperacion) : false,
-      };
-    });
-
-    return {
-      section,
-      estado: normalizedEstado,
-      ubicacion: normalizedUbicacion,
-      sucursal: normalizedSucursal,
-      data,
-      hasNextPage: params.paginated && rows.length > (params.limit ?? 100),
-    };
-  }
-
-  private static async fetchSaldoOperacionSaldosPorModelo(params: {
-    ubicacion: string | null;
-    sucursal: string | null;
-    codigosCancelados: number[];
-  }): Promise<SaldoOperacionSaldosPorModeloResponse> {
-    const normalizedUbicacion = normalizeNullableString(params.ubicacion);
-    const normalizedSucursal = normalizeNullableString(params.sucursal);
-    const cacheKey = `${normalizedUbicacion ?? "__TODAS__"}::${normalizedSucursal ?? "__TODAS__"}`;
-    const cached = this.saldoOperacionSaldosCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
-    }
-
-    const cancelacionClause = buildSaldoOperacionCancelacionClause(params.codigosCancelados, "conSaldo");
-
-    const rows = await sequelizeNIC.query<SaldoOperacionSaldoModeloRow>(
-      saldoOperacionSaldosPorModeloQuery(Boolean(normalizedUbicacion), Boolean(normalizedSucursal), cancelacionClause),
-      {
-        type: QueryTypes.SELECT,
-        replacements: {
-          ubicacion: normalizedUbicacion ?? undefined,
-          sucursal: normalizedSucursal ?? undefined,
-        },
-      },
-    );
-
-    const data = rows
-      .map((row) => ({
-        modelo: normalizeNullableString(row.modelo_general) ?? "SIN MODELO",
-        saldo: normalizeNullableNumber(row.saldo_total) ?? 0,
-      }))
-      .filter((row) => row.saldo > 0);
-    const value = {
-      data,
-      creditoTotal: normalizeNullableNumber(rows[0]?.credito_total_general) ?? 0,
-      usadoTotal: normalizeNullableNumber(rows[0]?.usado_total_general) ?? 0,
-    };
-
-    this.saldoOperacionSaldosCache.set(cacheKey, {
-      value,
-      expiresAt: Date.now() + 30_000,
-    });
-
-    return value;
-  }
-
-  static async getSaldoOperacion(
-    section: string | null,
-    estado: string | null,
-    ubicacion: string | null,
-    sucursal: string | null,
-    page: number,
-    limit: number,
-  ): Promise<SaldoOperacionResponse> {
-    const safePage = Number.isInteger(page) && page > 0 ? page : 1;
-    const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 200) : 100;
-    const cacheKey = [
-      normalizeSaldoOperacionSection(section),
-      normalizeNullableString(estado) ?? "__TODOS__",
-      normalizeNullableString(ubicacion) ?? "__TODAS__",
-      normalizeNullableString(sucursal) ?? "__TODAS__",
-      safePage,
-      safeLimit,
-    ].join("::");
-    const cached = this.saldoOperacionPageCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
-    }
-
-    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
-    const result = await this.getSaldoOperacionRows({
-      section: normalizeSaldoOperacionSection(section),
-      estado,
-      ubicacion,
-      sucursal,
-      page: safePage,
-      limit: safeLimit,
-      paginated: true,
-      codigosCancelados,
-    });
-    const value = {
-      filters: {
-        section: result.section,
-        estado: result.estado,
-        ubicacion: result.ubicacion,
-        sucursal: result.sucursal,
-      },
-      data: result.data,
-      meta: {
-        total: null,
-        saldosPorModelo: [],
-      },
-      pagination: {
-        page: safePage,
-        limit: safeLimit,
-        total: null,
-        totalPages: null,
-        hasNextPage: result.hasNextPage,
-      },
-    };
-    this.saldoOperacionPageCache.set(cacheKey, {
-      value,
-      expiresAt: Date.now() + 30_000,
-    });
-
-    return value;
-  }
-
-  static async getSaldoOperacionTotal(
-    section: string | null,
-    estado: string | null,
-    ubicacion: string | null,
-    sucursal: string | null,
-  ): Promise<number> {
-    const normalizedEstado = normalizeNullableString(estado);
-    const normalizedUbicacion = normalizeNullableString(ubicacion);
-    const normalizedSucursal = normalizeNullableString(sucursal);
-    const cacheKey = [
-      normalizeSaldoOperacionSection(section),
-      normalizedEstado ?? "__TODOS__",
-      normalizedUbicacion ?? "__TODAS__",
-      normalizedSucursal ?? "__TODAS__",
-    ].join("::");
-    const cached = this.saldoOperacionTotalCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
-    }
-
-    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
-    const rows = await sequelizeNIC.query<{ total: number | string | null }>(
-      !normalizedEstado && !normalizedUbicacion && !normalizedSucursal
-        ? saldoOperacionFastCountQuery(
-            buildSaldoOperacionCancelacionClause(codigosCancelados, normalizeSaldoOperacionSection(section)),
-          )
-        : saldoOperacionCountQuery(
-            Boolean(normalizedEstado),
-            Boolean(normalizedUbicacion),
-            Boolean(normalizedSucursal),
-            buildSaldoOperacionCancelacionClause(codigosCancelados, normalizeSaldoOperacionSection(section)),
-          ),
-      {
-        type: QueryTypes.SELECT,
-        replacements: {
-          estado: normalizedEstado ?? undefined,
-          ubicacion: normalizedUbicacion ?? undefined,
-          sucursal: normalizedSucursal ?? undefined,
-        },
-      },
-    );
-
-    const value = normalizeNullableNumber(rows[0]?.total) ?? 0;
-    this.saldoOperacionTotalCache.set(cacheKey, {
-      value,
-      expiresAt: Date.now() + 30_000,
-    });
-    return value;
-  }
-
-  static async getSaldoOperacionSaldosPorModelo(
-    ubicacion: string | null,
-    sucursal: string | null,
-  ): Promise<SaldoOperacionSaldosPorModeloResponse> {
-    const codigosCancelados = await this.getSaldoOperacionCanceladasCodigos();
-    return this.fetchSaldoOperacionSaldosPorModelo({ ubicacion, sucursal, codigosCancelados });
-  }
-
-  static async getSaldoOperacionFilters(): Promise<SaldoOperacionFiltersResponse> {
-    if (this.saldoOperacionFiltersCache && this.saldoOperacionFiltersCache.expiresAt > Date.now()) {
-      return this.saldoOperacionFiltersCache.value;
-    }
-
-    const [ubicacionRows, sucursalRows] = await Promise.all([
-      sequelizeNIC.query<{ ubicacion: string | null }>(saldoOperacionUbicacionesQuery(), { type: QueryTypes.SELECT }),
-      sequelizeNIC.query<{ sucursal: string | null }>(saldoOperacionSucursalesQuery(), { type: QueryTypes.SELECT }),
-    ]);
-    const ubicaciones = ubicacionRows
-      .map((item) => normalizeNullableString(item.ubicacion) ?? "STOCK CONCESIONARIO")
-      .filter((item, index, array) => array.indexOf(item) === index)
-      .sort((a, b) => a.localeCompare(b, "es"));
-    const sucursales = sucursalRows
-      .map((item) => normalizeNullableString(item.sucursal) ?? "SIN SUCURSAL")
-      .filter((item, index, array) => array.indexOf(item) === index)
-      .sort((a, b) => a.localeCompare(b, "es"));
-
-    const value = {
-      meta: {
-        estados: [],
-        ubicaciones,
-        sucursales,
-      },
-    };
-
-    this.saldoOperacionFiltersCache = {
-      value,
-      expiresAt: Date.now() + 10 * 60_000,
-    };
-
-    return value;
-  }
-
-  static async prewarmSaldoOperacion() {
-    await Promise.all([
-      this.getSaldoOperacion("conSaldo", null, null, null, 1, 60),
-      this.getSaldoOperacionFilters(),
-    ]);
-    await Promise.all([
-      this.getSaldoOperacionTotal("conSaldo", null, null, null),
-      this.getSaldoOperacionSaldosPorModelo(null, null),
-    ]);
-  }
-
-  static async updateSaldoOperacionCancelada(
-    codigoOperacion: number,
-    numeroFabrica: string,
-    cancelada: boolean,
-    user: { id: string; name: string },
-  ): Promise<SaldoOperacionCanceladaResponse> {
-    if (!cancelada) {
-      await SaldoOperacionCancelada.deleteOne({ codigoOperacion });
-      this.clearSaldoOperacionCache();
-
-      return {
-        message: "Operacion marcada nuevamente como con saldo",
-        data: {
-          codigoOperacion,
-          numeroFabrica,
-          cancelada: false,
-          updatedBy: user.id,
-          updatedByName: user.name,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
-    }
-
-    const payload = await SaldoOperacionCancelada.findOneAndUpdate(
-      { codigoOperacion },
-      {
-        codigoOperacion,
-        numeroFabrica,
-        updatedBy: new mongoose.Types.ObjectId(user.id),
-        updatedByName: user.name,
-      },
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true,
-      },
-    ).lean();
-
-    if (!payload) {
-      throw new Error("No fue posible actualizar la operacion");
-    }
-
-    this.clearSaldoOperacionCache();
-
-    return {
-      message: "Operacion marcada como cancelada",
-      data: serializeSaldoOperacionCancelada({
-        codigoOperacion: payload.codigoOperacion,
-        numeroFabrica: payload.numeroFabrica,
-        updatedBy: payload.updatedBy ?? null,
-        updatedByName: payload.updatedByName ?? "",
-        createdAt: payload.createdAt,
-        updatedAt: payload.updatedAt,
-      }),
-    };
-  }
-
-  static async exportSaldoOperacion(
-    section: string | null,
-    estado: string | null,
-    ubicacion: string | null,
-    sucursal: string | null,
-  ) {
-    return this.getSaldoOperacionRows({
-      section: normalizeSaldoOperacionSection(section),
-      estado,
-      ubicacion,
-      sucursal,
-      paginated: false,
-    });
-  }
-
-  static async cleanupSaldoOperacionCanceladasFacturadas() {
-    const canceladas = await SaldoOperacionCancelada.find({}, { codigoOperacion: 1 }).lean();
-    const codigos = Array.from(
-      new Set(
-        canceladas
-          .map((item) => Number(item.codigoOperacion))
-          .filter((item) => Number.isInteger(item) && item > 0),
-      ),
-    );
-
-    if (!codigos.length) {
-      return {
-        codigosRevisados: 0,
-        codigosFacturados: [] as number[],
-        eliminados: 0,
-      };
-    }
-
-    const facturadasRows = await sequelizeNIC.query<OperacionFacturadaRow>(
-      getOperacionesFacturadasByCodigoQuery(buildCodigoOperacionCsv(codigos)),
-      {
-        type: QueryTypes.SELECT,
-      },
-    );
-
-    const codigosFacturados = Array.from(
-      new Set(
-        facturadasRows
-          .map((row) => normalizeNullableNumber(row.opera))
-          .filter((item): item is number => item !== null && Number.isInteger(item) && item > 0),
-      ),
-    );
-
-    if (!codigosFacturados.length) {
-      return {
-        codigosRevisados: codigos.length,
-        codigosFacturados,
-        eliminados: 0,
-      };
-    }
-
-    const deleteResult = await SaldoOperacionCancelada.deleteMany({
-      codigoOperacion: { $in: codigosFacturados },
-    });
-    this.clearSaldoOperacionCache();
-
-    return {
-      codigosRevisados: codigos.length,
-      codigosFacturados,
-      eliminados: deleteResult.deletedCount ?? 0,
-    };
-  }
 }

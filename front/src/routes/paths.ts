@@ -43,10 +43,10 @@ export const paths = {
   },
   analisis: {
     operaciones: "/analisis/operaciones",
+    saldoOperacion: "/analisis/saldo-operacion",
     centralDeudores: "/analisis/central-de-deudores",
     analisisOperaciones: "/analisis/operaciones-preventa",
     vendedor: "/analisis/vendedor",
-    saldoOperacion: "/analisis/saldo-operacion",
     registros: "/sistema/registros",
     patentamientos: {
       home: "/analisis/patentamientos",
@@ -90,6 +90,7 @@ export const paths = {
     analisisStockDiccionarioVersiones: "/gestion/convencional/analisis-stock/diccionario-versiones",
     pendFac: "/gestion/convencional/pend-fac",
     solicitudCambioColor: "/gestion/convencional/solicitud-cambio-color",
+    repuestosSiniestros: "/gestion/convencional/rep-siniestros",
     preventas: "/comercial/preventas",
     preventasResumen: "/comercial/preventas/resumen",
     preventasAsignadas: "/comercial/preventas/asignadas",

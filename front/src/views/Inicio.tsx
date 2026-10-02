@@ -163,6 +163,7 @@ export default function Inicio() {
         { label: "Analisis de stock", to: paths.convencional.analisisStock, enabled: hasModulePathAccess(user, "analisisStock", paths.convencional.analisisStock), icon: BarChart3 },
         { label: "Pend Fac", to: paths.convencional.pendFac, enabled: hasModulePathAccess(user, "pendFac", paths.convencional.pendFac), icon: ClipboardList },
         { label: "Sol. cambio color", to: paths.convencional.solicitudCambioColor, enabled: hasModulePathAccess(user, "solicitudCambioColor", paths.convencional.solicitudCambioColor), icon: Palette },
+        { label: "Rep. Siniestros", to: paths.convencional.repuestosSiniestros, enabled: hasModulePathAccess(user, "repuestosSiniestros", paths.convencional.repuestosSiniestros), icon: Wrench },
         { label: "Preventas", to: preventasHomePath, enabled: hasModulePathAccess(user, "preventas", preventasHomePath), icon: ClipboardList },
         { label: "Pedido unidades", to: paths.convencional.pedidoUnidades, enabled: hasModulePathAccess(user, "pedidoUnidades", paths.convencional.pedidoUnidades), icon: Package },
       ],
@@ -186,6 +187,7 @@ export default function Inicio() {
       icon: BarChart3,
       items: [
         { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones), icon: BarChart3 },
+        { label: "Saldo de operacion", to: paths.analisis.saldoOperacion, enabled: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion), icon: FileSpreadsheet },
         {
           label: "Central de Deudores",
           to: paths.analisis.centralDeudores,
@@ -202,12 +204,6 @@ export default function Inicio() {
           label: "Analisis Vendedor",
           to: paths.analisis.vendedor,
           enabled: hasModulePathAccess(user, "analisisVendedor", paths.analisis.vendedor),
-          icon: FileSpreadsheet,
-        },
-        {
-          label: "Saldo de operacion",
-          to: paths.analisis.saldoOperacion,
-          enabled: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion),
           icon: FileSpreadsheet,
         },
         { label: "Ranking", to: paths.convencional.ranking, enabled: hasModulePathAccess(user, "ranking", paths.convencional.ranking), icon: Trophy },

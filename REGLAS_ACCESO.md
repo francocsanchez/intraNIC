@@ -56,6 +56,7 @@ La logica vigente es:
 - `pendienteDocumentacion`
 - `ingresos`
 - `operaciones`
+- `saldoOperacion`
 - `ranking`
 - `promedio`
 - `patentamientos`
@@ -153,6 +154,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 ### Analisis
 
 - `Operaciones` depende de `modules.operaciones = 1`.
+- `Saldo de operacion` depende de `modules.saldoOperacion = 1` y se accede por `/analisis/saldo-operacion`.
 - `Ranking` depende de `modules.ranking = 1`.
 - `Promedio` depende de `modules.promedio = 1`.
 - `Patentamientos` depende de `modules.patentamientos = 1`.
@@ -164,6 +166,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `Patentamientos` y `Transferencias` forman un modulo visual unificado en sidebar, pero cada uno sigue dependiendo de su propio modulo habilitado.
 - El navbar de `Analisis` debe mostrar solo modulos propios de la seccion:
   - `Operaciones`
+  - `Saldo de operacion`
   - `Ranking`
   - `Promedio`
 - `Transferencias` ya no debe aparecer en el navbar superior de `Analisis`.

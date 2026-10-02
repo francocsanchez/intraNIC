@@ -1,22 +1,10 @@
 # AGENTS.md
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 
-Las consultas costosas de `Saldo de operacion` deben evitar ejecuciones duplicadas por carga; los cachés breves de filtros, cancelaciones y resumen por modelo se invalidan al cambiar una cancelación.
-La primera página de `Saldo de operacion` no debe bloquearse por indicadores globales ni filtros secundarios; estas consultas se cargan de forma independiente.
-`Saldo de operacion` muestra y exporta la sucursal a la izquierda del vendedor, y permite filtrarla sin afectar la carga inicial de la tabla.
-En `Saldo de operacion`, Número de fábrica se conserva en la exportación Excel pero no se muestra en la tabla; los filtros y tarjetas de resumen priorizan una altura compacta.
-El orden de filtros superiores de `Saldo de operacion` es Sucursal, cantidad de registros, sección y estados operativos; el contador se muestra en una sola línea.
-`Saldo de operacion` excluye únicamente operaciones entregadas (estado con prefijo `ENT`); las facturadas permanecen visibles.
-La consulta inicial de `Saldo de operacion` no debe consultar movimientos de pedido para resolver ubicación; solo lo hace si el usuario selecciona un estado operativo.
-La primera página de `Saldo de operacion` no bloquea por el conteo global: la paginación usa la existencia de una fila adicional y el total se consulta luego en segundo plano.
-Los filtros secundarios y saldos por modelo de `Saldo de operacion` se solicitan después de la primera tabla; el bloque de saldos muestra un spinner durante su cálculo.
-Al cambiar filtros de `Saldo de operacion`, las solicitudes anteriores deben cancelarse mediante `AbortSignal`; las búsquedas de interno en SQL no aplican funciones sobre la columna indexable.
-En la primera página sin filtros de `Saldo de operacion`, la paginación de `csqUnidades` se ejecuta antes de los cruces de operación, modelo y sucursal.
-Los filtros de ubicación y sucursal de `Saldo de operacion` también deben reducir el conjunto antes de resolver los datos de detalle: ubicación parte de los internos de `movnped` y sucursal de las operaciones SIAC, preservando los mismos resultados funcionales.
-El conteo global sin filtros de `Saldo de operacion` consulta solamente `csqUnidades`; no debe cruzar operación, modelo ni sucursal cuando esos datos no intervienen en el resultado.
-Al iniciar el servidor se precalienta la primera página, filtros, total y saldos por modelo de `Saldo de operacion`; los cachés de respuesta duran como máximo 30 segundos y se invalidan al cambiar una cancelación.
-En `Saldo de operacion`, la grilla se presenta por saldo ascendente y el resumen de operaciones no canceladas incluye los totales globales de Crédito y Usado, respetando sucursal y ubicación activas.
-Los cards de Crédito y Usado de `Saldo de operacion` permanecen visibles también en la pestaña Canceladas, pero conservan el cálculo sobre las operaciones no canceladas.
+`Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC al iniciar y cada dos minutos. Los endpoints del tablero nunca realizan SQL directo.
+El sincronizador marca como entregados y oculta los snapshots que pasan a estado `ENT`, sin borrarlos ni perder su fecha de cancelación. Las fechas y días de cancelación viven en el snapshot y no pueden ser sobreescritos por el cron.
+El job `saldo-operacion-snapshot` debe aparecer en el monitor, permitir ejecución manual y evitar ejecuciones simultáneas. La tabla se ordena por saldo ascendente; sucursal aparece a la izquierda de vendedor y Número de fábrica se conserva solo para Excel.
+
 
 # Instrucciones del proyecto
 
@@ -39,7 +27,6 @@ El repositorio contiene dos aplicaciones independientes:
 - El backend expone las rutas bajo el prefijo `/api` y, por defecto, escucha en el puerto `4002`.
 - MongoDB persiste usuarios, configuraciones y entidades propias de la aplicacion mediante Mongoose.
 - SQL Server concentra las consultas operativas de las companias `NIPPON CAR` y `LIESS`, mediante Sequelize y Tedious.
-- El servidor ejecuta procesos programados al iniciar: agenda de entregas, alertas SSI, facturas de anticipo, patentamientos, transferencias, unidades de dealers, saldo de operaciones y exportacion VIN/chasis.
 - Docker Compose publica el backend en `4003` y el frontend en `8080`.
 
 ## Estructura relevante
@@ -185,6 +172,7 @@ Lado Derecho - Desarrollado por Franco Sanchez
 - En Registros de Entregas, Interno se mantiene como borrador local y solo aplica su consulta al confirmar con Buscar o Enter; no incluir el valor de cada pulsación en la `queryKey`.
 - Los colores de unidades se administran centralmente en `/sistema/configuracion/colores-unidades`, separados del catálogo de Preventas. Cada nombre puede definir un hexadecimal visual; los badges deben resolverlo sin distinguir mayúsculas, tildes o espacios, conservar un fallback neutro y mantener contraste legible.
 - `Sol. cambio color` vive en `/gestion/convencional/solicitud-cambio-color`, usa el permiso independiente `solicitudCambioColor`, admite hasta dos colores de destino y observaciones/N° OP., y conserva la auditoria de cada creacion, edicion y cambio de estado para unidades 0 km. Solo `stock` y `superAdmin` pueden cambiar los estados.
+- `Rep. Siniestros` vive en `/gestion/convencional/rep-siniestros`, usa el permiso independiente `repuestosSiniestros` y registra casos pendientes de internos 0 km contra una Nota de Pedido SIAC seleccionada por su operación. Conserva la fotografía de unidad, cabecera y artículos; el chasis es solamente informativo. La sucursal se muestra por nombre y la lectura tolera transitoriamente respuestas históricas con código numérico. En el detalle, cada artículo se sigue individualmente y en secuencia como Pedido, Arribado y Retirado; el último retiro completa el caso automáticamente y cada cambio queda auditado. Una nota puede aparecer en varios filtros mientras su etapa tenga avance pendiente; deja de mostrarse allí al completar el 100 %. La tabla muestra en Avance solo la métrica de la etapa activa: Pedido sobre el total, Arribado sobre los pedidos y Retirado sobre los arribados. El filtro de interno conserva el borrador local y solo consulta al pulsar Buscar o Enter. Todos los usuarios habilitados pueden crear, cambiar la nota o eliminar pendientes, siempre con auditoría.
 - Las solicitudes de cambio de color con chasis asignado no pueden crearse; las existentes se alertan en tabla. Solo `stock`, `gerente` y `superAdmin` pueden rechazarlas, dejando el rechazo como estado final auditado mediante una actualización atómica. Los cambios de estados de `stock` y `superAdmin` usan la misma persistencia atómica.
 - La vista inicial de `Sol. cambio color` muestra solo solicitudes pendientes; los filtros permiten acceder al resto de estados.
 - El Combobox de vendedores en `Sol. cambio color` requiere al menos tres caracteres antes de filtrar, para preservar la fluidez con listados extensos.

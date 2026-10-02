@@ -22,18 +22,22 @@ import {
 } from "../facturasAnticipoCron.service";
 import { TransferenciasImportService } from "../transferenciasImport.service";
 import { UnidadesDealersService } from "../unidadesDealers.service";
-import {
-  getSaldoOperacionCleanupJobKey,
-  getSaldoOperacionCleanupJobName,
-  getSaldoOperacionCleanupScheduleLabel,
-  isSaldoOperacionCleanupJobRunning,
-  runSaldoOperacionCleanupJob,
-} from "../saldoOperacionCleanupCron.service";
 import { VinChasisExportService } from "../vinChasisExport.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
+import { SaldoOperacionSnapshotJobService } from "./saldoOperacionSnapshotJob.service";
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
 
 const JOB_CATALOG: JobMonitorCatalogItem[] = [
+  {
+    jobKey: SaldoOperacionSnapshotJobService.getJobKey(),
+    title: "Sincronizacion saldo de operacion",
+    scheduleLabel: SaldoOperacionSnapshotJobService.getScheduleLabel(),
+    jobName: SaldoOperacionSnapshotJobService.getJobName(),
+    sourceType: "database",
+    sourcePath: "SIAC csqUnidades -> Mongo saldo_operacion_snapshots",
+    isRunning: () => SaldoOperacionSnapshotJobService.isJobRunning(),
+    run: (trigger) => SaldoOperacionSnapshotJobService.run(trigger),
+  },
   {
     jobKey: getAgendaEntregaEnvioJobKey(),
     title: "Envio agenda de entrega",
@@ -103,16 +107,6 @@ const JOB_CATALOG: JobMonitorCatalogItem[] = [
     sourcePath: "OperacionFacturaAnticipo",
     isRunning: () => isFacturasAnticipoJobRunning(),
     run: (trigger) => runFacturasAnticipoJob(trigger),
-  },
-  {
-    jobKey: getSaldoOperacionCleanupJobKey(),
-    title: "Limpieza Saldo de operacion",
-    scheduleLabel: getSaldoOperacionCleanupScheduleLabel(),
-    jobName: getSaldoOperacionCleanupJobName(),
-    sourceType: "database",
-    sourcePath: "saldo_operacion_canceladas",
-    isRunning: () => isSaldoOperacionCleanupJobRunning(),
-    run: (trigger) => runSaldoOperacionCleanupJob(trigger),
   },
 ];
 

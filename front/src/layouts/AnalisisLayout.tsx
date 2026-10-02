@@ -5,9 +5,9 @@ import { paths } from "@/routes/paths";
 import {
   BarChart3,
   ChartColumn,
+  CircleDollarSign,
   Rows3,
   ShieldAlert,
-  TableProperties,
   Trophy,
   UserRound,
 } from "lucide-react";
@@ -28,6 +28,13 @@ export default function AnalisisLayout() {
         paths.analisis.operaciones,
       ),
       active: pathname === paths.analisis.operaciones,
+    },
+    {
+      label: "Saldo de operacion",
+      to: paths.analisis.saldoOperacion,
+      icon: CircleDollarSign,
+      visible: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion),
+      active: pathname === paths.analisis.saldoOperacion,
     },
     {
       label: "Central de Deudores",
@@ -61,17 +68,6 @@ export default function AnalisisLayout() {
         paths.analisis.vendedor,
       ),
       active: pathname === paths.analisis.vendedor,
-    },
-    {
-      label: "Saldo de operacion",
-      to: paths.analisis.saldoOperacion,
-      icon: TableProperties,
-      visible: hasModulePathAccess(
-        user,
-        "saldoOperacion",
-        paths.analisis.saldoOperacion,
-      ),
-      active: pathname === paths.analisis.saldoOperacion,
     },
     {
       label: "Ranking",

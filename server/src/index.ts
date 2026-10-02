@@ -4,11 +4,10 @@ import { startSsiVentasHotAlertJob } from "./jobs/ssiVentasHotAlert.job";
 import server from "./server";
 import { startFacturasAnticipoJob } from "./jobs/facturasAnticipo.job";
 import { startPatentamientosImportJob } from "./jobs/patentamientosImport.job";
-import { startSaldoOperacionCleanupJob } from "./jobs/saldoOperacionCleanup.job";
 import { startTransferenciasImportJob } from "./jobs/transferenciasImport.job";
 import { startUnidadesDealersJob } from "./jobs/unidadesDealers.job";
 import { startVinChasisExportJob } from "./jobs/vinChasisExport.job";
-import { OperacionesDashboardService } from "./services/operacionesDashboard.service";
+import { startSaldoOperacionSnapshotJob } from "./jobs/saldoOperacionSnapshot.job";
 
 const port = process.env.PORT || 4002;
 
@@ -23,15 +22,9 @@ server.listen(Number(port), "0.0.0.0", () => {
   startAgendaEntregaEnvioJob();
   startSsiVentasHotAlertJob();
   startFacturasAnticipoJob();
-  startSaldoOperacionCleanupJob();
   startPatentamientosImportJob();
   startTransferenciasImportJob();
   startUnidadesDealersJob();
   startVinChasisExportJob();
-
-  setTimeout(() => {
-    void OperacionesDashboardService.prewarmSaldoOperacion().catch((error) => {
-      console.error("No se pudo precalentar Saldo de operacion", error);
-    });
-  }, 5_000);
+  startSaldoOperacionSnapshotJob();
 });

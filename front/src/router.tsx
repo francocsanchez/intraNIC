@@ -70,6 +70,7 @@ const AnalisisStockView = lazy(() => import("./views/admin/siac/AnalisisStockVie
 const AnalisisStockVersionesView = lazy(() => import("./views/admin/siac/AnalisisStockVersionesView"));
 const PendFacView = lazy(() => import("./views/admin/siac/PendFacView"));
 const SolicitudCambioColorView = lazy(() => import("./views/admin/siac/SolicitudCambioColorView"));
+const RepuestosSiniestrosView = lazy(() => import("./views/admin/siac/RepuestosSiniestrosView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
 const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
@@ -90,10 +91,10 @@ const RendicionesGastosView = lazy(() => import("./views/comercial/RendicionesGa
 const RendicionGastoCreateView = lazy(() => import("./views/comercial/RendicionGastoCreateView"));
 const RendicionGastoDetailView = lazy(() => import("./views/comercial/RendicionGastoDetailView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
+const SaldoOperacionView = lazy(() => import("./views/operaciones/SaldoOperacionView"));
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
 const AnalisisVendedorView = lazy(() => import("./views/operaciones/AnalisisVendedorView"));
-const SaldoOperacionView = lazy(() => import("./views/operaciones/SaldoOperacionView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
 const InscripcionUnidadesView = lazy(() => import("./views/patentamientos/InscripcionUnidadesView"));
@@ -298,6 +299,9 @@ export default function Router() {
             <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
             </Route>
+            <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacion"]} />}>
+              <Route path={paths.analisis.saldoOperacion} element={<SaldoOperacionView />} />
+            </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["centralDeudores"]} />}>
               <Route path={paths.analisis.centralDeudores} element={<CentralDeudoresView />} />
@@ -309,10 +313,6 @@ export default function Router() {
 
             <Route element={<ModuleProtectedRoute allowedModules={["analisisVendedor"]} />}>
               <Route path={paths.analisis.vendedor} element={<AnalisisVendedorView />} />
-            </Route>
-
-            <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacion"]} />}>
-              <Route path={paths.analisis.saldoOperacion} element={<SaldoOperacionView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>
@@ -460,6 +460,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["solicitudCambioColor"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.solicitudCambioColor} element={<SolicitudCambioColorView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["repuestosSiniestros"]} />}>
+            <Route element={<GestionConvencionalLayout />}>
+              <Route path={paths.convencional.repuestosSiniestros} element={<RepuestosSiniestrosView />} />
             </Route>
           </Route>
 

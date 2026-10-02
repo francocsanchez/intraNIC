@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/authenticate";
 import { OperacionesController } from "../controllers/OperacionesController";
 import { authorizeModules } from "../middleware/authorizeModules";
+import { SaldoOperacionSnapshotController } from "../controllers/SaldoOperacionSnapshotController";
 
 const router = Router();
 
@@ -47,35 +48,9 @@ router.get(
   authorizeModules("analisisOperaciones"),
   OperacionesController.getAnalisisPreventaFormaPago,
 );
-router.get(
-  "/saldo-operacion/filtros",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.getSaldoOperacionFilters,
-);
-router.get(
-  "/saldo-operacion/saldos-por-modelo",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.getSaldoOperacionSaldosPorModelo,
-);
-router.get(
-  "/saldo-operacion/total",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.getSaldoOperacionTotal,
-);
-router.get(
-  "/saldo-operacion/export",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.exportSaldoOperacion,
-);
-router.get(
-  "/saldo-operacion",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.getSaldoOperacion,
-);
-router.patch(
-  "/saldo-operacion/:codigoOperacion/cancelada",
-  authorizeModules("saldoOperacion"),
-  OperacionesController.updateSaldoOperacionCancelada,
-);
-
+router.get("/saldo-operacion/filtros", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.filters);
+router.get("/saldo-operacion/resumen", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.summary);
+router.get("/saldo-operacion/export", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.export);
+router.get("/saldo-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.list);
+router.patch("/saldo-operacion/:codigoOperacion/cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateFechaCancelacion);
 export default router;
