@@ -7,6 +7,10 @@ El sincronizador marca como entregados y oculta los snapshots que pasan a estado
 El usuario de operación conserva por separado el valor original SIAC y el override local. El cron solo actualiza el original; la grilla y Excel muestran el override cuando existe. El catálogo seleccionable contiene únicamente usuarios SIAC habilitados sincronizados en Mongo.
 La grilla de `Saldo de operacion` no etiqueta visualmente como local los usuarios corregidos; muestra únicamente el usuario efectivo.
 `Analisis de cancelacion` consulta exclusivamente snapshots Mongo con fecha y días de cancelación válidos, incluye operaciones luego entregadas y agrupa el usuario efectivo en el árbol Vendedor → Usuario → Sucursal → Tiempo total. Sus rangos visuales son verde para menos de 15 días, amarillo desde 15 hasta menos de 18 y rojo desde 18.
+`Analisis de cancelacion` permite filtrar el árbol por mes de asignación y mantiene arriba una tabla horizontal con el promedio histórico por cada mes disponible; este resumen mensual no se reduce al filtro activo.
+El contenedor del árbol de `Analisis de cancelacion` debe definir una altura responsive efectiva para garantizar que ECharts reciba dimensiones al iniciar; no usar expresiones Tailwind arbitrarias que puedan quedar fuera de la generación de estilos.
+El árbol de `Analisis de cancelacion` es fijo: no permite zoom ni arrastre; su altura crece conforme a la cantidad de vendedores para mostrar todos los nodos sin desplazamiento interno.
+El árbol de `Analisis de cancelacion` reserva margen lateral para sus etiquetas y divide los nombres extensos en líneas, para que ningún nodo se dibuje fuera del contenedor.
 Al confirmar una fecha de cancelación, se debe invalidar el caché de Análisis de cancelación para que al navegar al árbol se vean los datos actualizados sin recargar la página.
 El autocomplete de usuario de operación no consulta ni muestra opciones hasta que se ingresen al menos tres caracteres; la búsqueda se resuelve en Mongo y limita los resultados.
 Cuando falle la consulta del autocomplete, el diálogo debe mostrar el error y permitir reintentar; no debe presentarlo como una búsqueda sin coincidencias.

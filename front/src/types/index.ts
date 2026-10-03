@@ -2596,7 +2596,14 @@ export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays:
 export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
   name: z.string(), averageDays: z.number(), operations: z.number(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
 }));
-export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({ data: z.object({ averageDays: z.number(), operations: z.number(), tree: saldoOperacionCancelacionAnalysisNodeSchema }) });
+export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
+  data: z.object({
+    averageDays: z.number(),
+    operations: z.number(),
+    tree: saldoOperacionCancelacionAnalysisNodeSchema,
+    months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
+  }),
+});
 export type SaldoOperacionSnapshotItem = z.infer<typeof saldoOperacionSnapshotItemSchema>;
 export type SaldoOperacionSnapshotListResponse = z.infer<typeof saldoOperacionSnapshotListResponseSchema>;
 export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacionSnapshotFiltersResponseSchema>;

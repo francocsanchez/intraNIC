@@ -77,8 +77,8 @@ export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperaci
   try { const { data } = await api.get("/operaciones/saldo-operacion/resumen", { params, signal }); const parsed = saldoOperacionSnapshotSummaryResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Resumen invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener resumen")); }
 }
-export async function getSaldoOperacionCancelacionAnalysis(signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
-  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
+export async function getSaldoOperacionCancelacionAnalysis(mesAsignacion?: string, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { params: { mesAsignacion }, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de cancelacion")); }
 }
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string) {

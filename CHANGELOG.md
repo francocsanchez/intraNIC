@@ -1,11 +1,20 @@
 # Changelog
 
+## 2026-10-03
+
+- **Análisis de cancelación:** se corrigió el alto efectivo del contenedor ECharts del árbol, que impedía su renderizado, y se compactó su superficie responsive.
+- **Análisis de cancelación:** el árbol quedó fijo, sin zoom ni arrastre, y adapta su alto a la cantidad de vendedores visualizados.
+- **Análisis de cancelación:** se reservaron márgenes para etiquetas y los nombres extensos ahora se dividen en líneas para evitar que los nodos sobresalgan del contenedor.
+- **Análisis de cancelación:** se corrigió el renderizado de nombres multilínea de los nodos del árbol.
+- **Análisis de cancelación:** se corrigió la composición de los nombres para que cada nodo conserve su etiqueta completa.
+
 ## 2026-10-02
 
 ### Saldo de operación
 
 - Se corrigió el build de frontend retirando una ruta de Repuestos Siniestros cuyo componente no formaba parte del commit publicado.
 - Se incorporó Análisis de cancelación: un árbol histórico Mongo de promedios por vendedor, usuario efectivo y sucursal, con promedio total y rangos visuales por tiempo.
+- El análisis ahora permite filtrar el árbol por mes de asignación e incorpora una tabla comparativa de promedios históricos mensuales, además de un árbol más amplio e interactivo.
 - Al guardar una cancelación se invalida el caché del análisis, evitando tener que recargar la página para ver el árbol actualizado.
 - Se agregó la corrección local del usuario de operación mediante el catálogo SIAC habilitado sincronizado en Mongo; las correcciones no modifican SIAC ni son sobrescritas por el cron.
 - Se retiró la etiqueta visual `local` de usuarios corregidos; la grilla muestra solo el usuario efectivo.

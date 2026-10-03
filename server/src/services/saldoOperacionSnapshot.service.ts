@@ -24,6 +24,12 @@ type CancelacionAnalysisGroup = {
   operations: number;
 };
 
+type CancelacionMonthlyGroup = {
+  _id: string;
+  averageDays: number;
+  operations: number;
+};
+
 const trim = (value: unknown, fallback = "") => {
   const normalized = String(value ?? "").trim();
   return normalized || fallback;
@@ -241,9 +247,16 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async cancelacionAnalysis() {
-    const groups = await SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
-      { $match: { fechaCancelacion: { $type: "string" }, diasHastaCancelacion: { $type: "number" } } },
+  static async cancelacionAnalysis(month?: string | null) {
+    const cancelacionMatch = {
+      fechaCancelacion: { $type: "string" },
+      fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+      diasHastaCancelacion: { $type: "number" },
+    };
+    const selectedMatch = month ? { ...cancelacionMatch, fechaAsignacion: { $regex: `^${month}-` } } : cancelacionMatch;
+    const [groups, months] = await Promise.all([
+      SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
+      { $match: selectedMatch },
       {
         $project: {
           diasHastaCancelacion: 1,
@@ -285,6 +298,13 @@ export class SaldoOperacionSnapshotService {
           operations: { $sum: 1 },
         },
       },
+      ]),
+      SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
+        { $match: cancelacionMatch },
+        { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, diasHastaCancelacion: 1 } },
+        { $group: { _id: "$month", averageDays: { $avg: "$diasHastaCancelacion" }, operations: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
     const branches = new Map<string, Map<string, CancelacionAnalysisGroup[]>>();
@@ -311,7 +331,14 @@ export class SaldoOperacionSnapshotService {
       });
 
     const tree = buildAnalysisNode("Tiempo total", groups, children);
-    return { data: { averageDays: tree.averageDays, operations: tree.operations, tree } };
+    return {
+      data: {
+        averageDays: tree.averageDays,
+        operations: tree.operations,
+        tree,
+        months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations })),
+      },
+    };
   }
 
   static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null }) {
