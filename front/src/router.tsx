@@ -70,7 +70,6 @@ const AnalisisStockView = lazy(() => import("./views/admin/siac/AnalisisStockVie
 const AnalisisStockVersionesView = lazy(() => import("./views/admin/siac/AnalisisStockVersionesView"));
 const PendFacView = lazy(() => import("./views/admin/siac/PendFacView"));
 const SolicitudCambioColorView = lazy(() => import("./views/admin/siac/SolicitudCambioColorView"));
-const RepuestosSiniestrosView = lazy(() => import("./views/admin/siac/RepuestosSiniestrosView"));
 const PreventasView = lazy(() => import("./views/admin/siac/PreventasView"));
 const PreventasAsignadasView = lazy(() => import("./views/admin/siac/PreventasAsignadasView"));
 const PreventasResumenView = lazy(() => import("./views/admin/siac/PreventasResumenView"));
@@ -462,12 +461,6 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["solicitudCambioColor"]} />}>
             <Route element={<GestionConvencionalLayout />}>
               <Route path={paths.convencional.solicitudCambioColor} element={<SolicitudCambioColorView />} />
-            </Route>
-          </Route>
-
-          <Route element={<ModuleProtectedRoute allowedModules={["repuestosSiniestros"]} />}>
-            <Route element={<GestionConvencionalLayout />}>
-              <Route path={paths.convencional.repuestosSiniestros} element={<RepuestosSiniestrosView />} />
             </Route>
           </Route>
 

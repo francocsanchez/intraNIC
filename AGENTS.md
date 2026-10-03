@@ -1,5 +1,6 @@
 # AGENTS.md
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
+No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
 `Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC cada dos minutos, de 07:00 a 20:00 (Buenos Aires), con última ejecución a las 20:00. Los endpoints del tablero nunca realizan SQL directo.
 El sincronizador marca como entregados y oculta los snapshots que pasan a estado `ENT`, sin borrarlos ni perder su fecha de cancelación. Las fechas y días de cancelación viven en el snapshot y no pueden ser sobreescritos por el cron.

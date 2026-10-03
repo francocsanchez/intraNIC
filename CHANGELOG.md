@@ -4,6 +4,7 @@
 
 ### Saldo de operación
 
+- Se corrigió el build de frontend retirando una ruta de Repuestos Siniestros cuyo componente no formaba parte del commit publicado.
 - Se incorporó Análisis de cancelación: un árbol histórico Mongo de promedios por vendedor, usuario efectivo y sucursal, con promedio total y rangos visuales por tiempo.
 - Al guardar una cancelación se invalida el caché del análisis, evitando tener que recargar la página para ver el árbol actualizado.
 - Se agregó la corrección local del usuario de operación mediante el catálogo SIAC habilitado sincronizado en Mongo; las correcciones no modifican SIAC ni son sobrescritas por el cron.
