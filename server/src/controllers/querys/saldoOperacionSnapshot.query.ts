@@ -48,3 +48,11 @@ SELECT csq.Codigo_operacion AS codigo_operacion, csq.Estado AS estado
 FROM dbo.csqUnidades csq
 WHERE csq.Codigo_operacion IN (:codigos);
 `;
+
+export const saldoOperacionUsuariosQuery = () => `
+SELECT CAST(usu_codigo AS VARCHAR(30)) AS codigo, LTRIM(RTRIM(usu_nombre)) AS nombre
+FROM dbo.usuario
+WHERE ISNULL(usu_habilitado, 0) = 1
+  AND usu_codigo IS NOT NULL
+ORDER BY usu_nombre ASC, usu_codigo ASC;
+`;

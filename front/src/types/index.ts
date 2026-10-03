@@ -2577,7 +2577,8 @@ export type SolicitudCambioColor = z.infer<typeof solicitudCambioColorSchema>;
 
 export const saldoOperacionSnapshotItemSchema = z.object({
   codigoOperacion: z.number(), clienteNombre: z.string(), vendedor: z.string(), sucursal: z.string(),
-  usuarioOperacion: z.string(), nombreUsuarioOperacion: z.string(), numeroFabrica: z.string(),
+  usuarioOperacion: z.string(), nombreUsuarioOperacion: z.string(), usuarioOperacionOriginal: z.string().optional().default(""),
+  nombreUsuarioOperacionOriginal: z.string().optional().default(""), usuarioOperacionCorregido: z.boolean().optional().default(false), numeroFabrica: z.string(),
   total: z.number().nullable(), bonificacion: z.number().nullable(), gestoria: z.number().nullable(), senas: z.number().nullable(),
   usado: z.number().nullable(), creditoBanco: z.number().nullable(), version: z.string(), modeloGeneral: z.string(),
   fechaAsignacion: z.string().nullable(), diasAsignada: z.number().nullable(), estado: z.string(), ubicacion: z.string(),
@@ -2590,10 +2591,18 @@ export const saldoOperacionSnapshotListResponseSchema = z.object({
 export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.object({ sucursales: z.array(z.string()), ubicaciones: z.array(z.string()) }) });
 export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), usadoTotal: z.number() });
 export const saldoOperacionSnapshotUpdateResponseSchema = z.object({ message: z.string(), data: saldoOperacionSnapshotItemSchema });
+export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });
+export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; children?: SaldoOperacionCancelacionAnalysisNode[] };
+export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
+  name: z.string(), averageDays: z.number(), operations: z.number(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
+}));
+export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({ data: z.object({ averageDays: z.number(), operations: z.number(), tree: saldoOperacionCancelacionAnalysisNodeSchema }) });
 export type SaldoOperacionSnapshotItem = z.infer<typeof saldoOperacionSnapshotItemSchema>;
 export type SaldoOperacionSnapshotListResponse = z.infer<typeof saldoOperacionSnapshotListResponseSchema>;
 export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacionSnapshotFiltersResponseSchema>;
 export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacionSnapshotSummaryResponseSchema>;
+export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
+export type SaldoOperacionUsuario = z.infer<typeof saldoOperacionUsuariosResponseSchema>['data'][number];
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;

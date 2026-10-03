@@ -7,6 +7,10 @@ export interface ISaldoOperacionSnapshot extends Document {
   sucursal: string;
   usuarioOperacion: string;
   nombreUsuarioOperacion: string;
+  usuarioOperacionSiac: string;
+  nombreUsuarioOperacionSiac: string;
+  usuarioOperacionManual: string | null;
+  nombreUsuarioOperacionManual: string | null;
   numeroFabrica: string;
   total: number | null;
   bonificacion: number | null;
@@ -37,6 +41,10 @@ const saldoOperacionSnapshotSchema = new Schema<ISaldoOperacionSnapshot>(
     sucursal: { type: String, default: "SIN SUCURSAL", trim: true },
     usuarioOperacion: { type: String, default: "", trim: true },
     nombreUsuarioOperacion: { type: String, default: "", trim: true },
+    usuarioOperacionSiac: { type: String, default: "", trim: true },
+    nombreUsuarioOperacionSiac: { type: String, default: "", trim: true },
+    usuarioOperacionManual: { type: String, default: null, trim: true },
+    nombreUsuarioOperacionManual: { type: String, default: null, trim: true },
     numeroFabrica: { type: String, default: "", trim: true },
     total: nullableNumber,
     bonificacion: nullableNumber,

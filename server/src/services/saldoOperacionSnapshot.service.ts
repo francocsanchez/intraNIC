@@ -4,11 +4,25 @@ import {
   saldoOperacionEstadosEntregadosQuery,
   saldoOperacionSnapshotSourceQuery,
   saldoOperacionUbicacionesQuery,
+  saldoOperacionUsuariosQuery,
 } from "../controllers/querys/saldoOperacionSnapshot.query";
 import SaldoOperacionSnapshot from "../models/SaldoOperacionSnapshot";
+import SaldoOperacionUsuario from "../models/SaldoOperacionUsuario";
 
 type SourceRow = Record<string, unknown>;
 type SnapshotSection = "conSaldo" | "canceladas";
+type CancelacionAnalysisNode = {
+  name: string;
+  averageDays: number;
+  operations: number;
+  children?: CancelacionAnalysisNode[];
+};
+
+type CancelacionAnalysisGroup = {
+  _id: { sucursal: string; usuario: string; vendedor: string };
+  averageDays: number;
+  operations: number;
+};
 
 const trim = (value: unknown, fallback = "") => {
   const normalized = String(value ?? "").trim();
@@ -44,6 +58,15 @@ const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
 const normalizeSection = (value: string | null | undefined): SnapshotSection =>
   String(value ?? "").trim().toLowerCase() === "canceladas" ? "canceladas" : "conSaldo";
 
+const nodeName = (value: unknown, fallback: string) => trim(value, fallback);
+const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], children?: CancelacionAnalysisNode[]): CancelacionAnalysisNode => {
+  const operations = groups.reduce((total, group) => total + group.operations, 0);
+  const averageDays = operations
+    ? groups.reduce((total, group) => total + group.averageDays * group.operations, 0) / operations
+    : 0;
+  return { name, averageDays, operations, ...(children?.length ? { children } : {}) };
+};
+
 const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null }) => {
   const filter: Record<string, unknown> = { entregada: false };
   filter.fechaCancelacion = normalizeSection(params.section) === "canceladas" ? { $ne: null } : null;
@@ -59,8 +82,11 @@ const serialize = (item: any) => ({
   clienteNombre: item.clienteNombre ?? "",
   vendedor: item.vendedor ?? "",
   sucursal: item.sucursal ?? "SIN SUCURSAL",
-  usuarioOperacion: item.usuarioOperacion ?? "",
-  nombreUsuarioOperacion: item.nombreUsuarioOperacion ?? "",
+  usuarioOperacion: item.usuarioOperacionManual ?? item.usuarioOperacionSiac ?? item.usuarioOperacion ?? "",
+  nombreUsuarioOperacion: item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion ?? "",
+  usuarioOperacionOriginal: item.usuarioOperacionSiac ?? item.usuarioOperacion ?? "",
+  nombreUsuarioOperacionOriginal: item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion ?? "",
+  usuarioOperacionCorregido: Boolean(item.usuarioOperacionManual),
   numeroFabrica: item.numeroFabrica ?? "",
   total: item.total ?? null,
   bonificacion: item.bonificacion ?? null,
@@ -82,9 +108,10 @@ const serialize = (item: any) => ({
 
 export class SaldoOperacionSnapshotService {
   static async syncFromSiac() {
-    const [sourceRows, ubicacionRows] = await Promise.all([
+    const [sourceRows, ubicacionRows, usuarioRows] = await Promise.all([
       sequelizeNIC.query<SourceRow>(saldoOperacionSnapshotSourceQuery(), { type: QueryTypes.SELECT }),
       sequelizeNIC.query<SourceRow>(saldoOperacionUbicacionesQuery(), { type: QueryTypes.SELECT }),
+      sequelizeNIC.query<SourceRow>(saldoOperacionUsuariosQuery(), { type: QueryTypes.SELECT }),
     ]);
     const ubicaciones = new Map<string, string>();
     ubicacionRows.forEach((row) => {
@@ -103,8 +130,8 @@ export class SaldoOperacionSnapshotService {
           clienteNombre: trim(row.cliente_nombre),
           vendedor: trim(row.vendedor),
           sucursal: trim(row.sucursal, "SIN SUCURSAL"),
-          usuarioOperacion: trim(row.usuario_operacion),
-          nombreUsuarioOperacion: trim(row.nombre_usuario_operacion),
+          usuarioOperacionSiac: trim(row.usuario_operacion),
+          nombreUsuarioOperacionSiac: trim(row.nombre_usuario_operacion),
           numeroFabrica,
           total: numberOrNull(row.pcio_venta),
           bonificacion: numberOrNull(row.bonif_venta),
@@ -138,6 +165,17 @@ export class SaldoOperacionSnapshotService {
       );
     }
 
+    const usuarios = usuarioRows
+      .map((row) => ({ codigo: trim(row.codigo), nombre: trim(row.nombre), habilitado: true, sincronizadoEn: now }))
+      .filter((usuario) => Boolean(usuario.codigo && usuario.nombre));
+    if (usuarios.length) {
+      await SaldoOperacionUsuario.bulkWrite(
+        usuarios.map((usuario) => ({ updateOne: { filter: { codigo: usuario.codigo }, update: { $set: usuario }, upsert: true } })),
+        { ordered: false },
+      );
+      await SaldoOperacionUsuario.updateMany({ codigo: { $nin: usuarios.map((usuario) => usuario.codigo) } }, { $set: { habilitado: false, sincronizadoEn: now } });
+    }
+
     const activos = await SaldoOperacionSnapshot.find({ entregada: false }, { codigoOperacion: 1 }).lean();
     const codigos = activos.map((item) => Number(item.codigoOperacion)).filter((item) => Number.isInteger(item));
     let entregadas = 0;
@@ -159,7 +197,7 @@ export class SaldoOperacionSnapshotService {
       }
     }
 
-    return { total: operations.length, createdOrUpdated: operations.length, entregadas };
+    return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
   static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; page: number; limit: number }) {
@@ -203,6 +241,79 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
+  static async cancelacionAnalysis() {
+    const groups = await SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
+      { $match: { fechaCancelacion: { $type: "string" }, diasHastaCancelacion: { $type: "number" } } },
+      {
+        $project: {
+          diasHastaCancelacion: 1,
+          sucursal: {
+            $let: {
+              vars: { value: { $trim: { input: { $ifNull: ["$sucursal", ""] } } } },
+              in: { $cond: [{ $eq: ["$$value", ""] }, "Sin sucursal", "$$value"] },
+            },
+          },
+          usuario: {
+            $let: {
+              vars: {
+                value: {
+                  $trim: {
+                    input: {
+                      $ifNull: [
+                        "$nombreUsuarioOperacionManual",
+                        { $ifNull: ["$nombreUsuarioOperacionSiac", { $ifNull: ["$nombreUsuarioOperacion", ""] }] },
+                      ],
+                    },
+                  },
+                },
+              },
+              in: { $cond: [{ $eq: ["$$value", ""] }, "Sin usuario", "$$value"] },
+            },
+          },
+          vendedor: {
+            $let: {
+              vars: { value: { $trim: { input: { $ifNull: ["$vendedor", ""] } } } },
+              in: { $cond: [{ $eq: ["$$value", ""] }, "Sin vendedor", "$$value"] },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { sucursal: "$sucursal", usuario: "$usuario", vendedor: "$vendedor" },
+          averageDays: { $avg: "$diasHastaCancelacion" },
+          operations: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const branches = new Map<string, Map<string, CancelacionAnalysisGroup[]>>();
+    groups.forEach((group) => {
+      const sucursal = nodeName(group._id.sucursal, "Sin sucursal");
+      const usuario = nodeName(group._id.usuario, "Sin usuario");
+      const byUser = branches.get(sucursal) ?? new Map<string, CancelacionAnalysisGroup[]>();
+      byUser.set(usuario, [...(byUser.get(usuario) ?? []), group]);
+      branches.set(sucursal, byUser);
+    });
+
+    const children = [...branches.entries()]
+      .sort(([left], [right]) => left.localeCompare(right, "es"))
+      .map(([sucursal, users]) => {
+        const userNodes = [...users.entries()]
+          .sort(([left], [right]) => left.localeCompare(right, "es"))
+          .map(([usuario, userGroups]) => {
+            const sellers = userGroups
+              .sort((left, right) => nodeName(left._id.vendedor, "Sin vendedor").localeCompare(nodeName(right._id.vendedor, "Sin vendedor"), "es"))
+              .map((group) => buildAnalysisNode(nodeName(group._id.vendedor, "Sin vendedor"), [group]));
+            return buildAnalysisNode(usuario, userGroups, sellers);
+          });
+        return buildAnalysisNode(sucursal, [...users.values()].flat(), userNodes);
+      });
+
+    const tree = buildAnalysisNode("Tiempo total", groups, children);
+    return { data: { averageDays: tree.averageDays, operations: tree.operations, tree } };
+  }
+
   static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find(baseFilter(params)).lean();
     return rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion).map(serialize);
@@ -217,6 +328,28 @@ export class SaldoOperacionSnapshotService {
     if (diasHastaCancelacion < 0) throw new Error("La fecha de cancelacion no puede ser anterior a la fecha de asignacion");
     snapshot.fechaCancelacion = fechaCancelacion;
     snapshot.diasHastaCancelacion = diasHastaCancelacion;
+    await snapshot.save();
+    return serialize(snapshot);
+  }
+
+  static async listUsuariosOperacion(busqueda: string) {
+    const normalizedSearch = trim(busqueda);
+    if (normalizedSearch.length < 3) return { data: [] };
+    const expression = new RegExp(normalizedSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const usuarios = await SaldoOperacionUsuario.find(
+      { habilitado: true, $or: [{ codigo: expression }, { nombre: expression }] },
+      { codigo: 1, nombre: 1 },
+    ).sort({ nombre: 1, codigo: 1 }).limit(30).lean();
+    return { data: usuarios.map((usuario) => ({ codigo: usuario.codigo, nombre: usuario.nombre })) };
+  }
+
+  static async updateUsuarioOperacion(codigoOperacion: number, codigoUsuario: string) {
+    const usuario = await SaldoOperacionUsuario.findOne({ codigo: codigoUsuario, habilitado: true }).lean();
+    if (!usuario) throw new Error("El usuario SIAC seleccionado no existe o no esta habilitado");
+    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion, entregada: false });
+    if (!snapshot) throw new Error("La operacion no existe en el snapshot activo");
+    snapshot.usuarioOperacionManual = usuario.codigo;
+    snapshot.nombreUsuarioOperacionManual = usuario.nombre;
     await snapshot.save();
     return serialize(snapshot);
   }

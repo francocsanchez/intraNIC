@@ -4,7 +4,7 @@ import type { JobExecutionResult, JobMonitorTrigger } from "./jobMonitor.types";
 
 const JOB_KEY = "saldo-operacion-snapshot";
 const JOB_NAME = "saldo-operacion-snapshot";
-const JOB_SCHEDULE_LABEL = "Cada 2 minutos";
+const JOB_SCHEDULE_LABEL = "Cada 2 minutos, de 07:00 a 20:00";
 
 export class SaldoOperacionSnapshotJobService {
   private static isRunning = false;

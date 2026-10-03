@@ -3,7 +3,7 @@ import {
   LegendComponent,
   TooltipComponent,
 } from "echarts/components";
-import { BarChart, LineChart, PieChart, TreemapChart } from "echarts/charts";
+import { BarChart, LineChart, PieChart, TreeChart, TreemapChart } from "echarts/charts";
 import {
   init,
   use as registerECharts,
@@ -23,6 +23,7 @@ registerECharts([
   SVGRenderer,
   TooltipComponent,
   TreemapChart,
+  TreeChart,
 ]);
 
 type EChartProps = {

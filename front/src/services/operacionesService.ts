@@ -22,9 +22,13 @@ import {
   saldoOperacionSnapshotListResponseSchema,
   saldoOperacionSnapshotSummaryResponseSchema,
   saldoOperacionSnapshotUpdateResponseSchema,
+  saldoOperacionCancelacionAnalysisResponseSchema,
+  type SaldoOperacionCancelacionAnalysisResponse,
+  saldoOperacionUsuariosResponseSchema,
   type SaldoOperacionSnapshotFiltersResponse,
   type SaldoOperacionSnapshotListResponse,
   type SaldoOperacionSnapshotSummaryResponse,
+  type SaldoOperacionUsuario,
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
@@ -73,9 +77,21 @@ export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperaci
   try { const { data } = await api.get("/operaciones/saldo-operacion/resumen", { params, signal }); const parsed = saldoOperacionSnapshotSummaryResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Resumen invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener resumen")); }
 }
+export async function getSaldoOperacionCancelacionAnalysis(signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de cancelacion")); }
+}
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/cancelacion`, { fechaCancelacion }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar la cancelacion")); }
+}
+export async function getSaldoOperacionUsuarios(buscar: string, signal?: AbortSignal): Promise<SaldoOperacionUsuario[]> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/usuarios", { params: { buscar }, signal }); const parsed = saldoOperacionUsuariosResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Usuarios invalidos"); return parsed.data.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al obtener usuarios SIAC")); }
+}
+export async function updateSaldoOperacionUsuario(codigoOperacion: number, codigoUsuario: string) {
+  try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/usuario-operacion`, { codigoUsuario }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar el usuario de operacion")); }
 }
 export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSnapshotParams, "section" | "sucursal" | "ubicacion">): Promise<Blob> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/export", { params, responseType: "blob" }); return data; }

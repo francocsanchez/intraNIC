@@ -1,8 +1,15 @@
 # AGENTS.md
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 
-`Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC al iniciar y cada dos minutos. Los endpoints del tablero nunca realizan SQL directo.
+`Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC cada dos minutos, de 07:00 a 20:00 (Buenos Aires), con última ejecución a las 20:00. Los endpoints del tablero nunca realizan SQL directo.
 El sincronizador marca como entregados y oculta los snapshots que pasan a estado `ENT`, sin borrarlos ni perder su fecha de cancelación. Las fechas y días de cancelación viven en el snapshot y no pueden ser sobreescritos por el cron.
+El usuario de operación conserva por separado el valor original SIAC y el override local. El cron solo actualiza el original; la grilla y Excel muestran el override cuando existe. El catálogo seleccionable contiene únicamente usuarios SIAC habilitados sincronizados en Mongo.
+La grilla de `Saldo de operacion` no etiqueta visualmente como local los usuarios corregidos; muestra únicamente el usuario efectivo.
+`Analisis de cancelacion` consulta exclusivamente snapshots Mongo con fecha y días de cancelación válidos, incluye operaciones luego entregadas y agrupa el usuario efectivo en el árbol Vendedor → Usuario → Sucursal → Tiempo total. Sus rangos visuales son verde para menos de 15 días, amarillo desde 15 hasta menos de 18 y rojo desde 18.
+Al confirmar una fecha de cancelación, se debe invalidar el caché de Análisis de cancelación para que al navegar al árbol se vean los datos actualizados sin recargar la página.
+El autocomplete de usuario de operación no consulta ni muestra opciones hasta que se ingresen al menos tres caracteres; la búsqueda se resuelve en Mongo y limita los resultados.
+Cuando falle la consulta del autocomplete, el diálogo debe mostrar el error y permitir reintentar; no debe presentarlo como una búsqueda sin coincidencias.
+La respuesta de snapshots debe tolerar transitoriamente la ausencia de los campos de override del usuario, para no bloquear el tablero durante una actualización escalonada de frontend y backend.
 El job `saldo-operacion-snapshot` debe aparecer en el monitor, permitir ejecución manual y evitar ejecuciones simultáneas. La tabla se ordena por saldo ascendente; sucursal aparece a la izquierda de vendedor y Número de fábrica se conserva solo para Excel.
 
 

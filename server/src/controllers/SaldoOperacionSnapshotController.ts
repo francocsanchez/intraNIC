@@ -32,6 +32,11 @@ export class SaldoOperacionSnapshotController {
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el resumen" }); }
   };
 
+  static cancelacionAnalysis = async (_req: Request, res: Response) => {
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.cancelacionAnalysis()); }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de cancelacion" }); }
+  };
+
   static updateFechaCancelacion = async (req: Request, res: Response) => {
     const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
     const fechaCancelacion = optionalString(req.body?.fechaCancelacion);
@@ -43,13 +48,30 @@ export class SaldoOperacionSnapshotController {
     } catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudo actualizar la cancelacion" }); }
   };
 
+  static listUsuariosOperacion = async (req: Request, res: Response) => {
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.listUsuariosOperacion(optionalString(req.query.buscar) ?? "")); }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudieron obtener los usuarios SIAC" }); }
+  };
+
+  static updateUsuarioOperacion = async (req: Request, res: Response) => {
+    const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
+    const codigoUsuario = optionalString(req.body?.codigoUsuario);
+    if (!codigoOperacion) return res.status(400).json({ message: "El codigo de operacion debe ser valido" });
+    if (!codigoUsuario) return res.status(400).json({ message: "El usuario SIAC es obligatorio" });
+    try {
+      const data = await SaldoOperacionSnapshotService.updateUsuarioOperacion(codigoOperacion, codigoUsuario);
+      return res.status(200).json({ message: "Usuario de operacion actualizado", data });
+    } catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudo actualizar el usuario" }); }
+  };
+
   static export = async (req: Request, res: Response) => {
     try {
       const items = await SaldoOperacionSnapshotService.exportRows(parseFilters(req));
       const rows = items.map((item) => ({
         op: item.codigoOperacion, numero_fabrica: item.numeroFabrica, version: item.version, modelo: item.modeloGeneral,
         cliente: item.clienteNombre, sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.usuarioOperacion,
-        nombre_usuario_operacion: item.nombreUsuarioOperacion, ubicacion: item.ubicacion, estado: item.estado,
+        nombre_usuario_operacion: item.nombreUsuarioOperacion, usuario_operacion_siac: item.usuarioOperacionOriginal,
+        nombre_usuario_operacion_siac: item.nombreUsuarioOperacionOriginal, ubicacion: item.ubicacion, estado: item.estado,
         fecha_asignacion: item.fechaAsignacion ?? "", dias_asignada: item.diasAsignada ?? "", fecha_cancelacion: item.fechaCancelacion ?? "",
         dias_hasta_cancelacion: item.diasHastaCancelacion ?? "", total: item.total ?? 0, bonificacion: item.bonificacion ?? 0,
         gestoria: item.gestoria ?? 0, senas: item.senas ?? 0, usado: item.usado ?? 0, credito: item.creditoBanco ?? 0, saldo: item.saldo,

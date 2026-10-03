@@ -4,7 +4,15 @@
 
 ### Saldo de operación
 
-- Se reconstruyó el tablero sobre snapshots Mongo sincronizados desde SIAC al iniciar el servidor y cada dos minutos.
+- Se incorporó Análisis de cancelación: un árbol histórico Mongo de promedios por vendedor, usuario efectivo y sucursal, con promedio total y rangos visuales por tiempo.
+- Al guardar una cancelación se invalida el caché del análisis, evitando tener que recargar la página para ver el árbol actualizado.
+- Se agregó la corrección local del usuario de operación mediante el catálogo SIAC habilitado sincronizado en Mongo; las correcciones no modifican SIAC ni son sobrescritas por el cron.
+- Se retiró la etiqueta visual `local` de usuarios corregidos; la grilla muestra solo el usuario efectivo.
+- El selector de usuario ahora busca en Mongo a partir de tres caracteres, evitando cargar el catálogo completo en el navegador.
+- El autocomplete diferencia errores de API de una búsqueda sin coincidencias e incorpora reintento.
+- La respuesta del tablero tolera temporalmente servidores que aún no informen los campos nuevos de usuario, evitando fallos de carga durante despliegues escalonados.
+- El sincronizador quedó limitado al horario operativo: cada dos minutos entre las 07:00 y las 20:00 de Buenos Aires, sin ejecución nocturna ni sincronización inicial fuera de esa franja.
+- Se reconstruyó el tablero sobre snapshots Mongo sincronizados desde SIAC.
 - Se agregaron filtros por sucursal y ubicación, resumen, exportación Excel, fecha de cancelación con días calendario y permiso independiente.
 - Las operaciones entregadas se conservan como historial en Mongo y se ocultan de ambas secciones.
 
