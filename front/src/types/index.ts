@@ -2602,6 +2602,10 @@ export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
     operations: z.number(),
     tree: saldoOperacionCancelacionAnalysisNodeSchema,
     months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
+    sucursalesPorMes: z.array(z.object({
+      sucursal: z.string(),
+      months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
+    })),
   }),
 });
 export type SaldoOperacionSnapshotItem = z.infer<typeof saldoOperacionSnapshotItemSchema>;

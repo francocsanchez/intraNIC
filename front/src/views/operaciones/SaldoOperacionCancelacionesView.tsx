@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ALL_MONTHS = "__TODOS__";
+const ALL_YEARS = "__TODOS__";
 const formatDays = (value: number) => `${Math.round(value)} día${Math.round(value) === 1 ? "" : "s"}`;
 const formatDecimalDays = (value: number) => new Intl.NumberFormat("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
 const formatMonth = (month: string) => {
@@ -59,11 +60,13 @@ const countLeafNodes = (node: SaldoOperacionCancelacionAnalysisNode): number => 
 
 export default function SaldoOperacionCancelacionesView() {
   const navigate = useNavigate();
+  const [year, setYear] = useState(ALL_YEARS);
   const [month, setMonth] = useState(ALL_MONTHS);
   const mesAsignacion = month === ALL_MONTHS ? undefined : month;
+  const anioAsignacion = year === ALL_YEARS ? undefined : year;
   const analysis = useQuery({
-    queryKey: ["saldo-operacion-cancelacion-analysis", mesAsignacion],
-    queryFn: ({ signal }) => getSaldoOperacionCancelacionAnalysis(mesAsignacion, signal),
+    queryKey: ["saldo-operacion-cancelacion-analysis", anioAsignacion, mesAsignacion],
+    queryFn: ({ signal }) => getSaldoOperacionCancelacionAnalysis({ anioAsignacion, mesAsignacion }, signal),
     staleTime: 30_000,
   });
   const option = useMemo<EChartsCoreOption | null>(() => {
@@ -100,13 +103,16 @@ export default function SaldoOperacionCancelacionesView() {
   if (analysis.isError) return <div className="p-4 text-destructive">{analysis.error.message}</div>;
   const data = analysis.data?.data;
   const months = data?.months ?? [];
+  const years = [...new Set(months.map((item) => item.month.slice(0, 4)))].sort((left, right) => right.localeCompare(left));
+  const monthsForYear = anioAsignacion ? months.filter((item) => item.month.startsWith(`${anioAsignacion}-`)) : months;
   const treeHeight = data ? Math.max(480, countLeafNodes(data.tree) * 64 + 120) : 480;
 
   return <div className="space-y-3 bg-muted p-2 font-preset">
     <section className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
       <div><h1 className="text-base font-semibold">Análisis de cancelación</h1><p className="text-xs text-muted-foreground">Promedio de días entre asignación y cancelación.</p></div>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-xs text-muted-foreground"><CalendarDays className="size-4" /><span>Mes asignado</span><select value={month} onChange={(event) => setMonth(event.target.value)} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_MONTHS}>Todos los meses</option>{months.map((item) => <option key={item.month} value={item.month}>{formatMonth(item.month)}</option>)}</select></label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground"><CalendarDays className="size-4" /><span>Año asignado</span><select value={year} onChange={(event) => { setYear(event.target.value); setMonth(ALL_MONTHS); }} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_YEARS}>Todos los años</option>{years.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground"><span>Mes asignado</span><select value={month} onChange={(event) => setMonth(event.target.value)} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_MONTHS}>Todos los meses</option>{monthsForYear.map((item) => <option key={item.month} value={item.month}>{formatMonth(item.month)}</option>)}</select></label>
         <Button size="sm" variant="outline" onClick={() => navigate(paths.analisis.saldoOperacion)}><ArrowLeft /> Volver a saldo</Button>
       </div>
     </section>
@@ -117,7 +123,7 @@ export default function SaldoOperacionCancelacionesView() {
         <div className="rounded-md border border-border bg-card p-3"><div className="text-[11px] text-muted-foreground">Cancelaciones analizadas</div><div className="text-lg font-semibold">{data.operations}</div></div>
       </section>
 
-      <section className="overflow-x-auto rounded-md border border-border bg-card"><div className="border-b border-border px-3 py-2"><h2 className="text-sm font-medium">Tiempos promedio por mes de asignación</h2></div><table className="min-w-full text-xs"><thead className="bg-muted text-left"><tr><th className="whitespace-nowrap px-3 py-2 font-medium">Mes</th>{months.map((item) => <th key={item.month} className={`min-w-24 whitespace-nowrap px-3 py-2 text-center font-medium ${month === item.month ? "bg-background" : ""}`}>{formatMonth(item.month)}</th>)}</tr></thead><tbody><tr><th className="whitespace-nowrap px-3 py-2 text-left font-medium">Tiempo promedio</th>{months.map((item) => <td key={item.month} className={`px-3 py-2 text-center font-medium ${month === item.month ? "bg-muted" : ""}`}>{formatDays(item.averageDays)}</td>)}</tr></tbody></table></section>
+      <section className="overflow-x-auto rounded-md border border-border bg-card"><div className="border-b border-border px-3 py-2"><h2 className="text-sm font-medium">Tiempos promedio por mes de asignación</h2></div><table className="min-w-full text-xs"><thead className="bg-muted text-left"><tr><th className="whitespace-nowrap px-3 py-2 font-medium">Sucursal</th>{monthsForYear.map((item) => <th key={item.month} className={`min-w-24 whitespace-nowrap px-3 py-2 text-center font-medium ${month === item.month ? "bg-background" : ""}`}>{formatMonth(item.month)}</th>)}</tr></thead><tbody><tr><th className="whitespace-nowrap px-3 py-2 text-left font-medium">Tiempo promedio</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center font-medium ${month === item.month ? "bg-muted" : ""}`}>{formatDays(item.averageDays)}</td>)}</tr>{data?.sucursalesPorMes.map((sucursal) => { const averages = new Map(sucursal.months.map((item) => [item.month, item.averageDays])); return <tr key={sucursal.sucursal} className="border-t border-border"><th className="whitespace-nowrap px-3 py-2 text-left font-medium">{sucursal.sucursal}</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center ${month === item.month ? "bg-muted" : ""}`}>{averages.has(item.month) ? formatDays(averages.get(item.month)!) : "—"}</td>)}</tr>; })}</tbody></table></section>
 
       <section className="overflow-hidden rounded-md border border-border bg-card"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2"><div><h2 className="text-sm font-medium">Árbol de tiempos de cancelación</h2><p className="text-[11px] text-muted-foreground">Vendedor → Usuario → Sucursal → Tiempo total.</p></div><div className="flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div></div><div className="w-full" style={{ height: treeHeight }}><EChart option={option!} /></div></section>
     </>}

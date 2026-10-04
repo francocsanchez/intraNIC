@@ -30,6 +30,12 @@ type CancelacionMonthlyGroup = {
   operations: number;
 };
 
+type CancelacionSucursalMonthlyGroup = {
+  _id: { month: string; sucursal: string };
+  averageDays: number;
+  operations: number;
+};
+
 const trim = (value: unknown, fallback = "") => {
   const normalized = String(value ?? "").trim();
   return normalized || fallback;
@@ -247,14 +253,16 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async cancelacionAnalysis(month?: string | null) {
+  static async cancelacionAnalysis(month?: string | null, year?: string | null) {
     const cancelacionMatch = {
       fechaCancelacion: { $type: "string" },
       fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
       diasHastaCancelacion: { $type: "number" },
     };
-    const selectedMatch = month ? { ...cancelacionMatch, fechaAsignacion: { $regex: `^${month}-` } } : cancelacionMatch;
-    const [groups, months] = await Promise.all([
+    const selectedMatch = month
+      ? { ...cancelacionMatch, fechaAsignacion: { $regex: `^${month}-` } }
+      : year ? { ...cancelacionMatch, fechaAsignacion: { $regex: `^${year}-` } } : cancelacionMatch;
+    const [groups, months, sucursalesPorMes] = await Promise.all([
       SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
       { $match: selectedMatch },
       {
@@ -305,6 +313,23 @@ export class SaldoOperacionSnapshotService {
         { $group: { _id: "$month", averageDays: { $avg: "$diasHastaCancelacion" }, operations: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]),
+      SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([
+        { $match: cancelacionMatch },
+        {
+          $project: {
+            month: { $substrBytes: ["$fechaAsignacion", 0, 7] },
+            diasHastaCancelacion: 1,
+            sucursal: {
+              $let: {
+                vars: { value: { $trim: { input: { $ifNull: ["$sucursal", ""] } } } },
+                in: { $cond: [{ $eq: ["$$value", ""] }, "Sin sucursal", "$$value"] },
+              },
+            },
+          },
+        },
+        { $group: { _id: { month: "$month", sucursal: "$sucursal" }, averageDays: { $avg: "$diasHastaCancelacion" }, operations: { $sum: 1 } } },
+        { $sort: { "_id.sucursal": 1, "_id.month": 1 } },
+      ]),
     ]);
 
     const branches = new Map<string, Map<string, CancelacionAnalysisGroup[]>>();
@@ -337,6 +362,14 @@ export class SaldoOperacionSnapshotService {
         operations: tree.operations,
         tree,
         months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations })),
+        sucursalesPorMes: [...new Map(sucursalesPorMes.map((item) => [nodeName(item._id.sucursal, "Sin sucursal"), item._id.sucursal])).keys()]
+          .sort((left, right) => left.localeCompare(right, "es"))
+          .map((sucursal) => ({
+            sucursal,
+            months: sucursalesPorMes
+              .filter((item) => nodeName(item._id.sucursal, "Sin sucursal") === sucursal)
+              .map((item) => ({ month: item._id.month, averageDays: item.averageDays, operations: item.operations })),
+          })),
       },
     };
   }

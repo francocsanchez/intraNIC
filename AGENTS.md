@@ -8,6 +8,7 @@ El usuario de operación conserva por separado el valor original SIAC y el overr
 La grilla de `Saldo de operacion` no etiqueta visualmente como local los usuarios corregidos; muestra únicamente el usuario efectivo.
 `Analisis de cancelacion` consulta exclusivamente snapshots Mongo con fecha y días de cancelación válidos, incluye operaciones luego entregadas y agrupa el usuario efectivo en el árbol Vendedor → Usuario → Sucursal → Tiempo total. Sus rangos visuales son verde para menos de 15 días, amarillo desde 15 hasta menos de 18 y rojo desde 18.
 `Analisis de cancelacion` permite filtrar el árbol por mes de asignación y mantiene arriba una tabla horizontal con el promedio histórico por cada mes disponible; este resumen mensual no se reduce al filtro activo.
+`Analisis de cancelacion` permite filtrar por año de asignación; su tabla anualizada conserva la fila de promedio general y agrega una fila por sucursal, con una celda por cada mes del año.
 El contenedor del árbol de `Analisis de cancelacion` debe definir una altura responsive efectiva para garantizar que ECharts reciba dimensiones al iniciar; no usar expresiones Tailwind arbitrarias que puedan quedar fuera de la generación de estilos.
 El árbol de `Analisis de cancelacion` es fijo: no permite zoom ni arrastre; su altura crece conforme a la cantidad de vendedores para mostrar todos los nodos sin desplazamiento interno.
 El árbol de `Analisis de cancelacion` reserva margen lateral para sus etiquetas y divide los nombres extensos en líneas, para que ningún nodo se dibuje fuera del contenedor.

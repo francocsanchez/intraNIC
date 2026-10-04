@@ -34,8 +34,11 @@ export class SaldoOperacionSnapshotController {
 
   static cancelacionAnalysis = async (req: Request, res: Response) => {
     const month = optionalString(req.query.mesAsignacion);
+    const year = optionalString(req.query.anioAsignacion);
     if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return res.status(400).json({ message: "El mes de asignacion debe tener formato AAAA-MM" });
-    try { return res.status(200).json(await SaldoOperacionSnapshotService.cancelacionAnalysis(month)); }
+    if (year && !/^\d{4}$/.test(year)) return res.status(400).json({ message: "El año de asignacion debe tener formato AAAA" });
+    if (month && year && !month.startsWith(`${year}-`)) return res.status(400).json({ message: "El mes debe pertenecer al año de asignacion seleccionado" });
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.cancelacionAnalysis(month, year)); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de cancelacion" }); }
   };
 

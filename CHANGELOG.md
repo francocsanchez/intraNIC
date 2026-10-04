@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-04
+
+- **Análisis de cancelación:** se agregó el filtro por año de asignación y la tabla anualizada ahora muestra el promedio general y el desglose mensual por sucursal.
+
 ## 2026-10-03
 
 - **Análisis de cancelación:** se corrigió el alto efectivo del contenedor ECharts del árbol, que impedía su renderizado, y se compactó su superficie responsive.
