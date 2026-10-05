@@ -2588,7 +2588,7 @@ export const saldoOperacionSnapshotListResponseSchema = z.object({
   data: z.array(saldoOperacionSnapshotItemSchema),
   pagination: z.object({ page: z.number(), limit: z.number(), total: z.number(), totalPages: z.number(), hasNextPage: z.boolean() }),
 });
-export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.object({ sucursales: z.array(z.string()), ubicaciones: z.array(z.string()), usuarios: z.array(z.string()), vendedores: z.array(z.string()) }) });
+export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.object({ sucursales: z.array(z.string()), ubicaciones: z.array(z.string()), usuarios: z.array(z.string()).optional().default([]), vendedores: z.array(z.string()).optional().default([]) }) });
 export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), usadoTotal: z.number() });
 export const saldoOperacionSnapshotUpdateResponseSchema = z.object({ message: z.string(), data: saldoOperacionSnapshotItemSchema });
 export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });

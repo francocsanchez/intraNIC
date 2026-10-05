@@ -50,7 +50,7 @@ type AnalisisVendedorParams = {
   vendedor?: number | null;
 };
 
-export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; page?: number; limit?: number };
+export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number };
 
 
 const getErrorMessage = (error: unknown, fallback: string) => {

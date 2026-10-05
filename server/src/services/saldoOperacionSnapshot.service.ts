@@ -81,17 +81,20 @@ const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], chi
 
 const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
   trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
+const isOperacionNoFacturada = (estado: unknown) => /^NO\s+FIS/i.test(trim(estado));
 
-const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) => {
+const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
   const filter: Record<string, unknown> = { entregada: false };
   filter.fechaCancelacion = normalizeSection(params.section) === "canceladas" ? { $ne: null } : null;
   const ubicacion = trim(params.ubicacion);
   const sucursal = trim(params.sucursal);
   const usuario = trim(params.usuario);
   const vendedor = trim(params.vendedor);
+  const operacion = Number(params.operacion);
   if (ubicacion) filter.ubicacion = ubicacion;
   if (sucursal) filter.sucursal = sucursal;
   if (vendedor) filter.vendedor = vendedor;
+  if (Number.isInteger(operacion) && operacion > 0) filter.codigoOperacion = operacion;
   if (usuario) {
     filter.$expr = {
       $eq: [
@@ -226,7 +229,7 @@ export class SaldoOperacionSnapshotService {
     return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
-  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; page: number; limit: number }) {
+  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number }) {
     const filter = baseFilter(params);
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
@@ -259,7 +262,7 @@ export class SaldoOperacionSnapshotService {
     rows.forEach((row) => {
       const modelo = trim(row.modeloGeneral, "SIN MODELO");
       grouped.set(modelo, (grouped.get(modelo) ?? 0) + calculateSaldo(row));
-      creditoTotal += row.creditoBanco ?? 0;
+      if (isOperacionNoFacturada(row.estado)) creditoTotal += row.creditoBanco ?? 0;
       usadoTotal += row.usado ?? 0;
     });
     return {
@@ -390,7 +393,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find(baseFilter(params)).lean();
     return rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion).map(serialize);
   }

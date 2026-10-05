@@ -17,6 +17,12 @@ El autocomplete de usuario de operación no consulta ni muestra opciones hasta q
 Cuando falle la consulta del autocomplete, el diálogo debe mostrar el error y permitir reintentar; no debe presentarlo como una búsqueda sin coincidencias.
 La respuesta de snapshots debe tolerar transitoriamente la ausencia de los campos de override del usuario, para no bloquear el tablero durante una actualización escalonada de frontend y backend.
 El job `saldo-operacion-snapshot` debe aparecer en el monitor, permitir ejecución manual y evitar ejecuciones simultáneas. La tabla se ordena por saldo ascendente; sucursal aparece a la izquierda de vendedor y Número de fábrica se conserva solo para Excel.
+En el tablero de `Saldo de operacion`, filtros y saldos por modelo comparten una única superficie compacta. Sucursal, usuario, vendedor, sección y ubicación se resuelven con selects y aplican también al resumen y exportación.
+La respuesta de filtros de `Saldo de operacion` debe tolerar temporalmente la ausencia de los catálogos de usuario y vendedor, para conservar sucursales y ubicaciones durante un despliegue escalonado.
+La columna Saldo de la tabla de `Saldo de operacion` usa verde para importes menores o iguales a cero y rojo para importes positivos pendientes de cobro.
+La columna Estado no se muestra en la tabla de `Saldo de operacion`; la ubicación sigue disponible como filtro.
+La tabla de `Saldo de operacion` permite buscar una operación por su número exacto; el valor permanece como borrador y se aplica únicamente al confirmar con Buscar o Enter.
+La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones con estado SIAC `No Fis.Res.c/B.`; las operaciones facturadas no intervienen en ese importe.
 
 
 # Instrucciones del proyecto

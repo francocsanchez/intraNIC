@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-05
+
+- **Saldo de operación:** se agregó la búsqueda exacta por número de operación en la cabecera de la tabla, aplicable con Buscar o Enter.
+- **Saldo de operación:** el indicador Crédito no facturado ahora suma exclusivamente operaciones SIAC no facturadas.
+
+## 2026-10-04
+
+- **Saldo de operación:** se hizo compatible la lectura de filtros con respuestas de backend previas, evitando que la ausencia temporal de usuario/vendedor oculte sucursales y ubicaciones.
+
+## 2026-10-04
+
+- **Saldo de operación:** la columna Saldo ahora identifica en verde los valores en cero o negativos y en rojo los saldos positivos pendientes de cobro.
+- **Saldo de operación:** se retiró la columna Estado de la tabla para priorizar densidad.
+
+## 2026-10-04
+
+- **Saldo de operación:** se unificaron filtros y saldos por modelo en una sola superficie compacta; se añadieron filtros por usuario efectivo y vendedor, y sección/ubicación pasaron a selects. Los nuevos filtros también aplican al resumen y Excel.
+
 ## 2026-10-04
 
 - **Análisis de cancelación:** se agregó el filtro por año de asignación y la tabla anualizada ahora muestra el promedio general y el desglose mensual por sucursal.

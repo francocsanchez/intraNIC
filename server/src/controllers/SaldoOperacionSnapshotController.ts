@@ -14,12 +14,15 @@ const parseFilters = (req: Request) => ({
   sucursal: optionalString(req.query.sucursal),
   usuario: optionalString(req.query.usuario),
   vendedor: optionalString(req.query.vendedor),
+  operacion: optionalString(req.query.operacion),
 });
 
 export class SaldoOperacionSnapshotController {
   static list = async (req: Request, res: Response) => {
+    const filters = parseFilters(req);
+    if (filters.operacion && (!/^\d+$/.test(filters.operacion) || Number(filters.operacion) <= 0)) return res.status(400).json({ message: "La operación debe ser un número positivo" });
     try {
-      const response = await SaldoOperacionSnapshotService.list({ ...parseFilters(req), page: positiveInt(req.query.page, 1), limit: positiveInt(req.query.limit, 60) });
+      const response = await SaldoOperacionSnapshotService.list({ ...filters, page: positiveInt(req.query.page, 1), limit: positiveInt(req.query.limit, 60) });
       return res.status(200).json(response);
     } catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el tablero" }); }
   };
@@ -73,7 +76,9 @@ export class SaldoOperacionSnapshotController {
 
   static export = async (req: Request, res: Response) => {
     try {
-      const items = await SaldoOperacionSnapshotService.exportRows(parseFilters(req));
+      const filters = parseFilters(req);
+      if (filters.operacion && (!/^\d+$/.test(filters.operacion) || Number(filters.operacion) <= 0)) return res.status(400).json({ message: "La operación debe ser un número positivo" });
+      const items = await SaldoOperacionSnapshotService.exportRows(filters);
       const rows = items.map((item) => ({
         op: item.codigoOperacion, numero_fabrica: item.numeroFabrica, version: item.version, modelo: item.modeloGeneral,
         cliente: item.clienteNombre, sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.usuarioOperacion,
