@@ -30,6 +30,8 @@ type EChartProps = {
   option: EChartsCoreOption;
   className?: string;
   enableHoverEmphasis?: boolean;
+  /** Reinicia la serie antes de aplicar datos estructurales (por ejemplo, árboles). */
+  resetOnOptionChange?: boolean;
 };
 
 function resolveChartOption<T>(value: T): T {
@@ -107,7 +109,7 @@ function stabilizeInteractiveOption(option: EChartsCoreOption, enableHoverEmphas
   } as EChartsCoreOption;
 }
 
-export default function EChart({ option, className = "", enableHoverEmphasis = true }: EChartProps) {
+export default function EChart({ option, className = "", enableHoverEmphasis = true, resetOnOptionChange = false }: EChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
 
@@ -135,8 +137,11 @@ export default function EChart({ option, className = "", enableHoverEmphasis = t
     if (!chart || chart.isDisposed()) return;
 
     // ECharts cannot reliably resolve CSS custom properties inside SVG attributes.
+    // TreeChart conserva aristas internas entre actualizaciones incluso con notMerge.
+    // Limpiarlo explícitamente evita que intente reutilizar una arista ya descartada.
+    if (resetOnOptionChange) chart.clear();
     chart.setOption(stabilizeInteractiveOption(option, enableHoverEmphasis), { notMerge: true });
-  }, [enableHoverEmphasis, option]);
+  }, [enableHoverEmphasis, option, resetOnOptionChange]);
 
   return (
     <div ref={containerRef} className={`h-full w-full ${className}`.trim()} />

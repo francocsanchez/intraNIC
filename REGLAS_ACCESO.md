@@ -52,6 +52,7 @@ La logica vigente es:
 - `analisisStock`
 - `pendFac`
 - `solicitudCambioColor`
+- `repuestosSiniestros`
 - `noReparado`
 - `pendienteDocumentacion`
 - `ingresos`
@@ -137,6 +138,11 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - El flujo es secuencial: una solicitud solo se completa despues de marcarse como pedida.
 - Solo los roles `stock`, `gerente` y `superAdmin` pueden rechazar una solicitud; el rechazo es final, registra el motivo operativo y bloquea ediciones y cambios de estado.
 - No se permiten nuevas solicitudes para internos con chasis asignado. Las solicitudes existentes muestran una alerta cuando la unidad adquiere un chasis.
+- `Rep. Siniestros` depende de `modules.repuestosSiniestros = 1`.
+- Todo usuario con el módulo habilitado puede crear, editar la Nota de Pedido seleccionada o eliminar casos mientras estén en estado `pendiente`; cada acción queda auditada.
+- Solo admite internos de unidades 0 km (tipo 5). El chasis se informa y no bloquea el alta. La combinación de interno y operación SIAC de Nota de Pedido no puede repetirse mientras exista un caso activo.
+- El seguimiento de cada repuesto es individual y secuencial: Pedido, Arribado y Retirado. El último retiro completa el caso automáticamente; todos esos cambios quedan auditados.
+- Una nota puede aparecer en varios filtros de etapa; cada filtro muestra únicamente sus repuestos correspondientes y los conteos/porcentajes de Pendiente, Pedido, Arribado y Retirado. Los casos completados se incluyen en `Retirados`.
 
 ### Gestion de stock usados
 

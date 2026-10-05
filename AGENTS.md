@@ -25,6 +25,7 @@ La tabla de `Saldo de operacion` permite buscar una operación por su número ex
 La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones sin `ope_fecfac`; la fecha de factura se sincroniza desde SIAC al snapshot y determina facturación, independientemente del estado físico.
 El análisis de no canceladas usa exclusivamente snapshots activos sin fecha de cancelación y promedia `diasAsignada`; comparte el árbol, filtros anual/mensual y resumen por sucursal del análisis de cancelación. Los accesos del tablero se muestran en verde para cancelación y rojo para no canceladas.
 Los análisis de canceladas y no canceladas preseleccionan el año y mes calendario actuales; al cambiar período, el árbol ECharts se remonta y no se intenta dibujar si faltan ramas, evitando pantallas vacías por estructuras incompletas.
+Los árboles de análisis deben limpiar explícitamente la serie ECharts antes de aplicar una nueva estructura y remontarse al renovarse la respuesta; TreeChart conserva aristas internas que de otro modo pueden provocar errores al cambiar el mes.
 
 
 # Instrucciones del proyecto

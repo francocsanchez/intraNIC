@@ -2,6 +2,10 @@
 
 ## 2026-10-05
 
+- Análisis de saldos: se estabilizó el cambio de mes de ambos árboles; ECharts descarta las aristas previas antes de recibir una nueva estructura para evitar el error de renderizado `_edge`.
+
+## 2026-10-05
+
 - **Saldo de operación:** se incorporó el análisis de no canceladas, con promedios de días desde asignación, árbol por vendedor/usuario/sucursal y los mismos filtros anual, mensual y resumen por sucursal. Los accesos distinguen cancelación en verde y no canceladas en rojo.
 - **Análisis de cancelación:** se conserva la respuesta previa durante los cambios de filtro para evitar pantallas vacías al seleccionar un mes.
 - **Análisis de cancelación:** año y mes actuales quedan preseleccionados; se estabilizó el árbol al cambiar de período para evitar fallas de ECharts.
