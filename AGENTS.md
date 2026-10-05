@@ -13,6 +13,7 @@ El contenedor del árbol de `Analisis de cancelacion` debe definir una altura re
 El árbol de `Analisis de cancelacion` es fijo: no permite zoom ni arrastre; su altura crece conforme a la cantidad de vendedores para mostrar todos los nodos sin desplazamiento interno.
 El árbol de `Analisis de cancelacion` reserva margen lateral para sus etiquetas y divide los nombres extensos en líneas, para que ningún nodo se dibuje fuera del contenedor.
 La grilla de Saldo de operación permite ordenar, sobre todo el conjunto paginado y no solo la página visible, desde cualquiera de sus encabezados; el orden inicial es saldo ascendente y un segundo clic invierte la dirección.
+El análisis de no canceladas muestra, junto con el promedio de días de cada nivel del árbol, la suma de saldos pendientes de las operaciones incluidas; los análisis de cancelación históricos no muestran ese monto.
 Al confirmar una fecha de cancelación, se debe invalidar el caché de Análisis de cancelación para que al navegar al árbol se vean los datos actualizados sin recargar la página.
 El autocomplete de usuario de operación no consulta ni muestra opciones hasta que se ingresen al menos tres caracteres; la búsqueda se resuelve en Mongo y limita los resultados.
 Cuando falle la consulta del autocomplete, el diálogo debe mostrar el error y permitir reintentar; no debe presentarlo como una búsqueda sin coincidencias.

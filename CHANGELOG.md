@@ -2,6 +2,10 @@
 
 ## 2026-10-05
 
+- Análisis de no canceladas: cada nodo del árbol y el indicador principal muestran ahora los días promedio junto con el monto pendiente acumulado para cancelar; se corrigió el cálculo Mongo para restar correctamente señas, usados y crédito.
+
+## 2026-10-05
+
 - Saldo de operación: los encabezados de la grilla ahora ordenan ascendente o descendente todas las operaciones filtradas, incluidos importes, fechas y días.
 
 ## 2026-10-05

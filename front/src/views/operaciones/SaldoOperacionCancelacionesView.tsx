@@ -17,6 +17,7 @@ const CURRENT_YEAR = String(currentDate.getFullYear());
 const CURRENT_MONTH = `${CURRENT_YEAR}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
 const formatDays = (value: number) => `${Math.round(value)} día${Math.round(value) === 1 ? "" : "s"}`;
 const formatDecimalDays = (value: number) => new Intl.NumberFormat("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+const formatMoney = (value: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value);
 const formatMonth = (month: string) => {
   const [year, monthNumber] = month.split("-").map(Number);
   return new Intl.DateTimeFormat("es-AR", { month: "short", year: "numeric", timeZone: "UTC" })
@@ -39,20 +40,23 @@ const wrapNodeName = (name: string) => name.split(" ").reduce<string[]>((lines, 
   return lines;
 }, []).join("\n");
 
-const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode): Record<string, unknown> => {
+const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, includeSaldo = false): Record<string, unknown> => {
   const tone = toneForAverage(node.averageDays);
+  const metric = includeSaldo && typeof node.saldoTotal === "number"
+    ? `${formatDays(node.averageDays)} · ${formatMoney(node.saldoTotal)}`
+    : formatDays(node.averageDays);
   return {
     ...node,
     itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: 1.5, shadowBlur: 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
     label: {
-      formatter: `${wrapNodeName(node.name)}\n{days|${formatDays(node.averageDays)}}`,
+      formatter: `${wrapNodeName(node.name)}\n{days|${metric}}`,
       color: "#18181b",
       fontSize: 11,
       fontWeight: 600,
       lineHeight: 16,
       rich: { days: { color: tone.text, fontSize: 10, fontWeight: 400, lineHeight: 14 } },
     },
-    children: node.children?.map(toChartNode),
+    children: node.children?.map((child) => toChartNode(child, includeSaldo)),
   };
 };
 
@@ -84,11 +88,11 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
         backgroundColor: "#18181b",
         borderWidth: 0,
         textStyle: { color: "#fafafa" },
-        formatter: (params: { data: SaldoOperacionCancelacionAnalysisNode }) => `<b>${params.data.name}</b><br/>Promedio: ${formatDecimalDays(params.data.averageDays)} días<br/>Cancelaciones: ${params.data.operations}`,
+        formatter: (params: { data: SaldoOperacionCancelacionAnalysisNode }) => `<b>${params.data.name}</b><br/>Promedio: ${formatDecimalDays(params.data.averageDays)} días${isNoCanceladas && typeof params.data.saldoTotal === "number" ? `<br/>Monto a cancelar: ${formatMoney(params.data.saldoTotal)}` : ""}<br/>${isNoCanceladas ? "Operaciones" : "Cancelaciones"}: ${params.data.operations}`,
       },
       series: [{
         type: "tree",
-        data: [toChartNode(analysis.data.data.tree)],
+        data: [toChartNode(analysis.data.data.tree, isNoCanceladas)],
         orient: "RL",
         top: "4%",
         bottom: "4%",
@@ -104,7 +108,7 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
         leaves: { label: { position: "left", align: "right", verticalAlign: "middle" } },
       }],
     } as EChartsCoreOption;
-  }, [analysis.data]);
+  }, [analysis.data, isNoCanceladas]);
 
   if (analysis.isLoading) return <Loading />;
   if (analysis.isError) return <div className="p-4 text-destructive">{analysis.error.message}</div>;
@@ -130,7 +134,7 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
 
     {!data?.operations ? <section className="rounded-md border border-border bg-card p-6 text-center text-sm text-muted-foreground">{isNoCanceladas ? "No hay operaciones no canceladas con asignación válida para el período seleccionado." : "No hay cancelaciones con fecha válida para el período seleccionado."}</section> : <>
       <section className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <div className="rounded-md border border-border bg-card p-3"><div className="text-[11px] text-muted-foreground">Tiempo promedio {mesAsignacion ? `· ${formatMonth(mesAsignacion)}` : "total"}</div><div className="text-lg font-semibold">{formatDays(data.averageDays)}</div></div>
+        <div className="rounded-md border border-border bg-card p-3"><div className="text-[11px] text-muted-foreground">Tiempo promedio {mesAsignacion ? `· ${formatMonth(mesAsignacion)}` : "total"}</div><div className="text-lg font-semibold">{formatDays(data.averageDays)}{isNoCanceladas && typeof data.tree.saldoTotal === "number" ? ` · ${formatMoney(data.tree.saldoTotal)}` : ""}</div></div>
         <div className="rounded-md border border-border bg-card p-3"><div className="text-[11px] text-muted-foreground">{isNoCanceladas ? "No canceladas analizadas" : "Cancelaciones analizadas"}</div><div className="text-lg font-semibold">{data.operations}</div></div>
       </section>
 

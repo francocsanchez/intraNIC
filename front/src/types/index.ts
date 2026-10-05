@@ -2592,9 +2592,9 @@ export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.ob
 export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), usadoTotal: z.number() });
 export const saldoOperacionSnapshotUpdateResponseSchema = z.object({ message: z.string(), data: saldoOperacionSnapshotItemSchema });
 export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });
-export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; children?: SaldoOperacionCancelacionAnalysisNode[] };
+export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; saldoTotal?: number; children?: SaldoOperacionCancelacionAnalysisNode[] };
 export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
-  name: z.string(), averageDays: z.number(), operations: z.number(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
+  name: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
 }));
 export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
   data: z.object({

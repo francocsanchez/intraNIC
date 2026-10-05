@@ -16,6 +16,7 @@ type CancelacionAnalysisNode = {
   name: string;
   averageDays: number;
   operations: number;
+  saldoTotal?: number;
   children?: CancelacionAnalysisNode[];
 };
 
@@ -23,6 +24,7 @@ type CancelacionAnalysisGroup = {
   _id: { sucursal: string; usuario: string; vendedor: string };
   averageDays: number;
   operations: number;
+  saldoTotal?: number;
 };
 
 type CancelacionMonthlyGroup = {
@@ -77,7 +79,9 @@ const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], chi
   const averageDays = operations
     ? groups.reduce((total, group) => total + group.averageDays * group.operations, 0) / operations
     : 0;
-  return { name, averageDays, operations, ...(children?.length ? { children } : {}) };
+  const hasSaldo = groups.some((group) => typeof group.saldoTotal === "number");
+  const saldoTotal = groups.reduce((total, group) => total + (group.saldoTotal ?? 0), 0);
+  return { name, averageDays, operations, ...(hasSaldo ? { saldoTotal } : {}), ...(children?.length ? { children } : {}) };
 };
 
 const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: CancelacionMonthlyGroup[], sucursalesPorMes: CancelacionSucursalMonthlyGroup[]) => {
@@ -443,8 +447,21 @@ export class SaldoOperacionSnapshotService {
     const [groups, months, sucursalesPorMes] = await Promise.all([
       SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
         { $match: selectedMatch },
-        { $project: { dias: "$diasAsignada", ...projection } },
-        { $group: { _id: { sucursal: "$sucursal", usuario: "$usuario", vendedor: "$vendedor" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
+        {
+          $project: {
+            dias: "$diasAsignada",
+            saldo: {
+              $add: [
+                { $ifNull: ["$total", 0] },
+                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$creditoBanco", 0] }, -1] },
+              ],
+            },
+            ...projection,
+          },
+        },
+        { $group: { _id: { sucursal: "$sucursal", usuario: "$usuario", vendedor: "$vendedor" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 }, saldoTotal: { $sum: "$saldo" } } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
         { $match: noCanceladasMatch },
