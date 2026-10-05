@@ -17,11 +17,12 @@ SELECT
   csq.Version AS version,
   COALESCE(famiauto_modelo.fam_nombre, csq.Modelo_General) AS modelo_general,
   CONVERT(char(10), opera.fecha_asignacion, 23) AS fecha_asignacion,
+  CONVERT(char(10), opera.fecha_factura, 23) AS fecha_factura,
   DATEDIFF(DAY, opera.fecha_asignacion, GETDATE()) AS dias_asignada,
   csq.Estado AS estado
 FROM dbo.csqUnidades csq
 OUTER APPLY (
-  SELECT TOP 1 ope.ope_fecasig AS fecha_asignacion, ope.ope_auto AS auto_codigo,
+  SELECT TOP 1 ope.ope_fecasig AS fecha_asignacion, ope.ope_fecfac AS fecha_factura, ope.ope_auto AS auto_codigo,
     ope.ope_marca AS auto_marca, ope.ope_sucur AS sucursal_codigo, ope.ope_usua AS usuario_codigo
   FROM dbo.opera ope
   WHERE ope.ope_tipo = 5 AND ope.ope_codigo = csq.Codigo_operacion AND ope.ope_fecbaj IS NULL

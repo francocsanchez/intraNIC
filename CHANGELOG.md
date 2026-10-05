@@ -4,6 +4,7 @@
 
 - **Saldo de operación:** se agregó la búsqueda exacta por número de operación en la cabecera de la tabla, aplicable con Buscar o Enter.
 - **Saldo de operación:** el indicador Crédito no facturado ahora suma exclusivamente operaciones SIAC no facturadas.
+- **Saldo de operación:** la facturación del indicador Crédito se determina por `ope_fecfac` sincronizado desde SIAC, no por el estado físico de la operación.
 
 ## 2026-10-04
 

@@ -21,6 +21,7 @@ export interface ISaldoOperacionSnapshot extends Document {
   version: string;
   modeloGeneral: string;
   fechaAsignacion: string | null;
+  fechaFactura: string | null;
   diasAsignada: number | null;
   estado: string;
   ubicacion: string;
@@ -55,6 +56,7 @@ const saldoOperacionSnapshotSchema = new Schema<ISaldoOperacionSnapshot>(
     version: { type: String, default: "", trim: true },
     modeloGeneral: { type: String, default: "SIN MODELO", trim: true },
     fechaAsignacion: { type: String, default: null },
+    fechaFactura: { type: String, default: null },
     diasAsignada: nullableNumber,
     estado: { type: String, default: "Sin estado", trim: true },
     ubicacion: { type: String, default: "STOCK CONCESIONARIO", trim: true },

@@ -22,7 +22,7 @@ La respuesta de filtros de `Saldo de operacion` debe tolerar temporalmente la au
 La columna Saldo de la tabla de `Saldo de operacion` usa verde para importes menores o iguales a cero y rojo para importes positivos pendientes de cobro.
 La columna Estado no se muestra en la tabla de `Saldo de operacion`; la ubicación sigue disponible como filtro.
 La tabla de `Saldo de operacion` permite buscar una operación por su número exacto; el valor permanece como borrador y se aplica únicamente al confirmar con Buscar o Enter.
-La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones con estado SIAC `No Fis.Res.c/B.`; las operaciones facturadas no intervienen en ese importe.
+La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones sin `ope_fecfac`; la fecha de factura se sincroniza desde SIAC al snapshot y determina facturación, independientemente del estado físico.
 
 
 # Instrucciones del proyecto

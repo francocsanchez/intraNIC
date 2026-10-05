@@ -81,7 +81,6 @@ const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], chi
 
 const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
   trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
-const isOperacionNoFacturada = (estado: unknown) => /^NO\s+FIS/i.test(trim(estado));
 
 const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
   const filter: Record<string, unknown> = { entregada: false };
@@ -171,6 +170,7 @@ export class SaldoOperacionSnapshotService {
           version: trim(row.version),
           modeloGeneral: trim(row.modelo_general, "SIN MODELO"),
           fechaAsignacion: dateOnlyOrNull(row.fecha_asignacion),
+          fechaFactura: dateOnlyOrNull(row.fecha_factura),
           diasAsignada: numberOrNull(row.dias_asignada),
           estado: trim(row.estado, "Sin estado"),
           ubicacion: ubicaciones.get(numeroFabrica) ?? "STOCK CONCESIONARIO",
@@ -262,7 +262,7 @@ export class SaldoOperacionSnapshotService {
     rows.forEach((row) => {
       const modelo = trim(row.modeloGeneral, "SIN MODELO");
       grouped.set(modelo, (grouped.get(modelo) ?? 0) + calculateSaldo(row));
-      if (isOperacionNoFacturada(row.estado)) creditoTotal += row.creditoBanco ?? 0;
+      if (!row.fechaFactura) creditoTotal += row.creditoBanco ?? 0;
       usadoTotal += row.usado ?? 0;
     });
     return {
