@@ -79,6 +79,49 @@ const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], chi
   return { name, averageDays, operations, ...(children?.length ? { children } : {}) };
 };
 
+const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: CancelacionMonthlyGroup[], sucursalesPorMes: CancelacionSucursalMonthlyGroup[]) => {
+  const branches = new Map<string, Map<string, CancelacionAnalysisGroup[]>>();
+  groups.forEach((group) => {
+    const sucursal = nodeName(group._id.sucursal, "Sin sucursal");
+    const usuario = nodeName(group._id.usuario, "Sin usuario");
+    const byUser = branches.get(sucursal) ?? new Map<string, CancelacionAnalysisGroup[]>();
+    byUser.set(usuario, [...(byUser.get(usuario) ?? []), group]);
+    branches.set(sucursal, byUser);
+  });
+
+  const children = [...branches.entries()]
+    .sort(([left], [right]) => left.localeCompare(right, "es"))
+    .map(([sucursal, users]) => {
+      const userNodes = [...users.entries()]
+        .sort(([left], [right]) => left.localeCompare(right, "es"))
+        .map(([usuario, userGroups]) => {
+          const sellers = userGroups
+            .sort((left, right) => nodeName(left._id.vendedor, "Sin vendedor").localeCompare(nodeName(right._id.vendedor, "Sin vendedor"), "es"))
+            .map((group) => buildAnalysisNode(nodeName(group._id.vendedor, "Sin vendedor"), [group]));
+          return buildAnalysisNode(usuario, userGroups, sellers);
+        });
+      return buildAnalysisNode(sucursal, [...users.values()].flat(), userNodes);
+    });
+
+  const tree = buildAnalysisNode("Tiempo total", groups, children);
+  return {
+    data: {
+      averageDays: tree.averageDays,
+      operations: tree.operations,
+      tree,
+      months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations })),
+      sucursalesPorMes: [...new Map(sucursalesPorMes.map((item) => [nodeName(item._id.sucursal, "Sin sucursal"), item._id.sucursal])).keys()]
+        .sort((left, right) => left.localeCompare(right, "es"))
+        .map((sucursal) => ({
+          sucursal,
+          months: sucursalesPorMes
+            .filter((item) => nodeName(item._id.sucursal, "Sin sucursal") === sucursal)
+            .map((item) => ({ month: item._id.month, averageDays: item.averageDays, operations: item.operations })),
+        })),
+    },
+  };
+};
+
 const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
   trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
 
@@ -351,46 +394,59 @@ export class SaldoOperacionSnapshotService {
       ]),
     ]);
 
-    const branches = new Map<string, Map<string, CancelacionAnalysisGroup[]>>();
-    groups.forEach((group) => {
-      const sucursal = nodeName(group._id.sucursal, "Sin sucursal");
-      const usuario = nodeName(group._id.usuario, "Sin usuario");
-      const byUser = branches.get(sucursal) ?? new Map<string, CancelacionAnalysisGroup[]>();
-      byUser.set(usuario, [...(byUser.get(usuario) ?? []), group]);
-      branches.set(sucursal, byUser);
-    });
+    return buildAnalysisResponse(groups, months, sucursalesPorMes);
+  }
 
-    const children = [...branches.entries()]
-      .sort(([left], [right]) => left.localeCompare(right, "es"))
-      .map(([sucursal, users]) => {
-        const userNodes = [...users.entries()]
-          .sort(([left], [right]) => left.localeCompare(right, "es"))
-          .map(([usuario, userGroups]) => {
-            const sellers = userGroups
-              .sort((left, right) => nodeName(left._id.vendedor, "Sin vendedor").localeCompare(nodeName(right._id.vendedor, "Sin vendedor"), "es"))
-              .map((group) => buildAnalysisNode(nodeName(group._id.vendedor, "Sin vendedor"), [group]));
-            return buildAnalysisNode(usuario, userGroups, sellers);
-          });
-        return buildAnalysisNode(sucursal, [...users.values()].flat(), userNodes);
-      });
-
-    const tree = buildAnalysisNode("Tiempo total", groups, children);
-    return {
-      data: {
-        averageDays: tree.averageDays,
-        operations: tree.operations,
-        tree,
-        months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations })),
-        sucursalesPorMes: [...new Map(sucursalesPorMes.map((item) => [nodeName(item._id.sucursal, "Sin sucursal"), item._id.sucursal])).keys()]
-          .sort((left, right) => left.localeCompare(right, "es"))
-          .map((sucursal) => ({
-            sucursal,
-            months: sucursalesPorMes
-              .filter((item) => nodeName(item._id.sucursal, "Sin sucursal") === sucursal)
-              .map((item) => ({ month: item._id.month, averageDays: item.averageDays, operations: item.operations })),
-          })),
+  static async noCanceladasAnalysis(month?: string | null, year?: string | null) {
+    const noCanceladasMatch = {
+      entregada: false,
+      fechaCancelacion: null,
+      fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+      diasAsignada: { $type: "number" },
+    };
+    const selectedMatch = month
+      ? { ...noCanceladasMatch, fechaAsignacion: { $regex: `^${month}-` } }
+      : year ? { ...noCanceladasMatch, fechaAsignacion: { $regex: `^${year}-` } } : noCanceladasMatch;
+    const projection = {
+      sucursal: {
+        $let: {
+          vars: { value: { $trim: { input: { $ifNull: ["$sucursal", ""] } } } },
+          in: { $cond: [{ $eq: ["$$value", ""] }, "Sin sucursal", "$$value"] },
+        },
+      },
+      usuario: {
+        $let: {
+          vars: { value: { $trim: { input: { $ifNull: ["$nombreUsuarioOperacionManual", { $ifNull: ["$nombreUsuarioOperacionSiac", { $ifNull: ["$nombreUsuarioOperacion", ""] }] }] } } } },
+          in: { $cond: [{ $eq: ["$$value", ""] }, "Sin usuario", "$$value"] },
+        },
+      },
+      vendedor: {
+        $let: {
+          vars: { value: { $trim: { input: { $ifNull: ["$vendedor", ""] } } } },
+          in: { $cond: [{ $eq: ["$$value", ""] }, "Sin vendedor", "$$value"] },
+        },
       },
     };
+    const [groups, months, sucursalesPorMes] = await Promise.all([
+      SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
+        { $match: selectedMatch },
+        { $project: { dias: "$diasAsignada", ...projection } },
+        { $group: { _id: { sucursal: "$sucursal", usuario: "$usuario", vendedor: "$vendedor" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
+      ]),
+      SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
+        { $match: noCanceladasMatch },
+        { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, dias: "$diasAsignada" } },
+        { $group: { _id: "$month", averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+      SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([
+        { $match: noCanceladasMatch },
+        { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, dias: "$diasAsignada", sucursal: projection.sucursal } },
+        { $group: { _id: { month: "$month", sucursal: "$sucursal" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
+        { $sort: { "_id.sucursal": 1, "_id.month": 1 } },
+      ]),
+    ]);
+    return buildAnalysisResponse(groups, months, sucursalesPorMes);
   }
 
   static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {

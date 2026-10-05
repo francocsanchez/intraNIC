@@ -47,6 +47,16 @@ export class SaldoOperacionSnapshotController {
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de cancelacion" }); }
   };
 
+  static noCanceladasAnalysis = async (req: Request, res: Response) => {
+    const month = optionalString(req.query.mesAsignacion);
+    const year = optionalString(req.query.anioAsignacion);
+    if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return res.status(400).json({ message: "El mes de asignacion debe tener formato AAAA-MM" });
+    if (year && !/^\d{4}$/.test(year)) return res.status(400).json({ message: "El año de asignacion debe tener formato AAAA" });
+    if (month && year && !month.startsWith(`${year}-`)) return res.status(400).json({ message: "El mes debe pertenecer al año de asignacion seleccionado" });
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.noCanceladasAnalysis(month, year)); }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de no canceladas" }); }
+  };
+
   static updateFechaCancelacion = async (req: Request, res: Response) => {
     const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
     const fechaCancelacion = optionalString(req.body?.fechaCancelacion);

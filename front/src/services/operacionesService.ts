@@ -81,6 +81,10 @@ export async function getSaldoOperacionCancelacionAnalysis(params: { mesAsignaci
   try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { params, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de cancelacion")); }
 }
+export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas", { params, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de no canceladas invalido"); return parsed.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de no canceladas")); }
+}
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/cancelacion`, { fechaCancelacion }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar la cancelacion")); }

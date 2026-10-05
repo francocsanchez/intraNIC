@@ -73,7 +73,8 @@ export default function SaldoOperacionView() {
         <select aria-label="Sección" value={section} onChange={(event) => { setSection(event.target.value as Section); setPage(1); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs"><option value="conSaldo">Con saldo</option><option value="canceladas">Canceladas</option></select>
         <select aria-label="Ubicación" value={ubicacion} onChange={(event) => { setUbicacion(event.target.value); setPage(1); }} className="h-9 min-w-44 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las ubicaciones</option>{filters.data?.meta.ubicaciones.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <Button size="sm" variant="outline" disabled={exporter.isPending} onClick={() => exporter.mutate()}><Download /> Exportar</Button>
-        <Button size="sm" variant="outline" onClick={() => navigate(paths.analisis.saldoOperacionCancelaciones)}><GitBranch /> Análisis de cancelación</Button>
+        <Button size="sm" variant="outline" className="border-green-300 bg-green-100 text-green-800 hover:bg-green-200" onClick={() => navigate(paths.analisis.saldoOperacionCancelaciones)}><GitBranch /> Análisis de cancelación</Button>
+        <Button size="sm" variant="outline" className="border-red-300 bg-red-100 text-red-800 hover:bg-red-200" onClick={() => navigate(paths.analisis.saldoOperacionNoCanceladas)}><GitBranch /> Análisis de no canceladas</Button>
       </div>
       <div className="mb-1 flex items-center justify-between text-[11px]"><span>Saldos restantes a cobrar por modelo</span>{summary.isFetching && <LoaderCircle className="size-3 animate-spin" />}</div>
       <div className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-6">

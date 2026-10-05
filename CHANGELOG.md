@@ -2,6 +2,12 @@
 
 ## 2026-10-05
 
+- **Saldo de operación:** se incorporó el análisis de no canceladas, con promedios de días desde asignación, árbol por vendedor/usuario/sucursal y los mismos filtros anual, mensual y resumen por sucursal. Los accesos distinguen cancelación en verde y no canceladas en rojo.
+- **Análisis de cancelación:** se conserva la respuesta previa durante los cambios de filtro para evitar pantallas vacías al seleccionar un mes.
+- **Análisis de cancelación:** año y mes actuales quedan preseleccionados; se estabilizó el árbol al cambiar de período para evitar fallas de ECharts.
+
+## 2026-10-05
+
 - **Saldo de operación:** se agregó la búsqueda exacta por número de operación en la cabecera de la tabla, aplicable con Buscar o Enter.
 - **Saldo de operación:** el indicador Crédito no facturado ahora suma exclusivamente operaciones SIAC no facturadas.
 - **Saldo de operación:** la facturación del indicador Crédito se determina por `ope_fecfac` sincronizado desde SIAC, no por el estado físico de la operación.
