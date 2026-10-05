@@ -95,6 +95,13 @@ export default function GestionConvencionalLayout() {
       active: pathname === paths.convencional.solicitudCambioColor,
     },
     {
+      label: "Rep. siniestros",
+      to: paths.convencional.repuestosSiniestros,
+      icon: Wrench,
+      visible: hasModulePathAccess(user, "repuestosSiniestros", paths.convencional.repuestosSiniestros),
+      active: pathname === paths.convencional.repuestosSiniestros,
+    },
+    {
       label: "Pend. fac",
       to: paths.convencional.pendFac,
       icon: FileStack,
