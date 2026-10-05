@@ -12,6 +12,8 @@ const parseFilters = (req: Request) => ({
   section: optionalString(req.query.section),
   ubicacion: optionalString(req.query.ubicacion),
   sucursal: optionalString(req.query.sucursal),
+  usuario: optionalString(req.query.usuario),
+  vendedor: optionalString(req.query.vendedor),
 });
 
 export class SaldoOperacionSnapshotController {

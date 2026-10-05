@@ -79,13 +79,27 @@ const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], chi
   return { name, averageDays, operations, ...(children?.length ? { children } : {}) };
 };
 
-const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null }) => {
+const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
+  trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
+
+const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) => {
   const filter: Record<string, unknown> = { entregada: false };
   filter.fechaCancelacion = normalizeSection(params.section) === "canceladas" ? { $ne: null } : null;
   const ubicacion = trim(params.ubicacion);
   const sucursal = trim(params.sucursal);
+  const usuario = trim(params.usuario);
+  const vendedor = trim(params.vendedor);
   if (ubicacion) filter.ubicacion = ubicacion;
   if (sucursal) filter.sucursal = sucursal;
+  if (vendedor) filter.vendedor = vendedor;
+  if (usuario) {
+    filter.$expr = {
+      $eq: [
+        { $ifNull: ["$nombreUsuarioOperacionManual", { $ifNull: ["$nombreUsuarioOperacionSiac", "$nombreUsuarioOperacion"] }] },
+        usuario,
+      ],
+    };
+  }
   return filter;
 };
 
@@ -212,7 +226,7 @@ export class SaldoOperacionSnapshotService {
     return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
-  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; page: number; limit: number }) {
+  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; page: number; limit: number }) {
     const filter = baseFilter(params);
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
@@ -226,16 +240,18 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async filters() {
-    const rows = await SaldoOperacionSnapshot.find({ entregada: false }, { sucursal: 1, ubicacion: 1 }).lean();
+    const rows = await SaldoOperacionSnapshot.find({ entregada: false }, { sucursal: 1, ubicacion: 1, vendedor: 1, nombreUsuarioOperacion: 1, nombreUsuarioOperacionSiac: 1, nombreUsuarioOperacionManual: 1 }).lean();
     return {
       meta: {
         sucursales: [...new Set(rows.map((item) => trim(item.sucursal, "SIN SUCURSAL")))].sort(),
         ubicaciones: [...new Set(rows.map((item) => trim(item.ubicacion, "STOCK CONCESIONARIO")))].sort(),
+        usuarios: [...new Set(rows.map(effectiveUsuario))].sort((left, right) => left.localeCompare(right, "es")),
+        vendedores: [...new Set(rows.map((item) => trim(item.vendedor, "SIN VENDEDOR")))].sort((left, right) => left.localeCompare(right, "es")),
       },
     };
   }
 
-  static async summary(params: { ubicacion?: string | null; sucursal?: string | null }) {
+  static async summary(params: { ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
@@ -374,7 +390,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null }) {
+  static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find(baseFilter(params)).lean();
     return rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion).map(serialize);
   }
