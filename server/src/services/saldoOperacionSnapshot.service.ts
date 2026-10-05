@@ -11,6 +11,7 @@ import SaldoOperacionUsuario from "../models/SaldoOperacionUsuario";
 
 type SourceRow = Record<string, unknown>;
 type SnapshotSection = "conSaldo" | "canceladas";
+export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
 type CancelacionAnalysisNode = {
   name: string;
   averageDays: number;
@@ -177,6 +178,14 @@ const serialize = (item: any) => ({
   sincronizadoEn: item.sincronizadoEn?.toISOString?.() ?? null,
 });
 
+const compareSnapshotValues = (left: unknown, right: unknown) => {
+  if (left == null && right == null) return 0;
+  if (left == null) return 1;
+  if (right == null) return -1;
+  if (typeof left === "number" && typeof right === "number") return left - right;
+  return String(left).localeCompare(String(right), "es", { numeric: true, sensitivity: "base" });
+};
+
 export class SaldoOperacionSnapshotService {
   static async syncFromSiac() {
     const [sourceRows, ubicacionRows, usuarioRows] = await Promise.all([
@@ -272,15 +281,19 @@ export class SaldoOperacionSnapshotService {
     return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
-  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number }) {
+  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {
     const filter = baseFilter(params);
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
-    const rows = await SaldoOperacionSnapshot.find(filter).lean();
-    const sorted = rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion);
+    const rows = (await SaldoOperacionSnapshot.find(filter).lean()).map(serialize);
+    const direction = params.sortDirection === "desc" ? -1 : 1;
+    const sorted = rows.sort((left, right) => {
+      const comparison = compareSnapshotValues(left[params.sortKey], right[params.sortKey]);
+      return comparison ? comparison * direction : left.codigoOperacion - right.codigoOperacion;
+    });
     const start = (page - 1) * limit;
     return {
-      data: sorted.slice(start, start + limit).map(serialize),
+      data: sorted.slice(start, start + limit),
       pagination: { page, limit, total: sorted.length, totalPages: Math.max(1, Math.ceil(sorted.length / limit)), hasNextPage: start + limit < sorted.length },
     };
   }

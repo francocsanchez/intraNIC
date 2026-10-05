@@ -12,6 +12,7 @@ La grilla de `Saldo de operacion` no etiqueta visualmente como local los usuario
 El contenedor del árbol de `Analisis de cancelacion` debe definir una altura responsive efectiva para garantizar que ECharts reciba dimensiones al iniciar; no usar expresiones Tailwind arbitrarias que puedan quedar fuera de la generación de estilos.
 El árbol de `Analisis de cancelacion` es fijo: no permite zoom ni arrastre; su altura crece conforme a la cantidad de vendedores para mostrar todos los nodos sin desplazamiento interno.
 El árbol de `Analisis de cancelacion` reserva margen lateral para sus etiquetas y divide los nombres extensos en líneas, para que ningún nodo se dibuje fuera del contenedor.
+La grilla de Saldo de operación permite ordenar, sobre todo el conjunto paginado y no solo la página visible, desde cualquiera de sus encabezados; el orden inicial es saldo ascendente y un segundo clic invierte la dirección.
 Al confirmar una fecha de cancelación, se debe invalidar el caché de Análisis de cancelación para que al navegar al árbol se vean los datos actualizados sin recargar la página.
 El autocomplete de usuario de operación no consulta ni muestra opciones hasta que se ingresen al menos tres caracteres; la búsqueda se resuelve en Mongo y limita los resultados.
 Cuando falle la consulta del autocomplete, el diálogo debe mostrar el error y permitir reintentar; no debe presentarlo como una búsqueda sin coincidencias.

@@ -50,7 +50,8 @@ type AnalisisVendedorParams = {
   vendedor?: number | null;
 };
 
-export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number };
+export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
 
 
 const getErrorMessage = (error: unknown, fallback: string) => {

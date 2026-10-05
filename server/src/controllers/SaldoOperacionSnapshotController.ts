@@ -1,12 +1,17 @@
 import type { Request, Response } from "express";
 import * as XLSX from "xlsx";
-import { SaldoOperacionSnapshotService } from "../services/saldoOperacionSnapshot.service";
+import { SaldoOperacionSnapshotService, type SnapshotSortKey } from "../services/saldoOperacionSnapshot.service";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 const positiveInt = (value: unknown, fallback: number) => {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 };
+const snapshotSortKeys = new Set([
+  "codigoOperacion", "clienteNombre", "sucursal", "vendedor", "nombreUsuarioOperacion",
+  "modeloGeneral", "version", "ubicacion", "fechaAsignacion", "diasAsignada",
+  "fechaCancelacion", "diasHastaCancelacion", "saldo",
+]);
 
 const parseFilters = (req: Request) => ({
   section: optionalString(req.query.section),
@@ -22,7 +27,10 @@ export class SaldoOperacionSnapshotController {
     const filters = parseFilters(req);
     if (filters.operacion && (!/^\d+$/.test(filters.operacion) || Number(filters.operacion) <= 0)) return res.status(400).json({ message: "La operación debe ser un número positivo" });
     try {
-      const response = await SaldoOperacionSnapshotService.list({ ...filters, page: positiveInt(req.query.page, 1), limit: positiveInt(req.query.limit, 60) });
+      const requestedSort = optionalString(req.query.sortKey);
+      const sortKey = (requestedSort && snapshotSortKeys.has(requestedSort) ? requestedSort : "saldo") as SnapshotSortKey;
+      const sortDirection = req.query.sortDirection === "desc" ? "desc" : "asc";
+      const response = await SaldoOperacionSnapshotService.list({ ...filters, page: positiveInt(req.query.page, 1), limit: positiveInt(req.query.limit, 60), sortKey, sortDirection });
       return res.status(200).json(response);
     } catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el tablero" }); }
   };

@@ -2,6 +2,10 @@
 
 ## 2026-10-05
 
+- Saldo de operación: los encabezados de la grilla ahora ordenan ascendente o descendente todas las operaciones filtradas, incluidos importes, fechas y días.
+
+## 2026-10-05
+
 - Análisis de saldos: se estabilizó el cambio de mes de ambos árboles; ECharts descarta las aristas previas antes de recibir una nueva estructura para evitar el error de renderizado `_edge`.
 
 ## 2026-10-05
