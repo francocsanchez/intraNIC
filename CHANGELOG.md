@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-06
+
+- **Saldo de operación:** las operaciones entregadas guardadas en Mongo permanecen visibles en tablero, filtros, resumen y Excel hasta cargar su fecha de cancelación; al completar ambos estados se ocultan sin consultar historial SQL.
+- **Saldo de operación:** se agregó el filtro de entrega y el resaltado amarillo suave para entregadas aún no canceladas.
+- **Análisis de no canceladas:** incorpora operaciones entregadas sin fecha de cancelación en sus árboles, promedios y saldos pendientes.
+
 ## 2026-10-05
 
 - Análisis de no canceladas: cada nodo del árbol y el indicador principal muestran ahora los días promedio junto con el monto pendiente acumulado para cancelar; se corrigió el cálculo Mongo para restar correctamente señas, usados y crédito.

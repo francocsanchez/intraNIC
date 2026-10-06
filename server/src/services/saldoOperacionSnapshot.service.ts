@@ -11,6 +11,7 @@ import SaldoOperacionUsuario from "../models/SaldoOperacionUsuario";
 
 type SourceRow = Record<string, unknown>;
 type SnapshotSection = "conSaldo" | "canceladas";
+type SnapshotEntrega = "todas" | "entregadas" | "sinEntregar";
 export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
 type CancelacionAnalysisNode = {
   name: string;
@@ -73,6 +74,13 @@ const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
 const normalizeSection = (value: string | null | undefined): SnapshotSection =>
   String(value ?? "").trim().toLowerCase() === "canceladas" ? "canceladas" : "conSaldo";
 
+const normalizeEntrega = (value: string | null | undefined): SnapshotEntrega => {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "entregadas") return "entregadas";
+  if (normalized === "sin-entregar") return "sinEntregar";
+  return "todas";
+};
+
 const nodeName = (value: unknown, fallback: string) => trim(value, fallback);
 const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], children?: CancelacionAnalysisNode[]): CancelacionAnalysisNode => {
   const operations = groups.reduce((total, group) => total + group.operations, 0);
@@ -130,9 +138,21 @@ const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: Cance
 const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
   trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
 
-const baseFilter = (params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
-  const filter: Record<string, unknown> = { entregada: false };
+// Un snapshot entregado solo deja de ser visible en el tablero cuando su cancelacion fue registrada.
+// `fechaCancelacion: null` tambien contempla documentos previos que aun no tengan el campo.
+const visibleSnapshotMatch = () => ({
+  $or: [
+    { entregada: { $ne: true } },
+    { fechaCancelacion: null },
+  ],
+});
+
+const baseFilter = (params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
+  const filter: Record<string, unknown> = visibleSnapshotMatch();
   filter.fechaCancelacion = normalizeSection(params.section) === "canceladas" ? { $ne: null } : null;
+  const entrega = normalizeEntrega(params.entrega);
+  if (entrega === "entregadas") filter.entregada = true;
+  if (entrega === "sinEntregar") filter.entregada = { $ne: true };
   const ubicacion = trim(params.ubicacion);
   const sucursal = trim(params.sucursal);
   const usuario = trim(params.usuario);
@@ -178,6 +198,7 @@ const serialize = (item: any) => ({
   ubicacion: item.ubicacion ?? "STOCK CONCESIONARIO",
   fechaCancelacion: item.fechaCancelacion ?? null,
   diasHastaCancelacion: item.diasHastaCancelacion ?? null,
+  entregada: Boolean(item.entregada),
   saldo: calculateSaldo(item),
   sincronizadoEn: item.sincronizadoEn?.toISOString?.() ?? null,
 });
@@ -285,7 +306,7 @@ export class SaldoOperacionSnapshotService {
     return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
-  static async list(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {
+  static async list(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {
     const filter = baseFilter(params);
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
@@ -303,7 +324,7 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async filters() {
-    const rows = await SaldoOperacionSnapshot.find({ entregada: false }, { sucursal: 1, ubicacion: 1, vendedor: 1, nombreUsuarioOperacion: 1, nombreUsuarioOperacionSiac: 1, nombreUsuarioOperacionManual: 1 }).lean();
+    const rows = await SaldoOperacionSnapshot.find(visibleSnapshotMatch(), { sucursal: 1, ubicacion: 1, vendedor: 1, nombreUsuarioOperacion: 1, nombreUsuarioOperacionSiac: 1, nombreUsuarioOperacionManual: 1 }).lean();
     return {
       meta: {
         sucursales: [...new Set(rows.map((item) => trim(item.sucursal, "SIN SUCURSAL")))].sort(),
@@ -314,7 +335,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async summary(params: { ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
@@ -416,7 +437,6 @@ export class SaldoOperacionSnapshotService {
 
   static async noCanceladasAnalysis(month?: string | null, year?: string | null) {
     const noCanceladasMatch = {
-      entregada: false,
       fechaCancelacion: null,
       fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
       diasAsignada: { $type: "number" },
@@ -479,15 +499,15 @@ export class SaldoOperacionSnapshotService {
     return buildAnalysisResponse(groups, months, sucursalesPorMes);
   }
 
-  static async exportRows(params: { section?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {
+  static async exportRows(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find(baseFilter(params)).lean();
     return rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion).map(serialize);
   }
 
   static async updateFechaCancelacion(codigoOperacion: number, fechaCancelacion: string) {
     if (!dateOnlyOrNull(fechaCancelacion)) throw new Error("La fecha de cancelacion debe ser una fecha valida con formato AAAA-MM-DD");
-    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion, entregada: false });
-    if (!snapshot) throw new Error("La operacion no existe en el snapshot activo");
+    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion, ...visibleSnapshotMatch() });
+    if (!snapshot) throw new Error("La operacion no existe en el snapshot visible");
     if (!snapshot.fechaAsignacion) throw new Error("La operacion no tiene una fecha de asignacion valida en SIAC");
     const diasHastaCancelacion = calculateDays(snapshot.fechaAsignacion, fechaCancelacion);
     if (diasHastaCancelacion < 0) throw new Error("La fecha de cancelacion no puede ser anterior a la fecha de asignacion");
@@ -511,8 +531,8 @@ export class SaldoOperacionSnapshotService {
   static async updateUsuarioOperacion(codigoOperacion: number, codigoUsuario: string) {
     const usuario = await SaldoOperacionUsuario.findOne({ codigo: codigoUsuario, habilitado: true }).lean();
     if (!usuario) throw new Error("El usuario SIAC seleccionado no existe o no esta habilitado");
-    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion, entregada: false });
-    if (!snapshot) throw new Error("La operacion no existe en el snapshot activo");
+    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion, ...visibleSnapshotMatch() });
+    if (!snapshot) throw new Error("La operacion no existe en el snapshot visible");
     snapshot.usuarioOperacionManual = usuario.codigo;
     snapshot.nombreUsuarioOperacionManual = usuario.nombre;
     await snapshot.save();

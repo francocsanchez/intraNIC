@@ -51,7 +51,7 @@ type AnalisisVendedorParams = {
 };
 
 export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
-export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
+export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; entrega?: "entregadas" | "sin-entregar"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
 
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -74,7 +74,7 @@ export async function getSaldoOperacionSnapshotFilters(): Promise<SaldoOperacion
   try { const { data } = await api.get("/operaciones/saldo-operacion/filtros"); const parsed = saldoOperacionSnapshotFiltersResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Filtros invalidos"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener filtros")); }
 }
-export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperacionSnapshotParams, "sucursal" | "ubicacion" | "usuario" | "vendedor">, signal?: AbortSignal): Promise<SaldoOperacionSnapshotSummaryResponse> {
+export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperacionSnapshotParams, "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor">, signal?: AbortSignal): Promise<SaldoOperacionSnapshotSummaryResponse> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/resumen", { params, signal }); const parsed = saldoOperacionSnapshotSummaryResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Resumen invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener resumen")); }
 }
@@ -98,7 +98,7 @@ export async function updateSaldoOperacionUsuario(codigoOperacion: number, codig
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/usuario-operacion`, { codigoUsuario }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar el usuario de operacion")); }
 }
-export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSnapshotParams, "section" | "sucursal" | "ubicacion">): Promise<Blob> {
+export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSnapshotParams, "section" | "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor" | "operacion">): Promise<Blob> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/export", { params, responseType: "blob" }); return data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al exportar Saldo de operacion")); }
 }
