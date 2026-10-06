@@ -21,7 +21,6 @@ import type { SaldoOperacionSnapshotSortKey } from "@/services/operacionesServic
 const PAGE_SIZE = 60;
 const ALL = "__TODAS__";
 type Section = "conSaldo" | "canceladas";
-type Entrega = "todas" | "entregadas" | "sin-entregar";
 type SortDirection = "asc" | "desc";
 const tableColumns: Array<{ label: string; key: SaldoOperacionSnapshotSortKey }> = [
   { label: "OP", key: "codigoOperacion" }, { label: "Cliente", key: "clienteNombre" }, { label: "Sucursal", key: "sucursal" },
@@ -34,12 +33,10 @@ const tableColumns: Array<{ label: string; key: SaldoOperacionSnapshotSortKey }>
 const money = (value: number | null) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
 const download = (blob: Blob, name: string) => { const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = name; link.click(); URL.revokeObjectURL(url); };
 
-export default function SaldoOperacionView() {
+export default function SaldoOperacionView({ soloEntregadas = false }: { soloEntregadas?: boolean }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [section, setSection] = useState<Section>("conSaldo");
-  const [entrega, setEntrega] = useState<Entrega>("todas");
-  const [soloEntregadas, setSoloEntregadas] = useState(false);
   const [sucursal, setSucursal] = useState(ALL);
   const [ubicacion, setUbicacion] = useState(ALL);
   const [usuario, setUsuario] = useState(ALL);
@@ -53,10 +50,10 @@ export default function SaldoOperacionView() {
   const [fechaCancelacion, setFechaCancelacion] = useState("");
   const [usuarioPending, setUsuarioPending] = useState<SaldoOperacionSnapshotItem | null>(null);
   const [usuarioSearch, setUsuarioSearch] = useState("");
-  const params = { section, entrega: soloEntregadas || entrega === "todas" ? undefined : entrega, soloEntregadas: soloEntregadas || undefined, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor, operacion: operacion || undefined, page, limit: PAGE_SIZE, sortKey, sortDirection };
+  const params = { section, soloEntregadas: soloEntregadas || undefined, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor, operacion: operacion || undefined, page, limit: PAGE_SIZE, sortKey, sortDirection };
   const table = useQuery({ queryKey: ["saldo-operacion-snapshot", params], queryFn: ({ signal }) => getSaldoOperacionSnapshot(params, signal), refetchOnWindowFocus: false });
   const filters = useQuery({ queryKey: ["saldo-operacion-snapshot-filters"], queryFn: getSaldoOperacionSnapshotFilters, staleTime: 60_000 });
-  const summary = useQuery({ queryKey: ["saldo-operacion-snapshot-summary", entrega, sucursal, ubicacion, usuario, vendedor], queryFn: ({ signal }) => getSaldoOperacionSnapshotSummary({ entrega: entrega === "todas" ? undefined : entrega, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor }, signal), staleTime: 30_000 });
+  const summary = useQuery({ queryKey: ["saldo-operacion-snapshot-summary", soloEntregadas, sucursal, ubicacion, usuario, vendedor], queryFn: ({ signal }) => getSaldoOperacionSnapshotSummary({ soloEntregadas: soloEntregadas || undefined, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor }, signal), staleTime: 30_000 });
   const usuarioSearchReady = usuarioSearch.trim().length >= 3;
   const usuarios = useQuery({ queryKey: ["saldo-operacion-usuarios", usuarioSearch], queryFn: ({ signal }) => getSaldoOperacionUsuarios(usuarioSearch.trim(), signal), enabled: Boolean(usuarioPending) && usuarioSearchReady, staleTime: 60_000 });
   const update = useMutation({
@@ -91,12 +88,11 @@ export default function SaldoOperacionView() {
         <select aria-label="Sucursal" value={sucursal} onChange={(event) => { setSucursal(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las sucursales</option>{filters.data?.meta.sucursales.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <select aria-label="Usuario" value={usuario} onChange={(event) => { setUsuario(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todos los usuarios</option>{filters.data?.meta.usuarios.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <select aria-label="Vendedor" value={vendedor} onChange={(event) => { setVendedor(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todos los vendedores</option>{filters.data?.meta.vendedores.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <select aria-label="Entrega" value={entrega} onChange={(event) => { setSoloEntregadas(false); setEntrega(event.target.value as Entrega); setPage(1); }} className="h-9 min-w-36 rounded-md border border-border bg-background px-2 text-xs"><option value="todas">Todas</option><option value="entregadas">Entregadas</option><option value="sin-entregar">Sin entregar</option></select>
         <span className="whitespace-nowrap text-xs text-muted-foreground">Can. Registros: <b className="text-foreground">{pagination?.total ?? 0}</b></span>
-        <select aria-label="Sección" value={section} onChange={(event) => { setSection(event.target.value as Section); setPage(1); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs"><option value="conSaldo">Con saldo</option><option value="canceladas">Canceladas</option></select>
+        {!soloEntregadas && <select aria-label="Sección" value={section} onChange={(event) => { setSection(event.target.value as Section); setPage(1); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs"><option value="conSaldo">Con saldo</option><option value="canceladas">Canceladas</option></select>}
         <select aria-label="Ubicación" value={ubicacion} onChange={(event) => { setUbicacion(event.target.value); setPage(1); }} className="h-9 min-w-44 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las ubicaciones</option>{filters.data?.meta.ubicaciones.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <Button size="sm" variant="outline" disabled={exporter.isPending} onClick={() => exporter.mutate()}><Download /> Exportar</Button>
-        <Button size="sm" variant="outline" aria-pressed={soloEntregadas} className="border-amber-300 bg-amber-100 text-amber-900 hover:bg-amber-200" onClick={() => { setSoloEntregadas((current) => !current); setPage(1); }}>Entregadas</Button>
+        {!soloEntregadas && <Button size="sm" variant="outline" className="border-amber-300 bg-amber-100 text-amber-900 hover:bg-amber-200" onClick={() => navigate(paths.analisis.saldoOperacionEntregadas)}>Entregadas</Button>}
         <Button size="sm" variant="outline" className="border-green-300 bg-green-100 text-green-800 hover:bg-green-200" onClick={() => navigate(paths.analisis.saldoOperacionCancelaciones)}><GitBranch /> Análisis de cancelación</Button>
         <Button size="sm" variant="outline" className="border-red-300 bg-red-100 text-red-800 hover:bg-red-200" onClick={() => navigate(paths.analisis.saldoOperacionNoCanceladas)}><GitBranch /> Análisis de no canceladas</Button>
       </div>

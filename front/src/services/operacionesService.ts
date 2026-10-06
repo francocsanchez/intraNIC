@@ -74,7 +74,7 @@ export async function getSaldoOperacionSnapshotFilters(): Promise<SaldoOperacion
   try { const { data } = await api.get("/operaciones/saldo-operacion/filtros"); const parsed = saldoOperacionSnapshotFiltersResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Filtros invalidos"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener filtros")); }
 }
-export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperacionSnapshotParams, "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor">, signal?: AbortSignal): Promise<SaldoOperacionSnapshotSummaryResponse> {
+export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperacionSnapshotParams, "soloEntregadas" | "sucursal" | "ubicacion" | "usuario" | "vendedor">, signal?: AbortSignal): Promise<SaldoOperacionSnapshotSummaryResponse> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/resumen", { params, signal }); const parsed = saldoOperacionSnapshotSummaryResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Resumen invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener resumen")); }
 }

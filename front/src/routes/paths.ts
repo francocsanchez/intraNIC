@@ -44,6 +44,7 @@ export const paths = {
   analisis: {
     operaciones: "/analisis/operaciones",
     saldoOperacion: "/analisis/saldo-operacion",
+    saldoOperacionEntregadas: "/analisis/saldo-operacion/entregadas",
     saldoOperacionCancelaciones: "/analisis/saldo-operacion/cancelaciones",
     saldoOperacionNoCanceladas: "/analisis/saldo-operacion/no-canceladas",
     centralDeudores: "/analisis/central-de-deudores",

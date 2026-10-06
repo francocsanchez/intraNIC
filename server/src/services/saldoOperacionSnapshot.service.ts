@@ -337,7 +337,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  static async summary(params: { soloEntregadas?: boolean; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
