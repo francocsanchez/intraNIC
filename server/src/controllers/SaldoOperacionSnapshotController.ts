@@ -16,6 +16,7 @@ const snapshotSortKeys = new Set([
 const parseFilters = (req: Request) => ({
   section: optionalString(req.query.section),
   entrega: optionalString(req.query.entrega),
+  soloEntregadas: req.query.soloEntregadas === "true",
   ubicacion: optionalString(req.query.ubicacion),
   sucursal: optionalString(req.query.sucursal),
   usuario: optionalString(req.query.usuario),
@@ -68,12 +69,13 @@ export class SaldoOperacionSnapshotController {
 
   static updateFechaCancelacion = async (req: Request, res: Response) => {
     const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
-    const fechaCancelacion = optionalString(req.body?.fechaCancelacion);
+    const anularFechaCancelacion = req.body?.fechaCancelacion === null;
+    const fechaCancelacion = anularFechaCancelacion ? null : optionalString(req.body?.fechaCancelacion);
     if (!codigoOperacion) return res.status(400).json({ message: "El codigo de operacion debe ser valido" });
-    if (!fechaCancelacion) return res.status(400).json({ message: "La fecha de cancelacion es obligatoria" });
+    if (!anularFechaCancelacion && !fechaCancelacion) return res.status(400).json({ message: "La fecha de cancelacion es obligatoria" });
     try {
       const data = await SaldoOperacionSnapshotService.updateFechaCancelacion(codigoOperacion, fechaCancelacion);
-      return res.status(200).json({ message: "Fecha de cancelacion actualizada", data });
+      return res.status(200).json({ message: anularFechaCancelacion ? "Fecha de cancelacion anulada" : "Fecha de cancelacion actualizada", data });
     } catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudo actualizar la cancelacion" }); }
   };
 
