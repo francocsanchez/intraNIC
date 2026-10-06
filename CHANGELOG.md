@@ -6,6 +6,7 @@
 - **Saldo de operación:** se agregó el filtro de entrega y el resaltado amarillo suave para entregadas aún no canceladas.
 - **Saldo de operación:** la fecha de cancelación puede anularse desde el diálogo para corregir registros cargados por error.
 - **Saldo de operación:** se incorporó el acceso amarillo `Entregadas`, que lista todos los snapshots Mongo entregados —incluidos los ocultos por cancelación— para revisar y corregirlos.
+- **Saldo de operación:** corregida la interacción entre el acceso `Entregadas` y el selector de entrega para que `Sin entregar` excluya siempre las operaciones entregadas.
 - **Análisis de no canceladas:** incorpora operaciones entregadas sin fecha de cancelación en sus árboles, promedios y saldos pendientes.
 
 ## 2026-10-05
