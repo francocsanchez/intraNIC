@@ -12,7 +12,7 @@ import {
 } from "@/services/operacionesService";
 import type { SaldoOperacionSnapshotItem, SaldoOperacionUsuario } from "@/types/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitBranch, LoaderCircle, Pencil, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitBranch, Pencil, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import type { SaldoOperacionSnapshotSortKey } from "@/services/operacionesServic
 const PAGE_SIZE = 60;
 const ALL = "__TODAS__";
 type Section = "conSaldo" | "canceladas";
+type Entrega = "entregadas" | "sin-entregar";
 type SortDirection = "asc" | "desc";
 const tableColumns: Array<{ label: string; key: SaldoOperacionSnapshotSortKey }> = [
   { label: "OP", key: "codigoOperacion" }, { label: "Cliente", key: "clienteNombre" }, { label: "Sucursal", key: "sucursal" },
@@ -33,10 +34,11 @@ const tableColumns: Array<{ label: string; key: SaldoOperacionSnapshotSortKey }>
 const money = (value: number | null) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value ?? 0);
 const download = (blob: Blob, name: string) => { const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = name; link.click(); URL.revokeObjectURL(url); };
 
-export default function SaldoOperacionView({ soloEntregadas = false }: { soloEntregadas?: boolean }) {
+export default function SaldoOperacionView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [section, setSection] = useState<Section>("conSaldo");
+  const [entrega, setEntrega] = useState<Entrega>("sin-entregar");
   const [sucursal, setSucursal] = useState(ALL);
   const [ubicacion, setUbicacion] = useState(ALL);
   const [usuario, setUsuario] = useState(ALL);
@@ -50,10 +52,10 @@ export default function SaldoOperacionView({ soloEntregadas = false }: { soloEnt
   const [fechaCancelacion, setFechaCancelacion] = useState("");
   const [usuarioPending, setUsuarioPending] = useState<SaldoOperacionSnapshotItem | null>(null);
   const [usuarioSearch, setUsuarioSearch] = useState("");
-  const params = { section, soloEntregadas: soloEntregadas || undefined, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor, operacion: operacion || undefined, page, limit: PAGE_SIZE, sortKey, sortDirection };
+  const params = { section, entrega, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor, operacion: operacion || undefined, page, limit: PAGE_SIZE, sortKey, sortDirection };
   const table = useQuery({ queryKey: ["saldo-operacion-snapshot", params], queryFn: ({ signal }) => getSaldoOperacionSnapshot(params, signal), refetchOnWindowFocus: false });
   const filters = useQuery({ queryKey: ["saldo-operacion-snapshot-filters"], queryFn: getSaldoOperacionSnapshotFilters, staleTime: 60_000 });
-  const summary = useQuery({ queryKey: ["saldo-operacion-snapshot-summary", soloEntregadas, sucursal, ubicacion, usuario, vendedor], queryFn: ({ signal }) => getSaldoOperacionSnapshotSummary({ soloEntregadas: soloEntregadas || undefined, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor }, signal), staleTime: 30_000 });
+  const summary = useQuery({ queryKey: ["saldo-operacion-snapshot-summary", entrega, sucursal, ubicacion, usuario, vendedor], queryFn: ({ signal }) => getSaldoOperacionSnapshotSummary({ entrega, sucursal: sucursal === ALL ? undefined : sucursal, ubicacion: ubicacion === ALL ? undefined : ubicacion, usuario: usuario === ALL ? undefined : usuario, vendedor: vendedor === ALL ? undefined : vendedor }, signal), staleTime: 30_000 });
   const usuarioSearchReady = usuarioSearch.trim().length >= 3;
   const usuarios = useQuery({ queryKey: ["saldo-operacion-usuarios", usuarioSearch], queryFn: ({ signal }) => getSaldoOperacionUsuarios(usuarioSearch.trim(), signal), enabled: Boolean(usuarioPending) && usuarioSearchReady, staleTime: 60_000 });
   const update = useMutation({
@@ -85,18 +87,17 @@ export default function SaldoOperacionView({ soloEntregadas = false }: { soloEnt
   return <div className="space-y-3 bg-muted p-2 font-preset">
     <section className="space-y-2 rounded-md border border-border bg-card p-2">
       <div className="flex flex-wrap items-center gap-2">
+        <span className="whitespace-nowrap text-xs text-muted-foreground">Operaciones: <b className="text-foreground">{pagination?.total ?? 0}</b></span>
         <select aria-label="Sucursal" value={sucursal} onChange={(event) => { setSucursal(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las sucursales</option>{filters.data?.meta.sucursales.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <select aria-label="Usuario" value={usuario} onChange={(event) => { setUsuario(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todos los usuarios</option>{filters.data?.meta.usuarios.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <select aria-label="Vendedor" value={vendedor} onChange={(event) => { setVendedor(event.target.value); setPage(1); }} className="h-9 min-w-40 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todos los vendedores</option>{filters.data?.meta.vendedores.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <span className="whitespace-nowrap text-xs text-muted-foreground">Can. Registros: <b className="text-foreground">{pagination?.total ?? 0}</b></span>
-        {!soloEntregadas && <select aria-label="Sección" value={section} onChange={(event) => { setSection(event.target.value as Section); setPage(1); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs"><option value="conSaldo">Con saldo</option><option value="canceladas">Canceladas</option></select>}
+        <select aria-label="Entrega" value={entrega} onChange={(event) => { setEntrega(event.target.value as Entrega); setPage(1); }} className="h-9 min-w-36 rounded-md border border-border bg-background px-2 text-xs"><option value="sin-entregar">No entregadas</option><option value="entregadas">Entregadas</option></select>
+        {entrega === "sin-entregar" && <select aria-label="Sección" value={section} onChange={(event) => { setSection(event.target.value as Section); setPage(1); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs"><option value="conSaldo">Con saldo</option><option value="canceladas">Canceladas</option></select>}
         <select aria-label="Ubicación" value={ubicacion} onChange={(event) => { setUbicacion(event.target.value); setPage(1); }} className="h-9 min-w-44 rounded-md border border-border bg-background px-2 text-xs"><option value={ALL}>Todas las ubicaciones</option>{filters.data?.meta.ubicaciones.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <Button size="sm" variant="outline" disabled={exporter.isPending} onClick={() => exporter.mutate()}><Download /> Exportar</Button>
-        {!soloEntregadas && <Button size="sm" variant="outline" className="border-amber-300 bg-amber-100 text-amber-900 hover:bg-amber-200" onClick={() => navigate(paths.analisis.saldoOperacionEntregadas)}>Entregadas</Button>}
-        <Button size="sm" variant="outline" className="border-green-300 bg-green-100 text-green-800 hover:bg-green-200" onClick={() => navigate(paths.analisis.saldoOperacionCancelaciones)}><GitBranch /> Análisis de cancelación</Button>
-        <Button size="sm" variant="outline" className="border-red-300 bg-red-100 text-red-800 hover:bg-red-200" onClick={() => navigate(paths.analisis.saldoOperacionNoCanceladas)}><GitBranch /> Análisis de no canceladas</Button>
+        <Button size="sm" variant="outline" className="ml-auto h-8 border-green-300 bg-green-100 px-2 text-[11px] text-green-800 hover:bg-green-200" onClick={() => navigate(paths.analisis.saldoOperacionCancelaciones)}><GitBranch className="size-3" /> A. Canceladas</Button>
+        <Button size="sm" variant="outline" className="h-8 border-red-300 bg-red-100 px-2 text-[11px] text-red-800 hover:bg-red-200" onClick={() => navigate(paths.analisis.saldoOperacionNoCanceladas)}><GitBranch className="size-3" /> A. No canceladas</Button>
+        <Button size="sm" variant="outline" aria-label="Exportar Excel" title="Exportar Excel" disabled={exporter.isPending} onClick={() => exporter.mutate()} className="size-9 border-green-300 bg-green-100 p-0 text-green-800 hover:bg-green-200"><Download /></Button>
       </div>
-      <div className="mb-1 flex items-center justify-between text-[11px]"><span>Saldos restantes a cobrar por modelo</span>{summary.isFetching && <LoaderCircle className="size-3 animate-spin" />}</div>
       <div className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-6">
         {summary.data?.data.map((item) => <div key={item.modelo} className="rounded-md border border-border bg-muted p-2"><div className="text-[11px] tracking-wide">{item.modelo}</div><div className="text-base text-destructive">{money(item.saldo)}</div></div>)}
         <div className="rounded-md border border-border bg-muted p-2"><div className="text-[11px]">Crédito no facturado</div><div className="text-base text-destructive">{money(summary.data?.creditoTotal ?? 0)}</div></div>

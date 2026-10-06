@@ -5,7 +5,9 @@
 - **Saldo de operación:** las operaciones entregadas guardadas en Mongo permanecen visibles en tablero, filtros, resumen y Excel hasta cargar su fecha de cancelación; al completar ambos estados se ocultan sin consultar historial SQL.
 - **Saldo de operación:** se agregó el filtro de entrega y el resaltado amarillo suave para entregadas aún no canceladas.
 - **Saldo de operación:** la fecha de cancelación puede anularse desde el diálogo para corregir registros cargados por error.
-- **Saldo de operación:** el acceso amarillo `Entregadas` ahora abre una vista independiente que lista todos los snapshots Mongo entregados —incluidos los ocultos por cancelación— para revisarlos y corregirlos; se retiró el selector de entrega del tablero principal.
+- **Saldo de operación:** se reemplazó el acceso separado por un selector con `No entregadas` predeterminado y `Entregadas`, que muestra exclusivamente los snapshots Mongo entregados —incluidos los cancelados— para revisarlos y corregirlos.
+- **Saldo de operación:** el acceso de exportación Excel ahora es cuadrado, verde y se alinea a la derecha de los filtros.
+- **Saldo de operación:** el conteo pasó al inicio como `Operaciones`, y los accesos a análisis se compactaron y renombraron para acompañar la exportación.
 - **Análisis de no canceladas:** incorpora operaciones entregadas sin fecha de cancelación en sus árboles, promedios y saldos pendientes.
 
 ## 2026-10-05
