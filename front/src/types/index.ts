@@ -935,6 +935,28 @@ export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperaciones
 export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
 export type AnalisisOperacionesPreventaFormaPago = z.infer<typeof analisisOperacionesPreventaFormaPagoSchema>;
 export type AnalisisOperacionesPreventaFormaPagoResponse = z.infer<typeof analisisOperacionesPreventaFormaPagoResponseSchema>;
+
+const analisisOperacionesPreventaMovilResumenItemSchema = z.object({
+  nombre: z.string(),
+  total: z.number(),
+});
+
+export const analisisOperacionesPreventaMovilResumenResponseSchema = z.object({
+  filters: z.object({
+    anio: z.number(),
+    mes: z.number(),
+  }),
+  data: z.object({
+    totalOperaciones: z.number(),
+    sucursales: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+    modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+    vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+  }),
+});
+
+export type AnalisisOperacionesPreventaMovilResumenResponse = z.infer<
+  typeof analisisOperacionesPreventaMovilResumenResponseSchema
+>;
 export type AnalisisOperacionesPreventaDescuentoMensualItem = z.infer<
   typeof analisisOperacionesPreventaDescuentoMensualItemSchema
 >;

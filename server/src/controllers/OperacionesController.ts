@@ -102,6 +102,31 @@ export class OperacionesController {
     }
   };
 
+  static getDashboardMovilResumen = async (req: Request, res: Response) => {
+    const anio = parseStrictPositiveInt(req.query.anio);
+    const mes = parseStrictPositiveInt(req.query.mes);
+
+    if (!anio) {
+      return res.status(400).json({ message: "El parametro anio es obligatorio y debe ser un entero valido" });
+    }
+
+    if (!mes || mes < 1 || mes > 12) {
+      return res.status(400).json({ message: "El parametro mes es obligatorio y debe estar entre 1 y 12" });
+    }
+
+    try {
+      const response = await OperacionesDashboardService.getDashboardMovilResumen({
+        anio,
+        mes,
+      });
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getDashboardMovilResumen");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
   static getAnalisisVendedorFilters = async (_req: Request, res: Response) => {
     try {
       const response = await OperacionesDashboardService.getAnalisisVendedorFilters();

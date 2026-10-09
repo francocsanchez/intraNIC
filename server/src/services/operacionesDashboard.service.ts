@@ -73,6 +73,24 @@ type OperacionesAnalisisPreventaFilters = {
   tipo: OperacionesAnalisisTipo;
 };
 
+type AnalisisOperacionesPreventaMovilResumenItem = {
+  nombre: string;
+  total: number;
+};
+
+type AnalisisOperacionesPreventaMovilResumenResponse = {
+  filters: {
+    anio: number;
+    mes: number;
+  };
+  data: {
+    totalOperaciones: number;
+    sucursales: AnalisisOperacionesPreventaMovilResumenItem[];
+    modelos: AnalisisOperacionesPreventaMovilResumenItem[];
+    vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
+  };
+};
+
 type AnalisisVendedorFilters = {
   anio: number;
   vendedor: number | null;
@@ -581,6 +599,60 @@ export class OperacionesDashboardService {
     return {
       filters,
       data,
+    };
+  }
+
+  static async getDashboardMovilResumen(
+    filters: { anio: number; mes: number },
+  ): Promise<AnalisisOperacionesPreventaMovilResumenResponse> {
+    const rows = await sequelizeNIC.query<OperacionDashboardRow>(
+      operacionesDashboardQuery({
+        hasAnios: true,
+        hasMeses: true,
+        hasSucursales: false,
+        hasModelos: false,
+        hasDias: false,
+      }),
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          anios: [filters.anio],
+          meses: [filters.mes],
+        },
+      },
+    );
+
+    const summary = {
+      totalOperaciones: rows.length,
+      sucursales: [] as AnalisisOperacionesPreventaMovilResumenItem[],
+      modelos: [] as AnalisisOperacionesPreventaMovilResumenItem[],
+      vendedores: [] as AnalisisOperacionesPreventaMovilResumenItem[],
+    };
+
+    const groupRows = (value: (row: OperacionDashboardRow) => unknown) => {
+      const totals = new Map<string, number>();
+      rows.forEach((row) => {
+        const label = normalizeNullableString(value(row)) ?? "SIN DATOS";
+        totals.set(label, (totals.get(label) ?? 0) + 1);
+      });
+      return Array.from(totals, ([nombre, total]) => ({ nombre, total }));
+    };
+
+    summary.sucursales.push(...groupRows((row) => row.sucursalNombre));
+    summary.modelos.push(...groupRows((row) => row.modeloNombre));
+    summary.vendedores.push(...groupRows((row) => row.vendedorNombre));
+
+    const sortItems = (items: AnalisisOperacionesPreventaMovilResumenItem[]) =>
+      items.sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+
+    return {
+      filters,
+      data: {
+        totalOperaciones: summary.totalOperaciones,
+        sucursales: sortItems(summary.sucursales),
+        modelos: sortItems(summary.modelos),
+        vendedores: sortItems(summary.vendedores),
+      },
     };
   }
 

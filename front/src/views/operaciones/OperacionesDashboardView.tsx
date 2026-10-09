@@ -13,6 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Filter, Inbox } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { ActionButton } from "@/components/ui/action-button";
+import { paths } from "@/routes/paths";
 
 const MONTH_LABELS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
 
@@ -45,6 +47,15 @@ export default function OperacionesDashboardView() {
   const [selectedSucursales, setSelectedSucursales] = useState<string[]>([]);
   const [selectedModelos, setSelectedModelos] = useState<string[]>([]);
   const [selectedDias, setSelectedDias] = useState<number[]>([]);
+
+  const handleCopyMobileLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${paths.analisis.operacionesMovil}`);
+      toast.success("Link móvil copiado");
+    } catch {
+      toast.error("No se pudo copiar el link móvil");
+    }
+  };
   const effectiveChartDimension =
     chartCompareBy === "anio" && !["mes", "dia"].includes(chartDimension) ? "mes" : chartDimension;
 
@@ -199,7 +210,10 @@ export default function OperacionesDashboardView() {
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <p className="text-primary font-semibold uppercase tracking-[0.16em] text-primary">Modulo operativo</p>
-            <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Dashboard de operaciones</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">Dashboard de operaciones</h1>
+              <ActionButton variant="outline" onClick={handleCopyMobileLink}>Copiar link</ActionButton>
+            </div>
             <p className="mt-1 max-w-3xl text-xs text-muted-foreground">
               Supervisa asignaciones por vendedor, cruza sucursales, modelos, dias y anios para detectar tendencias visuales.
             </p>

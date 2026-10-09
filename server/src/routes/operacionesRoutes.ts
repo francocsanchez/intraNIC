@@ -9,6 +9,11 @@ const router = Router();
 router.use(authenticate);
 router.get("/dashboard", authorizeModules("operaciones"), OperacionesController.getDashboard);
 router.get(
+  "/dashboard/movil/resumen",
+  authorizeModules("operaciones"),
+  OperacionesController.getDashboardMovilResumen,
+);
+router.get(
   "/analisis-vendedor/filtros",
   authorizeModules("analisisVendedor"),
   OperacionesController.getAnalisisVendedorFilters,

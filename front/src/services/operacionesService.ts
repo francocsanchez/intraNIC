@@ -5,6 +5,7 @@ import {
   analisisOperacionesPreventaCreditoMensualResponseSchema,
   analisisOperacionesPreventaDescuentoMensualResponseSchema,
   analisisOperacionesPreventaFormaPagoResponseSchema,
+  analisisOperacionesPreventaMovilResumenResponseSchema,
   analisisOperacionesPreventaResumenFinanciacionResponseSchema,
   analisisOperacionesPreventaResponseSchema,
   operacionesDashboardResponseSchema,
@@ -13,6 +14,7 @@ import {
   type AnalisisOperacionesPreventaCreditoMensualResponse,
   type AnalisisOperacionesPreventaDescuentoMensualResponse,
   type AnalisisOperacionesPreventaFormaPagoResponse,
+  type AnalisisOperacionesPreventaMovilResumenResponse,
   type AnalisisOperacionesPreventaResumenFinanciacionResponse,
   type AnalisisOperacionesPreventaResponse,
   type AnalisisOperacionesPreventaUsadosMensualResponse,
@@ -196,6 +198,24 @@ export async function getAnalisisOperacionesPreventa(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener Analisis Operaciones"));
+  }
+}
+
+export async function getOperacionesDashboardMovilResumen(
+  params: AnalisisOperacionesPreventaParams,
+): Promise<AnalisisOperacionesPreventaMovilResumenResponse> {
+  try {
+    const { data } = await api.get("/operaciones/dashboard/movil/resumen", { params });
+    const parsed = analisisOperacionesPreventaMovilResumenResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del resumen móvil no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener el resumen móvil de operaciones"));
   }
 }
 

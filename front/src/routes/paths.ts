@@ -43,6 +43,7 @@ export const paths = {
   },
   analisis: {
     operaciones: "/analisis/operaciones",
+    operacionesMovil: "/analisis/operaciones/movil",
     saldoOperacion: "/analisis/saldo-operacion",
     saldoOperacionCancelaciones: "/analisis/saldo-operacion/cancelaciones",
     saldoOperacionNoCanceladas: "/analisis/saldo-operacion/no-canceladas",
