@@ -4,6 +4,10 @@
 
 - **Tablero de operaciones:** se incorporó la SPA móvil protegida en `/analisis/operaciones/movil`, con navegación mensual, actualización manual y rankings de operaciones por sucursal, modelo y vendedor.
 - **Tablero de operaciones:** la vista de escritorio incorpora `Copiar link` para compartir el acceso móvil; el enlace conserva el control de sesión y abre el período vigente en el dispositivo receptor.
+- **Tablero de operaciones:** `Copiar link` incorpora compatibilidad para despliegues internos por HTTP y navegadores donde no está disponible la Clipboard API.
+- **Tablero de operaciones:** la SPA móvil se presenta sin navegación ni footer, e incorpora usados tomados y descuentos promedio de Preventas por modelo y sucursal.
+- **Tablero de operaciones:** los descuentos promedio se integraron como columna en las tablas móviles por modelo y sucursal.
+- **Tablero de operaciones:** la tabla móvil por vendedor incorpora el descuento promedio; las tablas muestran primero cantidad y luego descuento.
 - **Rend. Gastos:** se corrigió la validación de importes positivos con dos decimales para que no rechace comprobantes válidos por la precisión interna de números decimales; los comprobantes pueden editarse antes de guardar la rendición.
 - **Valorización de stock:** el resumen ahora detalla el importe valorizado de las unidades disponibles, reservadas, guardadas y del total, además de sus cantidades.
 - **Saldo de operación:** la grilla incorpora el indicador `Fact.` para identificar con un icono las operaciones facturadas según la fecha SIAC sincronizada; además, se abreviaron los encabezados de días para ganar densidad.

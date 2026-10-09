@@ -941,6 +941,11 @@ const analisisOperacionesPreventaMovilResumenItemSchema = z.object({
   total: z.number(),
 });
 
+const analisisOperacionesPreventaMovilDescuentoItemSchema = z.object({
+  nombre: z.string(),
+  promedio: z.number(),
+});
+
 export const analisisOperacionesPreventaMovilResumenResponseSchema = z.object({
   filters: z.object({
     anio: z.number(),
@@ -951,6 +956,12 @@ export const analisisOperacionesPreventaMovilResumenResponseSchema = z.object({
     sucursales: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
     modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
     vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+    usadosTomados: z.number(),
+    descuentosPromedio: z.object({
+      porModelo: z.array(analisisOperacionesPreventaMovilDescuentoItemSchema),
+      porSucursal: z.array(analisisOperacionesPreventaMovilDescuentoItemSchema),
+      porVendedor: z.array(analisisOperacionesPreventaMovilDescuentoItemSchema),
+    }),
   }),
 });
 

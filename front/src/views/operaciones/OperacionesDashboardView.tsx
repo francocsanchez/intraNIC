@@ -37,6 +37,28 @@ const getFechaParts = (fechaAsignacion: string) => {
   };
 };
 
+const copyText = async (value: string) => {
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch {
+      // El fallback soporta despliegues internos por HTTP y navegadores sin permiso de portapapeles.
+    }
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = value;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textArea);
+  return copied;
+};
+
 export default function OperacionesDashboardView() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -49,10 +71,11 @@ export default function OperacionesDashboardView() {
   const [selectedDias, setSelectedDias] = useState<number[]>([]);
 
   const handleCopyMobileLink = async () => {
-    try {
-      await navigator.clipboard.writeText(`${window.location.origin}${paths.analisis.operacionesMovil}`);
+    const copied = await copyText(`${window.location.origin}${paths.analisis.operacionesMovil}`);
+
+    if (copied) {
       toast.success("Link móvil copiado");
-    } catch {
+    } else {
       toast.error("No se pudo copiar el link móvil");
     }
   };

@@ -125,6 +125,10 @@ export default function Router() {
             </Route>
             <Route path={paths.noAutorizado} element={<NoAutorizadoView />} />
 
+            <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
+              <Route path={paths.analisis.operacionesMovil} element={<AnalisisOperacionesMovilView />} />
+            </Route>
+
             <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
               <Route element={<CalidadLayout />}>
                 <Route path={paths.calidad.home} element={<Navigate to={paths.calidad.ssiVentas} replace />} />
@@ -301,7 +305,6 @@ export default function Router() {
           <Route element={<AnalisisLayout />}>
             <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
               <Route path={paths.analisis.operaciones} element={<OperacionesDashboardView />} />
-              <Route path={paths.analisis.operacionesMovil} element={<AnalisisOperacionesMovilView />} />
             </Route>
             <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacion"]} />}>
               <Route path={paths.analisis.saldoOperacion} element={<SaldoOperacionView />} />

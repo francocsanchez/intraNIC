@@ -3,7 +3,7 @@ import { ActionButton } from "@/components/ui/action-button";
 import { getOperacionesDashboardMovilResumen } from "@/services/operacionesService";
 import type { AnalisisOperacionesPreventaMovilResumenResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, BarChart3, Building2, CarFront, RefreshCw, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Building2, CarFront, Handshake, RefreshCw, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const MONTHS = [
@@ -12,13 +12,28 @@ const MONTHS = [
 ];
 
 type RankingItem = AnalisisOperacionesPreventaMovilResumenResponse["data"]["sucursales"][number];
+type DescuentoItem = AnalisisOperacionesPreventaMovilResumenResponse["data"]["descuentosPromedio"]["porModelo"][number];
 
-function RankingCard({ title, items, icon: Icon }: { title: string; items: RankingItem[]; icon: typeof Building2 }) {
+function RankingCard({
+  title,
+  items,
+  descuentos,
+  icon: Icon,
+}: {
+  title: string;
+  items: RankingItem[];
+  descuentos?: DescuentoItem[];
+  icon: typeof Building2;
+}) {
+  const descuentosPorNombre = new Map(descuentos?.map((item) => [item.nombre, item.promedio]));
+
   return (
     <section className="overflow-hidden rounded-md border border-border bg-card">
       <header className="flex items-center gap-2 border-b border-border px-3 py-2.5">
         <Icon size={16} className="text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <h2 className="min-w-0 flex-1 text-sm font-semibold text-foreground">{title}</h2>
+        <span className="w-8 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Cant.</span>
+        {descuentos ? <span className="w-14 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Desc.</span> : null}
       </header>
       {items.length ? (
         <ol className="divide-y divide-border">
@@ -26,7 +41,14 @@ function RankingCard({ title, items, icon: Icon }: { title: string; items: Ranki
             <li key={item.nombre} className="flex items-center gap-3 px-3 py-2.5">
               <span className="w-5 text-xs font-semibold text-muted-foreground">{index + 1}</span>
               <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={item.nombre}>{item.nombre}</span>
-              <span className="text-sm font-semibold tabular-nums text-foreground">{item.total}</span>
+              <span className="w-8 text-right text-sm font-semibold tabular-nums text-foreground">{item.total}</span>
+              {descuentos ? (
+                <span className="w-14 text-right text-xs font-semibold tabular-nums text-foreground">
+                  {descuentosPorNombre.has(item.nombre)
+                    ? `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(descuentosPorNombre.get(item.nombre)!)}%`
+                    : "-"}
+                </span>
+              ) : null}
             </li>
           ))}
         </ol>
@@ -57,18 +79,18 @@ export default function AnalisisOperacionesMovilView() {
 
   if (isError || !data) {
     return (
-      <div className="mx-auto w-full max-w-md px-3 py-4">
+      <div className="min-h-screen bg-muted font-preset"><div className="mx-auto w-full max-w-md px-3 py-4">
         <section className="rounded-md border border-destructive/30 bg-card p-4 text-center">
           <h1 className="text-base font-semibold text-foreground">No se pudo cargar el resumen</h1>
           <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Intentá actualizar nuevamente."}</p>
           <ActionButton className="mt-4" onClick={() => void refetch()} disabled={isFetching}>Actualizar</ActionButton>
         </section>
-      </div>
+      </div></div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-3 px-3 py-4">
+    <div className="min-h-screen bg-muted font-preset"><div className="mx-auto w-full max-w-md space-y-3 px-3 py-4">
       <section className="rounded-md border border-border bg-card p-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tablero de operaciones</p>
         <div className="mt-2 flex items-center justify-between gap-2">
@@ -93,9 +115,17 @@ export default function AnalisisOperacionesMovilView() {
         </div>
       </section>
 
-      <RankingCard title="Operaciones por sucursal" items={data.data.sucursales} icon={Building2} />
-      <RankingCard title="Operaciones por modelo" items={data.data.modelos} icon={CarFront} />
-      <RankingCard title="Operaciones por vendedor" items={data.data.vendedores} icon={UserRound} />
-    </div>
+      <section className="flex items-center gap-3 rounded-md border border-border bg-card p-3">
+        <span className="rounded-md bg-secondary p-2 text-primary"><Handshake size={20} /></span>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Usados tomados</p>
+          <p className="text-2xl font-bold tabular-nums text-foreground">{data.data.usadosTomados}</p>
+        </div>
+      </section>
+
+      <RankingCard title="Operaciones por sucursal" items={data.data.sucursales} descuentos={data.data.descuentosPromedio.porSucursal} icon={Building2} />
+      <RankingCard title="Operaciones por modelo" items={data.data.modelos} descuentos={data.data.descuentosPromedio.porModelo} icon={CarFront} />
+      <RankingCard title="Operaciones por vendedor" items={data.data.vendedores} descuentos={data.data.descuentosPromedio.porVendedor} icon={UserRound} />
+    </div></div>
   );
 }

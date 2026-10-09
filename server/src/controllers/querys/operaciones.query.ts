@@ -56,6 +56,7 @@ SELECT
     ope.ope_fecfac AS fecha_factura,
     LTRIM(RTRIM(ISNULL(cli.cli_nombre, '-'))) AS cliente,
     LTRIM(RTRIM(ISNULL(sucursal.suc_nombre, 'SIN SUCURSAL'))) AS sucursal,
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN VENDEDOR'))) AS vendedor,
     LTRIM(RTRIM(vp.modelo)) AS version,
     LTRIM(RTRIM(ISNULL(famiauto.fam_nombre, ''))) AS modelo,
     vp.precio,
@@ -81,6 +82,8 @@ LEFT JOIN cliente cli ON
     cli.cli_codigo = ope.ope_cliente
 LEFT JOIN sucursal ON
     sucursal.suc_codigo = vp.sucursal_id
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = vp.vendedor_id
 LEFT JOIN auto ON
     auto.au_codigo = ope.ope_auto
     AND auto.au_marca = ope.ope_marca

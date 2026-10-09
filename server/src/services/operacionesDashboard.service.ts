@@ -78,6 +78,11 @@ type AnalisisOperacionesPreventaMovilResumenItem = {
   total: number;
 };
 
+type AnalisisOperacionesPreventaMovilDescuentoItem = {
+  nombre: string;
+  promedio: number;
+};
+
 type AnalisisOperacionesPreventaMovilResumenResponse = {
   filters: {
     anio: number;
@@ -88,6 +93,12 @@ type AnalisisOperacionesPreventaMovilResumenResponse = {
     sucursales: AnalisisOperacionesPreventaMovilResumenItem[];
     modelos: AnalisisOperacionesPreventaMovilResumenItem[];
     vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
+    usadosTomados: number;
+    descuentosPromedio: {
+      porModelo: AnalisisOperacionesPreventaMovilDescuentoItem[];
+      porSucursal: AnalisisOperacionesPreventaMovilDescuentoItem[];
+      porVendedor: AnalisisOperacionesPreventaMovilDescuentoItem[];
+    };
   };
 };
 
@@ -230,6 +241,7 @@ type AnalisisOperacionPreventaRow = {
   fecha_factura: string | Date | null;
   cliente: string | null;
   sucursal: string | null;
+  vendedor: string | null;
   version: string | null;
   modelo: string | null;
   precio: number | string | null;
@@ -252,6 +264,7 @@ type AnalisisOperacionPreventaItem = {
   fechaFactura: string | null;
   cliente: string;
   sucursal: string;
+  vendedor: string;
   version: string;
   modelo: string;
   precio: number | null;
@@ -581,6 +594,7 @@ export class OperacionesDashboardService {
       fechaFactura: serializeNullableDate(row.fecha_factura),
       cliente: normalizeNullableString(row.cliente) ?? "-",
       sucursal: normalizeNullableString(row.sucursal) ?? "SIN SUCURSAL",
+      vendedor: normalizeNullableString(row.vendedor) ?? "SIN VENDEDOR",
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
       precio: normalizeNullableNumber(row.precio),
@@ -605,22 +619,26 @@ export class OperacionesDashboardService {
   static async getDashboardMovilResumen(
     filters: { anio: number; mes: number },
   ): Promise<AnalisisOperacionesPreventaMovilResumenResponse> {
-    const rows = await sequelizeNIC.query<OperacionDashboardRow>(
-      operacionesDashboardQuery({
-        hasAnios: true,
-        hasMeses: true,
-        hasSucursales: false,
-        hasModelos: false,
-        hasDias: false,
-      }),
-      {
-        type: QueryTypes.SELECT,
-        replacements: {
-          anios: [filters.anio],
-          meses: [filters.mes],
+    const [rows, preventa, financiacion] = await Promise.all([
+      sequelizeNIC.query<OperacionDashboardRow>(
+        operacionesDashboardQuery({
+          hasAnios: true,
+          hasMeses: true,
+          hasSucursales: false,
+          hasModelos: false,
+          hasDias: false,
+        }),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anios: [filters.anio],
+            meses: [filters.mes],
+          },
         },
-      },
-    );
+      ),
+      this.getAnalisisPreventa({ ...filters, tipo: "Cero" }),
+      this.getAnalisisPreventaResumenFinanciacion(filters.anio, filters.mes),
+    ]);
 
     const summary = {
       totalOperaciones: rows.length,
@@ -645,6 +663,23 @@ export class OperacionesDashboardService {
     const sortItems = (items: AnalisisOperacionesPreventaMovilResumenItem[]) =>
       items.sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
 
+    const buildDescuentosPromedio = (key: "modelo" | "sucursal" | "vendedor") => {
+      const totals = new Map<string, { suma: number; cantidad: number }>();
+
+      preventa.data.forEach((row) => {
+        if (row.precio === null || row.precio <= 0 || row.bonificacion === null || row.bonificacion <= 0) return;
+        const nombre = row[key].trim() || `SIN ${key.toUpperCase()}`;
+        const descuento = (row.bonificacion * 100) / row.precio;
+        const current = totals.get(nombre) ?? { suma: 0, cantidad: 0 };
+        totals.set(nombre, { suma: current.suma + descuento, cantidad: current.cantidad + 1 });
+      });
+
+      return Array.from(totals, ([nombre, value]) => ({
+        nombre,
+        promedio: value.suma / value.cantidad,
+      })).sort((a, b) => b.promedio - a.promedio || a.nombre.localeCompare(b.nombre));
+    };
+
     return {
       filters,
       data: {
@@ -652,6 +687,12 @@ export class OperacionesDashboardService {
         sucursales: sortItems(summary.sucursales),
         modelos: sortItems(summary.modelos),
         vendedores: sortItems(summary.vendedores),
+        usadosTomados: financiacion.data.cantidadOperacionesUsado,
+        descuentosPromedio: {
+          porModelo: buildDescuentosPromedio("modelo"),
+          porSucursal: buildDescuentosPromedio("sucursal"),
+          porVendedor: buildDescuentosPromedio("vendedor"),
+        },
       },
     };
   }
@@ -789,6 +830,7 @@ export class OperacionesDashboardService {
       fechaFactura: null,
       cliente: normalizeNullableString(row.cliente) ?? "-",
       sucursal: "",
+      vendedor: "",
       version: normalizeNullableString(row.version) ?? "",
       modelo: normalizeNullableString(row.modelo) ?? "",
       precio: normalizeNullableNumber(row.precio),
