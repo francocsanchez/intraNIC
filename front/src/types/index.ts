@@ -38,8 +38,11 @@ export const stockDisponibleConvencionalSchema = z.object({
 export const stockValorizacionConvencionalItemSchema = z.object({
   modelo: z.string(),
   stockDisponible: z.number(),
+  valorizacionDisponible: z.number(),
   stockReservado: z.number(),
+  valorizacionReservado: z.number(),
   stockGuardado: z.number(),
+  valorizacionGuardado: z.number(),
   total: z.number(),
   valorizacion: z.number(),
 });
@@ -47,8 +50,11 @@ export const stockValorizacionConvencionalItemSchema = z.object({
 export const stockValorizacionConvencionalResumenSchema = z.object({
   modelos: z.number(),
   stockDisponible: z.number(),
+  valorizacionDisponible: z.number(),
   stockReservado: z.number(),
+  valorizacionReservado: z.number(),
   stockGuardado: z.number(),
+  valorizacionGuardado: z.number(),
   total: z.number(),
   valorizacionTotal: z.number(),
   versionesSinPrecio: z.number(),

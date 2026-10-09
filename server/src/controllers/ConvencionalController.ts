@@ -60,8 +60,11 @@ const isExcelCompatibleFile = (file: Express.Multer.File) =>
 type ValorizacionRow = {
   modelo: string;
   stockDisponible: number;
+  valorizacionDisponible: number;
   stockReservado: number;
+  valorizacionReservado: number;
   stockGuardado: number;
+  valorizacionGuardado: number;
   total: number;
   valorizacion: number;
 };
@@ -71,8 +74,11 @@ type ValorizacionVersionRow = {
   version: string;
   versionKey: string;
   stockDisponible: number;
+  valorizacionDisponible: number;
   stockReservado: number;
+  valorizacionReservado: number;
   stockGuardado: number;
+  valorizacionGuardado: number;
   total: number;
   valor: number | null;
   valorizacion: number;
@@ -161,8 +167,11 @@ const buildValorizacionVersionRows = async (
       version,
       versionKey,
       stockDisponible: 0,
+      valorizacionDisponible: 0,
       stockReservado: 0,
+      valorizacionReservado: 0,
       stockGuardado: 0,
+      valorizacionGuardado: 0,
       total: 0,
       valor: typeof price?.valor === "number" ? price.valor : null,
       valorizacion: 0,
@@ -190,11 +199,15 @@ const buildValorizacionVersionRows = async (
   return Array.from(grouped.values())
     .map((item) => {
       const total = item.stockDisponible + item.stockReservado + item.stockGuardado;
+      const valor = item.valor ?? 0;
 
       return {
         ...item,
         total,
-        valorizacion: total * (item.valor ?? 0),
+        valorizacionDisponible: item.stockDisponible * valor,
+        valorizacionReservado: item.stockReservado * valor,
+        valorizacionGuardado: item.stockGuardado * valor,
+        valorizacion: total * valor,
       };
     })
     .sort((a, b) => {
@@ -214,15 +227,21 @@ const buildValorizacionRows = (versionRows: ValorizacionVersionRow[]): Valorizac
     const current = grouped.get(row.modelo) ?? {
       modelo: row.modelo,
       stockDisponible: 0,
+      valorizacionDisponible: 0,
       stockReservado: 0,
+      valorizacionReservado: 0,
       stockGuardado: 0,
+      valorizacionGuardado: 0,
       total: 0,
       valorizacion: 0,
     };
 
     current.stockDisponible += row.stockDisponible;
+    current.valorizacionDisponible += row.valorizacionDisponible;
     current.stockReservado += row.stockReservado;
+    current.valorizacionReservado += row.valorizacionReservado;
     current.stockGuardado += row.stockGuardado;
+    current.valorizacionGuardado += row.valorizacionGuardado;
     current.total += row.total;
     current.valorizacion += row.valorizacion;
 
@@ -235,8 +254,11 @@ const buildValorizacionRows = (versionRows: ValorizacionVersionRow[]): Valorizac
 const buildValorizacionResumen = (rows: ValorizacionRow[], versionRows: ValorizacionVersionRow[]) => ({
   modelos: rows.length,
   stockDisponible: rows.reduce((acc, row) => acc + row.stockDisponible, 0),
+  valorizacionDisponible: rows.reduce((acc, row) => acc + row.valorizacionDisponible, 0),
   stockReservado: rows.reduce((acc, row) => acc + row.stockReservado, 0),
+  valorizacionReservado: rows.reduce((acc, row) => acc + row.valorizacionReservado, 0),
   stockGuardado: rows.reduce((acc, row) => acc + row.stockGuardado, 0),
+  valorizacionGuardado: rows.reduce((acc, row) => acc + row.valorizacionGuardado, 0),
   total: rows.reduce((acc, row) => acc + row.total, 0),
   valorizacionTotal: rows.reduce((acc, row) => acc + row.valorizacion, 0),
   versionesSinPrecio: versionRows.filter((row) => row.valor === null).length,

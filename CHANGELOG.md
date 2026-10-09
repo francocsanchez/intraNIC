@@ -2,6 +2,7 @@
 
 ## 2026-10-09
 
+- **Valorización de stock:** el resumen ahora detalla el importe valorizado de las unidades disponibles, reservadas, guardadas y del total, además de sus cantidades.
 - **Saldo de operación:** la grilla incorpora el indicador `Fact.` para identificar con un icono las operaciones facturadas según la fecha SIAC sincronizada; además, se abreviaron los encabezados de días para ganar densidad.
 
 ## 2026-10-08

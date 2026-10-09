@@ -65,8 +65,11 @@ export default function StockValorizacionConvencional() {
   const resumen = data?.resumen ?? {
     modelos: 0,
     stockDisponible: 0,
+    valorizacionDisponible: 0,
     stockReservado: 0,
+    valorizacionReservado: 0,
     stockGuardado: 0,
+    valorizacionGuardado: 0,
     total: 0,
     valorizacionTotal: 0,
     versionesSinPrecio: 0,
@@ -100,18 +103,18 @@ export default function StockValorizacionConvencional() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 border-t border-border sm:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 border-t border-border sm:grid-cols-3 xl:grid-cols-5">
           {[
             ["Modelos", resumen.modelos],
-            ["Disponible", resumen.stockDisponible],
-            ["Reservado", resumen.stockReservado],
-            ["Guardado", resumen.stockGuardado],
-            ["Total", resumen.total],
-            ["Valorizacion", formatMoney(resumen.valorizacionTotal)],
-          ].map(([label, value]) => (
+            ["Disponible", resumen.stockDisponible, resumen.valorizacionDisponible],
+            ["Reservado", resumen.stockReservado, resumen.valorizacionReservado],
+            ["Guardado", resumen.stockGuardado, resumen.valorizacionGuardado],
+            ["Total", resumen.total, resumen.valorizacionTotal],
+          ].map(([label, value, valorizacion]) => (
             <div key={label} className="border-b border-r border-border px-3 py-2 last:border-r-0 xl:border-b-0">
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
               <p className="mt-1 text-lg font-semibold tracking-tight text-card-foreground">{value}</p>
+              {typeof valorizacion === "number" ? <p className="text-xs font-medium text-muted-foreground">{formatMoney(valorizacion)}</p> : null}
             </div>
           ))}
         </div>
