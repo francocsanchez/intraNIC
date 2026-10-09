@@ -2,6 +2,7 @@
 
 ## 2026-10-09
 
+- **Rend. Gastos:** se corrigió la validación de importes positivos con dos decimales para que no rechace comprobantes válidos por la precisión interna de números decimales; los comprobantes pueden editarse antes de guardar la rendición.
 - **Valorización de stock:** el resumen ahora detalla el importe valorizado de las unidades disponibles, reservadas, guardadas y del total, además de sus cantidades.
 - **Saldo de operación:** la grilla incorpora el indicador `Fact.` para identificar con un icono las operaciones facturadas según la fecha SIAC sincronizada; además, se abreviaron los encabezados de días para ganar densidad.
 

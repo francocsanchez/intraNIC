@@ -10,10 +10,13 @@ const CUIT_PATTERN = /^\d{11}$/;
 export const toCentavos = (value: unknown, required: boolean) => {
   if ((value === undefined || value === null || value === "") && !required) return 0;
   const numberValue = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(numberValue) || numberValue < 0 || Math.round(numberValue * 100) !== numberValue * 100) {
+  const centavos = Math.round(numberValue * 100);
+  // El JSON llega como punto flotante: 76017,07 puede representarse como
+  // 76017.069999... y no debe rechazarse por ese redondeo binario.
+  const exceedsTwoDecimals = Math.abs(numberValue - centavos / 100) > 1e-8;
+  if (!Number.isFinite(numberValue) || numberValue < 0 || exceedsTwoDecimals) {
     throw new Error("Los montos deben ser positivos y tener hasta dos decimales");
   }
-  const centavos = Math.round(numberValue * 100);
   if (required && centavos <= 0) throw new Error("El monto de cada gasto debe ser mayor a cero");
   return centavos;
 };
