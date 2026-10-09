@@ -1,5 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Loading from "@/components/Loading";
+import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { EditActionButton } from "@/components/ui/action-button";
 import {
   getTableroCobranzasDetalleDiario,
@@ -8,6 +10,7 @@ import {
 } from "@/services/operacionesService";
 import type { TableroCobranzasDia } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
+import type { EChartsCoreOption } from "echarts/core";
 import { CalendarDays, ListChecks, WalletCards, X } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 
@@ -49,6 +52,14 @@ const receiptPaymentLabels = [
   ["certificados", "Certificados"],
 ] as const;
 
+const WEEK_RANGES = [
+  { desde: 1, hasta: 7, etiqueta: "1–7" },
+  { desde: 8, hasta: 14, etiqueta: "8–14" },
+  { desde: 15, hasta: 21, etiqueta: "15–21" },
+  { desde: 22, hasta: 28, etiqueta: "22–28" },
+  { desde: 29, hasta: 31, etiqueta: "29–fin" },
+] as const;
+
 export default function TableroCobranzasView() {
   const today = new Date();
   const [anio, setAnio] = useState(today.getFullYear());
@@ -79,6 +90,41 @@ export default function TableroCobranzasView() {
       return acc;
     }, {});
   }, [query.data]);
+  const weeklyCollections = useMemo(() => {
+    const days = query.data?.data.dias ?? [];
+    return WEEK_RANGES.map((week) => ({
+      ...week,
+      total: days
+        .filter((day) => day.dia >= week.desde && day.dia <= week.hasta)
+        .reduce((sum, day) => sum + day.total, 0),
+    }));
+  }, [query.data]);
+  const weeklyChartOption = useMemo<EChartsCoreOption>(() => ({
+    color: getPresetChartColors(),
+    grid: { top: 18, right: 18, bottom: 34, left: 78 },
+    tooltip: {
+      trigger: "axis",
+      valueFormatter: (value: number | string) => money.format(Number(value)),
+    },
+    xAxis: {
+      type: "category",
+      data: weeklyCollections.map((week) => week.etiqueta),
+      axisTick: { alignWithLabel: true },
+      axisLabel: { fontSize: 11 },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { fontSize: 10, formatter: (value: number) => money.format(value) },
+      splitLine: { lineStyle: { color: "var(--border)" } },
+    },
+    series: [{
+      type: "bar",
+      name: "Cobrado",
+      data: weeklyCollections.map((week) => week.total),
+      barMaxWidth: 54,
+      itemStyle: { borderRadius: [3, 3, 0, 0] },
+    }],
+  }), [weeklyCollections]);
 
   if (query.isLoading) return <Loading />;
   if (query.isError) return <div className="bg-muted p-4 font-preset text-destructive">{query.error.message}</div>;
@@ -99,6 +145,14 @@ export default function TableroCobranzasView() {
           </select>
           <input aria-label="Año" type="number" min="2000" max="2100" value={anio} onChange={(event) => { setAnio(Number(event.target.value) || today.getFullYear()); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 w-24 rounded-md border border-border bg-background px-2 text-xs" />
         </div>
+      </section>
+
+      <section className="overflow-hidden rounded-md border border-border bg-card">
+        <div className="border-b border-border px-3 py-2">
+          <h2 className="text-sm font-semibold">Cobranzas por semana</h2>
+          <p className="text-[11px] text-muted-foreground">Total cobrado por semana de {MONTHS[mes - 1]} {anio}.</p>
+        </div>
+        <div className="h-56 p-2"><EChart option={weeklyChartOption} /></div>
       </section>
 
       <section className="overflow-x-auto rounded-md border border-border bg-card">
