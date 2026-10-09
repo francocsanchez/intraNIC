@@ -2581,7 +2581,7 @@ export const saldoOperacionSnapshotItemSchema = z.object({
   nombreUsuarioOperacionOriginal: z.string().optional().default(""), usuarioOperacionCorregido: z.boolean().optional().default(false), numeroFabrica: z.string(),
   total: z.number().nullable(), bonificacion: z.number().nullable(), gestoria: z.number().nullable(), senas: z.number().nullable(),
   usado: z.number().nullable(), creditoBanco: z.number().nullable(), version: z.string(), modeloGeneral: z.string(),
-  fechaAsignacion: z.string().nullable(), diasAsignada: z.number().nullable(), estado: z.string(), ubicacion: z.string(),
+  fechaAsignacion: z.string().nullable(), fechaFactura: z.string().nullable().optional().default(null), diasAsignada: z.number().nullable(), estado: z.string(), ubicacion: z.string(),
   fechaCancelacion: z.string().nullable(), diasHastaCancelacion: z.number().nullable(), entregada: z.boolean().optional().default(false), saldo: z.number(), sincronizadoEn: z.string().nullable(),
 });
 export const saldoOperacionSnapshotListResponseSchema = z.object({

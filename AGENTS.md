@@ -25,6 +25,7 @@ La columna Saldo de la tabla de `Saldo de operacion` usa verde para importes men
 La columna Estado no se muestra en la tabla de `Saldo de operacion`; la ubicación sigue disponible como filtro.
 La tabla de `Saldo de operacion` permite buscar una operación por su número exacto; el valor permanece como borrador y se aplica únicamente al confirmar con Buscar o Enter.
 La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones sin `ope_fecfac`; la fecha de factura se sincroniza desde SIAC al snapshot y determina facturación, independientemente del estado físico.
+La tabla de `Saldo de operacion` muestra una columna `Fact.` con icono cuando el snapshot tiene fecha de factura SIAC.
 El análisis de no canceladas usa exclusivamente snapshots Mongo sin fecha de cancelación, incluidas las entregadas aún no canceladas, y promedia `diasAsignada`; comparte el árbol, filtros anual/mensual y resumen por sucursal del análisis de cancelación. Los accesos del tablero se muestran en verde para cancelación y rojo para no canceladas.
 Los análisis de canceladas y no canceladas preseleccionan el año y mes calendario actuales; al cambiar período, el árbol ECharts se remonta y no se intenta dibujar si faltan ramas, evitando pantallas vacías por estructuras incompletas.
 Los árboles de análisis deben limpiar explícitamente la serie ECharts antes de aplicar una nueva estructura y remontarse al renovarse la respuesta; TreeChart conserva aristas internas que de otro modo pueden provocar errores al cambiar el mes.

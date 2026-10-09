@@ -194,6 +194,7 @@ const serialize = (item: any) => ({
   version: item.version ?? "",
   modeloGeneral: item.modeloGeneral ?? "SIN MODELO",
   fechaAsignacion: item.fechaAsignacion ?? null,
+  fechaFactura: item.fechaFactura ?? null,
   diasAsignada: item.diasAsignada ?? null,
   estado: item.estado ?? "Sin estado",
   ubicacion: item.ubicacion ?? "STOCK CONCESIONARIO",
