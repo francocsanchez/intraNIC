@@ -1,9 +1,15 @@
+import { Dialog, Transition } from "@headlessui/react";
 import Loading from "@/components/Loading";
-import { getTableroCobranzasDetalleDiario, getTableroCobranzasDiario } from "@/services/operacionesService";
+import { EditActionButton } from "@/components/ui/action-button";
+import {
+  getTableroCobranzasDetalleDiario,
+  getTableroCobranzasDiario,
+  getTableroCobranzasRecibosOperacion,
+} from "@/services/operacionesService";
 import type { TableroCobranzasDia } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, ListChecks, WalletCards } from "lucide-react";
-import { useMemo, useState } from "react";
+import { CalendarDays, ListChecks, WalletCards, X } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
 
 const MONTHS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -17,7 +23,6 @@ const COLUMNS: Array<{ key: keyof Omit<TableroCobranzasDia, "dia">; label: strin
   { key: "chequesTerceros", label: "Cheques terceros" },
   { key: "chequesPropios", label: "Cheques propios" },
   { key: "retenciones", label: "Retenciones" },
-  { key: "divisas", label: "Divisas" },
   { key: "documentos", label: "Documentos" },
   { key: "prenda", label: "Prenda" },
   { key: "compensaciones", label: "Compensaciones" },
@@ -31,11 +36,25 @@ const money = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 });
 
+const receiptPaymentLabels = [
+  ["efectivo", "Efectivo"],
+  ["acreditacionBancaria", "Acred. bancaria"],
+  ["tarjetas", "Tarjetas"],
+  ["chequesTerceros", "Cheques terceros"],
+  ["chequesPropios", "Cheques propios"],
+  ["retenciones", "Retenciones"],
+  ["documentos", "Documentos"],
+  ["prenda", "Prenda"],
+  ["compensaciones", "Compensaciones"],
+  ["certificados", "Certificados"],
+] as const;
+
 export default function TableroCobranzasView() {
   const today = new Date();
   const [anio, setAnio] = useState(today.getFullYear());
   const [mes, setMes] = useState(today.getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [selectedOperation, setSelectedOperation] = useState<number | null>(null);
   const query = useQuery({
     queryKey: ["tablero-cobranzas-diario", anio, mes],
     queryFn: ({ signal }) => getTableroCobranzasDiario({ anio, mes }, signal),
@@ -45,6 +64,12 @@ export default function TableroCobranzasView() {
     queryKey: ["tablero-cobranzas-detalle-diario", anio, mes, selectedDay],
     queryFn: ({ signal }) => getTableroCobranzasDetalleDiario({ anio, mes, dia: selectedDay! }, signal),
     enabled: selectedDay !== null,
+    refetchOnWindowFocus: false,
+  });
+  const receiptsQuery = useQuery({
+    queryKey: ["tablero-cobranzas-recibos-operacion", selectedOperation],
+    queryFn: ({ signal }) => getTableroCobranzasRecibosOperacion(selectedOperation!, signal),
+    enabled: selectedOperation !== null,
     refetchOnWindowFocus: false,
   });
   const totals = useMemo(() => {
@@ -69,35 +94,35 @@ export default function TableroCobranzasView() {
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <CalendarDays className="size-4 text-muted-foreground" />
-          <select aria-label="Mes" value={mes} onChange={(event) => { setMes(Number(event.target.value)); setSelectedDay(null); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs">
+          <select aria-label="Mes" value={mes} onChange={(event) => { setMes(Number(event.target.value)); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs">
             {MONTHS.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}
           </select>
-          <input aria-label="Año" type="number" min="2000" max="2100" value={anio} onChange={(event) => { setAnio(Number(event.target.value) || today.getFullYear()); setSelectedDay(null); }} className="h-9 w-24 rounded-md border border-border bg-background px-2 text-xs" />
+          <input aria-label="Año" type="number" min="2000" max="2100" value={anio} onChange={(event) => { setAnio(Number(event.target.value) || today.getFullYear()); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 w-24 rounded-md border border-border bg-background px-2 text-xs" />
         </div>
       </section>
 
       <section className="overflow-x-auto rounded-md border border-border bg-card">
-        <table className="w-full min-w-[1900px] text-xs">
+        <table className="w-full min-w-[1540px] text-[11px]">
           <thead className="border-b border-border bg-muted text-right">
             <tr>
-              <th className="px-2 py-2 text-left font-medium">Día</th>
-              {COLUMNS.map((column) => <th key={column.key} className="px-2 py-2 font-medium whitespace-nowrap">{column.label}</th>)}
+              <th className="px-1.5 py-1.5 text-left font-medium">Día</th>
+              {COLUMNS.map((column) => <th key={column.key} className="px-1.5 py-1.5 font-medium whitespace-nowrap">{column.label}</th>)}
             </tr>
           </thead>
           <tbody>
             {days.map((day) => (
               <tr key={day.dia} className={`border-b border-border last:border-0 hover:bg-muted/60 ${selectedDay === day.dia ? "bg-muted" : ""}`}>
-                <td className="px-2 py-1.5 font-medium">
+                <td className="px-1.5 py-1 font-medium">
                   <button type="button" onClick={() => setSelectedDay(day.dia)} className="w-full text-left underline-offset-2 hover:underline" aria-label={`Ver operaciones del día ${day.dia}`}>{day.dia}</button>
                 </td>
-                {COLUMNS.map((column) => <td key={column.key} className="px-2 py-1.5 text-right tabular-nums">{money.format(day[column.key])}</td>)}
+                {COLUMNS.map((column) => <td key={column.key} className="px-1.5 py-1 text-right tabular-nums">{money.format(day[column.key])}</td>)}
               </tr>
             ))}
           </tbody>
           <tfoot className="border-t border-border bg-muted text-right font-semibold">
             <tr>
-              <td className="px-2 py-2 text-left">Total</td>
-              {COLUMNS.map((column) => <td key={column.key} className="px-2 py-2 tabular-nums">{money.format(totals[column.key] ?? 0)}</td>)}
+              <td className="px-1.5 py-1.5 text-left">Total</td>
+              {COLUMNS.map((column) => <td key={column.key} className="px-1.5 py-1.5 tabular-nums">{money.format(totals[column.key] ?? 0)}</td>)}
             </tr>
           </tfoot>
         </table>
@@ -127,6 +152,7 @@ export default function TableroCobranzasView() {
                       <th className="px-2 py-2 font-medium">Modelo</th>
                       <th className="px-2 py-2 font-medium">Versión</th>
                       <th className="px-2 py-2 text-right font-medium">Monto abonado</th>
+                      <th className="px-2 py-2 text-right font-medium">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,6 +163,9 @@ export default function TableroCobranzasView() {
                         <td className="px-2 py-1.5">{operacion.modelo}</td>
                         <td className="px-2 py-1.5">{operacion.version}</td>
                         <td className="px-2 py-1.5 text-right tabular-nums">{money.format(operacion.monto)}</td>
+                        <td className="px-2 py-1.5 text-right">
+                          <EditActionButton className="h-7 px-2 text-xs" onClick={() => setSelectedOperation(operacion.codigoOperacion)}>Ver</EditActionButton>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -146,6 +175,52 @@ export default function TableroCobranzasView() {
           </div>
         )}
       </section>
+
+      <Transition appear show={selectedOperation !== null} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setSelectedOperation(null)}>
+          <Transition.Child as={Fragment} enter="ease-out duration-150" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-foreground/20" />
+          </Transition.Child>
+          <div className="fixed inset-0 overflow-y-auto p-4">
+            <div className="flex min-h-full items-center justify-center">
+              <Transition.Child as={Fragment} enter="ease-out duration-150" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-100" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                <Dialog.Panel className="w-full max-w-4xl overflow-hidden rounded-md border border-border bg-card shadow-xl">
+                  <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                    <div>
+                      <Dialog.Title className="text-sm font-semibold">Recibos de anticipo — OP {selectedOperation}</Dialog.Title>
+                      <p className="text-xs text-muted-foreground">Recibos vinculados a la operación en SIAC.</p>
+                    </div>
+                    <EditActionButton className="size-8 p-0" aria-label="Cerrar" onClick={() => setSelectedOperation(null)}><X className="size-4" /></EditActionButton>
+                  </div>
+                  <div className="max-h-[70vh] overflow-auto p-4">
+                    {receiptsQuery.isLoading ? <Loading /> : receiptsQuery.isError ? (
+                      <p className="text-xs text-destructive">{receiptsQuery.error.message}</p>
+                    ) : (receiptsQuery.data?.data.recibos.length ?? 0) === 0 ? (
+                      <p className="text-xs text-muted-foreground">No hay recibos de anticipo vinculados a esta operación.</p>
+                    ) : (
+                      <table className="w-full min-w-[720px] text-xs">
+                        <thead className="border-b border-border bg-muted text-left">
+                          <tr><th className="px-2 py-2 font-medium">Fecha</th><th className="px-2 py-2 font-medium">Comprobante</th><th className="px-2 py-2 font-medium">Medios de pago</th><th className="px-2 py-2 text-right font-medium">Total</th></tr>
+                        </thead>
+                        <tbody>
+                          {receiptsQuery.data?.data.recibos.map((recibo) => (
+                            <tr key={`${recibo.fecha}-${recibo.comprobante}`} className="border-b border-border last:border-0">
+                              <td className="px-2 py-1.5 tabular-nums">{recibo.fecha.split("-").reverse().join("/")}</td>
+                              <td className="px-2 py-1.5 tabular-nums">{recibo.comprobante}</td>
+                              <td className="px-2 py-1.5">{receiptPaymentLabels.filter(([key]) => recibo[key] > 0).map(([key, label]) => `${label}: ${money.format(recibo[key])}`).join(" · ") || "-"}</td>
+                              <td className="px-2 py-1.5 text-right tabular-nums">{money.format(recibo.total)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

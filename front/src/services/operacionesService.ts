@@ -31,8 +31,10 @@ import {
   type SaldoOperacionUsuario,
   tableroCobranzasDiarioResponseSchema,
   tableroCobranzasDetalleDiarioResponseSchema,
+  tableroCobranzasRecibosOperacionResponseSchema,
   type TableroCobranzasDetalleDiarioResponse,
   type TableroCobranzasDiarioResponse,
+  type TableroCobranzasRecibosOperacionResponse,
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
@@ -82,6 +84,20 @@ export async function getTableroCobranzasDetalleDiario(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener el detalle diario de cobranzas"));
+  }
+}
+
+export async function getTableroCobranzasRecibosOperacion(
+  operacion: number,
+  signal?: AbortSignal,
+): Promise<TableroCobranzasRecibosOperacionResponse> {
+  try {
+    const { data } = await api.get(`/cobranzas/operaciones/${operacion}/recibos`, { signal });
+    const parsed = tableroCobranzasRecibosOperacionResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("Los recibos de la operación no tienen el formato esperado");
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener los recibos de la operación"));
   }
 }
 

@@ -2654,9 +2654,31 @@ export const tableroCobranzasDetalleDiarioResponseSchema = z.object({
   }),
 });
 
+export const tableroCobranzasRecibosOperacionResponseSchema = z.object({
+  data: z.object({
+    operacion: z.number(),
+    recibos: z.array(z.object({
+      fecha: z.string(),
+      comprobante: z.number(),
+      efectivo: z.number(),
+      acreditacionBancaria: z.number(),
+      tarjetas: z.number(),
+      chequesTerceros: z.number(),
+      chequesPropios: z.number(),
+      retenciones: z.number(),
+      documentos: z.number(),
+      prenda: z.number(),
+      compensaciones: z.number(),
+      certificados: z.number(),
+      total: z.number(),
+    })),
+  }),
+});
+
 export type TableroCobranzasDiarioResponse = z.infer<typeof tableroCobranzasDiarioResponseSchema>;
 export type TableroCobranzasDia = z.infer<typeof tableroCobranzasDiaSchema>;
 export type TableroCobranzasDetalleDiarioResponse = z.infer<typeof tableroCobranzasDetalleDiarioResponseSchema>;
+export type TableroCobranzasRecibosOperacionResponse = z.infer<typeof tableroCobranzasRecibosOperacionResponseSchema>;
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;

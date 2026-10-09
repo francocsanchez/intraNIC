@@ -49,6 +49,38 @@ export type CobranzaDetalle = {
   monto: number;
 };
 
+type CobranzaReciboRow = {
+  fecha: string;
+  comprobante: number | string;
+  efectivo: number | null;
+  acreditacionBancaria: number | null;
+  tarjetas: number | null;
+  chequesTerceros: number | null;
+  chequesPropios: number | null;
+  retenciones: number | null;
+  documentos: number | null;
+  prenda: number | null;
+  compensaciones: number | null;
+  certificados: number | null;
+  total: number | null;
+};
+
+export type CobranzaRecibo = {
+  fecha: string;
+  comprobante: number;
+  efectivo: number;
+  acreditacionBancaria: number;
+  tarjetas: number;
+  chequesTerceros: number;
+  chequesPropios: number;
+  retenciones: number;
+  documentos: number;
+  prenda: number;
+  compensaciones: number;
+  certificados: number;
+  total: number;
+};
+
 const getMonthBounds = (anio: number, mes: number) => ({
   inicio: new Date(Date.UTC(anio, mes - 1, 1)).toISOString().slice(0, 10),
   fin: new Date(Date.UTC(anio, mes, 1)).toISOString().slice(0, 10),
@@ -181,6 +213,43 @@ GROUP BY ope_codigo, cliente, modelo, version
 ORDER BY ope_codigo;
 `;
 
+const cobranzaRecibosOperacionQuery = `
+WITH operacion_elegible AS (
+  SELECT o.ope_codigo, o.ope_tipo
+  FROM dbo.opera o
+  INNER JOIN dbo.stoauto s
+    ON s.sa_codigo = o.ope_stoauto
+    AND s.sa_tipo = o.ope_tipo
+  WHERE o.ope_codigo = :operacion
+    AND o.ope_tipo = 5
+    AND o.ope_fecbaj IS NULL
+    AND o.ope_fecasig IS NOT NULL
+    AND s.sa_nrofab LIKE 'NIC%'
+)
+SELECT DISTINCT
+  CONVERT(char(10), h.mc_fecha, 23) AS fecha,
+  h.mc_nromov AS comprobante,
+  h.mc_impefe AS efectivo,
+  h.mc_impban AS acreditacionBancaria,
+  h.mc_imptar AS tarjetas,
+  h.mc_impchen AS chequesTerceros,
+  h.mc_impchep AS chequesPropios,
+  h.mc_impret AS retenciones,
+  h.mc_impdoc AS documentos,
+  h.mc_imppda AS prenda,
+  h.mc_compensa AS compensaciones,
+  h.mc_impcer AS certificados,
+  ${totalRecibo} AS total
+FROM operacion_elegible o
+INNER JOIN dbo.salglo g
+  ON g.sgl_opera = o.ope_codigo
+  AND g.sgl_tipo = o.ope_tipo
+  AND g.sgl_tipmov = 105
+  AND g.sgl_haber > 0
+INNER JOIN dbo.movcajh h ON h.mc_nroope = g.sgl_nroope
+ORDER BY fecha, comprobante;
+`;
+
 export class TableroCobranzasService {
   static async getDiario(anio: number, mes: number) {
     const { inicio, fin } = getMonthBounds(anio, mes);
@@ -228,5 +297,30 @@ export class TableroCobranzasService {
     }));
 
     return { anio, mes, dia, operaciones };
+  }
+
+  static async getRecibosOperacion(operacion: number) {
+    const rows = await sequelizeNIC.query<CobranzaReciboRow>(cobranzaRecibosOperacionQuery, {
+      type: QueryTypes.SELECT,
+      replacements: { operacion },
+    });
+
+    const recibos: CobranzaRecibo[] = rows.map((row) => ({
+      fecha: row.fecha,
+      comprobante: Number(row.comprobante),
+      efectivo: toNumber(row.efectivo),
+      acreditacionBancaria: toNumber(row.acreditacionBancaria),
+      tarjetas: toNumber(row.tarjetas),
+      chequesTerceros: toNumber(row.chequesTerceros),
+      chequesPropios: toNumber(row.chequesPropios),
+      retenciones: toNumber(row.retenciones),
+      documentos: toNumber(row.documentos),
+      prenda: toNumber(row.prenda),
+      compensaciones: toNumber(row.compensaciones),
+      certificados: toNumber(row.certificados),
+      total: toNumber(row.total),
+    }));
+
+    return { operacion, recibos };
   }
 }

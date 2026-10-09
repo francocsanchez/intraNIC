@@ -2,6 +2,7 @@
 
 ## 2026-10-08
 
+- **Tablero de cobranzas:** se compactó la matriz diaria, se ocultó Divisas y el detalle por día incorpora un diálogo para consultar los recibos SIAC vinculados de cada operación.
 - **Tablero de cobranzas:** se incorporó `/analisis/tablero-cobranzas` con permiso independiente, filtro mensual predeterminado en el mes actual y matriz diaria de 1 a 31.
 - **Tablero de cobranzas:** la cobranza diaria se alimenta exclusivamente de los recibos SIAC imputados mediante `opera → salglo → movcajh`; conserva operaciones facturadas o entregadas y excluye vínculos inferidos por cliente, descripción o `mc_opera`.
 - **Tablero de cobranzas:** al seleccionar un día, se muestra el detalle de las operaciones involucradas con cliente, modelo, versión y monto abonado en la fecha.

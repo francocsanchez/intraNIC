@@ -44,4 +44,21 @@ export class TableroCobranzasController {
       return res.status(500).json({ message: "No se pudo obtener el detalle diario de cobranzas." });
     }
   };
+
+  static getRecibosOperacion = async (req: Request, res: Response) => {
+    const operacion = parseInteger(req.params.operacion);
+
+    if (!operacion || operacion < 1) {
+      return res.status(400).json({ message: "Ingresar un número de operación válido." });
+    }
+
+    try {
+      const data = await TableroCobranzasService.getRecibosOperacion(operacion);
+      return res.status(200).json({ data });
+    } catch (error) {
+      logError("TableroCobranzasController.getRecibosOperacion");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudieron obtener los recibos de la operación." });
+    }
+  };
 }

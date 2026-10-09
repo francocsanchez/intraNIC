@@ -8,5 +8,6 @@ const router = Router();
 router.use(authenticate);
 router.get("/diario", authorizeModules("tableroCobranzas"), TableroCobranzasController.getDiario);
 router.get("/diario/detalle", authorizeModules("tableroCobranzas"), TableroCobranzasController.getDetalleDiario);
+router.get("/operaciones/:operacion/recibos", authorizeModules("tableroCobranzas"), TableroCobranzasController.getRecibosOperacion);
 
 export default router;
