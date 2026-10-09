@@ -16,7 +16,6 @@ const snapshotSortKeys = new Set([
 const parseFilters = (req: Request) => ({
   section: optionalString(req.query.section),
   entrega: optionalString(req.query.entrega),
-  soloEntregadas: req.query.soloEntregadas === "true",
   ubicacion: optionalString(req.query.ubicacion),
   sucursal: optionalString(req.query.sucursal),
   usuario: optionalString(req.query.usuario),

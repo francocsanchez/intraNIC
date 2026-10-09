@@ -37,6 +37,7 @@ import centralDeudoresRoutes from "./routes/centralDeudoresRoutes";
 import ssiVentasRoutes from "./routes/ssiVentasRoutes";
 import solicitudCambioColorRoutes from "./routes/solicitudCambioColorRoutes";
 import repuestosSiniestrosRoutes from "./routes/repuestosSiniestrosRoutes";
+import cobranzasRoutes from "./routes/cobranzasRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -80,6 +81,7 @@ app.use("/api/dms/plan-ahorro", planAhorroRoutes);
 app.use("/api/entregas", entregasRoutes);
 app.use("/api/jobs-monitor", jobMonitorRoutes);
 app.use("/api/central-deudores", centralDeudoresRoutes);
+app.use("/api/cobranzas", cobranzasRoutes);
 app.use("/api/calidad/ssi-ventas", ssiVentasRoutes);
 
 export default app;

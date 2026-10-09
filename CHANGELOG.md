@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-08
+
+- **Tablero de cobranzas:** se incorporó `/analisis/tablero-cobranzas` con permiso independiente, filtro mensual predeterminado en el mes actual y matriz diaria de 1 a 31.
+- **Tablero de cobranzas:** la cobranza diaria se alimenta exclusivamente de los recibos SIAC imputados mediante `opera → salglo → movcajh`; conserva operaciones facturadas o entregadas y excluye vínculos inferidos por cliente, descripción o `mc_opera`.
+- **Tablero de cobranzas:** al seleccionar un día, se muestra el detalle de las operaciones involucradas con cliente, modelo, versión y monto abonado en la fecha.
+- **Tablero de cobranzas:** se eliminó la sección de pendientes de imputación; la matriz y el detalle usan la misma relación de recibos, por lo que sus totales son consistentes.
+- **Navegación:** la portada autenticada incorpora la sección Herramientas, que agrupa Central de Deudores, Rend. Gastos y Minutas sin modificar sus rutas ni permisos.
+
 ## 2026-10-06
 
 - **Saldo de operación:** las operaciones entregadas guardadas en Mongo permanecen visibles en tablero, filtros, resumen y Excel hasta cargar su fecha de cancelación; al completar ambos estados se ocultan sin consultar historial SQL.

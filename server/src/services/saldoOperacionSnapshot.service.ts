@@ -147,12 +147,11 @@ const visibleSnapshotMatch = () => ({
   ],
 });
 
-const baseFilter = (params: { section?: string | null; entrega?: string | null; soloEntregadas?: boolean; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
-  const filter: Record<string, unknown> = params.soloEntregadas ? { entregada: true } : visibleSnapshotMatch();
-  if (!params.soloEntregadas) {
+const baseFilter = (params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
+  const entrega = normalizeEntrega(params.entrega);
+  const filter: Record<string, unknown> = entrega === "entregadas" ? { entregada: true } : visibleSnapshotMatch();
+  if (entrega !== "entregadas") {
     filter.fechaCancelacion = normalizeSection(params.section) === "canceladas" ? { $ne: null } : null;
-    const entrega = normalizeEntrega(params.entrega);
-    if (entrega === "entregadas") filter.entregada = true;
     if (entrega === "sinEntregar") filter.entregada = { $ne: true };
   }
   const ubicacion = trim(params.ubicacion);
@@ -308,7 +307,7 @@ export class SaldoOperacionSnapshotService {
     return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
   }
 
-  static async list(params: { section?: string | null; entrega?: string | null; soloEntregadas?: boolean; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {
+  static async list(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {
     const filter = baseFilter(params);
     const page = Math.max(1, params.page);
     const limit = Math.min(200, Math.max(1, params.limit));
@@ -337,7 +336,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async summary(params: { soloEntregadas?: boolean; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
     const grouped = new Map<string, number>();
     let creditoTotal = 0;

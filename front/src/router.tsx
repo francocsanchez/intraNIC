@@ -91,9 +91,9 @@ const RendicionGastoCreateView = lazy(() => import("./views/comercial/RendicionG
 const RendicionGastoDetailView = lazy(() => import("./views/comercial/RendicionGastoDetailView"));
 const OperacionesDashboardView = lazy(() => import("./views/operaciones/OperacionesDashboardView"));
 const SaldoOperacionView = lazy(() => import("./views/operaciones/SaldoOperacionView"));
-const SaldoOperacionEntregadasView = lazy(() => import("./views/operaciones/SaldoOperacionEntregadasView"));
 const SaldoOperacionCancelacionesView = lazy(() => import("./views/operaciones/SaldoOperacionCancelacionesView"));
 const SaldoOperacionNoCanceladasView = lazy(() => import("./views/operaciones/SaldoOperacionNoCanceladasView"));
+const TableroCobranzasView = lazy(() => import("./views/operaciones/TableroCobranzasView"));
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
 const AnalisisVendedorView = lazy(() => import("./views/operaciones/AnalisisVendedorView"));
@@ -303,9 +303,12 @@ export default function Router() {
             </Route>
             <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacion"]} />}>
               <Route path={paths.analisis.saldoOperacion} element={<SaldoOperacionView />} />
-              <Route path={paths.analisis.saldoOperacionEntregadas} element={<SaldoOperacionEntregadasView />} />
               <Route path={paths.analisis.saldoOperacionCancelaciones} element={<SaldoOperacionCancelacionesView />} />
               <Route path={paths.analisis.saldoOperacionNoCanceladas} element={<SaldoOperacionNoCanceladasView />} />
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["tableroCobranzas"]} />}>
+              <Route path={paths.analisis.tableroCobranzas} element={<TableroCobranzasView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["centralDeudores"]} />}>

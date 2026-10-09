@@ -24,6 +24,7 @@ export const moduleKeys = [
   "ingresos",
   "operaciones",
   "saldoOperacion",
+  "tableroCobranzas",
   "centralDeudores",
   "analisisOperaciones",
   "analisisVendedor",

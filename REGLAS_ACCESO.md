@@ -161,6 +161,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 
 - `Operaciones` depende de `modules.operaciones = 1`.
 - `Saldo de operacion` depende de `modules.saldoOperacion = 1` y se accede por `/analisis/saldo-operacion`.
+- `Tablero de cobranzas` depende de `modules.tableroCobranzas = 1` y se accede por `/analisis/tablero-cobranzas`.
 - `Ranking` depende de `modules.ranking = 1`.
 - `Promedio` depende de `modules.promedio = 1`.
 - `Patentamientos` depende de `modules.patentamientos = 1`.
@@ -173,6 +174,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - El navbar de `Analisis` debe mostrar solo modulos propios de la seccion:
   - `Operaciones`
   - `Saldo de operacion`
+- `Tablero de cobranzas`
   - `Ranking`
   - `Promedio`
 - `Transferencias` ya no debe aparecer en el navbar superior de `Analisis`.

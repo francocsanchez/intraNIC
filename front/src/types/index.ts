@@ -2614,6 +2614,49 @@ export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacio
 export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacionSnapshotSummaryResponseSchema>;
 export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
 export type SaldoOperacionUsuario = z.infer<typeof saldoOperacionUsuariosResponseSchema>['data'][number];
+
+export const tableroCobranzasDiaSchema = z.object({
+  dia: z.number(),
+  efectivo: z.number(),
+  acreditacionBancaria: z.number(),
+  tarjetas: z.number(),
+  chequesTerceros: z.number(),
+  chequesPropios: z.number(),
+  retenciones: z.number(),
+  divisas: z.number(),
+  documentos: z.number(),
+  prenda: z.number(),
+  compensaciones: z.number(),
+  certificados: z.number(),
+  total: z.number(),
+});
+
+export const tableroCobranzasDiarioResponseSchema = z.object({
+  data: z.object({
+    anio: z.number(),
+    mes: z.number(),
+    dias: z.array(tableroCobranzasDiaSchema).length(31),
+  }),
+});
+
+export const tableroCobranzasDetalleDiarioResponseSchema = z.object({
+  data: z.object({
+    anio: z.number(),
+    mes: z.number(),
+    dia: z.number(),
+    operaciones: z.array(z.object({
+      codigoOperacion: z.number(),
+      cliente: z.string(),
+      modelo: z.string(),
+      version: z.string(),
+      monto: z.number(),
+    })),
+  }),
+});
+
+export type TableroCobranzasDiarioResponse = z.infer<typeof tableroCobranzasDiarioResponseSchema>;
+export type TableroCobranzasDia = z.infer<typeof tableroCobranzasDiaSchema>;
+export type TableroCobranzasDetalleDiarioResponse = z.infer<typeof tableroCobranzasDetalleDiarioResponseSchema>;
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;
