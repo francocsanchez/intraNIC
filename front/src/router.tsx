@@ -93,6 +93,7 @@ const OperacionesDashboardView = lazy(() => import("./views/operaciones/Operacio
 const SaldoOperacionView = lazy(() => import("./views/operaciones/SaldoOperacionView"));
 const SaldoOperacionCancelacionesView = lazy(() => import("./views/operaciones/SaldoOperacionCancelacionesView"));
 const SaldoOperacionNoCanceladasView = lazy(() => import("./views/operaciones/SaldoOperacionNoCanceladasView"));
+const CobrosVendedorView = lazy(() => import("./views/operaciones/CobrosVendedorView"));
 const TableroCobranzasView = lazy(() => import("./views/operaciones/TableroCobranzasView"));
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
@@ -310,6 +311,9 @@ export default function Router() {
               <Route path={paths.analisis.saldoOperacion} element={<SaldoOperacionView />} />
               <Route path={paths.analisis.saldoOperacionCancelaciones} element={<SaldoOperacionCancelacionesView />} />
               <Route path={paths.analisis.saldoOperacionNoCanceladas} element={<SaldoOperacionNoCanceladasView />} />
+            </Route>
+            <Route element={<ModuleProtectedRoute allowedModules={["cobrosVendedor"]} />}>
+              <Route path={paths.analisis.cobrosVendedor} element={<CobrosVendedorView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["tableroCobranzas"]} />}>

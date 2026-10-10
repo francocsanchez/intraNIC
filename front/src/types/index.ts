@@ -2654,6 +2654,27 @@ export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacio
 export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
 export type SaldoOperacionUsuario = z.infer<typeof saldoOperacionUsuariosResponseSchema>['data'][number];
 
+export const cobrosVendedorOptionSchema = z.object({ codigo: z.number(), vendedor: z.string() });
+export const cobrosVendedorOptionsResponseSchema = z.object({ data: z.array(cobrosVendedorOptionSchema) });
+export const cobrosVendedorListResponseSchema = z.object({
+  data: z.array(z.object({
+    codigoOperacion: z.number(), numeroFabrica: z.string(), cliente: z.string(), modelo: z.string(), version: z.string(),
+    total: z.number(), cobrado: z.number(), usado: z.number(), saldo: z.number(),
+  })),
+  pagination: z.object({ page: z.number(), limit: z.number(), total: z.number(), totalPages: z.number(), hasNextPage: z.boolean() }),
+});
+export const cobrosVendedorDetalleResponseSchema = z.object({
+  data: z.object({
+    codigoOperacion: z.number(), venta: z.number(), gestoria: z.number(), bonificacion: z.number(), total: z.number(),
+    anticipos: z.number(), deudoresVarios: z.number(), usado: z.number(), credito: z.number(), cobrado: z.number(), saldo: z.number(),
+    recibosAnticipos: z.array(z.object({ fecha: z.string().nullable(), caja: z.number(), comprobante: z.number(), importe: z.number() })),
+    recibosDeudores: z.array(z.object({ fecha: z.string().nullable(), caja: z.number(), comprobante: z.number(), importe: z.number() })),
+  }),
+});
+export type CobrosVendedorOption = z.infer<typeof cobrosVendedorOptionSchema>;
+export type CobrosVendedorListResponse = z.infer<typeof cobrosVendedorListResponseSchema>;
+export type CobrosVendedorDetalleResponse = z.infer<typeof cobrosVendedorDetalleResponseSchema>;
+
 export const tableroCobranzasDiaSchema = z.object({
   dia: z.number(),
   efectivo: z.number(),

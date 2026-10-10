@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import * as XLSX from "xlsx";
 import { SaldoOperacionSnapshotService, type SnapshotSortKey } from "../services/saldoOperacionSnapshot.service";
+import { CobrosVendedorService } from "../services/cobrosVendedor.service";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 const positiveInt = (value: unknown, fallback: number) => {
@@ -24,6 +25,34 @@ const parseFilters = (req: Request) => ({
 });
 
 export class SaldoOperacionSnapshotController {
+  static searchVendedoresCobros = async (req: Request, res: Response) => {
+    try { return res.status(200).json(await CobrosVendedorService.searchVendedores(optionalString(req.query.buscar) ?? "")); }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudieron buscar los vendedores" }); }
+  };
+
+  static listCobrosVendedor = async (req: Request, res: Response) => {
+    const vendedor = positiveInt(req.query.vendedor, 0);
+    const operacion = positiveInt(req.query.operacion, 0);
+    const anio = positiveInt(req.query.anio, 0);
+    const mes = positiveInt(req.query.mes, 0);
+    if (!vendedor && !operacion) return res.status(400).json({ message: "Ingresá un vendedor o una operación válida" });
+    if (!operacion && (anio < 2000 || anio > 2100)) return res.status(400).json({ message: "El año debe ser válido" });
+    if (!operacion && (mes < 1 || mes > 12)) return res.status(400).json({ message: "El mes debe estar entre 1 y 12" });
+    try {
+      return res.status(200).json(await CobrosVendedorService.list({
+        vendedor: vendedor || undefined, operacion: operacion || undefined, anio: anio || undefined, mes: mes || undefined,
+        page: positiveInt(req.query.page, 1), limit: positiveInt(req.query.limit, 60),
+      }));
+    } catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudieron obtener los cobros del vendedor" }); }
+  };
+
+  static detailCobrosVendedor = async (req: Request, res: Response) => {
+    const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
+    if (!codigoOperacion) return res.status(400).json({ message: "La operación debe ser válida" });
+    try { return res.status(200).json(await CobrosVendedorService.detail(codigoOperacion)); }
+    catch (error) { return res.status(404).json({ message: error instanceof Error ? error.message : "No se pudo obtener el detalle de cobros" }); }
+  };
+
   static list = async (req: Request, res: Response) => {
     const filters = parseFilters(req);
     if (filters.operacion && (!/^\d+$/.test(filters.operacion) || Number(filters.operacion) <= 0)) return res.status(400).json({ message: "La operación debe ser un número positivo" });

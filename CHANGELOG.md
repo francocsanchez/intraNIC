@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-10
+
+- **Cobros x Vendedor:** se agregó `/analisis/cobros-vendedor` con permiso independiente, autocomplete de vendedores desde tres caracteres y filtros mensuales.
+- **Cobros x Vendedor:** la grilla consulta exclusivamente los snapshots Mongo conservados, incluye entregadas y canceladas, pagina de a 60 y muestra total, saldo y porcentaje pagado por operación.
+- **Cobros x Vendedor:** la grilla ahora desglosa Total, `$ Anticipos` y Saldo, calculado como total menos anticipos; dejó de mostrar porcentaje pagado.
+- **Cobros x Vendedor:** el total mostrado descuenta la bonificación de la operación antes de calcular el saldo pendiente.
+- **Cobros x Vendedor:** la grilla ahora parte de las operaciones SIAC del vendedor y período, y calcula `$ Anticipos` con la suma histórica de recibos imputados por la misma relación usada en Tablero de cobranzas; ya no depende de la disponibilidad del snapshot Mongo.
+- **Cobros x Vendedor:** el total ahora replica la fórmula SIAC `venta + gestoría - bonificación` antes de descontar los anticipos.
+- **Cobros x Vendedor:** al cambiar de vendedor, mes, año o página se muestra un spinner hasta completar la consulta SIAC, sin conservar la grilla del período anterior.
+- **Cobros x Vendedor:** se incorporó `$ Deudores varios`, tomado del importe SIAC aplicado a crédito/deudores, y el saldo ahora descuenta tanto anticipos como ese cobro.
+- **Cobros x Vendedor:** se redujeron la tipografía, los encabezados y el espaciado de filas para hacer la grilla más compacta.
+- **Cobros x Vendedor:** anticipos y deudores varios se agrupan ahora en la única columna `$ Cobrado`; el saldo se calcula contra ese acumulado.
+- **Cobros x Vendedor:** se agregó la columna `$ Usado` proveniente de SIAC y el saldo ahora se resuelve como `Total - Cobrado - Usado`.
+- **Cobros x Vendedor:** `$ Cobrado` ahora incorpora también los recibos de Deudores Varios registrados en cuenta corriente cuando cierran exactamente el pendiente facturado de la operación.
+- **Cobros x Vendedor:** cada operación incorpora un acceso por ícono al detalle SIAC de valores, bonificación, recibos de anticipo, Deudores Varios, usado y crédito.
+- **Cobros x Vendedor:** se habilitó la búsqueda excluyente por número exacto de operación, sin requerir vendedor ni período.
+
 ## 2026-10-09
 
 - **Tablero de operaciones:** se incorporó la SPA móvil protegida en `/analisis/operaciones/movil`, con navegación mensual, actualización manual y rankings de operaciones por sucursal, modelo y vendedor.

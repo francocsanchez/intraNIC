@@ -27,6 +27,12 @@ import {
   saldoOperacionCancelacionAnalysisResponseSchema,
   type SaldoOperacionCancelacionAnalysisResponse,
   saldoOperacionUsuariosResponseSchema,
+  cobrosVendedorOptionsResponseSchema,
+  cobrosVendedorListResponseSchema,
+  cobrosVendedorDetalleResponseSchema,
+  type CobrosVendedorListResponse,
+  type CobrosVendedorDetalleResponse,
+  type CobrosVendedorOption,
   type SaldoOperacionSnapshotFiltersResponse,
   type SaldoOperacionSnapshotListResponse,
   type SaldoOperacionSnapshotSummaryResponse,
@@ -119,6 +125,33 @@ export async function getSaldoOperacionSnapshot(params: SaldoOperacionSnapshotPa
     if (!parsed.success) throw new Error("La respuesta del tablero no tiene el formato esperado");
     return parsed.data;
   } catch (error) { throw new Error(getErrorMessage(error, "Error al obtener Saldo de operacion")); }
+}
+export async function searchCobrosVendedorVendedores(buscar: string, signal?: AbortSignal): Promise<CobrosVendedorOption[]> {
+  try {
+    const { data } = await api.get("/operaciones/cobros-vendedor/vendedores", { params: { buscar }, signal });
+    const parsed = cobrosVendedorOptionsResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("La respuesta de vendedores no tiene el formato esperado");
+    return parsed.data.data;
+  } catch (error) { throw new Error(getErrorMessage(error, "Error al buscar vendedores")); }
+}
+export async function getCobrosVendedor(
+  params: { vendedor?: number; anio?: number; mes?: number; operacion?: number; page?: number; limit?: number },
+  signal?: AbortSignal,
+): Promise<CobrosVendedorListResponse> {
+  try {
+    const { data } = await api.get("/operaciones/cobros-vendedor", { params, signal });
+    const parsed = cobrosVendedorListResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("La respuesta de cobros no tiene el formato esperado");
+    return parsed.data;
+  } catch (error) { throw new Error(getErrorMessage(error, "Error al obtener los cobros del vendedor")); }
+}
+export async function getCobrosVendedorDetalle(codigoOperacion: number, signal?: AbortSignal): Promise<CobrosVendedorDetalleResponse> {
+  try {
+    const { data } = await api.get(`/operaciones/cobros-vendedor/${codigoOperacion}/detalle`, { signal });
+    const parsed = cobrosVendedorDetalleResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("El detalle de cobros no tiene el formato esperado");
+    return parsed.data;
+  } catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el detalle de cobros")); }
 }
 export async function getSaldoOperacionSnapshotFilters(): Promise<SaldoOperacionSnapshotFiltersResponse> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/filtros"); const parsed = saldoOperacionSnapshotFiltersResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Filtros invalidos"); return parsed.data; }

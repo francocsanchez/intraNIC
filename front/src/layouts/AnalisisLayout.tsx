@@ -6,6 +6,7 @@ import {
   BarChart3,
   ChartColumn,
   CircleDollarSign,
+  CirclePercent,
   HandCoins,
   Rows3,
   ShieldAlert,
@@ -36,6 +37,13 @@ export default function AnalisisLayout() {
       icon: CircleDollarSign,
       visible: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion),
       active: pathname === paths.analisis.saldoOperacion,
+    },
+    {
+      label: "Cobros x Vendedor",
+      to: paths.analisis.cobrosVendedor,
+      icon: CirclePercent,
+      visible: hasModulePathAccess(user, "cobrosVendedor", paths.analisis.cobrosVendedor),
+      active: pathname === paths.analisis.cobrosVendedor,
     },
     {
       label: "Tablero de cobranzas",

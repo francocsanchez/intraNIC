@@ -54,6 +54,9 @@ router.get(
   OperacionesController.getAnalisisPreventaFormaPago,
 );
 router.get("/saldo-operacion/filtros", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.filters);
+router.get("/cobros-vendedor/vendedores", authorizeModules("cobrosVendedor"), SaldoOperacionSnapshotController.searchVendedoresCobros);
+router.get("/cobros-vendedor/:codigoOperacion/detalle", authorizeModules("cobrosVendedor"), SaldoOperacionSnapshotController.detailCobrosVendedor);
+router.get("/cobros-vendedor", authorizeModules("cobrosVendedor"), SaldoOperacionSnapshotController.listCobrosVendedor);
 router.get("/saldo-operacion/usuarios", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.listUsuariosOperacion);
 router.get("/saldo-operacion/resumen", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.summary);
 router.get("/saldo-operacion/analisis-cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.cancelacionAnalysis);
