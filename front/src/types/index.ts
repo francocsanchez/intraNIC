@@ -2615,7 +2615,7 @@ export type HotAlertMailConfigResponse = z.infer<typeof hotAlertMailConfigRespon
 export type SolicitudCambioColor = z.infer<typeof solicitudCambioColorSchema>;
 
 export const saldoOperacionSnapshotItemSchema = z.object({
-  codigoOperacion: z.number(), clienteNombre: z.string(), tipoCliente: z.enum(["Particular", "Leasing", "Reventa", "Empresa"]).nullable().optional().default(null), vendedor: z.string(), sucursal: z.string(),
+  codigoOperacion: z.number(), clienteNombre: z.string(), tipoCliente: z.enum(["Particular", "Leasing", "Reventa", "Empresa", "Licitación"]).nullable().optional().default(null), vendedor: z.string(), sucursal: z.string(),
   usuarioOperacion: z.string(), nombreUsuarioOperacion: z.string(), usuarioOperacionOriginal: z.string().optional().default(""),
   nombreUsuarioOperacionOriginal: z.string().optional().default(""), usuarioOperacionCorregido: z.boolean().optional().default(false), numeroFabrica: z.string(),
   total: z.number().nullable(), bonificacion: z.number().nullable(), gestoria: z.number().nullable(), senas: z.number().nullable(),

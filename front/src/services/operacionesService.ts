@@ -65,7 +65,7 @@ type AnalisisVendedorParams = {
 };
 
 export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
-export type SaldoOperacionTipoCliente = "Particular" | "Leasing" | "Reventa" | "Empresa";
+export type SaldoOperacionTipoCliente = "Particular" | "Leasing" | "Reventa" | "Empresa" | "Licitación";
 export type SaldoOperacionAnalysisDimension = "tipoCliente" | "vendedor" | "usuario" | "sucursal";
 export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; entrega?: "entregadas" | "sin-entregar"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
 
