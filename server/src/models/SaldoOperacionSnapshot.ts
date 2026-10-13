@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface ISaldoOperacionSnapshot extends Document {
   codigoOperacion: number;
   clienteNombre: string;
+  tipoCliente: "Particular" | "Leasing" | "Reventa" | "Empresa" | null;
   vendedor: string;
   sucursal: string;
   usuarioOperacion: string;
@@ -38,6 +39,7 @@ const saldoOperacionSnapshotSchema = new Schema<ISaldoOperacionSnapshot>(
   {
     codigoOperacion: { type: Number, required: true, unique: true, index: true },
     clienteNombre: { type: String, default: "", trim: true },
+    tipoCliente: { type: String, enum: ["Particular", "Leasing", "Reventa", "Empresa"], default: null },
     vendedor: { type: String, default: "", trim: true },
     sucursal: { type: String, default: "SIN SUCURSAL", trim: true },
     usuarioOperacion: { type: String, default: "", trim: true },

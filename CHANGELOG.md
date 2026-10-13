@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-13
+
+- **Saldo de operación:** se agregó la columna editable `T. Cliente` para clasificar cada operación como Particular, Leasing, Reventa o Empresa. La clasificación comienza vacía, se conserva en el snapshot Mongo sin ser alterada por la sincronización SIAC y se incluye en el Excel exportado.
+
 ## 2026-10-10
 
 - **Cobros x Vendedor:** se agregó `/analisis/cobros-vendedor` con permiso independiente, autocomplete de vendedores desde tres caracteres y filtros mensuales.

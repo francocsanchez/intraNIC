@@ -65,4 +65,5 @@ router.get("/saldo-operacion/export", authorizeModules("saldoOperacion"), SaldoO
 router.get("/saldo-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.list);
 router.patch("/saldo-operacion/:codigoOperacion/cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateFechaCancelacion);
 router.patch("/saldo-operacion/:codigoOperacion/usuario-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateUsuarioOperacion);
+router.patch("/saldo-operacion/:codigoOperacion/tipo-cliente", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateTipoCliente);
 export default router;

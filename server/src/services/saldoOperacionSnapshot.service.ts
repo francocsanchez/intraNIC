@@ -12,7 +12,9 @@ import SaldoOperacionUsuario from "../models/SaldoOperacionUsuario";
 type SourceRow = Record<string, unknown>;
 type SnapshotSection = "conSaldo" | "canceladas";
 type SnapshotEntrega = "todas" | "entregadas" | "sinEntregar";
-export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export const tiposCliente = ["Particular", "Leasing", "Reventa", "Empresa"] as const;
+export type TipoCliente = typeof tiposCliente[number];
 type CancelacionAnalysisNode = {
   name: string;
   averageDays: number;
@@ -177,6 +179,7 @@ const baseFilter = (params: { section?: string | null; entrega?: string | null; 
 const serialize = (item: any) => ({
   codigoOperacion: Number(item.codigoOperacion),
   clienteNombre: item.clienteNombre ?? "",
+  tipoCliente: tiposCliente.includes(item.tipoCliente) ? item.tipoCliente : null,
   vendedor: item.vendedor ?? "",
   sucursal: item.sucursal ?? "SIN SUCURSAL",
   usuarioOperacion: item.usuarioOperacionManual ?? item.usuarioOperacionSiac ?? item.usuarioOperacion ?? "",
@@ -265,7 +268,7 @@ export class SaldoOperacionSnapshotService {
         operations.map((row) => ({
           updateOne: {
             filter: { codigoOperacion: row.codigoOperacion },
-            update: { $set: row, $setOnInsert: { fechaCancelacion: null, diasHastaCancelacion: null } },
+            update: { $set: row, $setOnInsert: { fechaCancelacion: null, diasHastaCancelacion: null, tipoCliente: null } },
             upsert: true,
           },
         })),
@@ -543,6 +546,14 @@ export class SaldoOperacionSnapshotService {
     if (!snapshot) throw new Error("La operacion no existe en el snapshot visible");
     snapshot.usuarioOperacionManual = usuario.codigo;
     snapshot.nombreUsuarioOperacionManual = usuario.nombre;
+    await snapshot.save();
+    return serialize(snapshot);
+  }
+
+  static async updateTipoCliente(codigoOperacion: number, tipoCliente: TipoCliente | null) {
+    const snapshot = await SaldoOperacionSnapshot.findOne({ codigoOperacion });
+    if (!snapshot) throw new Error("La operacion no existe en el snapshot");
+    snapshot.tipoCliente = tipoCliente;
     await snapshot.save();
     return serialize(snapshot);
   }

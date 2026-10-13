@@ -64,7 +64,8 @@ type AnalisisVendedorParams = {
   vendedor?: number | null;
 };
 
-export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SaldoOperacionTipoCliente = "Particular" | "Leasing" | "Reventa" | "Empresa";
 export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; entrega?: "entregadas" | "sin-entregar"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
 
 export async function getTableroCobranzasDiario(
@@ -180,6 +181,10 @@ export async function getSaldoOperacionUsuarios(buscar: string, signal?: AbortSi
 export async function updateSaldoOperacionUsuario(codigoOperacion: number, codigoUsuario: string) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/usuario-operacion`, { codigoUsuario }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar el usuario de operacion")); }
+}
+export async function updateSaldoOperacionTipoCliente(codigoOperacion: number, tipoCliente: SaldoOperacionTipoCliente | null) {
+  try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/tipo-cliente`, { tipoCliente }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar el tipo de cliente")); }
 }
 export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSnapshotParams, "section" | "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor" | "operacion">): Promise<Blob> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/export", { params, responseType: "blob" }); return data; }

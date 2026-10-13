@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import * as XLSX from "xlsx";
-import { SaldoOperacionSnapshotService, type SnapshotSortKey } from "../services/saldoOperacionSnapshot.service";
+import { SaldoOperacionSnapshotService, tiposCliente, type SnapshotSortKey, type TipoCliente } from "../services/saldoOperacionSnapshot.service";
 import { CobrosVendedorService } from "../services/cobrosVendedor.service";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -10,6 +10,7 @@ const positiveInt = (value: unknown, fallback: number) => {
 };
 const snapshotSortKeys = new Set([
   "codigoOperacion", "clienteNombre", "sucursal", "vendedor", "nombreUsuarioOperacion",
+  "tipoCliente",
   "modeloGeneral", "version", "ubicacion", "fechaAsignacion", "diasAsignada",
   "fechaCancelacion", "diasHastaCancelacion", "saldo",
 ]);
@@ -123,6 +124,19 @@ export class SaldoOperacionSnapshotController {
     } catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudo actualizar el usuario" }); }
   };
 
+  static updateTipoCliente = async (req: Request, res: Response) => {
+    const codigoOperacion = positiveInt(req.params.codigoOperacion, 0);
+    const tipoCliente = req.body?.tipoCliente === null ? null : optionalString(req.body?.tipoCliente);
+    if (!codigoOperacion) return res.status(400).json({ message: "El codigo de operacion debe ser valido" });
+    if (tipoCliente !== null && !tiposCliente.includes(tipoCliente as TipoCliente)) {
+      return res.status(400).json({ message: "El tipo de cliente no es valido" });
+    }
+    try {
+      const data = await SaldoOperacionSnapshotService.updateTipoCliente(codigoOperacion, tipoCliente as TipoCliente | null);
+      return res.status(200).json({ message: "Tipo de cliente actualizado", data });
+    } catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudo actualizar el tipo de cliente" }); }
+  };
+
   static export = async (req: Request, res: Response) => {
     try {
       const filters = parseFilters(req);
@@ -130,7 +144,7 @@ export class SaldoOperacionSnapshotController {
       const items = await SaldoOperacionSnapshotService.exportRows(filters);
       const rows = items.map((item) => ({
         op: item.codigoOperacion, numero_fabrica: item.numeroFabrica, version: item.version, modelo: item.modeloGeneral,
-        cliente: item.clienteNombre, sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.usuarioOperacion,
+        cliente: item.clienteNombre, tipo_cliente: item.tipoCliente ?? "", sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.usuarioOperacion,
         nombre_usuario_operacion: item.nombreUsuarioOperacion, usuario_operacion_siac: item.usuarioOperacionOriginal,
         nombre_usuario_operacion_siac: item.nombreUsuarioOperacionOriginal, ubicacion: item.ubicacion, estado: item.estado,
         fecha_asignacion: item.fechaAsignacion ?? "", dias_asignada: item.diasAsignada ?? "", fecha_cancelacion: item.fechaCancelacion ?? "",
