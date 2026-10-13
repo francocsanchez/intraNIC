@@ -66,6 +66,7 @@ type AnalisisVendedorParams = {
 
 export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
 export type SaldoOperacionTipoCliente = "Particular" | "Leasing" | "Reventa" | "Empresa";
+export type SaldoOperacionAnalysisDimension = "tipoCliente" | "vendedor" | "usuario" | "sucursal";
 export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; entrega?: "entregadas" | "sin-entregar"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
 
 export async function getTableroCobranzasDiario(
@@ -162,12 +163,12 @@ export async function getSaldoOperacionSnapshotSummary(params: Pick<SaldoOperaci
   try { const { data } = await api.get("/operaciones/saldo-operacion/resumen", { params, signal }); const parsed = saldoOperacionSnapshotSummaryResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Resumen invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener resumen")); }
 }
-export async function getSaldoOperacionCancelacionAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
-  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { params, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
+export async function getSaldoOperacionCancelacionAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string; dimensionOrder?: SaldoOperacionAnalysisDimension[] }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-cancelacion", { params: { ...params, dimensionOrder: params.dimensionOrder?.join(",") }, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de cancelacion invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de cancelacion")); }
 }
-export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
-  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas", { params, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de no canceladas invalido"); return parsed.data; }
+export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string; dimensionOrder?: SaldoOperacionAnalysisDimension[] }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas", { params: { ...params, dimensionOrder: params.dimensionOrder?.join(",") }, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de no canceladas invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de no canceladas")); }
 }
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string | null) {

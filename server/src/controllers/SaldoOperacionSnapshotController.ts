@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import * as XLSX from "xlsx";
-import { SaldoOperacionSnapshotService, tiposCliente, type SnapshotSortKey, type TipoCliente } from "../services/saldoOperacionSnapshot.service";
+import { SaldoOperacionSnapshotService, analysisDimensions, defaultAnalysisDimensionOrder, tiposCliente, type AnalysisDimension, type SnapshotSortKey, type TipoCliente } from "../services/saldoOperacionSnapshot.service";
 import { CobrosVendedorService } from "../services/cobrosVendedor.service";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -24,6 +24,15 @@ const parseFilters = (req: Request) => ({
   vendedor: optionalString(req.query.vendedor),
   operacion: optionalString(req.query.operacion),
 });
+const parseAnalysisDimensions = (value: unknown): AnalysisDimension[] => {
+  if (value === undefined) return defaultAnalysisDimensionOrder;
+  if (typeof value !== "string") throw new Error("El orden de dimensiones debe ser una lista separada por comas");
+  const dimensions = value.split(",").map((item) => item.trim());
+  if (dimensions.length !== analysisDimensions.length || new Set(dimensions).size !== analysisDimensions.length || dimensions.some((item) => !analysisDimensions.includes(item as AnalysisDimension))) {
+    throw new Error("El orden debe incluir una vez T. Cliente, Vendedor, Usuario y Sucursal");
+  }
+  return dimensions as AnalysisDimension[];
+};
 
 export class SaldoOperacionSnapshotController {
   static searchVendedoresCobros = async (req: Request, res: Response) => {
@@ -82,7 +91,10 @@ export class SaldoOperacionSnapshotController {
     if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return res.status(400).json({ message: "El mes de asignacion debe tener formato AAAA-MM" });
     if (year && !/^\d{4}$/.test(year)) return res.status(400).json({ message: "El año de asignacion debe tener formato AAAA" });
     if (month && year && !month.startsWith(`${year}-`)) return res.status(400).json({ message: "El mes debe pertenecer al año de asignacion seleccionado" });
-    try { return res.status(200).json(await SaldoOperacionSnapshotService.cancelacionAnalysis(month, year)); }
+    let dimensions: AnalysisDimension[];
+    try { dimensions = parseAnalysisDimensions(req.query.dimensionOrder); }
+    catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "El orden de dimensiones no es valido" }); }
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.cancelacionAnalysis(month, year, dimensions)); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de cancelacion" }); }
   };
 
@@ -92,7 +104,10 @@ export class SaldoOperacionSnapshotController {
     if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return res.status(400).json({ message: "El mes de asignacion debe tener formato AAAA-MM" });
     if (year && !/^\d{4}$/.test(year)) return res.status(400).json({ message: "El año de asignacion debe tener formato AAAA" });
     if (month && year && !month.startsWith(`${year}-`)) return res.status(400).json({ message: "El mes debe pertenecer al año de asignacion seleccionado" });
-    try { return res.status(200).json(await SaldoOperacionSnapshotService.noCanceladasAnalysis(month, year)); }
+    let dimensions: AnalysisDimension[];
+    try { dimensions = parseAnalysisDimensions(req.query.dimensionOrder); }
+    catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "El orden de dimensiones no es valido" }); }
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.noCanceladasAnalysis(month, year, dimensions)); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de no canceladas" }); }
   };
 

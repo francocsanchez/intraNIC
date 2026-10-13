@@ -3,6 +3,8 @@
 ## 2026-10-13
 
 - **Saldo de operación:** se agregó la columna editable `T. Cliente` para clasificar cada operación como Particular, Leasing, Reventa o Empresa. La clasificación comienza vacía, se conserva en el snapshot Mongo sin ser alterada por la sincronización SIAC y se incluye en el Excel exportado.
+- **Saldo de operación:** los árboles de Cancelaciones y No canceladas ahora permiten ordenar T. Cliente, Vendedor, Usuario y Sucursal con controles compactos; la jerarquía elegida se conserva por navegador, se valida en la API y agrupa las operaciones sin tipo como `Sin clasificar`.
+- **Saldo de operación:** el orden de dimensiones de ambos árboles ahora se ajusta mediante arrastrar y soltar.
 
 ## 2026-10-10
 

@@ -6,12 +6,16 @@ import { getSaldoOperacionCancelacionAnalysis, getSaldoOperacionNoCanceladasAnal
 import type { SaldoOperacionCancelacionAnalysisNode } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { ArrowLeft, CalendarDays, GripVertical } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { SaldoOperacionAnalysisDimension } from "@/services/operacionesService";
 
 const ALL_MONTHS = "__TODOS__";
 const ALL_YEARS = "__TODOS__";
+const ANALYSIS_ORDER_STORAGE_KEY = "saldo-operacion-tiempo-dimension-order";
+const DEFAULT_DIMENSION_ORDER: SaldoOperacionAnalysisDimension[] = ["tipoCliente", "vendedor", "usuario", "sucursal"];
+const dimensionLabels: Record<SaldoOperacionAnalysisDimension, string> = { tipoCliente: "T. Cliente", vendedor: "Vendedor", usuario: "Usuario", sucursal: "Sucursal" };
 const currentDate = new Date();
 const CURRENT_YEAR = String(currentDate.getFullYear());
 const CURRENT_MONTH = `${CURRENT_YEAR}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
@@ -23,6 +27,14 @@ const formatMonth = (month: string) => {
   return new Intl.DateTimeFormat("es-AR", { month: "short", year: "numeric", timeZone: "UTC" })
     .format(new Date(Date.UTC(year, monthNumber - 1, 1)))
     .replace(".", "");
+};
+
+const readDimensionOrder = (): SaldoOperacionAnalysisDimension[] => {
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(ANALYSIS_ORDER_STORAGE_KEY) ?? "null");
+    if (Array.isArray(value) && value.length === DEFAULT_DIMENSION_ORDER.length && new Set(value).size === DEFAULT_DIMENSION_ORDER.length && value.every((item) => DEFAULT_DIMENSION_ORDER.includes(item as SaldoOperacionAnalysisDimension))) return value as SaldoOperacionAnalysisDimension[];
+  } catch { /* La preferencia inválida se reemplaza por el orden predeterminado. */ }
+  return DEFAULT_DIMENSION_ORDER;
 };
 
 // Tonos suaves locales solicitados para los tiempos de cancelación.
@@ -72,11 +84,13 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
   const isNoCanceladas = kind === "noCanceladas";
   const [year, setYear] = useState(CURRENT_YEAR);
   const [month, setMonth] = useState(CURRENT_MONTH);
+  const [dimensionOrder, setDimensionOrder] = useState<SaldoOperacionAnalysisDimension[]>(readDimensionOrder);
+  const [draggedDimension, setDraggedDimension] = useState<SaldoOperacionAnalysisDimension | null>(null);
   const mesAsignacion = month === ALL_MONTHS ? undefined : month;
   const anioAsignacion = year === ALL_YEARS ? undefined : year;
   const analysis = useQuery({
-    queryKey: ["saldo-operacion-tiempo-analysis", kind, anioAsignacion, mesAsignacion],
-    queryFn: ({ signal }) => (isNoCanceladas ? getSaldoOperacionNoCanceladasAnalysis({ anioAsignacion, mesAsignacion }, signal) : getSaldoOperacionCancelacionAnalysis({ anioAsignacion, mesAsignacion }, signal)),
+    queryKey: ["saldo-operacion-tiempo-analysis", kind, anioAsignacion, mesAsignacion, dimensionOrder],
+    queryFn: ({ signal }) => (isNoCanceladas ? getSaldoOperacionNoCanceladasAnalysis({ anioAsignacion, mesAsignacion, dimensionOrder }, signal) : getSaldoOperacionCancelacionAnalysis({ anioAsignacion, mesAsignacion, dimensionOrder }, signal)),
     staleTime: 30_000,
     placeholderData: (previousData) => previousData,
   });
@@ -121,6 +135,16 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
     : monthsForYear;
   const treeHeight = data ? Math.max(480, countLeafNodes(data.tree) * 64 + 120) : 480;
   const hasTreeBranches = Boolean(data?.tree.children?.length);
+  const persistDimensionOrder = (nextOrder: SaldoOperacionAnalysisDimension[]) => {
+    setDimensionOrder(nextOrder);
+    window.localStorage.setItem(ANALYSIS_ORDER_STORAGE_KEY, JSON.stringify(nextOrder));
+  };
+  const dropDimension = (targetDimension: SaldoOperacionAnalysisDimension) => {
+    if (!draggedDimension || draggedDimension === targetDimension) return;
+    const nextOrder = dimensionOrder.filter((dimension) => dimension !== draggedDimension);
+    nextOrder.splice(nextOrder.indexOf(targetDimension), 0, draggedDimension);
+    persistDimensionOrder(nextOrder);
+  };
 
   return <div className="space-y-3 bg-muted p-2 font-preset">
     <section className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
@@ -140,7 +164,7 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
 
       <section className="overflow-x-auto rounded-md border border-border bg-card"><div className="border-b border-border px-3 py-2"><h2 className="text-sm font-medium">Tiempos promedio por mes de asignación</h2></div><table className="min-w-full text-xs"><thead className="bg-muted text-left"><tr><th className="whitespace-nowrap px-3 py-2 font-medium">Sucursal</th>{monthsForYear.map((item) => <th key={item.month} className={`min-w-24 whitespace-nowrap px-3 py-2 text-center font-medium ${month === item.month ? "bg-background" : ""}`}>{formatMonth(item.month)}</th>)}</tr></thead><tbody><tr><th className="whitespace-nowrap px-3 py-2 text-left font-medium">Tiempo promedio</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center font-medium ${month === item.month ? "bg-muted" : ""}`}>{formatDays(item.averageDays)}</td>)}</tr>{data.sucursalesPorMes.map((sucursal) => { const averages = new Map(sucursal.months.map((item) => [item.month, item.averageDays])); return <tr key={sucursal.sucursal} className="border-t border-border"><th className="whitespace-nowrap px-3 py-2 text-left font-medium">{sucursal.sucursal}</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center ${month === item.month ? "bg-muted" : ""}`}>{averages.has(item.month) ? formatDays(averages.get(item.month)!) : "—"}</td>)}</tr>; })}</tbody></table></section>
 
-      <section className="overflow-hidden rounded-md border border-border bg-card"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2"><div><h2 className="text-sm font-medium">{isNoCanceladas ? "Árbol de tiempos sin cancelación" : "Árbol de tiempos de cancelación"}</h2><p className="text-[11px] text-muted-foreground">Vendedor → Usuario → Sucursal → Tiempo total.</p></div><div className="flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div></div>{hasTreeBranches ? <div className="w-full" style={{ height: treeHeight }}><EChart key={`${kind}-${anioAsignacion ?? ALL_YEARS}-${mesAsignacion ?? ALL_MONTHS}-${analysis.dataUpdatedAt}`} option={option!} resetOnOptionChange /></div> : <p className="p-6 text-center text-sm text-muted-foreground">No hay distribución suficiente para dibujar el árbol en el período seleccionado.</p>}</section>
+      <section className="overflow-hidden rounded-md border border-border bg-card"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2"><div><h2 className="text-sm font-medium">{isNoCanceladas ? "Árbol de tiempos sin cancelación" : "Árbol de tiempos de cancelación"}</h2><p className="text-[11px] text-muted-foreground">{dimensionOrder.map((dimension) => dimensionLabels[dimension]).join(" → ")} → Tiempo total.</p></div><div className="flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div></div><div className="border-b border-border px-3 py-2"><p className="mb-1 text-[11px] text-muted-foreground">Orden del análisis · arrastrá una variable para reordenarla</p><div className="flex flex-wrap gap-1">{dimensionOrder.map((dimension) => <div key={dimension} draggable onDragStart={() => setDraggedDimension(dimension)} onDragOver={(event) => event.preventDefault()} onDrop={() => dropDimension(dimension)} onDragEnd={() => setDraggedDimension(null)} className={`inline-flex cursor-grab items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs active:cursor-grabbing ${draggedDimension === dimension ? "border-primary opacity-50" : "border-border"}`}><GripVertical className="size-3.5 text-muted-foreground" /><span>{dimensionLabels[dimension]}</span></div>)}<span className="inline-flex items-center px-2 text-xs text-muted-foreground">→ Tiempo total</span></div></div>{hasTreeBranches ? <div className="w-full" style={{ height: treeHeight }}><EChart key={`${kind}-${anioAsignacion ?? ALL_YEARS}-${mesAsignacion ?? ALL_MONTHS}-${dimensionOrder.join("-")}-${analysis.dataUpdatedAt}`} option={option!} resetOnOptionChange /></div> : <p className="p-6 text-center text-sm text-muted-foreground">No hay distribución suficiente para dibujar el árbol en el período seleccionado.</p>}</section>
     </>}
   </div>;
 }
