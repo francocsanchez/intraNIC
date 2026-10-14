@@ -2576,7 +2576,7 @@ export const solicitudCambioColorListResponseSchema = z.object({ data: z.array(s
 export const solicitudCambioColorResponseSchema = z.object({ message: z.string(), data: solicitudCambioColorSchema });
 export const solicitudCambioColorUnidadResponseSchema = z.object({ data: z.object({ interno: z.number(), version: z.string(), color: z.string() }) });
 
-export const repuestoSiniestroArticuloSchema = z.object({ renglon: z.number(), articulo: z.string(), denominacion: z.string(), cantidad: z.number(), pedido: z.boolean(), arribado: z.boolean(), retirado: z.boolean() });
+export const repuestoSiniestroArticuloSchema = z.object({ renglon: z.number(), articulo: z.string(), denominacion: z.string(), cantidad: z.number(), pedido: z.boolean(), arribado: z.boolean(), retirado: z.boolean(), retiradoPor: z.object({ usuarioId: z.string(), nombre: z.string() }).optional() });
 export const repuestoSiniestroUnidadSchema = z.object({ interno: z.number(), modelo: z.string(), version: z.string(), chasis: z.string(), cliente: z.string() });
 export const repuestoSiniestroNotaSchema = z.object({ operacion: z.number(), numero: z.number(), fecha: z.string(), cuenta: z.number(), cliente: z.string(), sucursal: z.coerce.string() });
 export const repuestoSiniestroNotaBusquedaSchema = repuestoSiniestroNotaSchema.extend({ cantidadArticulos: z.number() });
@@ -2590,6 +2590,7 @@ export const repuestoSiniestroResponseSchema = z.object({ message: z.string(), d
 export const repuestoSiniestroUnidadResponseSchema = z.object({ data: repuestoSiniestroUnidadSchema });
 export const repuestoSiniestroNotasResponseSchema = z.object({ data: z.array(repuestoSiniestroNotaBusquedaSchema) });
 export const repuestoSiniestroNotaResponseSchema = z.object({ data: repuestoSiniestroNotaDetalleSchema });
+export const repuestoSiniestroRetiradoresResponseSchema = z.object({ data: z.array(z.object({ _id: z.string(), nombre: z.string() })) });
 
 export type SsiVentasStatus = z.infer<typeof ssiVentasStatusSchema>;
 export type SsiVentasClosedReason = z.infer<typeof ssiVentasClosedReasonSchema>;

@@ -26,7 +26,7 @@ export interface IRepuestoSiniestro extends Document {
   interno: number;
   unidad: { modelo: string; version: string; chasis: string; cliente: string };
   nota: { operacion: number; numero: number; fecha: string; cuenta: number; cliente: string; sucursal: string };
-  articulos: Array<{ renglon: number; articulo: string; denominacion: string; cantidad: number; pedido: boolean; arribado: boolean; retirado: boolean }>;
+  articulos: Array<{ renglon: number; articulo: string; denominacion: string; cantidad: number; pedido: boolean; arribado: boolean; retirado: boolean; retiradoPor?: { usuarioId: Types.ObjectId; nombre: string } }>;
   estado: "pendiente" | "completado" | "eliminado";
   activo: boolean;
   createdBy: Types.ObjectId;
@@ -54,6 +54,7 @@ const articuloSchema = new Schema({
   pedido: { type: Boolean, default: false },
   arribado: { type: Boolean, default: false },
   retirado: { type: Boolean, default: false },
+  retiradoPor: { usuarioId: { type: Schema.Types.ObjectId, ref: "users" }, nombre: { type: String, trim: true } },
 }, { _id: false });
 
 const repuestoSiniestroSchema = new Schema<IRepuestoSiniestro>({

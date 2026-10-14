@@ -5,6 +5,8 @@
 - **Gestión de stock convencional · Rep. Siniestros:** se registró la ruta protegida `/gestion/convencional/rep-siniestros` en el router principal, restaurando el acceso a la vista ya implementada para usuarios con el permiso `repuestosSiniestros`.
 - **Gestión de stock convencional · Rep. Siniestros:** se agregó el rol `repuestos`; junto con `superAdmin`, es el único habilitado para crear, editar, actualizar etapas o eliminar. Los demás usuarios con el módulo conservan acceso de consulta.
 - **Gestión de stock convencional · Rep. Siniestros:** en el detalle de solo lectura, los estados de artículos ahora se representan con check o `-`, en lugar de checkboxes deshabilitados.
+- **Gestión de stock convencional · Rep. Siniestros:** los casos permanecen visibles en Pedido, Arribado o Retirado hasta que sus artículos avancen a la siguiente etapa, evitando que desaparezcan al completar una etapa intermedia.
+- **Gestión de stock convencional · Rep. Siniestros:** los retiros ahora se seleccionan y guardan por lote, requiriendo registrar el usuario de IntraNIC que retiró cada repuesto.
 
 ## 2026-10-13
 

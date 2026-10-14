@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
 import RepuestoSiniestro, { repuestoSiniestroAuditAction } from "../models/RepuestoSiniestro";
+import User from "../models/User";
 import { notaPedidoArticulosQuery, notaPedidoCabeceraQuery, notasPedidoPorNumeroQuery, unidadRepuestoSiniestroQuery } from "./querys/repuestosSiniestros.query";
 import { logError } from "../utils/logError";
 
@@ -30,12 +31,12 @@ const articuloPerteneceEtapa = (articulo: { pedido: boolean; arribado: boolean; 
 };
 const etapaIncompleta = (avance: { total: number; pendientes: number; pedidos: number; arribados: number; retirados: number }, etapa: Etapa) => {
   if (etapa === "pendiente") return avance.pendientes > 0;
-  if (etapa === "pedido") return avance.pedidos > 0 && avance.pedidos < avance.total;
-  if (etapa === "arribado") return avance.arribados > 0 && avance.arribados < avance.pedidos;
-  return avance.retirados > 0 && avance.retirados < avance.arribados;
+  if (etapa === "pedido") return avance.pedidos > 0;
+  if (etapa === "arribado") return avance.arribados > 0;
+  return avance.retirados > 0;
 };
 const format = (item: any, etapa?: Etapa) => {
-  const articulos = (item.articulos ?? []).map((articulo: any) => ({ renglon: articulo.renglon, articulo: articulo.articulo, denominacion: articulo.denominacion, cantidad: articulo.cantidad, pedido: Boolean(articulo.pedido), arribado: Boolean(articulo.arribado), retirado: Boolean(articulo.retirado) }));
+  const articulos = (item.articulos ?? []).map((articulo: any) => ({ renglon: articulo.renglon, articulo: articulo.articulo, denominacion: articulo.denominacion, cantidad: articulo.cantidad, pedido: Boolean(articulo.pedido), arribado: Boolean(articulo.arribado), retirado: Boolean(articulo.retirado), retiradoPor: articulo.retiradoPor?.usuarioId ? { usuarioId: String(articulo.retiradoPor.usuarioId), nombre: articulo.retiradoPor.nombre } : undefined }));
   const avance = { total: articulos.length, pendientes: articulos.filter((articulo) => !articulo.pedido).length, pedidos: articulos.filter((articulo) => articulo.pedido).length, arribados: articulos.filter((articulo) => articulo.arribado).length, retirados: articulos.filter((articulo) => articulo.retirado).length };
   return {
     _id: String(item._id), interno: item.interno, unidad: item.unidad, nota: item.nota, articulos, articulosEtapa: etapa ? articulos.filter((articulo) => articuloPerteneceEtapa(articulo, etapa)) : articulos, avance,
@@ -46,6 +47,10 @@ const format = (item: any, etapa?: Etapa) => {
 const noteSnapshot = (nota: Nota & { articulos: Articulo[] }) => ({ operacion: Number(nota.operacion), numero: Number(nota.numero), fecha: nota.fecha, cuenta: Number(nota.cuenta), cliente: nota.cliente, sucursal: nota.sucursal });
 
 export class RepuestosSiniestrosController {
+  static retiradores = async (_req: Request, res: Response) => {
+    try { const data = await User.find({ enable: true }).sort({ lastName: 1, name: 1 }).select("name lastName").lean(); return res.json({ data: data.map((user) => ({ _id: String(user._id), nombre: `${user.lastName}, ${user.name}`.trim() })) }); }
+    catch (error) { logError("RepuestosSiniestrosController.retiradores"); console.error(error); return res.status(500).json({ message: "Error al obtener los usuarios" }); }
+  };
   static list = async (req: Request, res: Response) => {
     try {
       const internoText = String(req.query.interno ?? "").trim();
@@ -109,6 +114,7 @@ export class RepuestosSiniestrosController {
       const field = String(req.body?.field ?? "");
       const value = req.body?.value;
       if (!renglon || !["pedido", "arribado", "retirado"].includes(field) || typeof value !== "boolean") return res.status(400).json({ error: "El repuesto y el estado indicado son obligatorios" });
+      if (field === "retirado") return res.status(400).json({ error: "Los retiros se registran por lote e indican quién retiró los repuestos" });
       const item = await RepuestoSiniestro.findById(req.params.id);
       if (!item) return res.status(404).json({ error: "Caso no encontrado" });
       if (item.estado !== "pendiente") return res.status(400).json({ error: "Solo se pueden modificar casos pendientes" });
@@ -130,6 +136,25 @@ export class RepuestosSiniestrosController {
       await item.save();
       return res.json({ message: item.estado === "completado" ? "Repuesto retirado y caso completado" : "Estado del repuesto actualizado", data: format(item.toObject()) });
     } catch (error) { logError("RepuestosSiniestrosController.updateEstadoArticulo"); console.error(error); return res.status(500).json({ message: "Error al actualizar el estado del repuesto" }); }
+  };
+  static registrarRetiros = async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Usuario no autenticado" });
+      const renglones = Array.isArray(req.body?.renglones) ? [...new Set(req.body.renglones.map(positiveInteger).filter(Boolean) as number[])] : [];
+      const retiradoPorId = String(req.body?.retiradoPorId ?? "").trim();
+      if (!renglones.length || !mongoose.isValidObjectId(retiradoPorId)) return res.status(400).json({ error: "Seleccioná los repuestos y quién los retiró" });
+      const retirador = await User.findOne({ _id: retiradoPorId, enable: true }).select("name lastName").lean();
+      if (!retirador) return res.status(404).json({ error: "El usuario que retiró los repuestos no está disponible" });
+      const item = await RepuestoSiniestro.findById(req.params.id); if (!item) return res.status(404).json({ error: "Caso no encontrado" }); if (item.estado !== "pendiente") return res.status(400).json({ error: "Solo se pueden modificar casos pendientes" });
+      const articulos = renglones.map((renglon) => item.articulos.find((entry) => Number(entry.renglon) === renglon));
+      if (articulos.some((articulo) => !articulo)) return res.status(404).json({ error: "Uno de los repuestos no pertenece a este caso" });
+      if (articulos.some((articulo) => !articulo!.arribado || articulo!.retirado)) return res.status(400).json({ error: "Solo se pueden retirar repuestos arribados que aún no fueron retirados" });
+      const nombre = `${retirador.lastName}, ${retirador.name}`.trim(); const before = articulos.map((articulo) => ({ renglon: articulo!.renglon, articulo: articulo!.articulo, retirado: articulo!.retirado }));
+      articulos.forEach((articulo) => { articulo!.retirado = true; articulo!.retiradoPor = { usuarioId: new mongoose.Types.ObjectId(retiradoPorId), nombre }; });
+      item.audit.push({ action: repuestoSiniestroAuditAction.WITHDRAWAL_CHANGED, actorId: new mongoose.Types.ObjectId(req.user._id), actorName: actorName(req.user), before: { articulos: before }, after: { articulos: articulos.map((articulo) => ({ renglon: articulo!.renglon, articulo: articulo!.articulo, retirado: true, retiradoPor: nombre })) }, createdAt: new Date() });
+      if (item.articulos.every((entry) => entry.retirado)) { item.estado = "completado"; item.audit.push({ action: repuestoSiniestroAuditAction.COMPLETED, actorId: new mongoose.Types.ObjectId(req.user._id), actorName: actorName(req.user), before: { estado: "pendiente" }, after: { estado: "completado" }, createdAt: new Date() }); }
+      await item.save(); return res.json({ message: item.estado === "completado" ? "Retiros registrados y caso completado" : "Retiros registrados correctamente", data: format(item.toObject()) });
+    } catch (error) { logError("RepuestosSiniestrosController.registrarRetiros"); console.error(error); return res.status(500).json({ message: "Error al registrar los retiros" }); }
   };
   static remove = async (req: Request, res: Response) => {
     try {

@@ -1,5 +1,5 @@
 import api from "@/libs/axios";
-import { repuestoSiniestroListResponseSchema, repuestoSiniestroNotaResponseSchema, repuestoSiniestroNotasResponseSchema, repuestoSiniestroResponseSchema, repuestoSiniestroUnidadResponseSchema } from "@/types/index";
+import { repuestoSiniestroListResponseSchema, repuestoSiniestroNotaResponseSchema, repuestoSiniestroNotasResponseSchema, repuestoSiniestroResponseSchema, repuestoSiniestroRetiradoresResponseSchema, repuestoSiniestroUnidadResponseSchema } from "@/types/index";
 import { isAxiosError } from "axios";
 
 const parse = async <T>(request: Promise<{ data: unknown }>, schema: { safeParse: (data: unknown) => { success: true; data: T } | { success: false } }, fallback: string) => {
@@ -14,4 +14,6 @@ export const getNotaPedidoSiniestro = (mscNroope: number) => parse(api.get(`/dms
 export const createRepuestoSiniestro = (payload: { interno: number; mscNroope: number }) => parse(api.post("/dms/repuestos-siniestros", payload), repuestoSiniestroResponseSchema, "Error al crear el caso");
 export const updateRepuestoSiniestro = (id: string, mscNroope: number) => parse(api.put(`/dms/repuestos-siniestros/${id}`, { mscNroope }), repuestoSiniestroResponseSchema, "Error al actualizar el caso");
 export const updateRepuestoSiniestroArticuloEstado = (id: string, renglon: number, field: "pedido" | "arribado" | "retirado", value: boolean) => parse(api.patch(`/dms/repuestos-siniestros/${id}/articulos/${renglon}/estado`, { field, value }), repuestoSiniestroResponseSchema, "Error al actualizar el estado del repuesto");
+export const getRepuestosSiniestrosRetiradores = () => parse(api.get("/dms/repuestos-siniestros/retiradores"), repuestoSiniestroRetiradoresResponseSchema, "Error al obtener los usuarios");
+export const registrarRetirosRepuestoSiniestro = (id: string, renglones: number[], retiradoPorId: string) => parse(api.patch(`/dms/repuestos-siniestros/${id}/articulos/retiro`, { renglones, retiradoPorId }), repuestoSiniestroResponseSchema, "Error al registrar los retiros");
 export const deleteRepuestoSiniestro = (id: string) => parse(api.delete(`/dms/repuestos-siniestros/${id}`), repuestoSiniestroResponseSchema, "Error al eliminar el caso");
