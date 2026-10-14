@@ -27,6 +27,7 @@ La logica vigente es:
   - `gerente`
   - `administracion`
   - `stock`
+  - `repuestos`
   - `coordinador`
   - `entrega`
   - `accesorios`
@@ -140,7 +141,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - Solo los roles `stock`, `gerente` y `superAdmin` pueden rechazar una solicitud; el rechazo es final, registra el motivo operativo y bloquea ediciones y cambios de estado.
 - No se permiten nuevas solicitudes para internos con chasis asignado. Las solicitudes existentes muestran una alerta cuando la unidad adquiere un chasis.
 - `Rep. Siniestros` depende de `modules.repuestosSiniestros = 1`.
-- Todo usuario con el módulo habilitado puede crear, editar la Nota de Pedido seleccionada o eliminar casos mientras estén en estado `pendiente`; cada acción queda auditada.
+- Todo usuario con el módulo habilitado puede consultar los casos, su detalle y auditoría. Solo los roles `repuestos` y `superAdmin` pueden crear, editar la Nota de Pedido seleccionada, actualizar etapas o eliminar casos mientras estén en estado `pendiente`; cada acción queda auditada.
 - Solo admite internos de unidades 0 km (tipo 5). El chasis se informa y no bloquea el alta. La combinación de interno y operación SIAC de Nota de Pedido no puede repetirse mientras exista un caso activo.
 - El seguimiento de cada repuesto es individual y secuencial: Pedido, Arribado y Retirado. El último retiro completa el caso automáticamente; todos esos cambios quedan auditados.
 - Una nota puede aparecer en varios filtros de etapa; cada filtro muestra únicamente sus repuestos correspondientes y los conteos/porcentajes de Pendiente, Pedido, Arribado y Retirado. Los casos completados se incluyen en `Retirados`.
@@ -265,6 +266,7 @@ Estado actual de definicion funcional:
 
 - `administracion`: definido e implementado
 - `stock`: definido e implementado
+- `repuestos`: definido e implementado para operar Rep. Siniestros
 - `supervisor`: definido e implementado
 - `gerente`: definido e implementado
 - `vendedor`: definido e implementado
@@ -495,7 +497,7 @@ Hasta nuevo aviso:
 
 - los modulos siguen siendo la base principal de acceso
 - no se deben volver a introducir reglas por `company`
-- los roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion`, `stock`, `coordinador`, `entrega` y `accesorios`
+- los roles activos en codigo son `superAdmin`, `vendedor`, `supervisor`, `gerente`, `administracion`, `stock`, `repuestos`, `coordinador`, `entrega` y `accesorios`
 - no se deben asumir otros `role` fuera de esa lista hasta definir formalmente una nueva etapa
 - `superAdmin` siempre debe tener acceso total
 

@@ -38,6 +38,7 @@ const roleOptions = [
   { value: "supervisor", label: "Supervisor" },
   { value: "superAdmin", label: "Super Admin" },
   { value: "stock", label: "Stock" },
+  { value: "repuestos", label: "Repuestos" },
   { value: "administracion", label: "Administracion" },
 ] as const;
 

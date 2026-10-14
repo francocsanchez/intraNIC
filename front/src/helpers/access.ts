@@ -11,6 +11,7 @@ import {
   hasSystemConfigToggleAccess,
   hasSolicitudCambioColorEstadoAccess,
   hasSolicitudCambioColorRejectAccess,
+  hasRepuestosSiniestrosActionAccess,
   hasSuperAdminRole,
 } from "@/constants/roleAccess";
 
@@ -98,5 +99,6 @@ export {
   hasSystemConfigToggleAccess,
   hasSolicitudCambioColorEstadoAccess,
   hasSolicitudCambioColorRejectAccess,
+  hasRepuestosSiniestrosActionAccess,
   hasSuperAdminRole,
 };

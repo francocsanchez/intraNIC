@@ -5,7 +5,7 @@ type AuthUser = Usuario | null | undefined;
 export type PreventaAction = "create" | "edit" | "delete" | "assign" | "viewAssigned";
 export type RegistroTestDriveAction = "deleteManaged" | "editPlanAhorroManaged";
 
-const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "coordinador", "entrega", "accesorios", "ssi"] as const;
+const ACTIVE_ROLE_KEYS = ["vendedor", "supervisor", "gerente", "administracion", "stock", "repuestos", "coordinador", "entrega", "accesorios", "ssi"] as const;
 type ActiveRoleKey = (typeof ACTIVE_ROLE_KEYS)[number];
 
 const normalizeRole = (role: unknown) =>
@@ -145,4 +145,12 @@ export function hasSolicitudCambioColorRejectAccess(user: AuthUser) {
 
   const normalizedRoles = getNormalizedRoles(user);
   return normalizedRoles.includes("stock") || normalizedRoles.includes("gerente");
+}
+
+export function hasRepuestosSiniestrosActionAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  return getNormalizedRoles(user).includes("repuestos");
 }
