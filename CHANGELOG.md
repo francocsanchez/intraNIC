@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-14
+
+- **Gestión de stock convencional · Rep. Siniestros:** se registró la ruta protegida `/gestion/convencional/rep-siniestros` en el router principal, restaurando el acceso a la vista ya implementada para usuarios con el permiso `repuestosSiniestros`.
+
 ## 2026-10-13
 
 - **Saldo de operación:** se agregó la columna editable `T. Cliente` para clasificar cada operación como Particular, Leasing, Reventa o Empresa. La clasificación comienza vacía, se conserva en el snapshot Mongo sin ser alterada por la sincronización SIAC y se incluye en el Excel exportado.
