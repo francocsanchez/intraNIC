@@ -238,7 +238,8 @@ export class SaldoOperacionSnapshotService {
     const operations = sourceRows
       .map((row) => {
         const codigoOperacion = numberOrNull(row.codigo_operacion);
-        if (!codigoOperacion || codigoOperacion <= 0) return null;
+        const fechaAsignacion = dateOnlyOrNull(row.fecha_asignacion);
+        if (!codigoOperacion || codigoOperacion <= 0 || !fechaAsignacion) return null;
         const numeroFabrica = trim(row.numero_fabrica);
         return {
           codigoOperacion,
@@ -256,7 +257,7 @@ export class SaldoOperacionSnapshotService {
           creditoBanco: numberOrNull(row.total_cred_banco),
           version: trim(row.version),
           modeloGeneral: trim(row.modelo_general, "SIN MODELO"),
-          fechaAsignacion: dateOnlyOrNull(row.fecha_asignacion),
+          fechaAsignacion,
           fechaFactura: dateOnlyOrNull(row.fecha_factura),
           diasAsignada: numberOrNull(row.dias_asignada),
           estado: trim(row.estado, "Sin estado"),
@@ -294,16 +295,18 @@ export class SaldoOperacionSnapshotService {
 
     const activos = await SaldoOperacionSnapshot.find({ entregada: false }, { codigoOperacion: 1 }).lean();
     const codigos = activos.map((item) => Number(item.codigoOperacion)).filter((item) => Number.isInteger(item));
+    const codigosConAsignacion = new Set(operations.map((item) => item.codigoOperacion));
     let entregadas = 0;
+    let eliminadasSinAsignacion = 0;
     if (codigos.length) {
       const statusRows = await sequelizeNIC.query<SourceRow>(saldoOperacionEstadosEntregadosQuery(), {
         type: QueryTypes.SELECT,
         replacements: { codigos },
       });
-      const codigosEntregados = statusRows
+      const codigosEntregados = [...new Set(statusRows
         .filter((row) => /^ENT/i.test(trim(row.estado)))
         .map((row) => numberOrNull(row.codigo_operacion))
-        .filter((codigo): codigo is number => Boolean(codigo));
+        .filter((codigo): codigo is number => Boolean(codigo)))];
       if (codigosEntregados.length) {
         const result = await SaldoOperacionSnapshot.updateMany(
           { codigoOperacion: { $in: codigosEntregados }, entregada: false },
@@ -311,9 +314,14 @@ export class SaldoOperacionSnapshotService {
         );
         entregadas = result.modifiedCount;
       }
+      const codigosParaEliminar = codigos.filter((codigo) => !codigosConAsignacion.has(codigo) && !codigosEntregados.includes(codigo));
+      if (codigosParaEliminar.length) {
+        const result = await SaldoOperacionSnapshot.deleteMany({ codigoOperacion: { $in: codigosParaEliminar }, entregada: false });
+        eliminadasSinAsignacion = result.deletedCount;
+      }
     }
 
-    return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas };
+    return { total: operations.length, createdOrUpdated: operations.length, usuariosSincronizados: usuarios.length, entregadas, eliminadasSinAsignacion };
   }
 
   static async list(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null; page: number; limit: number; sortKey: SnapshotSortKey; sortDirection: "asc" | "desc" }) {

@@ -14,6 +14,7 @@
 - **Saldo de operación:** los árboles de Cancelaciones y No canceladas ahora permiten ordenar T. Cliente, Vendedor, Usuario y Sucursal con controles compactos; la jerarquía elegida se conserva por navegador, se valida en la API y agrupa las operaciones sin tipo como `Sin clasificar`.
 - **Saldo de operación:** el orden de dimensiones de ambos árboles ahora se ajusta mediante arrastrar y soltar.
 - **Saldo de operación:** se agregó Licitación como tipo de cliente seleccionable y analizable.
+- **Saldo de operación:** el cron ahora elimina snapshots activos cuando SIAC devuelve la operación sin fecha de asignación o deja de reportarla como asignada, evitando contabilizar operaciones sin unidad asignada.
 
 ## 2026-10-10
 

@@ -25,10 +25,10 @@ export class SaldoOperacionSnapshotJobService {
     try {
       const summary = await SaldoOperacionSnapshotService.syncFromSiac();
       const finishedAt = new Date();
-      const message = `Sincronizacion finalizada: ${summary.total} leidos, ${summary.entregadas} entregadas ocultas`;
-      const metrics = { totalReceived: summary.total, created: summary.createdOrUpdated, updated: 0, discarded: summary.entregadas, errors: 0 };
-      const resultSummary = { title: "Resultado", lines: [`Snapshots procesados: ${summary.createdOrUpdated}`, `Entregadas ocultas: ${summary.entregadas}`] };
-      await ImportExecutionLoggerService.finishExecution(String(log._id), { status: "success", message, totalRead: summary.total, inserted: summary.createdOrUpdated, discarded: summary.entregadas, metrics, sourceSummary: { title: "Origen", lines: ["SIAC: csqUnidades, opera, movnped"] }, resultSummary });
+      const message = `Sincronizacion finalizada: ${summary.total} leidos, ${summary.entregadas} entregadas ocultas, ${summary.eliminadasSinAsignacion} sin asignacion eliminadas`;
+      const metrics = { totalReceived: summary.total, created: summary.createdOrUpdated, updated: 0, discarded: summary.entregadas + summary.eliminadasSinAsignacion, errors: 0 };
+      const resultSummary = { title: "Resultado", lines: [`Snapshots procesados: ${summary.createdOrUpdated}`, `Entregadas ocultas: ${summary.entregadas}`, `Sin asignacion eliminadas: ${summary.eliminadasSinAsignacion}`] };
+      await ImportExecutionLoggerService.finishExecution(String(log._id), { status: "success", message, totalRead: summary.total, inserted: summary.createdOrUpdated, discarded: summary.entregadas + summary.eliminadasSinAsignacion, metrics, sourceSummary: { title: "Origen", lines: ["SIAC: csqUnidades, opera, movnped"] }, resultSummary });
       return { status: "success", fileName: null, startedAt: startedAt.toISOString(), finishedAt: finishedAt.toISOString(), durationMs: finishedAt.getTime() - startedAt.getTime(), message, errorSummary: [], metrics, sourceSummary: { title: "Origen", lines: ["SIAC: csqUnidades, opera, movnped"] }, resultSummary, requestSample: [], responseSample: [] };
     } catch (error) {
       const finishedAt = new Date();
