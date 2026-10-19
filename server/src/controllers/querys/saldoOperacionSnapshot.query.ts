@@ -16,9 +16,9 @@ SELECT
   csq.total_Cred_banco AS total_cred_banco,
   csq.Version AS version,
   COALESCE(famiauto_modelo.fam_nombre, csq.Modelo_General) AS modelo_general,
-  CONVERT(char(10), opera.fecha_asignacion, 23) AS fecha_asignacion,
+  CONVERT(char(10), COALESCE(auditoria_asignacion.fecha_asignacion, opera.fecha_asignacion), 23) AS fecha_asignacion,
   CONVERT(char(10), opera.fecha_factura, 23) AS fecha_factura,
-  DATEDIFF(DAY, opera.fecha_asignacion, GETDATE()) AS dias_asignada,
+  DATEDIFF(DAY, COALESCE(auditoria_asignacion.fecha_asignacion, opera.fecha_asignacion), GETDATE()) AS dias_asignada,
   csq.Estado AS estado
 FROM dbo.csqUnidades csq
 OUTER APPLY (
@@ -28,6 +28,15 @@ OUTER APPLY (
   WHERE ope.ope_tipo = 5 AND ope.ope_codigo = csq.Codigo_operacion AND ope.ope_fecbaj IS NULL
   ORDER BY ope.ope_fecasig DESC
 ) opera
+OUTER APPLY (
+  SELECT TOP 1 aud.aud_fecha AS fecha_asignacion
+  FROM dbo.audittabla aud
+  WHERE aud.aud_codigo = csq.Codigo_operacion
+    AND aud.aud_codigo1 = 5
+    AND aud.aud_tabla = N'opera'
+    AND aud.aud_campo = N'Asignación Unidad'
+  ORDER BY aud.aud_fecha DESC, aud.aud_hora DESC, aud.aud_renglon DESC
+) auditoria_asignacion
 LEFT JOIN dbo.auto auto_modelo ON auto_modelo.au_codigo = opera.auto_codigo AND auto_modelo.au_marca = opera.auto_marca
 LEFT JOIN dbo.famiauto famiauto_modelo ON famiauto_modelo.fam_codigo = auto_modelo.au_familia
 LEFT JOIN dbo.sucursal sucursal_operacion ON sucursal_operacion.suc_codigo = opera.sucursal_codigo
