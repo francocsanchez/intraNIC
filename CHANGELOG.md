@@ -3,6 +3,7 @@
 ## 2026-10-19
 
 - **Saldo de operación:** los árboles de cancelaciones y no canceladas ahora permiten quitar y volver a agregar T. Cliente, Vendedor, Usuario y Sucursal, además de reordenarlas; Tiempo total permanece fijo y siempre debe quedar al menos una dimensión activa.
+- **Saldo de operación · No canceladas:** se agregó un resumen mensual de promedio de días y monto pendiente, con el total del período seleccionado, antes de la tabla histórica por sucursal.
 
 ## 2026-10-14
 

@@ -37,6 +37,7 @@ type CancelacionMonthlyGroup = {
   _id: string;
   averageDays: number;
   operations: number;
+  saldoTotal?: number;
 };
 
 type CancelacionSucursalMonthlyGroup = {
@@ -122,7 +123,7 @@ const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: Cance
       operations: tree.operations,
       tree,
       dimensionOrder: dimensions,
-      months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations })),
+      months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations, ...(typeof item.saldoTotal === "number" ? { saldoTotal: item.saldoTotal } : {}) })),
       sucursalesPorMes: [...new Map(sucursalesPorMes.map((item) => [nodeName(item._id.sucursal, "Sin sucursal"), item._id.sucursal])).keys()]
         .sort((left, right) => left.localeCompare(right, "es"))
         .map((sucursal) => ({
@@ -455,8 +456,21 @@ export class SaldoOperacionSnapshotService {
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
         { $match: noCanceladasMatch },
-        { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, dias: "$diasAsignada" } },
-        { $group: { _id: "$month", averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
+        {
+          $project: {
+            month: { $substrBytes: ["$fechaAsignacion", 0, 7] },
+            dias: "$diasAsignada",
+            saldo: {
+              $add: [
+                { $ifNull: ["$total", 0] },
+                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$creditoBanco", 0] }, -1] },
+              ],
+            },
+          },
+        },
+        { $group: { _id: "$month", averageDays: { $avg: "$dias" }, operations: { $sum: 1 }, saldoTotal: { $sum: "$saldo" } } },
         { $sort: { _id: 1 } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([
