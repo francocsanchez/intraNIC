@@ -1,12 +1,13 @@
 import Loading from "@/components/Loading";
 import EChart from "@/components/charts/EChart";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/action-button";
 import { paths } from "@/routes/paths";
 import { getSaldoOperacionCancelacionAnalysis, getSaldoOperacionNoCanceladasAnalysis } from "@/services/operacionesService";
 import type { SaldoOperacionCancelacionAnalysisNode } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
-import { ArrowLeft, CalendarDays, GripVertical } from "lucide-react";
+import { ArrowLeft, CalendarDays, GripVertical, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { SaldoOperacionAnalysisDimension } from "@/services/operacionesService";
@@ -32,7 +33,7 @@ const formatMonth = (month: string) => {
 const readDimensionOrder = (): SaldoOperacionAnalysisDimension[] => {
   try {
     const value: unknown = JSON.parse(window.localStorage.getItem(ANALYSIS_ORDER_STORAGE_KEY) ?? "null");
-    if (Array.isArray(value) && value.length === DEFAULT_DIMENSION_ORDER.length && new Set(value).size === DEFAULT_DIMENSION_ORDER.length && value.every((item) => DEFAULT_DIMENSION_ORDER.includes(item as SaldoOperacionAnalysisDimension))) return value as SaldoOperacionAnalysisDimension[];
+    if (Array.isArray(value) && value.length > 0 && new Set(value).size === value.length && value.every((item) => DEFAULT_DIMENSION_ORDER.includes(item as SaldoOperacionAnalysisDimension))) return value as SaldoOperacionAnalysisDimension[];
   } catch { /* La preferencia inválida se reemplaza por el orden predeterminado. */ }
   return DEFAULT_DIMENSION_ORDER;
 };
@@ -145,6 +146,15 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
     nextOrder.splice(nextOrder.indexOf(targetDimension), 0, draggedDimension);
     persistDimensionOrder(nextOrder);
   };
+  const removeDimension = (dimension: SaldoOperacionAnalysisDimension) => {
+    if (dimensionOrder.length === 1) return;
+    persistDimensionOrder(dimensionOrder.filter((item) => item !== dimension));
+  };
+  const addDimension = (dimension: SaldoOperacionAnalysisDimension) => {
+    if (dimensionOrder.includes(dimension)) return;
+    persistDimensionOrder([...dimensionOrder, dimension]);
+  };
+  const availableDimensions = DEFAULT_DIMENSION_ORDER.filter((dimension) => !dimensionOrder.includes(dimension));
 
   return <div className="space-y-3 bg-muted p-2 font-preset">
     <section className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
@@ -164,7 +174,7 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
 
       <section className="overflow-x-auto rounded-md border border-border bg-card"><div className="border-b border-border px-3 py-2"><h2 className="text-sm font-medium">Tiempos promedio por mes de asignación</h2></div><table className="min-w-full text-xs"><thead className="bg-muted text-left"><tr><th className="whitespace-nowrap px-3 py-2 font-medium">Sucursal</th>{monthsForYear.map((item) => <th key={item.month} className={`min-w-24 whitespace-nowrap px-3 py-2 text-center font-medium ${month === item.month ? "bg-background" : ""}`}>{formatMonth(item.month)}</th>)}</tr></thead><tbody><tr><th className="whitespace-nowrap px-3 py-2 text-left font-medium">Tiempo promedio</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center font-medium ${month === item.month ? "bg-muted" : ""}`}>{formatDays(item.averageDays)}</td>)}</tr>{data.sucursalesPorMes.map((sucursal) => { const averages = new Map(sucursal.months.map((item) => [item.month, item.averageDays])); return <tr key={sucursal.sucursal} className="border-t border-border"><th className="whitespace-nowrap px-3 py-2 text-left font-medium">{sucursal.sucursal}</th>{monthsForYear.map((item) => <td key={item.month} className={`px-3 py-2 text-center ${month === item.month ? "bg-muted" : ""}`}>{averages.has(item.month) ? formatDays(averages.get(item.month)!) : "—"}</td>)}</tr>; })}</tbody></table></section>
 
-      <section className="overflow-hidden rounded-md border border-border bg-card"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2"><div><h2 className="text-sm font-medium">{isNoCanceladas ? "Árbol de tiempos sin cancelación" : "Árbol de tiempos de cancelación"}</h2><p className="text-[11px] text-muted-foreground">{dimensionOrder.map((dimension) => dimensionLabels[dimension]).join(" → ")} → Tiempo total.</p></div><div className="flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div></div><div className="border-b border-border px-3 py-2"><p className="mb-1 text-[11px] text-muted-foreground">Orden del análisis · arrastrá una variable para reordenarla</p><div className="flex flex-wrap gap-1">{dimensionOrder.map((dimension) => <div key={dimension} draggable onDragStart={() => setDraggedDimension(dimension)} onDragOver={(event) => event.preventDefault()} onDrop={() => dropDimension(dimension)} onDragEnd={() => setDraggedDimension(null)} className={`inline-flex cursor-grab items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs active:cursor-grabbing ${draggedDimension === dimension ? "border-primary opacity-50" : "border-border"}`}><GripVertical className="size-3.5 text-muted-foreground" /><span>{dimensionLabels[dimension]}</span></div>)}<span className="inline-flex items-center px-2 text-xs text-muted-foreground">→ Tiempo total</span></div></div>{hasTreeBranches ? <div className="w-full" style={{ height: treeHeight }}><EChart key={`${kind}-${anioAsignacion ?? ALL_YEARS}-${mesAsignacion ?? ALL_MONTHS}-${dimensionOrder.join("-")}-${analysis.dataUpdatedAt}`} option={option!} resetOnOptionChange /></div> : <p className="p-6 text-center text-sm text-muted-foreground">No hay distribución suficiente para dibujar el árbol en el período seleccionado.</p>}</section>
+      <section className="overflow-hidden rounded-md border border-border bg-card"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2"><div><h2 className="text-sm font-medium">{isNoCanceladas ? "Árbol de tiempos sin cancelación" : "Árbol de tiempos de cancelación"}</h2><p className="text-[11px] text-muted-foreground">{dimensionOrder.map((dimension) => dimensionLabels[dimension]).join(" → ")} → Tiempo total.</p></div><div className="flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div></div><div className="space-y-2 border-b border-border px-3 py-2"><div><p className="mb-1 text-[11px] text-muted-foreground">Dimensiones activas · arrastrá para reordenar. Tiempo total permanece fijo.</p><div className="flex flex-wrap gap-1">{dimensionOrder.map((dimension) => <div key={dimension} draggable onDragStart={() => setDraggedDimension(dimension)} onDragOver={(event) => event.preventDefault()} onDrop={() => dropDimension(dimension)} onDragEnd={() => setDraggedDimension(null)} className={`inline-flex cursor-grab items-center gap-1 rounded-md border bg-background py-1 pl-2 pr-1 text-xs active:cursor-grabbing ${draggedDimension === dimension ? "border-primary opacity-50" : "border-border"}`}><GripVertical className="size-3.5 text-muted-foreground" /><span>{dimensionLabels[dimension]}</span><ActionButton type="button" variant="ghost" size="icon" className="size-5" onClick={() => removeDimension(dimension)} disabled={dimensionOrder.length === 1} title={`Quitar ${dimensionLabels[dimension]}`} aria-label={`Quitar ${dimensionLabels[dimension]}`}><X className="size-3.5" /></ActionButton></div>)}<span className="inline-flex items-center px-2 text-xs text-muted-foreground">→ Tiempo total</span></div></div>{availableDimensions.length > 0 && <div><p className="mb-1 text-[11px] text-muted-foreground">Agregar dimensión</p><div className="flex flex-wrap gap-1">{availableDimensions.map((dimension) => <ActionButton key={dimension} type="button" variant="outline" className="h-7 gap-1 px-2 text-xs" onClick={() => addDimension(dimension)}><Plus className="size-3.5" />{dimensionLabels[dimension]}</ActionButton>)}</div></div>}</div>{hasTreeBranches ? <div className="w-full" style={{ height: treeHeight }}><EChart key={`${kind}-${anioAsignacion ?? ALL_YEARS}-${mesAsignacion ?? ALL_MONTHS}-${dimensionOrder.join("-")}-${analysis.dataUpdatedAt}`} option={option!} resetOnOptionChange /></div> : <p className="p-6 text-center text-sm text-muted-foreground">No hay distribución suficiente para dibujar el árbol en el período seleccionado.</p>}</section>
     </>}
   </div>;
 }

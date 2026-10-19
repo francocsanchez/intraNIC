@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-19
+
+- **Saldo de operación:** los árboles de cancelaciones y no canceladas ahora permiten quitar y volver a agregar T. Cliente, Vendedor, Usuario y Sucursal, además de reordenarlas; Tiempo total permanece fijo y siempre debe quedar al menos una dimensión activa.
+
 ## 2026-10-14
 
 - **Gestión de stock convencional · Rep. Siniestros:** se registró la ruta protegida `/gestion/convencional/rep-siniestros` en el router principal, restaurando el acceso a la vista ya implementada para usuarios con el permiso `repuestosSiniestros`.

@@ -27,9 +27,9 @@ const parseFilters = (req: Request) => ({
 const parseAnalysisDimensions = (value: unknown): AnalysisDimension[] => {
   if (value === undefined) return defaultAnalysisDimensionOrder;
   if (typeof value !== "string") throw new Error("El orden de dimensiones debe ser una lista separada por comas");
-  const dimensions = value.split(",").map((item) => item.trim());
-  if (dimensions.length !== analysisDimensions.length || new Set(dimensions).size !== analysisDimensions.length || dimensions.some((item) => !analysisDimensions.includes(item as AnalysisDimension))) {
-    throw new Error("El orden debe incluir una vez T. Cliente, Vendedor, Usuario y Sucursal");
+  const dimensions = value.split(",").map((item) => item.trim()).filter(Boolean);
+  if (!dimensions.length || new Set(dimensions).size !== dimensions.length || dimensions.some((item) => !analysisDimensions.includes(item as AnalysisDimension))) {
+    throw new Error("Indicá al menos una dimensión sin repetir: T. Cliente, Vendedor, Usuario o Sucursal");
   }
   return dimensions as AnalysisDimension[];
 };

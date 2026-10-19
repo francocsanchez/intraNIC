@@ -2641,7 +2641,7 @@ export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
     averageDays: z.number(),
     operations: z.number(),
     tree: saldoOperacionCancelacionAnalysisNodeSchema,
-    dimensionOrder: z.array(z.enum(["tipoCliente", "vendedor", "usuario", "sucursal"])).optional().default(["tipoCliente", "vendedor", "usuario", "sucursal"]),
+    dimensionOrder: z.array(z.enum(["tipoCliente", "vendedor", "usuario", "sucursal"])).min(1).optional().default(["tipoCliente", "vendedor", "usuario", "sucursal"]),
     months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
     sucursalesPorMes: z.array(z.object({
       sucursal: z.string(),
