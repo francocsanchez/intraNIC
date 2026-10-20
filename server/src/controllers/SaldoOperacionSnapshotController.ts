@@ -213,17 +213,18 @@ export class SaldoOperacionSnapshotController {
 
   static exportResumen = async (req: Request, res: Response) => {
     try {
-      // Las tarjetas siempre representan operaciones con saldo, sin depender de la sección de la grilla.
+      // El saldo y usado corresponden a no canceladas; crédito pendiente incluye también canceladas aún no liquidadas.
       const filters = parseFilters(req);
-      const items = await SaldoOperacionSnapshotService.exportRows({ ...filters, section: "conSaldo", operacion: null });
+      const items = await SaldoOperacionSnapshotService.exportSummaryRows(filters);
       const rows = items.map((item) => ({
         op: item.codigoOperacion, cliente: item.clienteNombre, tipo_cliente: item.tipoCliente ?? "", modelo: item.modeloGeneral, version: item.version,
         sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.nombreUsuarioOperacion,
-        total_venta: item.total ?? 0, senas: item.senas ?? 0, usado_no_cancelado: item.usado ?? 0,
+        fecha_cancelacion: item.fechaCancelacion ?? "", total_venta: item.total ?? 0, senas: item.senas ?? 0,
+        usado_no_cancelado: item.incluyeSaldoModelo ? item.usado ?? 0 : 0,
         credito_siac: item.creditoBanco ?? 0, estado_credito: item.creditoEstado,
         credito_liquidado: item.creditoLiquidadoMonto ?? 0,
         credito_pendiente: item.creditoEstado === "pendiente" ? item.creditoBanco ?? 0 : 0,
-        saldo_que_suma_al_modelo: item.saldo,
+        saldo_que_suma_al_modelo: item.incluyeSaldoModelo ? item.saldo : 0,
         fecha_asignacion: item.fechaAsignacion ?? "", chasis: item.chasis,
       }));
       const workbook = XLSX.utils.book_new();

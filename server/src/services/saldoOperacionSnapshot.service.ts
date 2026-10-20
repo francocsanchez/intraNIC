@@ -412,21 +412,22 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
-    const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
+    const { saldoRows, creditoRows } = await this.summaryRows(params);
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
     let creditoPendienteCantidad = 0;
     let usadoTotal = 0;
     let usadoCantidad = 0;
-    rows.forEach((row) => {
+    saldoRows.forEach((row) => {
       const modelo = trim(row.modeloGeneral, "SIN MODELO");
       grouped.set(modelo, (grouped.get(modelo) ?? 0) + calculateSaldo(row));
-      if (creditoEstado(row) === "pendiente") {
-        creditoTotal += row.creditoBanco ?? 0;
-        creditoPendienteCantidad += 1;
-      }
       usadoTotal += row.usado ?? 0;
       if ((row.usado ?? 0) > 0) usadoCantidad += 1;
+    });
+    creditoRows.forEach((row) => {
+      if (creditoEstado(row) !== "pendiente") return;
+      creditoTotal += row.creditoBanco ?? 0;
+      creditoPendienteCantidad += 1;
     });
     return {
       data: [...grouped.entries()].map(([modelo, saldo]) => ({ modelo, saldo })).sort((a, b) => b.saldo - a.saldo),
@@ -585,6 +586,23 @@ export class SaldoOperacionSnapshotService {
   static async exportRows(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {
     const rows = await SaldoOperacionSnapshot.find(baseFilter(params)).lean();
     return rows.sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion).map(serialize);
+  }
+
+  static async exportSummaryRows(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+    const { saldoRows, creditoRows } = await this.summaryRows(params);
+    const saldoOperationCodes = new Set(saldoRows.map((row) => Number(row.codigoOperacion)));
+    return creditoRows
+      .sort((a, b) => calculateSaldo(a) - calculateSaldo(b) || a.codigoOperacion - b.codigoOperacion)
+      .map((row) => ({ ...serialize(row), incluyeSaldoModelo: saldoOperationCodes.has(Number(row.codigoOperacion)) }));
+  }
+
+  private static async summaryRows(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+    const [saldoRows, canceladasRows] = await Promise.all([
+      SaldoOperacionSnapshot.find(baseFilter({ ...params, section: "conSaldo" })).lean(),
+      SaldoOperacionSnapshot.find(baseFilter({ ...params, section: "canceladas" })).lean(),
+    ]);
+    const creditoRows = [...new Map([...saldoRows, ...canceladasRows].map((row) => [Number(row.codigoOperacion), row])).values()];
+    return { saldoRows, creditoRows };
   }
 
   static async updateFechaCancelacion(codigoOperacion: number, fechaCancelacion: string | null) {
