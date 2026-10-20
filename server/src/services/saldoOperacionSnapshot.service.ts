@@ -64,8 +64,8 @@ const dateOnlyOrNull = (value: unknown) => {
   return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day ? normalized : null;
 };
 
-const calculateSaldo = (row: { total?: number | null; senas?: number | null; usado?: number | null; creditoBanco?: number | null }) =>
-  (row.total ?? 0) - (row.senas ?? 0) - (row.usado ?? 0) - (row.creditoBanco ?? 0);
+const calculateSaldo = (row: { total?: number | null; senas?: number | null; usado?: number | null }) =>
+  (row.total ?? 0) - (row.senas ?? 0) - (row.usado ?? 0);
 
 const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
   const [asignacionYear, asignacionMonth, asignacionDay] = fechaAsignacion.split("-").map(Number);
@@ -446,7 +446,6 @@ export class SaldoOperacionSnapshotService {
                 { $ifNull: ["$total", 0] },
                 { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
                 { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
-                { $multiply: [{ $ifNull: ["$creditoBanco", 0] }, -1] },
               ],
             },
             ...analysisDimensionProjection,
@@ -465,7 +464,6 @@ export class SaldoOperacionSnapshotService {
                 { $ifNull: ["$total", 0] },
                 { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
                 { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
-                { $multiply: [{ $ifNull: ["$creditoBanco", 0] }, -1] },
               ],
             },
           },

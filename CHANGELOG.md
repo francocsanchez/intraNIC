@@ -5,6 +5,7 @@
 - **Saldo de operación:** los árboles de cancelaciones y no canceladas ahora permiten quitar y volver a agregar T. Cliente, Vendedor, Usuario y Sucursal, además de reordenarlas; Tiempo total permanece fijo y siempre debe quedar al menos una dimensión activa.
 - **Saldo de operación · No canceladas:** se agregó un resumen mensual de promedio de días y monto pendiente, con el total del período seleccionado, antes de la tabla histórica por sucursal.
 - **Saldo de operación:** la fecha de asignación ahora toma la última auditoría SIAC de `Asignación Unidad` cuando existe, para que las reasignaciones reinicien los días y el período de análisis.
+- **Saldo de operación:** el saldo pendiente deja de descontar temporalmente el crédito bancario; ahora se calcula como total de venta menos señas y usado, también en No canceladas y en la exportación.
 
 ## 2026-10-14
 

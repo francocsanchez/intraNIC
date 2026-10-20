@@ -26,6 +26,7 @@ El job `saldo-operacion-snapshot` debe aparecer en el monitor, permitir ejecuci�
 En el tablero de `Saldo de operacion`, filtros y saldos por modelo comparten una única superficie compacta. `Operaciones: {cantidad}` abre la fila de filtros; sucursal, usuario, vendedor, sección y ubicación se resuelven con selects y aplican también al resumen y exportación. Los accesos compactos `A. Canceladas` y `A. No canceladas` se ubican inmediatamente antes del botón de exportación Excel, que es cuadrado, verde y se alinea al extremo derecho.
 La respuesta de filtros de `Saldo de operacion` debe tolerar temporalmente la ausencia de los catálogos de usuario y vendedor, para conservar sucursales y ubicaciones durante un despliegue escalonado.
 La columna Saldo de la tabla de `Saldo de operacion` usa verde para importes menores o iguales a cero y rojo para importes positivos pendientes de cobro.
+El Saldo de operación se calcula como `total venta - señas - usado`; temporalmente no descuenta crédito bancario.
 La columna Estado no se muestra en la tabla de `Saldo de operacion`; la ubicación sigue disponible como filtro.
 La tabla de `Saldo de operacion` permite buscar una operación por su número exacto; el valor permanece como borrador y se aplica únicamente al confirmar con Buscar o Enter.
 La tarjeta Crédito de `Saldo de operacion` suma únicamente el crédito de operaciones sin `ope_fecfac`; la fecha de factura se sincroniza desde SIAC al snapshot y determina facturación, independientemente del estado físico.
