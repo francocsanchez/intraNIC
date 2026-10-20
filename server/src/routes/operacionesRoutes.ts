@@ -72,6 +72,7 @@ router.get("/saldo-operacion/usuarios", authorizeModules("saldoOperacion"), Sald
 router.get("/saldo-operacion/resumen", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.summary);
 router.get("/saldo-operacion/analisis-cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.cancelacionAnalysis);
 router.get("/saldo-operacion/analisis-no-canceladas", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.noCanceladasAnalysis);
+router.get("/saldo-operacion/resumen-export", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.exportResumen);
 router.get("/saldo-operacion/export", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.export);
 router.post("/saldo-operacion/creditos-liquidados/importar", authorizeModules("saldoOperacion"), singleExcelUpload, SaldoOperacionSnapshotController.importCreditosLiquidados);
 router.get("/saldo-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.list);

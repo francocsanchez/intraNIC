@@ -2,6 +2,9 @@
 
 ## 2026-10-20
 
+- **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
+- **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.
+- **Saldo de operación:** las columnas monetarias de las exportaciones Excel se presentan con un único símbolo de pesos argentinos, sin duplicarlo.
 - **Saldo de operación:** se agregó la importación Excel de créditos liquidados por las columnas `Chasis` y `$ a Financiar`, disponible para todos los usuarios con acceso al módulo.
 - **Saldo de operación:** el cron sincroniza el chasis desde SIAC y concilia importaciones acumulativas por VIN, incluso cuando la operación aparece después; las correcciones de monto conservan auditoría y las reimportaciones no duplican descuentos.
 - **Saldo de operación:** el saldo ahora descuenta únicamente el crédito efectivamente liquidado, la grilla incorpora el estado `Cred` y la exportación incluye chasis, estado y monto liquidado.

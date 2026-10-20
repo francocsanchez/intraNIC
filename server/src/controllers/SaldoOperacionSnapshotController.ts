@@ -20,6 +20,22 @@ const excelMimeTypes = new Set([
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/octet-stream",
 ]);
+// El identificador regional ya incorpora el símbolo monetario; agregar otro `$` lo duplica en Excel.
+const pesoFormat = '[$$-es-AR] #,##0.00;[Red]-[$$-es-AR] #,##0.00';
+const sheetWithPesoColumns = (rows: Record<string, unknown>[], monetaryColumns: string[]) => {
+  const sheet = XLSX.utils.json_to_sheet(rows);
+  if (!rows.length) return sheet;
+  const columns = Object.keys(rows[0]);
+  monetaryColumns.forEach((column) => {
+    const columnIndex = columns.indexOf(column);
+    if (columnIndex < 0) return;
+    for (let rowIndex = 1; rowIndex <= rows.length; rowIndex += 1) {
+      const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+      if (cell?.t === "n") cell.z = pesoFormat;
+    }
+  });
+  return sheet;
+};
 
 const parseFilters = (req: Request) => ({
   section: optionalString(req.query.section),
@@ -187,11 +203,35 @@ export class SaldoOperacionSnapshotController {
         estado_credito: item.creditoEstado, credito_liquidado: item.creditoLiquidadoMonto ?? 0, saldo: item.saldo,
       }));
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), "SaldoOperacion");
+      XLSX.utils.book_append_sheet(workbook, sheetWithPesoColumns(rows, ["total", "bonificacion", "gestoria", "senas", "usado", "credito", "credito_liquidado", "saldo"]), "SaldoOperacion");
       const fileBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="saldo-operacion-${new Date().toISOString().slice(0, 10)}.xlsx"`);
       return res.status(200).send(fileBuffer);
     } catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo exportar el tablero" }); }
+  };
+
+  static exportResumen = async (req: Request, res: Response) => {
+    try {
+      // Las tarjetas siempre representan operaciones con saldo, sin depender de la sección de la grilla.
+      const filters = parseFilters(req);
+      const items = await SaldoOperacionSnapshotService.exportRows({ ...filters, section: "conSaldo", operacion: null });
+      const rows = items.map((item) => ({
+        op: item.codigoOperacion, cliente: item.clienteNombre, tipo_cliente: item.tipoCliente ?? "", modelo: item.modeloGeneral, version: item.version,
+        sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.nombreUsuarioOperacion,
+        total_venta: item.total ?? 0, senas: item.senas ?? 0, usado_no_cancelado: item.usado ?? 0,
+        credito_siac: item.creditoBanco ?? 0, estado_credito: item.creditoEstado,
+        credito_liquidado: item.creditoLiquidadoMonto ?? 0,
+        credito_pendiente: item.creditoEstado === "pendiente" ? item.creditoBanco ?? 0 : 0,
+        saldo_que_suma_al_modelo: item.saldo,
+        fecha_asignacion: item.fechaAsignacion ?? "", chasis: item.chasis,
+      }));
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, sheetWithPesoColumns(rows, ["total_venta", "senas", "usado_no_cancelado", "credito_siac", "credito_liquidado", "credito_pendiente", "saldo_que_suma_al_modelo"]), "Detalle cuadros");
+      const fileBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="saldo-operacion-detalle-cuadros-${new Date().toISOString().slice(0, 10)}.xlsx"`);
+      return res.status(200).send(fileBuffer);
+    } catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo exportar el detalle de los cuadros" }); }
   };
 }

@@ -203,6 +203,10 @@ export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSn
   try { const { data } = await api.get("/operaciones/saldo-operacion/export", { params, responseType: "blob" }); return data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al exportar Saldo de operacion")); }
 }
+export async function exportSaldoOperacionResumen(params: Pick<SaldoOperacionSnapshotParams, "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor">): Promise<Blob> {
+  try { const { data } = await api.get("/operaciones/saldo-operacion/resumen-export", { params, responseType: "blob" }); return data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al exportar el detalle de los cuadros")); }
+}
 
 export async function getOperacionesDashboard(
   params: OperacionesDashboardParams,
