@@ -8,6 +8,9 @@ export const paths = {
     home: "/calidad",
     ssiVentas: "/calidad/ssi-ventas",
   },
+  kinto: {
+    flota: "/kinto/flota",
+  },
   entregas: {
     agenda: "/entregas/agenda",
     pendientesTurnar: "/entregas/pendientes-turnar",

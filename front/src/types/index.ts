@@ -2755,6 +2755,22 @@ export type TableroCobranzasDiarioResponse = z.infer<typeof tableroCobranzasDiar
 export type TableroCobranzasDia = z.infer<typeof tableroCobranzasDiaSchema>;
 export type TableroCobranzasDetalleDiarioResponse = z.infer<typeof tableroCobranzasDetalleDiarioResponseSchema>;
 export type TableroCobranzasRecibosOperacionResponse = z.infer<typeof tableroCobranzasRecibosOperacionResponseSchema>;
+export const kintoFlotaSchema = z.object({
+  _id: z.string(), dominio: z.string(), modelo: z.string(), anio: z.number(), vin: z.string(),
+  kmIniciales: z.number(), kmActual: z.number(), geotab: z.enum(["Reportando", "Sin Conexion"]), activo: z.boolean(), sucursalEntregaId: z.string().nullable(),
+  historialKm: z.array(z.object({ kmAnterior: z.number(), kmActual: z.number(), actorNombre: z.string(), createdAt: z.string() })),
+  auditoria: z.array(z.object({ accion: z.enum(["KM_UPDATED", "DEACTIVATED", "REACTIVATED", "GEOTAB_CHANGED"]), actorNombre: z.string(), before: z.record(z.string(), z.unknown()), after: z.record(z.string(), z.unknown()), createdAt: z.string() })),
+});
+export const kintoFlotaListResponseSchema = z.object({ data: z.array(kintoFlotaSchema) });
+export const kintoFlotaLookupResponseSchema = z.object({
+  data: z.object({ modelo: z.string(), anio: z.number().nullable(), vin: z.string() }).nullable(),
+  matches: z.number(), patente: z.string(),
+});
+export const kintoFlotaResponseSchema = z.object({ message: z.string(), data: kintoFlotaSchema });
+export type KintoFlota = z.infer<typeof kintoFlotaSchema>;
+export type KintoFlotaListResponse = z.infer<typeof kintoFlotaListResponseSchema>;
+export type KintoFlotaLookupResponse = z.infer<typeof kintoFlotaLookupResponseSchema>;
+export type KintoFlotaResponse = z.infer<typeof kintoFlotaResponseSchema>;
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;

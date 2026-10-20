@@ -44,6 +44,7 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "ssiVentas",
+  "kintoFlota",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];
@@ -95,6 +96,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   promediosPlanAhorro: "Promedios Plan de ahorro",
   minutas: "Minutas",
   ssiVentas: "SSI Ventas",
+  kintoFlota: "Kinto · Flota",
 };
 
 export const moduleSections: Array<{
@@ -140,6 +142,10 @@ export const moduleSections: Array<{
   {
     title: "Calidad",
     modules: ["ssiVentas"],
+  },
+  {
+    title: "Kinto",
+    modules: ["kintoFlota"],
   },
 ];
 

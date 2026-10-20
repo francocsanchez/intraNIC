@@ -2,6 +2,17 @@
 
 ## 2026-10-20
 
+- **Kinto · Flota:** se incorporó la sección protegida `/kinto/flota`, con permiso independiente, navegación propia y listado de unidades de alquiler.
+- **Kinto · Flota:** el alta consulta `siac.dbo.viewunidades` por `patente`, completa modelo, `modelo_ano` y VIN con una coincidencia única, y permite la carga manual si la búsqueda no resuelve una unidad.
+- **Kinto · Flota:** las unidades se persisten en Mongo con dominio y VIN únicos, KM iniciales y estado Geotab; la primera etapa no incluye edición ni baja.
+- **Kinto · Flota:** el botón de búsqueda de patente muestra un spinner y bloquea reintentos mientras SIAC responde.
+- **Kinto · Flota:** KM iniciales comienza vacío para evitar ceros prefijados; la grilla permite asignar o quitar por fila una sucursal de entrega, incluyendo las inactivas.
+- **Kinto · Flota:** se agregó la columna Acciones con actualización de KM actual e historial, cambio de Geotab y desactivación de unidades. Las tres acciones guardan usuario, fecha y valores anteriores/nuevos en Mongo; Geotab se representa con icono verde al reportar y rojo sin conexión.
+- **Kinto · Flota:** Geotab ahora recibe el estado de destino explícitamente, las unidades se separan entre activas y desactivadas, y la baja se confirma en un diálogo. Se agregó un acceso al historial completo de cambios por unidad, se quitaron las etiquetas de sucursal inactiva y la inicialización elimina el índice legado `chasis_1` que podía bloquear altas válidas.
+- **Kinto · Flota:** el diálogo de actualización de KM inicia vacío y bloquea valores inferiores al kilometraje vigente tanto en la interfaz como en la API.
+- **Kinto · Flota:** el historial de cambios compacta los valores anterior y nuevo en una misma línea por registro.
+- **Kinto · Flota:** las unidades desactivadas ahora pueden reactivarse con confirmación y auditoría de usuario.
+
 - **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
 - **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.
 - **Saldo de operación:** las columnas monetarias de las exportaciones Excel se presentan con un único símbolo de pesos argentinos, sin duplicarlo.

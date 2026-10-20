@@ -74,6 +74,7 @@ La logica vigente es:
 - `registroTestDrive`
 - `promediosPlanAhorro`
 - `minutas`
+- `kintoFlota`
 
 ## Regla general vigente
 Para cualquier pantalla, menu, accion o endpoint:
@@ -183,6 +184,12 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
   - `Promedio`
 - `Transferencias` ya no debe aparecer en el navbar superior de `Analisis`.
 - `Patentamientos` y `Transferencias` ya no deben vivir como accesos separados en ese navbar superior, porque se navegan desde su sidebar unificado.
+
+### Kinto
+
+- `Flota` depende de `modules.kintoFlota = 1` y se accede por `/kinto/flota`.
+- Todo usuario con el módulo habilitado puede consultar las pestañas de unidades activas y desactivadas, buscar patentes en `siac.dbo.viewunidades`, dar de alta unidades, asignarles cualquiera de las sucursales de entrega —incluso inactivas—, actualizar KM actual, cambiar Geotab, desactivar o reactivar con confirmación y consultar el historial de cambios. No hay restricciones adicionales por rol en esta etapa. Las acciones de KM, Geotab, desactivación y reactivación conservan auditoría de usuario, fecha y valores previos/nuevos.
+- `superAdmin` conserva acceso total.
 
 ### Regla transversal para todos los modulos
 

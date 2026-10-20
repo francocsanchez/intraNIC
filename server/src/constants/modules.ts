@@ -44,6 +44,7 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "ssiVentas",
+  "kintoFlota",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];

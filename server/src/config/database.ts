@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
 import { syncAgendaEntregaIndexes } from "../models/AgendaEntrega";
 import { syncPendienteTurnarIndexes } from "../models/PendienteTurnar";
+import { syncKintoFlotaIndexes } from "../models/KintoFlota";
 
 dotenv.config();
 const separator = colors.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -65,6 +66,7 @@ export const connectMongo = async () => {
     const connection = await mongoose.connect(process.env.DATABASE_MONGO!);
     await syncAgendaEntregaIndexes();
     await syncPendienteTurnarIndexes();
+    await syncKintoFlotaIndexes();
     console.log("\n" + colors.bgGreen.white.bold(" 🍃 MONGODB "));
     console.log(separator);
     console.log(`${colors.yellow("🌐 Host:")} ${colors.white(`${connection.connection.host}:${connection.connection.port}`)}`);

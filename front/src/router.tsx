@@ -19,6 +19,7 @@ const SuperAdminProtectedRoute = lazy(() => import("./layouts/SuperAdminProtecte
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
 const NICBelgranoLayout = lazy(() => import("./layouts/NICBelgranoLayout"));
+const KintoLayout = lazy(() => import("./layouts/KintoLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
@@ -110,6 +111,7 @@ const PendientesTurnarView = lazy(() => import("./views/entregas/PendientesTurna
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
+const KintoFlotaView = lazy(() => import("./views/kinto/KintoFlotaView"));
 
 export default function Router() {
   return (
@@ -135,6 +137,12 @@ export default function Router() {
               <Route element={<CalidadLayout />}>
                 <Route path={paths.calidad.home} element={<Navigate to={paths.calidad.ssiVentas} replace />} />
                 <Route path={paths.calidad.ssiVentas} element={<SsiVentasView />} />
+              </Route>
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["kintoFlota"]} />}>
+              <Route element={<KintoLayout />}>
+                <Route path={paths.kinto.flota} element={<KintoFlotaView />} />
               </Route>
             </Route>
 

@@ -88,6 +88,13 @@ export default function Inicio() {
       ],
     },
     {
+      title: "Kinto",
+      icon: CarFront,
+      items: [
+        { label: "Flota", to: paths.kinto.flota, enabled: hasModulePathAccess(user, "kintoFlota", paths.kinto.flota), icon: CarFront },
+      ],
+    },
+    {
       title: "Entregas",
       icon: CalendarDays,
       items: [
