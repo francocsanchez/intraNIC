@@ -48,6 +48,7 @@ WHERE csq.Numero_Fabrica LIKE 'NIC%'
 
 export const saldoOperacionUbicacionesQuery = () => `
 SELECT mnp.mnp_nrofab AS numero_fabrica,
+  NULLIF(LTRIM(RTRIM(mnp.mnp_chasis)), '') AS chasis,
   COALESCE(NULLIF(LTRIM(RTRIM(mnp.mnp_status)), ''), 'STOCK CONCESIONARIO') AS ubicacion
 FROM dbo.movnped mnp
 WHERE mnp.mnp_nrofab LIKE 'NIC%';

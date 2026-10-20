@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as XLSX from "xlsx";
 import { SaldoOperacionSnapshotService, analysisDimensions, defaultAnalysisDimensionOrder, tiposCliente, type AnalysisDimension, type SnapshotSortKey, type TipoCliente } from "../services/saldoOperacionSnapshot.service";
 import { CobrosVendedorService } from "../services/cobrosVendedor.service";
+import { SaldoOperacionCreditoLiquidadoService } from "../services/saldoOperacionCreditoLiquidado.service";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 const positiveInt = (value: unknown, fallback: number) => {
@@ -12,7 +13,12 @@ const snapshotSortKeys = new Set([
   "codigoOperacion", "clienteNombre", "sucursal", "vendedor", "nombreUsuarioOperacion",
   "tipoCliente",
   "modeloGeneral", "version", "ubicacion", "fechaAsignacion", "diasAsignada",
-  "fechaCancelacion", "diasHastaCancelacion", "saldo",
+  "fechaCancelacion", "diasHastaCancelacion", "creditoEstado", "saldo",
+]);
+const excelMimeTypes = new Set([
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/octet-stream",
 ]);
 
 const parseFilters = (req: Request) => ({
@@ -35,6 +41,19 @@ const parseAnalysisDimensions = (value: unknown): AnalysisDimension[] => {
 };
 
 export class SaldoOperacionSnapshotController {
+  static importCreditosLiquidados = async (req: Request, res: Response) => {
+    if (!req.file?.buffer?.length) return res.status(400).json({ message: "Seleccioná un archivo Excel" });
+    if (!/\.(xls|xlsx)$/i.test(req.file.originalname) && !excelMimeTypes.has(req.file.mimetype)) {
+      return res.status(400).json({ message: "El archivo debe tener formato .xls o .xlsx" });
+    }
+    try {
+      const data = await SaldoOperacionCreditoLiquidadoService.importWorkbook(req.file, req.user!);
+      return res.status(200).json({ message: "Créditos liquidados importados", data });
+    } catch (error) {
+      return res.status(400).json({ message: error instanceof Error ? error.message : "No se pudieron importar los créditos liquidados" });
+    }
+  };
+
   static searchVendedoresCobros = async (req: Request, res: Response) => {
     try { return res.status(200).json(await CobrosVendedorService.searchVendedores(optionalString(req.query.buscar) ?? "")); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudieron buscar los vendedores" }); }
@@ -158,13 +177,14 @@ export class SaldoOperacionSnapshotController {
       if (filters.operacion && (!/^\d+$/.test(filters.operacion) || Number(filters.operacion) <= 0)) return res.status(400).json({ message: "La operación debe ser un número positivo" });
       const items = await SaldoOperacionSnapshotService.exportRows(filters);
       const rows = items.map((item) => ({
-        op: item.codigoOperacion, numero_fabrica: item.numeroFabrica, version: item.version, modelo: item.modeloGeneral,
+        op: item.codigoOperacion, numero_fabrica: item.numeroFabrica, chasis: item.chasis, version: item.version, modelo: item.modeloGeneral,
         cliente: item.clienteNombre, tipo_cliente: item.tipoCliente ?? "", sucursal: item.sucursal, vendedor: item.vendedor, usuario_operacion: item.usuarioOperacion,
         nombre_usuario_operacion: item.nombreUsuarioOperacion, usuario_operacion_siac: item.usuarioOperacionOriginal,
         nombre_usuario_operacion_siac: item.nombreUsuarioOperacionOriginal, ubicacion: item.ubicacion, estado: item.estado,
         fecha_asignacion: item.fechaAsignacion ?? "", dias_asignada: item.diasAsignada ?? "", fecha_cancelacion: item.fechaCancelacion ?? "",
         dias_hasta_cancelacion: item.diasHastaCancelacion ?? "", total: item.total ?? 0, bonificacion: item.bonificacion ?? 0,
-        gestoria: item.gestoria ?? 0, senas: item.senas ?? 0, usado: item.usado ?? 0, credito: item.creditoBanco ?? 0, saldo: item.saldo,
+        gestoria: item.gestoria ?? 0, senas: item.senas ?? 0, usado: item.usado ?? 0, credito: item.creditoBanco ?? 0,
+        estado_credito: item.creditoEstado, credito_liquidado: item.creditoLiquidadoMonto ?? 0, saldo: item.saldo,
       }));
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), "SaldoOperacion");

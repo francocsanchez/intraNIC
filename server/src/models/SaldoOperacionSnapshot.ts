@@ -13,12 +13,15 @@ export interface ISaldoOperacionSnapshot extends Document {
   usuarioOperacionManual: string | null;
   nombreUsuarioOperacionManual: string | null;
   numeroFabrica: string;
+  chasis: string;
   total: number | null;
   bonificacion: number | null;
   gestoria: number | null;
   senas: number | null;
   usado: number | null;
   creditoBanco: number | null;
+  creditoLiquidadoMonto: number | null;
+  creditoLiquidadoEn: Date | null;
   version: string;
   modeloGeneral: string;
   fechaAsignacion: string | null;
@@ -49,12 +52,15 @@ const saldoOperacionSnapshotSchema = new Schema<ISaldoOperacionSnapshot>(
     usuarioOperacionManual: { type: String, default: null, trim: true },
     nombreUsuarioOperacionManual: { type: String, default: null, trim: true },
     numeroFabrica: { type: String, default: "", trim: true },
+    chasis: { type: String, default: "", trim: true, uppercase: true, index: true },
     total: nullableNumber,
     bonificacion: nullableNumber,
     gestoria: nullableNumber,
     senas: nullableNumber,
     usado: nullableNumber,
     creditoBanco: nullableNumber,
+    creditoLiquidadoMonto: nullableNumber,
+    creditoLiquidadoEn: { type: Date, default: null },
     version: { type: String, default: "", trim: true },
     modeloGeneral: { type: String, default: "SIN MODELO", trim: true },
     fechaAsignacion: { type: String, default: null },

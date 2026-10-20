@@ -2619,8 +2619,10 @@ export const saldoOperacionSnapshotItemSchema = z.object({
   codigoOperacion: z.number(), clienteNombre: z.string(), tipoCliente: z.enum(["Particular", "Leasing", "Reventa", "Empresa", "Licitación"]).nullable().optional().default(null), vendedor: z.string(), sucursal: z.string(),
   usuarioOperacion: z.string(), nombreUsuarioOperacion: z.string(), usuarioOperacionOriginal: z.string().optional().default(""),
   nombreUsuarioOperacionOriginal: z.string().optional().default(""), usuarioOperacionCorregido: z.boolean().optional().default(false), numeroFabrica: z.string(),
+  chasis: z.string().optional().default(""),
   total: z.number().nullable(), bonificacion: z.number().nullable(), gestoria: z.number().nullable(), senas: z.number().nullable(),
-  usado: z.number().nullable(), creditoBanco: z.number().nullable(), version: z.string(), modeloGeneral: z.string(),
+  usado: z.number().nullable(), creditoBanco: z.number().nullable(), creditoLiquidadoMonto: z.number().nullable().optional().default(null),
+  creditoEstado: z.enum(["sin_credito", "pendiente", "liquidado"]).optional().default("sin_credito"), version: z.string(), modeloGeneral: z.string(),
   fechaAsignacion: z.string().nullable(), fechaFactura: z.string().nullable().optional().default(null), diasAsignada: z.number().nullable(), estado: z.string(), ubicacion: z.string(),
   fechaCancelacion: z.string().nullable(), diasHastaCancelacion: z.number().nullable(), entregada: z.boolean().optional().default(false), saldo: z.number(), sincronizadoEn: z.string().nullable(),
 });
@@ -2629,8 +2631,16 @@ export const saldoOperacionSnapshotListResponseSchema = z.object({
   pagination: z.object({ page: z.number(), limit: z.number(), total: z.number(), totalPages: z.number(), hasNextPage: z.boolean() }),
 });
 export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.object({ sucursales: z.array(z.string()), ubicaciones: z.array(z.string()), usuarios: z.array(z.string()).optional().default([]), vendedores: z.array(z.string()).optional().default([]) }) });
-export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), usadoTotal: z.number() });
+export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), creditoPendienteCantidad: z.number().optional().default(0), usadoTotal: z.number(), usadoCantidad: z.number().optional().default(0) });
 export const saldoOperacionSnapshotUpdateResponseSchema = z.object({ message: z.string(), data: saldoOperacionSnapshotItemSchema });
+export const saldoOperacionCreditoImportResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({
+    totalFilas: z.number(), validas: z.number(), nuevas: z.number(), actualizadas: z.number(), repetidas: z.number(),
+    conciliadas: z.number(), sinCoincidencia: z.number(), descartadas: z.number(),
+    errores: z.array(z.object({ row: z.number(), chasis: z.string().optional(), message: z.string() })),
+  }),
+});
 export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });
 export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; saldoTotal?: number; children?: SaldoOperacionCancelacionAnalysisNode[] };
 export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
@@ -2642,7 +2652,10 @@ export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
     operations: z.number(),
     tree: saldoOperacionCancelacionAnalysisNodeSchema,
     dimensionOrder: z.array(z.enum(["tipoCliente", "vendedor", "usuario", "sucursal"])).min(1).optional().default(["tipoCliente", "vendedor", "usuario", "sucursal"]),
-    months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional() })),
+    months: z.array(z.object({
+      month: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(),
+      creditoPendiente: z.number().optional(), usadoPendiente: z.number().optional(), montoPendiente: z.number().optional(), totalPendiente: z.number().optional(),
+    })),
     sucursalesPorMes: z.array(z.object({
       sucursal: z.string(),
       months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
@@ -2653,6 +2666,7 @@ export type SaldoOperacionSnapshotItem = z.infer<typeof saldoOperacionSnapshotIt
 export type SaldoOperacionSnapshotListResponse = z.infer<typeof saldoOperacionSnapshotListResponseSchema>;
 export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacionSnapshotFiltersResponseSchema>;
 export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacionSnapshotSummaryResponseSchema>;
+export type SaldoOperacionCreditoImportResponse = z.infer<typeof saldoOperacionCreditoImportResponseSchema>;
 export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
 export type SaldoOperacionUsuario = z.infer<typeof saldoOperacionUsuariosResponseSchema>['data'][number];
 

@@ -8,11 +8,13 @@ import {
 } from "../controllers/querys/saldoOperacionSnapshot.query";
 import SaldoOperacionSnapshot from "../models/SaldoOperacionSnapshot";
 import SaldoOperacionUsuario from "../models/SaldoOperacionUsuario";
+import SaldoOperacionCreditoLiquidado from "../models/SaldoOperacionCreditoLiquidado";
+import { normalizeSaldoOperacionChasis } from "./saldoOperacionCreditoLiquidado.service";
 
 type SourceRow = Record<string, unknown>;
 type SnapshotSection = "conSaldo" | "canceladas";
 type SnapshotEntrega = "todas" | "entregadas" | "sinEntregar";
-export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "creditoEstado" | "saldo";
 export const tiposCliente = ["Particular", "Leasing", "Reventa", "Empresa", "Licitación"] as const;
 export type TipoCliente = typeof tiposCliente[number];
 export const analysisDimensions = ["tipoCliente", "vendedor", "usuario", "sucursal"] as const;
@@ -38,6 +40,10 @@ type CancelacionMonthlyGroup = {
   averageDays: number;
   operations: number;
   saldoTotal?: number;
+  creditoPendiente?: number;
+  usadoPendiente?: number;
+  montoPendiente?: number;
+  totalPendiente?: number;
 };
 
 type CancelacionSucursalMonthlyGroup = {
@@ -64,8 +70,29 @@ const dateOnlyOrNull = (value: unknown) => {
   return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day ? normalized : null;
 };
 
-const calculateSaldo = (row: { total?: number | null; senas?: number | null; usado?: number | null }) =>
-  (row.total ?? 0) - (row.senas ?? 0) - (row.usado ?? 0);
+const creditoEstado = (row: { creditoBanco?: number | null; creditoLiquidadoMonto?: number | null }) => {
+  if ((row.creditoBanco ?? 0) <= 0) return "sin_credito" as const;
+  return (row.creditoLiquidadoMonto ?? 0) > 0 ? "liquidado" as const : "pendiente" as const;
+};
+
+const calculateSaldo = (row: { total?: number | null; senas?: number | null; usado?: number | null; creditoBanco?: number | null; creditoLiquidadoMonto?: number | null }) =>
+  (row.total ?? 0) - (row.senas ?? 0) - (row.usado ?? 0) - (creditoEstado(row) === "liquidado" ? (row.creditoLiquidadoMonto ?? 0) : 0);
+
+const creditoLiquidadoExpression = {
+  $cond: [{ $gt: [{ $ifNull: ["$creditoBanco", 0] }, 0] }, { $ifNull: ["$creditoLiquidadoMonto", 0] }, 0],
+};
+const creditoPendienteExpression = {
+  $cond: [
+    {
+      $and: [
+        { $gt: [{ $ifNull: ["$creditoBanco", 0] }, 0] },
+        { $lte: [{ $ifNull: ["$creditoLiquidadoMonto", 0] }, 0] },
+      ],
+    },
+    { $ifNull: ["$creditoBanco", 0] },
+    0,
+  ],
+};
 
 const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
   const [asignacionYear, asignacionMonth, asignacionDay] = fechaAsignacion.split("-").map(Number);
@@ -123,7 +150,16 @@ const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: Cance
       operations: tree.operations,
       tree,
       dimensionOrder: dimensions,
-      months: months.map((item) => ({ month: item._id, averageDays: item.averageDays, operations: item.operations, ...(typeof item.saldoTotal === "number" ? { saldoTotal: item.saldoTotal } : {}) })),
+      months: months.map((item) => ({
+        month: item._id,
+        averageDays: item.averageDays,
+        operations: item.operations,
+        ...(typeof item.saldoTotal === "number" ? { saldoTotal: item.saldoTotal } : {}),
+        ...(typeof item.creditoPendiente === "number" ? { creditoPendiente: item.creditoPendiente } : {}),
+        ...(typeof item.usadoPendiente === "number" ? { usadoPendiente: item.usadoPendiente } : {}),
+        ...(typeof item.montoPendiente === "number" ? { montoPendiente: item.montoPendiente } : {}),
+        ...(typeof item.totalPendiente === "number" ? { totalPendiente: item.totalPendiente } : {}),
+      })),
       sucursalesPorMes: [...new Map(sucursalesPorMes.map((item) => [nodeName(item._id.sucursal, "Sin sucursal"), item._id.sucursal])).keys()]
         .sort((left, right) => left.localeCompare(right, "es"))
         .map((sucursal) => ({
@@ -194,12 +230,15 @@ const serialize = (item: any) => ({
   nombreUsuarioOperacionOriginal: item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion ?? "",
   usuarioOperacionCorregido: Boolean(item.usuarioOperacionManual),
   numeroFabrica: item.numeroFabrica ?? "",
+  chasis: item.chasis ?? "",
   total: item.total ?? null,
   bonificacion: item.bonificacion ?? null,
   gestoria: item.gestoria ?? null,
   senas: item.senas ?? null,
   usado: item.usado ?? null,
   creditoBanco: item.creditoBanco ?? null,
+  creditoLiquidadoMonto: item.creditoLiquidadoMonto ?? null,
+  creditoEstado: creditoEstado(item),
   version: item.version ?? "",
   modeloGeneral: item.modeloGeneral ?? "SIN MODELO",
   fechaAsignacion: item.fechaAsignacion ?? null,
@@ -230,13 +269,17 @@ export class SaldoOperacionSnapshotService {
       sequelizeNIC.query<SourceRow>(saldoOperacionUsuariosQuery(), { type: QueryTypes.SELECT }),
     ]);
     const ubicaciones = new Map<string, string>();
+    const chassis = new Map<string, string>();
     ubicacionRows.forEach((row) => {
       const numeroFabrica = trim(row.numero_fabrica);
-      if (numeroFabrica) ubicaciones.set(numeroFabrica, trim(row.ubicacion, "STOCK CONCESIONARIO"));
+      if (numeroFabrica) {
+        ubicaciones.set(numeroFabrica, trim(row.ubicacion, "STOCK CONCESIONARIO"));
+        chassis.set(numeroFabrica, normalizeSaldoOperacionChasis(row.chasis));
+      }
     });
 
     const now = new Date();
-    const operations = sourceRows
+    const sourceOperations = sourceRows
       .map((row) => {
         const codigoOperacion = numberOrNull(row.codigo_operacion);
         const fechaAsignacion = dateOnlyOrNull(row.fecha_asignacion);
@@ -250,6 +293,7 @@ export class SaldoOperacionSnapshotService {
           usuarioOperacionSiac: trim(row.usuario_operacion),
           nombreUsuarioOperacionSiac: trim(row.nombre_usuario_operacion),
           numeroFabrica,
+          chasis: chassis.get(numeroFabrica) ?? "",
           total: numberOrNull(row.pcio_venta),
           bonificacion: numberOrNull(row.bonif_venta),
           gestoria: numberOrNull(row.gestoria),
@@ -269,6 +313,19 @@ export class SaldoOperacionSnapshotService {
         };
       })
       .filter((row): row is NonNullable<typeof row> => row !== null);
+    const operationChassis = [...new Set(sourceOperations.map((item) => item.chasis).filter(Boolean))];
+    const creditosLiquidated = operationChassis.length
+      ? await SaldoOperacionCreditoLiquidado.find({ chasisNormalizado: { $in: operationChassis } }).lean()
+      : [];
+    const liquidacionesByChasis = new Map(creditosLiquidated.map((item) => [item.chasisNormalizado, item]));
+    const operations = sourceOperations.map((operation) => {
+      const liquidacion = liquidacionesByChasis.get(operation.chasis);
+      return {
+        ...operation,
+        creditoLiquidadoMonto: liquidacion?.montoLiquidado ?? null,
+        creditoLiquidadoEn: liquidacion?.liquidadoEn ?? null,
+      };
+    });
 
     if (operations.length) {
       await SaldoOperacionSnapshot.bulkWrite(
@@ -358,17 +415,25 @@ export class SaldoOperacionSnapshotService {
     const rows = await SaldoOperacionSnapshot.find({ ...baseFilter({ ...params, section: "conSaldo" }) }).lean();
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
+    let creditoPendienteCantidad = 0;
     let usadoTotal = 0;
+    let usadoCantidad = 0;
     rows.forEach((row) => {
       const modelo = trim(row.modeloGeneral, "SIN MODELO");
       grouped.set(modelo, (grouped.get(modelo) ?? 0) + calculateSaldo(row));
-      if (!row.fechaFactura) creditoTotal += row.creditoBanco ?? 0;
+      if (creditoEstado(row) === "pendiente") {
+        creditoTotal += row.creditoBanco ?? 0;
+        creditoPendienteCantidad += 1;
+      }
       usadoTotal += row.usado ?? 0;
+      if ((row.usado ?? 0) > 0) usadoCantidad += 1;
     });
     return {
       data: [...grouped.entries()].map(([modelo, saldo]) => ({ modelo, saldo })).sort((a, b) => b.saldo - a.saldo),
       creditoTotal,
+      creditoPendienteCantidad,
       usadoTotal,
+      usadoCantidad,
     };
   }
 
@@ -446,6 +511,12 @@ export class SaldoOperacionSnapshotService {
                 { $ifNull: ["$total", 0] },
                 { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
                 { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                {
+                  $multiply: [
+                    { $cond: [{ $gt: [{ $ifNull: ["$creditoBanco", 0] }, 0] }, { $ifNull: ["$creditoLiquidadoMonto", 0] }, 0] },
+                    -1,
+                  ],
+                },
               ],
             },
             ...analysisDimensionProjection,
@@ -464,11 +535,41 @@ export class SaldoOperacionSnapshotService {
                 { $ifNull: ["$total", 0] },
                 { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
                 { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                { $multiply: [creditoLiquidadoExpression, -1] },
+              ],
+            },
+            creditoPendiente: creditoPendienteExpression,
+            usadoPendiente: { $ifNull: ["$usado", 0] },
+            montoPendiente: {
+              $add: [
+                { $ifNull: ["$total", 0] },
+                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                { $multiply: [creditoLiquidadoExpression, -1] },
+                { $multiply: [creditoPendienteExpression, -1] },
+              ],
+            },
+            totalPendiente: {
+              $add: [
+                { $ifNull: ["$total", 0] },
+                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
+                { $multiply: [creditoLiquidadoExpression, -1] },
               ],
             },
           },
         },
-        { $group: { _id: "$month", averageDays: { $avg: "$dias" }, operations: { $sum: 1 }, saldoTotal: { $sum: "$saldo" } } },
+        {
+          $group: {
+            _id: "$month",
+            averageDays: { $avg: "$dias" },
+            operations: { $sum: 1 },
+            saldoTotal: { $sum: "$saldo" },
+            creditoPendiente: { $sum: "$creditoPendiente" },
+            usadoPendiente: { $sum: "$usadoPendiente" },
+            montoPendiente: { $sum: "$montoPendiente" },
+            totalPendiente: { $sum: "$totalPendiente" },
+          },
+        },
         { $sort: { _id: 1 } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([

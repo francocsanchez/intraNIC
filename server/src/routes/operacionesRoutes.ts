@@ -1,10 +1,21 @@
-import { Router } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
+import multer from "multer";
 import { authenticate } from "../middleware/authenticate";
 import { OperacionesController } from "../controllers/OperacionesController";
 import { authorizeModules } from "../middleware/authorizeModules";
 import { SaldoOperacionSnapshotController } from "../controllers/SaldoOperacionSnapshotController";
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { files: 1, fileSize: 10 * 1024 * 1024 } });
+const singleExcelUpload = (req: Request, res: Response, next: NextFunction) => {
+  upload.single("file")(req, res, (error) => {
+    if (!error) return next();
+    const message = error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE"
+      ? "El archivo supera el límite permitido de 10 MB"
+      : "No se pudo recibir el archivo seleccionado";
+    return res.status(400).json({ message });
+  });
+};
 
 router.use(authenticate);
 router.get("/dashboard", authorizeModules("operaciones"), OperacionesController.getDashboard);
@@ -62,6 +73,7 @@ router.get("/saldo-operacion/resumen", authorizeModules("saldoOperacion"), Saldo
 router.get("/saldo-operacion/analisis-cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.cancelacionAnalysis);
 router.get("/saldo-operacion/analisis-no-canceladas", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.noCanceladasAnalysis);
 router.get("/saldo-operacion/export", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.export);
+router.post("/saldo-operacion/creditos-liquidados/importar", authorizeModules("saldoOperacion"), singleExcelUpload, SaldoOperacionSnapshotController.importCreditosLiquidados);
 router.get("/saldo-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.list);
 router.patch("/saldo-operacion/:codigoOperacion/cancelacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateFechaCancelacion);
 router.patch("/saldo-operacion/:codigoOperacion/usuario-operacion", authorizeModules("saldoOperacion"), SaldoOperacionSnapshotController.updateUsuarioOperacion);

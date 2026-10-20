@@ -36,6 +36,8 @@ import {
   type SaldoOperacionSnapshotFiltersResponse,
   type SaldoOperacionSnapshotListResponse,
   type SaldoOperacionSnapshotSummaryResponse,
+  saldoOperacionCreditoImportResponseSchema,
+  type SaldoOperacionCreditoImportResponse,
   type SaldoOperacionUsuario,
   tableroCobranzasDiarioResponseSchema,
   tableroCobranzasDetalleDiarioResponseSchema,
@@ -64,7 +66,7 @@ type AnalisisVendedorParams = {
   vendedor?: number | null;
 };
 
-export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "saldo";
+export type SaldoOperacionSnapshotSortKey = "codigoOperacion" | "clienteNombre" | "tipoCliente" | "sucursal" | "vendedor" | "nombreUsuarioOperacion" | "modeloGeneral" | "version" | "ubicacion" | "fechaAsignacion" | "diasAsignada" | "fechaCancelacion" | "diasHastaCancelacion" | "creditoEstado" | "saldo";
 export type SaldoOperacionTipoCliente = "Particular" | "Leasing" | "Reventa" | "Empresa" | "Licitación";
 export type SaldoOperacionAnalysisDimension = "tipoCliente" | "vendedor" | "usuario" | "sucursal";
 export type SaldoOperacionSnapshotParams = { section?: "conSaldo" | "canceladas"; entrega?: "entregadas" | "sin-entregar"; sucursal?: string; ubicacion?: string; usuario?: string; vendedor?: string; operacion?: string; page?: number; limit?: number; sortKey?: SaldoOperacionSnapshotSortKey; sortDirection?: "asc" | "desc" };
@@ -186,6 +188,16 @@ export async function updateSaldoOperacionUsuario(codigoOperacion: number, codig
 export async function updateSaldoOperacionTipoCliente(codigoOperacion: number, tipoCliente: SaldoOperacionTipoCliente | null) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/tipo-cliente`, { tipoCliente }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al actualizar el tipo de cliente")); }
+}
+export async function importSaldoOperacionCreditosLiquidados(file: File): Promise<SaldoOperacionCreditoImportResponse> {
+  const form = new FormData();
+  form.append("file", file);
+  try {
+    const { data } = await api.post("/operaciones/saldo-operacion/creditos-liquidados/importar", form);
+    const parsed = saldoOperacionCreditoImportResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("La respuesta de importación no tiene el formato esperado");
+    return parsed.data;
+  } catch (error) { throw new Error(getErrorMessage(error, "Error al importar créditos liquidados")); }
 }
 export async function exportSaldoOperacionSnapshot(params: Pick<SaldoOperacionSnapshotParams, "section" | "entrega" | "sucursal" | "ubicacion" | "usuario" | "vendedor" | "operacion">): Promise<Blob> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/export", { params, responseType: "blob" }); return data; }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-20
+
+- **Saldo de operación:** se agregó la importación Excel de créditos liquidados por las columnas `Chasis` y `$ a Financiar`, disponible para todos los usuarios con acceso al módulo.
+- **Saldo de operación:** el cron sincroniza el chasis desde SIAC y concilia importaciones acumulativas por VIN, incluso cuando la operación aparece después; las correcciones de monto conservan auditoría y las reimportaciones no duplican descuentos.
+- **Saldo de operación:** el saldo ahora descuenta únicamente el crédito efectivamente liquidado, la grilla incorpora el estado `Cred` y la exportación incluye chasis, estado y monto liquidado.
+- **Saldo de operación:** la tarjeta de crédito ahora suma los créditos pendientes de liquidación y el análisis de No canceladas utiliza la misma fórmula conciliada.
+- **Saldo de operación:** la tarjeta de crédito pendiente ahora informa también la cantidad de operaciones que todavía requieren liquidación.
+- **Saldo de operación:** la tarjeta de usados no cancelados ahora informa en su título la cantidad de operaciones con usado, junto al monto.
+- **Saldo de operación · No canceladas:** el resumen mensual ahora desglosa crédito pendiente, usado pendiente, monto pendiente y total pendiente por mes de asignación.
+
 ## 2026-10-19
 
 - **Saldo de operación:** los árboles de cancelaciones y no canceladas ahora permiten quitar y volver a agregar T. Cliente, Vendedor, Usuario y Sucursal, además de reordenarlas; Tiempo total permanece fijo y siempre debe quedar al menos una dimensión activa.
