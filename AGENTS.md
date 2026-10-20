@@ -41,6 +41,7 @@ Los árboles de análisis deben limpiar explícitamente la serie ECharts antes d
 El diálogo para actualizar KM actual comienza vacío y no admite un valor menor al KM actualmente registrado; esta regla se valida también en la API.
 El historial de cambios de Kinto presenta los valores anterior y nuevo en una misma fila para mantener registros compactos.
 Las unidades desactivadas pueden reactivarse desde su pestaña, previa confirmación; la reactivación conserva actor, fecha y cambio de estado en el historial.
+Flota muestra sobre su tabla un resumen general por sucursal, con total de unidades y cantidades Geotab reportando y sin conexión.
 
 
 # Instrucciones del proyecto

@@ -12,6 +12,7 @@
 - **Kinto · Flota:** el diálogo de actualización de KM inicia vacío y bloquea valores inferiores al kilometraje vigente tanto en la interfaz como en la API.
 - **Kinto · Flota:** el historial de cambios compacta los valores anterior y nuevo en una misma línea por registro.
 - **Kinto · Flota:** las unidades desactivadas ahora pueden reactivarse con confirmación y auditoría de usuario.
+- **Kinto · Flota:** se agregaron tarjetas de resumen por sucursal, con total de unidades y estado Geotab reportando/sin conexión.
 
 - **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
 - **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.
