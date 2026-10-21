@@ -11,6 +11,14 @@ import { useMemo, useState } from "react";
 type MarcaFiltro = "TODOS" | string;
 const EMPTY_STOCK_USADOS: UnidadRow[] = [];
 
+function normalizarBusqueda(valor: string | null | undefined) {
+  return valor
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-AR")
+    .trim() ?? "";
+}
+
 function formatCurrency(value?: number) {
   if (!value) return "-";
 
@@ -24,6 +32,7 @@ function formatCurrency(value?: number) {
 export default function StockDisponibleUsados() {
   const { user, isLoading: authLoading } = useAuth();
   const [marcaActiva, setMarcaActiva] = useState<MarcaFiltro>("TODOS");
+  const [busqueda, setBusqueda] = useState("");
   const [currentTime] = useState(() => Date.now());
 
   const { data: configResponse, isError: configError, isLoading: configLoading } = useQuery({
@@ -45,10 +54,16 @@ export default function StockDisponibleUsados() {
     () => ["TODOS", ...Array.from(new Set(items.map((item) => item.marca?.trim().toUpperCase()).filter(Boolean))).sort((a, b) => a.localeCompare(b))],
     [items],
   );
-  const itemsFiltrados = useMemo(
-    () => (marcaActiva === "TODOS" ? items : items.filter((item) => item.marca?.trim().toUpperCase() === marcaActiva)),
-    [items, marcaActiva],
-  );
+  const itemsFiltrados = useMemo(() => {
+    const busquedaNormalizada = normalizarBusqueda(busqueda);
+
+    return items.filter((item) => {
+      const coincideMarca = marcaActiva === "TODOS" || item.marca?.trim().toUpperCase() === marcaActiva;
+      const coincideBusqueda = !busquedaNormalizada || [item.version, item.color].some((valor) => normalizarBusqueda(valor).includes(busquedaNormalizada));
+
+      return coincideMarca && coincideBusqueda;
+    });
+  }, [busqueda, items, marcaActiva]);
   const resumenMarcas = useMemo(
     () => Object.entries(resumen?.porMarca ?? {}).map(([marca, total]) => ({ marca, total: Number(total) })).sort((a, b) => a.marca.localeCompare(b.marca)),
     [resumen],
@@ -122,7 +137,16 @@ export default function StockDisponibleUsados() {
             <h2 className="text-base font-semibold tracking-tight text-foreground">Detalle de unidades</h2>
             <p className="mt-1 text-sm text-muted-foreground">{marcaActiva === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por marca: ${marcaActiva}`}</p>
           </div>
-          <p className="text-sm text-muted-foreground">{itemsFiltrados.length} registros</p>
+          <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center">
+            <input
+              aria-label="Buscar por modelo o color"
+              value={busqueda}
+              onChange={(event) => setBusqueda(event.target.value)}
+              placeholder="Buscar modelo o color"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm md:w-64"
+            />
+            <p className="whitespace-nowrap text-sm text-muted-foreground">{itemsFiltrados.length} registros</p>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -146,7 +170,7 @@ export default function StockDisponibleUsados() {
                   <td className="min-w-64 whitespace-pre-wrap px-3 py-1.5 text-muted-foreground">{item.observaciones?.trim() || "-"}</td>
                 </tr>
               ))}
-              {!itemsFiltrados.length && <tr><td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">No hay unidades para el filtro seleccionado.</td></tr>}
+              {!itemsFiltrados.length && <tr><td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">No hay unidades para los filtros seleccionados.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -2,6 +2,8 @@
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
+Las vistas `/stock/convencional/disponible`, `/stock/usados/disponible` y `/stock/liess/nuevos` incluyen un buscador inmediato por modelo o color, combinado con sus filtros existentes y tolerante a mayúsculas, tildes y espacios.
+
 `Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC cada dos minutos, de 07:00 a 20:00 (Buenos Aires), con última ejecución a las 20:00. Los endpoints del tablero nunca realizan SQL directo.
 La fecha de asignación de cada snapshot prioriza la última auditoría SIAC `Asignación Unidad` de `audittabla`; si no existe, utiliza `ope_fecasig`. Una reasignación reinicia así sus días y período de análisis.
 El sincronizador de `Saldo de operacion` elimina de Mongo los snapshots activos que SIAC devuelve sin fecha de asignación válida o que ya no aparecen como operaciones asignadas, para excluir operaciones que ya no poseen una unidad asignada ni saldo cobrable.

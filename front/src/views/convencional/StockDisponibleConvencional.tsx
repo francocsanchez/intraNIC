@@ -34,10 +34,19 @@ function normalizarUbicacion(ubicacion: string | null | undefined) {
   return "EN PRODUCCION";
 }
 
+function normalizarBusqueda(valor: string | null | undefined) {
+  return valor
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-AR")
+    .trim() ?? "";
+}
+
 export default function StockDisponibleConvencional() {
   const { user, isLoading: authLoading } = useAuth();
   const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
   const [ubicacionActiva, setUbicacionActiva] = useState<UbicacionFiltro>("TODAS");
+  const [busqueda, setBusqueda] = useState("");
 
   const {
     data: configResponse,
@@ -99,9 +108,15 @@ export default function StockDisponibleConvencional() {
   const ubicacionSeleccionada = ubicacionesDisponibles.includes(ubicacionActiva) ? ubicacionActiva : "TODAS";
 
   const itemsVisibles = useMemo(() => {
-    if (ubicacionSeleccionada === "TODAS") return itemsFiltrados;
-    return itemsFiltrados.filter((item) => normalizarUbicacion(item.ubicacion) === ubicacionSeleccionada);
-  }, [itemsFiltrados, ubicacionSeleccionada]);
+    const busquedaNormalizada = normalizarBusqueda(busqueda);
+
+    return itemsFiltrados.filter((item) => {
+      const coincideUbicacion = ubicacionSeleccionada === "TODAS" || normalizarUbicacion(item.ubicacion) === ubicacionSeleccionada;
+      const coincideBusqueda = !busquedaNormalizada || [item.modelo, item.version, item.color].some((valor) => normalizarBusqueda(valor).includes(busquedaNormalizada));
+
+      return coincideUbicacion && coincideBusqueda;
+    });
+  }, [busqueda, itemsFiltrados, ubicacionSeleccionada]);
 
   const formatDate = (value: string) => {
     const date = new Date(value);
@@ -256,6 +271,13 @@ export default function StockDisponibleConvencional() {
               {modeloActivo === "TODOS" ? "Listado completo de unidades disponibles" : `Listado filtrado por modelo: ${modeloActivo}`}
             </p>
           </div>
+          <input
+            aria-label="Buscar por modelo o color"
+            value={busqueda}
+            onChange={(event) => setBusqueda(event.target.value)}
+            placeholder="Buscar modelo o color"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm md:w-64"
+          />
         </div>
 
         <div className="overflow-x-auto">
@@ -302,7 +324,7 @@ export default function StockDisponibleConvencional() {
               {itemsVisibles.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-3 py-8 text-center text-sm text-muted-foreground">
-                    No hay unidades para el filtro seleccionado.
+                    No hay unidades para los filtros seleccionados.
                   </td>
                 </tr>
               )}

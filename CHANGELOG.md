@@ -2,6 +2,8 @@
 
 ## 2026-10-21
 
+- **Stock disponible:** se agregó en Convencional, Usados y LIESS nuevos un buscador inmediato por modelo o versión y color, combinado con los filtros existentes e indiferente de mayúsculas o tildes.
+
 - **Kinto · NPS Share:** se incorporó el módulo protegido `/kinto/nps-share`, con permiso independiente, filtro anual, gráfico de líneas y tabla mensual para Promotores, Pasivos y Detractores.
 - **Kinto · NPS Share:** la carga se realiza desde un diálogo y guarda un único registro por mes/año, actualizable con porcentajes entre 0 y 100.
 - **Kinto · NPS Share:** el gráfico identifica claramente las dimensiones con verde para Promotores, amarillo para Pasivos y rojo para Detractores.
