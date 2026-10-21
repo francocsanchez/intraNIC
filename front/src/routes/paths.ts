@@ -10,6 +10,7 @@ export const paths = {
   },
   kinto: {
     flota: "/kinto/flota",
+    matafuegos: "/kinto/matafuegos",
   },
   entregas: {
     agenda: "/entregas/agenda",

@@ -39,6 +39,7 @@ import solicitudCambioColorRoutes from "./routes/solicitudCambioColorRoutes";
 import repuestosSiniestrosRoutes from "./routes/repuestosSiniestrosRoutes";
 import cobranzasRoutes from "./routes/cobranzasRoutes";
 import kintoFlotaRoutes from "./routes/kintoFlotaRoutes";
+import kintoMatafuegosRoutes from "./routes/kintoMatafuegosRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -85,5 +86,6 @@ app.use("/api/central-deudores", centralDeudoresRoutes);
 app.use("/api/cobranzas", cobranzasRoutes);
 app.use("/api/calidad/ssi-ventas", ssiVentasRoutes);
 app.use("/api/kinto/flota", kintoFlotaRoutes);
+app.use("/api/kinto/matafuegos", kintoMatafuegosRoutes);
 
 export default app;

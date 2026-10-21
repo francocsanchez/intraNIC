@@ -12,6 +12,7 @@ import {
   FileSearch,
   FileText,
   FileSpreadsheet,
+  Flame,
   FolderCog,
   Hammer,
   Inbox,
@@ -92,6 +93,7 @@ export default function Inicio() {
       icon: CarFront,
       items: [
         { label: "Flota", to: paths.kinto.flota, enabled: hasModulePathAccess(user, "kintoFlota", paths.kinto.flota), icon: CarFront },
+        { label: "Matafuegos", to: paths.kinto.matafuegos, enabled: hasModulePathAccess(user, "kintoMatafuegos", paths.kinto.matafuegos), icon: Flame },
       ],
     },
     {

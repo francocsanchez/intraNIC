@@ -112,6 +112,7 @@ const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntr
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
 const KintoFlotaView = lazy(() => import("./views/kinto/KintoFlotaView"));
+const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView"));
 
 export default function Router() {
   return (
@@ -140,9 +141,12 @@ export default function Router() {
               </Route>
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["kintoFlota"]} />}>
-              <Route element={<KintoLayout />}>
+            <Route element={<KintoLayout />}>
+              <Route element={<ModuleProtectedRoute allowedModules={["kintoFlota"]} />}>
                 <Route path={paths.kinto.flota} element={<KintoFlotaView />} />
+              </Route>
+              <Route element={<ModuleProtectedRoute allowedModules={["kintoMatafuegos"]} />}>
+                <Route path={paths.kinto.matafuegos} element={<KintoMatafuegosView />} />
               </Route>
             </Route>
 

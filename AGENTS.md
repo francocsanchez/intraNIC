@@ -42,6 +42,8 @@ El diálogo para actualizar KM actual comienza vacío y no admite un valor menor
 El historial de cambios de Kinto presenta los valores anterior y nuevo en una misma fila para mantener registros compactos.
 Las unidades desactivadas pueden reactivarse desde su pestaña, previa confirmación; la reactivación conserva actor, fecha y cambio de estado en el historial.
 Flota muestra sobre su tabla un resumen general por sucursal, con total de unidades y cantidades Geotab reportando y sin conexión.
+`Kinto · Matafuegos` vive en `/kinto/matafuegos` y usa el permiso independiente `kintoMatafuegos`. Lista únicamente unidades activas de Flota, agrupadas por sucursal —o `Sin asignar`—, con dominio, modelo, año, KM actual, vencimiento, días restantes y estado. Sin recarga, con vencimiento hoy o vencimiento anterior significa `Vencido`; solo una fecha posterior a hoy muestra `Ok`. Cada recarga requiere fecha de recarga —precargada con hoy— y vencimiento posterior; observaciones son opcionales. Conserva actor, fecha y observaciones en su historial.
+Las tablas agrupadas de Matafuegos usan un layout de columnas fijo y compartido para alinear sus campos entre sucursales.
 
 
 # Instrucciones del proyecto

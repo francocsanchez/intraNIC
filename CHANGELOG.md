@@ -17,6 +17,9 @@
 - **Kinto · Flota:** el historial de cambios compacta los valores anterior y nuevo en una misma línea por registro.
 - **Kinto · Flota:** las unidades desactivadas ahora pueden reactivarse con confirmación y auditoría de usuario.
 - **Kinto · Flota:** se agregaron tarjetas de resumen por sucursal, con total de unidades y estado Geotab reportando/sin conexión.
+- **Kinto · Matafuegos:** se incorporó el módulo protegido para controlar recargas y vencimientos de las unidades activas de Flota, agrupadas por sucursal. Registra historial auditable por recarga y marca como vencidas las unidades sin registro o con vencimiento igual o anterior a hoy.
+- **Kinto · Matafuegos:** las observaciones de recarga ahora son opcionales, la fecha de recarga se precarga con hoy y la tabla informa los días restantes hasta el vencimiento.
+- **Kinto · Matafuegos:** las tablas por sucursal fijan los anchos de columnas para mantener sus datos alineados.
 
 - **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
 - **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.

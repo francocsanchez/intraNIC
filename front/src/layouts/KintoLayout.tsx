@@ -1,6 +1,6 @@
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { paths } from "@/routes/paths";
-import { CarFront } from "lucide-react";
+import { CarFront, Flame } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function KintoLayout() {
@@ -10,7 +10,7 @@ export default function KintoLayout() {
     <BaseAppLayout
       footerLeft="IntraNIC - Uso interno Nippon Car"
       footerRight="Desarrollado por Franco Sanchez"
-      centerContent={
+      centerContent={<>
         <Link
           to={paths.kinto.flota}
           className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -22,7 +22,18 @@ export default function KintoLayout() {
           <CarFront size={16} strokeWidth={1.75} />
           Flota
         </Link>
-      }
+        <Link
+          to={paths.kinto.matafuegos}
+          className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            pathname === paths.kinto.matafuegos
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+        >
+          <Flame size={16} strokeWidth={1.75} />
+          Matafuegos
+        </Link>
+      </>}
     />
   );
 }
