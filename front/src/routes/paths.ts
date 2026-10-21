@@ -9,6 +9,7 @@ export const paths = {
     ssiVentas: "/calidad/ssi-ventas",
   },
   kinto: {
+    dashboard: "/kinto/dashboard",
     flota: "/kinto/flota",
     matafuegos: "/kinto/matafuegos",
     multas: "/kinto/multas",

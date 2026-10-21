@@ -41,6 +41,7 @@ import cobranzasRoutes from "./routes/cobranzasRoutes";
 import kintoFlotaRoutes from "./routes/kintoFlotaRoutes";
 import kintoMatafuegosRoutes from "./routes/kintoMatafuegosRoutes";
 import kintoMultasRoutes from "./routes/kintoMultasRoutes";
+import kintoDashboardRoutes from "./routes/kintoDashboardRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -89,5 +90,6 @@ app.use("/api/calidad/ssi-ventas", ssiVentasRoutes);
 app.use("/api/kinto/flota", kintoFlotaRoutes);
 app.use("/api/kinto/matafuegos", kintoMatafuegosRoutes);
 app.use("/api/kinto/multas", kintoMultasRoutes);
+app.use("/api/kinto/dashboard", kintoDashboardRoutes);
 
 export default app;

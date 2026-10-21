@@ -45,6 +45,7 @@ export const moduleKeys = [
   "minutas",
   "ssiVentas",
   "kintoFlota",
+  "kintoDashboard",
   "kintoMatafuegos",
   "kintoMultas",
 ] as const;
@@ -99,6 +100,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   minutas: "Minutas",
   ssiVentas: "SSI Ventas",
   kintoFlota: "Kinto · Flota",
+  kintoDashboard: "Kinto · Dashboard",
   kintoMatafuegos: "Kinto · Matafuegos",
   kintoMultas: "Kinto · Multas",
 };
@@ -149,7 +151,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Kinto",
-    modules: ["kintoFlota", "kintoMatafuegos", "kintoMultas"],
+    modules: ["kintoFlota", "kintoDashboard", "kintoMatafuegos", "kintoMultas"],
   },
 ];
 

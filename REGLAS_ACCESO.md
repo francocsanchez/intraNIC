@@ -75,6 +75,7 @@ La logica vigente es:
 - `promediosPlanAhorro`
 - `minutas`
 - `kintoFlota`
+- `kintoDashboard`
 - `kintoMatafuegos`
 - `kintoMultas`
 
@@ -189,6 +190,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 
 ### Kinto
 
+- `Dashboard` depende de `modules.kintoDashboard = 1` y se accede por `/kinto/dashboard`. Consulta exclusivamente Mongo y permite analizar el estado actual de Flota junto con gastos históricos por fecha operativa de recargas y multas; no concede acceso para operar los módulos de Kinto. `superAdmin` conserva acceso total.
 - `Flota` depende de `modules.kintoFlota = 1` y se accede por `/kinto/flota`.
 - Todo usuario con el módulo habilitado puede consultar las pestañas de unidades activas y desactivadas, buscar patentes en `siac.dbo.viewunidades`, dar de alta unidades, asignarles cualquiera de las sucursales de entrega —incluso inactivas—, actualizar KM actual, cambiar Geotab, desactivar o reactivar con confirmación y consultar el historial de cambios. No hay restricciones adicionales por rol en esta etapa. Las acciones de KM, Geotab, desactivación y reactivación conservan auditoría de usuario, fecha y valores previos/nuevos.
 - `superAdmin` conserva acceso total.

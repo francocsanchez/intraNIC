@@ -2797,6 +2797,15 @@ export type KintoMultaListResponse = z.infer<typeof kintoMultaListResponseSchema
 export type KintoMultaResponse = z.infer<typeof kintoMultaResponseSchema>;
 export type KintoMultaHistoryResponse = z.infer<typeof kintoMultaHistoryResponseSchema>;
 export type KintoMultaDomainsResponse = z.infer<typeof kintoMultaDomainsResponseSchema>;
+export const kintoDashboardStatusSchema = z.enum(["PEND_COBRAR", "PEND_FACTURAR", "PEND_PAGAR", "PAGADO"]);
+export const kintoDashboardResponseSchema = z.object({
+  filtros: z.object({ anios: z.array(z.number()), sucursales: z.array(z.string()) }),
+  estadoActual: z.object({ unidadesActivas: z.number(), unidadesInactivas: z.number(), reportando: z.number(), sinConexion: z.number(), tasaConexion: z.number(), kmTotal: z.number(), kmPromedio: z.number(), matafuegos: z.object({ vencidos: z.number(), proximos: z.number(), sinRecarga: z.number() }) }),
+  gastos: z.object({ mensual: z.array(z.object({ month: z.number(), matafuegos: z.number(), multas: z.number(), cantidadMatafuegos: z.number(), cantidadMultas: z.number(), total: z.number() })), total: z.number(), promedioPorUnidad: z.number() }),
+  multas: z.object({ estados: z.array(z.object({ status: kintoDashboardStatusSchema, quantity: z.number(), amount: z.number() })), pendientesCantidad: z.number(), pendientesMonto: z.number() }),
+  sucursales: z.array(z.object({ sucursal: z.string(), activeUnits: z.number(), reporting: z.number(), disconnected: z.number(), matafuegosCriticos: z.number(), matafuegosAmount: z.number(), multasAmount: z.number(), multasPendientes: z.number(), montoPendiente: z.number() })),
+});
+export type KintoDashboardResponse = z.infer<typeof kintoDashboardResponseSchema>;
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;

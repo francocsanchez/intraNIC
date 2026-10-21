@@ -45,6 +45,7 @@ export const moduleKeys = [
   "minutas",
   "ssiVentas",
   "kintoFlota",
+  "kintoDashboard",
   "kintoMatafuegos",
   "kintoMultas",
 ] as const;
