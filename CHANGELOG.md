@@ -7,6 +7,7 @@
 - **Kinto · Multas:** la grilla permite avanzar Cobrado → Facturado → Pagado, filtrar los pendientes de cada etapa y corregir mediante retrocesos que limpian estados dependientes.
 - **Kinto · Multas:** cada cargo, edición, modificación de check y eliminación lógica conserva en Mongo el actor, fecha y valores anteriores/nuevos, visible desde el historial de la multa.
 - **Kinto · Multas:** se corrigió la actualización de checks cuando existían auditorías iniciales sin valor anterior y se centraron todos los encabezados, datos, checks y acciones de la grilla.
+- **Kinto · Multas:** se corrigió el tipado de la eliminación para que el build Docker de frontend valide la respuesta del endpoint correctamente.
 - **Kinto · Flota:** la consulta de alta por patente ahora parte directamente de `siac.dbo.anexnvo`; conserva el modelo, año vigente y VIN completo de la operación mediante `auto`, sin consultar la vista lenta `viewunidades`.
 
 ## 2026-10-20
