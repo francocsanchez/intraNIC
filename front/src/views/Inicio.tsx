@@ -17,6 +17,7 @@ import {
   Hammer,
   Inbox,
   LogOut,
+  LineChart,
   Motorbike,
   ReceiptText,
   Package,
@@ -97,6 +98,7 @@ export default function Inicio() {
         { label: "Flota", to: paths.kinto.flota, enabled: hasModulePathAccess(user, "kintoFlota", paths.kinto.flota), icon: CarFront },
         { label: "Matafuegos", to: paths.kinto.matafuegos, enabled: hasModulePathAccess(user, "kintoMatafuegos", paths.kinto.matafuegos), icon: Flame },
         { label: "Multas", to: paths.kinto.multas, enabled: hasModulePathAccess(user, "kintoMultas", paths.kinto.multas), icon: ReceiptText },
+        { label: "NPS Share", to: paths.kinto.npsShare, enabled: hasModulePathAccess(user, "kintoNpsShare", paths.kinto.npsShare), icon: LineChart },
       ],
     },
     {
