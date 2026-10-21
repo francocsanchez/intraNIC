@@ -2,7 +2,7 @@ import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { BarChart3, CarFront, Flame, ReceiptText } from "lucide-react";
+import { BarChart3, CarFront, Flame, LineChart, ReceiptText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function KintoLayout() {
@@ -13,6 +13,7 @@ export default function KintoLayout() {
     { label: "Flota", to: paths.kinto.flota, icon: CarFront, module: "kintoFlota" as const },
     { label: "Matafuegos", to: paths.kinto.matafuegos, icon: Flame, module: "kintoMatafuegos" as const },
     { label: "Multas", to: paths.kinto.multas, icon: ReceiptText, module: "kintoMultas" as const },
+    { label: "NPS Share", to: paths.kinto.npsShare, icon: LineChart, module: "kintoNpsShare" as const },
   ].filter((item) => hasModulePathAccess(user, item.module, item.to));
 
   return (

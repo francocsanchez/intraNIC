@@ -115,6 +115,7 @@ const KintoFlotaView = lazy(() => import("./views/kinto/KintoFlotaView"));
 const KintoDashboardView = lazy(() => import("./views/kinto/KintoDashboardView"));
 const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView"));
 const KintoMultasView = lazy(() => import("./views/kinto/KintoMultasView"));
+const KintoNpsShareView = lazy(() => import("./views/kinto/KintoNpsShareView"));
 
 export default function Router() {
   return (
@@ -155,6 +156,9 @@ export default function Router() {
               </Route>
               <Route element={<ModuleProtectedRoute allowedModules={["kintoMultas"]} />}>
                 <Route path={paths.kinto.multas} element={<KintoMultasView />} />
+              </Route>
+              <Route element={<ModuleProtectedRoute allowedModules={["kintoNpsShare"]} />}>
+                <Route path={paths.kinto.npsShare} element={<KintoNpsShareView />} />
               </Route>
             </Route>
 

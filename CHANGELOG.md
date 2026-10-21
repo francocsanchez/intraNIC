@@ -2,6 +2,9 @@
 
 ## 2026-10-21
 
+- **Kinto · NPS Share:** se incorporó el módulo protegido `/kinto/nps-share`, con permiso independiente, filtro anual, gráfico de líneas y tabla mensual para Promotores, Pasivos y Detractores.
+- **Kinto · NPS Share:** la carga se realiza desde un diálogo y guarda un único registro por mes/año, actualizable con porcentajes entre 0 y 100.
+- **Kinto · NPS Share:** el gráfico identifica claramente las dimensiones con verde para Promotores, amarillo para Pasivos y rojo para Detractores.
 - **Kinto · Dashboard:** se incorporó `/kinto/dashboard` con permiso independiente, filtros anuales, mensuales y por sucursal, categoría/estado interactivos, indicadores actuales de flota y Geotab, control de matafuegos, gastos históricos y análisis de multas por sucursal.
 - **Kinto · Multas:** se incorporó el módulo protegido `/kinto/multas`, con permiso independiente, carga mediante autocomplete de Dominio y captura histórica de sucursal, fecha, booking y monto.
 - **Kinto · Multas:** la grilla permite avanzar Cobrado → Facturado → Pagado, filtrar los pendientes de cada etapa y corregir mediante retrocesos que limpian estados dependientes.

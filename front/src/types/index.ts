@@ -2797,6 +2797,12 @@ export type KintoMultaListResponse = z.infer<typeof kintoMultaListResponseSchema
 export type KintoMultaResponse = z.infer<typeof kintoMultaResponseSchema>;
 export type KintoMultaHistoryResponse = z.infer<typeof kintoMultaHistoryResponseSchema>;
 export type KintoMultaDomainsResponse = z.infer<typeof kintoMultaDomainsResponseSchema>;
+export const kintoNpsShareSchema = z.object({ _id: z.string(), anio: z.number(), mes: z.number(), promotores: z.number(), pasivos: z.number(), detractores: z.number(), createdAt: z.string(), updatedAt: z.string() });
+export const kintoNpsShareListResponseSchema = z.object({ data: z.array(kintoNpsShareSchema), filtros: z.object({ anios: z.array(z.number()) }) });
+export const kintoNpsShareResponseSchema = z.object({ message: z.string(), data: kintoNpsShareSchema });
+export type KintoNpsShare = z.infer<typeof kintoNpsShareSchema>;
+export type KintoNpsShareListResponse = z.infer<typeof kintoNpsShareListResponseSchema>;
+export type KintoNpsShareResponse = z.infer<typeof kintoNpsShareResponseSchema>;
 export const kintoDashboardStatusSchema = z.enum(["PEND_COBRAR", "PEND_FACTURAR", "PEND_PAGAR", "PAGADO"]);
 export const kintoDashboardResponseSchema = z.object({
   filtros: z.object({ anios: z.array(z.number()), sucursales: z.array(z.string()) }),

@@ -42,6 +42,7 @@ import kintoFlotaRoutes from "./routes/kintoFlotaRoutes";
 import kintoMatafuegosRoutes from "./routes/kintoMatafuegosRoutes";
 import kintoMultasRoutes from "./routes/kintoMultasRoutes";
 import kintoDashboardRoutes from "./routes/kintoDashboardRoutes";
+import kintoNpsShareRoutes from "./routes/kintoNpsShareRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -91,5 +92,6 @@ app.use("/api/kinto/flota", kintoFlotaRoutes);
 app.use("/api/kinto/matafuegos", kintoMatafuegosRoutes);
 app.use("/api/kinto/multas", kintoMultasRoutes);
 app.use("/api/kinto/dashboard", kintoDashboardRoutes);
+app.use("/api/kinto/nps-share", kintoNpsShareRoutes);
 
 export default app;

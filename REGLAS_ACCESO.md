@@ -78,6 +78,7 @@ La logica vigente es:
 - `kintoDashboard`
 - `kintoMatafuegos`
 - `kintoMultas`
+- `kintoNpsShare`
 
 ## Regla general vigente
 Para cualquier pantalla, menu, accion o endpoint:
@@ -196,6 +197,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `superAdmin` conserva acceso total.
 - `Matafuegos` depende de `modules.kintoMatafuegos = 1` y se accede por `/kinto/matafuegos`. Todo usuario con el módulo puede consultar unidades activas, registrar recargas y consultar su historial; no hay restricciones adicionales por rol en esta etapa.
 - `Multas` depende de `modules.kintoMultas = 1` y se accede por `/kinto/multas`. Todo usuario con el módulo puede registrar, editar, eliminar lógicamente, actualizar los estados y consultar el historial de multas; no hay restricciones adicionales por rol en esta etapa.
+- `NPS Share` depende de `modules.kintoNpsShare = 1` y se accede por `/kinto/nps-share`. Todo usuario con el módulo puede consultar y cargar/actualizar los porcentajes mensuales de Promotores, Pasivos y Detractores.
 
 ### Regla transversal para todos los modulos
 
