@@ -19,6 +19,8 @@ const normalizeText = (value: unknown) => (typeof value === "string" ? value.tri
 export class KintoFlotaService {
   static async lookupVehicle(patente: string): Promise<KintoVehicleLookup[]> {
     const rows = await sequelizeNIC.query<KintoLookupRow>(kintoFlotaLookupQuery(), {
+      // anexnvo is the current-operation source and avoids the expensive
+      // viewunidades definition while preserving its model, year and VIN data.
       replacements: { patente },
       type: QueryTypes.SELECT,
     });

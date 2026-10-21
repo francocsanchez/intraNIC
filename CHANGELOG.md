@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-21
+
+- **Kinto · Flota:** la consulta de alta por patente ahora parte directamente de `siac.dbo.anexnvo`; conserva el modelo, año vigente y VIN completo de la operación mediante `auto`, sin consultar la vista lenta `viewunidades`.
+
 ## 2026-10-20
 
 - **Kinto · Flota:** se incorporó la sección protegida `/kinto/flota`, con permiso independiente, navegación propia y listado de unidades de alquiler.
