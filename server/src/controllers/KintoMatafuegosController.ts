@@ -15,6 +15,7 @@ const daysUntil = (date: string | null, today: string) => date ? Math.round((Dat
 
 const formatHistory = (item: any) => ({
   _id: String(item._id), fechaRecarga: item.fechaRecarga, fechaVencimiento: item.fechaVencimiento,
+  importeRecarga: typeof item.importeRecarga === "number" ? item.importeRecarga : null,
   observaciones: item.observaciones ?? "", actorNombre: item.actorNombre, createdAt: item.createdAt,
 });
 
@@ -52,13 +53,18 @@ export class KintoMatafuegosController {
     const fechaRecarga = typeof req.body?.fechaRecarga === "string" ? req.body.fechaRecarga.trim() : "";
     const fechaVencimiento = typeof req.body?.fechaVencimiento === "string" ? req.body.fechaVencimiento.trim() : "";
     const observaciones = typeof req.body?.observaciones === "string" ? req.body.observaciones.trim() : "";
+    const importeRaw = req.body?.importeRecarga;
+    const importeRecarga = typeof importeRaw === "number"
+      ? importeRaw
+      : typeof importeRaw === "string" && importeRaw.trim() !== "" ? Number(importeRaw) : Number.NaN;
     if (!mongoose.Types.ObjectId.isValid(flotaId)) return res.status(400).json({ error: "La unidad de flota no es válida" });
     if (!datePattern.test(fechaRecarga) || !datePattern.test(fechaVencimiento)) return res.status(400).json({ error: "Las fechas de recarga y vencimiento son obligatorias" });
     if (fechaVencimiento <= fechaRecarga) return res.status(400).json({ error: "La fecha de vencimiento debe ser posterior a la fecha de recarga" });
+    if (!Number.isFinite(importeRecarga) || importeRecarga < 0) return res.status(400).json({ error: "El importe de la recarga debe ser un número igual o mayor a cero" });
     try {
       const unit = await KintoFlota.exists({ _id: flotaId, activo: { $ne: false } });
       if (!unit) return res.status(404).json({ error: "La unidad activa de flota no fue encontrada" });
-      const created = await KintoMatafuegoRecarga.create({ flota: flotaId, fechaRecarga, fechaVencimiento, observaciones, actorId: req.user!._id, actorNombre: actorName(req) });
+      const created = await KintoMatafuegoRecarga.create({ flota: flotaId, fechaRecarga, fechaVencimiento, importeRecarga, observaciones, actorId: req.user!._id, actorNombre: actorName(req) });
       return res.status(201).json({ message: "Recarga registrada correctamente", data: formatHistory(created) });
     } catch (error) {
       logError("KintoMatafuegosController.createRecarga"); console.error(error);

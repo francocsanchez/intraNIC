@@ -7,4 +7,4 @@ async function parse<T>(promise: Promise<{ data: unknown }>, schema: { safeParse
 
 export const getKintoMatafuegos = () => parse(api.get("/kinto/matafuegos"), kintoMatafuegosListResponseSchema, "No se pudo cargar Matafuegos");
 export const getKintoMatafuegosHistory = (flotaId: string): Promise<KintoMatafuegosHistoryResponse> => parse(api.get(`/kinto/matafuegos/${flotaId}/historial`), kintoMatafuegosHistoryResponseSchema, "No se pudo cargar el historial");
-export const createKintoMatafuegosRecarga = (flotaId: string, payload: { fechaRecarga: string; fechaVencimiento: string; observaciones: string }): Promise<KintoMatafuegosRecargaResponse> => parse(api.post(`/kinto/matafuegos/${flotaId}/recargas`, payload), kintoMatafuegosRecargaResponseSchema, "No se pudo registrar la recarga");
+export const createKintoMatafuegosRecarga = (flotaId: string, payload: { fechaRecarga: string; fechaVencimiento: string; importeRecarga: number; observaciones: string }): Promise<KintoMatafuegosRecargaResponse> => parse(api.post(`/kinto/matafuegos/${flotaId}/recargas`, payload), kintoMatafuegosRecargaResponseSchema, "No se pudo registrar la recarga");

@@ -1,6 +1,6 @@
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { paths } from "@/routes/paths";
-import { CarFront, Flame } from "lucide-react";
+import { CarFront, Flame, ReceiptText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function KintoLayout() {
@@ -32,6 +32,17 @@ export default function KintoLayout() {
         >
           <Flame size={16} strokeWidth={1.75} />
           Matafuegos
+        </Link>
+        <Link
+          to={paths.kinto.multas}
+          className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            pathname === paths.kinto.multas
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+        >
+          <ReceiptText size={16} strokeWidth={1.75} />
+          Multas
         </Link>
       </>}
     />

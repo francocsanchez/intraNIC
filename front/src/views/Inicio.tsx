@@ -18,6 +18,7 @@ import {
   Inbox,
   LogOut,
   Motorbike,
+  ReceiptText,
   Package,
   Palette,
   Settings2, ShoppingCart,
@@ -94,6 +95,7 @@ export default function Inicio() {
       items: [
         { label: "Flota", to: paths.kinto.flota, enabled: hasModulePathAccess(user, "kintoFlota", paths.kinto.flota), icon: CarFront },
         { label: "Matafuegos", to: paths.kinto.matafuegos, enabled: hasModulePathAccess(user, "kintoMatafuegos", paths.kinto.matafuegos), icon: Flame },
+        { label: "Multas", to: paths.kinto.multas, enabled: hasModulePathAccess(user, "kintoMultas", paths.kinto.multas), icon: ReceiptText },
       ],
     },
     {

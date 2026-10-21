@@ -2,6 +2,10 @@
 
 ## 2026-10-21
 
+- **Kinto · Multas:** se incorporó el módulo protegido `/kinto/multas`, con permiso independiente, carga mediante autocomplete de Dominio y captura histórica de sucursal, fecha, booking y monto.
+- **Kinto · Multas:** la grilla permite avanzar Cobrado → Facturado → Pagado, filtrar los pendientes de cada etapa y corregir mediante retrocesos que limpian estados dependientes.
+- **Kinto · Multas:** cada cargo, edición, modificación de check y eliminación lógica conserva en Mongo el actor, fecha y valores anteriores/nuevos, visible desde el historial de la multa.
+- **Kinto · Multas:** se corrigió la actualización de checks cuando existían auditorías iniciales sin valor anterior y se centraron todos los encabezados, datos, checks y acciones de la grilla.
 - **Kinto · Flota:** la consulta de alta por patente ahora parte directamente de `siac.dbo.anexnvo`; conserva el modelo, año vigente y VIN completo de la operación mediante `auto`, sin consultar la vista lenta `viewunidades`.
 
 ## 2026-10-20
@@ -20,6 +24,9 @@
 - **Kinto · Matafuegos:** se incorporó el módulo protegido para controlar recargas y vencimientos de las unidades activas de Flota, agrupadas por sucursal. Registra historial auditable por recarga y marca como vencidas las unidades sin registro o con vencimiento igual o anterior a hoy.
 - **Kinto · Matafuegos:** las observaciones de recarga ahora son opcionales, la fecha de recarga se precarga con hoy y la tabla informa los días restantes hasta el vencimiento.
 - **Kinto · Matafuegos:** las tablas por sucursal fijan los anchos de columnas para mantener sus datos alineados.
+- **Kinto · Matafuegos:** cada recarga registra su importe en pesos, validado como un valor igual o mayor a cero, y lo muestra en el historial para futuros análisis de costos.
+- **Kinto · Flota:** las unidades activas y desactivadas ahora se presentan en tablas separadas por sucursal, conservando el selector de reasignación y columnas alineadas.
+- **Kinto · Flota:** se compactó la grilla por sucursal para mostrar todas sus columnas sin desplazamiento horizontal; los textos largos se truncan y las acciones se acomodan dentro de la celda.
 
 - **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
 - **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.

@@ -75,6 +75,8 @@ La logica vigente es:
 - `promediosPlanAhorro`
 - `minutas`
 - `kintoFlota`
+- `kintoMatafuegos`
+- `kintoMultas`
 
 ## Regla general vigente
 Para cualquier pantalla, menu, accion o endpoint:
@@ -191,6 +193,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - Todo usuario con el módulo habilitado puede consultar las pestañas de unidades activas y desactivadas, buscar patentes en `siac.dbo.viewunidades`, dar de alta unidades, asignarles cualquiera de las sucursales de entrega —incluso inactivas—, actualizar KM actual, cambiar Geotab, desactivar o reactivar con confirmación y consultar el historial de cambios. No hay restricciones adicionales por rol en esta etapa. Las acciones de KM, Geotab, desactivación y reactivación conservan auditoría de usuario, fecha y valores previos/nuevos.
 - `superAdmin` conserva acceso total.
 - `Matafuegos` depende de `modules.kintoMatafuegos = 1` y se accede por `/kinto/matafuegos`. Todo usuario con el módulo puede consultar unidades activas, registrar recargas y consultar su historial; no hay restricciones adicionales por rol en esta etapa.
+- `Multas` depende de `modules.kintoMultas = 1` y se accede por `/kinto/multas`. Todo usuario con el módulo puede registrar, editar, eliminar lógicamente, actualizar los estados y consultar el historial de multas; no hay restricciones adicionales por rol en esta etapa.
 
 ### Regla transversal para todos los modulos
 
