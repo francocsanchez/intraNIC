@@ -59,6 +59,7 @@
 - **Kinto · Matafuegos:** cada recarga registra su importe en pesos, validado como un valor igual o mayor a cero, y lo muestra en el historial para futuros análisis de costos.
 - **Kinto · Flota:** las unidades activas y desactivadas ahora se presentan en tablas separadas por sucursal, conservando el selector de reasignación y columnas alineadas.
 - **Kinto · Flota:** se compactó la grilla por sucursal para mostrar todas sus columnas sin desplazamiento horizontal; los textos largos se truncan y las acciones se acomodan dentro de la celda.
+- **Kinto · Flota:** se bloqueó la eliminación de sucursales de entrega que tengan unidades asignadas y las referencias antiguas que ya no existan se muestran como `Sin asignar` para permitir su reasignación.
 
 - **Saldo de operación:** se incorporó `Detalle de cuadros`, una descarga Excel que audita las operaciones que componen las tarjetas por modelo, crédito pendiente y usado, junto con cada componente de su cálculo y los filtros activos.
 - **Saldo de operación:** el Excel de detalle de cuadros ahora incluye el tipo de cliente de cada operación.

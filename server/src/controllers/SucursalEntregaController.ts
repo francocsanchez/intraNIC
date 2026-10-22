@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import AgendaEntrega from "../models/AgendaEntrega";
+import KintoFlota from "../models/KintoFlota";
 import PendienteTurnar from "../models/PendienteTurnar";
 import SucursalEntrega from "../models/SucursalEntrega";
 import { hasSuperAdminRole } from "../constants/roleAccess";
@@ -209,6 +210,13 @@ export class SucursalEntregaController {
       if (pendientesExists) {
         return res.status(409).json({
           error: "No se puede eliminar una sucursal que ya tiene pendientes de turnar asociados",
+        });
+      }
+
+      const flotaExists = await KintoFlota.exists({ sucursalEntrega: sucursal._id });
+      if (flotaExists) {
+        return res.status(409).json({
+          error: "No se puede eliminar una sucursal que tiene unidades de Flota asignadas",
         });
       }
 
