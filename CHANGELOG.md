@@ -19,6 +19,7 @@
 - **Dashboard Salón:** el contador de operaciones de la sucursal ahora informa su porcentaje entero sobre el total real de operaciones del período.
 - **Dashboard Salón:** se registró el componente ECharts necesario para renderizar la línea punteada del objetivo de vendedores.
 - **Dashboard Salón:** se agregaron flechas centrales para consultar meses anteriores y volver al período vigente.
+- **Dashboard Salón:** el ranking de vendedores eliminó el padding interno para aprovechar más la altura disponible.
 - **Usuarios:** se incorporó la sucursal SIAC independiente, seleccionable desde la tabla `sucursal` de SIAC; no modifica la sucursal predeterminada utilizada por Entregas.
 - **Usuarios:** el selector de sucursal SIAC ahora informa los errores de consulta y permite reintentar, evitando que una falla se vea como una lista vacía.
 

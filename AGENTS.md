@@ -45,6 +45,7 @@ El mismo formulario administra el objetivo mensual global de operaciones totales
 La cantidad de operaciones de la sucursal en Dashboard Salón se representa mediante un contador numérico simple, sin gráfico.
 Debajo del contador se muestra el porcentaje entero que representan las operaciones de la sucursal sobre el total real de operaciones de todas las sucursales en el período.
 El ranking de vendedores incluye una línea roja punteada a la altura del objetivo configurado, identificada con su valor.
+La tarjeta de ranking de vendedores no lleva padding interno: el título se superpone y el gráfico usa al máximo la superficie, reservando únicamente lo indispensable para sus etiquetas.
 El wrapper común de ECharts registra `MarkLineComponent` para que las referencias de objetivo se rendericen en los gráficos de barras.
 Dashboard Salón permite navegar desde el encabezado entre el mes actual y períodos anteriores mediante flechas; no permite avanzar hacia períodos futuros.
 Dashboard Salón organiza el ranking de vendedores con barras horizontales en la primera fila; la segunda fila ubica el medidor de cantidad de operaciones junto al ranking por modelo.

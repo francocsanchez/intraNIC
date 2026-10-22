@@ -21,7 +21,7 @@ function RankingChart({ title, items, colorIndex, vertical = false, highlightedN
   const option = useMemo<EChartsCoreOption>(() => {
     const color = getPresetChartColors()[colorIndex] ?? "var(--primary)";
     return {
-      grid: { top: vertical ? 42 : 20, right: 28, bottom: vertical ? 86 : 24, left: 12, containLabel: true },
+      grid: { top: vertical ? 46 : 20, right: 12, bottom: vertical ? 58 : 24, left: 12, containLabel: true },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "shadow" },
@@ -51,6 +51,10 @@ function RankingChart({ title, items, colorIndex, vertical = false, highlightedN
       }), barMaxWidth: vertical ? 52 : 42, itemStyle: { color, borderRadius: vertical ? [4, 4, 0, 0] : [0, 4, 4, 0] }, label: { show: true, position: vertical ? "top" : "right", color: "var(--foreground)", fontSize: 13 }, ...(vertical && objective ? { markLine: { silent: true, symbol: "none", lineStyle: { color: "#fca5a5", type: "dashed", width: 2 }, label: { show: true, formatter: `Target ${objective}`, color: "#b91c1c", position: "insideEndTop" }, data: [{ yAxis: objective }] } } : {}) }],
     };
   }, [colorIndex, highlightedName, items, objective, vertical]);
+
+  if (vertical) {
+    return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute left-4 top-3 z-10 text-xl font-semibold text-foreground">{title}</h2>{items.length ? <div className="h-full w-full"><EChart option={option} /></div> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
+  }
 
   return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="mb-2 text-xl font-semibold text-foreground">{title}</h2>{items.length ? <div className="min-h-0 flex-1"><EChart option={option} /></div> : <p className="flex flex-1 items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
 }
