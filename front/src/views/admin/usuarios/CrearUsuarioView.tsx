@@ -18,6 +18,7 @@ export default function CreateUsuarioView() {
     password: "",
     celular: "",
     sucursalPredeterminada: "",
+    sucursalSiacCodigo: "",
     unidadNegocio: "",
     numberSaleNic: 0,
     numberSaleLiess: 0,

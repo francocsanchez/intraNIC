@@ -9,6 +9,7 @@ import {
   getPendFacConvencional,
   getPrediccionAsignaciones,
   getStockConsolidadoNic,
+  getSucursalesNic,
   getVendedoresActivosNic,
   getVendedoresNic,
 } from "./querys/dms.query";
@@ -621,6 +622,19 @@ export class DmsController {
       return res.status(200).json({ data });
     } catch (error) {
       logError("ConvencionalController.getVendedores");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
+  static getSucursales = async (_req: Request, res: Response) => {
+    try {
+      const data = await sequelizeNIC.query<{ codigo: number; nombre: string }>(getSucursalesNic(), {
+        type: QueryTypes.SELECT,
+      });
+      return res.status(200).json({ data });
+    } catch (error) {
+      logError("DmsController.getSucursales");
       console.error(error);
       return res.status(500).json({ message: "Error del servidor SIAC" });
     }

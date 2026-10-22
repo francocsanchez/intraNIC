@@ -5,6 +5,7 @@ import {
   promedioOperacionesConvencionalResponseSchema,
   rankingOperacionesConvencionalResponseSchema,
   resumenGeneralSchema,
+  sucursalesSiacResponseSchema,
   vendedoresResponseSchema
 } from "@/types/index";
 import { isAxiosError } from "axios";
@@ -34,6 +35,20 @@ export async function getVendedoresNic() {
     throw new Error(
       "Error inesperado al obtener el los vendedores",
     );
+  }
+}
+
+export async function getSucursalesSiac() {
+  try {
+    const { data } = await api.get("/dms/sucursales");
+    const parsed = sucursalesSiacResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("La respuesta de sucursales SIAC no tiene el formato esperado");
+    return parsed.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || "Error al obtener las sucursales SIAC");
+    }
+    throw error instanceof Error ? error : new Error("Error al obtener las sucursales SIAC");
   }
 }
 

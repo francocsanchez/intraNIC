@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-22
+
+- **Dashboard Salón:** se agregó el módulo protegido `/analisis/dashboard-salon`, sin navbar ni footer, para mostrar en pantalla completa las asignaciones activas del mes vigente de la sucursal SIAC del usuario.
+- **Dashboard Salón:** la vista actualiza los datos cada minuto y muestra el ranking de vendedores, el total de operaciones en un medidor y el ranking estático por modelo.
+- **Dashboard Salón:** se reorganizó la pantalla en dos filas, con las barras horizontales de vendedores en la fila superior y el medidor junto al ranking por modelo en la inferior.
+- **Dashboard Salón:** el tablero fija su altura al viewport y no permite desplazamiento vertical; los gráficos ocupan el espacio disponible de ambas filas.
+- **Dashboard Salón:** el ranking de vendedores ahora usa columnas verticales, con los vendedores en el eje X y las cantidades en el eje Y.
+- **Dashboard Salón:** se agregó el medidor de cantidad total de operaciones de todas las sucursales, ubicado a la derecha del ranking por modelo.
+- **Dashboard Salón:** el vendedor con más asignaciones HILUX del período se identifica con un ícono de vehículo sobre su columna.
+- **Dashboard Salón:** se incorporó la configuración del objetivo mensual de vendedores en `/sistema/configuracion/dashboard-salon`; el ranking se colorea en verde al alcanzarlo, amarillo desde el 70% y rojo por debajo.
+- **Dashboard Salón:** los objetivos ahora se guardan por sucursal SIAC, mes y año, y los gráficos de barras no muestran líneas de ejes ni de grilla.
+- **Dashboard Salón:** se agregó el objetivo mensual de operaciones totales y su medidor global ahora usa un velocímetro por etapas, en rojo al alcanzar o superar la meta.
+- **Dashboard Salón:** el objetivo total se configura independientemente de la sucursal; el velocímetro usa escala redondeada, más espacio visual y etapas verde, amarillo y rojo.
+- **Dashboard Salón:** el velocímetro total ahora ocupa casi toda su tarjeta; el título se superpone sin restar superficie al gráfico.
+- **Dashboard Salón:** el medidor de operaciones de la sucursal fue reemplazado por un contador numérico.
+- **Dashboard Salón:** el ranking por vendedor ahora señala el objetivo con una línea horizontal roja punteada.
+- **Dashboard Salón:** el contador de operaciones de la sucursal ahora informa su porcentaje entero sobre el total real de operaciones del período.
+- **Dashboard Salón:** se registró el componente ECharts necesario para renderizar la línea punteada del objetivo de vendedores.
+- **Dashboard Salón:** se agregaron flechas centrales para consultar meses anteriores y volver al período vigente.
+- **Usuarios:** se incorporó la sucursal SIAC independiente, seleccionable desde la tabla `sucursal` de SIAC; no modifica la sucursal predeterminada utilizada por Entregas.
+- **Usuarios:** el selector de sucursal SIAC ahora informa los errores de consulta y permite reintentar, evitando que una falla se vea como una lista vacía.
+
 ## 2026-10-21
 
 - **Stock disponible:** se agregó en Convencional, Usados y LIESS nuevos un buscador inmediato por modelo o versión y color, combinado con los filtros existentes e indiferente de mayúsculas o tildes.

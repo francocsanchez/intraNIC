@@ -24,6 +24,7 @@ const KintoLayout = lazy(() => import("./layouts/KintoLayout"));
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
 const ConfiguracionHotAlertView = lazy(() => import("./views/admin/configuracion/ConfiguracionHotAlertView"));
+const ConfiguracionDashboardSalonView = lazy(() => import("./views/admin/configuracion/ConfiguracionDashboardSalonView"));
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
@@ -100,6 +101,7 @@ const TableroCobranzasView = lazy(() => import("./views/operaciones/TableroCobra
 const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
 const AnalisisOperacionesMovilView = lazy(() => import("./views/operaciones/AnalisisOperacionesMovilView"));
+const DashboardSalonView = lazy(() => import("./views/operaciones/DashboardSalonView"));
 const AnalisisVendedorView = lazy(() => import("./views/operaciones/AnalisisVendedorView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
@@ -135,6 +137,10 @@ export default function Router() {
 
             <Route element={<ModuleProtectedRoute allowedModules={["operaciones"]} />}>
               <Route path={paths.analisis.operacionesMovil} element={<AnalisisOperacionesMovilView />} />
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["dashboardSalon"]} />}>
+              <Route path={paths.analisis.dashboardSalon} element={<DashboardSalonView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
@@ -186,6 +192,7 @@ export default function Router() {
               <Route path={paths.admin.unidadesNegocio} element={<UnidadesNegocioView />} />
               <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
               <Route path={paths.admin.configuracionHotAlert} element={<ConfiguracionHotAlertView />} />
+              <Route path={paths.admin.configuracionDashboardSalon} element={<ConfiguracionDashboardSalonView />} />
             </Route>
           </Route>
 

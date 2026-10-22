@@ -15,6 +15,7 @@ declare global {
         celular?: string;
         numberSaleNic?: number;
         numberSaleLiess?: number;
+        sucursalSiacCodigo?: number | null;
         sucursalPredeterminada?: {
           _id: string;
           nombre: string;

@@ -12,6 +12,8 @@ router.get("/colores-unidades/badges", ColorUnidadController.badges);
 router.get("/colores-unidades", requireSuperAdmin, ColorUnidadController.list);
 router.post("/colores-unidades", requireSuperAdmin, ColorUnidadController.save);
 router.put("/colores-unidades/:id", requireSuperAdmin, ColorUnidadController.save);
+router.get("/dashboard-salon", authorizeModules("configuracion"), ConfigController.getDashboardSalonSettings);
+router.put("/dashboard-salon", authorizeModules("configuracion"), ConfigController.updateDashboardSalonSettings);
 
 /**
  *

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
+import Configuration from "../models/Config";
 import { getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
 import {
   analisisVendedorCreditoMensualQuery,
@@ -100,6 +101,18 @@ type AnalisisOperacionesPreventaMovilResumenResponse = {
       porVendedor: AnalisisOperacionesPreventaMovilDescuentoItem[];
     };
   };
+};
+
+type DashboardSalonResponse = {
+  periodo: { anio: number; mes: number };
+  sucursal: string;
+  totalOperaciones: number;
+  totalOperacionesTodasSucursales: number;
+  objetivoVendedores: number | null;
+  objetivoOperacionesTotales: number | null;
+  vendedorMayorHilux: string | null;
+  vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
+  modelos: AnalisisOperacionesPreventaMovilResumenItem[];
 };
 
 type AnalisisVendedorFilters = {
@@ -694,6 +707,97 @@ export class OperacionesDashboardService {
           porVendedor: buildDescuentosPromedio("vendedor"),
         },
       },
+    };
+  }
+
+  static async getDashboardSalon(
+    filters: { anio: number; mes: number; sucursalCodigo: number },
+  ): Promise<DashboardSalonResponse> {
+    const [rows, allBranchesRows, config] = await Promise.all([
+      sequelizeNIC.query<OperacionDashboardRow>(
+        operacionesDashboardQuery({
+          hasAnios: true,
+          hasMeses: true,
+          hasSucursales: true,
+          hasModelos: false,
+          hasDias: false,
+        }),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anios: [filters.anio],
+            meses: [filters.mes],
+            sucursales: [String(filters.sucursalCodigo)],
+          },
+        },
+      ),
+      sequelizeNIC.query<OperacionDashboardRow>(
+        operacionesDashboardQuery({
+          hasAnios: true,
+          hasMeses: true,
+          hasSucursales: false,
+          hasModelos: false,
+          hasDias: false,
+        }),
+        {
+          type: QueryTypes.SELECT,
+          replacements: { anios: [filters.anio], meses: [filters.mes] },
+        },
+      ),
+      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1 }).lean(),
+    ]);
+
+    const objetivoConfigurado = Number(
+      config?.objetivosVendedoresDashboardSalon?.find(
+        (item) =>
+          item.sucursalCodigo === filters.sucursalCodigo &&
+          item.anio === filters.anio &&
+          item.mes === filters.mes,
+      )?.objetivo,
+    );
+    const objetivoVendedores =
+      Number.isFinite(objetivoConfigurado) && objetivoConfigurado > 0
+        ? objetivoConfigurado
+        : null;
+    const objetivoOperacionesTotalesConfigurado = Number(
+      config?.objetivosOperacionesTotalesDashboardSalon?.find(
+        (item) => item.anio === filters.anio && item.mes === filters.mes,
+      )?.objetivo,
+    );
+    const objetivoOperacionesTotales =
+      Number.isFinite(objetivoOperacionesTotalesConfigurado) && objetivoOperacionesTotalesConfigurado > 0
+        ? objetivoOperacionesTotalesConfigurado
+        : null;
+
+    const groupRows = (value: (row: OperacionDashboardRow) => string) => {
+      const totals = new Map<string, number>();
+      rows.forEach((row) => {
+        const label = normalizeNullableString(value(row)) ?? "SIN DATOS";
+        totals.set(label, (totals.get(label) ?? 0) + 1);
+      });
+      return Array.from(totals, ([nombre, total]) => ({ nombre, total }))
+        .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+    };
+
+    const hiluxByVendedor = new Map<string, number>();
+    rows.forEach((row) => {
+      if (normalizeNullableString(row.modeloNombre)?.toLocaleUpperCase("es-AR") !== "HILUX") return;
+      const vendedor = normalizeNullableString(row.vendedorNombre) ?? "SIN DATOS";
+      hiluxByVendedor.set(vendedor, (hiluxByVendedor.get(vendedor) ?? 0) + 1);
+    });
+    const vendedorMayorHilux = Array.from(hiluxByVendedor.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? null;
+
+    return {
+      periodo: { anio: filters.anio, mes: filters.mes },
+      sucursal: rows[0]?.sucursalNombre ?? `Sucursal ${filters.sucursalCodigo}`,
+      totalOperaciones: rows.length,
+      totalOperacionesTodasSucursales: allBranchesRows.length,
+      objetivoVendedores,
+      objetivoOperacionesTotales,
+      vendedorMayorHilux,
+      vendedores: groupRows((row) => row.vendedorNombre),
+      modelos: groupRows((row) => row.modeloNombre),
     };
   }
 

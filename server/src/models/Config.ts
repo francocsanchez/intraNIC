@@ -20,6 +20,18 @@ export interface IConfiguration extends Document {
   vendedoresDisponibleLIESS: string[];
   vendedoresStockGuardadoLIESS: string[];
   vendedoresReservasLIESS: string[];
+
+  objetivosVendedoresDashboardSalon: Array<{
+    sucursalCodigo: number;
+    anio: number;
+    mes: number;
+    objetivo: number;
+  }>;
+  objetivosOperacionesTotalesDashboardSalon: Array<{
+    anio: number;
+    mes: number;
+    objetivo: number;
+  }>;
 }
 
 const configSchema: Schema = new Schema(
@@ -43,6 +55,26 @@ const configSchema: Schema = new Schema(
     vendedoresDisponibleLIESS: { type: [String] },
     vendedoresStockGuardadoLIESS: { type: [String] },
     vendedoresReservasLIESS: { type: [String] },
+
+    objetivosVendedoresDashboardSalon: {
+      type: [
+        {
+          sucursalCodigo: { type: Number, required: true, min: 1 },
+          anio: { type: Number, required: true, min: 2000 },
+          mes: { type: Number, required: true, min: 1, max: 12 },
+          objetivo: { type: Number, required: true, min: 1 },
+        },
+      ],
+      default: [],
+    },
+    objetivosOperacionesTotalesDashboardSalon: {
+      type: [{
+        anio: { type: Number, required: true, min: 2000 },
+        mes: { type: Number, required: true, min: 1, max: 12 },
+        objetivo: { type: Number, required: true, min: 1 },
+      }],
+      default: [],
+    },
   },
   { timestamps: true },
 );

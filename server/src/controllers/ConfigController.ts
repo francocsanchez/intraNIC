@@ -75,6 +75,101 @@ export class ConfigController {
     }
   };
 
+  static getDashboardSalonSettings = async (req: Request, res: Response) => {
+    try {
+      const sucursalRaw = req.query.sucursalCodigo;
+      const sucursalCodigo = sucursalRaw === undefined ? null : Number(sucursalRaw);
+      const anio = Number(req.query.anio);
+      const mes = Number(req.query.mes);
+      if ((sucursalCodigo !== null && (!Number.isInteger(sucursalCodigo) || sucursalCodigo < 1)) || !Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+        return res.status(400).json({ message: "El período y la sucursal seleccionada deben ser válidos." });
+      }
+      const config = await Configuration.findOne(
+        {},
+        { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1 },
+      ).lean();
+
+      if (!config) {
+        return res.status(404).json({ message: "No existe configuración inicial." });
+      }
+
+      const objetivoConfigurado = sucursalCodigo === null ? null : config.objetivosVendedoresDashboardSalon?.find(
+        (item) => item.sucursalCodigo === sucursalCodigo && item.anio === anio && item.mes === mes,
+      )?.objetivo;
+      const objetivo = Number(objetivoConfigurado);
+      const objetivoOperacionesTotales = Number(
+        config.objetivosOperacionesTotalesDashboardSalon?.find(
+          (item) => item.anio === anio && item.mes === mes,
+        )?.objetivo,
+      );
+      return res.status(200).json({
+        data: {
+          sucursalCodigo,
+          anio,
+          mes,
+          objetivoVendedores:
+            Number.isFinite(objetivo) && objetivo > 0 ? objetivo : null,
+          objetivoOperacionesTotales:
+            Number.isFinite(objetivoOperacionesTotales) && objetivoOperacionesTotales > 0
+              ? objetivoOperacionesTotales
+              : null,
+        },
+        message: "Configuración de Dashboard Salón listada",
+      });
+    } catch (error) {
+      logError("ConfigController.getDashboardSalonSettings");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor" });
+    }
+  };
+
+  static updateDashboardSalonSettings = async (req: Request, res: Response) => {
+    try {
+      const objetivoVendedores = Number(req.body?.objetivoVendedores);
+      const objetivoOperacionesTotales = Number(req.body?.objetivoOperacionesTotales);
+      const sucursalRaw = req.body?.sucursalCodigo;
+      const sucursalCodigo = sucursalRaw === undefined ? null : Number(sucursalRaw);
+      const anio = Number(req.body?.anio);
+      const mes = Number(req.body?.mes);
+      const hasObjetivoVendedores = Number.isInteger(objetivoVendedores) && objetivoVendedores > 0;
+      const hasObjetivoOperacionesTotales = Number.isInteger(objetivoOperacionesTotales) && objetivoOperacionesTotales > 0;
+      if ((!hasObjetivoVendedores && !hasObjetivoOperacionesTotales) || (hasObjetivoVendedores && (sucursalCodigo === null || !Number.isInteger(sucursalCodigo) || sucursalCodigo < 1)) || !Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+        return res.status(400).json({
+          message: "La sucursal, el período y el objetivo deben ser válidos.",
+        });
+      }
+
+      const config = await Configuration.findOne();
+
+      if (!config) {
+        return res.status(404).json({ message: "No existe configuración inicial." });
+      }
+
+      if (hasObjetivoVendedores && sucursalCodigo !== null) {
+        config.objetivosVendedoresDashboardSalon = config.objetivosVendedoresDashboardSalon.filter(
+          (item) => item.sucursalCodigo !== sucursalCodigo || item.anio !== anio || item.mes !== mes,
+        );
+        config.objetivosVendedoresDashboardSalon.push({ sucursalCodigo, anio, mes, objetivo: objetivoVendedores });
+      }
+      if (hasObjetivoOperacionesTotales) {
+        config.objetivosOperacionesTotalesDashboardSalon = config.objetivosOperacionesTotalesDashboardSalon.filter(
+          (item) => item.anio !== anio || item.mes !== mes,
+        );
+        config.objetivosOperacionesTotalesDashboardSalon.push({ anio, mes, objetivo: objetivoOperacionesTotales });
+      }
+      await config.save();
+
+      return res.status(200).json({
+        data: { sucursalCodigo, anio, mes, objetivoVendedores: hasObjetivoVendedores ? objetivoVendedores : null, objetivoOperacionesTotales: hasObjetivoOperacionesTotales ? objetivoOperacionesTotales : null },
+        message: "Objetivo de vendedores actualizado correctamente",
+      });
+    } catch (error) {
+      logError("ConfigController.updateDashboardSalonSettings");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor" });
+    }
+  };
+
   static toggleSistemaConvencional = async (req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne();

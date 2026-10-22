@@ -18,6 +18,7 @@ const singleExcelUpload = (req: Request, res: Response, next: NextFunction) => {
 };
 
 router.use(authenticate);
+router.get("/dashboard-salon", authorizeModules("dashboardSalon"), OperacionesController.getDashboardSalon);
 router.get("/dashboard", authorizeModules("operaciones"), OperacionesController.getDashboard);
 router.get(
   "/dashboard/movil/resumen",

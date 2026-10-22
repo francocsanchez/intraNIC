@@ -28,6 +28,7 @@ export default function AdminLayout() {
       active:
         pathname === paths.admin.configuracion ||
         pathname === paths.admin.configuracionEnvioAgenda ||
+        pathname === paths.admin.configuracionDashboardSalon ||
         pathname === paths.admin.unidadesNegocio ||
         pathname === paths.admin.colores ||
         pathname === paths.admin.coloresUnidades ||

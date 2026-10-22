@@ -1,6 +1,9 @@
 import api from "@/libs/axios";
 import { isAxiosError } from "axios";
-import { configuracionResponseSchema } from "../types";
+import {
+  configuracionResponseSchema,
+  dashboardSalonSettingsResponseSchema,
+} from "../types";
 
 export async function getConfiguracion() {
   try {
@@ -79,4 +82,33 @@ export async function updateConfiguracionBelgrano(formData: ConfigBelgranoForm) 
       throw new Error(error.response.data.error);
     }
   }
+}
+
+export type DashboardSalonSettingsScope = {
+  sucursalCodigo?: number;
+  anio: number;
+  mes: number;
+};
+
+export async function getDashboardSalonSettings(scope: DashboardSalonSettingsScope) {
+  const { data } = await api.get("/config/dashboard-salon", { params: scope });
+  const response = dashboardSalonSettingsResponseSchema.safeParse(data);
+  if (!response.success) {
+    throw new Error("La estructura de la configuración es inválida");
+  }
+  return response.data;
+}
+
+export async function updateDashboardSalonSettings(
+  payload: DashboardSalonSettingsScope & {
+    objetivoVendedores?: number;
+    objetivoOperacionesTotales?: number;
+  },
+) {
+  const { data } = await api.put("/config/dashboard-salon", payload);
+  const response = dashboardSalonSettingsResponseSchema.safeParse(data);
+  if (!response.success) {
+    throw new Error("La estructura de la configuración es inválida");
+  }
+  return response.data;
 }

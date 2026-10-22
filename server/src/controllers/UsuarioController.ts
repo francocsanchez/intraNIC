@@ -77,6 +77,12 @@ const normalizeUnidadNegocio = (value: unknown) => {
   return normalized.length ? normalized : null;
 };
 
+const normalizeSucursalSiacCodigo = (value: unknown) => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+};
+
 const resetAndSendPassword = async (usuario: any) => {
   const temporaryPassword = generateTemporaryPassword();
   const previousPassword = usuario.password;
@@ -140,12 +146,17 @@ export class UsuarioController {
         req.body?.sucursalPredeterminada ?? req.body?.sucursalEntrega,
       );
       const unidadNegocioId = normalizeUnidadNegocio(req.body?.unidadNegocio);
+      const sucursalSiacCodigo = normalizeSucursalSiacCodigo(req.body?.sucursalSiacCodigo);
 
       if (celularError) {
         return res.status(400).json({
           data: null,
           message: celularError,
         });
+      }
+
+      if (sucursalSiacCodigo === undefined) {
+        return res.status(400).json({ data: null, message: "La sucursal SIAC seleccionada no es valida" });
       }
 
       if (sucursalEntregaId) {
@@ -208,6 +219,7 @@ export class UsuarioController {
         celular: toWhatsappCelular(celularInput),
         password: hashedPassword,
         sucursalEntrega: sucursalEntregaId,
+        sucursalSiacCodigo,
         unidadNegocio: unidadNegocioId,
       });
 
@@ -313,6 +325,7 @@ export class UsuarioController {
         "modules",
         "numberSaleNic",
         "numberSaleLiess",
+        "sucursalSiacCodigo",
         "enable",
         "sucursalEntrega",
         "unidadNegocio",
@@ -369,6 +382,14 @@ export class UsuarioController {
         }
 
         req.body.unidadNegocio = unidadNegocioId;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.body, "sucursalSiacCodigo")) {
+        const sucursalSiacCodigo = normalizeSucursalSiacCodigo(req.body.sucursalSiacCodigo);
+        if (sucursalSiacCodigo === undefined) {
+          return res.status(400).json({ data: null, message: "La sucursal SIAC seleccionada no es valida" });
+        }
+        req.body.sucursalSiacCodigo = sucursalSiacCodigo;
       }
 
       if (Object.prototype.hasOwnProperty.call(req.body, "celular")) {

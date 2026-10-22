@@ -7,6 +7,7 @@ export type UsuarioFormData = {
   password?: string;
   celular: string;
   sucursalPredeterminada: string;
+  sucursalSiacCodigo: string;
   unidadNegocio: string;
   numberSaleNic: number;
   numberSaleLiess: number;

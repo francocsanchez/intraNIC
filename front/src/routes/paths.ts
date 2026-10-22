@@ -30,6 +30,7 @@ export const paths = {
     unidadesNegocio: "/sistema/configuracion/unidades-negocio",
     configuracionEnvioAgenda: "/sistema/configuracion/envio-agenda",
     configuracionHotAlert: "/sistema/configuracion/hot-alert",
+    configuracionDashboardSalon: "/sistema/configuracion/dashboard-salon",
     configuracionConvencionalEditar: "/sistema/configuracion/convencional/editar",
     configuracionUsadosEditar: "/sistema/configuracion/usados/editar",
     configuracionBelgranoEditar: "/sistema/configuracion/belgrano/editar",
@@ -51,6 +52,7 @@ export const paths = {
   analisis: {
     operaciones: "/analisis/operaciones",
     operacionesMovil: "/analisis/operaciones/movil",
+    dashboardSalon: "/analisis/dashboard-salon",
     saldoOperacion: "/analisis/saldo-operacion",
     saldoOperacionCancelaciones: "/analisis/saldo-operacion/cancelaciones",
     saldoOperacionNoCanceladas: "/analisis/saldo-operacion/no-canceladas",

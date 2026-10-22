@@ -5,7 +5,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
-import { getVendedoresNic } from "@/api/dms/dmsAPI";
+import { getSucursalesSiac, getVendedoresNic } from "@/api/dms/dmsAPI";
 import { getSucursalesEntrega } from "@/api/entregasAPI";
 import { getUnidadesNegocio } from "@/api/unidadNegocioAPI";
 import {
@@ -14,7 +14,7 @@ import {
   type ModuleKey,
 } from "@/constants/modules";
 import type { UsuarioFormData } from "@/views/admin/usuarios/formTypes";
-import type { SucursalEntrega, UnidadNegocio } from "@/types/index";
+import type { SucursalEntrega, SucursalSiac, UnidadNegocio } from "@/types/index";
 
 type Vendedor = {
   codigo: number;
@@ -67,10 +67,21 @@ export default function UsuarioForm({
     queryKey: ["unidades-negocio", "usuarios-form"],
     queryFn: () => getUnidadesNegocio(true),
   });
+  const {
+    data: sucursalesSiacResponse,
+    isLoading: isLoadingSucursalesSiac,
+    isError: isSucursalesSiacError,
+    error: sucursalesSiacError,
+    refetch: refetchSucursalesSiac,
+  } = useQuery({
+    queryKey: ["dms", "sucursales", "usuarios-form"],
+    queryFn: getSucursalesSiac,
+  });
 
   const vendedores: Vendedor[] = vendedoresResponse?.data ?? [];
   const sucursales: SucursalEntrega[] = sucursalesResponse?.data ?? [];
   const unidadesNegocio: UnidadNegocio[] = unidadesResponse?.data ?? [];
+  const sucursalesSiac: SucursalSiac[] = sucursalesSiacResponse?.data ?? [];
 
   return (
     <div className="space-y-4">
@@ -90,6 +101,31 @@ export default function UsuarioForm({
             {...register("name", { required: "El nombre es obligatorio" })}
           />
           <FieldError message={errors.name?.message} />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="sucursalSiacCodigo" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Sucursal SIAC
+          </label>
+          <select
+            id="sucursalSiacCodigo"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+            {...register("sucursalSiacCodigo")}
+          >
+            <option value="">-- Sin asignar --</option>
+            {sucursalesSiac.map((sucursal) => (
+              <option key={sucursal.codigo} value={sucursal.codigo}>{sucursal.nombre}</option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">Define la sucursal que usará Dashboard Salón.</p>
+          {isLoadingSucursalesSiac ? <p className="text-xs text-muted-foreground">Cargando sucursales SIAC...</p> : null}
+          {isSucursalesSiacError ? (
+            <div className="flex items-center gap-2 text-xs text-destructive">
+              <span>{sucursalesSiacError instanceof Error ? sucursalesSiacError.message : "No se pudieron cargar las sucursales SIAC."}</span>
+              <button type="button" className="underline" onClick={() => void refetchSucursalesSiac()}>Reintentar</button>
+            </div>
+          ) : null}
+          <FieldError message={errors.sucursalSiacCodigo?.message} />
         </div>
 
         <div className="space-y-2">

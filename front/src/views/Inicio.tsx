@@ -213,6 +213,7 @@ export default function Inicio() {
       icon: BarChart3,
       items: [
         { label: "Operaciones", to: paths.analisis.operaciones, enabled: hasModulePathAccess(user, "operaciones", paths.analisis.operaciones), icon: BarChart3 },
+        { label: "Dashboard Salon", to: paths.analisis.dashboardSalon, enabled: hasModulePathAccess(user, "dashboardSalon", paths.analisis.dashboardSalon), icon: BarChart3 },
         { label: "Saldo de operacion", to: paths.analisis.saldoOperacion, enabled: hasModulePathAccess(user, "saldoOperacion", paths.analisis.saldoOperacion), icon: FileSpreadsheet },
         { label: "Cobros x Vendedor", to: paths.analisis.cobrosVendedor, enabled: hasModulePathAccess(user, "cobrosVendedor", paths.analisis.cobrosVendedor), icon: FileSpreadsheet },
         {

@@ -38,6 +38,16 @@ ORDER BY
 	v.ven_nombre
 `;
 
+export const getSucursalesNic = () => `
+SELECT
+  suc_codigo AS "codigo",
+  LTRIM(RTRIM(suc_nombre)) AS "nombre"
+FROM sucursal
+WHERE suc_codigo IS NOT NULL
+  AND LTRIM(RTRIM(ISNULL(suc_nombre, ''))) <> ''
+ORDER BY suc_nombre;
+`;
+
 export const getVendedoresActivosNuevoNic = () => `
 SELECT
 	v.ven_nombre AS "vendedor",

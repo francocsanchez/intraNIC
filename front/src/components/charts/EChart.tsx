@@ -1,9 +1,10 @@
 import {
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
   TooltipComponent,
 } from "echarts/components";
-import { BarChart, LineChart, PieChart, TreeChart, TreemapChart } from "echarts/charts";
+import { BarChart, GaugeChart, LineChart, PieChart, TreeChart, TreemapChart } from "echarts/charts";
 import {
   init,
   use as registerECharts,
@@ -16,9 +17,11 @@ import { resolveChartColor } from "./presetChartTheme";
 
 registerECharts([
   BarChart,
+  GaugeChart,
   GridComponent,
   LegendComponent,
   LineChart,
+  MarkLineComponent,
   PieChart,
   SVGRenderer,
   TooltipComponent,

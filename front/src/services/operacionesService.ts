@@ -42,6 +42,7 @@ import {
   tableroCobranzasDiarioResponseSchema,
   tableroCobranzasDetalleDiarioResponseSchema,
   tableroCobranzasRecibosOperacionResponseSchema,
+  dashboardSalonResponseSchema,
   type TableroCobranzasDetalleDiarioResponse,
   type TableroCobranzasDiarioResponse,
   type TableroCobranzasRecibosOperacionResponse,
@@ -271,6 +272,17 @@ export async function getOperacionesDashboardMovilResumen(
     return parsed.data;
   } catch (error) {
     throw new Error(getErrorMessage(error, "Error al obtener el resumen móvil de operaciones"));
+  }
+}
+
+export async function getDashboardSalon(params?: { anio: number; mes: number }) {
+  try {
+    const { data } = await api.get("/operaciones/dashboard-salon", { params });
+    const parsed = dashboardSalonResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("La respuesta del Dashboard Salón no tiene el formato esperado");
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener Dashboard Salón"));
   }
 }
 

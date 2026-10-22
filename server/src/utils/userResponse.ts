@@ -88,6 +88,9 @@ export const serializeUserResponse = (user: any) => {
     company: normalizeStringArray(user?.company),
     numberSaleNic: Number(user?.numberSaleNic ?? 0),
     numberSaleLiess: Number(user?.numberSaleLiess ?? 0),
+    sucursalSiacCodigo: Number.isFinite(Number(user?.sucursalSiacCodigo))
+      ? Number(user.sucursalSiacCodigo)
+      : null,
     modules: sanitizeUserModules(user?.modules),
     unidadNegocio,
     sucursalPredeterminada,

@@ -148,6 +148,17 @@ export const vendedoresResponseSchema = z.object({
 });
 export type Vendedor = z.infer<typeof vendedorSchema>;
 
+export const sucursalSiacSchema = z.object({
+  codigo: z.number(),
+  nombre: z.string(),
+});
+
+export const sucursalesSiacResponseSchema = z.object({
+  data: z.array(sucursalSiacSchema),
+});
+
+export type SucursalSiac = z.infer<typeof sucursalSiacSchema>;
+
 //**************************** */
 // CONFIGURACION
 //**************************** */
@@ -185,6 +196,17 @@ export const configuracionResponseSchema = z.object({
   data: configuracionSchema,
 });
 
+export const dashboardSalonSettingsResponseSchema = z.object({
+  data: z.object({
+    sucursalCodigo: z.number().int().positive().nullable(),
+    anio: z.number().int(),
+    mes: z.number().int().min(1).max(12),
+    objetivoVendedores: z.number().int().positive().nullable(),
+    objetivoOperacionesTotales: z.number().int().positive().nullable(),
+  }),
+  message: z.string().optional(),
+});
+
 //**************************** */
 // USUARIOS
 //**************************** */
@@ -198,6 +220,7 @@ export const usuarioSchema = z.object({
   enable: z.boolean(),
   numberSaleNic: z.number(),
   numberSaleLiess: z.number(),
+  sucursalSiacCodigo: z.number().nullable().optional(),
   role: z.array(z.string()),
   company: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
@@ -248,6 +271,7 @@ export const userSchema = z.object({
   role: z.array(z.string()),
   modules: modulesSchema.optional().default({}),
   enable: z.boolean(),
+  sucursalSiacCodigo: z.number().nullable().optional(),
   unidadNegocio: z
     .object({
       _id: z.string(),
@@ -968,6 +992,20 @@ export const analisisOperacionesPreventaMovilResumenResponseSchema = z.object({
 export type AnalisisOperacionesPreventaMovilResumenResponse = z.infer<
   typeof analisisOperacionesPreventaMovilResumenResponseSchema
 >;
+
+export const dashboardSalonResponseSchema = z.object({
+  periodo: z.object({ anio: z.number(), mes: z.number() }),
+  sucursal: z.string(),
+  totalOperaciones: z.number(),
+  totalOperacionesTodasSucursales: z.number(),
+  objetivoVendedores: z.number().int().positive().nullable(),
+  objetivoOperacionesTotales: z.number().int().positive().nullable(),
+  vendedorMayorHilux: z.string().nullable(),
+  vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+  modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+});
+
+export type DashboardSalonResponse = z.infer<typeof dashboardSalonResponseSchema>;
 export type AnalisisOperacionesPreventaDescuentoMensualItem = z.infer<
   typeof analisisOperacionesPreventaDescuentoMensualItemSchema
 >;

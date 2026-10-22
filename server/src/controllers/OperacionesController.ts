@@ -45,7 +45,43 @@ const parseStrictPositiveInt = (value: unknown) => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
+const getBuenosAiresPeriod = () => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  return { anio: value("year"), mes: value("month") };
+};
+
 export class OperacionesController {
+  static getDashboardSalon = async (req: Request, res: Response) => {
+    const sucursalCodigo = req.user?.sucursalSiacCodigo;
+    if (!sucursalCodigo) {
+      return res.status(409).json({ message: "El usuario no tiene una sucursal SIAC configurada" });
+    }
+
+    try {
+      const currentPeriod = getBuenosAiresPeriod();
+      const requestedAnio = req.query.anio === undefined ? null : parseStrictPositiveInt(req.query.anio);
+      const requestedMes = req.query.mes === undefined ? null : parseStrictPositiveInt(req.query.mes);
+      if ((req.query.anio !== undefined && requestedAnio === null) || (req.query.mes !== undefined && (requestedMes === null || requestedMes > 12))) {
+        return res.status(400).json({ message: "El período solicitado no es válido" });
+      }
+      const response = await OperacionesDashboardService.getDashboardSalon({
+        anio: requestedAnio ?? currentPeriod.anio,
+        mes: requestedMes ?? currentPeriod.mes,
+        sucursalCodigo,
+      });
+      return res.status(200).json(response);
+    } catch (error) {
+      logError("OperacionesController.getDashboardSalon");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor SIAC" });
+    }
+  };
+
   static getDashboard = async (req: Request, res: Response) => {
     const anios = parseNumericList(req.query.anios);
 

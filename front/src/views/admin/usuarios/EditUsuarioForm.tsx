@@ -22,6 +22,7 @@ type Usuario = {
   enable: boolean;
   numberSaleNic: number;
   numberSaleLiess: number;
+  sucursalSiacCodigo?: number | null;
   role: string[];
   modules?: UserModules;
   unidadNegocio?: UnidadNegocio | null;
@@ -52,6 +53,7 @@ export default function EditUsuarioForm({
       email: data.email,
       celular: data.celular ?? "",
       sucursalPredeterminada: data.sucursalPredeterminada?._id ?? "",
+      sucursalSiacCodigo: data.sucursalSiacCodigo ? String(data.sucursalSiacCodigo) : "",
       unidadNegocio: data.unidadNegocio?._id ?? "",
       numberSaleNic: data.numberSaleNic,
       numberSaleLiess: data.numberSaleLiess,

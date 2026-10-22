@@ -13,6 +13,7 @@ router.use(authenticate);
  *
  */
 router.get("/vendedores", authorizeModules("usuarios", "configuracion"), DmsController.getVendedores);
+router.get("/sucursales", authorizeModules("usuarios", "configuracion"), DmsController.getSucursales);
 
 /**
  *
