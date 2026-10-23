@@ -10,6 +10,7 @@
 - **Dashboard Salón:** el ranking de vendedores ahora usa columnas verticales, con los vendedores en el eje X y las cantidades en el eje Y.
 - **Dashboard Salón:** se agregó el medidor de cantidad total de operaciones de todas las sucursales, ubicado a la derecha del ranking por modelo.
 - **Dashboard Salón:** el vendedor con más asignaciones HILUX del período se identifica con un ícono de vehículo sobre su columna.
+- **Dashboard Salón:** se retiró el ícono del vendedor con más HILUX; la tabla ahora destaca con estrella verde al líder de usados y con estrella amarilla al líder de créditos.
 - **Dashboard Salón:** se incorporó la configuración del objetivo mensual de vendedores en `/sistema/configuracion/dashboard-salon`; el ranking se colorea en verde al alcanzarlo, amarillo desde el 70% y rojo por debajo.
 - **Dashboard Salón:** los objetivos ahora se guardan por sucursal SIAC, mes y año, y los gráficos de barras no muestran líneas de ejes ni de grilla.
 - **Dashboard Salón:** se agregó el objetivo mensual de operaciones totales y su medidor global ahora usa un velocímetro por etapas, en rojo al alcanzar o superar la meta.

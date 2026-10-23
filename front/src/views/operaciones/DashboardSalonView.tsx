@@ -5,7 +5,7 @@ import { getDashboardSalon } from "@/services/operacionesService";
 import type { DashboardSalonResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
-import { CarFront, ChevronLeft, ChevronRight, CreditCard } from "lucide-react";
+import { CarFront, ChevronLeft, ChevronRight, CreditCard, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -30,7 +30,6 @@ type SellerRankingProps = {
   items: DashboardSalonResponse["vendedores"];
   colorIndex: number;
   vertical?: boolean;
-  highlightedName?: string | null;
   objective?: number | null;
   usadosItems?: DashboardSalonResponse["vendedores"];
   creditosItems?: DashboardSalonResponse["vendedores"];
@@ -40,15 +39,19 @@ type SellerRankingProps = {
 function SellerFinancingTable({ items, usadosItems, creditosItems }: Pick<SellerRankingProps, "items"> & { usadosItems: DashboardSalonResponse["vendedores"]; creditosItems: DashboardSalonResponse["vendedores"] }) {
   const usadosPorNombre = new Map(usadosItems.map((item) => [item.nombre, item.total]));
   const creditosPorNombre = new Map(creditosItems.map((item) => [item.nombre, item.total]));
+  const getLeader = (source: Map<string, number>) => {
+    const max = Math.max(0, ...items.map((item) => source.get(item.nombre) ?? 0));
+    return max > 0 ? items.filter((item) => (source.get(item.nombre) ?? 0) === max).map((item) => item.nombre).sort((a, b) => a.localeCompare(b))[0] : null;
+  };
   const rows = [
-    { label: "Usados", icon: CarFront, values: items.map((item) => usadosPorNombre.get(item.nombre) ?? 0) },
-    { label: "Créditos", icon: CreditCard, values: items.map((item) => creditosPorNombre.get(item.nombre) ?? 0) },
+    { label: "Usados", icon: CarFront, starClass: "text-emerald-500", leader: getLeader(usadosPorNombre), values: items.map((item) => usadosPorNombre.get(item.nombre) ?? 0) },
+    { label: "Créditos", icon: CreditCard, starClass: "text-amber-400", leader: getLeader(creditosPorNombre), values: items.map((item) => creditosPorNombre.get(item.nombre) ?? 0) },
   ];
 
-  return <div className="relative shrink-0 pb-2 text-[11px] leading-5 text-foreground"><div className="absolute left-0 top-0 flex w-[76px] flex-col border-y border-r border-border text-muted-foreground">{rows.map((row, index) => { const Icon = row.icon; return <span key={row.label} title={row.label} aria-label={row.label} className={`flex h-5 items-center justify-end pr-2 ${index ? "border-t border-border" : ""}`}><Icon size={14} strokeWidth={1.8} /></span>; })}</div><div className="ml-[76px] mr-3 grid border-y border-r border-border" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{rows.flatMap((row, rowIndex) => row.values.map((value, index) => <span key={`${row.label}-${items[index]?.nombre}`} className={`h-5 border-l border-border text-center ${rowIndex ? "border-t" : ""}`}>{value > 0 ? value : "-"}</span>))}</div></div>;
+  return <div className="relative shrink-0 pb-2 text-[11px] leading-5 text-foreground"><div className="absolute left-0 top-0 flex w-[76px] flex-col border-y border-r border-border text-muted-foreground">{rows.map((row, index) => { const Icon = row.icon; return <span key={row.label} title={row.label} aria-label={row.label} className={`flex h-5 items-center justify-end pr-2 ${index ? "border-t border-border" : ""}`}><Icon size={14} strokeWidth={1.8} /></span>; })}</div><div className="ml-[76px] mr-3 grid border-y border-r border-border" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{rows.flatMap((row, rowIndex) => row.values.map((value, index) => <span key={`${row.label}-${items[index]?.nombre}`} className={`flex h-5 items-center justify-center gap-0.5 border-l border-border text-center ${rowIndex ? "border-t" : ""}`}>{value > 0 ? value : "-"}{items[index]?.nombre === row.leader ? <Star aria-label={`Mayor cantidad de ${row.label.toLocaleLowerCase("es-AR")}`} size={12} className={row.starClass} fill="currentColor" /> : null}</span>))}</div></div>;
 }
 
-function RankingChart({ title, items, colorIndex, vertical = false, highlightedName, objective, usadosItems = [], creditosItems = [], modelImages = [] }: SellerRankingProps) {
+function RankingChart({ title, items, colorIndex, vertical = false, objective, usadosItems = [], creditosItems = [], modelImages = [] }: SellerRankingProps) {
   const totalUsados = usadosItems.reduce((total, item) => total + item.total, 0);
   const totalCreditos = creditosItems.reduce((total, item) => total + item.total, 0);
   const option = useMemo<EChartsCoreOption>(() => {
@@ -85,11 +88,10 @@ function RankingChart({ title, items, colorIndex, vertical = false, highlightedN
         return {
           value: item.total,
           ...(targetColor ? { itemStyle: { color: targetColor } } : {}),
-          ...(item.nombre === highlightedName ? { label: { formatter: "🚙\n{c}", lineHeight: 16 } } : {}),
         };
       }), barMaxWidth: vertical ? 52 : 42, itemStyle: { color, borderRadius: vertical ? [4, 4, 0, 0] : [0, 4, 4, 0] }, label: { show: true, position: vertical ? "top" : "right", color: "var(--foreground)", fontSize: 13 }, ...(vertical && objective ? { markLine: { silent: true, symbol: "none", lineStyle: { color: "#fca5a5", type: "dashed", width: 2 }, label: { show: true, formatter: `Objetivo ${objective}`, color: "#b91c1c", position: "insideEndTop" }, data: [{ yAxis: objective }] } } : {}) }],
     };
-  }, [colorIndex, highlightedName, items, modelImages, objective, vertical]);
+  }, [colorIndex, items, modelImages, objective, vertical]);
 
   if (vertical) {
     return <section className="relative flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute left-4 top-3 z-10 text-xl font-semibold text-foreground">{title}</h2><div className="pointer-events-none absolute right-4 top-3 z-10 flex items-center gap-4 text-sm font-semibold text-muted-foreground"><span className="flex items-center gap-1" title="Usados"><CarFront size={16} strokeWidth={1.8} /><span>{totalUsados}</span></span><span className="flex items-center gap-1" title="Créditos"><CreditCard size={16} strokeWidth={1.8} /><span>{totalCreditos}</span></span></div>{items.length ? <><div className="min-h-0 flex-1"><EChart option={option} /></div><SellerFinancingTable items={items} usadosItems={usadosItems} creditosItems={creditosItems} /></> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
@@ -149,5 +151,5 @@ export default function DashboardSalonView() {
     const date = new Date(Date.UTC(value.anio, value.mes - 1 + direction, 1));
     return { anio: date.getUTCFullYear(), mes: date.getUTCMonth() + 1 };
   });
-  return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset"><header className="mb-4 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-3xl font-bold text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-9 w-9 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={20} /></ActionButton><p className="whitespace-nowrap text-lg text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-9 w-9 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={20} /></ActionButton></div><div /></header><div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-4 overflow-hidden"><RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical highlightedName={data.vendedorMayorHilux} objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} /><div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title="Cantidad de operaciones" total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Cantidad de operaciones totales" total={data.totalOperacionesTodasSucursales} colorIndex={2} objective={data.objetivoOperacionesTotales} /></div></div></main>;
+  return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset"><header className="mb-4 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-3xl font-bold text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-9 w-9 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={20} /></ActionButton><p className="whitespace-nowrap text-lg text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-9 w-9 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={20} /></ActionButton></div><div /></header><div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-4 overflow-hidden"><RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} /><div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title="Cantidad de operaciones" total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Cantidad de operaciones totales" total={data.totalOperacionesTodasSucursales} colorIndex={2} objective={data.objetivoOperacionesTotales} /></div></div></main>;
 }

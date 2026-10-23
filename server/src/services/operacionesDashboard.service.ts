@@ -111,7 +111,6 @@ type DashboardSalonResponse = {
   totalOperacionesTodasSucursales: number;
   objetivoVendedores: number | null;
   objetivoOperacionesTotales: number | null;
-  vendedorMayorHilux: string | null;
   vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
   usadosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
   creditosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
@@ -811,15 +810,6 @@ export class OperacionesDashboardService {
         .filter((item) => item.total > 0)
         .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
 
-    const hiluxByVendedor = new Map<string, number>();
-    rows.forEach((row) => {
-      if (normalizeNullableString(row.modeloNombre)?.toLocaleUpperCase("es-AR") !== "HILUX") return;
-      const vendedor = normalizeNullableString(row.vendedorNombre) ?? "SIN DATOS";
-      hiluxByVendedor.set(vendedor, (hiluxByVendedor.get(vendedor) ?? 0) + 1);
-    });
-    const vendedorMayorHilux = Array.from(hiluxByVendedor.entries())
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? null;
-
     return {
       periodo: { anio: filters.anio, mes: filters.mes },
       sucursal: rows[0]?.sucursalNombre ?? `Sucursal ${filters.sucursalCodigo}`,
@@ -827,7 +817,6 @@ export class OperacionesDashboardService {
       totalOperacionesTodasSucursales: allBranchesRows.length,
       objetivoVendedores,
       objetivoOperacionesTotales,
-      vendedorMayorHilux,
       vendedores: groupRows((row) => row.vendedorNombre),
       usadosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadUsados),
       creditosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadCreditos),

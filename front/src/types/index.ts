@@ -1010,7 +1010,6 @@ export const dashboardSalonResponseSchema = z.object({
   totalOperacionesTodasSucursales: z.number(),
   objetivoVendedores: z.number().int().positive().nullable(),
   objetivoOperacionesTotales: z.number().int().positive().nullable(),
-  vendedorMayorHilux: z.string().nullable(),
   vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
   usadosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
   creditosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
