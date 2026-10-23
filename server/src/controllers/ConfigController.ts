@@ -62,6 +62,29 @@ export class ConfigController {
     }
   };
 
+  static deleteDashboardSalonModelImage = async (req: Request, res: Response) => {
+    const modelo = normalizeDashboardSalonModel(req.params.modelo);
+    if (!modelo) return res.status(400).json({ message: "Debes indicar el modelo a eliminar." });
+
+    try {
+      const config = await Configuration.findOne();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+
+      const images = config.imagenesModelosDashboardSalon ?? [];
+      if (!images.some((item) => item.modelo === modelo)) {
+        return res.status(404).json({ message: "No existe una imagen configurada para ese modelo." });
+      }
+
+      config.imagenesModelosDashboardSalon = images.filter((item) => item.modelo !== modelo);
+      await config.save();
+      return res.status(200).json({ message: `Imagen de ${modelo} eliminada correctamente` });
+    } catch (error) {
+      logError("ConfigController.deleteDashboardSalonModelImage");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudo eliminar el enlace de la imagen del modelo" });
+    }
+  };
+
   static listConfig = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne().lean();

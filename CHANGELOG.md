@@ -3,6 +3,7 @@
 ## 2026-10-23
 
 - **Dashboard Salón:** las imágenes de modelos ahora se configuran mediante enlaces HTTP(S), evitando depender del almacenamiento local del contenedor al actualizar el servidor.
+- **Dashboard Salón:** cada enlace de imagen por modelo puede eliminarse desde Configuración, con confirmación previa y actualización inmediata del gráfico.
 - **Calidad · Ventas:** se incorporó el módulo protegido `/calidad/ventas`, con permiso independiente, consulta mensual y carga o corrección por vendedor.
 - **Calidad · Ventas:** los resultados se persisten exclusivamente en Mongo con un único registro por vendedor, mes y año, fotografía histórica del vendedor y auditoría de altas y cambios.
 - **Calidad · Ventas:** la carga busca únicamente vendedores SIAC activos de ventas nuevas y calcula en servidor los puntos de Oportunidades con presupuesto, Entrega usado, TCFA y SSI Interno, con máximo de 8 puntos.

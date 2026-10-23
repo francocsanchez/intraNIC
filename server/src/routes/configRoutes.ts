@@ -16,6 +16,7 @@ router.get("/dashboard-salon", authorizeModules("configuracion"), ConfigControll
 router.put("/dashboard-salon", authorizeModules("configuracion"), ConfigController.updateDashboardSalonSettings);
 router.get("/dashboard-salon/modelos", authorizeModules("configuracion"), ConfigController.listDashboardSalonModelImages);
 router.post("/dashboard-salon/modelos", authorizeModules("configuracion"), ConfigController.saveDashboardSalonModelImage);
+router.delete("/dashboard-salon/modelos/:modelo", authorizeModules("configuracion"), ConfigController.deleteDashboardSalonModelImage);
 
 /**
  *

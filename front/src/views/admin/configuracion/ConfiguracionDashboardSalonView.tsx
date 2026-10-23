@@ -3,9 +3,10 @@ import {
   getDashboardSalonModelImages,
   updateDashboardSalonSettings,
   saveDashboardSalonModelImage,
+  deleteDashboardSalonModelImage,
 } from "@/api/configuracionAPI";
 import { getSucursalesSiac } from "@/api/dms/dmsAPI";
-import { ActionButton } from "@/components/ui/action-button";
+import { ActionButton, DeleteActionButton } from "@/components/ui/action-button";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -59,6 +60,15 @@ export default function ConfiguracionDashboardSalonView() {
       toast.success(response.message ?? "Imagen actualizada correctamente");
       setModeloImagen("");
       setEnlaceImagen("");
+      queryClient.invalidateQueries({ queryKey: ["configuracion", "dashboard-salon", "modelos"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-salon"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const deleteModelImageMutation = useMutation({
+    mutationFn: deleteDashboardSalonModelImage,
+    onSuccess: (response) => {
+      toast.success(response.message ?? "Imagen eliminada correctamente");
       queryClient.invalidateQueries({ queryKey: ["configuracion", "dashboard-salon", "modelos"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-salon"] });
     },
@@ -161,7 +171,7 @@ export default function ConfiguracionDashboardSalonView() {
           <ActionButton type="submit" disabled={saveModelImageMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveModelImageMutation.isPending ? "Guardando..." : "Guardar enlace"}</ActionButton>
         </form>
         {modelImagesQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudieron cargar las imágenes configuradas.</p> : null}
-        {modelImagesQuery.data?.data.length ? <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{modelImagesQuery.data.data.map((item) => <div key={item.modelo} className="overflow-hidden rounded-md border border-border bg-background"><img src={imageUrl(item.imageUrl)} alt={item.modelo} className="h-20 w-full object-contain" /><p className="truncate border-t border-border px-2 py-1 text-center text-xs font-medium text-foreground">{item.modelo}</p></div>)}</div> : <p className="mt-3 text-sm text-muted-foreground">Todavía no hay imágenes cargadas.</p>}
+        {modelImagesQuery.data?.data.length ? <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{modelImagesQuery.data.data.map((item) => <div key={item.modelo} className="overflow-hidden rounded-md border border-border bg-background"><img src={imageUrl(item.imageUrl)} alt={item.modelo} className="h-20 w-full object-contain" /><div className="flex items-center justify-between gap-2 border-t border-border px-2 py-1"><p className="truncate text-xs font-medium text-foreground">{item.modelo}</p><DeleteActionButton size="icon-sm" title={`Eliminar imagen de ${item.modelo}`} aria-label={`Eliminar imagen de ${item.modelo}`} disabled={deleteModelImageMutation.isPending} onClick={() => { if (window.confirm(`¿Eliminar el enlace de imagen de ${item.modelo}?`)) deleteModelImageMutation.mutate(item.modelo); }}>×</DeleteActionButton></div></div>)}</div> : <p className="mt-3 text-sm text-muted-foreground">Todavía no hay imágenes cargadas.</p>}
       </section>
     </div>
   );
