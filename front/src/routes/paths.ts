@@ -7,6 +7,7 @@ export const paths = {
   calidad: {
     home: "/calidad",
     ssiVentas: "/calidad/ssi-ventas",
+    ventas: "/calidad/ventas",
   },
   kinto: {
     dashboard: "/kinto/dashboard",

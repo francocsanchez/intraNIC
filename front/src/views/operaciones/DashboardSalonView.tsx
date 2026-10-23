@@ -122,15 +122,14 @@ function OperationsGauge({ title, total, colorIndex, objective }: { title: strin
   return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div></section>;
 }
 
-function OperationsCounter({ title, total, totalOperaciones, modelos }: { title: string; total: number; totalOperaciones: number; modelos: DashboardSalonResponse["modelos"] }) {
-  const percentage = totalOperaciones > 0 ? Math.round((total / totalOperaciones) * 100) : 0;
+function OperationsCounter({ title, total, modelos, totalOperaciones: _totalOperaciones }: { title: string; total: number; totalOperaciones: number; modelos: DashboardSalonResponse["modelos"] }) {
+  void _totalOperaciones;
   const option = useMemo<EChartsCoreOption>(() => ({
     color: MODEL_ROSE_COLORS,
     tooltip: { trigger: "item", formatter: (params: unknown) => { const item = params as { name?: string; value?: number; percent?: number }; return `${item.name ?? ""}: ${item.value ?? 0} - ${Math.round(item.percent ?? 0)}%`; } },
     series: [{ type: "pie", roseType: "radius", radius: ["27%", "65%"], center: ["50%", "56%"], avoidLabelOverlap: true, itemStyle: { borderRadius: 7, borderColor: "var(--card)", borderWidth: 3 }, label: { show: true, fontSize: 10, color: "var(--foreground)", formatter: (params: unknown) => { const item = params as { name?: string; value?: number; percent?: number }; return `${item.name ?? ""}: ${item.value ?? 0} - ${Math.round(item.percent ?? 0)}%`; } }, labelLine: { show: true, length: 8, length2: 8 }, data: modelos.map((item) => ({ name: item.nombre, value: item.total })) }],
-    graphic: [{ type: "text", left: "center", top: "42%", style: { text: `${total}\n${percentage}%`, textAlign: "center", textVerticalAlign: "middle", fill: "var(--foreground)", fontSize: 28, fontWeight: "bold", lineHeight: 32 } }],
-  }), [modelos, percentage, total]);
-  return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2>{modelos.length ? <div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div> : <div className="flex h-full flex-col items-center justify-center"><p className="text-7xl font-bold leading-none text-foreground">{total}</p><p className="mt-3 text-lg text-muted-foreground">{percentage}%</p></div>}</section>;
+  }), [modelos]);
+  return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2>{modelos.length ? <><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div><div className="pointer-events-none absolute left-1/2 top-[56%] z-20 -translate-x-1/2 -translate-y-1/2"><span className="text-5xl font-bold leading-none text-foreground">{total}</span></div></> : <div className="flex h-full items-center justify-center"><p className="text-7xl font-bold leading-none text-foreground">{total}</p></div>}</section>;
 }
 
 export default function DashboardSalonView() {

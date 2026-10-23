@@ -2,7 +2,7 @@ import Loading from "@/components/Loading";
 import AppBrand from "@/components/AppBrand";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { ChevronLeft, PhoneCall } from "lucide-react";
+import { ChevronLeft, ClipboardCheck, PhoneCall } from "lucide-react";
 import { Link, NavLink, Navigate, Outlet } from "react-router-dom";
 
 const sections = [
@@ -10,6 +10,11 @@ const sections = [
     label: "SSI Ventas",
     to: paths.calidad.ssiVentas,
     icon: PhoneCall,
+  },
+  {
+    label: "Ventas",
+    to: paths.calidad.ventas,
+    icon: ClipboardCheck,
   },
 ];
 

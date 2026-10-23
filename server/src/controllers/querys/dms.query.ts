@@ -70,6 +70,31 @@ ORDER BY
 	v.ven_nombre
 `;
 
+export const searchVendedoresActivosNuevoNic = () => `
+SELECT TOP 20
+  v.ven_codigo AS "codigo",
+  LTRIM(RTRIM(v.ven_nombre)) AS "vendedor",
+  ISNULL(LTRIM(RTRIM(sucursal.suc_nombre)), 'SIN ASIGNAR') AS "sucursal"
+FROM vendedor v
+LEFT JOIN sucursal ON sucursal.suc_codigo = v.ven_sucur
+WHERE v.ven_estado = 1
+  AND v.ven_vennvo = 1
+  AND LTRIM(RTRIM(ISNULL(v.ven_nombre, ''))) COLLATE Latin1_General_CI_AI LIKE :buscar COLLATE Latin1_General_CI_AI
+ORDER BY v.ven_nombre
+`;
+
+export const getVendedorActivoNuevoNicByCode = () => `
+SELECT
+  v.ven_codigo AS "codigo",
+  LTRIM(RTRIM(v.ven_nombre)) AS "vendedor",
+  ISNULL(LTRIM(RTRIM(sucursal.suc_nombre)), 'SIN ASIGNAR') AS "sucursal"
+FROM vendedor v
+LEFT JOIN sucursal ON sucursal.suc_codigo = v.ven_sucur
+WHERE v.ven_estado = 1
+  AND v.ven_vennvo = 1
+  AND v.ven_codigo = :codigo
+`;
+
 export const getAsignacionRecepcion = () => `
 SELECT
 	stoauto.sa_codigo AS interno,

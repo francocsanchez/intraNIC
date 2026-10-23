@@ -113,6 +113,8 @@ const PendientesTurnarView = lazy(() => import("./views/entregas/PendientesTurna
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
 const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
+const CalidadVentasView = lazy(() => import("./views/calidad/CalidadVentasView"));
+const CalidadHomeRedirect = lazy(() => import("./views/calidad/CalidadHomeRedirect"));
 const KintoFlotaView = lazy(() => import("./views/kinto/KintoFlotaView"));
 const KintoDashboardView = lazy(() => import("./views/kinto/KintoDashboardView"));
 const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView"));
@@ -143,10 +145,15 @@ export default function Router() {
               <Route path={paths.analisis.dashboardSalon} element={<DashboardSalonView />} />
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
+            <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas", "calidadVentas"]} />}>
               <Route element={<CalidadLayout />}>
-                <Route path={paths.calidad.home} element={<Navigate to={paths.calidad.ssiVentas} replace />} />
-                <Route path={paths.calidad.ssiVentas} element={<SsiVentasView />} />
+                <Route path={paths.calidad.home} element={<CalidadHomeRedirect />} />
+                <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
+                  <Route path={paths.calidad.ssiVentas} element={<SsiVentasView />} />
+                </Route>
+                <Route element={<ModuleProtectedRoute allowedModules={["calidadVentas"]} />}>
+                  <Route path={paths.calidad.ventas} element={<CalidadVentasView />} />
+                </Route>
               </Route>
             </Route>
 

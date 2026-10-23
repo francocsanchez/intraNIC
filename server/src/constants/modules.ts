@@ -45,6 +45,7 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "ssiVentas",
+  "calidadVentas",
   "kintoFlota",
   "kintoDashboard",
   "kintoMatafuegos",

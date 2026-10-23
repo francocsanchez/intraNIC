@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-23
+
+- **Calidad · Ventas:** se incorporó el módulo protegido `/calidad/ventas`, con permiso independiente, consulta mensual y carga o corrección por vendedor.
+- **Calidad · Ventas:** los resultados se persisten exclusivamente en Mongo con un único registro por vendedor, mes y año, fotografía histórica del vendedor y auditoría de altas y cambios.
+- **Calidad · Ventas:** la carga busca únicamente vendedores SIAC activos de ventas nuevas y calcula en servidor los puntos de Oportunidades con presupuesto, Entrega usado, TCFA y SSI Interno, con máximo de 8 puntos.
+- **Calidad · Ventas:** SSI Interno requiere valor con hasta dos decimales y estado consistente: Cumple desde 95,00; la grilla conserva los resultados históricos de vendedores inactivos.
+- **Calidad · Ventas:** al modificar el valor SSI, el estado se ajusta automáticamente según el objetivo de 95,00 para permitir registrar resultados menores sin bloquear la carga.
+- **Calidad · Ventas:** se corrigió la auditoría de altas y se normalizan registros históricos incompletos al editarlos, evitando que bloqueen el guardado.
+
 ## 2026-10-22
 
 - **Operaciones Preventa:** el gráfico `Montos Promedios de Credito` ahora combina barras de cantidad mensual de créditos y una línea con su monto promedio.
@@ -18,6 +27,7 @@
 - **Dashboard Salón:** el velocímetro total ahora ocupa casi toda su tarjeta; el título se superpone sin restar superficie al gráfico.
 - **Dashboard Salón:** el medidor de operaciones de la sucursal fue reemplazado por un contador numérico.
 - **Dashboard Salón:** la tarjeta de cantidad de operaciones ahora presenta una rosa por modelo, con un color y una etiqueta de cantidad/participación por segmento, y conserva en el centro el total y el porcentaje de la sucursal.
+- **Dashboard Salón:** el total de operaciones de la sucursal de la rosa se muestra en una capa frontal independiente, sin porcentaje, para que nunca quede oculto por sus segmentos.
 - **Dashboard Salón:** el ranking por vendedor ahora señala el objetivo con una línea horizontal roja punteada.
 - **Dashboard Salón:** el contador de operaciones de la sucursal ahora informa su porcentaje entero sobre el total real de operaciones del período.
 - **Dashboard Salón:** se registró el componente ECharts necesario para renderizar la línea punteada del objetivo de vendedores.

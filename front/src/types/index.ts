@@ -2866,3 +2866,35 @@ export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAudit
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;
 export type RepuestoSiniestroNota = z.infer<typeof repuestoSiniestroNotaDetalleSchema>;
+
+export const calidadVentasResultadoValorSchema = z.enum(["cumple", "noCumple"]);
+export const calidadVentasResultadoSchema = z.object({
+  _id: z.string(),
+  vendedorCodigo: z.number(),
+  vendedorNombre: z.string(),
+  sucursal: z.string(),
+  anio: z.number(),
+  mes: z.number(),
+  oportunidadesPresupuesto: calidadVentasResultadoValorSchema,
+  entregaUsado: calidadVentasResultadoValorSchema,
+  tcfa: calidadVentasResultadoValorSchema,
+  ssiInterno: calidadVentasResultadoValorSchema,
+  ssiValor: z.number(),
+  puntosOportunidades: z.number(),
+  puntosEntregaUsado: z.number(),
+  puntosTcfa: z.number(),
+  puntosSsi: z.number(),
+  puntosTotal: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const calidadVentasListResponseSchema = z.object({ data: z.array(calidadVentasResultadoSchema) });
+export const calidadVentasSellerSchema = z.object({ codigo: z.number(), vendedor: z.string(), sucursal: z.string() });
+export const calidadVentasSellersResponseSchema = z.object({ data: z.array(calidadVentasSellerSchema) });
+export const calidadVentasSaveResponseSchema = z.object({ message: z.string(), data: calidadVentasResultadoSchema });
+export type CalidadVentasResultadoValor = z.infer<typeof calidadVentasResultadoValorSchema>;
+export type CalidadVentasResultado = z.infer<typeof calidadVentasResultadoSchema>;
+export type CalidadVentasListResponse = z.infer<typeof calidadVentasListResponseSchema>;
+export type CalidadVentasSeller = z.infer<typeof calidadVentasSellerSchema>;
+export type CalidadVentasSellersResponse = z.infer<typeof calidadVentasSellersResponseSchema>;
+export type CalidadVentasSaveResponse = z.infer<typeof calidadVentasSaveResponseSchema>;
