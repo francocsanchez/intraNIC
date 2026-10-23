@@ -121,11 +121,8 @@ export async function getDashboardSalonModelImages() {
   return response.data;
 }
 
-export async function uploadDashboardSalonModelImage(payload: { modelo: string; file: File }) {
-  const formData = new FormData();
-  formData.append("modelo", payload.modelo);
-  formData.append("file", payload.file);
-  const { data } = await api.post("/config/dashboard-salon/modelos", formData);
+export async function saveDashboardSalonModelImage(payload: { modelo: string; imageUrl: string }) {
+  const { data } = await api.post("/config/dashboard-salon/modelos", payload);
   const response = dashboardSalonModelImagesResponseSchema.pick({ message: true }).safeParse(data);
   if (!response.success) throw new Error("La respuesta de la imagen de modelo es inválida");
   return response.data;

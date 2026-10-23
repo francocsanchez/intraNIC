@@ -60,7 +60,7 @@ Dashboard Salón organiza el ranking de vendedores con barras horizontales en la
 Dashboard Salón debe ocupar exactamente el viewport y no permite desplazamiento vertical; sus filas y gráficos se ajustan al alto disponible.
 En Dashboard Salón, el ranking de vendedores usa el formato ECharts de barras simples: vendedores en el eje X y cantidades en el eje Y.
 Dashboard Salón muestra, a la derecha del ranking por modelo, un segundo medidor igual al local con el total mensual de operaciones activas asignadas de todas las sucursales.
-La configuración de Dashboard Salón permite cargar una imagen JPG, PNG o WEBP por modelo. El gráfico por modelo muestra esa imagen junto a su etiqueta y usa un ícono de vehículo si no existe; una nueva carga para el mismo modelo reemplaza el registro y elimina del servidor el archivo anterior.
+La configuración de Dashboard Salón permite registrar un enlace HTTP(S) de imagen por modelo. El gráfico por modelo muestra esa imagen junto a su etiqueta y usa un ícono de vehículo si no existe; un nuevo enlace para el mismo modelo reemplaza el anterior.
 Las imágenes y el ícono de respaldo del gráfico por modelo se muestran en tamaño destacado para facilitar su lectura a distancia.
 En la tabla inferior de vendedores de Dashboard Salón, el mayor tomador de usados recibe una estrella verde y el mayor generador de créditos una estrella amarilla; ante empate se destaca el primer nombre alfabéticamente. No se identifica visualmente al vendedor con más HILUX.
 El selector de Sucursal SIAC del formulario de usuarios debe informar el error remoto y permitir reintentar; no debe mostrar una lista vacía cuando falle la consulta de SIAC.
