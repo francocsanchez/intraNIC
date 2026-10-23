@@ -207,6 +207,16 @@ export const dashboardSalonSettingsResponseSchema = z.object({
   message: z.string().optional(),
 });
 
+export const dashboardSalonModelImageSchema = z.object({
+  modelo: z.string().min(1),
+  imageUrl: z.string().min(1),
+});
+
+export const dashboardSalonModelImagesResponseSchema = z.object({
+  data: z.array(dashboardSalonModelImageSchema),
+  message: z.string().optional(),
+});
+
 //**************************** */
 // USUARIOS
 //**************************** */
@@ -1002,7 +1012,10 @@ export const dashboardSalonResponseSchema = z.object({
   objetivoOperacionesTotales: z.number().int().positive().nullable(),
   vendedorMayorHilux: z.string().nullable(),
   vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+  usadosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
+  creditosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
   modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+  imagenesModelos: z.array(dashboardSalonModelImageSchema).default([]),
 });
 
 export type DashboardSalonResponse = z.infer<typeof dashboardSalonResponseSchema>;

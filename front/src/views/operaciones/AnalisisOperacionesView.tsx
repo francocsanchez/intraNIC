@@ -88,7 +88,6 @@ type ChartSeries = {
 
 // Soft chart colors were requested for the preventa operations analysis only.
 const SOFT_BLUE = "oklch(0.69 0.1 245)";
-const SOFT_RED = "oklch(0.68 0.11 25)";
 const SOFT_LINE_COLORS = [
   "oklch(0.66 0.1 245)",
   "oklch(0.68 0.09 155)",
@@ -715,6 +714,7 @@ export default function AnalisisOperacionesView() {
     return {
       mes: month.mes,
       porcentajeCredito,
+      cantidadOperacionesCredito: match?.cantidadOperacionesCredito ?? 0,
       promedioCredito: match?.promedioCredito ?? null,
     };
   });
@@ -934,15 +934,15 @@ export default function AnalisisOperacionesView() {
 
         <article className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="flex flex-col gap-2 border-b border-border pb-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Monto Promedio de Credito</h2>
-            <p className="text-xs text-muted-foreground">Promedio mensual de credito bancario durante {anio}.</p>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Montos Promedios de Credito</h2>
+            <p className="text-xs text-muted-foreground">Cantidad y monto promedio mensual de créditos bancarios durante {anio}.</p>
           </div>
 
           <div className="mt-4 h-[320px] min-w-0">
             {isCreditoMensualLoading ? (
               <div className="h-full animate-pulse rounded-lg bg-muted" />
             ) : (
-              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "promedioCredito", label: "Promedio credito", color: SOFT_RED, valueFormatter: formatChartCurrency }]} />
+              <AnalyticsChart data={creditoChartData as ChartPoint[]} xKey="mes" series={[{ key: "cantidadOperacionesCredito", label: "Cantidad créditos", color: SOFT_BLUE, showValueLabel: true, valueFormatter: formatChartInteger }, { key: "promedioCredito", label: "Monto promedio crédito", type: "line", yAxisIndex: 1, color: "var(--foreground)", valueFormatter: formatChartCurrency }]} />
             )}
           </div>
         </article>

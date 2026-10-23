@@ -3,6 +3,7 @@ import { isAxiosError } from "axios";
 import {
   configuracionResponseSchema,
   dashboardSalonSettingsResponseSchema,
+  dashboardSalonModelImagesResponseSchema,
 } from "../types";
 
 export async function getConfiguracion() {
@@ -110,5 +111,22 @@ export async function updateDashboardSalonSettings(
   if (!response.success) {
     throw new Error("La estructura de la configuración es inválida");
   }
+  return response.data;
+}
+
+export async function getDashboardSalonModelImages() {
+  const { data } = await api.get("/config/dashboard-salon/modelos");
+  const response = dashboardSalonModelImagesResponseSchema.safeParse(data);
+  if (!response.success) throw new Error("La estructura de las imágenes de modelos es inválida");
+  return response.data;
+}
+
+export async function uploadDashboardSalonModelImage(payload: { modelo: string; file: File }) {
+  const formData = new FormData();
+  formData.append("modelo", payload.modelo);
+  formData.append("file", payload.file);
+  const { data } = await api.post("/config/dashboard-salon/modelos", formData);
+  const response = dashboardSalonModelImagesResponseSchema.pick({ message: true }).safeParse(data);
+  if (!response.success) throw new Error("La respuesta de la imagen de modelo es inválida");
   return response.data;
 }

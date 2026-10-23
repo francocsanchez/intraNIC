@@ -4,3 +4,4 @@
 dist
 outputs/
 .env.docker
+server/uploads/

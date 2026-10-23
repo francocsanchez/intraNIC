@@ -1,4 +1,5 @@
-import { Router } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
+import multer from "multer";
 import { ConfigController } from "../controllers/ConfigController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
@@ -6,6 +7,16 @@ import { ColorUnidadController } from "../controllers/ColorUnidadController";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin";
 
 const router = Router();
+const dashboardSalonModelUpload = multer({ storage: multer.memoryStorage(), limits: { files: 1, fileSize: 5 * 1024 * 1024 } });
+const singleDashboardSalonModelImage = (req: Request, res: Response, next: NextFunction) => {
+  dashboardSalonModelUpload.single("file")(req, res, (error) => {
+    if (!error) return next();
+    const message = error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE"
+      ? "La imagen supera el límite permitido de 5 MB"
+      : "No se pudo recibir la imagen seleccionada";
+    return res.status(400).json({ message });
+  });
+};
 router.use(authenticate);
 
 router.get("/colores-unidades/badges", ColorUnidadController.badges);
@@ -14,6 +25,8 @@ router.post("/colores-unidades", requireSuperAdmin, ColorUnidadController.save);
 router.put("/colores-unidades/:id", requireSuperAdmin, ColorUnidadController.save);
 router.get("/dashboard-salon", authorizeModules("configuracion"), ConfigController.getDashboardSalonSettings);
 router.put("/dashboard-salon", authorizeModules("configuracion"), ConfigController.updateDashboardSalonSettings);
+router.get("/dashboard-salon/modelos", authorizeModules("configuracion"), ConfigController.listDashboardSalonModelImages);
+router.post("/dashboard-salon/modelos", authorizeModules("configuracion"), singleDashboardSalonModelImage, ConfigController.uploadDashboardSalonModelImage);
 
 /**
  *

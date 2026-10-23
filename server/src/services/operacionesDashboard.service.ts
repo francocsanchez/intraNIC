@@ -20,6 +20,7 @@ import {
   analisisOperacionesPreventaQuery,
   analisisOperacionesPreventaResumenFinanciacionQuery,
   analisisOperacionesPreventaUsadosMensualQuery,
+  dashboardSalonFinanciacionPorVendedorQuery,
   operacionesDashboardQuery,
 } from "../controllers/querys/operaciones.query";
 
@@ -112,7 +113,10 @@ type DashboardSalonResponse = {
   objetivoOperacionesTotales: number | null;
   vendedorMayorHilux: string | null;
   vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
+  usadosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
+  creditosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
   modelos: AnalisisOperacionesPreventaMovilResumenItem[];
+  imagenesModelos: Array<{ modelo: string; imageUrl: string }>;
 };
 
 type AnalisisVendedorFilters = {
@@ -216,6 +220,12 @@ type OperacionDashboardRow = {
   interno: string | number | null;
   chasis: string | null;
   __sucursalCodigo: string;
+};
+
+type DashboardSalonFinanciacionPorVendedorRow = {
+  vendedorNombre: string | null;
+  cantidadUsados: number | string | null;
+  cantidadCreditos: number | string | null;
 };
 
 type OperacionDashboard = Omit<OperacionDashboardRow, "__sucursalCodigo">;
@@ -713,7 +723,7 @@ export class OperacionesDashboardService {
   static async getDashboardSalon(
     filters: { anio: number; mes: number; sucursalCodigo: number },
   ): Promise<DashboardSalonResponse> {
-    const [rows, allBranchesRows, config] = await Promise.all([
+    const [rows, allBranchesRows, config, financiacionRows] = await Promise.all([
       sequelizeNIC.query<OperacionDashboardRow>(
         operacionesDashboardQuery({
           hasAnios: true,
@@ -744,7 +754,18 @@ export class OperacionesDashboardService {
           replacements: { anios: [filters.anio], meses: [filters.mes] },
         },
       ),
-      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1 }).lean(),
+      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, imagenesModelosDashboardSalon: 1 }).lean(),
+      sequelizeNIC.query<DashboardSalonFinanciacionPorVendedorRow>(
+        dashboardSalonFinanciacionPorVendedorQuery(),
+        {
+          type: QueryTypes.SELECT,
+          replacements: {
+            anio: filters.anio,
+            mes: filters.mes,
+            sucursales: [String(filters.sucursalCodigo)],
+          },
+        },
+      ),
     ]);
 
     const objetivoConfigurado = Number(
@@ -779,6 +800,17 @@ export class OperacionesDashboardService {
         .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
     };
 
+    const groupFinanciacionPorVendedor = (
+      value: (row: DashboardSalonFinanciacionPorVendedorRow) => number | string | null,
+    ) =>
+      financiacionRows
+        .map((row) => ({
+          nombre: normalizeNullableString(row.vendedorNombre) ?? "SIN DATOS",
+          total: normalizeNullableNumber(value(row)) ?? 0,
+        }))
+        .filter((item) => item.total > 0)
+        .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+
     const hiluxByVendedor = new Map<string, number>();
     rows.forEach((row) => {
       if (normalizeNullableString(row.modeloNombre)?.toLocaleUpperCase("es-AR") !== "HILUX") return;
@@ -797,7 +829,13 @@ export class OperacionesDashboardService {
       objetivoOperacionesTotales,
       vendedorMayorHilux,
       vendedores: groupRows((row) => row.vendedorNombre),
+      usadosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadUsados),
+      creditosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadCreditos),
       modelos: groupRows((row) => row.modeloNombre),
+      imagenesModelos: (config?.imagenesModelosDashboardSalon ?? []).map((item) => ({
+        modelo: item.modelo,
+        imageUrl: item.imagePath,
+      })),
     };
   }
 

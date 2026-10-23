@@ -344,10 +344,10 @@ export default function ConfiguracionView() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Análisis</p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Objetivo de vendedores</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Define la meta mensual que colorea el ranking de vendedores del Dashboard Salón.</p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Dashboard Salón</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Define objetivos mensuales e imágenes por modelo para el Dashboard Salón.</p>
             </div>
-            <Link to={paths.admin.configuracionDashboardSalon} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Configurar objetivo</Link>
+            <Link to={paths.admin.configuracionDashboardSalon} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Configurar Dashboard</Link>
           </div>
         </section>
       ) : null}

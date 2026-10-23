@@ -1,6 +1,7 @@
 process.removeAllListeners("warning");
 
 import express from "express";
+import path from "path";
 import { connectDatabases } from "./config/database";
 import cors from "cors";
 
@@ -53,6 +54,7 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 app.use("/api/health", healthRoutes);
 app.use("/api/config", configRoutes);

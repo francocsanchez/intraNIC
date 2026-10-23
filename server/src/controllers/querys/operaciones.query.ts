@@ -397,6 +397,32 @@ ORDER BY
     mes ASC;
 `;
 
+export const dashboardSalonFinanciacionPorVendedorQuery = () => `
+SELECT
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN DATOS'))) AS "vendedorNombre",
+    SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS "cantidadUsados",
+    SUM(CASE WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN 1 ELSE 0 END) AS "cantidadCreditos"
+FROM
+    viewpreventa vp
+INNER JOIN opera ope ON
+    ope.ope_codigo = vp.numero
+    AND ope.ope_tipo = 5
+    AND ope.ope_fecasig IS NOT NULL
+INNER JOIN stoauto ON
+    stoauto.sa_codigo = ope.ope_stoauto
+LEFT JOIN vendedor vende ON
+    vende.ven_codigo = ope.ope_vende
+WHERE
+    vp.fecha_anulacion IS NULL
+    AND stoauto.sa_nrofab LIKE 'NIC%'
+    AND YEAR(ope.ope_fecasig) = :anio
+    AND MONTH(ope.ope_fecasig) = :mes
+    AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
+    AND ISNULL(CAST(vende.ven_sucur AS VARCHAR(20)), 'SIN_ASIGNAR') IN (:sucursales)
+GROUP BY
+    LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN DATOS')));
+`;
+
 export const analisisVendedorMensualPorModeloQuery = (hasVendedorFilter: boolean) => `
 SELECT
     MONTH(ope.ope_fecasig) AS mes,

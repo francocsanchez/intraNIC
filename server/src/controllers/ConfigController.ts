@@ -1,8 +1,86 @@
 import { Response, Request } from "express";
+import { randomUUID } from "crypto";
+import { mkdir, unlink, writeFile } from "fs/promises";
+import path from "path";
 import Configuration from "../models/Config";
 import { logError } from "../utils/logError";
 
+const DASHBOARD_SALON_MODEL_IMAGE_DIRECTORY = path.resolve(process.cwd(), "uploads", "dashboard-salon-modelos");
+const DASHBOARD_SALON_MODEL_IMAGE_PATH_PREFIX = "/uploads/dashboard-salon-modelos/";
+
+const normalizeDashboardSalonModel = (value: unknown) => {
+  const normalized = String(value ?? "").trim().replace(/\s+/g, " ");
+  return normalized ? normalized.toLocaleUpperCase("es-AR") : null;
+};
+
+const removeDashboardSalonModelImage = async (imagePath: string | undefined) => {
+  if (!imagePath?.startsWith(DASHBOARD_SALON_MODEL_IMAGE_PATH_PREFIX)) return;
+  const filePath = path.join(DASHBOARD_SALON_MODEL_IMAGE_DIRECTORY, path.basename(imagePath));
+  await unlink(filePath).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "ENOENT") throw error;
+  });
+};
+
 export class ConfigController {
+  static listDashboardSalonModelImages = async (_req: Request, res: Response) => {
+    try {
+      const config = await Configuration.findOne({}, { imagenesModelosDashboardSalon: 1 }).lean();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      return res.status(200).json({
+        data: (config.imagenesModelosDashboardSalon ?? []).map((item) => ({
+          modelo: item.modelo,
+          imageUrl: item.imagePath,
+        })),
+        message: "Imágenes de modelos listadas",
+      });
+    } catch (error) {
+      logError("ConfigController.listDashboardSalonModelImages");
+      console.error(error);
+      return res.status(500).json({ message: "Error del servidor" });
+    }
+  };
+
+  static uploadDashboardSalonModelImage = async (req: Request, res: Response) => {
+    const modelo = normalizeDashboardSalonModel(req.body?.modelo);
+    const file = req.file;
+    if (!modelo || !file) return res.status(400).json({ message: "Debes indicar un modelo y seleccionar una imagen." });
+    const extensionByMimeType: Record<string, string> = {
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "image/webp": ".webp",
+    };
+    const extension = extensionByMimeType[file.mimetype];
+    if (!extension) return res.status(400).json({ message: "La imagen debe estar en formato JPG, PNG o WEBP." });
+
+    let newImagePath: string | undefined;
+    try {
+      const config = await Configuration.findOne();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+
+      await mkdir(DASHBOARD_SALON_MODEL_IMAGE_DIRECTORY, { recursive: true });
+      const fileName = `${randomUUID()}${extension}`;
+      const filePath = path.join(DASHBOARD_SALON_MODEL_IMAGE_DIRECTORY, fileName);
+      await writeFile(filePath, file.buffer);
+      newImagePath = `${DASHBOARD_SALON_MODEL_IMAGE_PATH_PREFIX}${fileName}`;
+
+      const previousImage = config.imagenesModelosDashboardSalon.find((item) => item.modelo === modelo)?.imagePath;
+      config.imagenesModelosDashboardSalon = config.imagenesModelosDashboardSalon.filter((item) => item.modelo !== modelo);
+      config.imagenesModelosDashboardSalon.push({ modelo, imagePath: newImagePath });
+      await config.save();
+      await removeDashboardSalonModelImage(previousImage);
+
+      return res.status(200).json({
+        data: { modelo, imageUrl: newImagePath },
+        message: `Imagen de ${modelo} actualizada correctamente`,
+      });
+    } catch (error) {
+      if (newImagePath) await removeDashboardSalonModelImage(newImagePath).catch(() => undefined);
+      logError("ConfigController.uploadDashboardSalonModelImage");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudo guardar la imagen del modelo" });
+    }
+  };
+
   static listConfig = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne().lean();

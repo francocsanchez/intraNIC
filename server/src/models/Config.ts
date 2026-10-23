@@ -32,6 +32,10 @@ export interface IConfiguration extends Document {
     mes: number;
     objetivo: number;
   }>;
+  imagenesModelosDashboardSalon: Array<{
+    modelo: string;
+    imagePath: string;
+  }>;
 }
 
 const configSchema: Schema = new Schema(
@@ -72,6 +76,13 @@ const configSchema: Schema = new Schema(
         anio: { type: Number, required: true, min: 2000 },
         mes: { type: Number, required: true, min: 1, max: 12 },
         objetivo: { type: Number, required: true, min: 1 },
+      }],
+      default: [],
+    },
+    imagenesModelosDashboardSalon: {
+      type: [{
+        modelo: { type: String, required: true, trim: true },
+        imagePath: { type: String, required: true, trim: true },
       }],
       default: [],
     },

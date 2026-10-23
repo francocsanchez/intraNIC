@@ -2,6 +2,7 @@
 
 ## 2026-10-22
 
+- **Operaciones Preventa:** el gráfico `Montos Promedios de Credito` ahora combina barras de cantidad mensual de créditos y una línea con su monto promedio.
 - **Dashboard Salón:** se agregó el módulo protegido `/analisis/dashboard-salon`, sin navbar ni footer, para mostrar en pantalla completa las asignaciones activas del mes vigente de la sucursal SIAC del usuario.
 - **Dashboard Salón:** la vista actualiza los datos cada minuto y muestra el ranking de vendedores, el total de operaciones en un medidor y el ranking estático por modelo.
 - **Dashboard Salón:** se reorganizó la pantalla en dos filas, con las barras horizontales de vendedores en la fila superior y el medidor junto al ranking por modelo en la inferior.
@@ -15,11 +16,23 @@
 - **Dashboard Salón:** el objetivo total se configura independientemente de la sucursal; el velocímetro usa escala redondeada, más espacio visual y etapas verde, amarillo y rojo.
 - **Dashboard Salón:** el velocímetro total ahora ocupa casi toda su tarjeta; el título se superpone sin restar superficie al gráfico.
 - **Dashboard Salón:** el medidor de operaciones de la sucursal fue reemplazado por un contador numérico.
+- **Dashboard Salón:** la tarjeta de cantidad de operaciones ahora presenta una rosa por modelo, con un color y una etiqueta de cantidad/participación por segmento, y conserva en el centro el total y el porcentaje de la sucursal.
 - **Dashboard Salón:** el ranking por vendedor ahora señala el objetivo con una línea horizontal roja punteada.
 - **Dashboard Salón:** el contador de operaciones de la sucursal ahora informa su porcentaje entero sobre el total real de operaciones del período.
 - **Dashboard Salón:** se registró el componente ECharts necesario para renderizar la línea punteada del objetivo de vendedores.
 - **Dashboard Salón:** se agregaron flechas centrales para consultar meses anteriores y volver al período vigente.
 - **Dashboard Salón:** el ranking de vendedores eliminó el padding interno para aprovechar más la altura disponible.
+- **Dashboard Salón:** el ranking por vendedor reemplazó las líneas de usados y créditos por una tabla inferior alineada con sus barras, con una fila para cada modalidad.
+- **Dashboard Salón:** la tarjeta de vendedores ahora informa en su esquina superior derecha los totales de usados y créditos con sus íconos.
+- **Dashboard Salón:** el velocímetro de operaciones totales ahora progresa rojo → amarillo → verde y se pinta de verde al alcanzar la meta.
+- **Dashboard Salón:** se agregó la carga de una imagen por modelo desde Configuración; el gráfico la muestra junto a la etiqueta del modelo y usa un ícono cuando no existe imagen.
+- **Dashboard Salón:** cargar una nueva imagen para un modelo reemplaza y elimina de forma segura el archivo anterior del servidor.
+- **Dashboard Salón:** se amplió el tamaño de las imágenes e íconos de modelos en el gráfico para mejorar su visibilidad.
+- **Dashboard Salón:** la tabla de modalidades ahora usa íconos, líneas de celda y guiones para los valores sin operaciones.
+- **Dashboard Salón:** se compactó el margen inferior del gráfico de vendedores para acercar la tabla y ampliar visualmente las barras.
+- **Dashboard Salón:** se corrigió la alineación entre las barras de vendedores y las celdas de usados/créditos, eliminando el margen automático del eje oculto.
+- **Dashboard Salón:** la tabla de usados y créditos usa la misma fuente y reglas de Operaciones Preventa; informa por vendedor las cantidades de operaciones activas, asignadas, NIC y no anuladas con cada modalidad.
+- **Dashboard Salón:** la respuesta de las nuevas series de usados y créditos admite ausencia temporal durante actualizaciones escalonadas.
 - **Usuarios:** se incorporó la sucursal SIAC independiente, seleccionable desde la tabla `sucursal` de SIAC; no modifica la sucursal predeterminada utilizada por Entregas.
 - **Usuarios:** el selector de sucursal SIAC ahora informa los errores de consulta y permite reintentar, evitando que una falla se vea como una lista vacía.
 

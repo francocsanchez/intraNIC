@@ -1,6 +1,8 @@
 import {
   getDashboardSalonSettings,
+  getDashboardSalonModelImages,
   updateDashboardSalonSettings,
+  uploadDashboardSalonModelImage,
 } from "@/api/configuracionAPI";
 import { getSucursalesSiac } from "@/api/dms/dmsAPI";
 import { ActionButton } from "@/components/ui/action-button";
@@ -20,6 +22,8 @@ export default function ConfiguracionDashboardSalonView() {
   const [mes, setMes] = useState(String(today.getMonth() + 1));
   const [objetivoDraft, setObjetivoDraft] = useState<string | null>(null);
   const [objetivoTotalDraft, setObjetivoTotalDraft] = useState<string | null>(null);
+  const [modeloImagen, setModeloImagen] = useState("");
+  const [archivoImagen, setArchivoImagen] = useState<File | null>(null);
   const sucursalesQuery = useQuery({ queryKey: ["sucursales-siac"], queryFn: getSucursalesSiac });
   const period = { anio: Number(anio), mes: Number(mes) };
   const isPeriodValid = Number.isInteger(period.anio) && period.anio >= 2000 && Number.isInteger(period.mes) && period.mes >= 1 && period.mes <= 12;
@@ -35,12 +39,27 @@ export default function ConfiguracionDashboardSalonView() {
     queryFn: () => getDashboardSalonSettings(period),
     enabled: isPeriodValid,
   });
+  const modelImagesQuery = useQuery({
+    queryKey: ["configuracion", "dashboard-salon", "modelos"],
+    queryFn: getDashboardSalonModelImages,
+  });
 
   const saveMutation = useMutation({
     mutationFn: updateDashboardSalonSettings,
     onSuccess: (response) => {
       toast.success(response.message ?? "Objetivo actualizado correctamente");
       queryClient.invalidateQueries({ queryKey: ["configuracion", "dashboard-salon"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-salon"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const uploadModelImageMutation = useMutation({
+    mutationFn: uploadDashboardSalonModelImage,
+    onSuccess: (response) => {
+      toast.success(response.message ?? "Imagen actualizada correctamente");
+      setModeloImagen("");
+      setArchivoImagen(null);
+      queryClient.invalidateQueries({ queryKey: ["configuracion", "dashboard-salon", "modelos"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-salon"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -69,6 +88,21 @@ export default function ConfiguracionDashboardSalonView() {
       return;
     }
     saveMutation.mutate({ ...period, objetivoOperacionesTotales });
+  };
+
+  const saveModelImage = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!modeloImagen.trim() || !archivoImagen) {
+      toast.error("Indicá el modelo y seleccioná una imagen.");
+      return;
+    }
+    uploadModelImageMutation.mutate({ modelo: modeloImagen, file: archivoImagen });
+  };
+  const imageUrl = (value: string) => {
+    if (/^https?:\/\//i.test(value)) return value;
+    const apiUrl = String(import.meta.env.VITE_API_URL ?? "");
+    const apiOrigin = apiUrl.replace(/\/api\/?$/, "");
+    return apiOrigin ? `${apiOrigin}${value}` : value;
   };
 
   return (
@@ -110,6 +144,25 @@ export default function ConfiguracionDashboardSalonView() {
         <p className="mt-3 text-sm text-muted-foreground">Vendedores: verde al alcanzar, amarillo desde el 70% y rojo por debajo. Operaciones totales: el velocímetro pasa a rojo al alcanzar la meta.</p>
         <div className="mt-3 flex flex-wrap gap-2"><ActionButton type="submit" disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveMutation.isPending ? "Guardando..." : "Guardar objetivo vendedores"}</ActionButton><ActionButton type="button" onClick={saveTotal} disabled={!isPeriodValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo total</ActionButton></div>
       </form>
+
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Imágenes por modelo</h2>
+          <p className="mt-1 text-sm text-muted-foreground">La imagen se muestra junto al modelo en el gráfico. Al subir otra para el mismo modelo, reemplaza y elimina la anterior.</p>
+        </div>
+        <form onSubmit={saveModelImage} className="mt-3 grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+          <label className="text-sm font-semibold text-foreground">Modelo
+            <input value={modeloImagen} onChange={(event) => setModeloImagen(event.target.value)} placeholder="Ej. HILUX" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground" />
+          </label>
+          <label className="text-sm font-semibold text-foreground">Imagen
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setArchivoImagen(event.target.files?.[0] ?? null)} className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm font-normal text-foreground file:mr-2 file:border-0 file:bg-transparent file:text-sm file:font-medium" />
+          </label>
+          <ActionButton type="submit" disabled={uploadModelImageMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{uploadModelImageMutation.isPending ? "Subiendo..." : "Guardar imagen"}</ActionButton>
+        </form>
+        {modelImagesQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudieron cargar las imágenes configuradas.</p> : null}
+        {modelImagesQuery.data?.data.length ? <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{modelImagesQuery.data.data.map((item) => <div key={item.modelo} className="overflow-hidden rounded-md border border-border bg-background"><img src={imageUrl(item.imageUrl)} alt={item.modelo} className="h-20 w-full object-contain" /><p className="truncate border-t border-border px-2 py-1 text-center text-xs font-medium text-foreground">{item.modelo}</p></div>)}</div> : <p className="mt-3 text-sm text-muted-foreground">Todavía no hay imágenes cargadas.</p>}
+      </section>
     </div>
   );
 }
