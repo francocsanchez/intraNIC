@@ -4,6 +4,7 @@
 
 - **Dashboard Salón:** se agregó una tabla diaria de asignaciones por sucursal entre el ranking de vendedores y los gráficos inferiores, con todos los días del mes seleccionado.
 - **Dashboard Salón:** el título, sucursal y navegación de período se integraron a la tarjeta de vendedores para aprovechar mejor el alto disponible.
+- **Dashboard Salón:** las etiquetas visibles ahora identifican el objetivo como `Target`, la rosa con el nombre de sucursal y el medidor global como `Ventas NIC Totales`.
 
 ## 2026-10-23
 
