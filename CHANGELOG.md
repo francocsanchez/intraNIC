@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-28
+
+- **Dashboard Salón:** se agregó una tabla diaria de asignaciones por sucursal entre el ranking de vendedores y los gráficos inferiores, con todos los días del mes seleccionado.
+- **Dashboard Salón:** el título, sucursal y navegación de período se integraron a la tarjeta de vendedores para aprovechar mejor el alto disponible.
+
 ## 2026-10-23
 
 - **Dashboard Salón:** las imágenes de modelos ahora se configuran mediante enlaces HTTP(S), evitando depender del almacenamiento local del contenedor al actualizar el servidor.

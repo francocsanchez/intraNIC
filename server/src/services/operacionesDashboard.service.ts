@@ -115,6 +115,7 @@ type DashboardSalonResponse = {
   usadosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
   creditosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
   modelos: AnalisisOperacionesPreventaMovilResumenItem[];
+  operacionesPorDia: Array<{ dia: number; total: number }>;
   imagenesModelos: Array<{ modelo: string; imageUrl: string }>;
 };
 
@@ -809,6 +810,12 @@ export class OperacionesDashboardService {
         }))
         .filter((item) => item.total > 0)
         .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+    const totalDiasDelMes = new Date(Date.UTC(filters.anio, filters.mes, 0)).getUTCDate();
+    const operacionesPorDia = Array.from({ length: totalDiasDelMes }, (_, index) => ({ dia: index + 1, total: 0 }));
+    rows.forEach((row) => {
+      const dia = getDayFromFechaAsignacion(row.fechaAsignacion);
+      if (dia >= 1 && dia <= totalDiasDelMes) operacionesPorDia[dia - 1].total += 1;
+    });
 
     return {
       periodo: { anio: filters.anio, mes: filters.mes },
@@ -821,6 +828,7 @@ export class OperacionesDashboardService {
       usadosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadUsados),
       creditosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadCreditos),
       modelos: groupRows((row) => row.modeloNombre),
+      operacionesPorDia,
       imagenesModelos: (config?.imagenesModelosDashboardSalon ?? []).map((item) => ({
         modelo: item.modelo,
         imageUrl: item.imagePath,

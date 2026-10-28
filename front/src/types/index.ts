@@ -1014,6 +1014,7 @@ export const dashboardSalonResponseSchema = z.object({
   usadosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
   creditosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
   modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
+  operacionesPorDia: z.array(z.object({ dia: z.number().int().min(1).max(31), total: z.number().int().nonnegative() })).default([]),
   imagenesModelos: z.array(dashboardSalonModelImageSchema).default([]),
 });
 
