@@ -811,10 +811,16 @@ export class OperacionesDashboardService {
         .filter((item) => item.total > 0)
         .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
     const totalDiasDelMes = new Date(Date.UTC(filters.anio, filters.mes, 0)).getUTCDate();
-    const operacionesPorDia = Array.from({ length: totalDiasDelMes }, (_, index) => ({ dia: index + 1, total: 0 }));
+    const operacionesPorDia = Array.from({ length: totalDiasDelMes }, (_, index) => index + 1)
+      .filter((dia) => {
+        const diaSemana = new Date(Date.UTC(filters.anio, filters.mes - 1, dia)).getUTCDay();
+        return diaSemana !== 0 && diaSemana !== 6;
+      })
+      .map((dia) => ({ dia, total: 0 }));
     rows.forEach((row) => {
       const dia = getDayFromFechaAsignacion(row.fechaAsignacion);
-      if (dia >= 1 && dia <= totalDiasDelMes) operacionesPorDia[dia - 1].total += 1;
+      const item = operacionesPorDia.find((operacion) => operacion.dia === dia);
+      if (item) item.total += 1;
     });
 
     return {

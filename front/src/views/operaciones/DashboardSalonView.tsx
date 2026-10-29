@@ -101,26 +101,25 @@ function RankingChart({ title, items, colorIndex, vertical = false, objective, u
   return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="mb-2 text-xl font-semibold text-foreground">{title}</h2>{items.length ? <div className="min-h-0 flex-1"><EChart option={option} /></div> : <p className="flex flex-1 items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
 }
 
-const roundGaugeMaximum = (value: number) => {
-  const magnitude = 10 ** Math.floor(Math.log10(Math.max(value, 10)));
-  return Math.ceil(value / magnitude) * magnitude;
-};
-
-function OperationsGauge({ title, total, colorIndex, objective }: { title: string; total: number; colorIndex: number; objective?: number | null }) {
+function OperationsGauge({ title, total, objective }: { title: string; total: number; objective?: number | null }) {
+  const target = objective && objective > 0 ? objective : null;
+  const restantes = target === null ? null : Math.max(target - total, 0);
+  const porcentajeRestante = target === null || restantes === null ? null : (restantes / target) * 100;
+  const porcentajeCumplimiento = target === null ? null : Math.round((total / target) * 100);
+  const estadoTarget = porcentajeRestante === null ? null : porcentajeRestante < 10 ? "cerca" : porcentajeRestante <= 60 ? "en-riesgo" : "lejos";
+  const targetCumplido = target !== null && total >= target;
+  const colorTarget = estadoTarget === "cerca" ? { bar: "#22c55e", background: "#dcfce7", text: "text-emerald-600" } : estadoTarget === "en-riesgo" ? { bar: "#eab308", background: "#fef9c3", text: "text-yellow-600" } : { bar: "#ef4444", background: "#fee2e2", text: "text-red-600" };
   const option = useMemo<EChartsCoreOption>(() => {
-    const color = getPresetChartColors()[colorIndex] ?? "var(--primary)";
-    const hasObjective = Boolean(objective && objective > 0);
-    const max = hasObjective ? roundGaugeMaximum(Math.max(objective as number, total, 10) * 1.1) : Math.max(10, total * 1.2);
-    const target = objective ?? max;
-    const warningEnd = Math.min((target * 0.7) / max, 1);
-    const targetEnd = Math.min(target / max, 1);
-    const currentColor = !hasObjective ? color : total >= target ? "#bbf7d0" : total >= target * 0.7 ? "#fde68a" : "#fecaca";
     return {
-      series: [{ type: "gauge", center: ["50%", "57%"], radius: "96%", startAngle: 210, endAngle: -30, min: 0, max, splitNumber: hasObjective ? 6 : 5, progress: { show: !hasObjective, width: 18, itemStyle: { color } }, axisLine: { lineStyle: { width: hasObjective ? 26 : 18, color: hasObjective ? [[warningEnd, "#fecaca"], [targetEnd, "#fde68a"], [1, "#bbf7d0"]] : [[1, "var(--secondary)"]] } }, pointer: { show: hasObjective, length: "60%", width: 7, itemStyle: { color: currentColor } }, anchor: { show: hasObjective, size: 14, itemStyle: { color: currentColor } }, axisTick: { show: hasObjective, distance: -31, length: 7, lineStyle: { color: "var(--background)", width: 1 } }, splitLine: { show: hasObjective, distance: -33, length: 14, lineStyle: { color: "var(--background)", width: 2 } }, axisLabel: { show: hasObjective, distance: 34, color: "var(--muted-foreground)", fontSize: 13, formatter: (value: number) => String(Math.round(value)) }, detail: { valueAnimation: false, formatter: "{value}", color: "var(--foreground)", fontSize: hasObjective ? 80 : 72, fontWeight: "bold", offsetCenter: [0, "20%"] }, title: { color: "var(--muted-foreground)", fontSize: 16, offsetCenter: [0, "55%"] }, data: [{ value: total, name: "Operaciones" }] }],
+      grid: { top: 56, right: 30, bottom: 24, left: 30 },
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: () => `Target: ${target ?? 0}<br/>Ventas: ${total}<br/>Restantes: ${restantes ?? 0}` },
+      xAxis: { type: "category", data: ["Ventas restantes"], axisTick: { show: false }, axisLine: { show: false }, axisLabel: { show: false } },
+      yAxis: { type: "value", min: 0, max: target ?? 1, show: false },
+      series: [{ type: "bar", data: [restantes ?? 0], barWidth: "52%", showBackground: true, backgroundStyle: { color: colorTarget.background, borderRadius: [10, 10, 0, 0] }, itemStyle: { color: colorTarget.bar, borderRadius: [10, 10, 0, 0] }, label: { show: false } }],
     };
-  }, [colorIndex, objective, total]);
+  }, [colorTarget.background, colorTarget.bar, restantes, target, total]);
 
-  return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div></section>;
+  return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2>{target === null ? <div className="flex h-full flex-col items-center justify-center"><p className="text-6xl font-bold text-foreground">{total}</p><p className="mt-2 text-sm text-muted-foreground">Sin Target configurado</p></div> : <><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div><div className="pointer-events-none absolute inset-x-0 top-[42%] z-10 -translate-y-1/2 text-center"><p className={`text-7xl font-bold leading-none ${colorTarget.text}`}>{restantes}</p><p className="mt-2 text-base font-semibold text-muted-foreground">{targetCumplido ? "Target cumplido" : "Ventas restantes"}</p><p className={`mt-1 text-lg font-bold ${colorTarget.text}`}>{porcentajeCumplimiento}% de cumplimiento</p></div><div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 text-center"><p className="text-sm font-semibold text-foreground">{total} ventas · Target {target}</p></div></>}</section>;
 }
 
 function OperationsCounter({ title, total, modelos, totalOperaciones: _totalOperaciones }: { title: string; total: number; totalOperaciones: number; modelos: DashboardSalonResponse["modelos"] }) {
@@ -133,8 +132,12 @@ function OperationsCounter({ title, total, modelos, totalOperaciones: _totalOper
   return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2>{modelos.length ? <><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div><div className="pointer-events-none absolute left-1/2 top-[56%] z-20 -translate-x-1/2 -translate-y-1/2"><span className="text-5xl font-bold leading-none text-foreground">{total}</span></div></> : <div className="flex h-full items-center justify-center"><p className="text-7xl font-bold leading-none text-foreground">{total}</p></div>}</section>;
 }
 
-function DailyOperationsTable({ items }: { items: DashboardSalonResponse["operacionesPorDia"] }) {
-  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{items.flatMap((item) => [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className="border-r border-border font-semibold text-foreground">{item.total || "-"}</span>])}</div></div></section>;
+function DailyOperationsTable({ items, anio, mes }: { items: DashboardSalonResponse["operacionesPorDia"]; anio: number; mes: number }) {
+  const diasHabiles = items.filter((item) => {
+    const diaSemana = new Date(Date.UTC(anio, mes - 1, item.dia)).getUTCDay();
+    return diaSemana !== 0 && diaSemana !== 6;
+  });
+  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className="border-r border-border font-semibold text-foreground">{item.total || "-"}</span>])}</div></div></section>;
 }
 
 export default function DashboardSalonView() {
@@ -158,8 +161,8 @@ export default function DashboardSalonView() {
   return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset">
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_74px_minmax(0,1fr)] gap-4 overflow-hidden">
       <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
-      <DailyOperationsTable items={data.operacionesPorDia} />
-      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} colorIndex={2} objective={data.objetivoOperacionesTotales} /></div>
+      <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} />
+      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
     </div>
   </main>;
 }

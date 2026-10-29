@@ -5,6 +5,13 @@
 - **Dashboard Salón:** se agregó una tabla diaria de asignaciones por sucursal entre el ranking de vendedores y los gráficos inferiores, con todos los días del mes seleccionado.
 - **Dashboard Salón:** el título, sucursal y navegación de período se integraron a la tarjeta de vendedores para aprovechar mejor el alto disponible.
 - **Dashboard Salón:** las etiquetas visibles ahora identifican el objetivo como `Target`, la rosa con el nombre de sucursal y el medidor global como `Ventas NIC Totales`.
+- **Dashboard Salón:** `Ventas NIC Totales` reemplazó el velocímetro por una barra de Target restante que se reduce conforme se generan ventas.
+- **Dashboard Salón:** el indicador de ventas totales ahora resalta en grande las ventas restantes y utiliza contraste azul/verde en la barra según el avance del Target.
+- **Dashboard Salón:** la barra y cantidad restante de ventas totales ahora son verdes con menos de 20% pendiente, amarillas hasta 60% y rojas por encima de ese umbral.
+- **Dashboard Salón:** `Ventas NIC Totales` ahora informa también el porcentaje entero de cumplimiento del Target.
+- **Dashboard Salón:** el estado verde de ventas totales ahora se activa al quedar menos del 10% pendiente del Target.
+- **Dashboard Salón:** la tabla de asignaciones diarias ahora muestra solamente los días hábiles de lunes a viernes.
+- **Dashboard Salón:** la vista refuerza el filtro de días hábiles, de modo que nunca renderiza sábados ni domingos aunque una respuesta anterior los incluya temporalmente.
 
 ## 2026-10-23
 
