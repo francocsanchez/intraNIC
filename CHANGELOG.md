@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-03
+
+- **Dashboard Administración:** se incorporó `/analisis/dashboard-administracion`, protegido por el nuevo permiso independiente `dashboardAdministracion` y disponible desde Inicio y Análisis.
+- **Dashboard Administración:** la vista sin navbar ni footer ocupa el viewport completo y presenta el árbol de operaciones no canceladas de todas las sucursales para el mes vigente de Buenos Aires, obtenido exclusivamente desde snapshots Mongo.
+- **Dashboard Administración:** el árbol inicial se simplificó a la jerarquía Usuario → Sucursal → Tiempo total.
+- **Dashboard Administración:** se dividió el contenido en dos mitades iguales separadas por una línea vertical; el árbol ocupa la izquierda y la derecha reserva los gráficos futuros.
+- **Dashboard Administración:** el árbol izquierdo adopta el estilo básico de ECharts con aristas curvas.
+- **Dashboard Administración:** la mitad derecha ahora se divide en dos zonas horizontales; la superior presenta una rosa con la cantidad de operaciones pendientes por modelo.
+- **Dashboard Administración:** se retiró la leyenda inferior de la rosa por modelo para aprovechar mejor su superficie.
+- **Dashboard Administración:** la rosa por modelo ahora comparte su zona con el saldo total y las sumas de créditos y usados de las operaciones representadas.
+- **Dashboard Administración:** el resumen renombró sus métricas a Saldo pendiente, Créditos y Usados; ahora expresa importes en millones, prioriza visualmente el saldo y detalla las cantidades de créditos y usados.
+- **Dashboard Administración:** las métricas del resumen se centraron y Saldo pendiente amplió su tipografía para aprovechar la superficie disponible.
+
 ## 2026-10-28
 
 - **Dashboard Salón:** se agregó una tabla diaria de asignaciones por sucursal entre el ranking de vendedores y los gráficos inferiores, con todos los días del mes seleccionado.

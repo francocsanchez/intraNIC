@@ -26,6 +26,8 @@ import {
   saldoOperacionSnapshotUpdateResponseSchema,
   saldoOperacionCancelacionAnalysisResponseSchema,
   type SaldoOperacionCancelacionAnalysisResponse,
+  dashboardAdministracionResponseSchema,
+  type DashboardAdministracionResponse,
   saldoOperacionUsuariosResponseSchema,
   cobrosVendedorOptionsResponseSchema,
   cobrosVendedorListResponseSchema,
@@ -173,6 +175,11 @@ export async function getSaldoOperacionCancelacionAnalysis(params: { mesAsignaci
 export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string; dimensionOrder?: SaldoOperacionAnalysisDimension[] }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas", { params: { ...params, dimensionOrder: params.dimensionOrder?.join(",") }, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de no canceladas invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de no canceladas")); }
+}
+
+export async function getDashboardAdministracion(signal?: AbortSignal): Promise<DashboardAdministracionResponse> {
+  try { const { data } = await api.get("/operaciones/dashboard-administracion", { signal }); const parsed = dashboardAdministracionResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Dashboard Administración inválido"); return parsed.data; }
+  catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el Dashboard Administración")); }
 }
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string | null) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/cancelacion`, { fechaCancelacion }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }

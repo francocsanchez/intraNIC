@@ -39,6 +39,13 @@ export default function AnalisisLayout() {
       active: pathname === paths.analisis.dashboardSalon,
     },
     {
+      label: "Dashboard Administracion",
+      to: paths.analisis.dashboardAdministracion,
+      icon: ChartColumn,
+      visible: hasModulePathAccess(user, "dashboardAdministracion", paths.analisis.dashboardAdministracion),
+      active: pathname === paths.analisis.dashboardAdministracion,
+    },
+    {
       label: "Saldo de operacion",
       to: paths.analisis.saldoOperacion,
       icon: CircleDollarSign,

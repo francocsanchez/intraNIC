@@ -20,6 +20,7 @@ export type TipoCliente = typeof tiposCliente[number];
 export const analysisDimensions = ["tipoCliente", "vendedor", "usuario", "sucursal"] as const;
 export type AnalysisDimension = typeof analysisDimensions[number];
 export const defaultAnalysisDimensionOrder: AnalysisDimension[] = ["tipoCliente", "vendedor", "usuario", "sucursal"];
+const dashboardAdministracionDimensionOrder: AnalysisDimension[] = ["usuario", "sucursal"];
 type CancelacionAnalysisNode = {
   name: string;
   averageDays: number;
@@ -50,6 +51,19 @@ type CancelacionSucursalMonthlyGroup = {
   _id: { month: string; sucursal: string };
   averageDays: number;
   operations: number;
+};
+
+type DashboardAdministracionModelGroup = {
+  _id: string;
+  total: number;
+};
+
+type DashboardAdministracionSummary = {
+  saldoTotal: number;
+  creditoTotal: number;
+  creditoCantidad: number;
+  usadoTotal: number;
+  usadoCantidad: number;
 };
 
 const trim = (value: unknown, fallback = "") => {
@@ -92,6 +106,23 @@ const creditoPendienteExpression = {
     { $ifNull: ["$creditoBanco", 0] },
     0,
   ],
+};
+const noCanceladasAnalysisMatch = {
+  fechaCancelacion: null,
+  fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+  diasAsignada: { $type: "number" },
+};
+
+const currentBuenosAiresPeriod = () => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+  return {
+    anio: Number(parts.find((part) => part.type === "year")?.value),
+    mes: Number(parts.find((part) => part.type === "month")?.value),
+  };
 };
 
 const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
@@ -493,14 +524,9 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async noCanceladasAnalysis(month?: string | null, year?: string | null, dimensions: AnalysisDimension[] = defaultAnalysisDimensionOrder) {
-    const noCanceladasMatch = {
-      fechaCancelacion: null,
-      fechaAsignacion: { $regex: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
-      diasAsignada: { $type: "number" },
-    };
     const selectedMatch = month
-      ? { ...noCanceladasMatch, fechaAsignacion: { $regex: `^${month}-` } }
-      : year ? { ...noCanceladasMatch, fechaAsignacion: { $regex: `^${year}-` } } : noCanceladasMatch;
+      ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${month}-` } }
+      : year ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${year}-` } } : noCanceladasAnalysisMatch;
     const [groups, months, sucursalesPorMes] = await Promise.all([
       SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
         { $match: selectedMatch },
@@ -526,7 +552,7 @@ export class SaldoOperacionSnapshotService {
         { $group: { _id: { tipoCliente: "$tipoCliente", vendedor: "$vendedor", usuario: "$usuario", sucursal: "$sucursal" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 }, saldoTotal: { $sum: "$saldo" } } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
-        { $match: noCanceladasMatch },
+        { $match: noCanceladasAnalysisMatch },
         {
           $project: {
             month: { $substrBytes: ["$fechaAsignacion", 0, 7] },
@@ -574,13 +600,70 @@ export class SaldoOperacionSnapshotService {
         { $sort: { _id: 1 } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([
-        { $match: noCanceladasMatch },
+        { $match: noCanceladasAnalysisMatch },
         { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, dias: "$diasAsignada", sucursal: analysisDimensionProjection.sucursal } },
         { $group: { _id: { month: "$month", sucursal: "$sucursal" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
         { $sort: { "_id.sucursal": 1, "_id.month": 1 } },
       ]),
     ]);
     return buildAnalysisResponse(groups, months, sucursalesPorMes, dimensions);
+  }
+
+  static async dashboardAdministracion() {
+    const periodo = currentBuenosAiresPeriod();
+    const mesAsignacion = `${periodo.anio}-${String(periodo.mes).padStart(2, "0")}`;
+    const dashboardMatch = { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${mesAsignacion}-` } };
+    const [analysis, modelGroups, summaries] = await Promise.all([
+      this.noCanceladasAnalysis(mesAsignacion, String(periodo.anio), dashboardAdministracionDimensionOrder),
+      SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
+        { $match: dashboardMatch },
+        {
+          $project: {
+            modelo: {
+              $let: {
+                vars: { value: { $trim: { input: { $ifNull: ["$modeloGeneral", ""] } } } },
+                in: { $cond: [{ $eq: ["$$value", ""] }, "Sin modelo", "$$value"] },
+              },
+            },
+          },
+        },
+        { $group: { _id: "$modelo", total: { $sum: 1 } } },
+        { $sort: { total: -1, _id: 1 } },
+      ]),
+      SaldoOperacionSnapshot.aggregate<DashboardAdministracionSummary>([
+        { $match: dashboardMatch },
+        {
+          $project: {
+            saldo: {
+              $add: [
+                { $ifNull: ["$total", 0] },
+                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
+                { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
+                { $multiply: [creditoLiquidadoExpression, -1] },
+              ],
+            },
+            credito: { $ifNull: ["$creditoBanco", 0] },
+            usado: { $ifNull: ["$usado", 0] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            saldoTotal: { $sum: "$saldo" },
+            creditoTotal: { $sum: "$credito" },
+            creditoCantidad: { $sum: { $cond: [{ $gt: ["$credito", 0] }, 1, 0] } },
+            usadoTotal: { $sum: "$usado" },
+            usadoCantidad: { $sum: { $cond: [{ $gt: ["$usado", 0] }, 1, 0] } },
+          },
+        },
+      ]),
+    ]);
+    return {
+      ...analysis,
+      periodo,
+      modelos: modelGroups.map((item) => ({ nombre: item._id, total: item.total })),
+      resumen: summaries[0] ?? { saldoTotal: 0, creditoTotal: 0, creditoCantidad: 0, usadoTotal: 0, usadoCantidad: 0 },
+    };
   }
 
   static async exportRows(params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) {

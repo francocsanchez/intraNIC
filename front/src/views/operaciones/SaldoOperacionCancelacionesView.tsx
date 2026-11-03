@@ -1,10 +1,10 @@
 import Loading from "@/components/Loading";
 import EChart from "@/components/charts/EChart";
+import { countSaldoOperacionTreeLeaves, createSaldoOperacionTiempoTreeOption } from "@/components/operaciones/SaldoOperacionTiempoTree";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/ui/action-button";
 import { paths } from "@/routes/paths";
 import { getSaldoOperacionCancelacionAnalysis, getSaldoOperacionNoCanceladasAnalysis } from "@/services/operacionesService";
-import type { SaldoOperacionCancelacionAnalysisNode } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
 import { ArrowLeft, CalendarDays, GripVertical, Plus, X } from "lucide-react";
@@ -38,46 +38,6 @@ const readDimensionOrder = (): SaldoOperacionAnalysisDimension[] => {
   return DEFAULT_DIMENSION_ORDER;
 };
 
-// Tonos suaves locales solicitados para los tiempos de cancelación.
-const toneForAverage = (averageDays: number) => averageDays < 15
-  ? { fill: "#dcfce7", stroke: "#4ade80", text: "#166534" }
-  : averageDays < 18
-    ? { fill: "#fef9c3", stroke: "#facc15", text: "#854d0e" }
-    : { fill: "#fee2e2", stroke: "#f87171", text: "#991b1b" };
-
-const wrapNodeName = (name: string) => name.split(" ").reduce<string[]>((lines, word) => {
-  const currentLine = lines.at(-1) ?? "";
-  if (!currentLine) lines.push(word);
-  else if (`${currentLine} ${word}`.length <= 18) lines[lines.length - 1] = `${currentLine} ${word}`;
-  else lines.push(word);
-  return lines;
-}, []).join("\n");
-
-const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, includeSaldo = false): Record<string, unknown> => {
-  const tone = toneForAverage(node.averageDays);
-  const metric = includeSaldo && typeof node.saldoTotal === "number"
-    ? `${formatDays(node.averageDays)} · ${formatMoney(node.saldoTotal)}`
-    : formatDays(node.averageDays);
-  return {
-    ...node,
-    itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: 1.5, shadowBlur: 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
-    label: {
-      formatter: `${wrapNodeName(node.name)}\n{days|${metric}}`,
-      color: "#18181b",
-      fontSize: 11,
-      fontWeight: 600,
-      lineHeight: 16,
-      rich: { days: { color: tone.text, fontSize: 10, fontWeight: 400, lineHeight: 14 } },
-    },
-    children: node.children?.map((child) => toChartNode(child, includeSaldo)),
-  };
-};
-
-const countLeafNodes = (node: SaldoOperacionCancelacionAnalysisNode): number => {
-  if (!node.children?.length) return 1;
-  return node.children.reduce((total, child) => total + countLeafNodes(child), 0);
-};
-
 export type SaldoOperacionTiempoAnalysisKind = "canceladas" | "noCanceladas";
 
 export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempoAnalysisKind }) {
@@ -97,32 +57,10 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
   });
   const option = useMemo<EChartsCoreOption | null>(() => {
     if (!analysis.data?.data.operations) return null;
-    return {
-      tooltip: {
-        trigger: "item",
-        backgroundColor: "#18181b",
-        borderWidth: 0,
-        textStyle: { color: "#fafafa" },
-        formatter: (params: { data: SaldoOperacionCancelacionAnalysisNode }) => `<b>${params.data.name}</b><br/>Promedio: ${formatDecimalDays(params.data.averageDays)} días${isNoCanceladas && typeof params.data.saldoTotal === "number" ? `<br/>Monto a cancelar: ${formatMoney(params.data.saldoTotal)}` : ""}<br/>${isNoCanceladas ? "Operaciones" : "Cancelaciones"}: ${params.data.operations}`,
-      },
-      series: [{
-        type: "tree",
-        data: [toChartNode(analysis.data.data.tree, isNoCanceladas)],
-        orient: "RL",
-        top: "4%",
-        bottom: "4%",
-        left: "16%",
-        right: "16%",
-        symbol: "circle",
-        symbolSize: 14,
-        initialTreeDepth: -1,
-        edgeShape: "polyline",
-        roam: false,
-        lineStyle: { color: "#cbd5e1", width: 1.4 },
-        label: { position: "left", align: "right", verticalAlign: "middle" },
-        leaves: { label: { position: "left", align: "right", verticalAlign: "middle" } },
-      }],
-    } as EChartsCoreOption;
+    return createSaldoOperacionTiempoTreeOption(analysis.data.data.tree, {
+      showSaldo: isNoCanceladas,
+      operationLabel: isNoCanceladas ? "Operaciones" : "Cancelaciones",
+    });
   }, [analysis.data, isNoCanceladas]);
 
   if (analysis.isLoading) return <Loading />;
@@ -142,7 +80,7 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
   const monthlyAverageDays = monthlyOperations
     ? monthsForYear.reduce((total, item) => total + item.averageDays * item.operations, 0) / monthlyOperations
     : 0;
-  const treeHeight = data ? Math.max(480, countLeafNodes(data.tree) * 64 + 120) : 480;
+  const treeHeight = data ? Math.max(480, countSaldoOperacionTreeLeaves(data.tree) * 64 + 120) : 480;
   const hasTreeBranches = Boolean(data?.tree.children?.length);
   const persistDimensionOrder = (nextOrder: SaldoOperacionAnalysisDimension[]) => {
     setDimensionOrder(nextOrder);

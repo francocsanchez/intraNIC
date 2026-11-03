@@ -102,6 +102,7 @@ const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudor
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
 const AnalisisOperacionesMovilView = lazy(() => import("./views/operaciones/AnalisisOperacionesMovilView"));
 const DashboardSalonView = lazy(() => import("./views/operaciones/DashboardSalonView"));
+const DashboardAdministracionView = lazy(() => import("./views/operaciones/DashboardAdministracionView"));
 const AnalisisVendedorView = lazy(() => import("./views/operaciones/AnalisisVendedorView"));
 const DashboardPatentamientosView = lazy(() => import("./views/patentamientos/DashboardPatentamientosView"));
 const DashboardTransferenciasView = lazy(() => import("./views/transferencias/DashboardTransferenciasView"));
@@ -143,6 +144,10 @@ export default function Router() {
 
             <Route element={<ModuleProtectedRoute allowedModules={["dashboardSalon"]} />}>
               <Route path={paths.analisis.dashboardSalon} element={<DashboardSalonView />} />
+            </Route>
+
+            <Route element={<ModuleProtectedRoute allowedModules={["dashboardAdministracion"]} />}>
+              <Route path={paths.analisis.dashboardAdministracion} element={<DashboardAdministracionView />} />
             </Route>
 
             <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas", "calidadVentas"]} />}>

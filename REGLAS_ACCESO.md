@@ -58,6 +58,8 @@ La logica vigente es:
 - `pendienteDocumentacion`
 - `ingresos`
 - `operaciones`
+- `dashboardSalon`
+- `dashboardAdministracion`
 - `saldoOperacion`
 - `cobrosVendedor`
 - `ranking`
@@ -167,6 +169,8 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 ### Analisis
 
 - `Operaciones` depende de `modules.operaciones = 1`.
+- `Dashboard Salon` depende de `modules.dashboardSalon = 1` y se accede por `/analisis/dashboard-salon`.
+- `Dashboard Administración` depende de `modules.dashboardAdministracion = 1` y se accede por `/analisis/dashboard-administracion`.
 - `Saldo de operacion` depende de `modules.saldoOperacion = 1` y se accede por `/analisis/saldo-operacion`.
 - `Cobros x Vendedor` depende de `modules.cobrosVendedor = 1` y se accede por `/analisis/cobros-vendedor`.
 - `Tablero de cobranzas` depende de `modules.tableroCobranzas = 1` y se accede por `/analisis/tablero-cobranzas`.
@@ -181,6 +185,8 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `Patentamientos` y `Transferencias` forman un modulo visual unificado en sidebar, pero cada uno sigue dependiendo de su propio modulo habilitado.
 - El navbar de `Analisis` debe mostrar solo modulos propios de la seccion:
   - `Operaciones`
+  - `Dashboard Salon`
+  - `Dashboard Administración`
   - `Saldo de operacion`
 - `Cobros x Vendedor`
 - `Tablero de cobranzas`
