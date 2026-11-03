@@ -57,6 +57,17 @@ const parseAnalysisDimensions = (value: unknown): AnalysisDimension[] => {
   }
   return dimensions as AnalysisDimension[];
 };
+const parseAnalysisDetailFilters = (query: Request["query"], dimensions: AnalysisDimension[]): Partial<Record<AnalysisDimension, string>> => {
+  const filters: Partial<Record<AnalysisDimension, string>> = {};
+  for (const dimension of analysisDimensions) {
+    const rawValue = query[dimension];
+    const value = optionalString(rawValue);
+    if (rawValue !== undefined && !value) throw new Error(`El filtro ${dimension} debe ser un texto válido`);
+    if (value && !dimensions.includes(dimension)) throw new Error(`La dimensión ${dimension} no está activa`);
+    if (value) filters[dimension] = value;
+  }
+  return filters;
+};
 
 const currentBuenosAiresPeriod = () => {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric" }).formatToParts(new Date());
@@ -154,6 +165,24 @@ export class SaldoOperacionSnapshotController {
     catch (error) { return res.status(400).json({ message: error instanceof Error ? error.message : "El orden de dimensiones no es valido" }); }
     try { return res.status(200).json(await SaldoOperacionSnapshotService.noCanceladasAnalysis(month, year, dimensions)); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el analisis de no canceladas" }); }
+  };
+
+  static noCanceladasAnalysisDetail = async (req: Request, res: Response) => {
+    const month = optionalString(req.query.mesAsignacion);
+    const year = optionalString(req.query.anioAsignacion);
+    if (month && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return res.status(400).json({ message: "El mes de asignacion debe tener formato AAAA-MM" });
+    if (year && !/^\d{4}$/.test(year)) return res.status(400).json({ message: "El año de asignacion debe tener formato AAAA" });
+    if (month && year && !month.startsWith(`${year}-`)) return res.status(400).json({ message: "El mes debe pertenecer al año de asignacion seleccionado" });
+    let dimensions: AnalysisDimension[];
+    let filters: Partial<Record<AnalysisDimension, string>>;
+    try {
+      dimensions = parseAnalysisDimensions(req.query.dimensionOrder);
+      filters = parseAnalysisDetailFilters(req.query, dimensions);
+    } catch (error) {
+      return res.status(400).json({ message: error instanceof Error ? error.message : "Los filtros del detalle no son válidos" });
+    }
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.noCanceladasAnalysisDetail(month, year, dimensions, filters)); }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el detalle de no canceladas" }); }
   };
 
   static dashboardAdministracion = async (_req: Request, res: Response) => {

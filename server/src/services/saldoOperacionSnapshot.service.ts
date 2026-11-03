@@ -26,6 +26,7 @@ type CancelacionAnalysisNode = {
   averageDays: number;
   operations: number;
   saldoTotal?: number;
+  dimensionFilters?: Partial<Record<AnalysisDimension, string>>;
   children?: CancelacionAnalysisNode[];
 };
 
@@ -126,17 +127,17 @@ const normalizeEntrega = (value: string | null | undefined): SnapshotEntrega => 
 };
 
 const nodeName = (value: unknown, fallback: string) => trim(value, fallback);
-const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], children?: CancelacionAnalysisNode[]): CancelacionAnalysisNode => {
+const buildAnalysisNode = (name: string, groups: CancelacionAnalysisGroup[], children?: CancelacionAnalysisNode[], dimensionFilters?: Partial<Record<AnalysisDimension, string>>): CancelacionAnalysisNode => {
   const operations = groups.reduce((total, group) => total + group.operations, 0);
   const averageDays = operations
     ? groups.reduce((total, group) => total + group.averageDays * group.operations, 0) / operations
     : 0;
   const hasSaldo = groups.some((group) => typeof group.saldoTotal === "number");
   const saldoTotal = groups.reduce((total, group) => total + (group.saldoTotal ?? 0), 0);
-  return { name, averageDays, operations, ...(hasSaldo ? { saldoTotal } : {}), ...(children?.length ? { children } : {}) };
+  return { name, averageDays, operations, ...(hasSaldo ? { saldoTotal } : {}), ...(dimensionFilters && Object.keys(dimensionFilters).length ? { dimensionFilters } : {}), ...(children?.length ? { children } : {}) };
 };
 
-const buildAnalysisDimensionNodes = (groups: CancelacionAnalysisGroup[], dimensions: AnalysisDimension[], index = 0): CancelacionAnalysisNode[] => {
+const buildAnalysisDimensionNodes = (groups: CancelacionAnalysisGroup[], dimensions: AnalysisDimension[], index = 0, parentFilters: Partial<Record<AnalysisDimension, string>> = {}): CancelacionAnalysisNode[] => {
   const dimension = dimensions[index];
   if (!dimension) return [];
   const branches = new Map<string, CancelacionAnalysisGroup[]>();
@@ -146,7 +147,10 @@ const buildAnalysisDimensionNodes = (groups: CancelacionAnalysisGroup[], dimensi
   });
   return [...branches.entries()]
     .sort(([left], [right]) => left.localeCompare(right, "es"))
-    .map(([name, branchGroups]) => buildAnalysisNode(name, branchGroups, buildAnalysisDimensionNodes(branchGroups, dimensions, index + 1)));
+    .map(([name, branchGroups]) => {
+      const dimensionFilters = { ...parentFilters, [dimension]: name };
+      return buildAnalysisNode(name, branchGroups, buildAnalysisDimensionNodes(branchGroups, dimensions, index + 1, dimensionFilters), dimensionFilters);
+    });
 };
 
 const buildAnalysisResponse = (groups: CancelacionAnalysisGroup[], months: CancelacionMonthlyGroup[], sucursalesPorMes: CancelacionSucursalMonthlyGroup[], dimensions: AnalysisDimension[]) => {
@@ -192,6 +196,13 @@ const analysisDimensionProjection = {
 
 const effectiveUsuario = (item: { nombreUsuarioOperacionManual?: string | null; nombreUsuarioOperacionSiac?: string | null; nombreUsuarioOperacion?: string | null }) =>
   trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "SIN USUARIO");
+
+const analysisDimensionValue = (item: any, dimension: AnalysisDimension) => {
+  if (dimension === "tipoCliente") return trim(item.tipoCliente, "Sin clasificar");
+  if (dimension === "sucursal") return trim(item.sucursal, "Sin sucursal");
+  if (dimension === "vendedor") return trim(item.vendedor, "Sin vendedor");
+  return trim(item.nombreUsuarioOperacionManual ?? item.nombreUsuarioOperacionSiac ?? item.nombreUsuarioOperacion, "Sin usuario");
+};
 
 // Un snapshot entregado solo deja de ser visible en el tablero cuando su cancelacion fue registrada.
 // `fechaCancelacion: null` tambien contempla documentos previos que aun no tengan el campo.
@@ -587,6 +598,24 @@ export class SaldoOperacionSnapshotService {
       ]),
     ]);
     return buildAnalysisResponse(groups, months, sucursalesPorMes, dimensions);
+  }
+
+  static async noCanceladasAnalysisDetail(
+    month?: string | null,
+    year?: string | null,
+    dimensions: AnalysisDimension[] = defaultAnalysisDimensionOrder,
+    dimensionFilters: Partial<Record<AnalysisDimension, string>> = {},
+  ) {
+    const selectedMatch = month
+      ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${month}-` } }
+      : year ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${year}-` } } : noCanceladasAnalysisMatch;
+    const rows = await SaldoOperacionSnapshot.find(selectedMatch as any).lean();
+    return {
+      data: rows
+        .filter((item) => dimensions.every((dimension) => !dimensionFilters[dimension] || analysisDimensionValue(item, dimension) === dimensionFilters[dimension]))
+        .map(serialize)
+        .sort((left, right) => left.codigoOperacion - right.codigoOperacion),
+    };
   }
 
   static async dashboardAdministracion() {

@@ -2693,9 +2693,9 @@ export const saldoOperacionCreditoImportResponseSchema = z.object({
   }),
 });
 export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });
-export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; saldoTotal?: number; children?: SaldoOperacionCancelacionAnalysisNode[] };
+export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; saldoTotal?: number; dimensionFilters?: Partial<Record<"tipoCliente" | "vendedor" | "usuario" | "sucursal", string>>; children?: SaldoOperacionCancelacionAnalysisNode[] };
 export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
-  name: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
+  name: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(), dimensionFilters: z.object({ tipoCliente: z.string().optional(), vendedor: z.string().optional(), usuario: z.string().optional(), sucursal: z.string().optional() }).optional(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
 }));
 export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
   data: z.object({
@@ -2719,6 +2719,8 @@ export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacio
 export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacionSnapshotSummaryResponseSchema>;
 export type SaldoOperacionCreditoImportResponse = z.infer<typeof saldoOperacionCreditoImportResponseSchema>;
 export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
+export const saldoOperacionNoCanceladasDetailResponseSchema = z.object({ data: z.array(saldoOperacionSnapshotItemSchema) });
+export type SaldoOperacionNoCanceladasDetailResponse = z.infer<typeof saldoOperacionNoCanceladasDetailResponseSchema>;
 export const dashboardAdministracionResponseSchema = saldoOperacionCancelacionAnalysisResponseSchema.extend({
   modelos: z.array(z.object({ nombre: z.string(), total: z.number().int().nonnegative() })),
   resumen: z.object({ saldoTotal: z.number(), creditoTotal: z.number(), creditoCantidad: z.number().int().nonnegative(), usadoTotal: z.number(), usadoCantidad: z.number().int().nonnegative() }),

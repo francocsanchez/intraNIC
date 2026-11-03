@@ -26,6 +26,8 @@ import {
   saldoOperacionSnapshotUpdateResponseSchema,
   saldoOperacionCancelacionAnalysisResponseSchema,
   type SaldoOperacionCancelacionAnalysisResponse,
+  saldoOperacionNoCanceladasDetailResponseSchema,
+  type SaldoOperacionNoCanceladasDetailResponse,
   dashboardAdministracionResponseSchema,
   type DashboardAdministracionResponse,
   saldoOperacionUsuariosResponseSchema,
@@ -177,6 +179,16 @@ export async function getSaldoOperacionCancelacionAnalysis(params: { mesAsignaci
 export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignacion?: string; anioAsignacion?: string; dimensionOrder?: SaldoOperacionAnalysisDimension[] }, signal?: AbortSignal): Promise<SaldoOperacionCancelacionAnalysisResponse> {
   try { const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas", { params: { ...params, dimensionOrder: params.dimensionOrder?.join(",") }, signal }); const parsed = saldoOperacionCancelacionAnalysisResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Analisis de no canceladas invalido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el analisis de no canceladas")); }
+}
+export async function getSaldoOperacionNoCanceladasDetail(params: { mesAsignacion?: string; anioAsignacion?: string; dimensionOrder: SaldoOperacionAnalysisDimension[]; dimensionFilters?: Partial<Record<SaldoOperacionAnalysisDimension, string>> }, signal?: AbortSignal): Promise<SaldoOperacionNoCanceladasDetailResponse> {
+  try {
+    const { data } = await api.get("/operaciones/saldo-operacion/analisis-no-canceladas/detalle", {
+      params: { mesAsignacion: params.mesAsignacion, anioAsignacion: params.anioAsignacion, dimensionOrder: params.dimensionOrder.join(","), ...params.dimensionFilters }, signal,
+    });
+    const parsed = saldoOperacionNoCanceladasDetailResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("Detalle de no canceladas inválido");
+    return parsed.data;
+  } catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el detalle de no canceladas")); }
 }
 
 export async function getDashboardAdministracion(signal?: AbortSignal): Promise<DashboardAdministracionResponse> {

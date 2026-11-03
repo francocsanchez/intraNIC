@@ -2,6 +2,7 @@
 
 ## 2026-11-03
 
+- **Saldo de operación:** el árbol de Análisis de no canceladas ahora permite abrir desde cualquier nodo un detalle ancho con todas las operaciones Mongo que integran el indicador, respetando período y jerarquía activa.
 - **Dashboard Salón:** el refresco automático cada minuto continúa activo aun cuando la pantalla de TV o el navegador no tengan foco.
 - **Dashboard Administración:** se incorporó `/analisis/dashboard-administracion`, protegido por el nuevo permiso independiente `dashboardAdministracion` y disponible desde Inicio y Análisis.
 - **Dashboard Administración:** la vista sin navbar ni footer ocupa el viewport completo y presenta el árbol de operaciones no canceladas de todas las sucursales para el mes vigente de Buenos Aires, obtenido exclusivamente desde snapshots Mongo.

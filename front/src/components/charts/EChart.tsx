@@ -35,7 +35,7 @@ type EChartProps = {
   enableHoverEmphasis?: boolean;
   /** Reinicia la serie antes de aplicar datos estructurales (por ejemplo, árboles). */
   resetOnOptionChange?: boolean;
-  onChartClick?: (params: { name?: string; seriesName?: string; value?: unknown }) => void;
+  onChartClick?: (params: { name?: string; seriesName?: string; value?: unknown; data?: unknown }) => void;
 };
 
 function resolveChartOption<T>(value: T): T {
@@ -128,7 +128,7 @@ export default function EChart({ option, className = "", enableHoverEmphasis = t
 
     const chart = init(container, undefined, { renderer: "svg" });
     chartRef.current = chart;
-    const handleClick = (params: { name?: string; seriesName?: string; value?: unknown }) => clickHandlerRef.current?.(params);
+    const handleClick = (params: { name?: string; seriesName?: string; value?: unknown; data?: unknown }) => clickHandlerRef.current?.(params);
     chart.on("click", handleClick);
 
     const resizeObserver = new ResizeObserver(() => {

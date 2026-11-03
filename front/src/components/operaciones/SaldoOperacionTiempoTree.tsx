@@ -19,13 +19,14 @@ const wrapNodeName = (name: string) => name.split(" ").reduce<string[]>((lines, 
   return lines;
 }, []).join("\n");
 
-const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boolean): Record<string, unknown> => {
+const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boolean, clickable: boolean): Record<string, unknown> => {
   const tone = toneForAverage(node.averageDays);
   const metric = showSaldo && typeof node.saldoTotal === "number"
     ? `${formatDays(node.averageDays)} · ${formatMoney(node.saldoTotal)}`
     : formatDays(node.averageDays);
   return {
     ...node,
+    ...(clickable ? { cursor: "pointer" } : {}),
     itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: 1.5, shadowBlur: 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
     label: {
       formatter: `${wrapNodeName(node.name)}\n{days|${metric}}`,
@@ -35,11 +36,11 @@ const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boo
       lineHeight: 16,
       rich: { days: { color: tone.text, fontSize: 10, fontWeight: 400, lineHeight: 14 } },
     },
-    children: node.children?.map((child) => toChartNode(child, showSaldo)),
+    children: node.children?.map((child) => toChartNode(child, showSaldo, clickable)),
   };
 };
 
-export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancelacionAnalysisNode, options: { showSaldo: boolean; operationLabel: string; edgeShape?: "curve" | "polyline" }): EChartsCoreOption => ({
+export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancelacionAnalysisNode, options: { showSaldo: boolean; operationLabel: string; clickable?: boolean; edgeShape?: "curve" | "polyline" }): EChartsCoreOption => ({
   tooltip: {
     trigger: "item",
     backgroundColor: "#18181b",
@@ -49,7 +50,7 @@ export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancela
   },
   series: [{
     type: "tree",
-    data: [toChartNode(tree, options.showSaldo)],
+    data: [toChartNode(tree, options.showSaldo, Boolean(options.clickable))],
     orient: "RL",
     top: "4%",
     bottom: "4%",
