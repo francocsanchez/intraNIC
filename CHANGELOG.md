@@ -14,6 +14,12 @@
 - **Dashboard Administración:** las métricas del resumen se centraron y Saldo pendiente amplió su tipografía para aprovechar la superficie disponible.
 - **Dashboard Administración:** se quitó el filtro del mes vigente; todos los gráficos y métricas ahora incluyen todas las operaciones no canceladas con asignación válida.
 - **Dashboard Administración:** Créditos y Usados ahora reutilizan las reglas de las tarjetas de Saldo de operación para alinear importes y cantidades pendientes.
+- **Dashboard Administración:** Saldo pendiente ahora se calcula como la suma exacta de los saldos por modelo de Saldo de operación.
+- **Dashboard Administración:** Zona 2 incorpora el gráfico semanal de cobranzas del mes actual, con la misma fuente SIAC y rangos de Tablero de cobranzas.
+- **Dashboard Administración:** las barras de cobranzas semanales ahora muestran su importe fijo en millones, sin requerir hover.
+- **Dashboard Administración:** las etiquetas de cobranzas semanales se ampliaron y ahora se muestran dentro de un recuadro.
+- **Dashboard Administración:** se agregaron objetivos de cobranzas semanales configurables por año/mes desde Sistema; el gráfico muestra la meta punteada y colorea cada barra por cumplimiento.
+- **Dashboard Administración:** los campos de objetivos semanales ahora muestran pesos y separador de miles durante la carga.
 
 ## 2026-10-28
 

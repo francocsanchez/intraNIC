@@ -42,9 +42,11 @@ import {
   type SaldoOperacionCreditoImportResponse,
   type SaldoOperacionUsuario,
   tableroCobranzasDiarioResponseSchema,
+  dashboardAdministracionCobranzasResponseSchema,
   tableroCobranzasDetalleDiarioResponseSchema,
   tableroCobranzasRecibosOperacionResponseSchema,
   dashboardSalonResponseSchema,
+  type DashboardAdministracionCobranzasResponse,
   type TableroCobranzasDetalleDiarioResponse,
   type TableroCobranzasDiarioResponse,
   type TableroCobranzasRecibosOperacionResponse,
@@ -180,6 +182,17 @@ export async function getSaldoOperacionNoCanceladasAnalysis(params: { mesAsignac
 export async function getDashboardAdministracion(signal?: AbortSignal): Promise<DashboardAdministracionResponse> {
   try { const { data } = await api.get("/operaciones/dashboard-administracion", { signal }); const parsed = dashboardAdministracionResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Dashboard Administración inválido"); return parsed.data; }
   catch (error) { throw new Error(getErrorMessage(error, "Error al obtener el Dashboard Administración")); }
+}
+
+export async function getDashboardAdministracionCobranzas(signal?: AbortSignal): Promise<DashboardAdministracionCobranzasResponse> {
+  try {
+    const { data } = await api.get("/operaciones/dashboard-administracion/cobranzas", { signal });
+    const parsed = dashboardAdministracionCobranzasResponseSchema.safeParse(data);
+    if (!parsed.success) throw new Error("Cobranzas inválidas");
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al obtener las cobranzas del mes actual"));
+  }
 }
 export async function updateSaldoOperacionSnapshotCancelacion(codigoOperacion: number, fechaCancelacion: string | null) {
   try { const { data } = await api.patch(`/operaciones/saldo-operacion/${codigoOperacion}/cancelacion`, { fechaCancelacion }); const parsed = saldoOperacionSnapshotUpdateResponseSchema.safeParse(data); if (!parsed.success) throw new Error("Respuesta invalida"); return parsed.data; }

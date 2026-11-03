@@ -3,6 +3,8 @@ import * as XLSX from "xlsx";
 import { SaldoOperacionSnapshotService, analysisDimensions, defaultAnalysisDimensionOrder, tiposCliente, type AnalysisDimension, type SnapshotSortKey, type TipoCliente } from "../services/saldoOperacionSnapshot.service";
 import { CobrosVendedorService } from "../services/cobrosVendedor.service";
 import { SaldoOperacionCreditoLiquidadoService } from "../services/saldoOperacionCreditoLiquidado.service";
+import { TableroCobranzasService } from "../services/tableroCobranzas.service";
+import Configuration from "../models/Config";
 
 const optionalString = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 const positiveInt = (value: unknown, fallback: number) => {
@@ -54,6 +56,14 @@ const parseAnalysisDimensions = (value: unknown): AnalysisDimension[] => {
     throw new Error("Indicá al menos una dimensión sin repetir: T. Cliente, Vendedor, Usuario o Sucursal");
   }
   return dimensions as AnalysisDimension[];
+};
+
+const currentBuenosAiresPeriod = () => {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric" }).formatToParts(new Date());
+  return {
+    anio: Number(parts.find((part) => part.type === "year")?.value),
+    mes: Number(parts.find((part) => part.type === "month")?.value),
+  };
 };
 
 export class SaldoOperacionSnapshotController {
@@ -149,6 +159,20 @@ export class SaldoOperacionSnapshotController {
   static dashboardAdministracion = async (_req: Request, res: Response) => {
     try { return res.status(200).json(await SaldoOperacionSnapshotService.dashboardAdministracion()); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el Dashboard Administración" }); }
+  };
+
+  static dashboardAdministracionCobranzas = async (_req: Request, res: Response) => {
+    const period = currentBuenosAiresPeriod();
+    try {
+      const [cobranzas, config] = await Promise.all([
+        TableroCobranzasService.getDiario(period.anio, period.mes),
+        Configuration.findOne({}, { objetivosCobranzasSemanalesDashboardAdministracion: 1 }).lean(),
+      ]);
+      const objetivos = Array.from({ length: 5 }, (_, index) => config?.objetivosCobranzasSemanalesDashboardAdministracion
+        ?.find((item) => item.anio === period.anio && item.mes === period.mes && item.semana === index + 1)?.objetivo ?? null);
+      return res.status(200).json({ data: { ...cobranzas, objetivos } });
+    }
+    catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener la cobranza del mes actual" }); }
   };
 
   static updateFechaCancelacion = async (req: Request, res: Response) => {

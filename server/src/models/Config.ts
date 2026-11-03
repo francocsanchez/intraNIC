@@ -36,6 +36,12 @@ export interface IConfiguration extends Document {
     modelo: string;
     imagePath: string;
   }>;
+  objetivosCobranzasSemanalesDashboardAdministracion: Array<{
+    anio: number;
+    mes: number;
+    semana: number;
+    objetivo: number;
+  }>;
 }
 
 const configSchema: Schema = new Schema(
@@ -83,6 +89,15 @@ const configSchema: Schema = new Schema(
       type: [{
         modelo: { type: String, required: true, trim: true },
         imagePath: { type: String, required: true, trim: true },
+      }],
+      default: [],
+    },
+    objetivosCobranzasSemanalesDashboardAdministracion: {
+      type: [{
+        anio: { type: Number, required: true, min: 2000 },
+        mes: { type: Number, required: true, min: 1, max: 12 },
+        semana: { type: Number, required: true, min: 1, max: 5 },
+        objetivo: { type: Number, required: true, min: 0 },
       }],
       default: [],
     },

@@ -1,17 +1,33 @@
 import EChart from "@/components/charts/EChart";
+import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { createSaldoOperacionTiempoTreeOption } from "@/components/operaciones/SaldoOperacionTiempoTree";
-import { getDashboardAdministracion } from "@/services/operacionesService";
+import { getDashboardAdministracion, getDashboardAdministracionCobranzas } from "@/services/operacionesService";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
 import { useMemo } from "react";
 
 const MODEL_ROSE_COLORS = ["#93c5fd", "#86efac", "#fde68a", "#f9a8d4", "#c4b5fd", "#67e8f9", "#fdba74", "#a7f3d0"];
 const formatMillions = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.round(value / 1_000_000))}M`;
+const formatChartMillions = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.floor(value / 1_000_000))}M`;
+const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const WEEK_RANGES = [
+  { desde: 1, hasta: 7, etiqueta: "1–7" },
+  { desde: 8, hasta: 14, etiqueta: "8–14" },
+  { desde: 15, hasta: 21, etiqueta: "15–21" },
+  { desde: 22, hasta: 28, etiqueta: "22–28" },
+  { desde: 29, hasta: 31, etiqueta: "29–fin" },
+] as const;
 
 export default function DashboardAdministracionView() {
   const query = useQuery({
     queryKey: ["dashboard-administracion"],
     queryFn: ({ signal }) => getDashboardAdministracion(signal),
+    refetchOnWindowFocus: true,
+  });
+  const cobranzasQuery = useQuery({
+    queryKey: ["dashboard-administracion-cobranzas"],
+    queryFn: ({ signal }) => getDashboardAdministracionCobranzas(signal),
     refetchOnWindowFocus: true,
   });
   const option = useMemo(() => query.data
@@ -38,6 +54,39 @@ export default function DashboardAdministracionView() {
       data: query.data.modelos.map((item) => ({ name: item.nombre, value: item.total })),
     }],
   }) : null, [query.data]);
+  const weeklyChartOption = useMemo<EChartsCoreOption | null>(() => {
+    const data = cobranzasQuery.data?.data;
+    if (!data) return null;
+    const weeks = WEEK_RANGES.map((week) => ({
+      ...week,
+      total: data.dias.filter((day) => day.dia >= week.desde && day.dia <= week.hasta).reduce((total, day) => total + day.total, 0),
+    }));
+    const targetColors = { achieved: "#86efac", progress: "#fde68a", below: "#fecaca" };
+    return {
+      color: getPresetChartColors(),
+      grid: { top: 12, right: 14, bottom: 28, left: 66 },
+      tooltip: { trigger: "axis", valueFormatter: (value: number | string) => money.format(Number(value)) },
+      xAxis: { type: "category", data: weeks.map((week) => week.etiqueta), axisTick: { alignWithLabel: true }, axisLabel: { fontSize: 10 } },
+      yAxis: { type: "value", axisLabel: { fontSize: 9, formatter: (value: number) => formatChartMillions(value) }, splitLine: { lineStyle: { color: "var(--border)" } } },
+      series: [
+        {
+          type: "bar",
+          name: "Cobrado",
+          data: weeks.map((week, index) => {
+            const objetivo = data.objetivos[index];
+            const color = objetivo && objetivo > 0
+              ? week.total >= objetivo ? targetColors.achieved : week.total >= objetivo * 0.7 ? targetColors.progress : targetColors.below
+              : undefined;
+            return { value: week.total, ...(color ? { itemStyle: { color } } : {}) };
+          }),
+          barMaxWidth: 48,
+          itemStyle: { borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: "top", formatter: (params: { value?: number }) => formatChartMillions(Number(params.value ?? 0)), color: "var(--foreground)", fontSize: 14, fontWeight: 700, backgroundColor: "var(--card)", borderColor: "var(--border)", borderWidth: 1, borderRadius: 4, padding: [3, 6] },
+        },
+        { type: "line", name: "Objetivo", data: data.objetivos, symbol: "none", connectNulls: false, lineStyle: { color: "#ef4444", type: "dashed", width: 2 } },
+      ],
+    };
+  }, [cobranzasQuery.data]);
 
   if (query.isLoading) return <main className="grid h-dvh place-items-center overflow-hidden bg-muted font-preset text-lg text-muted-foreground">Cargando Dashboard Administración...</main>;
   if (query.isError || !query.data) return <main className="grid h-dvh place-items-center overflow-hidden bg-muted p-6 font-preset"><section className="max-w-lg rounded-md border border-destructive/30 bg-card p-6 text-center"><h1 className="text-xl font-semibold text-foreground">No se pudo cargar Dashboard Administración</h1><p className="mt-2 text-destructive">{query.error instanceof Error ? query.error.message : "Intentá actualizar nuevamente."}</p></section></main>;
@@ -56,7 +105,7 @@ export default function DashboardAdministracionView() {
         </section>
         <section className="grid min-h-0 grid-rows-2 divide-y divide-border">
           <section className="grid min-h-0 grid-cols-2 divide-x divide-border"><div className="flex min-h-0 flex-col overflow-hidden p-3"><h2 className="shrink-0 text-sm font-semibold text-foreground">Operaciones pendientes por modelo</h2>{modelOption ? <div className="min-h-0 flex-1"><EChart option={modelOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">Sin operaciones pendientes para representar.</p>}</div><div className="flex min-h-0 flex-col p-5"><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Saldo pendiente</p><p className="mt-2 text-7xl font-bold leading-none tracking-tight text-foreground">{formatMillions(query.data.resumen.saldoTotal)}</p></div><div className="grid shrink-0 grid-cols-2 gap-4 border-t border-border pt-4 text-center"><div><p className="text-sm font-semibold text-muted-foreground">Créditos</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.creditoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.creditoCantidad} operaciones</p></div><div><p className="text-sm font-semibold text-muted-foreground">Usados</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.usadoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.usadoCantidad} operaciones</p></div></div></div></section>
-          <section className="flex min-h-0 items-center justify-center p-3"><p className="text-xl font-semibold text-muted-foreground">Zona 2</p></section>
+          <section className="flex min-h-0 flex-col overflow-hidden p-3"><div className="shrink-0"><h2 className="text-sm font-semibold text-foreground">Cobranzas por semana</h2><p className="text-[11px] text-muted-foreground">{cobranzasQuery.data ? `Total cobrado por semana de ${MONTHS[cobranzasQuery.data.data.mes - 1]} ${cobranzasQuery.data.data.anio}.` : "Cobranzas del mes actual."}</p></div>{weeklyChartOption ? <div className="min-h-0 flex-1"><EChart option={weeklyChartOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">{cobranzasQuery.isError ? cobranzasQuery.error.message : "Cargando cobranzas..."}</p>}</section>
         </section>
       </div>
     </section>

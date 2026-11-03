@@ -32,6 +32,7 @@ export const paths = {
     configuracionEnvioAgenda: "/sistema/configuracion/envio-agenda",
     configuracionHotAlert: "/sistema/configuracion/hot-alert",
     configuracionDashboardSalon: "/sistema/configuracion/dashboard-salon",
+    configuracionDashboardAdministracion: "/sistema/configuracion/dashboard-administracion",
     configuracionConvencionalEditar: "/sistema/configuracion/convencional/editar",
     configuracionUsadosEditar: "/sistema/configuracion/usados/editar",
     configuracionBelgranoEditar: "/sistema/configuracion/belgrano/editar",

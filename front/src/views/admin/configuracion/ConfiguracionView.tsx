@@ -89,6 +89,9 @@ export default function ConfiguracionView() {
   const canManageDashboardSalon =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.configuracionDashboardSalon);
+  const canManageDashboardAdministracion =
+    hasModuleAccess(user, "configuracion") &&
+    hasPathAccess(user, paths.admin.configuracionDashboardAdministracion);
 
   if (!canViewConfiguracion) return null;
 
@@ -348,6 +351,19 @@ export default function ConfiguracionView() {
               <p className="mt-1 text-sm text-muted-foreground">Define objetivos mensuales e imágenes por modelo para el Dashboard Salón.</p>
             </div>
             <Link to={paths.admin.configuracionDashboardSalon} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Configurar Dashboard</Link>
+          </div>
+        </section>
+      ) : null}
+
+      {canManageDashboardAdministracion ? (
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Análisis</p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Cobranzas semanales</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Define los objetivos semanales que se comparan en Dashboard Administración.</p>
+            </div>
+            <Link to={paths.admin.configuracionDashboardAdministracion} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Configurar objetivos</Link>
           </div>
         </section>
       ) : null}

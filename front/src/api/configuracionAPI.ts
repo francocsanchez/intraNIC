@@ -4,6 +4,7 @@ import {
   configuracionResponseSchema,
   dashboardSalonSettingsResponseSchema,
   dashboardSalonModelImagesResponseSchema,
+  dashboardAdministracionCobranzasSettingsResponseSchema,
 } from "../types";
 
 export async function getConfiguracion() {
@@ -132,5 +133,19 @@ export async function deleteDashboardSalonModelImage(modelo: string) {
   const { data } = await api.delete(`/config/dashboard-salon/modelos/${encodeURIComponent(modelo)}`);
   const response = dashboardSalonModelImagesResponseSchema.pick({ message: true }).safeParse(data);
   if (!response.success) throw new Error("La respuesta de eliminación de la imagen es inválida");
+  return response.data;
+}
+
+export async function getDashboardAdministracionCobranzasSettings(scope: { anio: number; mes: number }) {
+  const { data } = await api.get("/config/dashboard-administracion/cobranzas", { params: scope });
+  const response = dashboardAdministracionCobranzasSettingsResponseSchema.safeParse(data);
+  if (!response.success) throw new Error("La estructura de los objetivos de cobranzas es inválida");
+  return response.data;
+}
+
+export async function updateDashboardAdministracionCobranzasSettings(payload: { anio: number; mes: number; objetivos: Array<number | null> }) {
+  const { data } = await api.put("/config/dashboard-administracion/cobranzas", payload);
+  const response = dashboardAdministracionCobranzasSettingsResponseSchema.safeParse(data);
+  if (!response.success) throw new Error("La respuesta de los objetivos de cobranzas es inválida");
   return response.data;
 }

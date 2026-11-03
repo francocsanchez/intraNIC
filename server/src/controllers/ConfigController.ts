@@ -20,6 +20,54 @@ const normalizeDashboardSalonImageUrl = (value: unknown) => {
 };
 
 export class ConfigController {
+  static getDashboardAdministracionCobranzasSettings = async (req: Request, res: Response) => {
+    const anio = Number(req.query.anio);
+    const mes = Number(req.query.mes);
+    if (!Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+      return res.status(400).json({ message: "El período seleccionado debe ser válido." });
+    }
+    try {
+      const config = await Configuration.findOne({}, { objetivosCobranzasSemanalesDashboardAdministracion: 1 }).lean();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      const objetivos = Array.from({ length: 5 }, (_, index) => config.objetivosCobranzasSemanalesDashboardAdministracion
+        ?.find((item) => item.anio === anio && item.mes === mes && item.semana === index + 1)?.objetivo ?? null);
+      return res.status(200).json({ data: { anio, mes, objetivos }, message: "Objetivos de cobranzas listados" });
+    } catch (error) {
+      logError("ConfigController.getDashboardAdministracionCobranzasSettings");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudieron obtener los objetivos de cobranzas." });
+    }
+  };
+
+  static updateDashboardAdministracionCobranzasSettings = async (req: Request, res: Response) => {
+    const anio = Number(req.body?.anio);
+    const mes = Number(req.body?.mes);
+    const objetivosRaw = req.body?.objetivos;
+    if (!Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12 || !Array.isArray(objetivosRaw) || objetivosRaw.length !== 5) {
+      return res.status(400).json({ message: "El período y los cinco objetivos semanales son obligatorios." });
+    }
+    const objetivos = objetivosRaw.map((value) => value === null || value === "" ? null : Number(value));
+    if (objetivos.some((value) => value !== null && (!Number.isFinite(value) || value < 0))) {
+      return res.status(400).json({ message: "Cada objetivo debe ser un importe igual o mayor a cero." });
+    }
+    try {
+      const config = await Configuration.findOne();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      config.objetivosCobranzasSemanalesDashboardAdministracion = config.objetivosCobranzasSemanalesDashboardAdministracion.filter(
+        (item) => item.anio !== anio || item.mes !== mes,
+      );
+      objetivos.forEach((objetivo, index) => {
+        if (objetivo !== null && objetivo > 0) config.objetivosCobranzasSemanalesDashboardAdministracion.push({ anio, mes, semana: index + 1, objetivo });
+      });
+      await config.save();
+      return res.status(200).json({ data: { anio, mes, objetivos }, message: "Objetivos semanales de cobranzas actualizados" });
+    } catch (error) {
+      logError("ConfigController.updateDashboardAdministracionCobranzasSettings");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudieron guardar los objetivos de cobranzas." });
+    }
+  };
+
   static listDashboardSalonModelImages = async (_req: Request, res: Response) => {
     try {
       const config = await Configuration.findOne({}, { imagenesModelosDashboardSalon: 1 }).lean();

@@ -58,10 +58,6 @@ type DashboardAdministracionModelGroup = {
   total: number;
 };
 
-type DashboardAdministracionSummary = {
-  saldoTotal: number;
-};
-
 const trim = (value: unknown, fallback = "") => {
   const normalized = String(value ?? "").trim();
   return normalized || fallback;
@@ -594,7 +590,7 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async dashboardAdministracion() {
-    const [analysis, modelGroups, summaries, saldoOperacionSummary] = await Promise.all([
+    const [analysis, modelGroups, saldoOperacionSummary] = await Promise.all([
       this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder),
       SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
         { $match: noCanceladasAnalysisMatch },
@@ -611,34 +607,13 @@ export class SaldoOperacionSnapshotService {
         { $group: { _id: "$modelo", total: { $sum: 1 } } },
         { $sort: { total: -1, _id: 1 } },
       ]),
-      SaldoOperacionSnapshot.aggregate<DashboardAdministracionSummary>([
-        { $match: noCanceladasAnalysisMatch },
-        {
-          $project: {
-            saldo: {
-              $add: [
-                { $ifNull: ["$total", 0] },
-                { $multiply: [{ $ifNull: ["$senas", 0] }, -1] },
-                { $multiply: [{ $ifNull: ["$usado", 0] }, -1] },
-                { $multiply: [creditoLiquidadoExpression, -1] },
-              ],
-            },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            saldoTotal: { $sum: "$saldo" },
-          },
-        },
-      ]),
       this.summary({ entrega: "sin-entregar" }),
     ]);
     return {
       ...analysis,
       modelos: modelGroups.map((item) => ({ nombre: item._id, total: item.total })),
       resumen: {
-        saldoTotal: summaries[0]?.saldoTotal ?? 0,
+        saldoTotal: saldoOperacionSummary.data.reduce((total, model) => total + model.saldo, 0),
         creditoTotal: saldoOperacionSummary.creditoTotal,
         creditoCantidad: saldoOperacionSummary.creditoPendienteCantidad,
         usadoTotal: saldoOperacionSummary.usadoTotal,

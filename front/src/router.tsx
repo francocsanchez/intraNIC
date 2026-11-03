@@ -25,6 +25,7 @@ const ConfiguracionView = lazy(() => import("./views/admin/configuracion/Configu
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
 const ConfiguracionHotAlertView = lazy(() => import("./views/admin/configuracion/ConfiguracionHotAlertView"));
 const ConfiguracionDashboardSalonView = lazy(() => import("./views/admin/configuracion/ConfiguracionDashboardSalonView"));
+const ConfiguracionDashboardAdministracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionDashboardAdministracionView"));
 const VendedoresView = lazy(() => import("./views/admin/configuracion/VendedoresView"));
 const EditConfiguracionConvView = lazy(() => import("./views/admin/configuracion/EditConfiguracionConvView"));
 const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionUsadoView"));
@@ -205,6 +206,7 @@ export default function Router() {
               <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
               <Route path={paths.admin.configuracionHotAlert} element={<ConfiguracionHotAlertView />} />
               <Route path={paths.admin.configuracionDashboardSalon} element={<ConfiguracionDashboardSalonView />} />
+              <Route path={paths.admin.configuracionDashboardAdministracion} element={<ConfiguracionDashboardAdministracionView />} />
             </Route>
           </Route>
 

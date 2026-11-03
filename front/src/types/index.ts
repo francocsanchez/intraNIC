@@ -2770,6 +2770,15 @@ export const tableroCobranzasDiarioResponseSchema = z.object({
     dias: z.array(tableroCobranzasDiaSchema).length(31),
   }),
 });
+export const dashboardAdministracionCobranzasResponseSchema = z.object({
+  data: tableroCobranzasDiarioResponseSchema.shape.data.extend({ objetivos: z.array(z.number().nullable()).length(5) }),
+});
+export const dashboardAdministracionCobranzasSettingsResponseSchema = z.object({
+  data: z.object({ anio: z.number().int(), mes: z.number().int().min(1).max(12), objetivos: z.array(z.number().nullable()).length(5) }),
+  message: z.string(),
+});
+export type DashboardAdministracionCobranzasResponse = z.infer<typeof dashboardAdministracionCobranzasResponseSchema>;
+export type DashboardAdministracionCobranzasSettingsResponse = z.infer<typeof dashboardAdministracionCobranzasSettingsResponseSchema>;
 
 export const tableroCobranzasDetalleDiarioResponseSchema = z.object({
   data: z.object({
