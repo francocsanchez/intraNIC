@@ -113,18 +113,6 @@ const noCanceladasAnalysisMatch = {
   diasAsignada: { $type: "number" },
 };
 
-const currentBuenosAiresPeriod = () => {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "numeric",
-  }).formatToParts(new Date());
-  return {
-    anio: Number(parts.find((part) => part.type === "year")?.value),
-    mes: Number(parts.find((part) => part.type === "month")?.value),
-  };
-};
-
 const calculateDays = (fechaAsignacion: string, fechaCancelacion: string) => {
   const [asignacionYear, asignacionMonth, asignacionDay] = fechaAsignacion.split("-").map(Number);
   const [cancelacionYear, cancelacionMonth, cancelacionDay] = fechaCancelacion.split("-").map(Number);
@@ -610,13 +598,10 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async dashboardAdministracion() {
-    const periodo = currentBuenosAiresPeriod();
-    const mesAsignacion = `${periodo.anio}-${String(periodo.mes).padStart(2, "0")}`;
-    const dashboardMatch = { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${mesAsignacion}-` } };
     const [analysis, modelGroups, summaries] = await Promise.all([
-      this.noCanceladasAnalysis(mesAsignacion, String(periodo.anio), dashboardAdministracionDimensionOrder),
+      this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder),
       SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
-        { $match: dashboardMatch },
+        { $match: noCanceladasAnalysisMatch },
         {
           $project: {
             modelo: {
@@ -631,7 +616,7 @@ export class SaldoOperacionSnapshotService {
         { $sort: { total: -1, _id: 1 } },
       ]),
       SaldoOperacionSnapshot.aggregate<DashboardAdministracionSummary>([
-        { $match: dashboardMatch },
+        { $match: noCanceladasAnalysisMatch },
         {
           $project: {
             saldo: {
@@ -660,7 +645,6 @@ export class SaldoOperacionSnapshotService {
     ]);
     return {
       ...analysis,
-      periodo,
       modelos: modelGroups.map((item) => ({ nombre: item._id, total: item.total })),
       resumen: summaries[0] ?? { saldoTotal: 0, creditoTotal: 0, creditoCantidad: 0, usadoTotal: 0, usadoCantidad: 0 },
     };

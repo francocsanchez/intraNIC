@@ -12,6 +12,7 @@
 - **Dashboard Administración:** la rosa por modelo ahora comparte su zona con el saldo total y las sumas de créditos y usados de las operaciones representadas.
 - **Dashboard Administración:** el resumen renombró sus métricas a Saldo pendiente, Créditos y Usados; ahora expresa importes en millones, prioriza visualmente el saldo y detalla las cantidades de créditos y usados.
 - **Dashboard Administración:** las métricas del resumen se centraron y Saldo pendiente amplió su tipografía para aprovechar la superficie disponible.
+- **Dashboard Administración:** se quitó el filtro del mes vigente; todos los gráficos y métricas ahora incluyen todas las operaciones no canceladas con asignación válida.
 
 ## 2026-10-28
 

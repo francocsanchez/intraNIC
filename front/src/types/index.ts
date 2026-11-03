@@ -2720,7 +2720,6 @@ export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacio
 export type SaldoOperacionCreditoImportResponse = z.infer<typeof saldoOperacionCreditoImportResponseSchema>;
 export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
 export const dashboardAdministracionResponseSchema = saldoOperacionCancelacionAnalysisResponseSchema.extend({
-  periodo: z.object({ anio: z.number().int(), mes: z.number().int().min(1).max(12) }),
   modelos: z.array(z.object({ nombre: z.string(), total: z.number().int().nonnegative() })),
   resumen: z.object({ saldoTotal: z.number(), creditoTotal: z.number(), creditoCantidad: z.number().int().nonnegative(), usadoTotal: z.number(), usadoCantidad: z.number().int().nonnegative() }),
 });
