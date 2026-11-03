@@ -13,6 +13,7 @@
 - **Dashboard Administración:** el resumen renombró sus métricas a Saldo pendiente, Créditos y Usados; ahora expresa importes en millones, prioriza visualmente el saldo y detalla las cantidades de créditos y usados.
 - **Dashboard Administración:** las métricas del resumen se centraron y Saldo pendiente amplió su tipografía para aprovechar la superficie disponible.
 - **Dashboard Administración:** se quitó el filtro del mes vigente; todos los gráficos y métricas ahora incluyen todas las operaciones no canceladas con asignación válida.
+- **Dashboard Administración:** Créditos y Usados ahora reutilizan las reglas de las tarjetas de Saldo de operación para alinear importes y cantidades pendientes.
 
 ## 2026-10-28
 

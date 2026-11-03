@@ -60,10 +60,6 @@ type DashboardAdministracionModelGroup = {
 
 type DashboardAdministracionSummary = {
   saldoTotal: number;
-  creditoTotal: number;
-  creditoCantidad: number;
-  usadoTotal: number;
-  usadoCantidad: number;
 };
 
 const trim = (value: unknown, fallback = "") => {
@@ -598,7 +594,7 @@ export class SaldoOperacionSnapshotService {
   }
 
   static async dashboardAdministracion() {
-    const [analysis, modelGroups, summaries] = await Promise.all([
+    const [analysis, modelGroups, summaries, saldoOperacionSummary] = await Promise.all([
       this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder),
       SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
         { $match: noCanceladasAnalysisMatch },
@@ -627,26 +623,27 @@ export class SaldoOperacionSnapshotService {
                 { $multiply: [creditoLiquidadoExpression, -1] },
               ],
             },
-            credito: { $ifNull: ["$creditoBanco", 0] },
-            usado: { $ifNull: ["$usado", 0] },
           },
         },
         {
           $group: {
             _id: null,
             saldoTotal: { $sum: "$saldo" },
-            creditoTotal: { $sum: "$credito" },
-            creditoCantidad: { $sum: { $cond: [{ $gt: ["$credito", 0] }, 1, 0] } },
-            usadoTotal: { $sum: "$usado" },
-            usadoCantidad: { $sum: { $cond: [{ $gt: ["$usado", 0] }, 1, 0] } },
           },
         },
       ]),
+      this.summary({ entrega: "sin-entregar" }),
     ]);
     return {
       ...analysis,
       modelos: modelGroups.map((item) => ({ nombre: item._id, total: item.total })),
-      resumen: summaries[0] ?? { saldoTotal: 0, creditoTotal: 0, creditoCantidad: 0, usadoTotal: 0, usadoCantidad: 0 },
+      resumen: {
+        saldoTotal: summaries[0]?.saldoTotal ?? 0,
+        creditoTotal: saldoOperacionSummary.creditoTotal,
+        creditoCantidad: saldoOperacionSummary.creditoPendienteCantidad,
+        usadoTotal: saldoOperacionSummary.usadoTotal,
+        usadoCantidad: saldoOperacionSummary.usadoCantidad,
+      },
     };
   }
 
