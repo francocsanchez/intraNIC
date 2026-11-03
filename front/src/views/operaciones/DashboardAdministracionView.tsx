@@ -23,11 +23,15 @@ export default function DashboardAdministracionView() {
   const query = useQuery({
     queryKey: ["dashboard-administracion"],
     queryFn: ({ signal }) => getDashboardAdministracion(signal),
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
   });
   const cobranzasQuery = useQuery({
     queryKey: ["dashboard-administracion-cobranzas"],
     queryFn: ({ signal }) => getDashboardAdministracionCobranzas(signal),
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
   });
   const option = useMemo(() => query.data

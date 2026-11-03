@@ -20,6 +20,8 @@
 - **Dashboard Administración:** las etiquetas de cobranzas semanales se ampliaron y ahora se muestran dentro de un recuadro.
 - **Dashboard Administración:** se agregaron objetivos de cobranzas semanales configurables por año/mes desde Sistema; el gráfico muestra la meta punteada y colorea cada barra por cumplimiento.
 - **Dashboard Administración:** los campos de objetivos semanales ahora muestran pesos y separador de miles durante la carga.
+- **Dashboard Administración:** saldo y cobranzas se actualizan automáticamente cada minuto.
+- **Dashboard Administración:** el refresco por minuto continúa activo aunque la pantalla de TV pierda el foco del navegador.
 
 ## 2026-10-28
 
