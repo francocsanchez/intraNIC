@@ -147,6 +147,7 @@ export default function DashboardSalonView() {
     queryKey: ["dashboard-salon", period],
     queryFn: () => getDashboardSalon(period),
     refetchInterval: 60_000,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
   });
   if (query.isLoading) return <div className="grid min-h-screen place-items-center bg-muted font-preset text-lg text-muted-foreground">Cargando Dashboard Salón...</div>;

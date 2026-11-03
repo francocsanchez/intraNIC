@@ -2,6 +2,7 @@
 
 ## 2026-11-03
 
+- **Dashboard Salón:** el refresco automático cada minuto continúa activo aun cuando la pantalla de TV o el navegador no tengan foco.
 - **Dashboard Administración:** se incorporó `/analisis/dashboard-administracion`, protegido por el nuevo permiso independiente `dashboardAdministracion` y disponible desde Inicio y Análisis.
 - **Dashboard Administración:** la vista sin navbar ni footer ocupa el viewport completo y presenta el árbol de operaciones no canceladas de todas las sucursales para el mes vigente de Buenos Aires, obtenido exclusivamente desde snapshots Mongo.
 - **Dashboard Administración:** el árbol inicial se simplificó a la jerarquía Usuario → Sucursal → Tiempo total.
