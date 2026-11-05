@@ -3,6 +3,7 @@ Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una im
 No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
 `Links` vive en `/sistema/links`, usa el permiso independiente `links` y persiste exclusivamente en Mongo URL y descripción obligatorias. Todo usuario con el módulo puede crear, editar y eliminar enlaces; la tabla permite copiar el enlace o abrirlo en una pestaña nueva.
+La vista de `Links` debe tolerar que la consulta aún no tenga respuesta al renderizar, para conservar el build estricto de frontend en Docker.
 
 Las vistas `/stock/convencional/disponible`, `/stock/usados/disponible` y `/stock/liess/nuevos` incluyen un buscador inmediato por modelo o color, combinado con sus filtros existentes y tolerante a mayúsculas, tildes y espacios.
 
