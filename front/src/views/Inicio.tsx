@@ -19,6 +19,7 @@ import {
   Inbox,
   LogOut,
   LineChart,
+  Link2,
   Motorbike,
   ReceiptText,
   Package,
@@ -258,6 +259,7 @@ export default function Inicio() {
       items: [
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
+        { label: "Links", to: paths.admin.links, enabled: hasModulePathAccess(user, "links", paths.admin.links), icon: Link2 },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
         {
           label: "Act. Registros",

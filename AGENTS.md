@@ -2,6 +2,8 @@
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
+`Links` vive en `/sistema/links`, usa el permiso independiente `links` y persiste exclusivamente en Mongo URL y descripción obligatorias. Todo usuario con el módulo puede crear, editar y eliminar enlaces; la tabla permite copiar el enlace o abrirlo en una pestaña nueva.
+
 Las vistas `/stock/convencional/disponible`, `/stock/usados/disponible` y `/stock/liess/nuevos` incluyen un buscador inmediato por modelo o color, combinado con sus filtros existentes y tolerante a mayúsculas, tildes y espacios.
 
 `Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC cada dos minutos, de 07:00 a 20:00 (Buenos Aires), con última ejecución a las 20:00. Los endpoints del tablero nunca realizan SQL directo.

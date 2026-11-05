@@ -40,6 +40,7 @@ export const moduleKeys = [
   "pendientesTurnar",
   "usuarios",
   "configuracion",
+  "links",
   "testDrive",
   "registroTestDriveConvencional",
   "registroTestDrive",
@@ -99,6 +100,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   pendientesTurnar: "Pendientes de turnar",
   usuarios: "Usuarios",
   configuracion: "Configuracion",
+  links: "Links",
   testDrive: "TestDrive",
   registroTestDriveConvencional: "Registro TestDrive Comercial",
   registroTestDrive: "Registro TestDrive Plan de ahorro",
@@ -151,7 +153,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Sistema",
-    modules: ["usuarios", "configuracion", "testDrive", "actualizacionRegistros"],
+    modules: ["usuarios", "configuracion", "links", "testDrive", "actualizacionRegistros"],
   },
   {
     title: "Calidad",

@@ -71,6 +71,7 @@ La logica vigente es:
 - `pendientesTurnar`
 - `usuarios`
 - `configuracion`
+- `links`
 - `testDrive`
 - `registroTestDriveConvencional`
 - `registroTestDrive`
@@ -445,6 +446,17 @@ Estado: definido
   - todos
 - Modulos que puede operar:
   - todos
+
+## Acceso especifico del modulo `links`
+
+- Módulo asociado: `links`
+- Sección visible en UI: `Sistema`
+- Ruta principal: `/sistema/links`
+- Reglas vigentes:
+  - cualquier usuario con `modules.links = 1` puede consultar, crear, editar y eliminar links compartidos
+  - el acceso a menú, URL y endpoints depende exclusivamente del módulo
+  - el rol no restringe acciones dentro del módulo
+  - `superAdmin` puede acceder y operar siempre aunque no tenga el módulo activo
 
 ## Acceso especifico del modulo `testDrive`
 - Modulo asociado: `testDrive`

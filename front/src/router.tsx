@@ -32,6 +32,7 @@ const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracio
 const EditConfiguracionBelgranoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionBelgranoView"));
 const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/UnidadesNegocioView"));
 const ColoresUnidadesView = lazy(() => import("./views/admin/configuracion/ColoresUnidadesView"));
+const LinksView = lazy(() => import("./views/admin/links/LinksView"));
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
 const CrearUsuarioView = lazy(() => import("./views/admin/usuarios/CrearUsuarioView"));
@@ -207,6 +208,12 @@ export default function Router() {
               <Route path={paths.admin.configuracionHotAlert} element={<ConfiguracionHotAlertView />} />
               <Route path={paths.admin.configuracionDashboardSalon} element={<ConfiguracionDashboardSalonView />} />
               <Route path={paths.admin.configuracionDashboardAdministracion} element={<ConfiguracionDashboardAdministracionView />} />
+            </Route>
+          </Route>
+
+          <Route element={<ModuleProtectedRoute allowedModules={["links"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path={paths.admin.links} element={<LinksView />} />
             </Route>
           </Route>
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-05
+
+- **Links:** se incorporó el módulo independiente `links` en Sistema, con ruta protegida `/sistema/links` y habilitación desde usuarios.
+- **Links:** se agregó el CRUD Mongo de URL y descripción, con alta y edición en diálogo, eliminación confirmada, copiado compatible con HTTP interno y apertura segura de enlaces.
+
 ## 2026-11-03
 
 - **Saldo de operación:** el árbol de Análisis de no canceladas ahora permite abrir desde cualquier nodo un detalle ancho con todas las operaciones Mongo que integran el indicador, respetando período y jerarquía activa.

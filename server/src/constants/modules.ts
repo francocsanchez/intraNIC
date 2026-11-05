@@ -40,6 +40,7 @@ export const moduleKeys = [
   "pendientesTurnar",
   "usuarios",
   "configuracion",
+  "links",
   "testDrive",
   "registroTestDriveConvencional",
   "registroTestDrive",

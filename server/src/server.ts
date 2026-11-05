@@ -45,6 +45,7 @@ import kintoMatafuegosRoutes from "./routes/kintoMatafuegosRoutes";
 import kintoMultasRoutes from "./routes/kintoMultasRoutes";
 import kintoDashboardRoutes from "./routes/kintoDashboardRoutes";
 import kintoNpsShareRoutes from "./routes/kintoNpsShareRoutes";
+import linksRoutes from "./routes/linksRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -59,6 +60,7 @@ app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 app.use("/api/health", healthRoutes);
 app.use("/api/config", configRoutes);
+app.use("/api/links", linksRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/dms/convencional", convencionalRoutes);
 app.use("/api/dms/usados", usadosRoutes);

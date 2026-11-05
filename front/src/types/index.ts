@@ -7,6 +7,21 @@ const modulesSchema = z.object(
   ) as Record<string, z.ZodTypeAny>,
 );
 
+export const linkSchema = z.object({
+  _id: z.string(),
+  url: z.string(),
+  descripcion: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const linksListResponseSchema = z.object({ data: z.array(linkSchema) });
+export const linkResponseSchema = z.object({ message: z.string(), data: linkSchema });
+export const linkDeleteResponseSchema = z.object({ message: z.string() });
+export type LinkItem = z.infer<typeof linkSchema>;
+export type LinksListResponse = z.infer<typeof linksListResponseSchema>;
+export type LinkResponse = z.infer<typeof linkResponseSchema>;
+
 //**************************** */
 // STOCK DISPONIBE - GUARDADO
 //**************************** */

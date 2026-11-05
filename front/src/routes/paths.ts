@@ -28,6 +28,7 @@ export const paths = {
     editarUsuarioRoute: "/sistema/usuarios/:idUsuario/editar",
     editarUsuario: (idUsuario: string) => `/sistema/usuarios/${idUsuario}/editar`,
     configuracion: "/sistema/configuracion",
+    links: "/sistema/links",
     unidadesNegocio: "/sistema/configuracion/unidades-negocio",
     configuracionEnvioAgenda: "/sistema/configuracion/envio-agenda",
     configuracionHotAlert: "/sistema/configuracion/hot-alert",
