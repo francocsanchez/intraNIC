@@ -89,3 +89,20 @@ INNER JOIN marca ON
 WHERE
 	stoauto.sa_estado NOT IN (40, 35)
 `
+
+export const unidadLiessPorInternoQuery = () => `
+SELECT TOP 1
+  stoauto.sa_codigo AS "interno", marca.mar_nombre AS "marca", auto.au_nombre AS "version",
+  COALESCE(anexnvo.an_color, anexusa.aus_color, '') AS "color",
+  COALESCE(NULLIF(movnped.mnp_chasis, ''), NULLIF(anexnvo.an_chasis, ''), '') AS "chasis",
+  CASE WHEN stoauto.sa_tipo = 5 THEN anexnvo.an_anio ELSE anexusa.aus_anio END AS "anio",
+  CASE WHEN stoauto.sa_tipo = 10 THEN anexusa.aus_km ELSE NULL END AS "kilometrosBase"
+FROM stoauto
+INNER JOIN auto ON auto.au_codigo = stoauto.sa_auto AND auto.au_marca = stoauto.sa_marca
+INNER JOIN marca ON marca.mar_codigo = auto.au_marca
+LEFT JOIN movnped ON movnped.mnp_stoauto = stoauto.sa_codigo
+LEFT JOIN anexnvo ON anexnvo.an_stoauto = stoauto.sa_codigo AND anexnvo.an_tipo = stoauto.sa_tipo
+LEFT JOIN anexusa ON anexusa.aus_codigo = stoauto.sa_codigo AND anexusa.aus_tipo = stoauto.sa_tipo
+WHERE stoauto.sa_codigo = :interno AND stoauto.sa_tipo = :tipo
+ORDER BY movnped.mnp_fecrec DESC
+`;

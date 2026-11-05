@@ -1,0 +1,15 @@
+import api from "@/libs/axios";
+import { isAxiosError } from "axios";
+import { liessPresupuestoResponseSchema, liessPresupuestosResponseSchema, liessTallerResponseSchema, liessTalleresResponseSchema, liessUnidadReparacionResponseSchema, type LiessPresupuesto, type LiessTaller, type LiessUnidadReparacion } from "@/types/index";
+const error = (value: unknown, fallback: string) => isAxiosError(value) ? value.response?.data?.error || value.response?.data?.message || fallback : fallback;
+const read = async <T>(promise: Promise<{ data: unknown }>, schema: { parse: (data: unknown) => T }, fallback: string) => { try { return schema.parse((await promise).data); } catch (cause) { throw new Error(error(cause, fallback)); } };
+export type LiessPresupuestoPayload = { fechaPedido: string; interno: number; tipoUnidad: "nuevo" | "usado"; tallerId: string; kmInformados: number; costoArs: number; numeroPresupuesto: string; fechaIngresoTaller: string; fechaEgresoTaller?: string | null; prioridad: "Alta" | "Media" | "Baja"; valorInfo: number; porcentajeToma: number; detalle?: string; observaciones?: string };
+export type LiessPresupuestoEstadoPayload = { estado: "Pendiente" | "Aprobado" | "Rechazado"; fechaIngresoTaller: string; fechaEgresoTaller?: string | null };
+export const getLiessPresupuestos = () => read(api.get("/dms/liess/reparaciones/presupuestos"), liessPresupuestosResponseSchema, "No se pudieron cargar los presupuestos");
+export const getLiessTalleres = (all = false) => read(api.get("/dms/liess/reparaciones/talleres", { params: { incluirInactivos: all } }), liessTalleresResponseSchema, "No se pudieron cargar los talleres");
+export const getLiessUnidad = (interno: number, tipo: "nuevo" | "usado") => read(api.get(`/dms/liess/reparaciones/unidades/${interno}`, { params: { tipo } }), liessUnidadReparacionResponseSchema, "No se pudo buscar la unidad");
+export const saveLiessPresupuesto = (payload: LiessPresupuestoPayload) => read(api.post("/dms/liess/reparaciones/presupuestos", payload), liessPresupuestoResponseSchema, "No se pudo guardar el presupuesto");
+export const updateLiessPresupuestoEstado = (id: string, payload: LiessPresupuestoEstadoPayload) => read(api.patch(`/dms/liess/reparaciones/presupuestos/${id}`, payload), liessPresupuestoResponseSchema, "No se pudo actualizar el estado");
+export const saveLiessTaller = (payload: Pick<LiessTaller, "nombre" | "tipoTrabajo">, id?: string) => read(id ? api.patch(`/dms/liess/reparaciones/talleres/${id}`, payload) : api.post("/dms/liess/reparaciones/talleres", payload), liessTallerResponseSchema, "No se pudo guardar el taller");
+export const setLiessTallerActivo = (id: string, activo: boolean) => read(api.patch(`/dms/liess/reparaciones/talleres/${id}/activo`, { activo }), liessTallerResponseSchema, "No se pudo actualizar el taller");
+export type { LiessPresupuesto, LiessTaller, LiessUnidadReparacion };

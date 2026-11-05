@@ -1,0 +1,47 @@
+import type { Request, Response } from "express";
+import mongoose from "mongoose";
+import { QueryTypes } from "sequelize";
+import { sequelizeLIESS } from "../config/database";
+import LiessReparacionPresupuesto from "../models/LiessReparacionPresupuesto";
+import LiessTaller from "../models/LiessTaller";
+import { logError } from "../utils/logError";
+import { unidadLiessPorInternoQuery } from "./querys/liess.query";
+
+const dates = /^\d{4}-\d{2}-\d{2}$/;
+const text = (value: unknown) => typeof value === "string" ? value.trim() : "";
+const responseTaller = (item: any) => ({ _id: String(item._id), nombre: item.nombre, tipoTrabajo: item.tipoTrabajo, activo: item.activo !== false, createdAt: item.createdAt, updatedAt: item.updatedAt });
+const responseBudget = (item: any) => ({ _id: String(item._id), fechaPedido: item.fechaPedido, unidad: item.unidad, tallerId: String(item.taller), tallerNombre: item.tallerNombre, tallerTipoTrabajo: item.tallerTipoTrabajo, kmInformados: item.kmInformados, costoArs: item.costoArs, numeroPresupuesto: item.numeroPresupuesto, fechaIngresoTaller: item.fechaIngresoTaller, fechaEgresoTaller: item.fechaEgresoTaller ?? null, estado: item.estado ?? "Pendiente", prioridad: item.prioridad, valorInfo: item.valorInfo, porcentajeToma: item.porcentajeToma, valorIngreso: item.valorIngreso, diferencia: item.diferencia, detalle: item.detalle ?? "", observaciones: item.observaciones ?? "", createdAt: item.createdAt, updatedAt: item.updatedAt });
+
+async function unit(interno: unknown, tipoSeleccionado: unknown) {
+  const value = Number(interno);
+  const tipo = text(tipoSeleccionado).toLowerCase() === "nuevo" ? 5 : text(tipoSeleccionado).toLowerCase() === "usado" ? 10 : null;
+  if (!Number.isInteger(value) || value <= 0 || !tipo) return null;
+  const rows = await sequelizeLIESS.query<any>(unidadLiessPorInternoQuery(), { replacements: { interno: value, tipo }, type: QueryTypes.SELECT });
+  const row = rows[0];
+  return row ? { interno: Number(row.interno), tipo: tipo === 5 ? "nuevo" : "usado", marca: text(row.marca), version: text(row.version), color: text(row.color), chasis: text(row.chasis), anio: row.anio == null ? null : Number(row.anio), kilometrosBase: row.kilometrosBase == null ? null : Number(row.kilometrosBase) } : null;
+}
+
+async function validate(body: Record<string, unknown>) {
+  const fechaPedido = text(body.fechaPedido), fechaIngresoTaller = text(body.fechaIngresoTaller), fechaEgresoTaller = text(body.fechaEgresoTaller) || null;
+  const kmInformados = Number(body.kmInformados), costoArs = Number(body.costoArs), valorInfo = Number(body.valorInfo), porcentajeToma = Number(body.porcentajeToma);
+  if (!dates.test(fechaPedido) || !dates.test(fechaIngresoTaller) || (fechaEgresoTaller && !dates.test(fechaEgresoTaller))) return { error: "Las fechas ingresadas no son válidas" };
+  if (!Number.isInteger(kmInformados) || kmInformados < 0 || ![costoArs, valorInfo, porcentajeToma].every(Number.isFinite) || costoArs < 0 || valorInfo < 0 || porcentajeToma < 0 || porcentajeToma > 100) return { error: "Revisá KM, importes y porcentaje de toma" };
+  const numeroPresupuesto = text(body.numeroPresupuesto), prioridad = text(body.prioridad), tallerId = text(body.tallerId);
+  if (!numeroPresupuesto || !["Alta", "Media", "Baja"].includes(prioridad)) return { error: "Completá número de presupuesto y prioridad" };
+  if (!mongoose.Types.ObjectId.isValid(tallerId)) return { error: "Seleccioná un taller válido" };
+  const taller = await LiessTaller.findOne({ _id: tallerId, activo: true }).lean(); if (!taller) return { error: "El taller seleccionado no está disponible" };
+  const unidad = await unit(body.interno, body.tipoUnidad); if (!unidad) return { error: "No se encontró una unidad LIESS para ese interno y tipo seleccionado" };
+  const valorIngreso = Math.round(valorInfo * (1 - porcentajeToma / 100) * 100) / 100;
+  return { data: { fechaPedido, unidad, taller: new mongoose.Types.ObjectId(tallerId), tallerNombre: taller.nombre, tallerTipoTrabajo: taller.tipoTrabajo, kmInformados, costoArs, numeroPresupuesto, fechaIngresoTaller, fechaEgresoTaller, prioridad, valorInfo, porcentajeToma, valorIngreso, diferencia: Math.round((valorInfo - valorIngreso) * 100) / 100, detalle: text(body.detalle), observaciones: text(body.observaciones) } };
+}
+
+export class LiessReparacionesController {
+  static unidad = async (req: Request, res: Response) => { try { const data = await unit(req.params.interno, req.query.tipo); return data ? res.json({ data }) : res.status(404).json({ error: "No se encontró una unidad LIESS para ese interno y tipo seleccionado" }); } catch (error) { logError("LiessReparaciones.unidad"); console.error(error); return res.status(500).json({ message: "No se pudo buscar la unidad" }); } };
+  static listPresupuestos = async (_req: Request, res: Response) => { try { const data = await LiessReparacionPresupuesto.find().sort({ fechaPedido: -1, createdAt: -1 }).lean(); return res.json({ data: data.map(responseBudget) }); } catch (error) { logError("LiessReparaciones.list"); console.error(error); return res.status(500).json({ message: "No se pudieron cargar los presupuestos" }); } };
+  static createPresupuesto = async (req: Request, res: Response) => { try { const checked = await validate(req.body ?? {}); if ("error" in checked) return res.status(400).json({ error: checked.error }); const item = await LiessReparacionPresupuesto.create(checked.data); return res.status(201).json({ message: "Presupuesto generado correctamente", data: responseBudget(item) }); } catch (error) { logError("LiessReparaciones.create"); console.error(error); return res.status(500).json({ message: "No se pudo generar el presupuesto" }); } };
+  static updatePresupuesto = async (req: Request, res: Response) => { const id = text(req.params.id), estado = text(req.body?.estado), fechaIngresoTaller = text(req.body?.fechaIngresoTaller), fechaEgresoTaller = text(req.body?.fechaEgresoTaller) || null; if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "El presupuesto no es válido" }); if (!["Pendiente", "Aprobado", "Rechazado"].includes(estado)) return res.status(400).json({ error: "Seleccioná un estado válido" }); if (estado !== "Rechazado" && (!dates.test(fechaIngresoTaller) || (fechaEgresoTaller && !dates.test(fechaEgresoTaller)))) return res.status(400).json({ error: "Las fechas ingresadas no son válidas" }); try { const current = await LiessReparacionPresupuesto.findById(id); if (!current) return res.status(404).json({ error: "Presupuesto no encontrado" }); current.estado = estado as "Pendiente" | "Aprobado" | "Rechazado"; if (estado !== "Rechazado") { current.fechaIngresoTaller = fechaIngresoTaller; current.fechaEgresoTaller = fechaEgresoTaller; } await current.save(); return res.json({ message: "Estado actualizado correctamente", data: responseBudget(current) }); } catch (error) { logError("LiessReparaciones.update"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar el estado" }); } };
+  static listTalleres = async (req: Request, res: Response) => { try { const data = await LiessTaller.find(req.query.incluirInactivos === "true" ? {} : { activo: true }).sort({ activo: -1, nombre: 1 }).lean(); return res.json({ data: data.map(responseTaller) }); } catch (error) { logError("LiessReparaciones.talleres"); console.error(error); return res.status(500).json({ message: "No se pudieron cargar los talleres" }); } };
+  static createTaller = async (req: Request, res: Response) => { const nombre = text(req.body?.nombre), tipoTrabajo = text(req.body?.tipoTrabajo); if (!nombre || !tipoTrabajo) return res.status(400).json({ error: "Nombre y tipo de trabajo son obligatorios" }); try { const item = await LiessTaller.create({ nombre, tipoTrabajo }); return res.status(201).json({ message: "Taller creado correctamente", data: responseTaller(item) }); } catch (error) { logError("LiessReparaciones.createTaller"); console.error(error); return res.status(500).json({ message: "No se pudo crear el taller" }); } };
+  static updateTaller = async (req: Request, res: Response) => { const id = text(req.params.id), nombre = text(req.body?.nombre), tipoTrabajo = text(req.body?.tipoTrabajo); if (!mongoose.Types.ObjectId.isValid(id) || !nombre || !tipoTrabajo) return res.status(400).json({ error: "Datos de taller inválidos" }); try { const item = await LiessTaller.findByIdAndUpdate(id, { nombre, tipoTrabajo }, { new: true }); return item ? res.json({ message: "Taller actualizado correctamente", data: responseTaller(item) }) : res.status(404).json({ error: "Taller no encontrado" }); } catch (error) { logError("LiessReparaciones.updateTaller"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar el taller" }); } };
+  static updateTallerActivo = async (req: Request, res: Response) => { const id = text(req.params.id), activo = req.body?.activo; if (!mongoose.Types.ObjectId.isValid(id) || typeof activo !== "boolean") return res.status(400).json({ error: "Estado de taller inválido" }); try { const item = await LiessTaller.findByIdAndUpdate(id, { activo }, { new: true }); return item ? res.json({ message: activo ? "Taller reactivado correctamente" : "Taller desactivado correctamente", data: responseTaller(item) }) : res.status(404).json({ error: "Taller no encontrado" }); } catch (error) { logError("LiessReparaciones.tallerActivo"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar el taller" }); } };
+}

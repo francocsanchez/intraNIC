@@ -2,8 +2,21 @@
 
 ## 2026-11-05
 
+- **LIESS · Reparaciones:** los presupuestos ahora nacen en estado Pendiente y, tras su alta, se gestionan desde la acción de cambio de estado (Pendiente, Aprobado o Rechazado) en lugar de editarse integralmente. El rechazo bloquea las fechas de ingreso y egreso; el diálogo incorpora un Resumen con estado, días de reparación y valor.
 - **Links:** se incorporó el módulo independiente `links` en Sistema, con ruta protegida `/sistema/links` y habilitación desde usuarios.
 - **Links:** se agregó el CRUD Mongo de URL y descripción, con alta y edición en diálogo, eliminación confirmada, copiado compatible con HTTP interno y apertura segura de enlaces.
+
+## 2026-11-04
+
+- **LIESS · Reparaciones:** se incorporó el módulo protegido `/stock/liess/reparaciones`, con listado, alta y edición de presupuestos vinculados a cualquier interno LIESS, fecha de egreso y cálculos automáticos de toma.
+- **LIESS · Reparaciones:** se agregó la administración de talleres con alta, edición, desactivación y reactivación, sin eliminación física.
+- **LIESS · Reparaciones:** el botón de alta o edición de talleres ahora ocupa el mismo ancho que los campos del formulario.
+- **LIESS · Reparaciones:** la búsqueda de interno se compactó en un botón cuadrado con ícono de lupa.
+- **LIESS · Reparaciones:** Costo ARS se resalta y aparece una alerta roja integrada al formulario si supera la Diferencia calculada.
+- **LIESS · Reparaciones:** la búsqueda de internos ahora permite elegir Nuevo o Usado para resolver correctamente los códigos de cada stock.
+- **LIESS · Reparaciones:** la fecha de egreso se quitó del alta inicial y queda disponible únicamente al editar un presupuesto existente.
+- **LIESS · Reparaciones:** Costo ARS ahora se carga con máscara de pesos y separador de miles.
+- **LIESS:** se creó su sección propia en Inicio y en la administración de módulos; el acceso existente a Nuevos conserva la ruta `/stock/liess/nuevos` y el permiso `liess`.
 
 ## 2026-11-03
 

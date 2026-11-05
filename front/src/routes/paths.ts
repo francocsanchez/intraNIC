@@ -164,5 +164,6 @@ export const paths = {
   liess: {
     stockDisponibleRoute: "/stock/liess/:tipo",
     stockDisponible: (tipo: string) => `/stock/liess/${tipo}`,
+    reparaciones: "/stock/liess/reparaciones",
   },
 };

@@ -4,6 +4,7 @@ export const moduleKeys = [
   "usados",
   "belgrano",
   "liess",
+  "liessReparaciones",
   "preventas",
   "proformas",
   "reventaPendientes",
@@ -64,6 +65,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   usados: "Usados",
   belgrano: "Belgrano",
   liess: "Liess",
+  liessReparaciones: "Reparaciones",
   preventas: "Preventas",
   proformas: "Proformas",
   reventaPendientes: "Reventa pendientes",
@@ -121,7 +123,11 @@ export const moduleSections: Array<{
 }> = [
   {
     title: "Stock de unidades",
-    modules: ["convencional", "valorizacion", "usados", "belgrano", "liess"],
+    modules: ["convencional", "valorizacion", "usados", "belgrano"],
+  },
+  {
+    title: "LIESS",
+    modules: ["liess", "liessReparaciones"],
   },
   {
     title: "Comercial",

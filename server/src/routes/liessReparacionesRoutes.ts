@@ -1,0 +1,15 @@
+import { Router } from "express";
+import { LiessReparacionesController } from "../controllers/LiessReparacionesController";
+import { authenticate } from "../middleware/authenticate";
+import { authorizeModules } from "../middleware/authorizeModules";
+const router = Router();
+router.use(authenticate, authorizeModules("liessReparaciones"));
+router.get("/unidades/:interno", LiessReparacionesController.unidad);
+router.get("/presupuestos", LiessReparacionesController.listPresupuestos);
+router.post("/presupuestos", LiessReparacionesController.createPresupuesto);
+router.patch("/presupuestos/:id", LiessReparacionesController.updatePresupuesto);
+router.get("/talleres", LiessReparacionesController.listTalleres);
+router.post("/talleres", LiessReparacionesController.createTaller);
+router.patch("/talleres/:id", LiessReparacionesController.updateTaller);
+router.patch("/talleres/:id/activo", LiessReparacionesController.updateTallerActivo);
+export default router;

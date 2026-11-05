@@ -77,7 +77,14 @@ export default function Inicio() {
         { label: "Convencional", to: paths.convencional.stockDisponible, enabled: hasModulePathAccess(user, "convencional", paths.convencional.stockDisponible), icon: CarFront },
         { label: "Usados", to: paths.usados.stockDisponible, enabled: hasModulePathAccess(user, "usados", paths.usados.stockDisponible), icon: Car },
         { label: "Belgrano", to: paths.belgrano.stockDisponible, enabled: hasModulePathAccess(user, "belgrano", paths.belgrano.stockDisponible), icon: Package },
+      ],
+    },
+    {
+      title: "LIESS",
+      icon: Motorbike,
+      items: [
         { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
+        { label: "Reparaciones", to: paths.liess.reparaciones, enabled: hasModulePathAccess(user, "liessReparaciones", paths.liess.reparaciones), icon: Wrench },
       ],
     },
     {

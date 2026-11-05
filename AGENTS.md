@@ -6,6 +6,15 @@ No registrar en el router una vista cuyo archivo no esté versionado en el mismo
 
 Las vistas `/stock/convencional/disponible`, `/stock/usados/disponible` y `/stock/liess/nuevos` incluyen un buscador inmediato por modelo o color, combinado con sus filtros existentes y tolerante a mayúsculas, tildes y espacios.
 
+`LIESS · Reparaciones` vive en `/stock/liess/reparaciones`, usa el permiso independiente `liessReparaciones` y persiste exclusivamente en Mongo presupuestos de reparación y talleres. Busca por interno sobre todo el stock LIESS en SQL y almacena el snapshot de la unidad. Talleres se desactivan o reactivan, nunca se eliminan. Valor ingreso se calcula como `valor info × (1 - % toma / 100)` y diferencia como `valor info - valor ingreso`; ambos son de solo lectura.
+Los presupuestos de `LIESS · Reparaciones` se generan inicialmente como `Pendiente` y luego se gestionan exclusivamente desde cambiar estado (`Pendiente`, `Aprobado` o `Rechazado`), sin editar su carga original. Al seleccionar Rechazado se bloquean F. Ingreso y F. Egreso. El diálogo de gestión incluye un cuadro `Resumen` con estado, días entre egreso e ingreso y valor de la reparación.
+En el diálogo de Talleres de LIESS · Reparaciones, el botón de alta o edición ocupa todo el ancho de su columna para alinearse con Nombre y Tipo de trabajo.
+En el diálogo de presupuesto de LIESS · Reparaciones, la búsqueda por interno usa un botón cuadrado con ícono de lupa y etiqueta accesible.
+El diálogo muestra debajo de los valores una alerta roja fija y bordea Costo ARS cuando supera la Diferencia calculada, sin bloquear el guardado.
+La búsqueda de internos de LIESS · Reparaciones exige seleccionar Nuevo o Usado y resuelve el interno únicamente dentro del tipo de stock elegido.
+La fecha de egreso no se solicita al generar un presupuesto de LIESS · Reparaciones; se informa luego al editarlo.
+Costo ARS de LIESS · Reparaciones usa máscara de pesos argentinos con símbolo y separador de miles, conservando el importe numérico para cálculos.
+
 `Saldo de operacion` lee exclusivamente `saldo_operacion_snapshots` en Mongo; su sincronizador consulta SIAC cada dos minutos, de 07:00 a 20:00 (Buenos Aires), con última ejecución a las 20:00. Los endpoints del tablero nunca realizan SQL directo.
 La fecha de asignación de cada snapshot prioriza la última auditoría SIAC `Asignación Unidad` de `audittabla`; si no existe, utiliza `ope_fecasig`. Una reasignación reinicia así sus días y período de análisis.
 El sincronizador de `Saldo de operacion` elimina de Mongo los snapshots activos que SIAC devuelve sin fecha de asignación válida o que ya no aparecen como operaciones asignadas, para excluir operaciones que ya no poseen una unidad asignada ni saldo cobrable.
@@ -173,7 +182,7 @@ El backend no cuenta con un script de tests automatizados definido actualmente. 
 - Para nuevas vistas o componentes visuales, usar `shadcn/ui` desde `front/src/components/ui` y los tokens definidos en `front/src/index.css`. No migrar ni reemplazar estilos existentes salvo que la tarea lo solicite expresamente.
 - El sistema shadcn esta configurado para Vite en `front/components.json`; antes de agregar componentes con el CLI, verificar que se creen bajo `front/src/components/ui`.
 - Mantener la separacion por dominio funcional: por ejemplo, las entregas usan `front/src/views/entregas`, `front/src/components/entregas` y las rutas bajo `/api/entregas`.
-- Las rutas del frontend deben usar prefijos que representen la seccion funcional visible para el usuario: `Sistema` bajo `/sistema`, `Comercial` bajo `/comercial`, `Plan de ahorro` bajo `/plan-ahorro`, `Stock de unidades` bajo `/stock`, `Analisis` bajo `/analisis`, `Entregas` bajo `/entregas`, `Calidad` bajo `/calidad` y las secciones de gestion bajo `/gestion/...`.
+- Las rutas del frontend deben usar prefijos que representen la seccion funcional visible para el usuario: `Sistema` bajo `/sistema`, `Comercial` bajo `/comercial`, `Plan de ahorro` bajo `/plan-ahorro`, `Stock de unidades` bajo `/stock`, `LIESS` bajo `/stock/liess`, `Analisis` bajo `/analisis`, `Entregas` bajo `/entregas`, `Calidad` bajo `/calidad` y las secciones de gestion bajo `/gestion/...`.
 - Validar permisos tanto en el frontend como en el backend cuando una funcionalidad este restringida por rol, modulo o compania.
 - Conservar el estilo TypeScript y evitar cambios ajenos a la funcionalidad solicitada.
 

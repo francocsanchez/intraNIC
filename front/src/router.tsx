@@ -52,6 +52,7 @@ const StockReservasConvencional = lazy(() => import("./views/convencional/StockR
 const StockValorizacionConvencional = lazy(() => import("./views/convencional/StockValorizacionConvencional"));
 const StockValorizacionListaPreciosView = lazy(() => import("./views/convencional/StockValorizacionListaPreciosView"));
 const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
+const LiessReparacionesView = lazy(() => import("./views/liess/LiessReparacionesView"));
 const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
 const PrediccionAsignacionesView = lazy(() => import("./views/admin/siac/PrediccionAsignacionesView"));
 const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
@@ -573,9 +574,12 @@ export default function Router() {
             </Route>
           </Route>
 
-          <Route element={<ModuleProtectedRoute allowedModules={["liess"]} />}>
-            <Route element={<LiessLayout />}>
+          <Route element={<LiessLayout />}>
+            <Route element={<ModuleProtectedRoute allowedModules={["liess"]} />}>
                 <Route path={paths.liess.stockDisponibleRoute} element={<StockDisponibleLiess />} />
+            </Route>
+            <Route element={<ModuleProtectedRoute allowedModules={["liessReparaciones"]} />}>
+              <Route path={paths.liess.reparaciones} element={<LiessReparacionesView />} />
             </Route>
           </Route>
 
