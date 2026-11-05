@@ -22,6 +22,7 @@ export default function ConfiguracionDashboardSalonView() {
   const [anio, setAnio] = useState(String(today.getFullYear()));
   const [mes, setMes] = useState(String(today.getMonth() + 1));
   const [objetivoDraft, setObjetivoDraft] = useState<string | null>(null);
+  const [objetivoDiarioDraft, setObjetivoDiarioDraft] = useState<string | null>(null);
   const [objetivoTotalDraft, setObjetivoTotalDraft] = useState<string | null>(null);
   const [modeloImagen, setModeloImagen] = useState("");
   const [enlaceImagen, setEnlaceImagen] = useState("");
@@ -77,6 +78,7 @@ export default function ConfiguracionDashboardSalonView() {
 
   const updateScope = (update: () => void) => {
     setObjetivoDraft(null);
+    setObjetivoDiarioDraft(null);
     setObjetivoTotalDraft(null);
     update();
   };
@@ -100,6 +102,15 @@ export default function ConfiguracionDashboardSalonView() {
     saveMutation.mutate({ ...period, objetivoOperacionesTotales });
   };
 
+  const saveDaily = () => {
+    const objetivoOperacionesDiarias = Number(objetivoDiarioDraft ?? settingsQuery.data?.data.objetivoOperacionesDiarias ?? "");
+    if (!isScopeValid || !Number.isInteger(objetivoOperacionesDiarias) || objetivoOperacionesDiarias < 1) {
+      toast.error("Seleccioná una sucursal, período y objetivo diario válido.");
+      return;
+    }
+    saveMutation.mutate({ ...scope, objetivoOperacionesDiarias });
+  };
+
   const saveModelImage = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!modeloImagen.trim() || !enlaceImagen.trim()) {
@@ -120,14 +131,14 @@ export default function ConfiguracionDashboardSalonView() {
       <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Análisis</p>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Objetivo de vendedores</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Define la meta mensual por sucursal aplicada al Dashboard Salón.</p>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Objetivos Dashboard Salón</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Define las metas mensuales y el objetivo diario por sucursal.</p>
         </div>
         <Link to={paths.admin.configuracion} className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:bg-primary/90">Volver</Link>
       </section>
 
       <form onSubmit={save} className="rounded-lg border border-border bg-card p-3 shadow-sm">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
           <label className="text-sm font-semibold text-foreground">Sucursal SIAC
             <select value={sucursalCodigo} onChange={(event) => updateScope(() => setSucursalCodigo(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground">
               <option value="">Seleccionar sucursal</option>
@@ -145,14 +156,17 @@ export default function ConfiguracionDashboardSalonView() {
           <label className="text-sm font-semibold text-foreground">Objetivo de vendedores
             <input type="number" min="1" step="1" inputMode="numeric" disabled={!isScopeValid || settingsQuery.isLoading} value={objetivoDraft ?? (settingsQuery.data?.data.objetivoVendedores ? String(settingsQuery.data.data.objetivoVendedores) : "")} onChange={(event) => setObjetivoDraft(event.target.value)} placeholder="Ej. 15" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground disabled:cursor-not-allowed disabled:opacity-50" />
           </label>
+          <label className="text-sm font-semibold text-foreground">Objetivo diario de operaciones
+            <input type="number" min="1" step="1" inputMode="numeric" disabled={!isScopeValid || settingsQuery.isLoading} value={objetivoDiarioDraft ?? (settingsQuery.data?.data.objetivoOperacionesDiarias ? String(settingsQuery.data.data.objetivoOperacionesDiarias) : "")} onChange={(event) => setObjetivoDiarioDraft(event.target.value)} placeholder="Ej. 17" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground disabled:cursor-not-allowed disabled:opacity-50" />
+          </label>
           <label className="text-sm font-semibold text-foreground">Objetivo operaciones totales
             <input type="number" min="1" step="1" inputMode="numeric" disabled={!isPeriodValid || totalSettingsQuery.isLoading} value={objetivoTotalDraft ?? (totalSettingsQuery.data?.data.objetivoOperacionesTotales ? String(totalSettingsQuery.data.data.objetivoOperacionesTotales) : "")} onChange={(event) => setObjetivoTotalDraft(event.target.value)} placeholder="Ej. 200" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground disabled:cursor-not-allowed disabled:opacity-50" />
           </label>
         </div>
         {sucursalesQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudieron cargar las sucursales SIAC.</p> : null}
         {settingsQuery.isError || totalSettingsQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudo cargar el objetivo del período seleccionado.</p> : null}
-        <p className="mt-3 text-sm text-muted-foreground">Vendedores: verde al alcanzar, amarillo desde el 70% y rojo por debajo. Operaciones totales: el velocímetro pasa a rojo al alcanzar la meta.</p>
-        <div className="mt-3 flex flex-wrap gap-2"><ActionButton type="submit" disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveMutation.isPending ? "Guardando..." : "Guardar objetivo vendedores"}</ActionButton><ActionButton type="button" onClick={saveTotal} disabled={!isPeriodValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo total</ActionButton></div>
+        <p className="mt-3 text-sm text-muted-foreground">Vendedores: verde al alcanzar, amarillo desde el 70% y rojo por debajo. El objetivo diario se aplica a todos los días hábiles del período.</p>
+        <div className="mt-3 flex flex-wrap gap-2"><ActionButton type="submit" disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveMutation.isPending ? "Guardando..." : "Guardar objetivo vendedores"}</ActionButton><ActionButton type="button" onClick={saveDaily} disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo diario</ActionButton><ActionButton type="button" onClick={saveTotal} disabled={!isPeriodValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo total</ActionButton></div>
       </form>
 
       <section className="rounded-lg border border-border bg-card p-3 shadow-sm">

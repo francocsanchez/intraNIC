@@ -111,6 +111,7 @@ type DashboardSalonResponse = {
   totalOperacionesTodasSucursales: number;
   objetivoVendedores: number | null;
   objetivoOperacionesTotales: number | null;
+  objetivoOperacionesDiarias: number | null;
   vendedores: Array<{ codigo: number; nombre: string; total: number }>;
   usadosPorVendedor: Array<{ codigo: number; nombre: string; total: number }>;
   creditosPorVendedor: Array<{ codigo: number; nombre: string; total: number }>;
@@ -757,7 +758,7 @@ export class OperacionesDashboardService {
           replacements: { anios: [filters.anio], meses: [filters.mes] },
         },
       ),
-      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, imagenesModelosDashboardSalon: 1, imagenesVendedoresDashboardSalon: 1 }).lean(),
+      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, objetivosOperacionesDiariasDashboardSalon: 1, imagenesModelosDashboardSalon: 1, imagenesVendedoresDashboardSalon: 1 }).lean(),
       sequelizeNIC.query<DashboardSalonFinanciacionPorVendedorRow>(
         dashboardSalonFinanciacionPorVendedorQuery(),
         {
@@ -791,6 +792,15 @@ export class OperacionesDashboardService {
     const objetivoOperacionesTotales =
       Number.isFinite(objetivoOperacionesTotalesConfigurado) && objetivoOperacionesTotalesConfigurado > 0
         ? objetivoOperacionesTotalesConfigurado
+        : null;
+    const objetivoOperacionesDiariasConfigurado = Number(
+      config?.objetivosOperacionesDiariasDashboardSalon?.find(
+        (item) => item.sucursalCodigo === filters.sucursalCodigo && item.anio === filters.anio && item.mes === filters.mes,
+      )?.objetivo,
+    );
+    const objetivoOperacionesDiarias =
+      Number.isFinite(objetivoOperacionesDiariasConfigurado) && objetivoOperacionesDiariasConfigurado > 0
+        ? objetivoOperacionesDiariasConfigurado
         : null;
 
     const groupRows = (value: (row: OperacionDashboardRow) => string) => {
@@ -845,6 +855,7 @@ export class OperacionesDashboardService {
       totalOperacionesTodasSucursales: allBranchesRows.length,
       objetivoVendedores,
       objetivoOperacionesTotales,
+      objetivoOperacionesDiarias,
       vendedores: groupSellers(),
       usadosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadUsados),
       creditosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadCreditos),

@@ -218,6 +218,7 @@ export const dashboardSalonSettingsResponseSchema = z.object({
     mes: z.number().int().min(1).max(12),
     objetivoVendedores: z.number().int().positive().nullable(),
     objetivoOperacionesTotales: z.number().int().positive().nullable(),
+    objetivoOperacionesDiarias: z.number().int().positive().nullable(),
   }),
   message: z.string().optional(),
 });
@@ -1035,6 +1036,7 @@ export const dashboardSalonResponseSchema = z.object({
   totalOperacionesTodasSucursales: z.number(),
   objetivoVendedores: z.number().int().positive().nullable(),
   objetivoOperacionesTotales: z.number().int().positive().nullable(),
+  objetivoOperacionesDiarias: z.number().int().positive().nullable(),
   vendedores: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })),
   usadosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),
   creditosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),

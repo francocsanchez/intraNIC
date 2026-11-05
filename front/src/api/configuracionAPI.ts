@@ -106,6 +106,7 @@ export async function updateDashboardSalonSettings(
   payload: DashboardSalonSettingsScope & {
     objetivoVendedores?: number;
     objetivoOperacionesTotales?: number;
+    objetivoOperacionesDiarias?: number;
   },
 ) {
   const { data } = await api.put("/config/dashboard-salon", payload);

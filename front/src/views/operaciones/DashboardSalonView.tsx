@@ -14,6 +14,14 @@ const getCurrentPeriod = () => {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric" }).formatToParts(new Date());
   return { anio: Number(parts.find((part) => part.type === "year")?.value), mes: Number(parts.find((part) => part.type === "month")?.value) };
 };
+const getCurrentBuenosAiresDate = () => {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(new Date());
+  return {
+    anio: Number(parts.find((part) => part.type === "year")?.value),
+    mes: Number(parts.find((part) => part.type === "month")?.value),
+    dia: Number(parts.find((part) => part.type === "day")?.value),
+  };
+};
 
 // Tonos de negocio solicitados para el cumplimiento del objetivo mensual.
 const SALES_TARGET_COLORS = { achieved: "#bbf7d0", progress: "#fde68a", below: "#fecaca" };
@@ -139,12 +147,19 @@ function OperationsCounter({ title, total, modelos, totalOperaciones: _totalOper
   return <section className="relative min-h-0 overflow-hidden rounded-md border border-border bg-card"><h2 className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xl font-semibold text-foreground">{title}</h2>{modelos.length ? <><div className="h-full w-full"><EChart option={option} enableHoverEmphasis={false} /></div><div className="pointer-events-none absolute left-1/2 top-[56%] z-20 -translate-x-1/2 -translate-y-1/2"><span className="text-5xl font-bold leading-none text-foreground">{total}</span></div></> : <div className="flex h-full items-center justify-center"><p className="text-7xl font-bold leading-none text-foreground">{total}</p></div>}</section>;
 }
 
-function DailyOperationsTable({ items, anio, mes }: { items: DashboardSalonResponse["operacionesPorDia"]; anio: number; mes: number }) {
+function DailyOperationsTable({ items, anio, mes, objetivoDiario }: { items: DashboardSalonResponse["operacionesPorDia"]; anio: number; mes: number; objetivoDiario: number | null }) {
+  const today = getCurrentBuenosAiresDate();
   const diasHabiles = items.filter((item) => {
     const diaSemana = new Date(Date.UTC(anio, mes - 1, item.dia)).getUTCDay();
     return diaSemana !== 0 && diaSemana !== 6;
   });
-  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className="border-r border-border font-semibold text-foreground">{item.total || "-"}</span>])}</div></div></section>;
+  const getObjectiveClass = (item: DashboardSalonResponse["operacionesPorDia"][number]) => {
+    if (!objetivoDiario) return "";
+    const isFuture = anio > today.anio || (anio === today.anio && (mes > today.mes || (mes === today.mes && item.dia > today.dia)));
+    if (isFuture) return "";
+    return item.total >= objetivoDiario ? "bg-emerald-100 text-emerald-950" : "bg-red-100 text-red-950";
+  };
+  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => { const objectiveClass = getObjectiveClass(item); return [<span key={`dia-${item.dia}`} className={`border-b border-r border-border text-muted-foreground ${objectiveClass}`}>{item.dia}</span>, <span key={`total-${item.dia}`} className={`border-r border-border font-semibold text-foreground ${objectiveClass}`}>{item.total || "-"}</span>]; })}</div></div></section>;
 }
 
 export default function DashboardSalonView() {
@@ -169,7 +184,7 @@ export default function DashboardSalonView() {
   return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset">
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_74px_minmax(0,1fr)] gap-4 overflow-hidden">
       <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} sellerImages={data.imagenesVendedores} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
-      <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} />
+      <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} objetivoDiario={data.objetivoOperacionesDiarias} />
       <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
     </div>
   </main>;
