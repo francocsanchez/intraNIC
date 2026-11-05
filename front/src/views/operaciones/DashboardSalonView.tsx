@@ -6,7 +6,7 @@ import { getDashboardSalon } from "@/services/operacionesService";
 import type { DashboardSalonResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
-import { CarFront, ChevronLeft, ChevronRight, CreditCard, Star } from "lucide-react";
+import { CarFront, Check, ChevronLeft, ChevronRight, CreditCard, Star, X } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 
 const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -153,13 +153,13 @@ function DailyOperationsTable({ items, anio, mes, objetivoDiario }: { items: Das
     const diaSemana = new Date(Date.UTC(anio, mes - 1, item.dia)).getUTCDay();
     return diaSemana !== 0 && diaSemana !== 6;
   });
-  const getObjectiveClass = (item: DashboardSalonResponse["operacionesPorDia"][number]) => {
-    if (!objetivoDiario) return "";
+  const getObjectiveStatus = (item: DashboardSalonResponse["operacionesPorDia"][number]) => {
+    if (!objetivoDiario) return null;
     const isFuture = anio > today.anio || (anio === today.anio && (mes > today.mes || (mes === today.mes && item.dia > today.dia)));
-    if (isFuture) return "";
-    return item.total >= objetivoDiario ? "bg-emerald-100 text-emerald-950" : "bg-red-100 text-red-950";
+    if (isFuture) return null;
+    return item.total >= objetivoDiario;
   };
-  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => { const objectiveClass = getObjectiveClass(item); return [<span key={`dia-${item.dia}`} className={`border-b border-r border-border text-muted-foreground ${objectiveClass}`}>{item.dia}</span>, <span key={`total-${item.dia}`} className={`border-r border-border font-semibold text-foreground ${objectiveClass}`}>{item.total || "-"}</span>]; })}</div></div></section>;
+  return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => { const objectiveStatus = getObjectiveStatus(item); const StatusIcon = objectiveStatus === null ? null : objectiveStatus ? Check : X; const statusLabel = objectiveStatus === null ? undefined : objectiveStatus ? "Objetivo diario cumplido" : "Objetivo diario no cumplido"; const statusClass = objectiveStatus ? "text-emerald-600" : "text-red-600"; const statusCellClass = objectiveStatus === null ? "" : objectiveStatus ? "bg-emerald-100" : "bg-red-100"; return [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className={`flex items-center justify-center gap-1 border-r border-border font-semibold text-foreground ${statusCellClass}`}>{item.total || "-"}{StatusIcon ? <StatusIcon size={12} className={statusClass} aria-label={statusLabel} role="img" /> : null}</span>]; })}</div></div></section>;
 }
 
 export default function DashboardSalonView() {

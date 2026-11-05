@@ -2,7 +2,7 @@
 
 ## 2026-11-05
 
-- **Dashboard Salón:** se agregó un objetivo único diario de operaciones por sucursal y período; la tabla diaria ahora colorea cada columna hábil en verde al alcanzar la meta y rojo al no hacerlo, dejando neutros los días futuros y los períodos sin objetivo.
+- **Dashboard Salón:** se agregó un objetivo único diario de operaciones por sucursal y período; la tabla diaria indica el cumplimiento con un check verde o una cruz roja y colorea la celda del total, dejando sin indicador los días futuros y los períodos sin objetivo.
 - **Stock LIESS · Nuevos y Usados:** las tablas por marca ahora comparten anchos de columna fijos para conservar alineados los datos y encabezados entre grupos.
 - **Dashboard Salón:** debajo de la tabla inferior de vendedores se muestran avatares sin borde, rótulo ni líneas de celda, con foto por código SIAC o iniciales como fallback; la gestión de enlaces HTTP(S) para cada vendedor activo se trasladó a su pantalla propia de Configuración.
 - **Links:** se corrigió la lectura transitoria sin respuesta de la consulta de links para que el build estricto de frontend en Docker compile correctamente.
