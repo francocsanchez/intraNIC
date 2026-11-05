@@ -232,6 +232,16 @@ export const dashboardSalonModelImagesResponseSchema = z.object({
   message: z.string().optional(),
 });
 
+export const dashboardSalonSellerImageSchema = z.object({
+  vendedorCodigo: z.number().int().positive(),
+  imageUrl: z.string().min(1),
+});
+
+export const dashboardSalonSellerImagesResponseSchema = z.object({
+  data: z.array(dashboardSalonSellerImageSchema),
+  message: z.string().optional(),
+});
+
 //**************************** */
 // USUARIOS
 //**************************** */
@@ -1025,12 +1035,13 @@ export const dashboardSalonResponseSchema = z.object({
   totalOperacionesTodasSucursales: z.number(),
   objetivoVendedores: z.number().int().positive().nullable(),
   objetivoOperacionesTotales: z.number().int().positive().nullable(),
-  vendedores: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
-  usadosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
-  creditosPorVendedor: z.array(analisisOperacionesPreventaMovilResumenItemSchema).default([]),
+  vendedores: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })),
+  usadosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),
+  creditosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),
   modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
   operacionesPorDia: z.array(z.object({ dia: z.number().int().min(1).max(31), total: z.number().int().nonnegative() })).default([]),
   imagenesModelos: z.array(dashboardSalonModelImageSchema).default([]),
+  imagenesVendedores: z.array(dashboardSalonSellerImageSchema).default([]),
 });
 
 export type DashboardSalonResponse = z.infer<typeof dashboardSalonResponseSchema>;

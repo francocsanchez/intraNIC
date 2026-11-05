@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-
 export default function ConfiguracionView() {
   const { user } = useAuth();
   const {
@@ -351,6 +350,19 @@ export default function ConfiguracionView() {
               <p className="mt-1 text-sm text-muted-foreground">Define objetivos mensuales e imágenes por modelo para el Dashboard Salón.</p>
             </div>
             <Link to={paths.admin.configuracionDashboardSalon} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Configurar Dashboard</Link>
+          </div>
+        </section>
+      ) : null}
+
+      {canManageDashboardSalon ? (
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Análisis</p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Fotos de vendedores</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Administra las fotos que se muestran debajo del ranking de vendedores del Dashboard Salón.</p>
+            </div>
+            <Link to={paths.admin.configuracionFotosVendedores} className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted">Administrar fotos</Link>
           </div>
         </section>
       ) : null}

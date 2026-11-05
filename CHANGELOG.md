@@ -2,6 +2,8 @@
 
 ## 2026-11-05
 
+- **Stock LIESS · Nuevos y Usados:** las tablas por marca ahora comparten anchos de columna fijos para conservar alineados los datos y encabezados entre grupos.
+- **Dashboard Salón:** debajo de la tabla inferior de vendedores se muestran avatares sin borde, rótulo ni líneas de celda, con foto por código SIAC o iniciales como fallback; la gestión de enlaces HTTP(S) para cada vendedor activo se trasladó a su pantalla propia de Configuración.
 - **Links:** se corrigió la lectura transitoria sin respuesta de la consulta de links para que el build estricto de frontend en Docker compile correctamente.
 - **LIESS · Reparaciones:** los presupuestos ahora nacen en estado Pendiente y, tras su alta, se gestionan desde la acción de cambio de estado (Pendiente, Aprobado o Rechazado) en lugar de editarse integralmente. El rechazo bloquea las fechas de ingreso y egreso; el diálogo incorpora un Resumen con estado, días de reparación y valor.
 - **Links:** se incorporó el módulo independiente `links` en Sistema, con ruta protegida `/sistema/links` y habilitación desde usuarios.

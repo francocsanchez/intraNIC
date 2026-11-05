@@ -19,6 +19,11 @@ const normalizeDashboardSalonImageUrl = (value: unknown) => {
   }
 };
 
+const normalizeDashboardSalonSellerCode = (value: unknown) => {
+  const sellerCode = Number(value);
+  return Number.isInteger(sellerCode) && sellerCode > 0 ? sellerCode : null;
+};
+
 export class ConfigController {
   static getDashboardAdministracionCobranzasSettings = async (req: Request, res: Response) => {
     const anio = Number(req.query.anio);
@@ -130,6 +135,65 @@ export class ConfigController {
       logError("ConfigController.deleteDashboardSalonModelImage");
       console.error(error);
       return res.status(500).json({ message: "No se pudo eliminar el enlace de la imagen del modelo" });
+    }
+  };
+
+  static listDashboardSalonSellerImages = async (_req: Request, res: Response) => {
+    try {
+      const config = await Configuration.findOne({}, { imagenesVendedoresDashboardSalon: 1 }).lean();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      return res.status(200).json({
+        data: (config.imagenesVendedoresDashboardSalon ?? []).map((item) => ({
+          vendedorCodigo: item.vendedorCodigo,
+          imageUrl: item.imagePath,
+        })),
+        message: "Imágenes de vendedores listadas",
+      });
+    } catch (error) {
+      logError("ConfigController.listDashboardSalonSellerImages");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudieron listar las imágenes de vendedores." });
+    }
+  };
+
+  static saveDashboardSalonSellerImage = async (req: Request, res: Response) => {
+    const vendedorCodigo = normalizeDashboardSalonSellerCode(req.body?.vendedorCodigo);
+    const imageUrl = normalizeDashboardSalonImageUrl(req.body?.imageUrl);
+    if (!vendedorCodigo || !imageUrl) return res.status(400).json({ message: "Debes indicar un vendedor y un enlace HTTP(S) válido para la imagen." });
+
+    try {
+      const config = await Configuration.findOne();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      config.imagenesVendedoresDashboardSalon = (config.imagenesVendedoresDashboardSalon ?? []).filter(
+        (item) => item.vendedorCodigo !== vendedorCodigo,
+      );
+      config.imagenesVendedoresDashboardSalon.push({ vendedorCodigo, imagePath: imageUrl });
+      await config.save();
+      return res.status(200).json({ data: { vendedorCodigo, imageUrl }, message: "Imagen de vendedor actualizada correctamente" });
+    } catch (error) {
+      logError("ConfigController.saveDashboardSalonSellerImage");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudo guardar el enlace de la imagen del vendedor." });
+    }
+  };
+
+  static deleteDashboardSalonSellerImage = async (req: Request, res: Response) => {
+    const vendedorCodigo = normalizeDashboardSalonSellerCode(req.params.vendedorCodigo);
+    if (!vendedorCodigo) return res.status(400).json({ message: "Debes indicar un vendedor válido." });
+    try {
+      const config = await Configuration.findOne();
+      if (!config) return res.status(404).json({ message: "No existe configuración inicial." });
+      const images = config.imagenesVendedoresDashboardSalon ?? [];
+      if (!images.some((item) => item.vendedorCodigo === vendedorCodigo)) {
+        return res.status(404).json({ message: "No existe una imagen configurada para ese vendedor." });
+      }
+      config.imagenesVendedoresDashboardSalon = images.filter((item) => item.vendedorCodigo !== vendedorCodigo);
+      await config.save();
+      return res.status(200).json({ message: "Imagen de vendedor eliminada correctamente" });
+    } catch (error) {
+      logError("ConfigController.deleteDashboardSalonSellerImage");
+      console.error(error);
+      return res.status(500).json({ message: "No se pudo eliminar la imagen del vendedor." });
     }
   };
 

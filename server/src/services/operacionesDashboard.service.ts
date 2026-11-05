@@ -111,12 +111,13 @@ type DashboardSalonResponse = {
   totalOperacionesTodasSucursales: number;
   objetivoVendedores: number | null;
   objetivoOperacionesTotales: number | null;
-  vendedores: AnalisisOperacionesPreventaMovilResumenItem[];
-  usadosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
-  creditosPorVendedor: AnalisisOperacionesPreventaMovilResumenItem[];
+  vendedores: Array<{ codigo: number; nombre: string; total: number }>;
+  usadosPorVendedor: Array<{ codigo: number; nombre: string; total: number }>;
+  creditosPorVendedor: Array<{ codigo: number; nombre: string; total: number }>;
   modelos: AnalisisOperacionesPreventaMovilResumenItem[];
   operacionesPorDia: Array<{ dia: number; total: number }>;
   imagenesModelos: Array<{ modelo: string; imageUrl: string }>;
+  imagenesVendedores: Array<{ vendedorCodigo: number; imageUrl: string }>;
 };
 
 type AnalisisVendedorFilters = {
@@ -214,6 +215,7 @@ type AnalisisVendedorDescuentoMensualRow = {
 type OperacionDashboardRow = {
   codigoOperacion: number;
   fechaAsignacion: string | Date;
+  vendedorCodigo: number | string | null;
   vendedorNombre: string;
   sucursalNombre: string;
   modeloNombre: string;
@@ -223,6 +225,7 @@ type OperacionDashboardRow = {
 };
 
 type DashboardSalonFinanciacionPorVendedorRow = {
+  vendedorCodigo: number | string | null;
   vendedorNombre: string | null;
   cantidadUsados: number | string | null;
   cantidadCreditos: number | string | null;
@@ -754,7 +757,7 @@ export class OperacionesDashboardService {
           replacements: { anios: [filters.anio], meses: [filters.mes] },
         },
       ),
-      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, imagenesModelosDashboardSalon: 1 }).lean(),
+      Configuration.findOne({}, { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, imagenesModelosDashboardSalon: 1, imagenesVendedoresDashboardSalon: 1 }).lean(),
       sequelizeNIC.query<DashboardSalonFinanciacionPorVendedorRow>(
         dashboardSalonFinanciacionPorVendedorQuery(),
         {
@@ -799,12 +802,24 @@ export class OperacionesDashboardService {
       return Array.from(totals, ([nombre, total]) => ({ nombre, total }))
         .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
     };
+    const groupSellers = () => {
+      const totals = new Map<number, { codigo: number; nombre: string; total: number }>();
+      rows.forEach((row) => {
+        const codigo = normalizeNullableNumber(row.vendedorCodigo) ?? 0;
+        const nombre = normalizeNullableString(row.vendedorNombre) ?? "SIN DATOS";
+        const current = totals.get(codigo);
+        if (current) current.total += 1;
+        else totals.set(codigo, { codigo, nombre, total: 1 });
+      });
+      return Array.from(totals.values()).sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+    };
 
     const groupFinanciacionPorVendedor = (
       value: (row: DashboardSalonFinanciacionPorVendedorRow) => number | string | null,
     ) =>
       financiacionRows
         .map((row) => ({
+          codigo: normalizeNullableNumber(row.vendedorCodigo) ?? 0,
           nombre: normalizeNullableString(row.vendedorNombre) ?? "SIN DATOS",
           total: normalizeNullableNumber(value(row)) ?? 0,
         }))
@@ -830,13 +845,17 @@ export class OperacionesDashboardService {
       totalOperacionesTodasSucursales: allBranchesRows.length,
       objetivoVendedores,
       objetivoOperacionesTotales,
-      vendedores: groupRows((row) => row.vendedorNombre),
+      vendedores: groupSellers(),
       usadosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadUsados),
       creditosPorVendedor: groupFinanciacionPorVendedor((row) => row.cantidadCreditos),
       modelos: groupRows((row) => row.modeloNombre),
       operacionesPorDia,
       imagenesModelos: (config?.imagenesModelosDashboardSalon ?? []).map((item) => ({
         modelo: item.modelo,
+        imageUrl: item.imagePath,
+      })),
+      imagenesVendedores: (config?.imagenesVendedoresDashboardSalon ?? []).map((item) => ({
+        vendedorCodigo: item.vendedorCodigo,
         imageUrl: item.imagePath,
       })),
     };

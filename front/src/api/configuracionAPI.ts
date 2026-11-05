@@ -4,6 +4,7 @@ import {
   configuracionResponseSchema,
   dashboardSalonSettingsResponseSchema,
   dashboardSalonModelImagesResponseSchema,
+  dashboardSalonSellerImagesResponseSchema,
   dashboardAdministracionCobranzasSettingsResponseSchema,
 } from "../types";
 
@@ -132,6 +133,27 @@ export async function saveDashboardSalonModelImage(payload: { modelo: string; im
 export async function deleteDashboardSalonModelImage(modelo: string) {
   const { data } = await api.delete(`/config/dashboard-salon/modelos/${encodeURIComponent(modelo)}`);
   const response = dashboardSalonModelImagesResponseSchema.pick({ message: true }).safeParse(data);
+  if (!response.success) throw new Error("La respuesta de eliminación de la imagen es inválida");
+  return response.data;
+}
+
+export async function getDashboardSalonSellerImages() {
+  const { data } = await api.get("/config/dashboard-salon/vendedores");
+  const response = dashboardSalonSellerImagesResponseSchema.safeParse(data);
+  if (!response.success) throw new Error("La estructura de las imágenes de vendedores es inválida");
+  return response.data;
+}
+
+export async function saveDashboardSalonSellerImage(payload: { vendedorCodigo: number; imageUrl: string }) {
+  const { data } = await api.post("/config/dashboard-salon/vendedores", payload);
+  const response = dashboardSalonSellerImagesResponseSchema.pick({ message: true }).safeParse(data);
+  if (!response.success) throw new Error("La respuesta de la imagen de vendedor es inválida");
+  return response.data;
+}
+
+export async function deleteDashboardSalonSellerImage(vendedorCodigo: number) {
+  const { data } = await api.delete(`/config/dashboard-salon/vendedores/${vendedorCodigo}`);
+  const response = dashboardSalonSellerImagesResponseSchema.pick({ message: true }).safeParse(data);
   if (!response.success) throw new Error("La respuesta de eliminación de la imagen es inválida");
   return response.data;
 }

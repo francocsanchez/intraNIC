@@ -1,6 +1,7 @@
 import EChart from "@/components/charts/EChart";
 import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { ActionButton } from "@/components/ui/action-button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDashboardSalon } from "@/services/operacionesService";
 import type { DashboardSalonResponse } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
@@ -27,32 +28,38 @@ const resolveDashboardSalonImageUrl = (imageUrl: string) => {
 
 type SellerRankingProps = {
   title: string;
-  items: DashboardSalonResponse["vendedores"];
+  items: Array<{ nombre: string; total: number; codigo?: number }>;
   colorIndex: number;
   vertical?: boolean;
   objective?: number | null;
   usadosItems?: DashboardSalonResponse["vendedores"];
   creditosItems?: DashboardSalonResponse["vendedores"];
   modelImages?: DashboardSalonResponse["imagenesModelos"];
+  sellerImages?: DashboardSalonResponse["imagenesVendedores"];
   dashboardHeader?: ReactNode;
 };
 
-function SellerFinancingTable({ items, usadosItems, creditosItems }: Pick<SellerRankingProps, "items"> & { usadosItems: DashboardSalonResponse["vendedores"]; creditosItems: DashboardSalonResponse["vendedores"] }) {
-  const usadosPorNombre = new Map(usadosItems.map((item) => [item.nombre, item.total]));
-  const creditosPorNombre = new Map(creditosItems.map((item) => [item.nombre, item.total]));
+const sellerInitials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("es-AR") || "V";
+
+function SellerFinancingTable({ items, usadosItems, creditosItems, sellerImages }: Pick<SellerRankingProps, "items" | "sellerImages"> & { usadosItems: DashboardSalonResponse["vendedores"]; creditosItems: DashboardSalonResponse["vendedores"] }) {
+  const usadosPorCodigo = new Map(usadosItems.map((item) => [item.codigo, item.total]));
+  const creditosPorCodigo = new Map(creditosItems.map((item) => [item.codigo, item.total]));
   const getLeader = (source: Map<string, number>) => {
-    const max = Math.max(0, ...items.map((item) => source.get(item.nombre) ?? 0));
-    return max > 0 ? items.filter((item) => (source.get(item.nombre) ?? 0) === max).map((item) => item.nombre).sort((a, b) => a.localeCompare(b))[0] : null;
+    const max = Math.max(0, ...items.map((item) => source.get(String(item.codigo ?? 0)) ?? 0));
+    return max > 0 ? items.filter((item) => (source.get(String(item.codigo ?? 0)) ?? 0) === max).map((item) => String(item.codigo ?? 0)).sort((a, b) => a.localeCompare(b))[0] : null;
   };
+  const usados = new Map([...usadosPorCodigo].map(([codigo, total]) => [String(codigo), total]));
+  const creditos = new Map([...creditosPorCodigo].map(([codigo, total]) => [String(codigo), total]));
+  const sellerImageByCode = new Map((sellerImages ?? []).map((item) => [item.vendedorCodigo, resolveDashboardSalonImageUrl(item.imageUrl)]));
   const rows = [
-    { label: "Usados", icon: CarFront, starClass: "text-emerald-500", leader: getLeader(usadosPorNombre), values: items.map((item) => usadosPorNombre.get(item.nombre) ?? 0) },
-    { label: "Créditos", icon: CreditCard, starClass: "text-amber-400", leader: getLeader(creditosPorNombre), values: items.map((item) => creditosPorNombre.get(item.nombre) ?? 0) },
+    { label: "Usados", icon: CarFront, starClass: "text-emerald-500", leader: getLeader(usados), values: items.map((item) => usados.get(String(item.codigo ?? 0)) ?? 0) },
+    { label: "Créditos", icon: CreditCard, starClass: "text-amber-400", leader: getLeader(creditos), values: items.map((item) => creditos.get(String(item.codigo ?? 0)) ?? 0) },
   ];
 
-  return <div className="relative shrink-0 pb-2 text-[11px] leading-5 text-foreground"><div className="absolute left-0 top-0 flex w-[76px] flex-col border-y border-r border-border text-muted-foreground">{rows.map((row, index) => { const Icon = row.icon; return <span key={row.label} title={row.label} aria-label={row.label} className={`flex h-5 items-center justify-end pr-2 ${index ? "border-t border-border" : ""}`}><Icon size={14} strokeWidth={1.8} /></span>; })}</div><div className="ml-[76px] mr-3 grid border-y border-r border-border" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{rows.flatMap((row, rowIndex) => row.values.map((value, index) => <span key={`${row.label}-${items[index]?.nombre}`} className={`flex h-5 items-center justify-center gap-0.5 border-l border-border text-center ${rowIndex ? "border-t" : ""}`}>{value > 0 ? value : "-"}{items[index]?.nombre === row.leader ? <Star aria-label={`Mayor cantidad de ${row.label.toLocaleLowerCase("es-AR")}`} size={12} className={row.starClass} fill="currentColor" /> : null}</span>))}</div></div>;
+  return <div className="relative shrink-0 pb-2 text-[11px] leading-5 text-foreground"><div className="absolute left-0 top-0 flex w-[76px] flex-col border-y border-r border-border text-muted-foreground">{rows.map((row, index) => { const Icon = row.icon; return <span key={row.label} title={row.label} aria-label={row.label} className={`flex h-5 items-center justify-end pr-2 ${index ? "border-t border-border" : ""}`}><Icon size={14} strokeWidth={1.8} /></span>; })}</div><div className="ml-[76px] mr-3 grid border-y border-r border-border" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{rows.flatMap((row, rowIndex) => row.values.map((value, index) => <span key={`${row.label}-${items[index]?.codigo ?? 0}`} className={`flex h-5 items-center justify-center gap-0.5 border-l border-border text-center ${rowIndex ? "border-t" : ""}`}>{value > 0 ? value : "-"}{String(items[index]?.codigo ?? 0) === row.leader ? <Star aria-label={`Mayor cantidad de ${row.label.toLocaleLowerCase("es-AR")}`} size={12} className={row.starClass} fill="currentColor" /> : null}</span>))}</div><div className="ml-[76px] mr-3 grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>{items.map((item) => <span key={`foto-${item.codigo ?? item.nombre}`} className="flex h-12 items-center justify-center"><Avatar className="size-9 bg-card"><AvatarImage src={item.codigo ? sellerImageByCode.get(item.codigo) : undefined} alt={`Foto de ${item.nombre}`} /><AvatarFallback className="bg-emerald-100 text-[10px] font-bold text-emerald-900">{sellerInitials(item.nombre)}</AvatarFallback></Avatar></span>)}</div></div>;
 }
 
-function RankingChart({ title, items, colorIndex, vertical = false, objective, usadosItems = [], creditosItems = [], modelImages = [], dashboardHeader }: SellerRankingProps) {
+function RankingChart({ title, items, colorIndex, vertical = false, objective, usadosItems = [], creditosItems = [], modelImages = [], sellerImages = [], dashboardHeader }: SellerRankingProps) {
   const totalUsados = usadosItems.reduce((total, item) => total + item.total, 0);
   const totalCreditos = creditosItems.reduce((total, item) => total + item.total, 0);
   const option = useMemo<EChartsCoreOption>(() => {
@@ -95,7 +102,7 @@ function RankingChart({ title, items, colorIndex, vertical = false, objective, u
   }, [colorIndex, dashboardHeader, items, modelImages, objective, vertical]);
 
   if (vertical) {
-    return <section className="relative flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card">{dashboardHeader ? <div className="absolute inset-x-4 top-2 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2">{dashboardHeader}</div> : null}<h2 className={`pointer-events-none absolute left-4 z-10 text-xl font-semibold text-foreground ${dashboardHeader ? "top-14" : "top-3"}`}>{title}</h2><div className="pointer-events-none absolute right-4 top-3 z-10 flex items-center gap-4 text-sm font-semibold text-muted-foreground"><span className="flex items-center gap-1" title="Usados"><CarFront size={16} strokeWidth={1.8} /><span>{totalUsados}</span></span><span className="flex items-center gap-1" title="Créditos"><CreditCard size={16} strokeWidth={1.8} /><span>{totalCreditos}</span></span></div>{items.length ? <><div className="min-h-0 flex-1"><EChart option={option} /></div><SellerFinancingTable items={items} usadosItems={usadosItems} creditosItems={creditosItems} /></> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
+    return <section className="relative flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card">{dashboardHeader ? <div className="absolute inset-x-4 top-2 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2">{dashboardHeader}</div> : null}<h2 className={`pointer-events-none absolute left-4 z-10 text-xl font-semibold text-foreground ${dashboardHeader ? "top-14" : "top-3"}`}>{title}</h2><div className="pointer-events-none absolute right-4 top-3 z-10 flex items-center gap-4 text-sm font-semibold text-muted-foreground"><span className="flex items-center gap-1" title="Usados"><CarFront size={16} strokeWidth={1.8} /><span>{totalUsados}</span></span><span className="flex items-center gap-1" title="Créditos"><CreditCard size={16} strokeWidth={1.8} /><span>{totalCreditos}</span></span></div>{items.length ? <><div className="min-h-0 flex-1"><EChart option={option} /></div><SellerFinancingTable items={items} usadosItems={usadosItems} creditosItems={creditosItems} sellerImages={sellerImages} /></> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
   }
 
   return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="mb-2 text-xl font-semibold text-foreground">{title}</h2>{items.length ? <div className="min-h-0 flex-1"><EChart option={option} /></div> : <p className="flex flex-1 items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
@@ -161,7 +168,7 @@ export default function DashboardSalonView() {
   });
   return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset">
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_74px_minmax(0,1fr)] gap-4 overflow-hidden">
-      <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
+      <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} sellerImages={data.imagenesVendedores} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
       <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} />
       <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
     </div>

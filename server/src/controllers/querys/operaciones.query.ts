@@ -8,6 +8,7 @@ export const operacionesDashboardQuery = (filters: {
 SELECT
     ope.ope_codigo AS "codigoOperacion",
     ope.ope_fecasig AS "fechaAsignacion",
+    vende.ven_codigo AS "vendedorCodigo",
     vende.ven_nombre AS "vendedorNombre",
     ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS "sucursalNombre",
     famiauto.fam_nombre AS "modeloNombre",
@@ -399,6 +400,7 @@ ORDER BY
 
 export const dashboardSalonFinanciacionPorVendedorQuery = () => `
 SELECT
+    vende.ven_codigo AS "vendedorCodigo",
     LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN DATOS'))) AS "vendedorNombre",
     SUM(CASE WHEN ISNULL(vp.usados, 0) > 0 THEN 1 ELSE 0 END) AS "cantidadUsados",
     SUM(CASE WHEN ISNULL(vp.credito_bancario, 0) > 0 THEN 1 ELSE 0 END) AS "cantidadCreditos"
@@ -420,6 +422,7 @@ WHERE
     AND UPPER(LTRIM(RTRIM(vp.tipo))) = 'CERO'
     AND ISNULL(CAST(vende.ven_sucur AS VARCHAR(20)), 'SIN_ASIGNAR') IN (:sucursales)
 GROUP BY
+    vende.ven_codigo,
     LTRIM(RTRIM(ISNULL(vende.ven_nombre, 'SIN DATOS')));
 `;
 
