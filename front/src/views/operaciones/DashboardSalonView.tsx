@@ -110,7 +110,7 @@ function RankingChart({ title, items, colorIndex, vertical = false, objective, u
   }, [colorIndex, dashboardHeader, items, modelImages, objective, vertical]);
 
   if (vertical) {
-    return <section className="relative flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card">{dashboardHeader ? <div className="absolute inset-x-4 top-2 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2">{dashboardHeader}</div> : null}<h2 className={`pointer-events-none absolute left-4 z-10 text-xl font-semibold text-foreground ${dashboardHeader ? "top-14" : "top-3"}`}>{title}</h2><div className="pointer-events-none absolute right-4 top-3 z-10 flex items-center gap-4 text-sm font-semibold text-muted-foreground"><span className="flex items-center gap-1" title="Usados"><CarFront size={16} strokeWidth={1.8} /><span>{totalUsados}</span></span><span className="flex items-center gap-1" title="Créditos"><CreditCard size={16} strokeWidth={1.8} /><span>{totalCreditos}</span></span></div>{items.length ? <><div className="min-h-0 flex-1"><EChart option={option} /></div><SellerFinancingTable items={items} usadosItems={usadosItems} creditosItems={creditosItems} sellerImages={sellerImages} /></> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
+    return <section className="relative flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card">{dashboardHeader ? <div className="absolute inset-x-4 top-2 z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-2">{dashboardHeader}</div> : null}<h2 className={`pointer-events-none absolute left-4 z-10 text-xl font-semibold text-foreground ${dashboardHeader ? "top-14" : "top-3"}`}>{title}</h2><div className="pointer-events-none absolute right-4 top-3 z-10 flex items-center gap-5 text-xl font-bold text-muted-foreground"><span className="flex items-center gap-1.5" title="Usados"><CarFront size={23} strokeWidth={2} /><span>{totalUsados}</span></span><span className="flex items-center gap-1.5" title="Créditos"><CreditCard size={23} strokeWidth={2} /><span>{totalCreditos}</span></span></div>{items.length ? <><div className="min-h-0 flex-1"><EChart option={option} /></div><SellerFinancingTable items={items} usadosItems={usadosItems} creditosItems={creditosItems} sellerImages={sellerImages} /></> : <p className="flex h-full items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
   }
 
   return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="mb-2 text-xl font-semibold text-foreground">{title}</h2>{items.length ? <div className="min-h-0 flex-1"><EChart option={option} /></div> : <p className="flex flex-1 items-center justify-center text-lg text-muted-foreground">Sin operaciones asignadas.</p>}</section>;
@@ -162,26 +162,30 @@ function DailyOperationsTable({ items, anio, mes, objetivoDiario }: { items: Das
   return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => { const objectiveStatus = getObjectiveStatus(item); const StatusIcon = objectiveStatus === null ? null : objectiveStatus ? Check : X; const statusLabel = objectiveStatus === null ? undefined : objectiveStatus ? "Objetivo diario cumplido" : "Objetivo diario no cumplido"; const statusClass = objectiveStatus ? "text-emerald-600" : "text-red-600"; const statusCellClass = objectiveStatus === null ? "" : objectiveStatus ? "bg-emerald-100" : "bg-red-100"; return [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className={`flex items-center justify-center gap-1 border-r border-border font-semibold text-foreground ${statusCellClass}`}>{item.total || "-"}{StatusIcon ? <StatusIcon size={12} className={statusClass} aria-label={statusLabel} role="img" /> : null}</span>]; })}</div></div></section>;
 }
 
-function MonthlyClosingProjection({ items, anio, mes, objetivoDiario }: { items: DashboardSalonResponse["operacionesPorDia"]; anio: number; mes: number; objetivoDiario: number | null }) {
-  const today = getCurrentBuenosAiresDate();
-  const totalDays = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
-  const workingDays = Array.from({ length: totalDays }, (_, index) => index + 1).filter((dia) => {
-    const diaSemana = new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay();
-    return diaSemana !== 0 && diaSemana !== 6;
-  });
-  const isCurrentMonth = anio === today.anio && mes === today.mes;
-  const elapsedWorkingDays = isCurrentMonth ? workingDays.filter((dia) => dia <= today.dia).length : workingDays.length;
-  const accumulatedTotal = items.filter((item) => !isCurrentMonth || item.dia <= today.dia).reduce((total, item) => total + item.total, 0);
-  const projectedTotal = isCurrentMonth && elapsedWorkingDays > 0
-    ? Math.round((accumulatedTotal / elapsedWorkingDays) * workingDays.length)
-    : accumulatedTotal;
-  const dailyAverage = elapsedWorkingDays > 0 ? accumulatedTotal / elapsedWorkingDays : 0;
-  const monthlyObjective = objetivoDiario ? objetivoDiario * workingDays.length : null;
-  const meetsObjective = monthlyObjective === null ? null : projectedTotal >= monthlyObjective;
-  const projectionClass = meetsObjective === null ? "text-foreground" : meetsObjective ? "text-emerald-600" : "text-red-600";
-  const statusText = monthlyObjective === null ? "Sin objetivo diario configurado" : meetsObjective ? "En ritmo para cumplir la meta" : "Por debajo del ritmo esperado";
+type SellerFinancingItem = DashboardSalonResponse["vendedores"][number];
 
-  return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="text-center text-xl font-semibold text-foreground">{isCurrentMonth ? "Proyección de cierre" : "Cierre mensual"}</h2><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className={`text-7xl font-bold leading-none ${projectionClass}`}>{projectedTotal}</p><p className="mt-2 text-sm font-semibold text-muted-foreground">{isCurrentMonth ? "operaciones proyectadas" : "operaciones registradas"}</p><p className={`mt-4 text-base font-bold ${projectionClass}`}>{statusText}</p>{monthlyObjective !== null ? <p className="mt-1 text-sm text-muted-foreground">Meta mensual estimada: {monthlyObjective}</p> : null}</div><div className="border-t border-border pt-3 text-center text-sm text-muted-foreground"><p>{dailyAverage.toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} operaciones por día hábil</p><p>{elapsedWorkingDays} de {workingDays.length} días hábiles transcurridos</p></div></section>;
+function SellerTopThree({ title, items, icon: Icon, tone }: { title: string; items: SellerFinancingItem[]; icon: typeof CarFront; tone: "emerald" | "amber" }) {
+  const topThree = items.slice(0, 3);
+  const styles = tone === "emerald"
+    ? { heading: "text-emerald-700", icon: "text-emerald-600", value: "text-emerald-700", placeholder: "border-emerald-200 bg-emerald-50/30" }
+    : { heading: "text-amber-700", icon: "text-amber-600", value: "text-amber-700", placeholder: "border-amber-200 bg-amber-50/30" };
+
+  return <section className="flex min-h-0 flex-col">
+    <h2 className={`flex shrink-0 items-center justify-center gap-2 pb-2 text-center text-sm font-bold uppercase tracking-wide ${styles.heading}`}><Icon size={17} aria-hidden /><span>{title}</span></h2>
+    <div className="grid min-h-0 flex-1 grid-rows-3 gap-2">
+      {Array.from({ length: 3 }, (_, index) => {
+        const seller = topThree[index];
+        return seller ? <article key={seller.codigo} className="flex min-h-0 flex-col items-center justify-center rounded-sm border-2 border-border bg-card px-2 text-center shadow-sm"><p className={`text-4xl font-bold leading-none tabular-nums ${styles.value}`}>{seller.total}</p><p className="mt-1 w-full truncate text-sm font-semibold uppercase text-foreground" title={seller.nombre}>{seller.nombre}</p></article> : <article key={`empty-${index}`} className={`flex min-h-0 items-center justify-center rounded-sm border-2 border-dashed px-2 text-sm font-medium text-muted-foreground ${styles.placeholder}`}>Sin datos</article>;
+      })}
+    </div>
+  </section>;
+}
+
+function FinancingTopThree({ usados, creditos }: { usados: SellerFinancingItem[]; creditos: SellerFinancingItem[] }) {
+  return <section className="grid min-h-0 grid-cols-2 gap-4 rounded-md border border-border bg-card p-3">
+    <SellerTopThree title="Usados" items={usados} icon={CarFront} tone="emerald" />
+    <SellerTopThree title="Créditos" items={creditos} icon={CreditCard} tone="amber" />
+  </section>;
 }
 
 export default function DashboardSalonView() {
@@ -190,12 +194,17 @@ export default function DashboardSalonView() {
   const query = useQuery({
     queryKey: ["dashboard-salon", period],
     queryFn: () => getDashboardSalon(period),
+    retry: false,
     refetchInterval: 60_000,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
   });
   if (query.isLoading) return <div className="grid min-h-screen place-items-center bg-muted font-preset text-lg text-muted-foreground">Cargando Dashboard Salón...</div>;
-  if (query.isError || !query.data) return <div className="grid min-h-screen place-items-center bg-muted p-6 font-preset"><section className="max-w-lg rounded-md border border-destructive/30 bg-card p-6 text-center"><h1 className="text-xl font-semibold text-foreground">No se pudo cargar Dashboard Salón</h1><p className="mt-2 text-destructive">{query.error instanceof Error ? query.error.message : "Intentá actualizar nuevamente."}</p></section></div>;
+  if (query.isError || !query.data) {
+    const errorMessage = query.error instanceof Error ? query.error.message : "Intentá actualizar nuevamente.";
+    const missingSucursal = errorMessage === "El usuario no tiene una sucursal SIAC configurada";
+    return <div className="grid min-h-screen place-items-center bg-muted p-6 font-preset"><section className="max-w-lg rounded-md border border-destructive/30 bg-card p-6 text-center"><h1 className="text-xl font-semibold text-foreground">{missingSucursal ? "Falta configurar la Sucursal SIAC" : "No se pudo cargar Dashboard Salón"}</h1><p className="mt-2 text-destructive">{missingSucursal ? "Asigná una Sucursal SIAC al usuario desde Administración de usuarios para ver el dashboard." : errorMessage}</p><ActionButton onClick={() => void query.refetch()} disabled={query.isFetching} className="mt-5 bg-primary text-primary-foreground hover:bg-primary/90">{query.isFetching ? "Reintentando..." : "Reintentar"}</ActionButton></section></div>;
+  }
 
   const { data } = query;
   const isCurrentPeriod = period.anio === currentPeriod.anio && period.mes === currentPeriod.mes;
@@ -207,7 +216,7 @@ export default function DashboardSalonView() {
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_74px_minmax(0,1fr)] gap-4 overflow-hidden">
       <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} sellerImages={data.imagenesVendedores} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
       <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} objetivoDiario={data.objetivoOperacionesDiarias} />
-      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><MonthlyClosingProjection items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} objetivoDiario={data.objetivoOperacionesDiarias} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
+      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><FinancingTopThree usados={data.usadosPorVendedor} creditos={data.creditosPorVendedor} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
     </div>
   </main>;
 }

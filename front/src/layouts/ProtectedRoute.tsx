@@ -5,9 +5,9 @@ import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, isLoading, isError } = useAuth();
+  const { isAuthenticated, isLoading, isSessionRecovering, isError } = useAuth();
 
-  if (isLoading) return <Loading />;
+  if (isLoading || isSessionRecovering) return <Loading />;
 
   if (isError || !isAuthenticated) {
     localStorage.removeItem("AUTH_TOKEN");

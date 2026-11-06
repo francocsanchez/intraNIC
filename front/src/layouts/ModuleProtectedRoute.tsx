@@ -4,6 +4,7 @@ import type { ModuleKey } from "@/constants/modules";
 import { paths } from "@/routes/paths";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { hasPathAccess } from "@/helpers/access";
+import Loading from "@/components/Loading";
 
 type ModuleProtectedRouteProps = {
   allowedModules: ModuleKey[];
@@ -12,10 +13,10 @@ type ModuleProtectedRouteProps = {
 export default function ModuleProtectedRoute({
   allowedModules,
 }: ModuleProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading, isError } = useAuth();
+  const { user, isAuthenticated, isLoading, isSessionRecovering, isError } = useAuth();
   const { pathname } = useLocation();
 
-  if (isLoading) return null;
+  if (isLoading || isSessionRecovering) return <Loading />;
 
   if (isError || !isAuthenticated || !user) {
     localStorage.removeItem("AUTH_TOKEN");

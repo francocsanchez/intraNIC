@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-06
+
+- **Dashboard Salón:** se ampliaron los íconos y las cantidades totales de usados y créditos en la esquina superior del ranking de vendedores.
+
+- **Dashboard Salón:** los encabezados de los rankings centrales ahora se presentan simplemente como Usados y Créditos, sin prefijos alfabéticos.
+
+- **Dashboard Salón:** cuando el usuario no tiene Sucursal SIAC configurada, la pantalla informa el requisito inmediatamente y ofrece reintento, sin quedar detenida en la carga.
+
+- **Dashboard Salón:** la proyección de cierre fue reemplazada por dos rankings centrales: A muestra el top 3 de usados tomados y B el top 3 de créditos generados, por cantidad y vendedor.
+
+- **Dashboard Salón / Sesión:** una recuperación transitoria del usuario autenticado ya no se interpreta como cierre de sesión al abrir o refrescar el dashboard; solo las respuestas 401 o 403 eliminan las credenciales locales.
+
 ## 2026-11-05
 
 - **Dashboard Administración:** el modo TV elimina la tarjeta Tiempo total y redistribuye la grilla jerárquica en 40% usuarios y 60% sucursales.

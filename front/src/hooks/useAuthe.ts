@@ -33,6 +33,7 @@ export const useAuth = () => {
 
   const sessionRejected = isSessionRejection(query.error);
   const user = query.data ?? cachedUser;
+  const isSessionRecovering = Boolean(token) && !user && !sessionRejected;
 
   useEffect(() => {
     if (query.data) localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(query.data));
@@ -46,7 +47,8 @@ export const useAuth = () => {
 
   return {
     user: user ?? null,
-    isLoading: query.isLoading || (Boolean(token) && !user && query.isFetching),
+    isLoading: query.isLoading || (isSessionRecovering && query.isFetching),
+    isSessionRecovering,
     isError: sessionRejected,
     isAuthenticated: Boolean(token) && !sessionRejected,
     refetch: query.refetch,
