@@ -11,6 +11,7 @@ En modo TV, el árbol de `Dashboard Administración` no usa ECharts: representa 
 La grilla jerárquica del modo TV no permite desplazamiento horizontal ni vertical y organiza los usuarios en una única columna, distribuyendo las tarjetas dentro del alto disponible.
 Las tarjetas de usuario compactas del modo TV siempre priorizan una línea visible para el nombre, seguida de días e importe pendiente.
 Si el usuario autenticado tiene Sucursal SIAC asignada, el árbol, los modelos y los indicadores de saldo de `Dashboard Administración` se filtran a esa sucursal usando snapshots Mongo; Cobranzas semanales conserva el total global.
+`Operaciones pendientes por modelo` de Dashboard Administración usa barras ECharts agrupadas por Tipo de cliente, incluyendo `Sin clasificar` cuando no existe clasificación. Ordena los tipos por cantidad: rojo para el mayor, verde para el menor y tonos intermedios entre ambos; cada barra etiqueta solo su cantidad.
 
 `Links` vive en `/sistema/links`, usa el permiso independiente `links` y persiste exclusivamente en Mongo URL y descripción obligatorias. Todo usuario con el módulo puede crear, editar y eliminar enlaces; la tabla permite copiar el enlace o abrirlo en una pestaña nueva.
 La vista de `Links` debe tolerar que la consulta aún no tenga respuesta al renderizar, para conservar el build estricto de frontend en Docker.

@@ -8,7 +8,6 @@ import type { EChartsCoreOption } from "echarts/core";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
-const MODEL_ROSE_COLORS = ["#93c5fd", "#86efac", "#fde68a", "#f9a8d4", "#c4b5fd", "#67e8f9", "#fdba74", "#a7f3d0"];
 const formatMillions = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.round(value / 1_000_000))}M`;
 const formatChartMillions = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.floor(value / 1_000_000))}M`;
 const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
@@ -20,6 +19,7 @@ const WEEK_RANGES = [
   { desde: 22, hasta: 28, etiqueta: "22–28" },
   { desde: 29, hasta: 31, etiqueta: "29–fin" },
 ] as const;
+const CLIENT_TYPE_BAR_COLORS = ["#fca5a5", "#fdba74", "#fde68a", "#bef264", "#86efac"];
 
 const nodeTone = (averageDays: number) => averageDays < 15
   ? "border-emerald-400 bg-emerald-50 text-emerald-950"
@@ -74,27 +74,32 @@ export default function DashboardAdministracionView() {
   const option = useMemo(() => query.data
     ? createSaldoOperacionTiempoTreeOption(query.data.data.tree, { showSaldo: true, operationLabel: "Operaciones", edgeShape: "curve" })
     : null, [query.data]);
-  const modelOption = useMemo<EChartsCoreOption | null>(() => query.data?.modelos.length ? ({
-    color: MODEL_ROSE_COLORS,
+  const clientTypeOption = useMemo<EChartsCoreOption | null>(() => {
+    const tiposCliente = [...(query.data?.tiposCliente ?? [])].sort((left, right) => right.total - left.total || left.nombre.localeCompare(right.nombre, "es"));
+    if (!tiposCliente.length) return null;
+    const colorAt = (index: number) => tiposCliente.length === 1
+      ? CLIENT_TYPE_BAR_COLORS.at(-1)!
+      : CLIENT_TYPE_BAR_COLORS[Math.round(index * (CLIENT_TYPE_BAR_COLORS.length - 1) / (tiposCliente.length - 1))];
+    return {
     tooltip: {
-      trigger: "item",
+      trigger: "axis",
       formatter: (params: unknown) => {
-        const item = params as { name?: string; value?: number; percent?: number };
-        return `${item.name ?? ""}: ${item.value ?? 0} operaciones (${Math.round(item.percent ?? 0)}%)`;
+        const item = (params as Array<{ axisValue?: string; value?: number }>)[0];
+        return `${item?.axisValue ?? ""}: ${item?.value ?? 0} operaciones`;
       },
     },
+    grid: { top: 26, right: 18, bottom: tvMode ? 46 : 34, left: 42 },
+    xAxis: { type: "category", data: tiposCliente.map((item) => item.nombre), axisTick: { alignWithLabel: true }, axisLabel: { color: "#18181b", fontSize: tvMode ? 14 : 11, fontWeight: 700 }, axisLine: { lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
+    yAxis: { type: "value", minInterval: 1, axisLabel: { color: "#475569", fontSize: tvMode ? 12 : 10 }, splitLine: { lineStyle: { color: "#cbd5e1", width: 1 } }, axisLine: { show: true, lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
     series: [{
-      name: "Operaciones pendientes",
-      type: "pie",
-      radius: [28, "67%"],
-      center: ["50%", "50%"],
-      roseType: "area",
-      itemStyle: { borderRadius: 8, borderColor: "var(--card)", borderWidth: 2 },
-      label: { formatter: "{b}\n{c}", color: "var(--foreground)", fontSize: tvMode ? 14 : 10, fontWeight: tvMode ? 600 : 400, lineHeight: tvMode ? 18 : 14 },
-      labelLine: { length: tvMode ? 12 : 6, length2: tvMode ? 10 : 6, lineStyle: { width: tvMode ? 2 : 1 } },
-      data: query.data.modelos.map((item) => ({ name: item.nombre, value: item.total })),
+      name: "Operaciones pendientes por tipo de cliente",
+      type: "bar",
+      barMaxWidth: tvMode ? 88 : 64,
+      data: tiposCliente.map((item, index) => ({ value: item.total, itemStyle: { color: colorAt(index) } })),
+      label: { show: true, position: "top", color: "#18181b", fontSize: tvMode ? 16 : 12, fontWeight: 700, formatter: "{c}" },
     }],
-  }) : null, [query.data, tvMode]);
+    } satisfies EChartsCoreOption;
+  }, [query.data, tvMode]);
   const weeklyChartOption = useMemo<EChartsCoreOption | null>(() => {
     const data = cobranzasQuery.data?.data;
     if (!data) return null;
@@ -145,7 +150,7 @@ export default function DashboardAdministracionView() {
           {hasTreeBranches ? tvMode ? <AdministrationTreeGrid tree={data.tree} /> : option ? <EChart option={option} resetOnOptionChange /> : null : <p className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">No hay operaciones no canceladas con asignación válida.</p>}
         </section>
         <section className="grid min-h-0 grid-rows-2 divide-y divide-border">
-          <section className="grid min-h-0 grid-cols-2 divide-x divide-border"><div className="flex min-h-0 flex-col overflow-hidden p-3"><h2 className="shrink-0 text-sm font-semibold text-foreground">Operaciones pendientes por modelo</h2>{modelOption ? <div className="min-h-0 flex-1"><EChart option={modelOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">Sin operaciones pendientes para representar.</p>}</div><div className="flex min-h-0 flex-col p-5"><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Saldo pendiente</p><p className="mt-2 text-7xl font-bold leading-none tracking-tight text-foreground">{formatMillions(query.data.resumen.saldoTotal)}</p></div><div className="grid shrink-0 grid-cols-2 gap-4 border-t border-border pt-4 text-center"><div><p className="text-sm font-semibold text-muted-foreground">Créditos</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.creditoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.creditoCantidad} operaciones</p></div><div><p className="text-sm font-semibold text-muted-foreground">Usados</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.usadoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.usadoCantidad} operaciones</p></div></div></div></section>
+          <section className="grid min-h-0 grid-cols-2 divide-x divide-border"><div className="flex min-h-0 flex-col overflow-hidden p-3"><h2 className="shrink-0 text-sm font-semibold text-foreground">Operaciones pendientes por tipo de cliente</h2>{clientTypeOption ? <div className="min-h-0 flex-1"><EChart option={clientTypeOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">Sin operaciones pendientes para representar.</p>}</div><div className="flex min-h-0 flex-col p-5"><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Saldo pendiente</p><p className="mt-2 text-7xl font-bold leading-none tracking-tight text-foreground">{formatMillions(query.data.resumen.saldoTotal)}</p></div><div className="grid shrink-0 grid-cols-2 gap-4 border-t border-border pt-4 text-center"><div><p className="text-sm font-semibold text-muted-foreground">Créditos</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.creditoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.creditoCantidad} operaciones</p></div><div><p className="text-sm font-semibold text-muted-foreground">Usados</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.usadoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.usadoCantidad} operaciones</p></div></div></div></section>
           <section className="flex min-h-0 flex-col overflow-hidden p-3"><div className="shrink-0"><h2 className="text-sm font-semibold text-foreground">Cobranzas por semana</h2><p className="text-[11px] text-muted-foreground">{cobranzasQuery.data ? `Total cobrado por semana de ${MONTHS[cobranzasQuery.data.data.mes - 1]} ${cobranzasQuery.data.data.anio}.` : "Cobranzas del mes actual."}</p></div>{weeklyChartOption ? <div className="min-h-0 flex-1"><EChart option={weeklyChartOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">{cobranzasQuery.isError ? cobranzasQuery.error.message : "Cargando cobranzas..."}</p>}</section>
         </section>
       </div>

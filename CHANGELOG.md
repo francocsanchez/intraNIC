@@ -2,6 +2,10 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** el gráfico por Tipo de cliente usa barras simples ECharts: rojo para el mayor volumen, verde para el menor y tonos intermedios ordenados entre ambos; cada barra etiqueta solo su cantidad.
+
+- **Dashboard Administración:** `Operaciones pendientes por modelo` fue reemplazado por barras ECharts agrupadas por Tipo de cliente, respetando la Sucursal SIAC del usuario cuando corresponde.
+
 - **LIESS · Reparaciones:** se rediseñó el módulo protegido con una colección de presupuestos v2 aislada de los históricos. Permite buscar internos nuevos o usados, cargar los datos iniciales, seleccionar talleres existentes activos y gestionar Pendiente, Aprobado o Rechazado; al aprobar exige fecha de ingreso y calcula los días hasta el egreso opcional.
 - **LIESS · Reparaciones:** la búsqueda del interno deja KM informado vacío y Costo se carga con máscara de pesos argentinos.
 - **LIESS · Reparaciones:** la grilla ahora oculta N. Presupuesto y Detalles; ambos se consultan desde un diálogo de solo lectura.

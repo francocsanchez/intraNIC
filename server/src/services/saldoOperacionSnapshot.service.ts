@@ -54,7 +54,7 @@ type CancelacionSucursalMonthlyGroup = {
   operations: number;
 };
 
-type DashboardAdministracionModelGroup = {
+type DashboardAdministracionTipoClienteGroup = {
   _id: string;
   total: number;
 };
@@ -627,28 +627,28 @@ export class SaldoOperacionSnapshotService {
     const scopedMatch = Number.isInteger(sucursalSiacCodigo) && Number(sucursalSiacCodigo) > 0
       ? { ...noCanceladasAnalysisMatch, sucursalSiacCodigo }
       : noCanceladasAnalysisMatch;
-    const [analysis, modelGroups, saldoOperacionSummary] = await Promise.all([
+    const [analysis, tipoClienteGroups, saldoOperacionSummary] = await Promise.all([
       this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder, sucursalSiacCodigo),
-      SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
+      SaldoOperacionSnapshot.aggregate<DashboardAdministracionTipoClienteGroup>([
         { $match: scopedMatch },
         {
           $project: {
-            modelo: {
+            tipoCliente: {
               $let: {
-                vars: { value: { $trim: { input: { $ifNull: ["$modeloGeneral", ""] } } } },
-                in: { $cond: [{ $eq: ["$$value", ""] }, "Sin modelo", "$$value"] },
+                vars: { value: { $trim: { input: { $ifNull: ["$tipoCliente", ""] } } } },
+                in: { $cond: [{ $eq: ["$$value", ""] }, "Sin clasificar", "$$value"] },
               },
             },
           },
         },
-        { $group: { _id: "$modelo", total: { $sum: 1 } } },
+        { $group: { _id: "$tipoCliente", total: { $sum: 1 } } },
         { $sort: { total: -1, _id: 1 } },
       ]),
       this.summary({ entrega: "sin-entregar", sucursalSiacCodigo }),
     ]);
     return {
       ...analysis,
-      modelos: modelGroups.map((item) => ({ nombre: item._id, total: item.total })),
+      tiposCliente: tipoClienteGroups.map((item) => ({ nombre: item._id, total: item.total })),
       resumen: {
         saldoTotal: saldoOperacionSummary.data.reduce((total, model) => total + model.saldo, 0),
         creditoTotal: saldoOperacionSummary.creditoTotal,
