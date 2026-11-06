@@ -247,13 +247,7 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `valorizacion`: resumen consolidado de stock convencional por modelo
 - `usados`: stock y vistas generales de usados
 - `liess`: vistas de Liess
-- `liessReparaciones`: presupuestos y talleres de Reparaciones LIESS
-
-### LIESS · Reparaciones
-
-- Depende exclusivamente de `modules.liessReparaciones = 1` y se accede por `/stock/liess/reparaciones`.
-- Todo usuario con el módulo puede consultar, crear y editar presupuestos, cargar o corregir fecha de egreso y administrar talleres; no hay restricciones adicionales por rol.
-- Los talleres se desactivan o reactivan y nunca se eliminan; un taller inactivo se conserva en el historial de presupuestos, pero no puede seleccionarse en nuevas cargas.
+- `liessReparaciones`: carga y gestión de presupuestos LIESS
 - `callCenter`: seccion de importacion y administracion de origenes
 - `preventas`: modulo de preventas
 - `proformas`: modulo de proformas

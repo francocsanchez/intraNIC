@@ -162,6 +162,28 @@ function DailyOperationsTable({ items, anio, mes, objetivoDiario }: { items: Das
   return <section className="h-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-card"><div className="flex h-6 items-center justify-between border-b border-border px-3"><h2 className="text-sm font-semibold text-foreground">Operaciones por día</h2><span className="text-xs text-muted-foreground">Asignaciones de la sucursal</span></div><div className="flex h-[47px] text-center text-[10px] leading-5"><div className="grid w-[76px] shrink-0 grid-rows-2 border-r border-border font-medium text-muted-foreground"><span className="border-b border-border">Día</span><span>Operaciones</span></div><div className="grid min-w-0 flex-1 grid-flow-col grid-rows-2" style={{ gridTemplateColumns: `repeat(${diasHabiles.length}, minmax(0, 1fr))` }}>{diasHabiles.flatMap((item) => { const objectiveStatus = getObjectiveStatus(item); const StatusIcon = objectiveStatus === null ? null : objectiveStatus ? Check : X; const statusLabel = objectiveStatus === null ? undefined : objectiveStatus ? "Objetivo diario cumplido" : "Objetivo diario no cumplido"; const statusClass = objectiveStatus ? "text-emerald-600" : "text-red-600"; const statusCellClass = objectiveStatus === null ? "" : objectiveStatus ? "bg-emerald-100" : "bg-red-100"; return [<span key={`dia-${item.dia}`} className="border-b border-r border-border text-muted-foreground">{item.dia}</span>, <span key={`total-${item.dia}`} className={`flex items-center justify-center gap-1 border-r border-border font-semibold text-foreground ${statusCellClass}`}>{item.total || "-"}{StatusIcon ? <StatusIcon size={12} className={statusClass} aria-label={statusLabel} role="img" /> : null}</span>]; })}</div></div></section>;
 }
 
+function MonthlyClosingProjection({ items, anio, mes, objetivoDiario }: { items: DashboardSalonResponse["operacionesPorDia"]; anio: number; mes: number; objetivoDiario: number | null }) {
+  const today = getCurrentBuenosAiresDate();
+  const totalDays = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
+  const workingDays = Array.from({ length: totalDays }, (_, index) => index + 1).filter((dia) => {
+    const diaSemana = new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay();
+    return diaSemana !== 0 && diaSemana !== 6;
+  });
+  const isCurrentMonth = anio === today.anio && mes === today.mes;
+  const elapsedWorkingDays = isCurrentMonth ? workingDays.filter((dia) => dia <= today.dia).length : workingDays.length;
+  const accumulatedTotal = items.filter((item) => !isCurrentMonth || item.dia <= today.dia).reduce((total, item) => total + item.total, 0);
+  const projectedTotal = isCurrentMonth && elapsedWorkingDays > 0
+    ? Math.round((accumulatedTotal / elapsedWorkingDays) * workingDays.length)
+    : accumulatedTotal;
+  const dailyAverage = elapsedWorkingDays > 0 ? accumulatedTotal / elapsedWorkingDays : 0;
+  const monthlyObjective = objetivoDiario ? objetivoDiario * workingDays.length : null;
+  const meetsObjective = monthlyObjective === null ? null : projectedTotal >= monthlyObjective;
+  const projectionClass = meetsObjective === null ? "text-foreground" : meetsObjective ? "text-emerald-600" : "text-red-600";
+  const statusText = monthlyObjective === null ? "Sin objetivo diario configurado" : meetsObjective ? "En ritmo para cumplir la meta" : "Por debajo del ritmo esperado";
+
+  return <section className="flex min-h-0 flex-col rounded-md border border-border bg-card p-4"><h2 className="text-center text-xl font-semibold text-foreground">{isCurrentMonth ? "Proyección de cierre" : "Cierre mensual"}</h2><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className={`text-7xl font-bold leading-none ${projectionClass}`}>{projectedTotal}</p><p className="mt-2 text-sm font-semibold text-muted-foreground">{isCurrentMonth ? "operaciones proyectadas" : "operaciones registradas"}</p><p className={`mt-4 text-base font-bold ${projectionClass}`}>{statusText}</p>{monthlyObjective !== null ? <p className="mt-1 text-sm text-muted-foreground">Meta mensual estimada: {monthlyObjective}</p> : null}</div><div className="border-t border-border pt-3 text-center text-sm text-muted-foreground"><p>{dailyAverage.toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} operaciones por día hábil</p><p>{elapsedWorkingDays} de {workingDays.length} días hábiles transcurridos</p></div></section>;
+}
+
 export default function DashboardSalonView() {
   const [period, setPeriod] = useState(getCurrentPeriod);
   const currentPeriod = getCurrentPeriod();
@@ -185,7 +207,7 @@ export default function DashboardSalonView() {
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_74px_minmax(0,1fr)] gap-4 overflow-hidden">
       <RankingChart title="Operaciones por vendedor" items={data.vendedores} colorIndex={0} vertical objective={data.objetivoVendedores} usadosItems={data.usadosPorVendedor} creditosItems={data.creditosPorVendedor} sellerImages={data.imagenesVendedores} dashboardHeader={<><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p><h1 className="text-2xl font-bold leading-tight text-foreground">{data.sucursal}</h1></div><div className="flex items-center gap-2"><ActionButton aria-label="Mes anterior" onClick={() => movePeriod(-1)} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronLeft size={18} /></ActionButton><p className="whitespace-nowrap text-base text-muted-foreground">Asignaciones · {MONTHS[data.periodo.mes - 1]} {data.periodo.anio}</p><ActionButton aria-label="Mes siguiente" onClick={() => movePeriod(1)} disabled={isCurrentPeriod} className="h-8 w-8 bg-primary p-0 text-primary-foreground hover:bg-primary/90"><ChevronRight size={18} /></ActionButton></div><div /></>} />
       <DailyOperationsTable items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} objetivoDiario={data.objetivoOperacionesDiarias} />
-      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><RankingChart title="Operaciones por modelo" items={data.modelos} colorIndex={1} modelImages={data.imagenesModelos} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
+      <div className="grid min-h-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-4 overflow-hidden"><OperationsCounter title={data.sucursal} total={data.totalOperaciones} totalOperaciones={data.totalOperacionesTodasSucursales} modelos={data.modelos} /><MonthlyClosingProjection items={data.operacionesPorDia} anio={data.periodo.anio} mes={data.periodo.mes} objetivoDiario={data.objetivoOperacionesDiarias} /><OperationsGauge title="Ventas NIC Totales" total={data.totalOperacionesTodasSucursales} objective={data.objetivoOperacionesTotales} /></div>
     </div>
   </main>;
 }

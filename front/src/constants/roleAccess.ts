@@ -28,6 +28,15 @@ export function hasSuperAdminRole(user: AuthUser) {
   return getNormalizedRoles(user).includes("superadmin");
 }
 
+export function hasLiessStockUsadosActionAccess(user: AuthUser) {
+  if (hasSuperAdminRole(user)) {
+    return true;
+  }
+
+  const roles = getNormalizedRoles(user);
+  return roles.includes("supervisor") || roles.includes("gerente");
+}
+
 export function hasPathAccess(user: AuthUser, path: string) {
   if (hasSuperAdminRole(user)) {
     return true;

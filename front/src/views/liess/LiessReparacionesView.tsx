@@ -1,627 +1,103 @@
-import {
-  getLiessPresupuestos,
-  getLiessTalleres,
-  getLiessUnidad,
-  saveLiessPresupuesto,
-  updateLiessPresupuestoEstado,
-  saveLiessTaller,
-  setLiessTallerActivo,
-  type LiessPresupuesto,
-  type LiessTaller,
-} from "@/api/liess/reparacionesAPI";
-import { ActionButton } from "@/components/ui/action-button";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createLiessPresupuesto, getLiessPresupuestos, getLiessTalleres, getLiessUnidad, manageLiessPresupuesto, saveLiessTaller, setLiessTallerActivo, type LiessPresupuestoV2, type LiessPresupuestoV2Payload } from "@/api/liess/reparacionesAPI";
+import { ActionButton, EditActionButton } from "@/components/ui/action-button";
+import type { LiessReparacionEstado, LiessTaller, LiessUnidadReparacion } from "@/types/index";
 import { Dialog, Transition } from "@headlessui/react";
-import { ClipboardPenLine, Edit3, Plus, Search, Wrench, X } from "lucide-react";
-import { Fragment, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ClipboardPenLine, Eye, Pencil, Plus, Search, Wrench, X } from "lucide-react";
+import { Fragment, type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const money = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-});
-const formatPesosInput = (value: string) => {
-  const digits = value.replace(/\D/g, "");
-  return digits ? `$ ${new Intl.NumberFormat("es-AR").format(Number(digits))}` : "";
-};
-const today = () =>
-  new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Argentina/Buenos_Aires",
-  });
-type Form = {
-  fechaPedido: string;
-  tipoUnidad: "nuevo" | "usado";
-  interno: string;
-  tallerId: string;
-  kmInformados: string;
-  costoArs: string;
-  numeroPresupuesto: string;
-  fechaIngresoTaller: string;
-  fechaEgresoTaller: string;
-  prioridad: "Alta" | "Media" | "Baja";
-  valorInfo: string;
-  porcentajeToma: string;
-  detalle: string;
-  observaciones: string;
-};
-const empty = (): Form => ({
-  fechaPedido: today(),
-  tipoUnidad: "nuevo",
-  interno: "",
-  tallerId: "",
-  kmInformados: "",
-  costoArs: "",
-  numeroPresupuesto: "",
-  fechaIngresoTaller: today(),
-  fechaEgresoTaller: "",
-  prioridad: "Media",
-  valorInfo: "",
-  porcentajeToma: "0",
-  detalle: "",
-  observaciones: "",
-});
-function Modal({
-  children,
-  close,
-}: {
-  children: React.ReactNode;
-  close: () => void;
-}) {
-  return (
-    <Transition appear show as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={close}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-150"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-foreground/40" />
-        </Transition.Child>
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-3">
-            <Dialog.Panel className="w-full max-w-4xl rounded-lg border border-border bg-card shadow-xl">
-              {children}
-            </Dialog.Panel>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Argentina/Buenos_Aires" });
+const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+const pesosInput = (value: string) => value ? `$ ${new Intl.NumberFormat("es-AR").format(Number(value))}` : "";
+const dateLabel = (value: string | null) => value ? new Intl.DateTimeFormat("es-AR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "-";
+const input = "mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm";
+
+function Modal({ children, close, wide = false, pending = false }: { children: ReactNode; close: () => void; wide?: boolean; pending?: boolean }) {
+  return <Transition appear show as={Fragment}><Dialog as="div" className="relative z-50" onClose={() => { if (!pending) close(); }}><Transition.Child as={Fragment} enter="ease-out duration-150" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="fixed inset-0 bg-foreground/40" /></Transition.Child><div className="fixed inset-0 overflow-y-auto"><div className="flex min-h-full items-center justify-center p-3"><Dialog.Panel className={`w-full rounded-lg border border-border bg-card shadow-xl ${wide ? "max-w-4xl" : "max-w-xl"}`}>{children}</Dialog.Panel></div></div></Dialog></Transition>;
 }
-function BudgetDialog({
-  close,
-}: {
-  close: () => void;
-}) {
+
+type BudgetForm = { fecha: string; tipoUnidad: "nuevo" | "usado"; interno: string; kmInformado: string; tallerId: string; numeroPresupuesto: string; costo: string; prioridad: "Alta" | "Media" | "Baja"; detalles: string };
+const blank = (): BudgetForm => ({ fecha: today(), tipoUnidad: "nuevo", interno: "", kmInformado: "", tallerId: "", numeroPresupuesto: "", costo: "", prioridad: "Media", detalles: "" });
+
+function BudgetDialog({ close }: { close: () => void }) {
   const client = useQueryClient();
-  const talleres = useQuery({
-    queryKey: ["liess", "reparaciones", "talleres"],
-    queryFn: () => getLiessTalleres(),
-  });
-  const [form, setForm] = useState<Form>(empty);
-  const [unit, setUnit] = useState<LiessPresupuesto["unidad"] | null>(null);
-  const change = (key: keyof Form, value: string) =>
-    setForm((old) => ({ ...old, [key]: value }));
-  const valueInfo = Number(form.valorInfo) || 0,
-    percent = Number(form.porcentajeToma) || 0,
-    ingreso = valueInfo * (1 - percent / 100),
-    diferencia = valueInfo - ingreso,
-    costoArs = Number(form.costoArs) || 0,
-    costoSuperaDiferencia = costoArs > diferencia;
-  const lookup = useMutation({
-    mutationFn: () => getLiessUnidad(Number(form.interno), form.tipoUnidad),
-    onSuccess: (data) => {
-      setUnit(data.data);
-      if (!form.kmInformados && data.data.kilometrosBase != null)
-        change("kmInformados", String(data.data.kilometrosBase));
-    },
-    onError: (error: Error) => {
-      setUnit(null);
-      toast.error(error.message);
-    },
-  });
-  const save = useMutation({
-    mutationFn: () =>
-      saveLiessPresupuesto(
-        {
-          ...form,
-          tipoUnidad: form.tipoUnidad,
-          interno: Number(form.interno),
-          kmInformados: Number(form.kmInformados),
-          costoArs: Number(form.costoArs),
-          valorInfo: valueInfo,
-          porcentajeToma: percent,
-          fechaEgresoTaller: form.fechaEgresoTaller || null,
-        },
-      ),
-    onSuccess: (data) => {
-      toast.success(data.message);
-      client.invalidateQueries({
-        queryKey: ["liess", "reparaciones", "presupuestos"],
-      });
-      close();
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-  const input =
-    "h-9 w-full rounded-md border border-input bg-background px-3 text-sm";
-  return (
-    <Modal close={close}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (unit) save.mutate();
-        }}
-      >
-        <div className="flex items-center justify-between border-b border-border px-3 py-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">
-              LIESS · Reparaciones
-            </p>
-            <h2 className="text-xl font-semibold">
-              Generar nuevo presupuesto
-            </h2>
-          </div>
-          <button type="button" onClick={close}>
-            <X />
-          </button>
-        </div>
-        <div className="grid gap-3 p-3 md:grid-cols-3">
-          <label className="text-sm font-medium">
-            Fecha pedido
-            <input
-              required
-              type="date"
-              value={form.fechaPedido}
-              onChange={(e) => change("fechaPedido", e.target.value)}
-              className={input}
-            />
-          </label>
-          <label className="md:col-span-2 text-sm font-medium">
-            Interno
-            <div className="flex gap-2">
-              <select
-                value={form.tipoUnidad}
-                onChange={(e) => {
-                  change("tipoUnidad", e.target.value as Form["tipoUnidad"]);
-                  setUnit(null);
-                }}
-                className="h-9 w-28 shrink-0 rounded-md border border-input bg-background px-2 text-sm"
-                aria-label="Tipo de unidad"
-              >
-                <option value="nuevo">Nuevo</option>
-                <option value="usado">Usado</option>
-              </select>
-              <input
-                required
-                value={form.interno}
-                onChange={(e) => {
-                  change("interno", e.target.value);
-                  setUnit(null);
-                }}
-                className={input}
-              />
-              <ActionButton
-                type="button"
-                size="icon-sm"
-                variant="outline"
-                title="Buscar interno"
-                aria-label="Buscar interno"
-                onClick={() => lookup.mutate()}
-                disabled={!form.interno || lookup.isPending}
-              >
-                <Search />
-              </ActionButton>
-            </div>
-          </label>
-          {unit ? (
-            <div className="md:col-span-3 rounded-md border border-border bg-muted/40 p-3 text-sm">
-              <strong>
-                {unit.marca} {unit.version}
-              </strong>
-              <p className="mt-1 text-muted-foreground">
-                Interno {unit.interno} · Chasis: {unit.chasis || "-"} · KM base:{" "}
-                {unit.kilometrosBase ?? "-"}
-              </p>
-            </div>
-          ) : null}
-          <label className="text-sm font-medium">
-            Taller
-            <select
-              required
-              value={form.tallerId}
-              onChange={(e) => change("tallerId", e.target.value)}
-              className={input}
-            >
-              <option value="">Seleccionar</option>
-              {talleres.data?.data.map((t) => (
-                <option key={t._id} value={t._id}>
-                  {t.nombre} · {t.tipoTrabajo}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm font-medium">
-            KM informados
-            <input
-              required
-              min="0"
-              step="1"
-              type="number"
-              value={form.kmInformados}
-              onChange={(e) => change("kmInformados", e.target.value)}
-              className={input}
-            />
-          </label>
-          <label className="text-sm font-medium">
-            Costo ARS
-            <input
-              required
-              inputMode="numeric"
-              type="text"
-              value={formatPesosInput(form.costoArs)}
-              onChange={(e) => change("costoArs", e.target.value.replace(/\D/g, ""))}
-              className={`${input} ${costoSuperaDiferencia ? "border-destructive ring-1 ring-destructive" : ""}`}
-            />
-          </label>
-          <label className="text-sm font-medium">
-            N.º presupuesto
-            <input
-              required
-              value={form.numeroPresupuesto}
-              onChange={(e) => change("numeroPresupuesto", e.target.value)}
-              className={input}
-            />
-          </label>
-          <label className="text-sm font-medium">
-            Ingreso a taller
-            <input
-              required
-              type="date"
-              value={form.fechaIngresoTaller}
-              onChange={(e) => change("fechaIngresoTaller", e.target.value)}
-              className={input}
-            />
-          </label>
-          <label className="text-sm font-medium">
-            Prioridad
-            <select
-              value={form.prioridad}
-              onChange={(e) => change("prioridad", e.target.value)}
-              className={input}
-            >
-              {["Alta", "Media", "Baja"].map((p) => (
-                <option key={p}>{p}</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm font-medium">
-            Valor info
-            <input
-              required
-              min="0"
-              step="0.01"
-              type="number"
-              value={form.valorInfo}
-              onChange={(e) => change("valorInfo", e.target.value)}
-              className={input}
-            />
-          </label>
-          <label className="text-sm font-medium">
-            % toma
-            <input
-              required
-              min="0"
-              max="100"
-              step="0.01"
-              type="number"
-              value={form.porcentajeToma}
-              onChange={(e) => change("porcentajeToma", e.target.value)}
-              className={input}
-            />
-          </label>
-          <div className="text-sm font-medium">
-            Valor ingreso
-            <p className="mt-1 h-9 rounded-md border border-border bg-muted px-3 py-2">
-              {money.format(ingreso)}
-            </p>
-          </div>
-          <div className="text-sm font-medium">
-            Diferencia
-            <p className="mt-1 h-9 rounded-md border border-border bg-muted px-3 py-2">
-              {money.format(diferencia)}
-            </p>
-          </div>
-          {costoSuperaDiferencia ? (
-            <p className="md:col-span-3 flex items-center gap-2 rounded-md border border-destructive bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-              <span aria-hidden="true">⚠</span>
-              El presupuesto supera la diferencia.
-            </p>
-          ) : null}
-          <label className="md:col-span-3 text-sm font-medium">
-            Detalle
-            <textarea
-              value={form.detalle}
-              onChange={(e) => change("detalle", e.target.value)}
-              className="min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm"
-            />
-          </label>
-          <label className="md:col-span-3 text-sm font-medium">
-            Observaciones
-            <textarea
-              value={form.observaciones}
-              onChange={(e) => change("observaciones", e.target.value)}
-              className="min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm"
-            />
-          </label>
-        </div>
-        <div className="flex justify-end gap-2 border-t border-border p-3">
-          <ActionButton type="button" variant="outline" onClick={close}>
-            Cancelar
-          </ActionButton>
-          <ActionButton type="submit" disabled={!unit || save.isPending}>
-            {save.isPending ? "Guardando..." : "Guardar"}
-          </ActionButton>
-        </div>
-      </form>
-    </Modal>
-  );
-}
-function daysBetween(start: string, end: string | null) {
-  if (!start || !end) return null;
-  const milliseconds = new Date(`${end}T00:00:00`).getTime() - new Date(`${start}T00:00:00`).getTime();
-  return Number.isFinite(milliseconds) && milliseconds >= 0 ? Math.round(milliseconds / 86_400_000) : null;
-}
-function statusClass(estado: LiessPresupuesto["estado"]) {
-  return estado === "Aprobado" ? "bg-emerald-600 text-white" : estado === "Rechazado" ? "bg-destructive text-destructive-foreground" : "bg-amber-500 text-amber-950";
-}
-function BudgetStatusDialog({ item, close }: { item: LiessPresupuesto; close: () => void }) {
-  const client = useQueryClient();
-  const [estado, setEstado] = useState<LiessPresupuesto["estado"]>(item.estado);
-  const [fechaIngresoTaller, setFechaIngresoTaller] = useState(item.fechaIngresoTaller);
-  const [fechaEgresoTaller, setFechaEgresoTaller] = useState(item.fechaEgresoTaller ?? "");
-  const blocked = estado === "Rechazado";
-  const update = useMutation({
-    mutationFn: () => updateLiessPresupuestoEstado(item._id, { estado, fechaIngresoTaller, fechaEgresoTaller: fechaEgresoTaller || null }),
-    onSuccess: (data) => {
-      toast.success(data.message);
-      client.invalidateQueries({ queryKey: ["liess", "reparaciones", "presupuestos"] });
-      close();
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-  const days = daysBetween(fechaIngresoTaller, fechaEgresoTaller || null);
-  const input = "mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
-  return <Modal close={close}>
-    <form onSubmit={(event) => { event.preventDefault(); update.mutate(); }}>
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <div><h2 className="text-xl font-semibold">Gestionar presupuesto</h2><p className="text-xs text-muted-foreground">{item.unidad.interno} · {item.unidad.marca} {item.unidad.version}</p></div>
-        <button type="button" onClick={close} aria-label="Cerrar"><X /></button>
-      </div>
-      <div className="grid gap-3 p-4 md:grid-cols-3">
-        <label className="text-sm font-medium">Estado<select value={estado} onChange={(event) => setEstado(event.target.value as LiessPresupuesto["estado"])} className={input}><option>Pendiente</option><option>Aprobado</option><option>Rechazado</option></select></label>
-        <label className="text-sm font-medium">F. ingreso<input required={!blocked} disabled={blocked} type="date" value={fechaIngresoTaller} onChange={(event) => setFechaIngresoTaller(event.target.value)} className={input} /></label>
-        <label className="text-sm font-medium">F. egreso<input disabled={blocked} type="date" value={fechaEgresoTaller} onChange={(event) => setFechaEgresoTaller(event.target.value)} className={input} /></label>
-        <div className="md:col-span-3 rounded-md border border-border bg-muted/30 p-3 text-sm"><p className="font-medium">Detalle</p><p className="mt-1 whitespace-pre-wrap text-muted-foreground">{item.detalle || "Sin detalle informado."}</p></div>
-        {item.observaciones ? <div className="md:col-span-3 rounded-md border border-border bg-muted/30 p-3 text-sm"><p className="font-medium">Observaciones</p><p className="mt-1 whitespace-pre-wrap text-muted-foreground">{item.observaciones}</p></div> : null}
-        <section className="md:col-span-3 rounded-md border border-border p-4"><p className="text-xs font-semibold uppercase tracking-[.18em] text-muted-foreground">Resumen</p><div className="mt-3 grid gap-3 text-sm md:grid-cols-3"><div><p className="text-muted-foreground">Estado</p><span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(estado)}`}>{estado}</span></div><div><p className="text-muted-foreground">Días de reparación</p><p className="mt-1 font-medium">{days == null ? "-" : `${days} día${days === 1 ? "" : "s"}`}</p></div><div><p className="text-muted-foreground">Valor de reparación</p><p className="mt-1 font-medium">{money.format(item.costoArs)}</p></div></div></section>
-      </div>
-      <div className="flex justify-end gap-2 border-t border-border p-3"><ActionButton type="button" variant="outline" onClick={close}>Cancelar</ActionButton><ActionButton type="submit" disabled={update.isPending}>{update.isPending ? "Guardando..." : "Guardar cambios"}</ActionButton></div>
-    </form>
-  </Modal>;
-}
-function Workshops({ close }: { close: () => void }) {
-  const client = useQueryClient();
-  const query = useQuery({
-    queryKey: ["liess", "reparaciones", "talleres", "todos"],
-    queryFn: () => getLiessTalleres(true),
-  });
-  const [edit, setEdit] = useState<LiessTaller | null>(null);
-  const [nombre, setNombre] = useState(""),
-    [tipo, setTipo] = useState("");
-  const save = useMutation({
-    mutationFn: () => saveLiessTaller({ nombre, tipoTrabajo: tipo }, edit?._id),
-    onSuccess: () => {
-      client.invalidateQueries({
-        queryKey: ["liess", "reparaciones", "talleres"],
-      });
-      setEdit(null);
-      setNombre("");
-      setTipo("");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-  const toggle = useMutation({
-    mutationFn: (t: LiessTaller) => setLiessTallerActivo(t._id, !t.activo),
-    onSuccess: () =>
-      client.invalidateQueries({
-        queryKey: ["liess", "reparaciones", "talleres"],
-      }),
-  });
-  return (
-    <Modal close={close}>
-      <div className="flex items-center justify-between border-b border-border p-3">
-        <h2 className="text-xl font-semibold">Talleres</h2>
-        <button onClick={close}>
-          <X />
-        </button>
-      </div>
-      <form
-        className="grid gap-2 border-b border-border p-3 md:grid-cols-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          save.mutate();
-        }}
-      >
-        <input
-          required
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-        />
-        <input
-          required
-          placeholder="Tipo de trabajo"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-        />
-        <ActionButton type="submit" className="w-full">
-          {edit ? "Guardar" : "Agregar"}
-        </ActionButton>
-      </form>
-      <div className="max-h-[55vh] overflow-auto p-3 space-y-2">
-        {query.data?.data.map((t) => (
-          <div
-            key={t._id}
-            className="flex items-center justify-between rounded-md border border-border p-2 text-sm"
-          >
-            <span>
-              <strong>{t.nombre}</strong> · {t.tipoTrabajo}
-              {!t.activo ? " · Inactivo" : ""}
-            </span>
-            <span className="flex gap-1">
-              <ActionButton
-                size="icon-sm"
-                variant="outline"
-                onClick={() => {
-                  setEdit(t);
-                  setNombre(t.nombre);
-                  setTipo(t.tipoTrabajo);
-                }}
-              >
-                <Edit3 />
-              </ActionButton>
-              <ActionButton
-                size="sm"
-                variant="outline"
-                onClick={() => toggle.mutate(t)}
-              >
-                {t.activo ? "Desactivar" : "Reactivar"}
-              </ActionButton>
-            </span>
-          </div>
-        ))}
-      </div>
-    </Modal>
-  );
-}
-export default function LiessReparacionesView() {
-  const query = useQuery({
-    queryKey: ["liess", "reparaciones", "presupuestos"],
-    queryFn: getLiessPresupuestos,
-  });
-  const [create, setCreate] = useState(false),
-    [workshops, setWorkshops] = useState(false),
-    [statusItem, setStatusItem] = useState<LiessPresupuesto | null>(null);
-  const rows = query.data?.data ?? [];
-  return (
-    <div className="font-preset space-y-3 bg-muted p-3">
-      <section className="flex flex-col justify-between gap-3 rounded-lg border border-border bg-card p-3 md:flex-row md:items-center">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">
-            LIESS
-          </p>
-          <h1 className="text-xl font-semibold">Reparaciones</h1>
-          <p className="text-sm text-muted-foreground">
-            Presupuestos y seguimiento de ingreso a talleres.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <ActionButton variant="outline" onClick={() => setWorkshops(true)}>
-            <Wrench />
-            Talleres
-          </ActionButton>
-          <ActionButton onClick={() => setCreate(true)}>
-            <Plus />
-            Generar nuevo presupuesto
-          </ActionButton>
-        </div>
-      </section>
-      {query.isLoading ? (
-        <section className="rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground">
-          Cargando presupuestos...
-        </section>
-      ) : (
-        <section className="overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="min-w-[1320px] w-full text-sm">
-            <thead className="bg-muted text-xs uppercase text-muted-foreground">
-              <tr>
-                {[
-                  "F. pedido",
-                  "Interno",
-                  "Unidad",
-                  "Taller",
-                  "N.º",
-                  "Ingreso",
-                  "Egreso",
-                  "Estado",
-                  "Prioridad",
-                  "Costo",
-                  "V. ingreso",
-                  "Acciones",
-                ].map((h) => (
-                  <th key={h} className="px-3 py-2 text-left">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r._id} className="border-t border-border">
-                  <td className="px-3 py-1.5">{r.fechaPedido}</td>
-                  <td className="px-3 py-1.5 font-medium">
-                    {r.unidad.interno}
-                  </td>
-                  <td className="px-3 py-1.5">
-                    {r.unidad.marca} {r.unidad.version}
-                  </td>
-                  <td className="px-3 py-1.5">{r.tallerNombre}</td>
-                  <td className="px-3 py-1.5">{r.numeroPresupuesto}</td>
-                  <td className="px-3 py-1.5">{r.fechaIngresoTaller}</td>
-                  <td className="px-3 py-1.5">{r.fechaEgresoTaller ?? "-"}</td>
-                  <td className="px-3 py-1.5"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(r.estado)}`}>{r.estado}</span></td>
-                  <td className="px-3 py-1.5">{r.prioridad}</td>
-                  <td className="px-3 py-1.5">{money.format(r.costoArs)}</td>
-                  <td className="px-3 py-1.5">
-                    {money.format(r.valorIngreso)}
-                  </td>
-                  <td className="px-3 py-1.5">
-                    <ActionButton
-                      size="icon-sm"
-                      variant="outline"
-                      onClick={() => setStatusItem(r)}
-                      title="Cambiar estado"
-                      aria-label="Cambiar estado"
-                    >
-                      <ClipboardPenLine />
-                    </ActionButton>
-                  </td>
-                </tr>
-              ))}
-              {!rows.length ? (
-                <tr>
-                  <td
-                    colSpan={12}
-                    className="p-8 text-center text-muted-foreground"
-                  >
-                    No hay presupuestos cargados.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </section>
-      )}
-      {create ? <BudgetDialog close={() => setCreate(false)} /> : null}
-      {statusItem ? <BudgetStatusDialog item={statusItem} close={() => setStatusItem(null)} /> : null}
-      {workshops ? <Workshops close={() => setWorkshops(false)} /> : null}
+  const [form, setForm] = useState<BudgetForm>(blank);
+  const [unit, setUnit] = useState<LiessUnidadReparacion | null>(null);
+  const talleres = useQuery({ queryKey: ["liess", "reparaciones", "talleres"], queryFn: () => getLiessTalleres() });
+  const change = (key: keyof BudgetForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const lookup = useMutation({ mutationFn: () => getLiessUnidad(Number(form.interno), form.tipoUnidad), onSuccess: (response) => setUnit(response.data), onError: (error: Error) => { setUnit(null); toast.error(error.message); } });
+  const save = useMutation({ mutationFn: () => createLiessPresupuesto({ fecha: form.fecha, interno: Number(form.interno), tipoUnidad: form.tipoUnidad, kmInformado: Number(form.kmInformado), tallerId: form.tallerId, numeroPresupuesto: form.numeroPresupuesto, costo: Number(form.costo), prioridad: form.prioridad, detalles: form.detalles } satisfies LiessPresupuestoV2Payload), onSuccess: (response) => { toast.success(response.message); client.invalidateQueries({ queryKey: ["liess", "reparaciones", "presupuestos"] }); close(); }, onError: (error: Error) => toast.error(error.message) });
+  const invalid = !unit || !form.fecha || !form.tallerId || form.kmInformado === "" || !Number.isInteger(Number(form.kmInformado)) || Number(form.kmInformado) < 0 || form.costo === "" || !Number.isFinite(Number(form.costo)) || Number(form.costo) < 0 || !form.detalles.trim();
+
+  return <Modal close={close} wide pending={save.isPending}><form onSubmit={(event) => { event.preventDefault(); if (!invalid) save.mutate(); }}>
+    <header className="flex items-center justify-between border-b border-border px-3 py-3"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">LIESS</p><Dialog.Title className="mt-1 text-xl font-semibold">Nuevo presupuesto de reparación</Dialog.Title></div><button type="button" aria-label="Cerrar diálogo" onClick={close} disabled={save.isPending} className="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"><X size={18} /></button></header>
+    <div className="grid gap-3 p-3 md:grid-cols-3">
+      <label className="text-sm font-medium">Fecha<input required type="date" value={form.fecha} onChange={(event) => change("fecha", event.target.value)} className={input} /></label>
+      <label className="text-sm font-medium">Tipo<select value={form.tipoUnidad} onChange={(event) => { change("tipoUnidad", event.target.value); setUnit(null); }} className={input}><option value="nuevo">Nuevo</option><option value="usado">Usado</option></select></label>
+      <label className="text-sm font-medium">N. Interno<div className="mt-1 flex gap-2"><input required inputMode="numeric" value={form.interno} onChange={(event) => { change("interno", event.target.value.replace(/\D/g, "")); setUnit(null); }} className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm" /><ActionButton type="button" size="icon-sm" variant="outline" aria-label="Buscar interno" title="Buscar interno" disabled={!form.interno || lookup.isPending} onClick={() => lookup.mutate()}><Search size={16} /></ActionButton></div></label>
+      {unit ? <div className="rounded-md border border-border bg-muted p-3 text-sm md:col-span-3"><span className="font-semibold">Unidad encontrada:</span> {unit.marca} · {unit.version} · {unit.color || "Sin color"} · {unit.chasis || "Sin chasis"}</div> : null}
+      <label className="text-sm font-medium">KM informado<input required inputMode="numeric" value={form.kmInformado} onChange={(event) => change("kmInformado", event.target.value.replace(/\D/g, ""))} className={input} /></label>
+      <label className="text-sm font-medium">Taller<select required value={form.tallerId} onChange={(event) => change("tallerId", event.target.value)} className={input} disabled={talleres.isLoading || talleres.isError}><option value="">Seleccionar taller</option>{talleres.data?.data.map((taller) => <option key={taller._id} value={taller._id}>{taller.nombre} · {taller.tipoTrabajo}</option>)}</select>{talleres.isError ? <span className="mt-1 block text-xs text-destructive">{talleres.error.message}</span> : null}</label>
+      <label className="text-sm font-medium">N. Presupuesto <span className="font-normal text-muted-foreground">(opcional)</span><input value={form.numeroPresupuesto} onChange={(event) => change("numeroPresupuesto", event.target.value)} className={input} /></label>
+      <label className="text-sm font-medium">Costo<input required type="text" inputMode="numeric" value={pesosInput(form.costo)} onChange={(event) => change("costo", event.target.value.replace(/\D/g, ""))} placeholder="$ 0" className={input} /></label>
+      <label className="text-sm font-medium">Prioridad<select value={form.prioridad} onChange={(event) => change("prioridad", event.target.value)} className={input}><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option></select></label>
+      <label className="text-sm font-medium md:col-span-2">Detalles<textarea required rows={3} value={form.detalles} onChange={(event) => change("detalles", event.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /></label>
     </div>
-  );
+    <footer className="flex justify-end gap-2 border-t border-border px-3 py-3"><ActionButton type="button" variant="outline" onClick={close} disabled={save.isPending}>Cancelar</ActionButton><ActionButton type="submit" disabled={invalid || save.isPending}>{save.isPending ? "Guardando..." : "Cargar presupuesto"}</ActionButton></footer>
+  </form></Modal>;
+}
+
+const etapaLabels = ["Pendiente de ingreso", "Ingresada", "Diagnóstico", "Esperando Repuestos", "En Reparación", "Reparada (OK)"] as const;
+const etapaActual = (etapas: readonly boolean[]) => etapaLabels[Math.max(etapas.lastIndexOf(true), 0)];
+
+function ManageDialog({ item, close }: { item: LiessPresupuestoV2; close: () => void }) {
+  const client = useQueryClient();
+  const [estado, setEstado] = useState<LiessReparacionEstado>(item.estado);
+  const [fechaIngreso, setFechaIngreso] = useState(item.fechaIngreso ?? "");
+  const [fechaEgreso, setFechaEgreso] = useState(item.fechaEgreso ?? "");
+  const [etapas, setEtapas] = useState<[boolean, boolean, boolean, boolean, boolean, boolean]>(item.etapasReparacion);
+  useEffect(() => { if (fechaIngreso) setEtapas((current) => [true, true, current[2], current[3], current[4], current[5]]); }, [fechaIngreso]);
+  const mutation = useMutation({ mutationFn: () => manageLiessPresupuesto(item._id, { estado, fechaIngreso: estado === "Aprobado" ? fechaIngreso : null, fechaEgreso: estado === "Aprobado" ? fechaEgreso || null : null, etapasReparacion: etapas }), onSuccess: (response) => { toast.success(response.message); client.invalidateQueries({ queryKey: ["liess", "reparaciones", "presupuestos"] }); close(); }, onError: (error: Error) => toast.error(error.message) });
+  const invalidDates = estado === "Aprobado" && Boolean(fechaEgreso && (!fechaIngreso || fechaEgreso < fechaIngreso));
+  const toggle = (index: number) => setEtapas((current) => { if (fechaIngreso && index < 2) return current; const next = [...current] as [boolean, boolean, boolean, boolean, boolean, boolean]; next[index] = !next[index]; return next; });
+  return <Modal close={close} pending={mutation.isPending}><form onSubmit={(event) => { event.preventDefault(); if (!invalidDates) mutation.mutate(); }}><header className="flex items-center justify-between border-b border-border px-3 py-3"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">Interno {item.unidad.interno}</p><Dialog.Title className="mt-1 text-xl font-semibold">Gestionar presupuesto</Dialog.Title></div><button type="button" aria-label="Cerrar diálogo" onClick={close} disabled={mutation.isPending} className="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"><X size={18} /></button></header><div className="space-y-3 p-3"><label className="block text-sm font-medium">Estado<select value={estado} onChange={(event) => setEstado(event.target.value as LiessReparacionEstado)} className={input}><option value="Pendiente">Pendiente</option><option value="Aprobado">Aprobado</option><option value="Rechazado">Rechazado</option></select></label>{estado === "Aprobado" ? <><div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">F. Ingreso <span className="font-normal text-muted-foreground">(opcional)</span><input type="date" value={fechaIngreso} onChange={(event) => setFechaIngreso(event.target.value)} className={input} /></label><label className="text-sm font-medium">F. Egreso <span className="font-normal text-muted-foreground">(opcional)</span><input type="date" min={fechaIngreso || undefined} value={fechaEgreso} onChange={(event) => setFechaEgreso(event.target.value)} className={input} /></label></div><fieldset className="space-y-2 rounded-md border border-border p-3"><legend className="px-1 text-sm font-semibold">Etapas de reparación</legend>{etapaLabels.map((label, index) => { const blocked = (index > 0 && !etapas[index - 1]) || etapas.slice(index + 1).some(Boolean); return <label key={label} className={`flex items-center gap-2 text-sm ${blocked ? "text-muted-foreground" : ""}`}><input type="checkbox" checked={etapas[index]} disabled={blocked || mutation.isPending} onChange={() => toggle(index)} />{label}</label>; })}</fieldset>{fechaEgreso && fechaIngreso ? <p className="text-sm text-muted-foreground">Días de reparación: {Math.round((Date.parse(`${fechaEgreso}T00:00:00Z`) - Date.parse(`${fechaIngreso}T00:00:00Z`)) / 86_400_000)}</p> : null}</> : <p className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">Las fechas y etapas de reparación se informan cuando el presupuesto está aprobado.</p>}{invalidDates ? <p className="text-sm text-destructive">El egreso requiere una fecha de ingreso y no puede ser anterior.</p> : null}</div><footer className="flex justify-end gap-2 border-t border-border px-3 py-3"><ActionButton type="button" variant="outline" onClick={close} disabled={mutation.isPending}>Cancelar</ActionButton><ActionButton type="submit" disabled={invalidDates || mutation.isPending}>{mutation.isPending ? "Guardando..." : "Guardar gestión"}</ActionButton></footer></form></Modal>;
+}
+
+const statusClass: Record<LiessReparacionEstado, string> = { Pendiente: "border-amber-200 bg-amber-50 text-amber-800", Aprobado: "border-emerald-200 bg-emerald-50 text-emerald-800", Rechazado: "border-red-200 bg-red-50 text-red-800" };
+
+function DetailDialog({ item, close }: { item: LiessPresupuestoV2; close: () => void }) {
+  return <Modal close={close} wide><header className="flex items-center justify-between border-b border-border px-3 py-3"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">Interno {item.unidad.interno}</p><Dialog.Title className="mt-1 text-xl font-semibold">Presupuesto de reparación</Dialog.Title></div><button type="button" aria-label="Cerrar diálogo" onClick={close} className="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"><X size={18} /></button></header><div className="grid gap-3 p-3 text-sm sm:grid-cols-2 lg:grid-cols-3"><p><span className="text-muted-foreground">Fecha: </span>{dateLabel(item.fecha)}</p><p><span className="text-muted-foreground">Unidad: </span>{item.unidad.marca} · {item.unidad.version}</p><p><span className="text-muted-foreground">Color: </span>{item.unidad.color || "Sin color"}</p><p><span className="text-muted-foreground">KM informado: </span>{new Intl.NumberFormat("es-AR").format(item.kmInformado)}</p><p><span className="text-muted-foreground">Taller: </span>{item.tallerNombre} · {item.tallerTipoTrabajo}</p><p><span className="text-muted-foreground">N. Presupuesto: </span>{item.numeroPresupuesto || "-"}</p><p><span className="text-muted-foreground">Costo: </span>{money.format(item.costo)}</p><p><span className="text-muted-foreground">Prioridad: </span>{item.prioridad}</p><p><span className="text-muted-foreground">Estado: </span>{item.estado}</p><p className="sm:col-span-2 lg:col-span-3"><span className="text-muted-foreground">Detalles: </span>{item.detalles}</p></div><footer className="flex justify-end border-t border-border px-3 py-3"><ActionButton onClick={close}>Cerrar</ActionButton></footer></Modal>;
+}
+
+function TalleresDialog({ close }: { close: () => void }) {
+  const client = useQueryClient();
+  const query = useQuery({ queryKey: ["liess", "reparaciones", "talleres", "todos"], queryFn: () => getLiessTalleres(true) });
+  const [edit, setEdit] = useState<LiessTaller | null>(null);
+  const [nombre, setNombre] = useState("");
+  const [tipoTrabajo, setTipoTrabajo] = useState("");
+  const reset = () => { setEdit(null); setNombre(""); setTipoTrabajo(""); };
+  const refresh = () => { client.invalidateQueries({ queryKey: ["liess", "reparaciones", "talleres"] }); };
+  const save = useMutation({ mutationFn: () => saveLiessTaller({ nombre: nombre.trim(), tipoTrabajo: tipoTrabajo.trim() }, edit?._id), onSuccess: (response) => { toast.success(response.message); refresh(); reset(); }, onError: (error: Error) => toast.error(error.message) });
+  const active = useMutation({ mutationFn: (item: LiessTaller) => setLiessTallerActivo(item._id, !item.activo), onSuccess: (response) => { toast.success(response.message); refresh(); }, onError: (error: Error) => toast.error(error.message) });
+  const items = query.data?.data ?? [];
+  const busy = save.isPending || active.isPending;
+  return <Modal close={close} wide pending={busy}><header className="flex items-center justify-between border-b border-border px-3 py-3"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">LIESS</p><Dialog.Title className="mt-1 text-xl font-semibold">Talleres</Dialog.Title></div><button type="button" aria-label="Cerrar diálogo" onClick={close} disabled={busy} className="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"><X size={18} /></button></header><div className="grid gap-4 p-3 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.7fr)]"><section className="overflow-hidden rounded-md border border-border"><div className="overflow-x-auto"><table className="w-full min-w-[460px] text-sm"><thead className="bg-muted text-left text-[11px] uppercase tracking-[.12em] text-muted-foreground"><tr><th className="px-3 py-2">Nombre</th><th className="px-3 py-2">Tipo de trabajo</th><th className="px-3 py-2">Estado</th><th className="px-3 py-2 text-right">Acciones</th></tr></thead><tbody>{query.isLoading ? <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">Cargando talleres...</td></tr> : query.isError ? <tr><td colSpan={4} className="px-3 py-8 text-center text-destructive">{query.error.message}</td></tr> : items.map((item) => <tr key={item._id} className="border-t border-border"><td className="px-3 py-2 font-medium">{item.nombre}</td><td className="px-3 py-2">{item.tipoTrabajo}</td><td className="px-3 py-2">{item.activo ? <span className="text-emerald-700">Activo</span> : <span className="text-muted-foreground">Inactivo</span>}</td><td className="px-3 py-2"><div className="flex justify-end gap-1"><EditActionButton size="icon-sm" title="Editar taller" aria-label={`Editar ${item.nombre}`} disabled={busy} onClick={() => { setEdit(item); setNombre(item.nombre); setTipoTrabajo(item.tipoTrabajo); }}><Pencil size={15} /></EditActionButton><EditActionButton size="sm" title={item.activo ? "Desactivar taller" : "Reactivar taller"} disabled={busy} onClick={() => active.mutate(item)}>{item.activo ? "Desactivar" : "Reactivar"}</EditActionButton></div></td></tr>)}{!query.isLoading && !query.isError && !items.length ? <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">No hay talleres cargados.</td></tr> : null}</tbody></table></div></section><form onSubmit={(event) => { event.preventDefault(); if (nombre.trim() && tipoTrabajo.trim()) save.mutate(); }} className="h-fit space-y-3 rounded-md border border-border p-3"><h2 className="font-semibold">{edit ? "Editar taller" : "Nuevo taller"}</h2><label className="block text-sm font-medium">Nombre<input required value={nombre} onChange={(event) => setNombre(event.target.value)} className={input} /></label><label className="block text-sm font-medium">Tipo de trabajo<input required value={tipoTrabajo} onChange={(event) => setTipoTrabajo(event.target.value)} className={input} /></label><div className="flex justify-end gap-2"><ActionButton type="button" variant="outline" disabled={busy} onClick={reset}>Cancelar</ActionButton><ActionButton type="submit" disabled={busy || !nombre.trim() || !tipoTrabajo.trim()}>{save.isPending ? "Guardando..." : edit ? "Guardar cambios" : "Crear taller"}</ActionButton></div></form></div><footer className="flex justify-end border-t border-border px-3 py-3"><ActionButton variant="outline" onClick={close} disabled={busy}>Cerrar</ActionButton></footer></Modal>;
+}
+
+export default function LiessReparacionesView() {
+  const [newBudget, setNewBudget] = useState(false);
+  const [manage, setManage] = useState<LiessPresupuestoV2 | null>(null);
+  const [detail, setDetail] = useState<LiessPresupuestoV2 | null>(null);
+  const [talleresOpen, setTalleresOpen] = useState(false);
+  const [etapaFiltro, setEtapaFiltro] = useState<(typeof etapaLabels)[number] | "TODAS">("TODAS");
+  const query = useQuery({ queryKey: ["liess", "reparaciones", "presupuestos"], queryFn: getLiessPresupuestos });
+  const allItems = query.data?.data ?? [];
+  const items = etapaFiltro === "TODAS" ? allItems : allItems.filter((item) => item.estado === "Aprobado" && etapaActual(item.etapasReparacion) === etapaFiltro);
+  return <div className="font-preset space-y-3 bg-muted p-3">
+    <section className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 md:flex-row md:items-center md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">LIESS</p><h1 className="mt-1 text-xl font-semibold">Reparaciones</h1><p className="mt-1 text-sm text-muted-foreground">Cargá y gestioná presupuestos de reparación por interno.</p></div><div className="flex gap-2"><ActionButton variant="outline" onClick={() => setTalleresOpen(true)}><Wrench size={16} />Talleres</ActionButton><ActionButton onClick={() => setNewBudget(true)}><Plus size={16} />Nuevo presupuesto</ActionButton></div></section>
+    <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2"><label className="text-sm font-medium">Etapa de reparación<select value={etapaFiltro} onChange={(event) => setEtapaFiltro(event.target.value as (typeof etapaLabels)[number] | "TODAS")} className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"><option value="TODAS">Todas</option>{etapaLabels.map((etapa) => <option key={etapa} value={etapa}>{etapa}</option>)}</select></label><span className="text-sm text-muted-foreground">{items.length} presupuesto{items.length === 1 ? "" : "s"}</span></section>
+    <section className="overflow-hidden rounded-lg border border-border bg-card"><div className="overflow-x-auto"><table className="min-w-[1320px] w-full text-sm"><thead className="bg-muted text-left text-[11px] uppercase tracking-[.12em] text-muted-foreground"><tr><th className="px-3 py-2">Fecha</th><th className="px-3 py-2">Interno</th><th className="px-3 py-2">Unidad</th><th className="px-3 py-2">KM</th><th className="px-3 py-2">Taller</th><th className="px-3 py-2 text-right">Costo</th><th className="px-3 py-2">Prioridad</th><th className="px-3 py-2">Estado</th><th className="px-3 py-2">Etapa reparación</th><th className="px-3 py-2">F. Ingreso</th><th className="px-3 py-2">F. Egreso</th><th className="px-3 py-2 text-center">Días</th><th className="px-3 py-2 text-right">Acciones</th></tr></thead><tbody>{query.isLoading ? <tr><td colSpan={13} className="px-3 py-10 text-center text-muted-foreground">Cargando presupuestos...</td></tr> : query.isError ? <tr><td colSpan={13} className="px-3 py-10 text-center text-destructive">{query.error.message}</td></tr> : items.map((item) => <tr key={item._id} className="border-t border-border hover:bg-muted"><td className="whitespace-nowrap px-3 py-2">{dateLabel(item.fecha)}</td><td className="px-3 py-2 font-semibold">{item.unidad.interno}</td><td className="px-3 py-2"><p>{item.unidad.marca} · {item.unidad.version}</p><p className="text-xs text-muted-foreground">{item.unidad.color || "Sin color"}</p></td><td className="px-3 py-2">{new Intl.NumberFormat("es-AR").format(item.kmInformado)}</td><td className="px-3 py-2"><p>{item.tallerNombre}</p><p className="text-xs text-muted-foreground">{item.tallerTipoTrabajo}</p></td><td className="px-3 py-2 text-right tabular-nums">{money.format(item.costo)}</td><td className="px-3 py-2">{item.prioridad}</td><td className="px-3 py-2"><span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${statusClass[item.estado]}`}>{item.estado}</span></td><td className="px-3 py-2">{item.estado === "Aprobado" ? etapaActual(item.etapasReparacion) : "-"}</td><td className="px-3 py-2 whitespace-nowrap">{dateLabel(item.fechaIngreso)}</td><td className="px-3 py-2 whitespace-nowrap">{dateLabel(item.fechaEgreso)}</td><td className="px-3 py-2 text-center">{item.diasReparacion ?? "-"}</td><td className="px-3 py-2"><div className="flex justify-end gap-1"><EditActionButton title="Ver presupuesto" aria-label={`Ver presupuesto ${item.unidad.interno}`} onClick={() => setDetail(item)}><Eye size={15} />Ver</EditActionButton><EditActionButton title="Gestionar presupuesto" aria-label={`Gestionar presupuesto ${item.unidad.interno}`} onClick={() => setManage(item)}><ClipboardPenLine size={15} />Gestionar</EditActionButton></div></td></tr>)}{!query.isLoading && !query.isError && !items.length ? <tr><td colSpan={13} className="px-3 py-10 text-center text-muted-foreground">Todavía no hay presupuestos cargados.</td></tr> : null}</tbody></table></div></section>
+    {newBudget ? <BudgetDialog close={() => setNewBudget(false)} /> : null}{detail ? <DetailDialog item={detail} close={() => setDetail(null)} /> : null}{manage ? <ManageDialog item={manage} close={() => setManage(null)} /> : null}{talleresOpen ? <TalleresDialog close={() => setTalleresOpen(false)} /> : null}
+  </div>;
 }

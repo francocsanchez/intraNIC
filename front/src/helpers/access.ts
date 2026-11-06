@@ -12,6 +12,7 @@ import {
   hasSolicitudCambioColorEstadoAccess,
   hasSolicitudCambioColorRejectAccess,
   hasRepuestosSiniestrosActionAccess,
+  hasLiessStockUsadosActionAccess,
   hasSuperAdminRole,
 } from "@/constants/roleAccess";
 
@@ -100,5 +101,6 @@ export {
   hasSolicitudCambioColorEstadoAccess,
   hasSolicitudCambioColorRejectAccess,
   hasRepuestosSiniestrosActionAccess,
+  hasLiessStockUsadosActionAccess,
   hasSuperAdminRole,
 };

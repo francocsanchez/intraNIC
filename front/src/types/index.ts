@@ -353,6 +353,7 @@ export const stockDisponibleLiesslItemSchema = z.object({
   reservaVendedor: z.string(),
   tipo: z.string(),
   fechaRecepcion: z.string(),
+  accion: z.enum(["OK", "Reparacion"]),
 });
 
 export const stockDisponibleLiessResumenSchema = z.object({
@@ -372,6 +373,11 @@ export const stockDisponibleLiessSchema = z.object({
 });
 export type StockDisponibleLiessItem = z.infer<typeof stockDisponibleLiesslItemSchema>;
 export type StockDisponibleLiessResponse = z.infer<typeof stockDisponibleLiessSchema>;
+export type LiessStockUsadoAccion = StockDisponibleLiessItem["accion"];
+export const liessStockUsadoAccionResponseSchema = z.object({
+  message: z.string(),
+  data: z.object({ interno: z.number(), accion: z.enum(["OK", "Reparacion"]) }),
+});
 
 //**************************** */
 // MIS RESERVAS
@@ -2909,15 +2915,20 @@ export const kintoDashboardResponseSchema = z.object({
 export type KintoDashboardResponse = z.infer<typeof kintoDashboardResponseSchema>;
 export const liessTallerSchema = z.object({ _id: z.string(), nombre: z.string(), tipoTrabajo: z.string(), activo: z.boolean(), createdAt: z.string(), updatedAt: z.string() });
 export const liessUnidadReparacionSchema = z.object({ interno: z.number(), tipo: z.enum(["nuevo", "usado"]), marca: z.string(), version: z.string(), color: z.string(), chasis: z.string(), anio: z.number().nullable(), kilometrosBase: z.number().nullable() });
-export const liessPresupuestoSchema = z.object({ _id: z.string(), fechaPedido: z.string(), unidad: liessUnidadReparacionSchema, tallerId: z.string(), tallerNombre: z.string(), tallerTipoTrabajo: z.string(), kmInformados: z.number(), costoArs: z.number(), numeroPresupuesto: z.string(), fechaIngresoTaller: z.string(), fechaEgresoTaller: z.string().nullable(), estado: z.enum(["Pendiente", "Aprobado", "Rechazado"]).default("Pendiente"), prioridad: z.enum(["Alta", "Media", "Baja"]), valorInfo: z.number(), porcentajeToma: z.number(), valorIngreso: z.number(), diferencia: z.number(), detalle: z.string(), observaciones: z.string(), createdAt: z.string(), updatedAt: z.string() });
+export const liessReparacionEstadoSchema = z.enum(["Pendiente", "Aprobado", "Rechazado"]);
+export const liessReparacionPrioridadSchema = z.enum(["Alta", "Media", "Baja"]);
+export const liessReparacionEtapasSchema = z.tuple([z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean()]);
+export const liessPresupuestoV2Schema = z.object({ _id: z.string(), fecha: z.string(), unidad: liessUnidadReparacionSchema, kmInformado: z.number(), tallerId: z.string(), tallerNombre: z.string(), tallerTipoTrabajo: z.string(), numeroPresupuesto: z.string(), costo: z.number(), prioridad: liessReparacionPrioridadSchema, detalles: z.string(), estado: liessReparacionEstadoSchema, fechaIngreso: z.string().nullable(), fechaEgreso: z.string().nullable(), etapasReparacion: liessReparacionEtapasSchema, diasReparacion: z.number().nullable(), createdAt: z.string(), updatedAt: z.string() });
 export const liessTalleresResponseSchema = z.object({ data: z.array(liessTallerSchema) });
-export const liessPresupuestosResponseSchema = z.object({ data: z.array(liessPresupuestoSchema) });
-export const liessUnidadReparacionResponseSchema = z.object({ data: liessUnidadReparacionSchema });
 export const liessTallerResponseSchema = z.object({ message: z.string(), data: liessTallerSchema });
-export const liessPresupuestoResponseSchema = z.object({ message: z.string(), data: liessPresupuestoSchema });
+export const liessUnidadReparacionResponseSchema = z.object({ data: liessUnidadReparacionSchema });
+export const liessPresupuestosV2ResponseSchema = z.object({ data: z.array(liessPresupuestoV2Schema) });
+export const liessPresupuestoV2ResponseSchema = z.object({ message: z.string(), data: liessPresupuestoV2Schema });
 export type LiessTaller = z.infer<typeof liessTallerSchema>;
 export type LiessUnidadReparacion = z.infer<typeof liessUnidadReparacionSchema>;
-export type LiessPresupuesto = z.infer<typeof liessPresupuestoSchema>;
+export type LiessReparacionEstado = z.infer<typeof liessReparacionEstadoSchema>;
+export type LiessReparacionPrioridad = z.infer<typeof liessReparacionPrioridadSchema>;
+export type LiessPresupuestoV2 = z.infer<typeof liessPresupuestoV2Schema>;
 export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
 export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;

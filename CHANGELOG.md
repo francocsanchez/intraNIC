@@ -2,7 +2,18 @@
 
 ## 2026-11-05
 
+- **LIESS · Reparaciones:** se rediseñó el módulo protegido con una colección de presupuestos v2 aislada de los históricos. Permite buscar internos nuevos o usados, cargar los datos iniciales, seleccionar talleres existentes activos y gestionar Pendiente, Aprobado o Rechazado; al aprobar exige fecha de ingreso y calcula los días hasta el egreso opcional.
+- **LIESS · Reparaciones:** la búsqueda del interno deja KM informado vacío y Costo se carga con máscara de pesos argentinos.
+- **LIESS · Reparaciones:** la grilla ahora oculta N. Presupuesto y Detalles; ambos se consultan desde un diálogo de solo lectura.
+- **LIESS · Reparaciones:** aprobar un presupuesto ya no exige F. Ingreso; F. Egreso continúa requiriendo ingreso válido.
+- **LIESS · Reparaciones:** Gestión incorpora las etapas secuenciales Pendiente de ingreso, Diagnóstico, Esperando Repuestos, En Reparación y Reparada (OK), visibles también en la grilla.
+- **LIESS · Reparaciones:** se agregó la administración de talleres con alta, edición, desactivación y reactivación; los presupuestos solo permiten seleccionar talleres activos.
+- **LIESS · Reparaciones:** se agregó el filtro de la grilla por etapa de reparación.
+- **LIESS · Reparaciones:** se agregó la etapa `Ingresada`; F. Ingreso la completa automáticamente junto con Pendiente de ingreso.
+
 - **Sesión:** las caídas transitorias del backend durante un deploy ya no eliminan la sesión local; el usuario se desconecta solo ante una respuesta 401 o 403 y la validación se reintenta automáticamente.
+
+- **Stock LIESS · Usados:** se agregó el Estado persistido (`OK` o `Reparación`) por interno. Los vendedores solo ven unidades `OK`; supervisores, gerentes y superAdmin pueden actualizarlo desde la tabla.
 
 - **Dashboard Administración:** las tarjetas compactas de usuario del modo TV reservan siempre espacio para el nombre antes de días e importe, incluso con muchas operaciones visibles.
 
@@ -22,6 +33,7 @@
 
 - **Dashboard Administración:** se agregó el modo TV opcional (`?mode=tv`) para 1920×1080: conserva ECharts en SVG, amplía tipografía, nodos, líneas, etiquetas y contraste de los tres gráficos sin usar escalado CSS ni modificar datos.
 
+- **Dashboard Salón:** `Operaciones por modelo` fue reemplazado por una proyección de cierre mensual calculada según el promedio de asignaciones por día hábil y contrastada con la meta mensual estimada desde el objetivo diario.
 - **Dashboard Salón:** se agregó un objetivo único diario de operaciones por sucursal y período; la tabla diaria indica el cumplimiento con un check verde o una cruz roja y colorea la celda del total, dejando sin indicador los días futuros y los períodos sin objetivo.
 - **Stock LIESS · Nuevos y Usados:** las tablas por marca ahora comparten anchos de columna fijos para conservar alineados los datos y encabezados entre grupos.
 - **Dashboard Salón:** debajo de la tabla inferior de vendedores se muestran avatares sin borde, rótulo ni líneas de celda, con foto por código SIAC o iniciales como fallback; la gestión de enlaces HTTP(S) para cada vendedor activo se trasladó a su pantalla propia de Configuración.
