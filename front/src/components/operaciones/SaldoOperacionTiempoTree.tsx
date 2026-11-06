@@ -19,7 +19,7 @@ const wrapNodeName = (name: string) => name.split(" ").reduce<string[]>((lines, 
   return lines;
 }, []).join("\n");
 
-const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boolean, clickable: boolean): Record<string, unknown> => {
+const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boolean, clickable: boolean, tvMode: boolean): Record<string, unknown> => {
   const tone = toneForAverage(node.averageDays);
   const metric = showSaldo && typeof node.saldoTotal === "number"
     ? `${formatDays(node.averageDays)} · ${formatMoney(node.saldoTotal)}`
@@ -27,20 +27,20 @@ const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boo
   return {
     ...node,
     ...(clickable ? { cursor: "pointer" } : {}),
-    itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: 1.5, shadowBlur: 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
+    itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: tvMode ? 2 : 1.5, shadowBlur: tvMode ? 0 : 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
     label: {
       formatter: `${wrapNodeName(node.name)}\n{days|${metric}}`,
       color: "#18181b",
-      fontSize: 11,
+      fontSize: tvMode ? 14 : 11,
       fontWeight: 600,
-      lineHeight: 16,
-      rich: { days: { color: tone.text, fontSize: 10, fontWeight: 400, lineHeight: 14 } },
+      lineHeight: tvMode ? 20 : 16,
+      rich: { days: { color: tone.text, fontSize: tvMode ? 12 : 10, fontWeight: 500, lineHeight: tvMode ? 18 : 14 } },
     },
-    children: node.children?.map((child) => toChartNode(child, showSaldo, clickable)),
+    children: node.children?.map((child) => toChartNode(child, showSaldo, clickable, tvMode)),
   };
 };
 
-export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancelacionAnalysisNode, options: { showSaldo: boolean; operationLabel: string; clickable?: boolean; edgeShape?: "curve" | "polyline" }): EChartsCoreOption => ({
+export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancelacionAnalysisNode, options: { showSaldo: boolean; operationLabel: string; clickable?: boolean; edgeShape?: "curve" | "polyline"; tvMode?: boolean }): EChartsCoreOption => ({
   tooltip: {
     trigger: "item",
     backgroundColor: "#18181b",
@@ -50,18 +50,18 @@ export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancela
   },
   series: [{
     type: "tree",
-    data: [toChartNode(tree, options.showSaldo, Boolean(options.clickable))],
+    data: [toChartNode(tree, options.showSaldo, Boolean(options.clickable), Boolean(options.tvMode))],
     orient: "RL",
-    top: "4%",
-    bottom: "4%",
-    left: "16%",
-    right: "16%",
+    top: options.tvMode ? "5%" : "4%",
+    bottom: options.tvMode ? "5%" : "4%",
+    left: options.tvMode ? "19%" : "16%",
+    right: options.tvMode ? "19%" : "16%",
     symbol: "circle",
-    symbolSize: 14,
+    symbolSize: options.tvMode ? 19 : 14,
     initialTreeDepth: -1,
     edgeShape: options.edgeShape ?? "polyline",
     roam: false,
-    lineStyle: { color: "#cbd5e1", width: 1.4 },
+    lineStyle: { color: "#94a3b8", width: options.tvMode ? 2 : 1.4 },
     label: { position: "left", align: "right", verticalAlign: "middle" },
     leaves: { label: { position: "left", align: "right", verticalAlign: "middle" } },
   }],

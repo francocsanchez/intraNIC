@@ -2,6 +2,8 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** se agregó el modo TV opcional (`?mode=tv`) para 1920×1080: conserva ECharts en SVG, amplía tipografía, nodos, líneas, etiquetas y contraste de los tres gráficos sin usar escalado CSS ni modificar datos.
+
 - **Dashboard Salón:** se agregó un objetivo único diario de operaciones por sucursal y período; la tabla diaria indica el cumplimiento con un check verde o una cruz roja y colorea la celda del total, dejando sin indicador los días futuros y los períodos sin objetivo.
 - **Stock LIESS · Nuevos y Usados:** las tablas por marca ahora comparten anchos de columna fijos para conservar alineados los datos y encabezados entre grupos.
 - **Dashboard Salón:** debajo de la tabla inferior de vendedores se muestran avatares sin borde, rótulo ni líneas de celda, con foto por código SIAC o iniciales como fallback; la gestión de enlaces HTTP(S) para cada vendedor activo se trasladó a su pantalla propia de Configuración.

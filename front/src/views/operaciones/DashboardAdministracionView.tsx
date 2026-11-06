@@ -5,6 +5,7 @@ import { getDashboardAdministracion, getDashboardAdministracionCobranzas } from 
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
 import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const MODEL_ROSE_COLORS = ["#93c5fd", "#86efac", "#fde68a", "#f9a8d4", "#c4b5fd", "#67e8f9", "#fdba74", "#a7f3d0"];
 const formatMillions = (value: number) => `${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.round(value / 1_000_000))}M`;
@@ -20,6 +21,8 @@ const WEEK_RANGES = [
 ] as const;
 
 export default function DashboardAdministracionView() {
+  const [searchParams] = useSearchParams();
+  const tvMode = searchParams.get("mode") === "tv";
   const query = useQuery({
     queryKey: ["dashboard-administracion"],
     queryFn: ({ signal }) => getDashboardAdministracion(signal),
@@ -35,8 +38,8 @@ export default function DashboardAdministracionView() {
     refetchOnWindowFocus: true,
   });
   const option = useMemo(() => query.data
-    ? createSaldoOperacionTiempoTreeOption(query.data.data.tree, { showSaldo: true, operationLabel: "Operaciones", edgeShape: "curve" })
-    : null, [query.data]);
+    ? createSaldoOperacionTiempoTreeOption(query.data.data.tree, { showSaldo: true, operationLabel: "Operaciones", edgeShape: "curve", tvMode })
+    : null, [query.data, tvMode]);
   const modelOption = useMemo<EChartsCoreOption | null>(() => query.data?.modelos.length ? ({
     color: MODEL_ROSE_COLORS,
     tooltip: {
@@ -53,11 +56,11 @@ export default function DashboardAdministracionView() {
       center: ["50%", "50%"],
       roseType: "area",
       itemStyle: { borderRadius: 8, borderColor: "var(--card)", borderWidth: 2 },
-      label: { formatter: "{b}\n{c}", color: "var(--foreground)", fontSize: 10 },
-      labelLine: { length: 6, length2: 6 },
+      label: { formatter: "{b}\n{c}", color: "var(--foreground)", fontSize: tvMode ? 14 : 10, fontWeight: tvMode ? 600 : 400, lineHeight: tvMode ? 18 : 14 },
+      labelLine: { length: tvMode ? 12 : 6, length2: tvMode ? 10 : 6, lineStyle: { width: tvMode ? 2 : 1 } },
       data: query.data.modelos.map((item) => ({ name: item.nombre, value: item.total })),
     }],
-  }) : null, [query.data]);
+  }) : null, [query.data, tvMode]);
   const weeklyChartOption = useMemo<EChartsCoreOption | null>(() => {
     const data = cobranzasQuery.data?.data;
     if (!data) return null;
@@ -68,10 +71,10 @@ export default function DashboardAdministracionView() {
     const targetColors = { achieved: "#86efac", progress: "#fde68a", below: "#fecaca" };
     return {
       color: getPresetChartColors(),
-      grid: { top: 12, right: 14, bottom: 28, left: 66 },
+      grid: { top: tvMode ? 24 : 12, right: tvMode ? 20 : 14, bottom: tvMode ? 38 : 28, left: tvMode ? 82 : 66 },
       tooltip: { trigger: "axis", valueFormatter: (value: number | string) => money.format(Number(value)) },
-      xAxis: { type: "category", data: weeks.map((week) => week.etiqueta), axisTick: { alignWithLabel: true }, axisLabel: { fontSize: 10 } },
-      yAxis: { type: "value", axisLabel: { fontSize: 9, formatter: (value: number) => formatChartMillions(value) }, splitLine: { lineStyle: { color: "var(--border)" } } },
+      xAxis: { type: "category", data: weeks.map((week) => week.etiqueta), axisTick: { alignWithLabel: true }, axisLabel: { fontSize: tvMode ? 14 : 10, fontWeight: tvMode ? 600 : 400 }, axisLine: { lineStyle: { width: tvMode ? 2 : 1 } } },
+      yAxis: { type: "value", axisLabel: { fontSize: tvMode ? 12 : 9, fontWeight: tvMode ? 600 : 400, formatter: (value: number) => formatChartMillions(value) }, axisLine: { show: true, lineStyle: { width: tvMode ? 2 : 1 } }, splitLine: { lineStyle: { color: "var(--border)", width: tvMode ? 1.5 : 1 } } },
       series: [
         {
           type: "bar",
@@ -83,25 +86,25 @@ export default function DashboardAdministracionView() {
               : undefined;
             return { value: week.total, ...(color ? { itemStyle: { color } } : {}) };
           }),
-          barMaxWidth: 48,
+          barMaxWidth: tvMode ? 64 : 48,
           itemStyle: { borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: "top", formatter: (params: { value?: number }) => formatChartMillions(Number(params.value ?? 0)), color: "var(--foreground)", fontSize: 14, fontWeight: 700, backgroundColor: "var(--card)", borderColor: "var(--border)", borderWidth: 1, borderRadius: 4, padding: [3, 6] },
+          label: { show: true, position: "top", formatter: (params: { value?: number }) => formatChartMillions(Number(params.value ?? 0)), color: "var(--foreground)", fontSize: tvMode ? 17 : 14, fontWeight: 700, backgroundColor: "var(--card)", borderColor: "var(--border)", borderWidth: tvMode ? 2 : 1, borderRadius: 4, padding: tvMode ? [4, 8] : [3, 6] },
         },
-        { type: "line", name: "Objetivo", data: data.objetivos, symbol: "none", connectNulls: false, lineStyle: { color: "#ef4444", type: "dashed", width: 2 } },
+        { type: "line", name: "Objetivo", data: data.objetivos, symbol: "none", connectNulls: false, lineStyle: { color: "#dc2626", type: "dashed", width: tvMode ? 3 : 2 } },
       ],
     };
-  }, [cobranzasQuery.data]);
+  }, [cobranzasQuery.data, tvMode]);
 
   if (query.isLoading) return <main className="grid h-dvh place-items-center overflow-hidden bg-muted font-preset text-lg text-muted-foreground">Cargando Dashboard Administración...</main>;
   if (query.isError || !query.data) return <main className="grid h-dvh place-items-center overflow-hidden bg-muted p-6 font-preset"><section className="max-w-lg rounded-md border border-destructive/30 bg-card p-6 text-center"><h1 className="text-xl font-semibold text-foreground">No se pudo cargar Dashboard Administración</h1><p className="mt-2 text-destructive">{query.error instanceof Error ? query.error.message : "Intentá actualizar nuevamente."}</p></section></main>;
 
   const { data } = query.data;
   const hasTreeBranches = Boolean(data.operations && data.tree.children?.length);
-  return <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-muted p-4 font-preset">
+  return <main className={`flex h-dvh min-h-0 flex-col overflow-hidden bg-muted font-preset ${tvMode ? "p-3" : "p-4"}`}>
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-card">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
-        <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Dashboard Administración</p><h1 className="text-xl font-bold text-foreground">Operaciones no canceladas</h1></div>
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted-foreground"><span className="font-medium text-foreground">Todos los períodos</span><span>Todas las sucursales</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-green-200" />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-yellow-200" />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-red-200" />18 días o más</span></div>
+      <header className={`flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border ${tvMode ? "px-6 py-4" : "px-5 py-3"}`}>
+        <div><p className={`${tvMode ? "text-sm" : "text-xs"} font-semibold uppercase tracking-[0.16em] text-muted-foreground`}>Dashboard Administración</p><h1 className={`${tvMode ? "text-3xl" : "text-xl"} font-bold text-foreground`}>Operaciones no canceladas</h1></div>
+        <div className={`flex flex-wrap items-center justify-end gap-x-4 gap-y-1 ${tvMode ? "text-sm" : "text-xs"} text-muted-foreground`}><span className="font-medium text-foreground">Todos los períodos</span><span>Todas las sucursales</span><span className="inline-flex items-center gap-1"><i className={`${tvMode ? "size-3.5" : "size-2.5"} rounded-full bg-green-200`} />Menos de 15 días</span><span className="inline-flex items-center gap-1"><i className={`${tvMode ? "size-3.5" : "size-2.5"} rounded-full bg-yellow-200`} />15 a 17,99 días</span><span className="inline-flex items-center gap-1"><i className={`${tvMode ? "size-3.5" : "size-2.5"} rounded-full bg-red-200`} />18 días o más</span></div>
       </header>
       <div className="grid min-h-0 flex-1 grid-cols-2 divide-x divide-border">
         <section className="min-h-0 overflow-hidden p-3">

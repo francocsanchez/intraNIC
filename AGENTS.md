@@ -2,6 +2,8 @@
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
+`Dashboard Administración` admite `?mode=tv` para visualización nítida en 1920×1080: conserva ECharts SVG, evita zoom y transformaciones CSS globales, y aumenta selectivamente tipografías, líneas, nodos y separaciones sin modificar datos ni APIs.
+
 `Links` vive en `/sistema/links`, usa el permiso independiente `links` y persiste exclusivamente en Mongo URL y descripción obligatorias. Todo usuario con el módulo puede crear, editar y eliminar enlaces; la tabla permite copiar el enlace o abrirlo en una pestaña nueva.
 La vista de `Links` debe tolerar que la consulta aún no tenga respuesta al renderizar, para conservar el build estricto de frontend en Docker.
 
