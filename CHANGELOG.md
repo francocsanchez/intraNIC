@@ -2,6 +2,8 @@
 
 ## 2026-11-05
 
+- **Sesión:** las caídas transitorias del backend durante un deploy ya no eliminan la sesión local; el usuario se desconecta solo ante una respuesta 401 o 403 y la validación se reintenta automáticamente.
+
 - **Dashboard Administración:** las tarjetas compactas de usuario del modo TV reservan siempre espacio para el nombre antes de días e importe, incluso con muchas operaciones visibles.
 
 - **Dashboard Administración:** la grilla jerárquica del modo TV no genera desplazamiento y ordena los usuarios en una única columna, distribuyendo las tarjetas dentro del alto disponible.

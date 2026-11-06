@@ -2,6 +2,8 @@
 Siempre actualizar este archivo y el CHANGELOG.md cada vez que se realice una implementacion.
 No registrar en el router una vista cuyo archivo no esté versionado en el mismo commit; el build de frontend se ejecuta con un checkout limpio en Docker.
 
+La sesión conserva `AUTH_TOKEN` y el usuario validado ante errores transitorios de red o reinicios por deploy; solo respuestas 401 o 403 eliminan la sesión y redirigen al login.
+
 `Dashboard Administración` admite `?mode=tv` o `?modo=tv` para visualización nítida en 1920×1080: conserva ECharts SVG, evita zoom y transformaciones CSS globales, y aumenta selectivamente tipografías, líneas, nodos y separaciones sin modificar datos ni APIs.
 Los importes mostrados dentro del árbol de `Dashboard Administración` se abrevian como millones enteros con sufijo `M` para favorecer la lectura a distancia.
 En modo TV, el árbol de `Dashboard Administración` prioriza nombres y pendientes de cobranza con etiquetas, nodos y aristas de tamaño ampliado mientras conserve superficie disponible.
