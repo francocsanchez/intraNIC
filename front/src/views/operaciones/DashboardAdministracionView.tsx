@@ -22,7 +22,7 @@ const WEEK_RANGES = [
 
 export default function DashboardAdministracionView() {
   const [searchParams] = useSearchParams();
-  const tvMode = searchParams.get("mode") === "tv";
+  const tvMode = searchParams.get("mode") === "tv" || searchParams.get("modo") === "tv";
   const query = useQuery({
     queryKey: ["dashboard-administracion"],
     queryFn: ({ signal }) => getDashboardAdministracion(signal),

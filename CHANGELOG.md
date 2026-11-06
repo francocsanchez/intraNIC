@@ -2,6 +2,10 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** el modo TV acepta `?mode=tv` y `?modo=tv`, para habilitar la visualización de tarjetas en ambas variantes de enlace.
+
+- **Dashboard Administración:** el árbol en modo TV representa usuarios, sucursales y total como tarjetas rectangulares conectadas, para aumentar la lectura de nombres, días e importes sin perder la jerarquía gráfica.
+
 - **Dashboard Administración:** el árbol, los modelos y los indicadores de saldo se limitan a la Sucursal SIAC del usuario autenticado cuando la tiene configurada; Cobranzas semanales conserva el total global.
 
 - **Dashboard Administración:** el árbol en modo TV amplía aún más nombres, pendientes de cobranza, días, nodos y aristas para aprovechar su superficie disponible.

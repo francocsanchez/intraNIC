@@ -11,10 +11,10 @@ const toneForAverage = (averageDays: number) => averageDays < 15
     ? { fill: "#fef9c3", stroke: "#facc15", text: "#854d0e" }
     : { fill: "#fee2e2", stroke: "#f87171", text: "#991b1b" };
 
-const wrapNodeName = (name: string) => name.split(" ").reduce<string[]>((lines, word) => {
+const wrapNodeName = (name: string, maxLength = 18) => name.split(" ").reduce<string[]>((lines, word) => {
   const currentLine = lines.at(-1) ?? "";
   if (!currentLine) lines.push(word);
-  else if (`${currentLine} ${word}`.length <= 18) lines[lines.length - 1] = `${currentLine} ${word}`;
+  else if (`${currentLine} ${word}`.length <= maxLength) lines[lines.length - 1] = `${currentLine} ${word}`;
   else lines.push(word);
   return lines;
 }, []).join("\n");
@@ -27,13 +27,14 @@ const toChartNode = (node: SaldoOperacionCancelacionAnalysisNode, showSaldo: boo
   return {
     ...node,
     ...(clickable ? { cursor: "pointer" } : {}),
-    itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: tvMode ? 2 : 1.5, shadowBlur: tvMode ? 0 : 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
+    itemStyle: { color: tone.fill, borderColor: tone.stroke, borderWidth: tvMode ? 2.5 : 1.5, shadowBlur: tvMode ? 0 : 5, shadowColor: "rgba(24, 24, 27, 0.08)" },
     label: {
-      formatter: `${wrapNodeName(node.name)}\n{days|${metric}}`,
+      formatter: `${wrapNodeName(node.name, tvMode ? 24 : 18)}\n{days|${metric}}`,
       color: "#18181b",
       fontSize: tvMode ? 18 : 11,
       fontWeight: 600,
       lineHeight: tvMode ? 25 : 16,
+      ...(tvMode ? { position: "inside", align: "center", verticalAlign: "middle" } : {}),
       rich: { days: { color: tone.text, fontSize: tvMode ? 16 : 10, fontWeight: 600, lineHeight: tvMode ? 22 : 14 } },
     },
     children: node.children?.map((child) => toChartNode(child, showSaldo, clickable, tvMode)),
@@ -52,18 +53,18 @@ export const createSaldoOperacionTiempoTreeOption = (tree: SaldoOperacionCancela
     type: "tree",
     data: [toChartNode(tree, options.showSaldo, Boolean(options.clickable), Boolean(options.tvMode))],
     orient: "RL",
-    top: options.tvMode ? "5%" : "4%",
-    bottom: options.tvMode ? "5%" : "4%",
-    left: options.tvMode ? "19%" : "16%",
-    right: options.tvMode ? "19%" : "16%",
-    symbol: "circle",
-    symbolSize: options.tvMode ? 24 : 14,
+    top: options.tvMode ? "6%" : "4%",
+    bottom: options.tvMode ? "6%" : "4%",
+    left: options.tvMode ? "4%" : "16%",
+    right: options.tvMode ? "4%" : "16%",
+    symbol: options.tvMode ? "rect" : "circle",
+    symbolSize: options.tvMode ? [248, 72] : 14,
     initialTreeDepth: -1,
     edgeShape: options.edgeShape ?? "polyline",
     roam: false,
     lineStyle: { color: "#94a3b8", width: options.tvMode ? 2.5 : 1.4 },
-    label: { position: "left", align: "right", verticalAlign: "middle" },
-    leaves: { label: { position: "left", align: "right", verticalAlign: "middle" } },
+    label: { position: options.tvMode ? "inside" : "left", align: options.tvMode ? "center" : "right", verticalAlign: "middle" },
+    leaves: { label: { position: options.tvMode ? "inside" : "left", align: options.tvMode ? "center" : "right", verticalAlign: "middle" } },
   }],
 });
 
