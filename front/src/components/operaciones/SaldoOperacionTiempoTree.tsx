@@ -3,7 +3,7 @@ import type { EChartsCoreOption } from "echarts/core";
 
 const formatDays = (value: number) => `${Math.round(value)} día${Math.round(value) === 1 ? "" : "s"}`;
 const formatDecimalDays = (value: number) => new Intl.NumberFormat("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
-const formatMoney = (value: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(value);
+const formatMoney = (value: number) => `$ ${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(Math.round(value / 1_000_000))}M`;
 
 const toneForAverage = (averageDays: number) => averageDays < 15
   ? { fill: "#dcfce7", stroke: "#4ade80", text: "#166534" }

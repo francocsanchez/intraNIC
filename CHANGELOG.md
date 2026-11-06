@@ -2,6 +2,8 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** los importes del árbol se muestran abreviados en millones enteros (por ejemplo, `$ 363M`) para priorizar su lectura en TV.
+
 - **Dashboard Administración:** se agregó el modo TV opcional (`?mode=tv`) para 1920×1080: conserva ECharts en SVG, amplía tipografía, nodos, líneas, etiquetas y contraste de los tres gráficos sin usar escalado CSS ni modificar datos.
 
 - **Dashboard Salón:** se agregó un objetivo único diario de operaciones por sucursal y período; la tabla diaria indica el cumplimiento con un check verde o una cruz roja y colorea la celda del total, dejando sin indicador los días futuros y los períodos sin objetivo.
