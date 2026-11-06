@@ -2,6 +2,10 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** el árbol, los modelos y los indicadores de saldo se limitan a la Sucursal SIAC del usuario autenticado cuando la tiene configurada; Cobranzas semanales conserva el total global.
+
+- **Dashboard Administración:** el árbol en modo TV amplía aún más nombres, pendientes de cobranza, días, nodos y aristas para aprovechar su superficie disponible.
+
 - **Dashboard Administración:** los importes del árbol se muestran abreviados en millones enteros (por ejemplo, `$ 363M`) para priorizar su lectura en TV.
 
 - **Dashboard Administración:** se agregó el modo TV opcional (`?mode=tv`) para 1920×1080: conserva ECharts en SVG, amplía tipografía, nodos, líneas, etiquetas y contraste de los tres gráficos sin usar escalado CSS ni modificar datos.

@@ -5,6 +5,7 @@ SELECT
   csq.cliente_nombre AS cliente_nombre,
   csq.Vendedor AS vendedor,
   sucursal_operacion.suc_nombre AS sucursal,
+  opera.sucursal_codigo AS sucursal_siac_codigo,
   opera.usuario_codigo AS usuario_operacion,
   usuario_operacion.usu_nombre AS nombre_usuario_operacion,
   csq.Numero_Fabrica AS numero_fabrica,

@@ -4,6 +4,8 @@ No registrar en el router una vista cuyo archivo no esté versionado en el mismo
 
 `Dashboard Administración` admite `?mode=tv` para visualización nítida en 1920×1080: conserva ECharts SVG, evita zoom y transformaciones CSS globales, y aumenta selectivamente tipografías, líneas, nodos y separaciones sin modificar datos ni APIs.
 Los importes mostrados dentro del árbol de `Dashboard Administración` se abrevian como millones enteros con sufijo `M` para favorecer la lectura a distancia.
+En modo TV, el árbol de `Dashboard Administración` prioriza nombres y pendientes de cobranza con etiquetas, nodos y aristas de tamaño ampliado mientras conserve superficie disponible.
+Si el usuario autenticado tiene Sucursal SIAC asignada, el árbol, los modelos y los indicadores de saldo de `Dashboard Administración` se filtran a esa sucursal usando snapshots Mongo; Cobranzas semanales conserva el total global.
 
 `Links` vive en `/sistema/links`, usa el permiso independiente `links` y persiste exclusivamente en Mongo URL y descripción obligatorias. Todo usuario con el módulo puede crear, editar y eliminar enlaces; la tabla permite copiar el enlace o abrirlo en una pestaña nueva.
 La vista de `Links` debe tolerar que la consulta aún no tenga respuesta al renderizar, para conservar el build estricto de frontend en Docker.

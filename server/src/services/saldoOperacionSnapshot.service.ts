@@ -213,7 +213,7 @@ const visibleSnapshotMatch = () => ({
   ],
 });
 
-const baseFilter = (params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
+const baseFilter = (params: { section?: string | null; entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; sucursalSiacCodigo?: number | null; usuario?: string | null; vendedor?: string | null; operacion?: string | null }) => {
   const entrega = normalizeEntrega(params.entrega);
   const filter: Record<string, unknown> = entrega === "entregadas" ? { entregada: true } : visibleSnapshotMatch();
   if (entrega !== "entregadas") {
@@ -227,6 +227,7 @@ const baseFilter = (params: { section?: string | null; entrega?: string | null; 
   const operacion = Number(params.operacion);
   if (ubicacion) filter.ubicacion = ubicacion;
   if (sucursal) filter.sucursal = sucursal;
+  if (Number.isInteger(params.sucursalSiacCodigo) && Number(params.sucursalSiacCodigo) > 0) filter.sucursalSiacCodigo = params.sucursalSiacCodigo;
   if (vendedor) filter.vendedor = vendedor;
   if (Number.isInteger(operacion) && operacion > 0) filter.codigoOperacion = operacion;
   if (usuario) {
@@ -312,6 +313,7 @@ export class SaldoOperacionSnapshotService {
           clienteNombre: trim(row.cliente_nombre),
           vendedor: trim(row.vendedor),
           sucursal: trim(row.sucursal, "SIN SUCURSAL"),
+          sucursalSiacCodigo: numberOrNull(row.sucursal_siac_codigo),
           usuarioOperacionSiac: trim(row.usuario_operacion),
           nombreUsuarioOperacionSiac: trim(row.nombre_usuario_operacion),
           numeroFabrica,
@@ -433,7 +435,7 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  static async summary(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; sucursalSiacCodigo?: number | null; usuario?: string | null; vendedor?: string |null }) {
     const { saldoRows, creditoRows } = await this.summaryRows(params);
     const grouped = new Map<string, number>();
     let creditoTotal = 0;
@@ -514,13 +516,16 @@ export class SaldoOperacionSnapshotService {
     return buildAnalysisResponse(groups, months, sucursalesPorMes, dimensions);
   }
 
-  static async noCanceladasAnalysis(month?: string | null, year?: string | null, dimensions: AnalysisDimension[] = defaultAnalysisDimensionOrder) {
+  static async noCanceladasAnalysis(month?: string | null, year?: string | null, dimensions: AnalysisDimension[] = defaultAnalysisDimensionOrder, sucursalSiacCodigo?: number | null) {
     const selectedMatch = month
       ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${month}-` } }
       : year ? { ...noCanceladasAnalysisMatch, fechaAsignacion: { $regex: `^${year}-` } } : noCanceladasAnalysisMatch;
+    const scopedMatch = Number.isInteger(sucursalSiacCodigo) && Number(sucursalSiacCodigo) > 0
+      ? { ...selectedMatch, sucursalSiacCodigo }
+      : selectedMatch;
     const [groups, months, sucursalesPorMes] = await Promise.all([
       SaldoOperacionSnapshot.aggregate<CancelacionAnalysisGroup>([
-        { $match: selectedMatch },
+        { $match: scopedMatch },
         {
           $project: {
             dias: "$diasAsignada",
@@ -543,7 +548,7 @@ export class SaldoOperacionSnapshotService {
         { $group: { _id: { tipoCliente: "$tipoCliente", vendedor: "$vendedor", usuario: "$usuario", sucursal: "$sucursal" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 }, saldoTotal: { $sum: "$saldo" } } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionMonthlyGroup>([
-        { $match: noCanceladasAnalysisMatch },
+        { $match: scopedMatch },
         {
           $project: {
             month: { $substrBytes: ["$fechaAsignacion", 0, 7] },
@@ -591,7 +596,7 @@ export class SaldoOperacionSnapshotService {
         { $sort: { _id: 1 } },
       ]),
       SaldoOperacionSnapshot.aggregate<CancelacionSucursalMonthlyGroup>([
-        { $match: noCanceladasAnalysisMatch },
+        { $match: scopedMatch },
         { $project: { month: { $substrBytes: ["$fechaAsignacion", 0, 7] }, dias: "$diasAsignada", sucursal: analysisDimensionProjection.sucursal } },
         { $group: { _id: { month: "$month", sucursal: "$sucursal" }, averageDays: { $avg: "$dias" }, operations: { $sum: 1 } } },
         { $sort: { "_id.sucursal": 1, "_id.month": 1 } },
@@ -618,11 +623,14 @@ export class SaldoOperacionSnapshotService {
     };
   }
 
-  static async dashboardAdministracion() {
+  static async dashboardAdministracion(sucursalSiacCodigo?: number | null) {
+    const scopedMatch = Number.isInteger(sucursalSiacCodigo) && Number(sucursalSiacCodigo) > 0
+      ? { ...noCanceladasAnalysisMatch, sucursalSiacCodigo }
+      : noCanceladasAnalysisMatch;
     const [analysis, modelGroups, saldoOperacionSummary] = await Promise.all([
-      this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder),
+      this.noCanceladasAnalysis(undefined, undefined, dashboardAdministracionDimensionOrder, sucursalSiacCodigo),
       SaldoOperacionSnapshot.aggregate<DashboardAdministracionModelGroup>([
-        { $match: noCanceladasAnalysisMatch },
+        { $match: scopedMatch },
         {
           $project: {
             modelo: {
@@ -636,7 +644,7 @@ export class SaldoOperacionSnapshotService {
         { $group: { _id: "$modelo", total: { $sum: 1 } } },
         { $sort: { total: -1, _id: 1 } },
       ]),
-      this.summary({ entrega: "sin-entregar" }),
+      this.summary({ entrega: "sin-entregar", sucursalSiacCodigo }),
     ]);
     return {
       ...analysis,
@@ -664,7 +672,7 @@ export class SaldoOperacionSnapshotService {
       .map((row) => ({ ...serialize(row), incluyeSaldoModelo: saldoOperationCodes.has(Number(row.codigoOperacion)) }));
   }
 
-  private static async summaryRows(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; usuario?: string | null; vendedor?: string | null }) {
+  private static async summaryRows(params: { entrega?: string | null; ubicacion?: string | null; sucursal?: string | null; sucursalSiacCodigo?: number | null; usuario?: string | null; vendedor?: string | null }) {
     const [saldoRows, canceladasRows] = await Promise.all([
       SaldoOperacionSnapshot.find(baseFilter({ ...params, section: "conSaldo" })).lean(),
       SaldoOperacionSnapshot.find(baseFilter({ ...params, section: "canceladas" })).lean(),

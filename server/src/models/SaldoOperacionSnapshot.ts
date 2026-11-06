@@ -6,6 +6,7 @@ export interface ISaldoOperacionSnapshot extends Document {
   tipoCliente: "Particular" | "Leasing" | "Reventa" | "Empresa" | "Licitación" | null;
   vendedor: string;
   sucursal: string;
+  sucursalSiacCodigo: number | null;
   usuarioOperacion: string;
   nombreUsuarioOperacion: string;
   usuarioOperacionSiac: string;
@@ -45,6 +46,7 @@ const saldoOperacionSnapshotSchema = new Schema<ISaldoOperacionSnapshot>(
     tipoCliente: { type: String, enum: ["Particular", "Leasing", "Reventa", "Empresa", "Licitación"], default: null },
     vendedor: { type: String, default: "", trim: true },
     sucursal: { type: String, default: "SIN SUCURSAL", trim: true },
+    sucursalSiacCodigo: { type: Number, default: null, index: true },
     usuarioOperacion: { type: String, default: "", trim: true },
     nombreUsuarioOperacion: { type: String, default: "", trim: true },
     usuarioOperacionSiac: { type: String, default: "", trim: true },

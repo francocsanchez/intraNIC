@@ -185,8 +185,8 @@ export class SaldoOperacionSnapshotController {
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el detalle de no canceladas" }); }
   };
 
-  static dashboardAdministracion = async (_req: Request, res: Response) => {
-    try { return res.status(200).json(await SaldoOperacionSnapshotService.dashboardAdministracion()); }
+  static dashboardAdministracion = async (req: Request, res: Response) => {
+    try { return res.status(200).json(await SaldoOperacionSnapshotService.dashboardAdministracion(req.user?.sucursalSiacCodigo)); }
     catch (error) { return res.status(500).json({ message: error instanceof Error ? error.message : "No se pudo obtener el Dashboard Administración" }); }
   };
 
