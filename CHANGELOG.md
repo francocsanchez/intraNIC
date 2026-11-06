@@ -2,6 +2,12 @@
 
 ## 2026-11-05
 
+- **Dashboard Administración:** las tarjetas compactas de usuario del modo TV reservan siempre espacio para el nombre antes de días e importe, incluso con muchas operaciones visibles.
+
+- **Dashboard Administración:** la grilla jerárquica del modo TV no genera desplazamiento y ordena los usuarios en una única columna, distribuyendo las tarjetas dentro del alto disponible.
+
+- **Dashboard Administración:** el modo TV reemplaza el árbol ECharts por una grilla HTML/CSS de tarjetas jerárquicas, permitiendo ampliar al máximo nombres, días e importes sin depender del SVG del navegador de TV.
+
 - **Dashboard Administración:** el modo TV acepta `?mode=tv` y `?modo=tv`, para habilitar la visualización de tarjetas en ambas variantes de enlace.
 
 - **Dashboard Administración:** el árbol en modo TV representa usuarios, sucursales y total como tarjetas rectangulares conectadas, para aumentar la lectura de nombres, días e importes sin perder la jerarquía gráfica.

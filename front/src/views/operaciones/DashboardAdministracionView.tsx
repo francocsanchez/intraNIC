@@ -2,6 +2,7 @@ import EChart from "@/components/charts/EChart";
 import { getPresetChartColors } from "@/components/charts/presetChartTheme";
 import { createSaldoOperacionTiempoTreeOption } from "@/components/operaciones/SaldoOperacionTiempoTree";
 import { getDashboardAdministracion, getDashboardAdministracionCobranzas } from "@/services/operacionesService";
+import type { SaldoOperacionCancelacionAnalysisNode } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
 import type { EChartsCoreOption } from "echarts/core";
 import { useMemo } from "react";
@@ -19,6 +20,39 @@ const WEEK_RANGES = [
   { desde: 22, hasta: 28, etiqueta: "22–28" },
   { desde: 29, hasta: 31, etiqueta: "29–fin" },
 ] as const;
+
+const nodeTone = (averageDays: number) => averageDays < 15
+  ? "border-emerald-400 bg-emerald-50 text-emerald-950"
+  : averageDays < 18
+    ? "border-amber-400 bg-amber-50 text-amber-950"
+    : "border-red-400 bg-red-50 text-red-950";
+
+function TreeCard({ node, prominent = false, showOperations = true }: { node: SaldoOperacionCancelacionAnalysisNode; prominent?: boolean; showOperations?: boolean }) {
+  const compact = !prominent && !showOperations;
+  return <article className={`flex min-h-0 flex-col justify-center overflow-hidden border-2 px-4 py-2 text-center ${nodeTone(node.averageDays)} ${prominent ? "px-5 py-4" : ""}`}>
+    <p className={`${prominent ? "text-2xl" : compact ? "text-base" : "text-xl"} truncate font-bold leading-tight`}>{node.name}</p>
+    <p className={`${prominent ? "mt-2 text-xl" : compact ? "mt-0 text-sm" : "mt-1 text-lg"} whitespace-nowrap font-semibold leading-tight tabular-nums`}>{Math.round(node.averageDays)} días · $ {formatMillions(node.saldoTotal ?? 0)}</p>
+    {showOperations ? <p className="mt-1 text-sm font-medium opacity-75">{node.operations} operaciones</p> : null}
+  </article>;
+}
+
+function AdministrationTreeGrid({ tree }: { tree: SaldoOperacionCancelacionAnalysisNode }) {
+  const branches = tree.children ?? [];
+  return <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_17rem] gap-6 overflow-hidden p-6">
+    <div className="grid min-h-0 gap-4" style={{ gridTemplateRows: `repeat(${Math.max(branches.length, 1)}, minmax(0, 1fr))` }}>
+      {branches.map((branch) => {
+        const users = branch.children?.length ? branch.children : [branch];
+        return <section key={branch.name} className="grid min-h-0 grid-cols-[minmax(0,1fr)_14rem] gap-5 overflow-hidden">
+          <div className="grid min-h-0 gap-2" style={{ gridTemplateRows: `repeat(${users.length}, minmax(0, 1fr))` }}>
+            {users.map((user) => <TreeCard key={`${branch.name}-${user.name}`} node={user} showOperations={false} />)}
+          </div>
+          <TreeCard node={branch} />
+        </section>;
+      })}
+    </div>
+    <div className="flex min-h-0 items-center border-l-2 border-border pl-6"><TreeCard node={tree} prominent /></div>
+  </div>;
+}
 
 export default function DashboardAdministracionView() {
   const [searchParams] = useSearchParams();
@@ -38,8 +72,8 @@ export default function DashboardAdministracionView() {
     refetchOnWindowFocus: true,
   });
   const option = useMemo(() => query.data
-    ? createSaldoOperacionTiempoTreeOption(query.data.data.tree, { showSaldo: true, operationLabel: "Operaciones", edgeShape: "curve", tvMode })
-    : null, [query.data, tvMode]);
+    ? createSaldoOperacionTiempoTreeOption(query.data.data.tree, { showSaldo: true, operationLabel: "Operaciones", edgeShape: "curve" })
+    : null, [query.data]);
   const modelOption = useMemo<EChartsCoreOption | null>(() => query.data?.modelos.length ? ({
     color: MODEL_ROSE_COLORS,
     tooltip: {
@@ -108,7 +142,7 @@ export default function DashboardAdministracionView() {
       </header>
       <div className="grid min-h-0 flex-1 grid-cols-2 divide-x divide-border">
         <section className="min-h-0 overflow-hidden p-3">
-          {hasTreeBranches && option ? <EChart option={option} resetOnOptionChange /> : <p className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">No hay operaciones no canceladas con asignación válida.</p>}
+          {hasTreeBranches ? tvMode ? <AdministrationTreeGrid tree={data.tree} /> : option ? <EChart option={option} resetOnOptionChange /> : null : <p className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">No hay operaciones no canceladas con asignación válida.</p>}
         </section>
         <section className="grid min-h-0 grid-rows-2 divide-y divide-border">
           <section className="grid min-h-0 grid-cols-2 divide-x divide-border"><div className="flex min-h-0 flex-col overflow-hidden p-3"><h2 className="shrink-0 text-sm font-semibold text-foreground">Operaciones pendientes por modelo</h2>{modelOption ? <div className="min-h-0 flex-1"><EChart option={modelOption} /></div> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">Sin operaciones pendientes para representar.</p>}</div><div className="flex min-h-0 flex-col p-5"><div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"><p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Saldo pendiente</p><p className="mt-2 text-7xl font-bold leading-none tracking-tight text-foreground">{formatMillions(query.data.resumen.saldoTotal)}</p></div><div className="grid shrink-0 grid-cols-2 gap-4 border-t border-border pt-4 text-center"><div><p className="text-sm font-semibold text-muted-foreground">Créditos</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.creditoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.creditoCantidad} operaciones</p></div><div><p className="text-sm font-semibold text-muted-foreground">Usados</p><p className="mt-1 text-2xl font-bold leading-none text-foreground">{formatMillions(query.data.resumen.usadoTotal)}</p><p className="mt-2 text-xs font-medium text-muted-foreground">{query.data.resumen.usadoCantidad} operaciones</p></div></div></div></section>
