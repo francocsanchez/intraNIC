@@ -2,7 +2,9 @@
 
 ## 2026-11-05
 
-- **Dashboard Administración:** el gráfico por Tipo de cliente usa barras simples ECharts: rojo para el mayor volumen, verde para el menor y tonos intermedios ordenados entre ambos; cada barra etiqueta solo su cantidad.
+- **Dashboard Administración:** el modo TV elimina la tarjeta Tiempo total y redistribuye la grilla jerárquica en 40% usuarios y 60% sucursales.
+
+- **Dashboard Administración:** el gráfico por Tipo de cliente usa barras horizontales ECharts para mostrar siempre el nombre completo de cada tipo junto a su cantidad; rojo para el mayor volumen, verde para el menor y tonos intermedios ordenados entre ambos.
 
 - **Dashboard Administración:** `Operaciones pendientes por modelo` fue reemplazado por barras ECharts agrupadas por Tipo de cliente, respetando la Sucursal SIAC del usuario cuando corresponde.
 

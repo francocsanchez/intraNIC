@@ -38,19 +38,14 @@ function TreeCard({ node, prominent = false, showOperations = true }: { node: Sa
 
 function AdministrationTreeGrid({ tree }: { tree: SaldoOperacionCancelacionAnalysisNode }) {
   const branches = tree.children ?? [];
-  return <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_17rem] gap-6 overflow-hidden p-6">
-    <div className="grid min-h-0 gap-4" style={{ gridTemplateRows: `repeat(${Math.max(branches.length, 1)}, minmax(0, 1fr))` }}>
-      {branches.map((branch) => {
-        const users = branch.children?.length ? branch.children : [branch];
-        return <section key={branch.name} className="grid min-h-0 grid-cols-[minmax(0,1fr)_14rem] gap-5 overflow-hidden">
-          <div className="grid min-h-0 gap-2" style={{ gridTemplateRows: `repeat(${users.length}, minmax(0, 1fr))` }}>
-            {users.map((user) => <TreeCard key={`${branch.name}-${user.name}`} node={user} showOperations={false} />)}
-          </div>
-          <TreeCard node={branch} />
-        </section>;
-      })}
+  const users = branches.flatMap((branch) => branch.children?.length ? branch.children : [branch]);
+  return <div className="grid h-full min-h-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 overflow-hidden p-6">
+    <div className="grid min-h-0 gap-2" style={{ gridTemplateRows: `repeat(${Math.max(users.length, 1)}, minmax(0, 1fr))` }}>
+      {users.map((user) => <TreeCard key={user.name} node={user} showOperations={false} />)}
     </div>
-    <div className="flex min-h-0 items-center border-l-2 border-border pl-6"><TreeCard node={tree} prominent /></div>
+    <div className="grid min-h-0 gap-4 border-l-2 border-border pl-6" style={{ gridTemplateRows: `repeat(${Math.max(branches.length, 1)}, minmax(0, 1fr))` }}>
+      {branches.map((branch) => <TreeCard key={branch.name} node={branch} prominent />)}
+    </div>
   </div>;
 }
 
@@ -88,15 +83,15 @@ export default function DashboardAdministracionView() {
         return `${item?.axisValue ?? ""}: ${item?.value ?? 0} operaciones`;
       },
     },
-    grid: { top: 26, right: 18, bottom: tvMode ? 46 : 34, left: 42 },
-    xAxis: { type: "category", data: tiposCliente.map((item) => item.nombre), axisTick: { alignWithLabel: true }, axisLabel: { color: "#18181b", fontSize: tvMode ? 14 : 11, fontWeight: 700 }, axisLine: { lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
-    yAxis: { type: "value", minInterval: 1, axisLabel: { color: "#475569", fontSize: tvMode ? 12 : 10 }, splitLine: { lineStyle: { color: "#cbd5e1", width: 1 } }, axisLine: { show: true, lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
+    grid: { top: 18, right: tvMode ? 54 : 40, bottom: 16, left: tvMode ? 112 : 94 },
+    xAxis: { type: "value", minInterval: 1, axisLabel: { color: "#475569", fontSize: tvMode ? 12 : 10 }, splitLine: { lineStyle: { color: "#cbd5e1", width: 1 } }, axisLine: { show: true, lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
+    yAxis: { type: "category", inverse: true, data: tiposCliente.map((item) => item.nombre), axisTick: { show: false }, axisLabel: { interval: 0, hideOverlap: false, color: "#18181b", fontSize: tvMode ? 14 : 11, fontWeight: 700 }, axisLine: { lineStyle: { color: "#64748b", width: tvMode ? 2 : 1 } } },
     series: [{
       name: "Operaciones pendientes por tipo de cliente",
       type: "bar",
       barMaxWidth: tvMode ? 88 : 64,
       data: tiposCliente.map((item, index) => ({ value: item.total, itemStyle: { color: colorAt(index) } })),
-      label: { show: true, position: "top", color: "#18181b", fontSize: tvMode ? 16 : 12, fontWeight: 700, formatter: "{c}" },
+      label: { show: true, position: "right", color: "#18181b", fontSize: tvMode ? 16 : 12, fontWeight: 700, formatter: "{c}" },
     }],
     } satisfies EChartsCoreOption;
   }, [query.data, tvMode]);
