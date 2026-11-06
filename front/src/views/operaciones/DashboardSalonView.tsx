@@ -183,8 +183,8 @@ function SellerTopThree({ title, items, icon: Icon, tone }: { title: string; ite
 
 function FinancingTopThree({ usados, creditos }: { usados: SellerFinancingItem[]; creditos: SellerFinancingItem[] }) {
   return <section className="grid min-h-0 grid-cols-2 gap-4 rounded-md border border-border bg-card p-3">
-    <SellerTopThree title="Usados" items={usados} icon={CarFront} tone="emerald" />
-    <SellerTopThree title="Créditos" items={creditos} icon={CreditCard} tone="amber" />
+    <SellerTopThree title="Top 3 Usados" items={usados} icon={CarFront} tone="emerald" />
+    <SellerTopThree title="Top 3 Créditos" items={creditos} icon={CreditCard} tone="amber" />
   </section>;
 }
 

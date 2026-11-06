@@ -2,6 +2,8 @@
 
 ## 2026-11-06
 
+- **Dashboard Salón:** los rankings centrales ahora se identifican como Top 3 Usados y Top 3 Créditos.
+
 - **Dashboard Salón:** se ampliaron los íconos y las cantidades totales de usados y créditos en la esquina superior del ranking de vendedores.
 
 - **Dashboard Salón:** los encabezados de los rankings centrales ahora se presentan simplemente como Usados y Créditos, sin prefijos alfabéticos.
