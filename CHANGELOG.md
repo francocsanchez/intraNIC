@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-11-16
+
+- **Configuración:** los accesos de Parámetros de sistema se agruparon en una tarjeta independiente y se agregó el catálogo Mongo de Conversiones, con Tipo de conversión y Proveedor obligatorios, alta, edición y validación de combinación única.
+- **Licitaciones · Administración:** cada unidad ahora puede seleccionar opcionalmente una conversión y registrar sus etapas Pendiente, En Proveedor o Convertida; quitar la conversión limpia su estado.
+- **Licitaciones · Administración:** el resumen PDF reemplazó la columna Color por Conversión y Estado de conversión.
+- **Licitaciones · Administración:** cada unidad ahora registra ACC (Sí/No), con No por defecto, y el resumen PDF lo incluye como columna.
+- **Licitaciones · Administración:** la grilla separó Editar y Prórroga en Acciones, y Carga de unidades e Informe PDF en Gestión, con íconos más grandes y colores diferenciados.
+- **Licitaciones · Administración:** las unidades cuyo interno SIAC tenga `sa_estado` 35 o 40 ahora pasan automáticamente a Entregada, incluso al refrescar la grilla o generar el PDF.
+- **Licitaciones · Administración:** Gestión incorpora Ver, una vista de solo lectura del resumen y las unidades para consultar la operatoria sin descargar ni modificar datos.
+- **Licitaciones · Administración:** la vista de solo lectura colorea los estados de conversión para distinguir Pendiente, En Proveedor y Convertida.
+- **Licitaciones · Administración:** se amplió y compactó el diálogo de unidades; los datos no se quiebran en varias líneas y, una vez asignado, el interno se muestra fijo sin input ni botón de búsqueda.
+- **Licitaciones · Administración:** se redujo el buscador de interno y la asignación ahora marca la unidad como `Asignada` en verde; Estado se ubica después de Cant. servicios.
+- **Licitaciones · Administración:** se agregó la descarga de resumen PDF por licitación: A4 horizontal de una hoja, ficha completa, sello circular de estado, gráfico de unidades asignadas/pendientes e inventario de unidades.
+- **Licitaciones · Administración:** el resumen PDF migró a ReportLab, el mismo motor de las proformas, con diseño de cabecera, tarjetas de datos, gráfico y tabla compacta mejorados.
+- **Licitaciones · Administración:** el resumen PDF ahora se genera en A4 vertical para priorizar el alto disponible de la tabla de unidades.
+- **Licitaciones · Administración:** el PDF se optimizó para impresión en blanco y negro, eliminando fondos sólidos y el banner; el encabezado muestra solo la entidad y el estado se representa con un círculo de borde.
+- **Licitaciones · Administración:** el PDF dejó de incluir datos de contacto y CUIT; el gráfico se reemplazó por el conteo tabular de unidades totales, asignadas y pendientes.
+- **Licitaciones · Administración:** el estado del PDF ahora se muestra en una tarjeta rectangular contorneada, en lugar de un círculo.
+- **Licitaciones · Administración:** se quitó la fila redundante de hitos del PDF; la tarjeta de estado se ensanchó para una sola línea y la tabla de versiones incrementó su tipografía.
+- **Licitaciones · Administración:** se eliminó el título `Detalle de unidades` del PDF para simplificar el encabezado de la tabla.
+- **PDF:** en Windows, la generación ahora detecta automáticamente Chrome o Edge instalados para evitar fallas cuando Playwright no tiene su navegador embebido.
+- **Licitaciones · Administración:** se incorporó el módulo protegido para cargar y administrar licitaciones en Mongo, con trazabilidad, baja lógica y el flujo Técnica → mantenimiento de oferta → Pre-adjudicado → Pagaré → OC.
+- **Licitaciones · Administración:** Técnica y Pre-adjudicado ahora pueden regresar a `Pendiente`, limpiando los hitos dependientes para corregir una decisión.
+- **Licitaciones · Administración:** la grilla muestra los días restantes al vencimiento y permite prorrogar el mantenimiento de oferta desde Acciones; se quitó el historial del módulo.
+- **Licitaciones · Administración:** se eliminaron la acción y endpoint de borrado; la grilla ahora organiza los registros en las pestañas Pendientes, Adjudicadas y Perdidas.
+- **Licitaciones · Administración:** la tabla dejó de mostrar las columnas CUIT y Contacto; ambos datos se conservan para la carga y edición.
+- **Licitaciones · Administración:** se reemplazó la fecha de vencimiento visible por los días de mantenimiento de oferta; el cálculo permanece interno para habilitar el flujo y mostrar días restantes.
+- **Licitaciones · Administración:** se agregó la carga de unidades del pliego por Versión, Cantidad y Color, con edición, eliminación de líneas y acumulación de la misma combinación.
+- **Licitaciones · Administración:** las unidades del pliego ahora se desglosan en una línea por unidad, incluso para la misma versión y color; cada una se crea con estado `Pend de Asignar` y las cargas históricas agrupadas se normalizan al consultarse.
+- **Licitaciones · Administración:** se amplió el diálogo de unidades del pliego para dejar espacio a los campos que se incorporarán.
+- **Licitaciones · Administración:** se retiró la edición de líneas de unidades; la grilla conserva la eliminación individual y resume arriba el total y las cantidades por versión, sin mostrar la cantidad repetida en cada fila.
+- **Licitaciones · Administración:** la grilla principal ahora muestra el total de unidades de cada licitación, sin distinguir modelo ni color.
+- **Licitaciones · Administración:** cada unidad ahora administra Patentamiento y Flete (ambos inician en No), además de Cant. servicios (inicia en 0); los valores se editan y persisten desde su propia fila.
+- **Licitaciones · Administración:** se eliminó Color de la carga, persistencia y grilla de unidades; ahora se cargan exclusivamente Versión y Cantidad.
+- **Licitaciones · Administración:** cada fila permite buscar un Interno nuevo y completar desde SIAC su versión y color; un interno asignado no puede reutilizarse hasta quitarlo de su fila.
+- **Licitaciones · Administración:** la asignación por interno ya no exige que la versión exista en el catálogo local; conserva directamente los datos resueltos desde `stoauto` y sus relaciones SIAC.
+- **Licitaciones · Administración:** el cliente tolera temporalmente respuestas anteriores sin interno o color durante un despliegue escalonado, sin impedir que la asignación reemplace versión y color desde SIAC.
+
+## 2026-11-11
+
+- **InfoAuto:** se incorporó `docs/INFOAUTO_API.md`, una guía de integración de la API Autos con autenticación JWT, endpoints actuales e históricos, filtros, modelo de datos, límites y patrones de uso seguro; no contiene credenciales.
+
 ## 2026-11-06
 
 - **Dashboard Salón:** los rankings centrales ahora se identifican como Top 3 Usados y Top 3 Créditos.

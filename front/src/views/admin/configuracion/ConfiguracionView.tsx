@@ -73,9 +73,7 @@ export default function ConfiguracionView() {
     hasPathAccess(user, paths.admin.pedidoMensual);
   const canManageSystemParameters =
     hasSuperAdminRole(user) &&
-    (canManagePreventasCatalogs ||
-      canManagePlanNegocio ||
-      canManagePedidoMensual);
+    hasModuleAccess(user, "configuracion");
   const canManageAgendaEnvio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.configuracionEnvioAgenda);
@@ -118,19 +116,6 @@ export default function ConfiguracionView() {
         canEditConfiguracion &&
         hasPathAccess(user, paths.admin.configuracionConvencionalEditar),
       editPath: paths.admin.configuracionConvencionalEditar,
-      catalogos: canManageSystemParameters
-        ? [
-            { label: "Colores", to: paths.admin.colores },
-            { label: "Colores de unidades", to: paths.admin.coloresUnidades },
-            { label: "Versiones", to: paths.admin.versiones },
-            ...(canManagePlanNegocio
-              ? [{ label: "PN", to: paths.admin.planNegocio }]
-              : []),
-            ...(canManagePedidoMensual
-              ? [{ label: "Pedido mensual", to: paths.admin.pedidoMensual }]
-              : []),
-          ]
-        : [],
     },
     {
       title: "Usados",
@@ -163,7 +148,6 @@ export default function ConfiguracionView() {
         canEditConfiguracion &&
         hasPathAccess(user, paths.admin.configuracionUsadosEditar),
       editPath: paths.admin.configuracionUsadosEditar,
-      catalogos: [],
     },
     {
       title: "Belgrano",
@@ -180,7 +164,6 @@ export default function ConfiguracionView() {
         canEditConfiguracion &&
         hasPathAccess(user, paths.admin.configuracionBelgranoEditar),
       editPath: paths.admin.configuracionBelgranoEditar,
-      catalogos: [],
     },
   ];
 
@@ -266,28 +249,30 @@ export default function ConfiguracionView() {
                   </div>
                 ))}
 
-                {sistema.catalogos.length ? (
-                  <div>
-                    <div className="mb-2 text-primary font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Parametros de sistema
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {sistema.catalogos.map((catalogo) => (
-                        <Link
-                          key={catalogo.to}
-                          to={catalogo.to}
-                          className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
-                        >
-                          {catalogo.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </div>
             </div>
           ))}
       </section>
+
+      {canManageSystemParameters ? (
+        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sistema</p>
+              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Parámetros de sistema</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Administra los catálogos generales utilizados por los distintos módulos.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {canManagePreventasCatalogs ? <Link to={paths.admin.colores} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Colores</Link> : null}
+              {canManagePreventasCatalogs ? <Link to={paths.admin.coloresUnidades} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Colores de unidades</Link> : null}
+              {canManagePreventasCatalogs ? <Link to={paths.admin.versiones} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Versiones</Link> : null}
+              {canManagePlanNegocio ? <Link to={paths.admin.planNegocio} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">PN</Link> : null}
+              {canManagePedidoMensual ? <Link to={paths.admin.pedidoMensual} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Pedido mensual</Link> : null}
+              <Link to={paths.admin.conversiones} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Conversiones</Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {canManageAgendaEnvio ? (
         <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">

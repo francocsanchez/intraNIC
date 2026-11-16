@@ -16,6 +16,9 @@ export const paths = {
     multas: "/kinto/multas",
     npsShare: "/kinto/nps-share",
   },
+  licitaciones: {
+    administracion: "/licitaciones/administracion",
+  },
   entregas: {
     agenda: "/entregas/agenda",
     pendientesTurnar: "/entregas/pendientes-turnar",
@@ -40,6 +43,7 @@ export const paths = {
     configuracionBelgranoEditar: "/sistema/configuracion/belgrano/editar",
     colores: "/sistema/configuracion/colores",
     coloresUnidades: "/sistema/configuracion/colores-unidades",
+    conversiones: "/sistema/configuracion/conversiones",
     versiones: "/sistema/configuracion/versiones",
     planNegocio: "/sistema/configuracion/plan-negocio",
     pedidoMensual: "/sistema/configuracion/pedido-mensual",

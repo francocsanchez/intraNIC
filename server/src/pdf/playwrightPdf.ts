@@ -5,6 +5,7 @@ type GeneratePdfFromHtmlOptions = {
   footerTemplate?: string;
   format?: "A4";
   headerTemplate?: string;
+  landscape?: boolean;
   margin?: {
     bottom?: string;
     left?: string;
@@ -25,6 +26,9 @@ const getChromiumExecutablePath = () => {
   const knownPaths = [
     "/usr/bin/chromium-browser",
     "/usr/bin/chromium",
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
   ];
 
   return knownPaths.find((candidate) => fs.existsSync(candidate));
@@ -81,6 +85,7 @@ export const generatePdfFromHtml = async (html: string, options?: GeneratePdfFro
       headerTemplate,
       footerTemplate,
       format: options?.format ?? "A4",
+      landscape: options?.landscape ?? false,
       margin: {
         top: options?.margin?.top ?? "8mm",
         right: options?.margin?.right ?? "14mm",

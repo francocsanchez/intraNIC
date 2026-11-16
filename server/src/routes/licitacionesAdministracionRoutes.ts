@@ -1,0 +1,22 @@
+import { Router } from "express";
+import { LicitacionesAdministracionController } from "../controllers/LicitacionesAdministracionController";
+import { authenticate } from "../middleware/authenticate";
+import { authorizeModules } from "../middleware/authorizeModules";
+
+const router = Router();
+router.use(authenticate);
+router.use(authorizeModules("licitacionesAdministracion"));
+router.get("/catalogos", LicitacionesAdministracionController.catalogs);
+router.get("/", LicitacionesAdministracionController.list);
+router.post("/", LicitacionesAdministracionController.create);
+router.get("/:id/pdf", LicitacionesAdministracionController.exportPdf);
+router.get("/:id/unidades", LicitacionesAdministracionController.units);
+router.post("/:id/unidades", LicitacionesAdministracionController.addUnit);
+router.patch("/:id/unidades/:unitId", LicitacionesAdministracionController.updateUnit);
+router.patch("/:id/unidades/:unitId/interno", LicitacionesAdministracionController.assignUnitInterno);
+router.patch("/:id/unidades/:unitId/detalles", LicitacionesAdministracionController.updateUnitDetails);
+router.delete("/:id/unidades/:unitId", LicitacionesAdministracionController.removeUnit);
+router.patch("/:id", LicitacionesAdministracionController.update);
+router.patch("/:id/flujo", LicitacionesAdministracionController.updateFlow);
+router.patch("/:id/prorroga", LicitacionesAdministracionController.extendMaintenance);
+export default router;

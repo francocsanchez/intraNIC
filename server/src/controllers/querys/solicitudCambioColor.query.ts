@@ -4,6 +4,7 @@ export const unidadCambioColorQuery = () => `
     ISNULL(stoauto.sa_nrofab, '') AS "nrofab",
     auto.au_nombre AS "version",
     ISNULL(color.col_nombre, 'SIN COLOR') AS "color",
+    stoauto.sa_estado AS "estado",
     ISNULL(NULLIF(LTRIM(RTRIM(movnped.mnp_chasis)), ''), '') AS "chasis"
   FROM stoauto
   INNER JOIN auto ON auto.au_codigo = stoauto.sa_auto AND auto.au_marca = stoauto.sa_marca
@@ -17,6 +18,7 @@ export const unidadCambioColorQuery = () => `
 export const unidadesCambioColorChasisQuery = () => `
   SELECT
     stoauto.sa_codigo AS "interno",
+    MAX(stoauto.sa_estado) AS "estado",
     MAX(ISNULL(stoauto.sa_nrofab, '')) AS "nrofab",
     MAX(ISNULL(NULLIF(LTRIM(RTRIM(movnped.mnp_chasis)), ''), '')) AS "chasis"
   FROM stoauto

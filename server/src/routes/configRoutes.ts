@@ -3,6 +3,7 @@ import { ConfigController } from "../controllers/ConfigController";
 import { authenticate } from "../middleware/authenticate";
 import { authorizeModules } from "../middleware/authorizeModules";
 import { ColorUnidadController } from "../controllers/ColorUnidadController";
+import { ConversionController } from "../controllers/ConversionController";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin";
 
 const router = Router();
@@ -12,6 +13,9 @@ router.get("/colores-unidades/badges", ColorUnidadController.badges);
 router.get("/colores-unidades", requireSuperAdmin, ColorUnidadController.list);
 router.post("/colores-unidades", requireSuperAdmin, ColorUnidadController.save);
 router.put("/colores-unidades/:id", requireSuperAdmin, ColorUnidadController.save);
+router.get("/conversiones", requireSuperAdmin, ConversionController.list);
+router.post("/conversiones", requireSuperAdmin, ConversionController.save);
+router.put("/conversiones/:id", requireSuperAdmin, ConversionController.save);
 router.get("/dashboard-salon", authorizeModules("configuracion"), ConfigController.getDashboardSalonSettings);
 router.put("/dashboard-salon", authorizeModules("configuracion"), ConfigController.updateDashboardSalonSettings);
 router.get("/dashboard-salon/modelos", authorizeModules("configuracion"), ConfigController.listDashboardSalonModelImages);

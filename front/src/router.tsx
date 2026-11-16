@@ -20,6 +20,7 @@ const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const NICUsadosLayout = lazy(() => import("./layouts/NICUsadosLayout"));
 const NICBelgranoLayout = lazy(() => import("./layouts/NICBelgranoLayout"));
 const KintoLayout = lazy(() => import("./layouts/KintoLayout"));
+const LicitacionesLayout = lazy(() => import("./layouts/LicitacionesLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
@@ -33,6 +34,7 @@ const EditConfiguracionUsadoView = lazy(() => import("./views/admin/configuracio
 const EditConfiguracionBelgranoView = lazy(() => import("./views/admin/configuracion/EditConfiguracionBelgranoView"));
 const UnidadesNegocioView = lazy(() => import("./views/admin/configuracion/UnidadesNegocioView"));
 const ColoresUnidadesView = lazy(() => import("./views/admin/configuracion/ColoresUnidadesView"));
+const ConversionesView = lazy(() => import("./views/admin/configuracion/ConversionesView"));
 const LinksView = lazy(() => import("./views/admin/links/LinksView"));
 const UsuariosView = lazy(() => import("./views/admin/usuarios/UsuariosView"));
 const EditUsuarioView = lazy(() => import("./views/admin/usuarios/EditUsuarioView"));
@@ -125,6 +127,7 @@ const KintoDashboardView = lazy(() => import("./views/kinto/KintoDashboardView")
 const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView"));
 const KintoMultasView = lazy(() => import("./views/kinto/KintoMultasView"));
 const KintoNpsShareView = lazy(() => import("./views/kinto/KintoNpsShareView"));
+const LicitacionesAdministracionView = lazy(() => import("./views/licitaciones/LicitacionesAdministracionView"));
 
 export default function Router() {
   return (
@@ -181,6 +184,12 @@ export default function Router() {
               </Route>
               <Route element={<ModuleProtectedRoute allowedModules={["kintoNpsShare"]} />}>
                 <Route path={paths.kinto.npsShare} element={<KintoNpsShareView />} />
+              </Route>
+            </Route>
+
+            <Route element={<LicitacionesLayout />}>
+              <Route element={<ModuleProtectedRoute allowedModules={["licitacionesAdministracion"]} />}>
+                <Route path={paths.licitaciones.administracion} element={<LicitacionesAdministracionView />} />
               </Route>
             </Route>
 
@@ -430,6 +439,7 @@ export default function Router() {
               <Route element={<AdminLayout />}>
                 <Route path={paths.admin.colores} element={<ColoresView />} />
                 <Route path={paths.admin.coloresUnidades} element={<ColoresUnidadesView />} />
+                <Route path={paths.admin.conversiones} element={<ConversionesView />} />
                 <Route path={paths.admin.versiones} element={<VersionesView />} />
                 <Route path={paths.convencional.preventasColores} element={<Navigate to={paths.admin.colores} replace />} />
                 <Route path={paths.convencional.preventasColoresNuevo} element={<Navigate to={paths.admin.colores} replace />} />

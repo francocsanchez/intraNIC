@@ -3,7 +3,10 @@ import { moduleKeys } from "@/constants/modules";
 
 const modulesSchema = z.object(
   Object.fromEntries(
-    moduleKeys.map((moduleKey) => [moduleKey, z.number().nullable().optional()]),
+    moduleKeys.map((moduleKey) => [
+      moduleKey,
+      z.number().nullable().optional(),
+    ]),
   ) as Record<string, z.ZodTypeAny>,
 );
 
@@ -16,7 +19,10 @@ export const linkSchema = z.object({
 });
 
 export const linksListResponseSchema = z.object({ data: z.array(linkSchema) });
-export const linkResponseSchema = z.object({ message: z.string(), data: linkSchema });
+export const linkResponseSchema = z.object({
+  message: z.string(),
+  data: linkSchema,
+});
 export const linkDeleteResponseSchema = z.object({ message: z.string() });
 export type LinkItem = z.infer<typeof linkSchema>;
 export type LinksListResponse = z.infer<typeof linksListResponseSchema>;
@@ -88,7 +94,9 @@ export const stockValorizacionConvencionalSchema = z.object({
   faltantes: z.array(stockValorizacionConvencionalFaltanteSchema),
 });
 
-export type StockValorizacionConvencionalResponse = z.infer<typeof stockValorizacionConvencionalSchema>;
+export type StockValorizacionConvencionalResponse = z.infer<
+  typeof stockValorizacionConvencionalSchema
+>;
 
 export const stockValorizacionPrecioItemSchema = z.object({
   version: z.string(),
@@ -107,8 +115,12 @@ export const stockValorizacionPrecioResponseSchema = z.object({
   message: z.string(),
 });
 
-export type StockValorizacionPrecioListResponse = z.infer<typeof stockValorizacionPrecioListResponseSchema>;
-export type StockValorizacionPrecioResponse = z.infer<typeof stockValorizacionPrecioResponseSchema>;
+export type StockValorizacionPrecioListResponse = z.infer<
+  typeof stockValorizacionPrecioListResponseSchema
+>;
+export type StockValorizacionPrecioResponse = z.infer<
+  typeof stockValorizacionPrecioResponseSchema
+>;
 
 //**************************** */
 // STOCK RESERVADO
@@ -364,15 +376,22 @@ export const stockDisponibleLiessResumenSchema = z.object({
   porTipo: z.record(z.string(), z.number()),
   porReserva: z.record(z.string(), z.number()),
   marcas: z.array(z.string()),
-  tablasPorMarca: z.record(z.string(), z.array(stockDisponibleLiesslItemSchema)),
+  tablasPorMarca: z.record(
+    z.string(),
+    z.array(stockDisponibleLiesslItemSchema),
+  ),
 });
 
 export const stockDisponibleLiessSchema = z.object({
   data: z.array(stockDisponibleLiesslItemSchema),
   resumen: stockDisponibleLiessResumenSchema,
 });
-export type StockDisponibleLiessItem = z.infer<typeof stockDisponibleLiesslItemSchema>;
-export type StockDisponibleLiessResponse = z.infer<typeof stockDisponibleLiessSchema>;
+export type StockDisponibleLiessItem = z.infer<
+  typeof stockDisponibleLiesslItemSchema
+>;
+export type StockDisponibleLiessResponse = z.infer<
+  typeof stockDisponibleLiessSchema
+>;
 export type LiessStockUsadoAccion = StockDisponibleLiessItem["accion"];
 export const liessStockUsadoAccionResponseSchema = z.object({
   message: z.string(),
@@ -427,7 +446,9 @@ export const misListaDeEsperaResponseSchema = z.object({
   }),
 });
 
-export type MiListaDeEsperaResponse = z.infer<typeof misListaDeEsperaResponseSchema>;
+export type MiListaDeEsperaResponse = z.infer<
+  typeof misListaDeEsperaResponseSchema
+>;
 
 //**************************** */
 // MIS OPERACIONES
@@ -571,7 +592,10 @@ export const ReservaUsadosSchema = z.object({
   sucursal: z.string(),
 });
 
-export const ReservasUsadosDataSchema = z.record(z.string(), z.array(ReservaUsadosSchema));
+export const ReservasUsadosDataSchema = z.record(
+  z.string(),
+  z.array(ReservaUsadosSchema),
+);
 
 export const ReservasUsadosResumenSchema = z.object({
   data: ReservasUsadosDataSchema,
@@ -659,9 +683,15 @@ export const stockIngresoUsadosSchema = z.object({
   resumen: stockIngresoUsadosResumenSchema,
 });
 
-export type StockIngresoUsadosItem = z.infer<typeof stockIngresoUsadosItemSchema>;
-export type StockIngresoUsadosResumen = z.infer<typeof stockIngresoUsadosResumenSchema>;
-export type StockIngresoUsadosResponse = z.infer<typeof stockIngresoUsadosSchema>;
+export type StockIngresoUsadosItem = z.infer<
+  typeof stockIngresoUsadosItemSchema
+>;
+export type StockIngresoUsadosResumen = z.infer<
+  typeof stockIngresoUsadosResumenSchema
+>;
+export type StockIngresoUsadosResponse = z.infer<
+  typeof stockIngresoUsadosSchema
+>;
 
 //**************************** */
 // PROMEDIOS CONVENCIONAL
@@ -709,14 +739,19 @@ export const promedioOperacionesConvencionalResumenSchema = z.object({
   meses: z.array(promedioOperacionMesSchema),
   vendedores: z.array(promedioOperacionVendedorSchema),
   sucursales: z.array(promedioOperacionSucursalSchema),
-  tablasPorSucursal: z.record(z.string(), z.array(promedioOperacionTablaItemSchema)),
+  tablasPorSucursal: z.record(
+    z.string(),
+    z.array(promedioOperacionTablaItemSchema),
+  ),
 });
 
 export const promedioOperacionesConvencionalResponseSchema = z.object({
   resumen: promedioOperacionesConvencionalResumenSchema,
 });
 
-export type PromedioOperacionesConvencionalResponse = z.infer<typeof promedioOperacionesConvencionalResponseSchema>;
+export type PromedioOperacionesConvencionalResponse = z.infer<
+  typeof promedioOperacionesConvencionalResponseSchema
+>;
 
 //**************************** */
 // RANKING CONVENCIONAL
@@ -771,7 +806,9 @@ export const rankingOperacionesConvencionalResponseSchema = z.object({
   resumen: rankingOperacionesConvencionalResumenSchema,
 });
 
-export type RankingOperacionesConvencionalResponse = z.infer<typeof rankingOperacionesConvencionalResponseSchema>;
+export type RankingOperacionesConvencionalResponse = z.infer<
+  typeof rankingOperacionesConvencionalResponseSchema
+>;
 
 //**************************** */
 // PROMEDIOS PLAN AHORRO
@@ -815,7 +852,10 @@ export const promedioPlanAhorroResponseSchema = z.object({
     meses: z.array(promedioPlanAhorroMesSchema),
     vendedores: z.array(promedioPlanAhorroVendedorSchema),
     sucursales: z.array(promedioPlanAhorroSucursalSchema),
-    tablasPorSucursal: z.record(z.string(), z.array(promedioPlanAhorroTablaItemSchema)),
+    tablasPorSucursal: z.record(
+      z.string(),
+      z.array(promedioPlanAhorroTablaItemSchema),
+    ),
     metricas: z.object({
       totalVendedores: z.number(),
       promedioGeneral: z.number(),
@@ -828,7 +868,9 @@ export const promedioPlanAhorroResponseSchema = z.object({
   }),
 });
 
-export type PromedioPlanAhorroResponse = z.infer<typeof promedioPlanAhorroResponseSchema>;
+export type PromedioPlanAhorroResponse = z.infer<
+  typeof promedioPlanAhorroResponseSchema
+>;
 
 //**************************** */
 // OPERACIONES DASHBOARD
@@ -872,7 +914,9 @@ export const operacionesDashboardResponseSchema = z.object({
 });
 
 export type OperacionDashboard = z.infer<typeof operacionDashboardSchema>;
-export type OperacionesDashboardResponse = z.infer<typeof operacionesDashboardResponseSchema>;
+export type OperacionesDashboardResponse = z.infer<
+  typeof operacionesDashboardResponseSchema
+>;
 
 export const analisisOperacionesPreventaTipoSchema = z.enum(["Cero"]);
 
@@ -938,32 +982,34 @@ export const analisisOperacionesPreventaDescuentoMensualItemSchema = z.object({
   descuentoPromedio: z.number(),
 });
 
-export const analisisOperacionesPreventaDescuentoMensualResponseSchema = z.object({
-  filters: z.object({
-    anio: z.number(),
-    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
-  }),
-  data: z.array(analisisOperacionesPreventaDescuentoMensualItemSchema),
-});
+export const analisisOperacionesPreventaDescuentoMensualResponseSchema =
+  z.object({
+    filters: z.object({
+      anio: z.number(),
+      tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+    }),
+    data: z.array(analisisOperacionesPreventaDescuentoMensualItemSchema),
+  });
 
-export const analisisOperacionesPreventaResumenFinanciacionResponseSchema = z.object({
-  filters: z.object({
-    anio: z.number(),
-    mes: z.number(),
-    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
-  }),
-  data: z.object({
-    cantidadOperacionesCredito: z.number(),
-    cantidadOperacionesUsado: z.number(),
-    promedioValorUsado: z.number().nullable(),
-    promedioCreditoPorModelo: z.array(
-      z.object({
-        modelo: z.string(),
-        promedioCredito: z.number(),
-      }),
-    ),
-  }),
-});
+export const analisisOperacionesPreventaResumenFinanciacionResponseSchema =
+  z.object({
+    filters: z.object({
+      anio: z.number(),
+      mes: z.number(),
+      tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
+    }),
+    data: z.object({
+      cantidadOperacionesCredito: z.number(),
+      cantidadOperacionesUsado: z.number(),
+      promedioValorUsado: z.number().nullable(),
+      promedioCreditoPorModelo: z.array(
+        z.object({
+          modelo: z.string(),
+          promedioCredito: z.number(),
+        }),
+      ),
+    }),
+  });
 
 export const analisisOperacionesPreventaUsadosMensualResponseSchema = z.object({
   filters: z.object({
@@ -980,27 +1026,38 @@ export const analisisOperacionesPreventaUsadosMensualResponseSchema = z.object({
   ),
 });
 
-export const analisisOperacionesPreventaCreditoMensualResponseSchema = z.object({
-  filters: z.object({
-    anio: z.number(),
-    tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
-  }),
-  data: z.array(
-    z.object({
-      mes: z.number(),
-      totalOperaciones: z.number(),
-      cantidadOperacionesCredito: z.number(),
-      promedioCredito: z.number().nullable(),
+export const analisisOperacionesPreventaCreditoMensualResponseSchema = z.object(
+  {
+    filters: z.object({
+      anio: z.number(),
+      tipo: analisisOperacionesPreventaTipoSchema.default("Cero"),
     }),
-  ),
-});
+    data: z.array(
+      z.object({
+        mes: z.number(),
+        totalOperaciones: z.number(),
+        cantidadOperacionesCredito: z.number(),
+        promedioCredito: z.number().nullable(),
+      }),
+    ),
+  },
+);
 
-
-export type AnalisisOperacionesPreventaTipo = z.infer<typeof analisisOperacionesPreventaTipoSchema>;
-export type AnalisisOperacionesPreventaItem = z.infer<typeof analisisOperacionesPreventaItemSchema>;
-export type AnalisisOperacionesPreventaResponse = z.infer<typeof analisisOperacionesPreventaResponseSchema>;
-export type AnalisisOperacionesPreventaFormaPago = z.infer<typeof analisisOperacionesPreventaFormaPagoSchema>;
-export type AnalisisOperacionesPreventaFormaPagoResponse = z.infer<typeof analisisOperacionesPreventaFormaPagoResponseSchema>;
+export type AnalisisOperacionesPreventaTipo = z.infer<
+  typeof analisisOperacionesPreventaTipoSchema
+>;
+export type AnalisisOperacionesPreventaItem = z.infer<
+  typeof analisisOperacionesPreventaItemSchema
+>;
+export type AnalisisOperacionesPreventaResponse = z.infer<
+  typeof analisisOperacionesPreventaResponseSchema
+>;
+export type AnalisisOperacionesPreventaFormaPago = z.infer<
+  typeof analisisOperacionesPreventaFormaPagoSchema
+>;
+export type AnalisisOperacionesPreventaFormaPagoResponse = z.infer<
+  typeof analisisOperacionesPreventaFormaPagoResponseSchema
+>;
 
 const analisisOperacionesPreventaMovilResumenItemSchema = z.object({
   nombre: z.string(),
@@ -1043,16 +1100,47 @@ export const dashboardSalonResponseSchema = z.object({
   objetivoVendedores: z.number().int().positive().nullable(),
   objetivoOperacionesTotales: z.number().int().positive().nullable(),
   objetivoOperacionesDiarias: z.number().int().positive().nullable(),
-  vendedores: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })),
-  usadosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),
-  creditosPorVendedor: z.array(z.object({ codigo: z.number().int().nonnegative(), nombre: z.string(), total: z.number() })).default([]),
+  vendedores: z.array(
+    z.object({
+      codigo: z.number().int().nonnegative(),
+      nombre: z.string(),
+      total: z.number(),
+    }),
+  ),
+  usadosPorVendedor: z
+    .array(
+      z.object({
+        codigo: z.number().int().nonnegative(),
+        nombre: z.string(),
+        total: z.number(),
+      }),
+    )
+    .default([]),
+  creditosPorVendedor: z
+    .array(
+      z.object({
+        codigo: z.number().int().nonnegative(),
+        nombre: z.string(),
+        total: z.number(),
+      }),
+    )
+    .default([]),
   modelos: z.array(analisisOperacionesPreventaMovilResumenItemSchema),
-  operacionesPorDia: z.array(z.object({ dia: z.number().int().min(1).max(31), total: z.number().int().nonnegative() })).default([]),
+  operacionesPorDia: z
+    .array(
+      z.object({
+        dia: z.number().int().min(1).max(31),
+        total: z.number().int().nonnegative(),
+      }),
+    )
+    .default([]),
   imagenesModelos: z.array(dashboardSalonModelImageSchema).default([]),
   imagenesVendedores: z.array(dashboardSalonSellerImageSchema).default([]),
 });
 
-export type DashboardSalonResponse = z.infer<typeof dashboardSalonResponseSchema>;
+export type DashboardSalonResponse = z.infer<
+  typeof dashboardSalonResponseSchema
+>;
 export type AnalisisOperacionesPreventaDescuentoMensualItem = z.infer<
   typeof analisisOperacionesPreventaDescuentoMensualItemSchema
 >;
@@ -1079,11 +1167,13 @@ export const analisisVendedorFiltersResponseSchema = z.object({
   }),
 });
 
-export const analisisVendedorChartItemSchema = z.object({
-  mes: z.number(),
-  label: z.string(),
-  total: z.number(),
-}).catchall(z.union([z.string(), z.number()]));
+export const analisisVendedorChartItemSchema = z
+  .object({
+    mes: z.number(),
+    label: z.string(),
+    total: z.number(),
+  })
+  .catchall(z.union([z.string(), z.number()]));
 
 export const analisisVendedorResponseSchema = z.object({
   filters: z.object({
@@ -1130,10 +1220,18 @@ export const analisisVendedorResponseSchema = z.object({
   ),
 });
 
-export type AnalisisVendedorFilterOption = z.infer<typeof analisisVendedorFilterOptionSchema>;
-export type AnalisisVendedorFiltersResponse = z.infer<typeof analisisVendedorFiltersResponseSchema>;
-export type AnalisisVendedorChartItem = z.infer<typeof analisisVendedorChartItemSchema>;
-export type AnalisisVendedorResponse = z.infer<typeof analisisVendedorResponseSchema>;
+export type AnalisisVendedorFilterOption = z.infer<
+  typeof analisisVendedorFilterOptionSchema
+>;
+export type AnalisisVendedorFiltersResponse = z.infer<
+  typeof analisisVendedorFiltersResponseSchema
+>;
+export type AnalisisVendedorChartItem = z.infer<
+  typeof analisisVendedorChartItemSchema
+>;
+export type AnalisisVendedorResponse = z.infer<
+  typeof analisisVendedorResponseSchema
+>;
 
 export const centralDeudoresSituacionSchema = z.number().int().min(0).max(5);
 
@@ -1221,11 +1319,19 @@ export const centralDeudoresResponseSchema = z.object({
   }),
 });
 
-export type CentralDeudoresResponse = z.infer<typeof centralDeudoresResponseSchema>;
+export type CentralDeudoresResponse = z.infer<
+  typeof centralDeudoresResponseSchema
+>;
 export type CentralDeudoresData = CentralDeudoresResponse["data"];
-export type CentralDeudoresEntidadActual = z.infer<typeof centralDeudoresEntidadActualSchema>;
-export type CentralDeudoresEntidadHistorica = z.infer<typeof centralDeudoresEntidadHistoricaSchema>;
-export type CentralDeudoresChequeDetalle = z.infer<typeof centralDeudoresChequeDetalleSchema>;
+export type CentralDeudoresEntidadActual = z.infer<
+  typeof centralDeudoresEntidadActualSchema
+>;
+export type CentralDeudoresEntidadHistorica = z.infer<
+  typeof centralDeudoresEntidadHistoricaSchema
+>;
+export type CentralDeudoresChequeDetalle = z.infer<
+  typeof centralDeudoresChequeDetalleSchema
+>;
 
 //**************************** */
 // PEDIDO UNIDADES
@@ -1339,12 +1445,18 @@ export const pedidoUnidadPreviaResponseSchema = z.object({
   message: z.string(),
 });
 
-export type PedidoUnidadInfoInterno = z.infer<typeof pedidoUnidadInfoInternoSchema>;
+export type PedidoUnidadInfoInterno = z.infer<
+  typeof pedidoUnidadInfoInternoSchema
+>;
 export type PedidoUnidadItem = z.infer<typeof pedidoUnidadItemSchema>;
 export type PedidoUnidad = z.infer<typeof pedidoUnidadSchema>;
-export type PedidoUnidadListResponse = z.infer<typeof pedidoUnidadListResponseSchema>;
+export type PedidoUnidadListResponse = z.infer<
+  typeof pedidoUnidadListResponseSchema
+>;
 export type PedidoUnidadRegistro = z.infer<typeof pedidoUnidadRegistroSchema>;
-export type PedidoUnidadRegistroListResponse = z.infer<typeof pedidoUnidadRegistroListResponseSchema>;
+export type PedidoUnidadRegistroListResponse = z.infer<
+  typeof pedidoUnidadRegistroListResponseSchema
+>;
 export type PedidoUnidadPrioridad = PedidoUnidadItem["prioridad"];
 export type PedidoUnidadPrevia = z.infer<typeof pedidoUnidadPreviaSchema>;
 
@@ -1512,7 +1624,10 @@ export type RegistroAsignacionResumenResponse = z.infer<
 export const catalogoSchema = z.object({
   _id: z.string(),
   nombre: z.string(),
-  hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  hex: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional(),
   activo: z.boolean(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -1524,6 +1639,23 @@ export const catalogoListResponseSchema = z.object({
 
 export const catalogoResponseSchema = z.object({
   data: catalogoSchema,
+  message: z.string(),
+});
+
+export const conversionSchema = z.object({
+  _id: z.string(),
+  tipoConversion: z.string(),
+  proveedor: z.string(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const conversionListResponseSchema = z.object({
+  data: z.array(conversionSchema),
+});
+
+export const conversionResponseSchema = z.object({
+  data: conversionSchema,
   message: z.string(),
 });
 
@@ -1561,14 +1693,16 @@ const planNegocioMesesSchema = z.object({
   dic: z.number(),
 });
 
-export const planNegocioResumenRowSchema = z.object({
-  modelo: z.string(),
-  objetivo: z.number(),
-  totalAsignado: z.number(),
-  avance: z.number(),
-  restante: z.number(),
-  xMes: z.number(),
-}).extend(planNegocioMesesSchema.shape);
+export const planNegocioResumenRowSchema = z
+  .object({
+    modelo: z.string(),
+    objetivo: z.number(),
+    totalAsignado: z.number(),
+    avance: z.number(),
+    restante: z.number(),
+    xMes: z.number(),
+  })
+  .extend(planNegocioMesesSchema.shape);
 
 export const planNegocioResumenResponseSchema = z.object({
   data: z.array(planNegocioResumenRowSchema),
@@ -1591,11 +1725,11 @@ export const testDriveSchema = z.object({
   versionNombre: z.string(),
   chasis: z.string(),
   color: z.string(),
-    colorNombre: z.string(),
-    negocio: z.enum(["convencional", "planAhorro"]),
-    anio: z.number(),
-    permiteStarlink: z.boolean(),
-    activo: z.boolean(),
+  colorNombre: z.string(),
+  negocio: z.enum(["convencional", "planAhorro"]),
+  anio: z.number(),
+  permiteStarlink: z.boolean(),
+  activo: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -1610,12 +1744,12 @@ export const testDriveResponseSchema = z.object({
 });
 
 export const testDriveOptionSchema = z.object({
-    _id: z.string(),
-    dominio: z.string(),
-    version: z.string(),
-    versionNombre: z.string(),
-    permiteStarlink: z.boolean(),
-  });
+  _id: z.string(),
+  dominio: z.string(),
+  version: z.string(),
+  versionNombre: z.string(),
+  permiteStarlink: z.boolean(),
+});
 
 export const testDriveOptionListResponseSchema = z.object({
   data: z.array(testDriveOptionSchema),
@@ -1632,11 +1766,11 @@ export const testDriveRegistroSchema = z.object({
   horaRetiro: z.string(),
   fechaRegreso: z.string(),
   horaRegreso: z.string(),
-    retiroAt: z.string(),
-    regresoAt: z.string(),
-    starlink: z.boolean(),
-    permiteStarlink: z.boolean().optional().default(false),
-    observacion: z.string().optional().default(""),
+  retiroAt: z.string(),
+  regresoAt: z.string(),
+  starlink: z.boolean(),
+  permiteStarlink: z.boolean().optional().default(false),
+  observacion: z.string().optional().default(""),
   solicitadoPorId: z.string(),
   solicitadoPorNombre: z.string(),
   createdAt: z.string(),
@@ -1719,7 +1853,7 @@ export const importRecordsResponseSchema = z.object({
 });
 
 export const resumenPedidoMensualItemSchema = z.object({
-  versionId: z.string(),
+  versionId: z.string().nullable(),
   version: z.string(),
   pedido: z.number(),
   preventas_pendientes: z.number(),
@@ -1954,43 +2088,82 @@ export const fsanchezOperacionEstadoResponseSchema = z.object({
 export type Catalogo = z.infer<typeof catalogoSchema>;
 export type CatalogoListResponse = z.infer<typeof catalogoListResponseSchema>;
 export type CatalogoResponse = z.infer<typeof catalogoResponseSchema>;
+export type Conversion = z.infer<typeof conversionSchema>;
+export type ConversionListResponse = z.infer<typeof conversionListResponseSchema>;
+export type ConversionResponse = z.infer<typeof conversionResponseSchema>;
 export type PlanNegocioItem = z.infer<typeof planNegocioSchema>;
-export type PlanNegocioListResponse = z.infer<typeof planNegocioListResponseSchema>;
+export type PlanNegocioListResponse = z.infer<
+  typeof planNegocioListResponseSchema
+>;
 export type PlanNegocioResponse = z.infer<typeof planNegocioResponseSchema>;
 export type PlanNegocioResumenRow = z.infer<typeof planNegocioResumenRowSchema>;
-export type PlanNegocioResumenResponse = z.infer<typeof planNegocioResumenResponseSchema>;
-export type PlanNegocioModelosResponse = z.infer<typeof planNegocioModelosResponseSchema>;
+export type PlanNegocioResumenResponse = z.infer<
+  typeof planNegocioResumenResponseSchema
+>;
+export type PlanNegocioModelosResponse = z.infer<
+  typeof planNegocioModelosResponseSchema
+>;
 export type TestDrive = z.infer<typeof testDriveSchema>;
 export type TestDriveListResponse = z.infer<typeof testDriveListResponseSchema>;
 export type TestDriveResponse = z.infer<typeof testDriveResponseSchema>;
 export type TestDriveOption = z.infer<typeof testDriveOptionSchema>;
-export type TestDriveOptionListResponse = z.infer<typeof testDriveOptionListResponseSchema>;
+export type TestDriveOptionListResponse = z.infer<
+  typeof testDriveOptionListResponseSchema
+>;
 export type TestDriveRegistro = z.infer<typeof testDriveRegistroSchema>;
-export type TestDriveRegistroListResponse = z.infer<typeof testDriveRegistroListResponseSchema>;
-export type TestDriveRegistroResponse = z.infer<typeof testDriveRegistroResponseSchema>;
+export type TestDriveRegistroListResponse = z.infer<
+  typeof testDriveRegistroListResponseSchema
+>;
+export type TestDriveRegistroResponse = z.infer<
+  typeof testDriveRegistroResponseSchema
+>;
 export type Preventa = z.infer<typeof preventaSchema>;
 export type PreventaListResponse = z.infer<typeof preventaListResponseSchema>;
 export type PreventaResponse = z.infer<typeof preventaResponseSchema>;
 export type PreventaResumenItem = z.infer<typeof preventaResumenItemSchema>;
-export type PreventaResumenResponse = z.infer<typeof preventaResumenResponseSchema>;
+export type PreventaResumenResponse = z.infer<
+  typeof preventaResumenResponseSchema
+>;
 export type PedidoMensual = z.infer<typeof pedidoMensualSchema>;
-export type PedidoMensualListResponse = z.infer<typeof pedidoMensualListResponseSchema>;
+export type PedidoMensualListResponse = z.infer<
+  typeof pedidoMensualListResponseSchema
+>;
 export type PedidoMensualResponse = z.infer<typeof pedidoMensualResponseSchema>;
-export type ResumenPedidoMensualItem = z.infer<typeof resumenPedidoMensualItemSchema>;
-export type ResumenPedidoMensualResponse = z.infer<typeof resumenPedidoMensualResponseSchema>;
+export type ResumenPedidoMensualItem = z.infer<
+  typeof resumenPedidoMensualItemSchema
+>;
+export type ResumenPedidoMensualResponse = z.infer<
+  typeof resumenPedidoMensualResponseSchema
+>;
 export type AnalisisStockMonth = z.infer<typeof analisisStockMonthSchema>;
-export type PrediccionAsignacionItem = z.infer<typeof prediccionAsignacionItemSchema>;
-export type PrediccionAsignacionesResponse = z.infer<typeof prediccionAsignacionesResponseSchema>;
-export type AnalisisStockDictionaryItem = z.infer<typeof analisisStockDictionaryItemSchema>;
-export type AnalisisStockVersionesDisponiblesItem = z.infer<typeof analisisStockVersionesDisponiblesItemSchema>;
+export type PrediccionAsignacionItem = z.infer<
+  typeof prediccionAsignacionItemSchema
+>;
+export type PrediccionAsignacionesResponse = z.infer<
+  typeof prediccionAsignacionesResponseSchema
+>;
+export type AnalisisStockDictionaryItem = z.infer<
+  typeof analisisStockDictionaryItemSchema
+>;
+export type AnalisisStockVersionesDisponiblesItem = z.infer<
+  typeof analisisStockVersionesDisponiblesItemSchema
+>;
 export type AnalisisStockRow = z.infer<typeof analisisStockRowSchema>;
 export type AnalisisStockGroup = z.infer<typeof analisisStockGroupSchema>;
 export type AnalisisStockData = z.infer<typeof analisisStockDataSchema>;
 export type AnalisisStockResponse = z.infer<typeof analisisStockResponseSchema>;
-export type AnalisisStockPedResponse = z.infer<typeof analisisStockPedResponseSchema>;
-export type AnalisisStockDictionaryListResponse = z.infer<typeof analisisStockDictionaryListResponseSchema>;
-export type AnalisisStockDictionaryResponse = z.infer<typeof analisisStockDictionaryResponseSchema>;
-export type AnalisisStockVersionesDisponiblesResponse = z.infer<typeof analisisStockVersionesDisponiblesResponseSchema>;
+export type AnalisisStockPedResponse = z.infer<
+  typeof analisisStockPedResponseSchema
+>;
+export type AnalisisStockDictionaryListResponse = z.infer<
+  typeof analisisStockDictionaryListResponseSchema
+>;
+export type AnalisisStockDictionaryResponse = z.infer<
+  typeof analisisStockDictionaryResponseSchema
+>;
+export type AnalisisStockVersionesDisponiblesResponse = z.infer<
+  typeof analisisStockVersionesDisponiblesResponseSchema
+>;
 export type PendFacLocation = z.infer<typeof pendFacLocationSchema>;
 export type PendFacUnit = z.infer<typeof pendFacUnitSchema>;
 export type PendFacRow = z.infer<typeof pendFacRowSchema>;
@@ -1998,8 +2171,12 @@ export type PendFacGroup = z.infer<typeof pendFacGroupSchema>;
 export type PendFacData = z.infer<typeof pendFacDataSchema>;
 export type PendFacResponse = z.infer<typeof pendFacResponseSchema>;
 export type FsanchezOperacionItem = z.infer<typeof fsanchezOperacionItemSchema>;
-export type FsanchezOperacionesResponse = z.infer<typeof fsanchezOperacionesResponseSchema>;
-export type FsanchezOperacionEstadoResponse = z.infer<typeof fsanchezOperacionEstadoResponseSchema>;
+export type FsanchezOperacionesResponse = z.infer<
+  typeof fsanchezOperacionesResponseSchema
+>;
+export type FsanchezOperacionEstadoResponse = z.infer<
+  typeof fsanchezOperacionEstadoResponseSchema
+>;
 
 //**************************** */
 // PROFORMAS
@@ -2016,8 +2193,10 @@ export const proformaRowSchema = z.object({
 
 export const proformaUnidadSchema = z.object({
   _id: z.string(),
+  interno: z.number().int().positive().nullable().optional().default(null),
   versionId: z.string(),
   versionNombre: z.string(),
+  colorNombre: z.string().optional().default(""),
   cantidad: z.number(),
   ivaUnidad: z.number(),
   totalUnidad: z.number(),
@@ -2126,9 +2305,13 @@ export type MinutaTemario = z.infer<typeof minutaTemarioSchema>;
 export type MinutaUser = z.infer<typeof minutaUserSchema>;
 export type MinutaListResponse = z.infer<typeof minutaListResponseSchema>;
 export type MinutaResponse = z.infer<typeof minutaResponseSchema>;
-export type MinutaParticipantsResponse = z.infer<typeof minutaParticipantsResponseSchema>;
+export type MinutaParticipantsResponse = z.infer<
+  typeof minutaParticipantsResponseSchema
+>;
 export type MinutaGrupo = z.infer<typeof minutaGrupoSchema>;
-export type MinutaGroupsListResponse = z.infer<typeof minutaGroupsListResponseSchema>;
+export type MinutaGroupsListResponse = z.infer<
+  typeof minutaGroupsListResponseSchema
+>;
 export type MinutaGroupResponse = z.infer<typeof minutaGroupResponseSchema>;
 
 export const rendicionGastoItemSchema = z.object({
@@ -2151,12 +2334,23 @@ export const rendicionGastoSchema = z.object({
   createdAt: z.string(),
   createdAtLabel: z.string(),
 });
-export const rendicionGastoListResponseSchema = z.object({ data: z.array(rendicionGastoSchema) });
-export const rendicionGastoResponseSchema = z.object({ data: rendicionGastoSchema, message: z.string().optional() });
-export const empresaGastoResponseSchema = z.object({ data: z.object({ cuit: z.string(), nombre: z.string() }).nullable() });
+export const rendicionGastoListResponseSchema = z.object({
+  data: z.array(rendicionGastoSchema),
+});
+export const rendicionGastoResponseSchema = z.object({
+  data: rendicionGastoSchema,
+  message: z.string().optional(),
+});
+export const empresaGastoResponseSchema = z.object({
+  data: z.object({ cuit: z.string(), nombre: z.string() }).nullable(),
+});
 export type RendicionGasto = z.infer<typeof rendicionGastoSchema>;
-export type RendicionGastoListResponse = z.infer<typeof rendicionGastoListResponseSchema>;
-export type RendicionGastoResponse = z.infer<typeof rendicionGastoResponseSchema>;
+export type RendicionGastoListResponse = z.infer<
+  typeof rendicionGastoListResponseSchema
+>;
+export type RendicionGastoResponse = z.infer<
+  typeof rendicionGastoResponseSchema
+>;
 
 export const unidadNegocioSchema = z.object({
   _id: z.string(),
@@ -2178,7 +2372,9 @@ export const unidadNegocioResponseSchema = z.object({
 });
 
 export type UnidadNegocio = z.infer<typeof unidadNegocioSchema>;
-export type UnidadNegocioListResponse = z.infer<typeof unidadNegocioListResponseSchema>;
+export type UnidadNegocioListResponse = z.infer<
+  typeof unidadNegocioListResponseSchema
+>;
 export type UnidadNegocioResponse = z.infer<typeof unidadNegocioResponseSchema>;
 
 //**************************** */
@@ -2231,12 +2427,14 @@ export const sucursalEntregaResponseSchema = z.object({
 
 export const agendaEnvioConfigSchema = z.object({
   _id: z.string(),
-  sucursal: z.object({
-    _id: z.string(),
-    nombre: z.string(),
-    direccion: z.string().optional().default(""),
-    activa: z.boolean(),
-  }).nullable(),
+  sucursal: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      direccion: z.string().optional().default(""),
+      activa: z.boolean(),
+    })
+    .nullable(),
   emails: z.array(z.string()).default([]),
   activo: z.boolean(),
   createdAt: z.string(),
@@ -2277,12 +2475,14 @@ export const agendaEntregaSchema = z.object({
   tipoRegistro: z.enum(["turno", "reserva"]).default("turno"),
   interno: z.number().nullable(),
   tipoOperacion: z.string().default(""),
-  sucursal: z.object({
-    _id: z.string(),
-    nombre: z.string(),
-    direccion: z.string().optional().default(""),
-    activa: z.boolean(),
-  }).nullable(),
+  sucursal: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      direccion: z.string().optional().default(""),
+      activa: z.boolean(),
+    })
+    .nullable(),
   fechaAgenda: z.string(),
   horaAgenda: z.string(),
   equipado: z.boolean(),
@@ -2328,12 +2528,12 @@ export const agendaEntregaLogSchema = z.object({
     "RESERVA_CREADA",
     "RESERVA_MODIFICADA",
     "RESERVA_ELIMINADA",
-      "RESERVA_CONVERTIDA",
-      "ENTREGA_MARCADA",
-      "ENTREGA_DESMARCADA",
-      "EQUIPADO_MARCADO",
-      "EQUIPADO_DESMARCADO",
-    ]),
+    "RESERVA_CONVERTIDA",
+    "ENTREGA_MARCADA",
+    "ENTREGA_DESMARCADA",
+    "EQUIPADO_MARCADO",
+    "EQUIPADO_DESMARCADO",
+  ]),
   usuario: z.string().nullable(),
   usuarioNombre: z.string(),
   fecha: z.string(),
@@ -2358,12 +2558,14 @@ export const pendienteTurnarSchema = z.object({
   _id: z.string(),
   interno: z.number(),
   tipoOperacion: z.string().default(""),
-  sucursal: z.object({
-    _id: z.string(),
-    nombre: z.string(),
-    direccion: z.string().optional().default(""),
-    activa: z.boolean(),
-  }).nullable(),
+  sucursal: z
+    .object({
+      _id: z.string(),
+      nombre: z.string(),
+      direccion: z.string().optional().default(""),
+      activa: z.boolean(),
+    })
+    .nullable(),
   equipado: z.boolean(),
   entregaUsado: z.boolean(),
   siniestro: z.boolean(),
@@ -2406,19 +2608,39 @@ export type AgendaEntregaLookup = z.infer<typeof agendaEntregaLookupSchema>;
 export type AgendaEntrega = z.infer<typeof agendaEntregaSchema>;
 export type AgendaEntregaResponse = z.infer<typeof agendaEntregaResponseSchema>;
 export type SucursalEntrega = z.infer<typeof sucursalEntregaSchema>;
-export type SucursalEntregaListResponse = z.infer<typeof sucursalEntregaListResponseSchema>;
-export type SucursalEntregaResponse = z.infer<typeof sucursalEntregaResponseSchema>;
+export type SucursalEntregaListResponse = z.infer<
+  typeof sucursalEntregaListResponseSchema
+>;
+export type SucursalEntregaResponse = z.infer<
+  typeof sucursalEntregaResponseSchema
+>;
 export type AgendaEnvioConfig = z.infer<typeof agendaEnvioConfigSchema>;
-export type AgendaEnvioConfigListResponse = z.infer<typeof agendaEnvioConfigListResponseSchema>;
-export type AgendaEnvioConfigResponse = z.infer<typeof agendaEnvioConfigResponseSchema>;
-export type AgendaEntregaListResponse = z.infer<typeof agendaEntregaListResponseSchema>;
+export type AgendaEnvioConfigListResponse = z.infer<
+  typeof agendaEnvioConfigListResponseSchema
+>;
+export type AgendaEnvioConfigResponse = z.infer<
+  typeof agendaEnvioConfigResponseSchema
+>;
+export type AgendaEntregaListResponse = z.infer<
+  typeof agendaEntregaListResponseSchema
+>;
 export type AgendaEntregaLog = z.infer<typeof agendaEntregaLogSchema>;
-export type AgendaEntregaLogListResponse = z.infer<typeof agendaEntregaLogListResponseSchema>;
+export type AgendaEntregaLogListResponse = z.infer<
+  typeof agendaEntregaLogListResponseSchema
+>;
 export type PendienteTurnar = z.infer<typeof pendienteTurnarSchema>;
-export type PendienteTurnarListResponse = z.infer<typeof pendienteTurnarListResponseSchema>;
-export type PendienteTurnarResponse = z.infer<typeof pendienteTurnarResponseSchema>;
-export type PendienteTurnarImportSummary = z.infer<typeof pendienteTurnarImportSummarySchema>;
-export type PendienteTurnarImportResponse = z.infer<typeof pendienteTurnarImportResponseSchema>;
+export type PendienteTurnarListResponse = z.infer<
+  typeof pendienteTurnarListResponseSchema
+>;
+export type PendienteTurnarResponse = z.infer<
+  typeof pendienteTurnarResponseSchema
+>;
+export type PendienteTurnarImportSummary = z.infer<
+  typeof pendienteTurnarImportSummarySchema
+>;
+export type PendienteTurnarImportResponse = z.infer<
+  typeof pendienteTurnarImportResponseSchema
+>;
 
 //**************************** */
 // CALIDAD - SSI VENTAS
@@ -2437,7 +2659,11 @@ export const ssiVentasClosedReasonSchema = z.enum([
 ]);
 
 export const ssiVentasBinaryResponseSchema = z.enum(["si", "no", "noSabe"]);
-export const ssiVentasIdentificadorClienteSchema = z.enum(["promotor", "neutro", "detractor"]);
+export const ssiVentasIdentificadorClienteSchema = z.enum([
+  "promotor",
+  "neutro",
+  "detractor",
+]);
 
 export const ssiVentasNumericAnswersSchema = z.object({
   instalacionesConcesionario: z.number().int().min(1).max(10),
@@ -2475,7 +2701,9 @@ export const ssiVentasListItemSchema = z.object({
   sucursal: z.string(),
   hotAlert: z.boolean().optional().default(false),
   centralTelefonica: z.boolean().optional().default(false),
-  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema
+    .nullable()
+    .optional(),
   administrativaId: z.string().nullable().optional(),
   administrativaNombre: z.string().optional().default(""),
   status: ssiVentasStatusSchema,
@@ -2505,7 +2733,9 @@ export const ssiVentasCaseSchema = z.object({
   sucursal: z.string(),
   hotAlert: z.boolean().optional().default(false),
   centralTelefonica: z.boolean().optional().default(false),
-  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema
+    .nullable()
+    .optional(),
   administrativaId: z.string().nullable().optional(),
   administrativaNombre: z.string().optional().default(""),
   createdBy: z.string().nullable(),
@@ -2526,7 +2756,9 @@ export const ssiVentasAttemptSchema = z.object({
   createdBy: z.string().nullable(),
   createdByName: z.string(),
   centralTelefonica: z.boolean().optional().default(false),
-  identificadorCliente: ssiVentasIdentificadorClienteSchema.nullable().optional(),
+  identificadorCliente: ssiVentasIdentificadorClienteSchema
+    .nullable()
+    .optional(),
   importMetadata: z
     .object({
       fechaEnvio: z.string().nullable().optional(),
@@ -2591,7 +2823,13 @@ export const ssiVentasAdministrativasResponseSchema = z.object({
 
 export const ssiVentasImportRowResultSchema = z.object({
   rowNumber: z.number(),
-  status: z.enum(["importada", "ignoradaNoRespondida", "operacionNoEncontrada", "conflicto", "errorValidacion"]),
+  status: z.enum([
+    "importada",
+    "ignoradaNoRespondida",
+    "operacionNoEncontrada",
+    "conflicto",
+    "errorValidacion",
+  ]),
   operacion: z.number().nullable(),
   contactoNombre: z.string(),
   message: z.string(),
@@ -2627,7 +2865,13 @@ export const hotAlertMailConfigResponseSchema = z.object({
 
 export const solicitudCambioColorAuditSchema = z.object({
   _id: z.string(),
-  action: z.enum(["created", "destinationUpdated", "requestedChanged", "completedChanged", "rejected"]),
+  action: z.enum([
+    "created",
+    "destinationUpdated",
+    "requestedChanged",
+    "completedChanged",
+    "rejected",
+  ]),
   actorId: z.string(),
   actorName: z.string(),
   before: z.record(z.string(), z.unknown()),
@@ -2657,131 +2901,441 @@ export const solicitudCambioColorSchema = z.object({
   audit: z.array(solicitudCambioColorAuditSchema),
 });
 
-export const solicitudCambioColorListResponseSchema = z.object({ data: z.array(solicitudCambioColorSchema) });
-export const solicitudCambioColorResponseSchema = z.object({ message: z.string(), data: solicitudCambioColorSchema });
-export const solicitudCambioColorUnidadResponseSchema = z.object({ data: z.object({ interno: z.number(), version: z.string(), color: z.string() }) });
+export const solicitudCambioColorListResponseSchema = z.object({
+  data: z.array(solicitudCambioColorSchema),
+});
+export const solicitudCambioColorResponseSchema = z.object({
+  message: z.string(),
+  data: solicitudCambioColorSchema,
+});
+export const solicitudCambioColorUnidadResponseSchema = z.object({
+  data: z.object({
+    interno: z.number(),
+    version: z.string(),
+    color: z.string(),
+  }),
+});
 
-export const repuestoSiniestroArticuloSchema = z.object({ renglon: z.number(), articulo: z.string(), denominacion: z.string(), cantidad: z.number(), pedido: z.boolean(), arribado: z.boolean(), retirado: z.boolean(), retiradoPor: z.object({ usuarioId: z.string(), nombre: z.string() }).optional() });
-export const repuestoSiniestroUnidadSchema = z.object({ interno: z.number(), modelo: z.string(), version: z.string(), chasis: z.string(), cliente: z.string() });
-export const repuestoSiniestroNotaSchema = z.object({ operacion: z.number(), numero: z.number(), fecha: z.string(), cuenta: z.number(), cliente: z.string(), sucursal: z.coerce.string() });
-export const repuestoSiniestroNotaBusquedaSchema = repuestoSiniestroNotaSchema.extend({ cantidadArticulos: z.number() });
-export const repuestoSiniestroNotaDetalleSchema = repuestoSiniestroNotaSchema.extend({ articulos: z.array(repuestoSiniestroArticuloSchema.pick({ renglon: true, articulo: true, denominacion: true, cantidad: true })) });
-export const repuestoSiniestroAuditSchema = z.object({ _id: z.string(), action: z.enum(["created", "noteUpdated", "requestChanged", "arrivalChanged", "withdrawalChanged", "completed", "deleted"]), actorId: z.string(), actorName: z.string(), before: z.record(z.string(), z.unknown()), after: z.record(z.string(), z.unknown()), createdAt: z.string() });
-export const repuestoSiniestroEtapaSchema = z.enum(["pendiente", "pedido", "arribado", "retirado"]);
-export const repuestoSiniestroAvanceSchema = z.object({ total: z.number(), pendientes: z.number(), pedidos: z.number(), arribados: z.number(), retirados: z.number() });
-export const repuestoSiniestroSchema = z.object({ _id: z.string(), interno: z.number(), unidad: repuestoSiniestroUnidadSchema.omit({ interno: true }), nota: repuestoSiniestroNotaSchema, articulos: z.array(repuestoSiniestroArticuloSchema), articulosEtapa: z.array(repuestoSiniestroArticuloSchema), avance: repuestoSiniestroAvanceSchema, estado: z.enum(["pendiente", "completado", "eliminado"]), createdBy: z.string(), createdByName: z.string(), createdAt: z.string(), updatedAt: z.string(), audit: z.array(repuestoSiniestroAuditSchema) });
-export const repuestoSiniestroListResponseSchema = z.object({ data: z.array(repuestoSiniestroSchema) });
-export const repuestoSiniestroResponseSchema = z.object({ message: z.string(), data: repuestoSiniestroSchema });
-export const repuestoSiniestroUnidadResponseSchema = z.object({ data: repuestoSiniestroUnidadSchema });
-export const repuestoSiniestroNotasResponseSchema = z.object({ data: z.array(repuestoSiniestroNotaBusquedaSchema) });
-export const repuestoSiniestroNotaResponseSchema = z.object({ data: repuestoSiniestroNotaDetalleSchema });
-export const repuestoSiniestroRetiradoresResponseSchema = z.object({ data: z.array(z.object({ _id: z.string(), nombre: z.string() })) });
+export const repuestoSiniestroArticuloSchema = z.object({
+  renglon: z.number(),
+  articulo: z.string(),
+  denominacion: z.string(),
+  cantidad: z.number(),
+  pedido: z.boolean(),
+  arribado: z.boolean(),
+  retirado: z.boolean(),
+  retiradoPor: z
+    .object({ usuarioId: z.string(), nombre: z.string() })
+    .optional(),
+});
+export const repuestoSiniestroUnidadSchema = z.object({
+  interno: z.number(),
+  modelo: z.string(),
+  version: z.string(),
+  chasis: z.string(),
+  cliente: z.string(),
+});
+export const repuestoSiniestroNotaSchema = z.object({
+  operacion: z.number(),
+  numero: z.number(),
+  fecha: z.string(),
+  cuenta: z.number(),
+  cliente: z.string(),
+  sucursal: z.coerce.string(),
+});
+export const repuestoSiniestroNotaBusquedaSchema =
+  repuestoSiniestroNotaSchema.extend({ cantidadArticulos: z.number() });
+export const repuestoSiniestroNotaDetalleSchema =
+  repuestoSiniestroNotaSchema.extend({
+    articulos: z.array(
+      repuestoSiniestroArticuloSchema.pick({
+        renglon: true,
+        articulo: true,
+        denominacion: true,
+        cantidad: true,
+      }),
+    ),
+  });
+export const repuestoSiniestroAuditSchema = z.object({
+  _id: z.string(),
+  action: z.enum([
+    "created",
+    "noteUpdated",
+    "requestChanged",
+    "arrivalChanged",
+    "withdrawalChanged",
+    "completed",
+    "deleted",
+  ]),
+  actorId: z.string(),
+  actorName: z.string(),
+  before: z.record(z.string(), z.unknown()),
+  after: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+});
+export const repuestoSiniestroEtapaSchema = z.enum([
+  "pendiente",
+  "pedido",
+  "arribado",
+  "retirado",
+]);
+export const repuestoSiniestroAvanceSchema = z.object({
+  total: z.number(),
+  pendientes: z.number(),
+  pedidos: z.number(),
+  arribados: z.number(),
+  retirados: z.number(),
+});
+export const repuestoSiniestroSchema = z.object({
+  _id: z.string(),
+  interno: z.number(),
+  unidad: repuestoSiniestroUnidadSchema.omit({ interno: true }),
+  nota: repuestoSiniestroNotaSchema,
+  articulos: z.array(repuestoSiniestroArticuloSchema),
+  articulosEtapa: z.array(repuestoSiniestroArticuloSchema),
+  avance: repuestoSiniestroAvanceSchema,
+  estado: z.enum(["pendiente", "completado", "eliminado"]),
+  createdBy: z.string(),
+  createdByName: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  audit: z.array(repuestoSiniestroAuditSchema),
+});
+export const repuestoSiniestroListResponseSchema = z.object({
+  data: z.array(repuestoSiniestroSchema),
+});
+export const repuestoSiniestroResponseSchema = z.object({
+  message: z.string(),
+  data: repuestoSiniestroSchema,
+});
+export const repuestoSiniestroUnidadResponseSchema = z.object({
+  data: repuestoSiniestroUnidadSchema,
+});
+export const repuestoSiniestroNotasResponseSchema = z.object({
+  data: z.array(repuestoSiniestroNotaBusquedaSchema),
+});
+export const repuestoSiniestroNotaResponseSchema = z.object({
+  data: repuestoSiniestroNotaDetalleSchema,
+});
+export const repuestoSiniestroRetiradoresResponseSchema = z.object({
+  data: z.array(z.object({ _id: z.string(), nombre: z.string() })),
+});
 
 export type SsiVentasStatus = z.infer<typeof ssiVentasStatusSchema>;
 export type SsiVentasClosedReason = z.infer<typeof ssiVentasClosedReasonSchema>;
-export type SsiVentasBinaryResponse = z.infer<typeof ssiVentasBinaryResponseSchema>;
-export type SsiVentasIdentificadorCliente = z.infer<typeof ssiVentasIdentificadorClienteSchema>;
-export type SsiVentasNumericAnswers = z.infer<typeof ssiVentasNumericAnswersSchema>;
-export type SsiVentasBinaryAnswers = z.infer<typeof ssiVentasBinaryAnswersSchema>;
+export type SsiVentasBinaryResponse = z.infer<
+  typeof ssiVentasBinaryResponseSchema
+>;
+export type SsiVentasIdentificadorCliente = z.infer<
+  typeof ssiVentasIdentificadorClienteSchema
+>;
+export type SsiVentasNumericAnswers = z.infer<
+  typeof ssiVentasNumericAnswersSchema
+>;
+export type SsiVentasBinaryAnswers = z.infer<
+  typeof ssiVentasBinaryAnswersSchema
+>;
 export type SsiVentasSurveyData = z.infer<typeof ssiVentasSurveyDataSchema>;
 export type SsiVentasListItem = z.infer<typeof ssiVentasListItemSchema>;
 export type SsiVentasCase = z.infer<typeof ssiVentasCaseSchema>;
 export type SsiVentasAttempt = z.infer<typeof ssiVentasAttemptSchema>;
 export type SsiVentasDetailData = z.infer<typeof ssiVentasDetailDataSchema>;
 export type SsiVentasListResponse = z.infer<typeof ssiVentasListResponseSchema>;
-export type SsiVentasDetailResponse = z.infer<typeof ssiVentasDetailResponseSchema>;
-export type SsiVentasCaseActionResponse = z.infer<typeof ssiVentasCaseActionResponseSchema>;
-export type SsiVentasCaseUpdateResponse = z.infer<typeof ssiVentasCaseUpdateResponseSchema>;
-export type SsiVentasAdministrativa = z.infer<typeof ssiVentasAdministrativaSchema>;
-export type SsiVentasAdministrativasResponse = z.infer<typeof ssiVentasAdministrativasResponseSchema>;
-export type SsiVentasImportRowResult = z.infer<typeof ssiVentasImportRowResultSchema>;
-export type SsiVentasImportResponse = z.infer<typeof ssiVentasImportResponseSchema>;
+export type SsiVentasDetailResponse = z.infer<
+  typeof ssiVentasDetailResponseSchema
+>;
+export type SsiVentasCaseActionResponse = z.infer<
+  typeof ssiVentasCaseActionResponseSchema
+>;
+export type SsiVentasCaseUpdateResponse = z.infer<
+  typeof ssiVentasCaseUpdateResponseSchema
+>;
+export type SsiVentasAdministrativa = z.infer<
+  typeof ssiVentasAdministrativaSchema
+>;
+export type SsiVentasAdministrativasResponse = z.infer<
+  typeof ssiVentasAdministrativasResponseSchema
+>;
+export type SsiVentasImportRowResult = z.infer<
+  typeof ssiVentasImportRowResultSchema
+>;
+export type SsiVentasImportResponse = z.infer<
+  typeof ssiVentasImportResponseSchema
+>;
 export type HotAlertMailConfig = z.infer<typeof hotAlertMailConfigSchema>;
-export type HotAlertMailConfigResponse = z.infer<typeof hotAlertMailConfigResponseSchema>;
+export type HotAlertMailConfigResponse = z.infer<
+  typeof hotAlertMailConfigResponseSchema
+>;
 export type SolicitudCambioColor = z.infer<typeof solicitudCambioColorSchema>;
 
 export const saldoOperacionSnapshotItemSchema = z.object({
-  codigoOperacion: z.number(), clienteNombre: z.string(), tipoCliente: z.enum(["Particular", "Leasing", "Reventa", "Empresa", "Licitación"]).nullable().optional().default(null), vendedor: z.string(), sucursal: z.string(),
-  usuarioOperacion: z.string(), nombreUsuarioOperacion: z.string(), usuarioOperacionOriginal: z.string().optional().default(""),
-  nombreUsuarioOperacionOriginal: z.string().optional().default(""), usuarioOperacionCorregido: z.boolean().optional().default(false), numeroFabrica: z.string(),
+  codigoOperacion: z.number(),
+  clienteNombre: z.string(),
+  tipoCliente: z
+    .enum(["Particular", "Leasing", "Reventa", "Empresa", "Licitación"])
+    .nullable()
+    .optional()
+    .default(null),
+  vendedor: z.string(),
+  sucursal: z.string(),
+  usuarioOperacion: z.string(),
+  nombreUsuarioOperacion: z.string(),
+  usuarioOperacionOriginal: z.string().optional().default(""),
+  nombreUsuarioOperacionOriginal: z.string().optional().default(""),
+  usuarioOperacionCorregido: z.boolean().optional().default(false),
+  numeroFabrica: z.string(),
   chasis: z.string().optional().default(""),
-  total: z.number().nullable(), bonificacion: z.number().nullable(), gestoria: z.number().nullable(), senas: z.number().nullable(),
-  usado: z.number().nullable(), creditoBanco: z.number().nullable(), creditoLiquidadoMonto: z.number().nullable().optional().default(null),
-  creditoEstado: z.enum(["sin_credito", "pendiente", "liquidado"]).optional().default("sin_credito"), version: z.string(), modeloGeneral: z.string(),
-  fechaAsignacion: z.string().nullable(), fechaFactura: z.string().nullable().optional().default(null), diasAsignada: z.number().nullable(), estado: z.string(), ubicacion: z.string(),
-  fechaCancelacion: z.string().nullable(), diasHastaCancelacion: z.number().nullable(), entregada: z.boolean().optional().default(false), saldo: z.number(), sincronizadoEn: z.string().nullable(),
+  total: z.number().nullable(),
+  bonificacion: z.number().nullable(),
+  gestoria: z.number().nullable(),
+  senas: z.number().nullable(),
+  usado: z.number().nullable(),
+  creditoBanco: z.number().nullable(),
+  creditoLiquidadoMonto: z.number().nullable().optional().default(null),
+  creditoEstado: z
+    .enum(["sin_credito", "pendiente", "liquidado"])
+    .optional()
+    .default("sin_credito"),
+  version: z.string(),
+  modeloGeneral: z.string(),
+  fechaAsignacion: z.string().nullable(),
+  fechaFactura: z.string().nullable().optional().default(null),
+  diasAsignada: z.number().nullable(),
+  estado: z.string(),
+  ubicacion: z.string(),
+  fechaCancelacion: z.string().nullable(),
+  diasHastaCancelacion: z.number().nullable(),
+  entregada: z.boolean().optional().default(false),
+  saldo: z.number(),
+  sincronizadoEn: z.string().nullable(),
 });
 export const saldoOperacionSnapshotListResponseSchema = z.object({
   data: z.array(saldoOperacionSnapshotItemSchema),
-  pagination: z.object({ page: z.number(), limit: z.number(), total: z.number(), totalPages: z.number(), hasNextPage: z.boolean() }),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+    hasNextPage: z.boolean(),
+  }),
 });
-export const saldoOperacionSnapshotFiltersResponseSchema = z.object({ meta: z.object({ sucursales: z.array(z.string()), ubicaciones: z.array(z.string()), usuarios: z.array(z.string()).optional().default([]), vendedores: z.array(z.string()).optional().default([]) }) });
-export const saldoOperacionSnapshotSummaryResponseSchema = z.object({ data: z.array(z.object({ modelo: z.string(), saldo: z.number() })), creditoTotal: z.number(), creditoPendienteCantidad: z.number().optional().default(0), usadoTotal: z.number(), usadoCantidad: z.number().optional().default(0) });
-export const saldoOperacionSnapshotUpdateResponseSchema = z.object({ message: z.string(), data: saldoOperacionSnapshotItemSchema });
+export const saldoOperacionSnapshotFiltersResponseSchema = z.object({
+  meta: z.object({
+    sucursales: z.array(z.string()),
+    ubicaciones: z.array(z.string()),
+    usuarios: z.array(z.string()).optional().default([]),
+    vendedores: z.array(z.string()).optional().default([]),
+  }),
+});
+export const saldoOperacionSnapshotSummaryResponseSchema = z.object({
+  data: z.array(z.object({ modelo: z.string(), saldo: z.number() })),
+  creditoTotal: z.number(),
+  creditoPendienteCantidad: z.number().optional().default(0),
+  usadoTotal: z.number(),
+  usadoCantidad: z.number().optional().default(0),
+});
+export const saldoOperacionSnapshotUpdateResponseSchema = z.object({
+  message: z.string(),
+  data: saldoOperacionSnapshotItemSchema,
+});
 export const saldoOperacionCreditoImportResponseSchema = z.object({
   message: z.string(),
   data: z.object({
-    totalFilas: z.number(), validas: z.number(), nuevas: z.number(), actualizadas: z.number(), repetidas: z.number(),
-    conciliadas: z.number(), sinCoincidencia: z.number(), descartadas: z.number(),
-    errores: z.array(z.object({ row: z.number(), chasis: z.string().optional(), message: z.string() })),
+    totalFilas: z.number(),
+    validas: z.number(),
+    nuevas: z.number(),
+    actualizadas: z.number(),
+    repetidas: z.number(),
+    conciliadas: z.number(),
+    sinCoincidencia: z.number(),
+    descartadas: z.number(),
+    errores: z.array(
+      z.object({
+        row: z.number(),
+        chasis: z.string().optional(),
+        message: z.string(),
+      }),
+    ),
   }),
 });
-export const saldoOperacionUsuariosResponseSchema = z.object({ data: z.array(z.object({ codigo: z.string(), nombre: z.string() })) });
-export type SaldoOperacionCancelacionAnalysisNode = { name: string; averageDays: number; operations: number; saldoTotal?: number; dimensionFilters?: Partial<Record<"tipoCliente" | "vendedor" | "usuario" | "sucursal", string>>; children?: SaldoOperacionCancelacionAnalysisNode[] };
-export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> = z.lazy(() => z.object({
-  name: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(), dimensionFilters: z.object({ tipoCliente: z.string().optional(), vendedor: z.string().optional(), usuario: z.string().optional(), sucursal: z.string().optional() }).optional(), children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
-}));
+export const saldoOperacionUsuariosResponseSchema = z.object({
+  data: z.array(z.object({ codigo: z.string(), nombre: z.string() })),
+});
+export type SaldoOperacionCancelacionAnalysisNode = {
+  name: string;
+  averageDays: number;
+  operations: number;
+  saldoTotal?: number;
+  dimensionFilters?: Partial<
+    Record<"tipoCliente" | "vendedor" | "usuario" | "sucursal", string>
+  >;
+  children?: SaldoOperacionCancelacionAnalysisNode[];
+};
+export const saldoOperacionCancelacionAnalysisNodeSchema: z.ZodType<SaldoOperacionCancelacionAnalysisNode> =
+  z.lazy(() =>
+    z.object({
+      name: z.string(),
+      averageDays: z.number(),
+      operations: z.number(),
+      saldoTotal: z.number().optional(),
+      dimensionFilters: z
+        .object({
+          tipoCliente: z.string().optional(),
+          vendedor: z.string().optional(),
+          usuario: z.string().optional(),
+          sucursal: z.string().optional(),
+        })
+        .optional(),
+      children: z.array(saldoOperacionCancelacionAnalysisNodeSchema).optional(),
+    }),
+  );
 export const saldoOperacionCancelacionAnalysisResponseSchema = z.object({
   data: z.object({
     averageDays: z.number(),
     operations: z.number(),
     tree: saldoOperacionCancelacionAnalysisNodeSchema,
-    dimensionOrder: z.array(z.enum(["tipoCliente", "vendedor", "usuario", "sucursal"])).min(1).optional().default(["tipoCliente", "vendedor", "usuario", "sucursal"]),
-    months: z.array(z.object({
-      month: z.string(), averageDays: z.number(), operations: z.number(), saldoTotal: z.number().optional(),
-      creditoPendiente: z.number().optional(), usadoPendiente: z.number().optional(), montoPendiente: z.number().optional(), totalPendiente: z.number().optional(),
-    })),
-    sucursalesPorMes: z.array(z.object({
-      sucursal: z.string(),
-      months: z.array(z.object({ month: z.string(), averageDays: z.number(), operations: z.number() })),
-    })),
+    dimensionOrder: z
+      .array(z.enum(["tipoCliente", "vendedor", "usuario", "sucursal"]))
+      .min(1)
+      .optional()
+      .default(["tipoCliente", "vendedor", "usuario", "sucursal"]),
+    months: z.array(
+      z.object({
+        month: z.string(),
+        averageDays: z.number(),
+        operations: z.number(),
+        saldoTotal: z.number().optional(),
+        creditoPendiente: z.number().optional(),
+        usadoPendiente: z.number().optional(),
+        montoPendiente: z.number().optional(),
+        totalPendiente: z.number().optional(),
+      }),
+    ),
+    sucursalesPorMes: z.array(
+      z.object({
+        sucursal: z.string(),
+        months: z.array(
+          z.object({
+            month: z.string(),
+            averageDays: z.number(),
+            operations: z.number(),
+          }),
+        ),
+      }),
+    ),
   }),
 });
-export type SaldoOperacionSnapshotItem = z.infer<typeof saldoOperacionSnapshotItemSchema>;
-export type SaldoOperacionSnapshotListResponse = z.infer<typeof saldoOperacionSnapshotListResponseSchema>;
-export type SaldoOperacionSnapshotFiltersResponse = z.infer<typeof saldoOperacionSnapshotFiltersResponseSchema>;
-export type SaldoOperacionSnapshotSummaryResponse = z.infer<typeof saldoOperacionSnapshotSummaryResponseSchema>;
-export type SaldoOperacionCreditoImportResponse = z.infer<typeof saldoOperacionCreditoImportResponseSchema>;
-export type SaldoOperacionCancelacionAnalysisResponse = z.infer<typeof saldoOperacionCancelacionAnalysisResponseSchema>;
-export const saldoOperacionNoCanceladasDetailResponseSchema = z.object({ data: z.array(saldoOperacionSnapshotItemSchema) });
-export type SaldoOperacionNoCanceladasDetailResponse = z.infer<typeof saldoOperacionNoCanceladasDetailResponseSchema>;
-export const dashboardAdministracionResponseSchema = saldoOperacionCancelacionAnalysisResponseSchema.extend({
-  tiposCliente: z.array(z.object({ nombre: z.string(), total: z.number().int().nonnegative() })),
-  resumen: z.object({ saldoTotal: z.number(), creditoTotal: z.number(), creditoCantidad: z.number().int().nonnegative(), usadoTotal: z.number(), usadoCantidad: z.number().int().nonnegative() }),
+export type SaldoOperacionSnapshotItem = z.infer<
+  typeof saldoOperacionSnapshotItemSchema
+>;
+export type SaldoOperacionSnapshotListResponse = z.infer<
+  typeof saldoOperacionSnapshotListResponseSchema
+>;
+export type SaldoOperacionSnapshotFiltersResponse = z.infer<
+  typeof saldoOperacionSnapshotFiltersResponseSchema
+>;
+export type SaldoOperacionSnapshotSummaryResponse = z.infer<
+  typeof saldoOperacionSnapshotSummaryResponseSchema
+>;
+export type SaldoOperacionCreditoImportResponse = z.infer<
+  typeof saldoOperacionCreditoImportResponseSchema
+>;
+export type SaldoOperacionCancelacionAnalysisResponse = z.infer<
+  typeof saldoOperacionCancelacionAnalysisResponseSchema
+>;
+export const saldoOperacionNoCanceladasDetailResponseSchema = z.object({
+  data: z.array(saldoOperacionSnapshotItemSchema),
 });
-export type DashboardAdministracionResponse = z.infer<typeof dashboardAdministracionResponseSchema>;
-export type SaldoOperacionUsuario = z.infer<typeof saldoOperacionUsuariosResponseSchema>['data'][number];
+export type SaldoOperacionNoCanceladasDetailResponse = z.infer<
+  typeof saldoOperacionNoCanceladasDetailResponseSchema
+>;
+export const dashboardAdministracionResponseSchema =
+  saldoOperacionCancelacionAnalysisResponseSchema.extend({
+    tiposCliente: z.array(
+      z.object({ nombre: z.string(), total: z.number().int().nonnegative() }),
+    ),
+    resumen: z.object({
+      saldoTotal: z.number(),
+      creditoTotal: z.number(),
+      creditoCantidad: z.number().int().nonnegative(),
+      usadoTotal: z.number(),
+      usadoCantidad: z.number().int().nonnegative(),
+    }),
+  });
+export type DashboardAdministracionResponse = z.infer<
+  typeof dashboardAdministracionResponseSchema
+>;
+export type SaldoOperacionUsuario = z.infer<
+  typeof saldoOperacionUsuariosResponseSchema
+>["data"][number];
 
-export const cobrosVendedorOptionSchema = z.object({ codigo: z.number(), vendedor: z.string() });
-export const cobrosVendedorOptionsResponseSchema = z.object({ data: z.array(cobrosVendedorOptionSchema) });
+export const cobrosVendedorOptionSchema = z.object({
+  codigo: z.number(),
+  vendedor: z.string(),
+});
+export const cobrosVendedorOptionsResponseSchema = z.object({
+  data: z.array(cobrosVendedorOptionSchema),
+});
 export const cobrosVendedorListResponseSchema = z.object({
-  data: z.array(z.object({
-    codigoOperacion: z.number(), numeroFabrica: z.string(), cliente: z.string(), modelo: z.string(), version: z.string(),
-    total: z.number(), cobrado: z.number(), usado: z.number(), saldo: z.number(),
-  })),
-  pagination: z.object({ page: z.number(), limit: z.number(), total: z.number(), totalPages: z.number(), hasNextPage: z.boolean() }),
+  data: z.array(
+    z.object({
+      codigoOperacion: z.number(),
+      numeroFabrica: z.string(),
+      cliente: z.string(),
+      modelo: z.string(),
+      version: z.string(),
+      total: z.number(),
+      cobrado: z.number(),
+      usado: z.number(),
+      saldo: z.number(),
+    }),
+  ),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+    hasNextPage: z.boolean(),
+  }),
 });
 export const cobrosVendedorDetalleResponseSchema = z.object({
   data: z.object({
-    codigoOperacion: z.number(), venta: z.number(), gestoria: z.number(), bonificacion: z.number(), total: z.number(),
-    anticipos: z.number(), deudoresVarios: z.number(), usado: z.number(), credito: z.number(), cobrado: z.number(), saldo: z.number(),
-    recibosAnticipos: z.array(z.object({ fecha: z.string().nullable(), caja: z.number(), comprobante: z.number(), importe: z.number() })),
-    recibosDeudores: z.array(z.object({ fecha: z.string().nullable(), caja: z.number(), comprobante: z.number(), importe: z.number() })),
+    codigoOperacion: z.number(),
+    venta: z.number(),
+    gestoria: z.number(),
+    bonificacion: z.number(),
+    total: z.number(),
+    anticipos: z.number(),
+    deudoresVarios: z.number(),
+    usado: z.number(),
+    credito: z.number(),
+    cobrado: z.number(),
+    saldo: z.number(),
+    recibosAnticipos: z.array(
+      z.object({
+        fecha: z.string().nullable(),
+        caja: z.number(),
+        comprobante: z.number(),
+        importe: z.number(),
+      }),
+    ),
+    recibosDeudores: z.array(
+      z.object({
+        fecha: z.string().nullable(),
+        caja: z.number(),
+        comprobante: z.number(),
+        importe: z.number(),
+      }),
+    ),
   }),
 });
 export type CobrosVendedorOption = z.infer<typeof cobrosVendedorOptionSchema>;
-export type CobrosVendedorListResponse = z.infer<typeof cobrosVendedorListResponseSchema>;
-export type CobrosVendedorDetalleResponse = z.infer<typeof cobrosVendedorDetalleResponseSchema>;
+export type CobrosVendedorListResponse = z.infer<
+  typeof cobrosVendedorListResponseSchema
+>;
+export type CobrosVendedorDetalleResponse = z.infer<
+  typeof cobrosVendedorDetalleResponseSchema
+>;
 
 export const tableroCobranzasDiaSchema = z.object({
   dia: z.number(),
@@ -2807,132 +3361,502 @@ export const tableroCobranzasDiarioResponseSchema = z.object({
   }),
 });
 export const dashboardAdministracionCobranzasResponseSchema = z.object({
-  data: tableroCobranzasDiarioResponseSchema.shape.data.extend({ objetivos: z.array(z.number().nullable()).length(5) }),
+  data: tableroCobranzasDiarioResponseSchema.shape.data.extend({
+    objetivos: z.array(z.number().nullable()).length(5),
+  }),
 });
 export const dashboardAdministracionCobranzasSettingsResponseSchema = z.object({
-  data: z.object({ anio: z.number().int(), mes: z.number().int().min(1).max(12), objetivos: z.array(z.number().nullable()).length(5) }),
+  data: z.object({
+    anio: z.number().int(),
+    mes: z.number().int().min(1).max(12),
+    objetivos: z.array(z.number().nullable()).length(5),
+  }),
   message: z.string(),
 });
-export type DashboardAdministracionCobranzasResponse = z.infer<typeof dashboardAdministracionCobranzasResponseSchema>;
-export type DashboardAdministracionCobranzasSettingsResponse = z.infer<typeof dashboardAdministracionCobranzasSettingsResponseSchema>;
+export type DashboardAdministracionCobranzasResponse = z.infer<
+  typeof dashboardAdministracionCobranzasResponseSchema
+>;
+export type DashboardAdministracionCobranzasSettingsResponse = z.infer<
+  typeof dashboardAdministracionCobranzasSettingsResponseSchema
+>;
 
 export const tableroCobranzasDetalleDiarioResponseSchema = z.object({
   data: z.object({
     anio: z.number(),
     mes: z.number(),
     dia: z.number(),
-    operaciones: z.array(z.object({
-      codigoOperacion: z.number(),
-      cliente: z.string(),
-      modelo: z.string(),
-      version: z.string(),
-      monto: z.number(),
-    })),
+    operaciones: z.array(
+      z.object({
+        codigoOperacion: z.number(),
+        cliente: z.string(),
+        modelo: z.string(),
+        version: z.string(),
+        monto: z.number(),
+      }),
+    ),
   }),
 });
 
 export const tableroCobranzasRecibosOperacionResponseSchema = z.object({
   data: z.object({
     operacion: z.number(),
-    recibos: z.array(z.object({
-      fecha: z.string(),
-      comprobante: z.number(),
-      efectivo: z.number(),
-      acreditacionBancaria: z.number(),
-      tarjetas: z.number(),
-      chequesTerceros: z.number(),
-      chequesPropios: z.number(),
-      retenciones: z.number(),
-      documentos: z.number(),
-      prenda: z.number(),
-      compensaciones: z.number(),
-      certificados: z.number(),
-      total: z.number(),
-    })),
+    recibos: z.array(
+      z.object({
+        fecha: z.string(),
+        comprobante: z.number(),
+        efectivo: z.number(),
+        acreditacionBancaria: z.number(),
+        tarjetas: z.number(),
+        chequesTerceros: z.number(),
+        chequesPropios: z.number(),
+        retenciones: z.number(),
+        documentos: z.number(),
+        prenda: z.number(),
+        compensaciones: z.number(),
+        certificados: z.number(),
+        total: z.number(),
+      }),
+    ),
   }),
 });
 
-export type TableroCobranzasDiarioResponse = z.infer<typeof tableroCobranzasDiarioResponseSchema>;
+export type TableroCobranzasDiarioResponse = z.infer<
+  typeof tableroCobranzasDiarioResponseSchema
+>;
 export type TableroCobranzasDia = z.infer<typeof tableroCobranzasDiaSchema>;
-export type TableroCobranzasDetalleDiarioResponse = z.infer<typeof tableroCobranzasDetalleDiarioResponseSchema>;
-export type TableroCobranzasRecibosOperacionResponse = z.infer<typeof tableroCobranzasRecibosOperacionResponseSchema>;
+export type TableroCobranzasDetalleDiarioResponse = z.infer<
+  typeof tableroCobranzasDetalleDiarioResponseSchema
+>;
+export type TableroCobranzasRecibosOperacionResponse = z.infer<
+  typeof tableroCobranzasRecibosOperacionResponseSchema
+>;
 export const kintoFlotaSchema = z.object({
-  _id: z.string(), dominio: z.string(), modelo: z.string(), anio: z.number(), vin: z.string(),
-  kmIniciales: z.number(), kmActual: z.number(), geotab: z.enum(["Reportando", "Sin Conexion"]), activo: z.boolean(), sucursalEntregaId: z.string().nullable(),
-  historialKm: z.array(z.object({ kmAnterior: z.number(), kmActual: z.number(), actorNombre: z.string(), createdAt: z.string() })),
-  auditoria: z.array(z.object({ accion: z.enum(["KM_UPDATED", "DEACTIVATED", "REACTIVATED", "GEOTAB_CHANGED"]), actorNombre: z.string(), before: z.record(z.string(), z.unknown()), after: z.record(z.string(), z.unknown()), createdAt: z.string() })),
+  _id: z.string(),
+  dominio: z.string(),
+  modelo: z.string(),
+  anio: z.number(),
+  vin: z.string(),
+  kmIniciales: z.number(),
+  kmActual: z.number(),
+  geotab: z.enum(["Reportando", "Sin Conexion"]),
+  activo: z.boolean(),
+  sucursalEntregaId: z.string().nullable(),
+  historialKm: z.array(
+    z.object({
+      kmAnterior: z.number(),
+      kmActual: z.number(),
+      actorNombre: z.string(),
+      createdAt: z.string(),
+    }),
+  ),
+  auditoria: z.array(
+    z.object({
+      accion: z.enum([
+        "KM_UPDATED",
+        "DEACTIVATED",
+        "REACTIVATED",
+        "GEOTAB_CHANGED",
+      ]),
+      actorNombre: z.string(),
+      before: z.record(z.string(), z.unknown()),
+      after: z.record(z.string(), z.unknown()),
+      createdAt: z.string(),
+    }),
+  ),
 });
-export const kintoFlotaListResponseSchema = z.object({ data: z.array(kintoFlotaSchema) });
+export const kintoFlotaListResponseSchema = z.object({
+  data: z.array(kintoFlotaSchema),
+});
 export const kintoFlotaLookupResponseSchema = z.object({
-  data: z.object({ modelo: z.string(), anio: z.number().nullable(), vin: z.string() }).nullable(),
-  matches: z.number(), patente: z.string(),
+  data: z
+    .object({
+      modelo: z.string(),
+      anio: z.number().nullable(),
+      vin: z.string(),
+    })
+    .nullable(),
+  matches: z.number(),
+  patente: z.string(),
 });
-export const kintoFlotaResponseSchema = z.object({ message: z.string(), data: kintoFlotaSchema });
+export const kintoFlotaResponseSchema = z.object({
+  message: z.string(),
+  data: kintoFlotaSchema,
+});
 export type KintoFlota = z.infer<typeof kintoFlotaSchema>;
-export type KintoFlotaListResponse = z.infer<typeof kintoFlotaListResponseSchema>;
-export type KintoFlotaLookupResponse = z.infer<typeof kintoFlotaLookupResponseSchema>;
+export type KintoFlotaListResponse = z.infer<
+  typeof kintoFlotaListResponseSchema
+>;
+export type KintoFlotaLookupResponse = z.infer<
+  typeof kintoFlotaLookupResponseSchema
+>;
 export type KintoFlotaResponse = z.infer<typeof kintoFlotaResponseSchema>;
-export const kintoMatafuegosItemSchema = z.object({ flotaId: z.string(), dominio: z.string(), modelo: z.string(), anio: z.number(), kmActual: z.number(), sucursal: z.string(), fechaVencimiento: z.string().nullable(), diasRestantes: z.number().nullable(), estado: z.enum(["OK", "VENCIDO"]) });
-export const kintoMatafuegosHistoryItemSchema = z.object({ _id: z.string(), fechaRecarga: z.string(), fechaVencimiento: z.string(), importeRecarga: z.number().nullable(), observaciones: z.string(), actorNombre: z.string(), createdAt: z.string() });
-export const kintoMatafuegosListResponseSchema = z.object({ data: z.array(kintoMatafuegosItemSchema) });
-export const kintoMatafuegosHistoryResponseSchema = z.object({ data: z.array(kintoMatafuegosHistoryItemSchema) });
-export const kintoMatafuegosRecargaResponseSchema = z.object({ message: z.string(), data: kintoMatafuegosHistoryItemSchema });
+export const kintoMatafuegosItemSchema = z.object({
+  flotaId: z.string(),
+  dominio: z.string(),
+  modelo: z.string(),
+  anio: z.number(),
+  kmActual: z.number(),
+  sucursal: z.string(),
+  fechaVencimiento: z.string().nullable(),
+  diasRestantes: z.number().nullable(),
+  estado: z.enum(["OK", "VENCIDO"]),
+});
+export const kintoMatafuegosHistoryItemSchema = z.object({
+  _id: z.string(),
+  fechaRecarga: z.string(),
+  fechaVencimiento: z.string(),
+  importeRecarga: z.number().nullable(),
+  observaciones: z.string(),
+  actorNombre: z.string(),
+  createdAt: z.string(),
+});
+export const kintoMatafuegosListResponseSchema = z.object({
+  data: z.array(kintoMatafuegosItemSchema),
+});
+export const kintoMatafuegosHistoryResponseSchema = z.object({
+  data: z.array(kintoMatafuegosHistoryItemSchema),
+});
+export const kintoMatafuegosRecargaResponseSchema = z.object({
+  message: z.string(),
+  data: kintoMatafuegosHistoryItemSchema,
+});
 export type KintoMatafuegosItem = z.infer<typeof kintoMatafuegosItemSchema>;
-export type KintoMatafuegosHistoryItem = z.infer<typeof kintoMatafuegosHistoryItemSchema>;
-export type KintoMatafuegosListResponse = z.infer<typeof kintoMatafuegosListResponseSchema>;
-export type KintoMatafuegosHistoryResponse = z.infer<typeof kintoMatafuegosHistoryResponseSchema>;
-export type KintoMatafuegosRecargaResponse = z.infer<typeof kintoMatafuegosRecargaResponseSchema>;
-export const kintoMultaStatusSchema = z.enum(["PEND_COBRAR", "PEND_FACTURAR", "PEND_PAGAR", "PAGADO"]);
-export const kintoMultaSchema = z.object({ _id: z.string(), flotaId: z.string(), dominio: z.string(), sucursal: z.string(), fecha: z.string(), booking: z.string(), monto: z.number(), cobrado: z.boolean(), facturado: z.boolean(), pagado: z.boolean(), estado: kintoMultaStatusSchema, createdAt: z.string(), updatedAt: z.string() });
-export const kintoMultaAuditSchema = z.object({ _id: z.string(), accion: z.enum(["CARGO_CREATED", "UPDATED", "STATUS_CHANGED", "DELETED"]), actorNombre: z.string(), before: z.record(z.string(), z.unknown()), after: z.record(z.string(), z.unknown()), createdAt: z.string() });
-export const kintoMultaDomainSchema = z.object({ _id: z.string(), dominio: z.string(), modelo: z.string(), activo: z.boolean() });
-export const kintoMultaListResponseSchema = z.object({ data: z.array(kintoMultaSchema) });
-export const kintoMultaResponseSchema = z.object({ message: z.string(), data: kintoMultaSchema });
-export const kintoMultaHistoryResponseSchema = z.object({ data: z.array(kintoMultaAuditSchema) });
-export const kintoMultaDomainsResponseSchema = z.object({ data: z.array(kintoMultaDomainSchema) });
+export type KintoMatafuegosHistoryItem = z.infer<
+  typeof kintoMatafuegosHistoryItemSchema
+>;
+export type KintoMatafuegosListResponse = z.infer<
+  typeof kintoMatafuegosListResponseSchema
+>;
+export type KintoMatafuegosHistoryResponse = z.infer<
+  typeof kintoMatafuegosHistoryResponseSchema
+>;
+export type KintoMatafuegosRecargaResponse = z.infer<
+  typeof kintoMatafuegosRecargaResponseSchema
+>;
+export const kintoMultaStatusSchema = z.enum([
+  "PEND_COBRAR",
+  "PEND_FACTURAR",
+  "PEND_PAGAR",
+  "PAGADO",
+]);
+export const kintoMultaSchema = z.object({
+  _id: z.string(),
+  flotaId: z.string(),
+  dominio: z.string(),
+  sucursal: z.string(),
+  fecha: z.string(),
+  booking: z.string(),
+  monto: z.number(),
+  cobrado: z.boolean(),
+  facturado: z.boolean(),
+  pagado: z.boolean(),
+  estado: kintoMultaStatusSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const kintoMultaAuditSchema = z.object({
+  _id: z.string(),
+  accion: z.enum(["CARGO_CREATED", "UPDATED", "STATUS_CHANGED", "DELETED"]),
+  actorNombre: z.string(),
+  before: z.record(z.string(), z.unknown()),
+  after: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+});
+export const kintoMultaDomainSchema = z.object({
+  _id: z.string(),
+  dominio: z.string(),
+  modelo: z.string(),
+  activo: z.boolean(),
+});
+export const kintoMultaListResponseSchema = z.object({
+  data: z.array(kintoMultaSchema),
+});
+export const kintoMultaResponseSchema = z.object({
+  message: z.string(),
+  data: kintoMultaSchema,
+});
+export const kintoMultaHistoryResponseSchema = z.object({
+  data: z.array(kintoMultaAuditSchema),
+});
+export const kintoMultaDomainsResponseSchema = z.object({
+  data: z.array(kintoMultaDomainSchema),
+});
 export type KintoMultaStatus = z.infer<typeof kintoMultaStatusSchema>;
 export type KintoMulta = z.infer<typeof kintoMultaSchema>;
 export type KintoMultaAudit = z.infer<typeof kintoMultaAuditSchema>;
 export type KintoMultaDomain = z.infer<typeof kintoMultaDomainSchema>;
-export type KintoMultaListResponse = z.infer<typeof kintoMultaListResponseSchema>;
+export type KintoMultaListResponse = z.infer<
+  typeof kintoMultaListResponseSchema
+>;
 export type KintoMultaResponse = z.infer<typeof kintoMultaResponseSchema>;
-export type KintoMultaHistoryResponse = z.infer<typeof kintoMultaHistoryResponseSchema>;
-export type KintoMultaDomainsResponse = z.infer<typeof kintoMultaDomainsResponseSchema>;
-export const kintoNpsShareSchema = z.object({ _id: z.string(), anio: z.number(), mes: z.number(), promotores: z.number(), pasivos: z.number(), detractores: z.number(), createdAt: z.string(), updatedAt: z.string() });
-export const kintoNpsShareListResponseSchema = z.object({ data: z.array(kintoNpsShareSchema), filtros: z.object({ anios: z.array(z.number()) }) });
-export const kintoNpsShareResponseSchema = z.object({ message: z.string(), data: kintoNpsShareSchema });
-export type KintoNpsShare = z.infer<typeof kintoNpsShareSchema>;
-export type KintoNpsShareListResponse = z.infer<typeof kintoNpsShareListResponseSchema>;
-export type KintoNpsShareResponse = z.infer<typeof kintoNpsShareResponseSchema>;
-export const kintoDashboardStatusSchema = z.enum(["PEND_COBRAR", "PEND_FACTURAR", "PEND_PAGAR", "PAGADO"]);
-export const kintoDashboardResponseSchema = z.object({
-  filtros: z.object({ anios: z.array(z.number()), sucursales: z.array(z.string()) }),
-  estadoActual: z.object({ unidadesActivas: z.number(), unidadesInactivas: z.number(), reportando: z.number(), sinConexion: z.number(), tasaConexion: z.number(), kmTotal: z.number(), kmPromedio: z.number(), matafuegos: z.object({ vencidos: z.number(), proximos: z.number(), sinRecarga: z.number() }) }),
-  gastos: z.object({ mensual: z.array(z.object({ month: z.number(), matafuegos: z.number(), multas: z.number(), cantidadMatafuegos: z.number(), cantidadMultas: z.number(), total: z.number() })), total: z.number(), promedioPorUnidad: z.number() }),
-  multas: z.object({ estados: z.array(z.object({ status: kintoDashboardStatusSchema, quantity: z.number(), amount: z.number() })), pendientesCantidad: z.number(), pendientesMonto: z.number() }),
-  sucursales: z.array(z.object({ sucursal: z.string(), activeUnits: z.number(), reporting: z.number(), disconnected: z.number(), matafuegosCriticos: z.number(), matafuegosAmount: z.number(), multasAmount: z.number(), multasPendientes: z.number(), montoPendiente: z.number() })),
+export type KintoMultaHistoryResponse = z.infer<
+  typeof kintoMultaHistoryResponseSchema
+>;
+export type KintoMultaDomainsResponse = z.infer<
+  typeof kintoMultaDomainsResponseSchema
+>;
+export const kintoNpsShareSchema = z.object({
+  _id: z.string(),
+  anio: z.number(),
+  mes: z.number(),
+  promotores: z.number(),
+  pasivos: z.number(),
+  detractores: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
-export type KintoDashboardResponse = z.infer<typeof kintoDashboardResponseSchema>;
-export const liessTallerSchema = z.object({ _id: z.string(), nombre: z.string(), tipoTrabajo: z.string(), activo: z.boolean(), createdAt: z.string(), updatedAt: z.string() });
-export const liessUnidadReparacionSchema = z.object({ interno: z.number(), tipo: z.enum(["nuevo", "usado"]), marca: z.string(), version: z.string(), color: z.string(), chasis: z.string(), anio: z.number().nullable(), kilometrosBase: z.number().nullable() });
-export const liessReparacionEstadoSchema = z.enum(["Pendiente", "Aprobado", "Rechazado"]);
+export const kintoNpsShareListResponseSchema = z.object({
+  data: z.array(kintoNpsShareSchema),
+  filtros: z.object({ anios: z.array(z.number()) }),
+});
+export const kintoNpsShareResponseSchema = z.object({
+  message: z.string(),
+  data: kintoNpsShareSchema,
+});
+export type KintoNpsShare = z.infer<typeof kintoNpsShareSchema>;
+export type KintoNpsShareListResponse = z.infer<
+  typeof kintoNpsShareListResponseSchema
+>;
+export type KintoNpsShareResponse = z.infer<typeof kintoNpsShareResponseSchema>;
+export const kintoDashboardStatusSchema = z.enum([
+  "PEND_COBRAR",
+  "PEND_FACTURAR",
+  "PEND_PAGAR",
+  "PAGADO",
+]);
+export const kintoDashboardResponseSchema = z.object({
+  filtros: z.object({
+    anios: z.array(z.number()),
+    sucursales: z.array(z.string()),
+  }),
+  estadoActual: z.object({
+    unidadesActivas: z.number(),
+    unidadesInactivas: z.number(),
+    reportando: z.number(),
+    sinConexion: z.number(),
+    tasaConexion: z.number(),
+    kmTotal: z.number(),
+    kmPromedio: z.number(),
+    matafuegos: z.object({
+      vencidos: z.number(),
+      proximos: z.number(),
+      sinRecarga: z.number(),
+    }),
+  }),
+  gastos: z.object({
+    mensual: z.array(
+      z.object({
+        month: z.number(),
+        matafuegos: z.number(),
+        multas: z.number(),
+        cantidadMatafuegos: z.number(),
+        cantidadMultas: z.number(),
+        total: z.number(),
+      }),
+    ),
+    total: z.number(),
+    promedioPorUnidad: z.number(),
+  }),
+  multas: z.object({
+    estados: z.array(
+      z.object({
+        status: kintoDashboardStatusSchema,
+        quantity: z.number(),
+        amount: z.number(),
+      }),
+    ),
+    pendientesCantidad: z.number(),
+    pendientesMonto: z.number(),
+  }),
+  sucursales: z.array(
+    z.object({
+      sucursal: z.string(),
+      activeUnits: z.number(),
+      reporting: z.number(),
+      disconnected: z.number(),
+      matafuegosCriticos: z.number(),
+      matafuegosAmount: z.number(),
+      multasAmount: z.number(),
+      multasPendientes: z.number(),
+      montoPendiente: z.number(),
+    }),
+  ),
+});
+export type KintoDashboardResponse = z.infer<
+  typeof kintoDashboardResponseSchema
+>;
+export const licitacionEstadoSchema = z.enum([
+  "PENDIENTE_TECNICA",
+  "ESPERANDO_MANTENIMIENTO",
+  "PENDIENTE_PREADJUDICADO",
+  "PENDIENTE_PAGARE",
+  "PENDIENTE_OC",
+  "ADJUDICADA",
+  "PERDIDA",
+]);
+export const licitacionAdministracionSchema = z.object({
+  _id: z.string(),
+  entidad: z.string(),
+  cuit: z.string(),
+  contacto: z.object({
+    nombre: z.string(),
+    apellido: z.string(),
+    telefono: z.string(),
+  }),
+  fechaApertura: z.string(),
+  diasMantenimientoOferta: z.number().int(),
+  vencimientoMantenimiento: z.string(),
+  diasRestantesMantenimiento: z.number().int(),
+  tecnica: z.boolean().nullable(),
+  preAdjudicado: z.boolean().nullable(),
+  pagare: z.boolean(),
+  oc: z.boolean(),
+  totalUnidades: z.number().int().nonnegative(),
+  estado: licitacionEstadoSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const licitacionAdministracionListResponseSchema = z.object({
+  data: z.array(licitacionAdministracionSchema),
+});
+export const licitacionAdministracionResponseSchema = z.object({
+  message: z.string(),
+  data: licitacionAdministracionSchema,
+});
+export const licitacionUnidadSchema = z.object({
+  _id: z.string(),
+  interno: z.number().int().positive().nullable().optional().default(null),
+  versionId: z.string().nullable(),
+  versionNombre: z.string(),
+  colorNombre: z.string().optional().default(""),
+  cantidad: z.number().int().positive(),
+  estado: z.enum(["PENDIENTE_ASIGNAR", "ASIGNADA", "ENTREGADA"]),
+  patentamiento: z.boolean(),
+  flete: z.boolean(),
+  cantidadServicios: z.number().int().nonnegative(),
+  acc: z.boolean().optional().default(false),
+  conversionId: z.string().nullable().optional().default(null),
+  conversionTipo: z.string().optional().default(""),
+  conversionProveedor: z.string().optional().default(""),
+  estadoConversion: z.enum(["PENDIENTE", "EN_PROVEEDOR", "CONVERTIDA"]).nullable().optional().default(null),
+});
+export const licitacionUnidadesResponseSchema = z.object({
+  data: z.array(licitacionUnidadSchema),
+});
+export const licitacionCatalogosResponseSchema = z.object({
+  versiones: z.array(z.object({ _id: z.string(), nombre: z.string() })),
+  conversiones: z.array(z.object({ _id: z.string(), tipoConversion: z.string(), proveedor: z.string() })).optional().default([]),
+});
+export const licitacionUnidadesMutationResponseSchema = z.object({
+  message: z.string(),
+  data: z.array(licitacionUnidadSchema),
+});
+export type LicitacionEstado = z.infer<typeof licitacionEstadoSchema>;
+export type LicitacionAdministracion = z.infer<
+  typeof licitacionAdministracionSchema
+>;
+export type LicitacionAdministracionListResponse = z.infer<
+  typeof licitacionAdministracionListResponseSchema
+>;
+export type LicitacionAdministracionResponse = z.infer<
+  typeof licitacionAdministracionResponseSchema
+>;
+export type LicitacionUnidad = z.infer<typeof licitacionUnidadSchema>;
+export type LicitacionUnidadesResponse = z.infer<
+  typeof licitacionUnidadesResponseSchema
+>;
+export type LicitacionCatalogosResponse = z.infer<
+  typeof licitacionCatalogosResponseSchema
+>;
+export type LicitacionUnidadesMutationResponse = z.infer<
+  typeof licitacionUnidadesMutationResponseSchema
+>;
+export const liessTallerSchema = z.object({
+  _id: z.string(),
+  nombre: z.string(),
+  tipoTrabajo: z.string(),
+  activo: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const liessUnidadReparacionSchema = z.object({
+  interno: z.number(),
+  tipo: z.enum(["nuevo", "usado"]),
+  marca: z.string(),
+  version: z.string(),
+  color: z.string(),
+  chasis: z.string(),
+  anio: z.number().nullable(),
+  kilometrosBase: z.number().nullable(),
+});
+export const liessReparacionEstadoSchema = z.enum([
+  "Pendiente",
+  "Aprobado",
+  "Rechazado",
+]);
 export const liessReparacionPrioridadSchema = z.enum(["Alta", "Media", "Baja"]);
-export const liessReparacionEtapasSchema = z.tuple([z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean(), z.boolean()]);
-export const liessPresupuestoV2Schema = z.object({ _id: z.string(), fecha: z.string(), unidad: liessUnidadReparacionSchema, kmInformado: z.number(), tallerId: z.string(), tallerNombre: z.string(), tallerTipoTrabajo: z.string(), numeroPresupuesto: z.string(), costo: z.number(), prioridad: liessReparacionPrioridadSchema, detalles: z.string(), estado: liessReparacionEstadoSchema, fechaIngreso: z.string().nullable(), fechaEgreso: z.string().nullable(), etapasReparacion: liessReparacionEtapasSchema, diasReparacion: z.number().nullable(), createdAt: z.string(), updatedAt: z.string() });
-export const liessTalleresResponseSchema = z.object({ data: z.array(liessTallerSchema) });
-export const liessTallerResponseSchema = z.object({ message: z.string(), data: liessTallerSchema });
-export const liessUnidadReparacionResponseSchema = z.object({ data: liessUnidadReparacionSchema });
-export const liessPresupuestosV2ResponseSchema = z.object({ data: z.array(liessPresupuestoV2Schema) });
-export const liessPresupuestoV2ResponseSchema = z.object({ message: z.string(), data: liessPresupuestoV2Schema });
+export const liessReparacionEtapasSchema = z.tuple([
+  z.boolean(),
+  z.boolean(),
+  z.boolean(),
+  z.boolean(),
+  z.boolean(),
+  z.boolean(),
+]);
+export const liessPresupuestoV2Schema = z.object({
+  _id: z.string(),
+  fecha: z.string(),
+  unidad: liessUnidadReparacionSchema,
+  kmInformado: z.number(),
+  tallerId: z.string(),
+  tallerNombre: z.string(),
+  tallerTipoTrabajo: z.string(),
+  numeroPresupuesto: z.string(),
+  costo: z.number(),
+  prioridad: liessReparacionPrioridadSchema,
+  detalles: z.string(),
+  estado: liessReparacionEstadoSchema,
+  fechaIngreso: z.string().nullable(),
+  fechaEgreso: z.string().nullable(),
+  etapasReparacion: liessReparacionEtapasSchema,
+  diasReparacion: z.number().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const liessTalleresResponseSchema = z.object({
+  data: z.array(liessTallerSchema),
+});
+export const liessTallerResponseSchema = z.object({
+  message: z.string(),
+  data: liessTallerSchema,
+});
+export const liessUnidadReparacionResponseSchema = z.object({
+  data: liessUnidadReparacionSchema,
+});
+export const liessPresupuestosV2ResponseSchema = z.object({
+  data: z.array(liessPresupuestoV2Schema),
+});
+export const liessPresupuestoV2ResponseSchema = z.object({
+  message: z.string(),
+  data: liessPresupuestoV2Schema,
+});
 export type LiessTaller = z.infer<typeof liessTallerSchema>;
 export type LiessUnidadReparacion = z.infer<typeof liessUnidadReparacionSchema>;
 export type LiessReparacionEstado = z.infer<typeof liessReparacionEstadoSchema>;
-export type LiessReparacionPrioridad = z.infer<typeof liessReparacionPrioridadSchema>;
+export type LiessReparacionPrioridad = z.infer<
+  typeof liessReparacionPrioridadSchema
+>;
 export type LiessPresupuestoV2 = z.infer<typeof liessPresupuestoV2Schema>;
-export type SolicitudCambioColorAudit = z.infer<typeof solicitudCambioColorAuditSchema>;
+export type SolicitudCambioColorAudit = z.infer<
+  typeof solicitudCambioColorAuditSchema
+>;
 export type RepuestoSiniestro = z.infer<typeof repuestoSiniestroSchema>;
-export type RepuestoSiniestroUnidad = z.infer<typeof repuestoSiniestroUnidadSchema>;
-export type RepuestoSiniestroNota = z.infer<typeof repuestoSiniestroNotaDetalleSchema>;
+export type RepuestoSiniestroUnidad = z.infer<
+  typeof repuestoSiniestroUnidadSchema
+>;
+export type RepuestoSiniestroNota = z.infer<
+  typeof repuestoSiniestroNotaDetalleSchema
+>;
 
 export const calidadVentasResultadoValorSchema = z.enum(["cumple", "noCumple"]);
 export const calidadVentasResultadoSchema = z.object({
@@ -2955,13 +3879,34 @@ export const calidadVentasResultadoSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export const calidadVentasListResponseSchema = z.object({ data: z.array(calidadVentasResultadoSchema) });
-export const calidadVentasSellerSchema = z.object({ codigo: z.number(), vendedor: z.string(), sucursal: z.string() });
-export const calidadVentasSellersResponseSchema = z.object({ data: z.array(calidadVentasSellerSchema) });
-export const calidadVentasSaveResponseSchema = z.object({ message: z.string(), data: calidadVentasResultadoSchema });
-export type CalidadVentasResultadoValor = z.infer<typeof calidadVentasResultadoValorSchema>;
-export type CalidadVentasResultado = z.infer<typeof calidadVentasResultadoSchema>;
-export type CalidadVentasListResponse = z.infer<typeof calidadVentasListResponseSchema>;
+export const calidadVentasListResponseSchema = z.object({
+  data: z.array(calidadVentasResultadoSchema),
+});
+export const calidadVentasSellerSchema = z.object({
+  codigo: z.number(),
+  vendedor: z.string(),
+  sucursal: z.string(),
+});
+export const calidadVentasSellersResponseSchema = z.object({
+  data: z.array(calidadVentasSellerSchema),
+});
+export const calidadVentasSaveResponseSchema = z.object({
+  message: z.string(),
+  data: calidadVentasResultadoSchema,
+});
+export type CalidadVentasResultadoValor = z.infer<
+  typeof calidadVentasResultadoValorSchema
+>;
+export type CalidadVentasResultado = z.infer<
+  typeof calidadVentasResultadoSchema
+>;
+export type CalidadVentasListResponse = z.infer<
+  typeof calidadVentasListResponseSchema
+>;
 export type CalidadVentasSeller = z.infer<typeof calidadVentasSellerSchema>;
-export type CalidadVentasSellersResponse = z.infer<typeof calidadVentasSellersResponseSchema>;
-export type CalidadVentasSaveResponse = z.infer<typeof calidadVentasSaveResponseSchema>;
+export type CalidadVentasSellersResponse = z.infer<
+  typeof calidadVentasSellersResponseSchema
+>;
+export type CalidadVentasSaveResponse = z.infer<
+  typeof calidadVentasSaveResponseSchema
+>;

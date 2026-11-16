@@ -117,6 +117,13 @@ export default function Inicio() {
       ],
     },
     {
+      title: "Licitaciones",
+      icon: ClipboardList,
+      items: [
+        { label: "Administración", to: paths.licitaciones.administracion, enabled: hasModulePathAccess(user, "licitacionesAdministracion", paths.licitaciones.administracion), icon: ClipboardList },
+      ],
+    },
+    {
       title: "Entregas",
       icon: CalendarDays,
       items: [
