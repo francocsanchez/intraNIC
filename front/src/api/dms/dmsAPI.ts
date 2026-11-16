@@ -3,7 +3,6 @@ import {
   getAsignacionRecepcionResponseSchema,
   promedioPlanAhorroResponseSchema,
   promedioOperacionesConvencionalResponseSchema,
-  rankingOperacionesConvencionalResponseSchema,
   resumenGeneralSchema,
   sucursalesSiacResponseSchema,
   vendedoresResponseSchema
@@ -184,32 +183,6 @@ export async function getPromedioOperacionesConvencional(mes: number, anio: numb
     }
 
     throw new Error("Error inesperado al obtener el promedio de operaciones convencional");
-  }
-}
-
-export async function getRankingOperacionesConvencional(anio: number) {
-  try {
-    const { data } = await api.get(`/dms/convencional/ranking-operaciones/${anio}`);
-
-    const parsed = rankingOperacionesConvencionalResponseSchema.safeParse(data);
-
-    if (!parsed.success) {
-      console.error(parsed.error.issues);
-      throw new Error("La respuesta del endpoint no tiene el formato esperado");
-    }
-
-    return parsed.data;
-  } catch (error) {
-    if (isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al obtener el ranking de operaciones convencional",
-      );
-    }
-
-    throw new Error("Error inesperado al obtener el ranking de operaciones convencional");
   }
 }
 

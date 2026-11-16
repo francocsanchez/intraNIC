@@ -101,5 +101,4 @@ router.get("/mis-reservas", authorizeModules("convencional"), authorizeRoleAcces
 
 router.get("/mis-operaciones/:mes/:ano", authorizeModules("convencional"), authorizeRoleAccess("convencional.misOperaciones"), ConvencionalController.misOperaciones);
 router.get("/promedio-operaciones/:mes/:ano", authorizeModules("promedio"), ConvencionalController.promedioOperaciones);
-router.get("/ranking-operaciones/:ano", authorizeModules("ranking"), ConvencionalController.rankingOperaciones);
 export default router;

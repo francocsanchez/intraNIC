@@ -7,7 +7,6 @@ const NICLayout = lazy(() => import("./layouts/NICLayout"));
 const LiessLayout = lazy(() => import("./layouts/LiessLayout"));
 const AdminModuleLayout = lazy(() => import("./layouts/AdminModuleLayout"));
 const AnalisisMercadoLayout = lazy(() => import("./layouts/AnalisisMercadoLayout"));
-const CalidadLayout = lazy(() => import("./layouts/CalidadLayout"));
 const ProfileLayout = lazy(() => import("./layouts/ProfileLayout"));
 const EntregasLayout = lazy(() => import("./layouts/EntregasLayout"));
 const GestionConvencionalLayout = lazy(() => import("./layouts/GestionConvencionalLayout"));
@@ -24,7 +23,6 @@ const LicitacionesLayout = lazy(() => import("./layouts/LicitacionesLayout"));
 
 const ConfiguracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionView"));
 const ConfiguracionEnvioAgendaView = lazy(() => import("./views/admin/configuracion/ConfiguracionEnvioAgendaView"));
-const ConfiguracionHotAlertView = lazy(() => import("./views/admin/configuracion/ConfiguracionHotAlertView"));
 const ConfiguracionDashboardSalonView = lazy(() => import("./views/admin/configuracion/ConfiguracionDashboardSalonView"));
 const ConfiguracionFotosVendedoresView = lazy(() => import("./views/admin/configuracion/ConfiguracionFotosVendedoresView"));
 const ConfiguracionDashboardAdministracionView = lazy(() => import("./views/admin/configuracion/ConfiguracionDashboardAdministracionView"));
@@ -68,7 +66,6 @@ const StockReservasUsados = lazy(() => import("./views/usados/StockReservasUsado
 const StockIngresoUsados = lazy(() => import("./views/usados/StockIngresoUsados"));
 const PendienteReventaView = lazy(() => import("./views/admin/siac/PendienteReventaView"));
 const PromediosConvencionalView = lazy(() => import("./views/admin/siac/PromediosConvencionalView"));
-const RankingConvencionalView = lazy(() => import("./views/admin/siac/RankingConvencionalView"));
 const PedidoUnidadesView = lazy(() => import("./views/admin/siac/PedidoUnidadesView"));
 const PedidoUnidadesPreviasView = lazy(() => import("./views/admin/siac/PedidoUnidadesPreviasView"));
 const FacturasAnticipoView = lazy(() => import("./views/admin/siac/FacturasAnticipoView"));
@@ -104,7 +101,6 @@ const SaldoOperacionCancelacionesView = lazy(() => import("./views/operaciones/S
 const SaldoOperacionNoCanceladasView = lazy(() => import("./views/operaciones/SaldoOperacionNoCanceladasView"));
 const CobrosVendedorView = lazy(() => import("./views/operaciones/CobrosVendedorView"));
 const TableroCobranzasView = lazy(() => import("./views/operaciones/TableroCobranzasView"));
-const CentralDeudoresView = lazy(() => import("./views/operaciones/CentralDeudoresView"));
 const AnalisisOperacionesView = lazy(() => import("./views/operaciones/AnalisisOperacionesView"));
 const AnalisisOperacionesMovilView = lazy(() => import("./views/operaciones/AnalisisOperacionesMovilView"));
 const DashboardSalonView = lazy(() => import("./views/operaciones/DashboardSalonView"));
@@ -119,9 +115,6 @@ const AgendaEntregaView = lazy(() => import("./views/entregas/AgendaEntregaView"
 const PendientesTurnarView = lazy(() => import("./views/entregas/PendientesTurnarView"));
 const SucursalesEntregaView = lazy(() => import("./views/entregas/SucursalesEntregaView"));
 const AgendaEntregaRegistrosView = lazy(() => import("./views/entregas/AgendaEntregaRegistrosView"));
-const SsiVentasView = lazy(() => import("./views/calidad/SsiVentasView"));
-const CalidadVentasView = lazy(() => import("./views/calidad/CalidadVentasView"));
-const CalidadHomeRedirect = lazy(() => import("./views/calidad/CalidadHomeRedirect"));
 const KintoFlotaView = lazy(() => import("./views/kinto/KintoFlotaView"));
 const KintoDashboardView = lazy(() => import("./views/kinto/KintoDashboardView"));
 const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView"));
@@ -155,18 +148,6 @@ export default function Router() {
 
             <Route element={<ModuleProtectedRoute allowedModules={["dashboardAdministracion"]} />}>
               <Route path={paths.analisis.dashboardAdministracion} element={<DashboardAdministracionView />} />
-            </Route>
-
-            <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas", "calidadVentas"]} />}>
-              <Route element={<CalidadLayout />}>
-                <Route path={paths.calidad.home} element={<CalidadHomeRedirect />} />
-                <Route element={<ModuleProtectedRoute allowedModules={["ssiVentas"]} />}>
-                  <Route path={paths.calidad.ssiVentas} element={<SsiVentasView />} />
-                </Route>
-                <Route element={<ModuleProtectedRoute allowedModules={["calidadVentas"]} />}>
-                  <Route path={paths.calidad.ventas} element={<CalidadVentasView />} />
-                </Route>
-              </Route>
             </Route>
 
             <Route element={<KintoLayout />}>
@@ -216,7 +197,6 @@ export default function Router() {
               <Route path={paths.admin.configuracion} element={<ConfiguracionView />} />
               <Route path={paths.admin.unidadesNegocio} element={<UnidadesNegocioView />} />
               <Route path={paths.admin.configuracionEnvioAgenda} element={<ConfiguracionEnvioAgendaView />} />
-              <Route path={paths.admin.configuracionHotAlert} element={<ConfiguracionHotAlertView />} />
               <Route path={paths.admin.configuracionDashboardSalon} element={<ConfiguracionDashboardSalonView />} />
               <Route path={paths.admin.configuracionFotosVendedores} element={<ConfiguracionFotosVendedoresView />} />
               <Route path={paths.admin.configuracionDashboardAdministracion} element={<ConfiguracionDashboardAdministracionView />} />
@@ -385,10 +365,6 @@ export default function Router() {
               <Route path={paths.analisis.tableroCobranzas} element={<TableroCobranzasView />} />
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["centralDeudores"]} />}>
-              <Route path={paths.analisis.centralDeudores} element={<CentralDeudoresView />} />
-            </Route>
-
             <Route element={<ModuleProtectedRoute allowedModules={["analisisOperaciones"]} />}>
               <Route path={paths.analisis.analisisOperaciones} element={<AnalisisOperacionesView />} />
             </Route>
@@ -397,9 +373,6 @@ export default function Router() {
               <Route path={paths.analisis.vendedor} element={<AnalisisVendedorView />} />
             </Route>
 
-            <Route element={<ModuleProtectedRoute allowedModules={["ranking"]} />}>
-              <Route path={paths.convencional.ranking} element={<RankingConvencionalView />} />
-            </Route>
             <Route element={<ModuleProtectedRoute allowedModules={["promedio"]} />}>
               <Route path={paths.convencional.promedio} element={<PromediosConvencionalView />} />
             </Route>

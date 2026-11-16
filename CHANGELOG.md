@@ -2,6 +2,8 @@
 
 ## 2026-11-16
 
+- **Retiro de módulos:** se eliminaron Ranking Convencional, Central de Deudores y toda la sección Calidad, incluyendo rutas, accesos, permisos, APIs y la tarea programada de Hot Alert. Los registros históricos de Mongo se conservan.
+
 - **Configuración:** los accesos de Parámetros de sistema se agruparon en una tarjeta independiente y se agregó el catálogo Mongo de Conversiones, con Tipo de conversión y Proveedor obligatorios, alta, edición y validación de combinación única.
 - **Licitaciones · Administración:** cada unidad ahora puede seleccionar opcionalmente una conversión y registrar sus etapas Pendiente, En Proveedor o Convertida; quitar la conversión limpia su estado.
 - **Licitaciones · Administración:** el resumen PDF reemplazó la columna Color por Conversión y Estado de conversión.

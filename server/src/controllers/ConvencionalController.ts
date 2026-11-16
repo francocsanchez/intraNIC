@@ -13,7 +13,6 @@ import {
   misOperacionesQuery,
   misReservasConvencionalQuery,
   operacionesConvencional,
-  operacionesConvencionalRanking,
   reservasConvencionalQuery,
   stockConvencionalQuery,
 } from "./querys/convencional.query";
@@ -26,7 +25,6 @@ import {
   MisOperacionRow,
 } from "../utils/reportMisOperacionesConvencional";
 import { buildReportePromedioOperaciones, PromedioOperacionRow } from "../utils/reportPromedioOperacionesConvencional";
-import { buildReporteRankingOperaciones, RankingOperacionRow } from "../utils/reportRankingOperacionesConvencional";
 
 const normalizeNumericList = (values: unknown): number[] => {
   if (!Array.isArray(values)) return [];
@@ -802,29 +800,4 @@ export class ConvencionalController {
     }
   };
 
-  static rankingOperaciones = async (req: Request, res: Response) => {
-    const { ano } = req.params;
-    const anoNumber = parsePositiveInt(ano);
-
-    if (!anoNumber) {
-      return res.status(400).json({ message: "Periodo no valido" });
-    }
-
-    try {
-      const query = operacionesConvencionalRanking();
-
-      const data = await sequelizeNIC.query<RankingOperacionRow>(query, {
-        type: QueryTypes.SELECT,
-        replacements: { ano: anoNumber },
-      });
-
-      const resumen = buildReporteRankingOperaciones(data, anoNumber);
-
-      return res.status(200).json({ resumen });
-    } catch (error) {
-      logError("ConvencionalController.rankingOperaciones");
-      console.error(error);
-      return res.status(500).json({ message: "Error del servidor SIAC" });
-    }
-  };
 }

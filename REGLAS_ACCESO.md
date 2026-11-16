@@ -176,13 +176,11 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
 - `Saldo de operacion` depende de `modules.saldoOperacion = 1` y se accede por `/analisis/saldo-operacion`.
 - `Cobros x Vendedor` depende de `modules.cobrosVendedor = 1` y se accede por `/analisis/cobros-vendedor`.
 - `Tablero de cobranzas` depende de `modules.tableroCobranzas = 1` y se accede por `/analisis/tablero-cobranzas`.
-- `Ranking` depende de `modules.ranking = 1`.
 - `Promedio` depende de `modules.promedio = 1`.
 - `Patentamientos` depende de `modules.patentamientos = 1`.
 - `Transferencias` depende de `modules.transferencias = 1`.
 - Si el modulo correspondiente esta habilitado, el rol no debe bloquear el acceso a la pantalla.
 - Esto incluye acceso por menu, acceso por URL directa y acceso a los endpoints backend del modulo.
-- `Ranking` debe permitir ingreso a `/analisis/ranking-convencional` solo por `modules.ranking = 1`.
 - `Promedio` debe permitir ingreso a `/analisis/promedio-convencional` solo por `modules.promedio = 1`.
 - `Patentamientos` y `Transferencias` forman un modulo visual unificado en sidebar, pero cada uno sigue dependiendo de su propio modulo habilitado.
 - El navbar de `Analisis` debe mostrar solo modulos propios de la seccion:
@@ -192,7 +190,6 @@ En la etapa actual, todas las pantallas y secciones del sistema dependen solo de
   - `Saldo de operacion`
 - `Cobros x Vendedor`
 - `Tablero de cobranzas`
-  - `Ranking`
   - `Promedio`
 - `Transferencias` ya no debe aparecer en el navbar superior de `Analisis`.
 - `Patentamientos` y `Transferencias` ya no deben vivir como accesos separados en ese navbar superior, porque se navegan desde su sidebar unificado.
@@ -333,7 +330,6 @@ Estado: definido
   - `/convencional/proformas/nueva`
   - `/gestion/convencional/test-drive`
   - `/convencional/preventas/resumen`
-  - `/analisis/ranking-convencional`
   - `/analisis/promedio-convencional`
   - `/usados/stock/disponible`
   - `/liess/stock/nuevos`

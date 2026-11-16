@@ -6,10 +6,7 @@ import { paths } from "@/routes/paths";
 import {
   BarChart3, CalendarRange, Car, CarFront, ClipboardClock, ClipboardList,
   Cog,
-  ShieldAlert,
   CalendarDays,
-  ClipboardCheck,
-  PhoneCall,
   FileSearch,
   FileText,
   FileSpreadsheet,
@@ -25,7 +22,6 @@ import {
   Package,
   Palette,
   Settings2, ShoppingCart,
-  Trophy,
   UserCog,
   Warehouse,
   Wrench
@@ -88,24 +84,6 @@ export default function Inicio() {
       ],
     },
     {
-      title: "Calidad",
-      icon: PhoneCall,
-      items: [
-        {
-          label: "SSI Ventas",
-          to: paths.calidad.ssiVentas,
-          enabled: hasModulePathAccess(user, "ssiVentas", paths.calidad.ssiVentas),
-          icon: PhoneCall,
-        },
-        {
-          label: "Ventas",
-          to: paths.calidad.ventas,
-          enabled: hasModulePathAccess(user, "calidadVentas", paths.calidad.ventas),
-          icon: ClipboardCheck,
-        },
-      ],
-    },
-    {
       title: "Kinto",
       icon: CarFront,
       items: [
@@ -153,12 +131,6 @@ export default function Inicio() {
       title: "Herramientas",
       icon: Wrench,
       items: [
-        {
-          label: "Central de Deudores",
-          to: paths.analisis.centralDeudores,
-          enabled: hasModulePathAccess(user, "centralDeudores", paths.analisis.centralDeudores),
-          icon: ShieldAlert,
-        },
         { label: "Rend. Gastos", to: paths.convencional.rendicionesGastos, enabled: Boolean(user), icon: FileSpreadsheet },
         { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
       ],
@@ -251,7 +223,6 @@ export default function Inicio() {
           enabled: hasModulePathAccess(user, "analisisVendedor", paths.analisis.vendedor),
           icon: FileSpreadsheet,
         },
-        { label: "Ranking", to: paths.convencional.ranking, enabled: hasModulePathAccess(user, "ranking", paths.convencional.ranking), icon: Trophy },
         { label: "Promedio", to: paths.convencional.promedio, enabled: hasModulePathAccess(user, "promedio", paths.convencional.promedio), icon: BarChart3 },
         {
           label: "Patentamientos",

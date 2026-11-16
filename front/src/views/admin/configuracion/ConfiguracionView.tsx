@@ -77,9 +77,6 @@ export default function ConfiguracionView() {
   const canManageAgendaEnvio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.configuracionEnvioAgenda);
-  const canManageHotAlert =
-    hasModuleAccess(user, "configuracion") &&
-    hasPathAccess(user, paths.admin.configuracionHotAlert);
   const canManageUnidadesNegocio =
     hasModuleAccess(user, "configuracion") &&
     hasPathAccess(user, paths.admin.unidadesNegocio);
@@ -295,32 +292,6 @@ export default function ConfiguracionView() {
               className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
             >
               Administrar envíos
-            </Link>
-          </div>
-        </section>
-      ) : null}
-
-      {canManageHotAlert ? (
-        <section className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Calidad
-              </p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-                Hot Alert
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Configura los destinatarios del correo diario consolidado de Hot
-                Alert de SSI Ventas.
-              </p>
-            </div>
-
-            <Link
-              to={paths.admin.configuracionHotAlert}
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted"
-            >
-              Administrar envios
             </Link>
           </div>
         </section>

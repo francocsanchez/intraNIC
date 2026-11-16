@@ -9,8 +9,6 @@ import {
   CirclePercent,
   HandCoins,
   Rows3,
-  ShieldAlert,
-  Trophy,
   UserRound,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -71,17 +69,6 @@ export default function AnalisisLayout() {
       active: pathname === paths.analisis.tableroCobranzas,
     },
     {
-      label: "Central de Deudores",
-      to: paths.analisis.centralDeudores,
-      icon: ShieldAlert,
-      visible: hasModulePathAccess(
-        user,
-        "centralDeudores",
-        paths.analisis.centralDeudores,
-      ),
-      active: pathname === paths.analisis.centralDeudores,
-    },
-    {
       label: "Analisis Operaciones",
       to: paths.analisis.analisisOperaciones,
       icon: Rows3,
@@ -102,13 +89,6 @@ export default function AnalisisLayout() {
         paths.analisis.vendedor,
       ),
       active: pathname === paths.analisis.vendedor,
-    },
-    {
-      label: "Ranking",
-      to: paths.convencional.ranking,
-      icon: Trophy,
-      visible: hasModulePathAccess(user, "ranking", paths.convencional.ranking),
-      active: pathname === paths.convencional.ranking,
     },
     {
       label: "Promedio",
