@@ -10,6 +10,7 @@
 - **Licitaciones · Administración:** las unidades cuyo interno SIAC tenga `sa_estado` 35 o 40 ahora pasan automáticamente a Entregada, incluso al refrescar la grilla o generar el PDF.
 - **Licitaciones · Administración:** Gestión incorpora Ver, una vista de solo lectura del resumen y las unidades para consultar la operatoria sin descargar ni modificar datos.
 - **Licitaciones · Administración:** la vista de solo lectura colorea los estados de conversión para distinguir Pendiente, En Proveedor y Convertida.
+- **Licitaciones · Administración:** la vista de solo lectura también colorea los estados de unidad Pendiente, Asignada y Entregada.
 - **Licitaciones · Administración:** se amplió y compactó el diálogo de unidades; los datos no se quiebran en varias líneas y, una vez asignado, el interno se muestra fijo sin input ni botón de búsqueda.
 - **Licitaciones · Administración:** se redujo el buscador de interno y la asignación ahora marca la unidad como `Asignada` en verde; Estado se ubica después de Cant. servicios.
 - **Licitaciones · Administración:** se agregó la descarga de resumen PDF por licitación: A4 horizontal de una hoja, ficha completa, sello circular de estado, gráfico de unidades asignadas/pendientes e inventario de unidades.

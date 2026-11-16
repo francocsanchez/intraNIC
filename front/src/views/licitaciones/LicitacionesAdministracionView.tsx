@@ -888,6 +888,11 @@ function LicitacionViewDialog({
       : unit.estado === "ASIGNADA"
         ? "Asignada"
         : "Pendiente";
+  const unitStateClass: Record<LicitacionUnidad["estado"], string> = {
+    PENDIENTE_ASIGNAR: "bg-amber-100 text-amber-800",
+    ASIGNADA: "bg-emerald-100 text-emerald-800",
+    ENTREGADA: "bg-sky-100 text-sky-800",
+  };
   const conversionLabel = (unit: LicitacionUnidad) =>
     [unit.conversionTipo, unit.conversionProveedor]
       .filter(Boolean)
@@ -929,7 +934,7 @@ function LicitacionViewDialog({
             {unitsQuery.isLoading ? <tr><td colSpan={10} className="px-3 py-8 text-center text-muted-foreground">Cargando unidades...</td></tr> : null}
             {unitsQuery.isError ? <tr><td colSpan={10} className="px-3 py-8 text-center text-destructive">No se pudieron cargar las unidades.</td></tr> : null}
             {!unitsQuery.isLoading && !unitsQuery.isError && units.length === 0 ? <tr><td colSpan={10} className="px-3 py-8 text-center text-muted-foreground">Todavía no hay unidades cargadas.</td></tr> : null}
-            {units.map((unit, index) => <tr key={unit._id} className="border-t border-border"><td className="px-3 py-2">{index + 1}</td><td className="px-3 py-2 font-medium tabular-nums">{unit.interno ?? "-"}</td><td className="px-3 py-2 font-medium">{unit.versionNombre}</td><td className="px-3 py-2">{conversionLabel(unit)}</td><td className="px-3 py-2">{unit.estadoConversion ? <span className={`inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-medium ${conversionStateClass[unit.estadoConversion]}`}>{conversionStateLabel[unit.estadoConversion]}</span> : "-"}</td><td className="px-3 py-2">{unit.patentamiento ? "Sí" : "No"}</td><td className="px-3 py-2">{unit.flete ? "Sí" : "No"}</td><td className="px-3 py-2">{unit.cantidadServicios}</td><td className="px-3 py-2">{unit.acc ? "Sí" : "No"}</td><td className="px-3 py-2 font-medium">{unitStateLabel(unit)}</td></tr>)}
+            {units.map((unit, index) => <tr key={unit._id} className="border-t border-border"><td className="px-3 py-2">{index + 1}</td><td className="px-3 py-2 font-medium tabular-nums">{unit.interno ?? "-"}</td><td className="px-3 py-2 font-medium">{unit.versionNombre}</td><td className="px-3 py-2">{conversionLabel(unit)}</td><td className="px-3 py-2">{unit.estadoConversion ? <span className={`inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-medium ${conversionStateClass[unit.estadoConversion]}`}>{conversionStateLabel[unit.estadoConversion]}</span> : "-"}</td><td className="px-3 py-2">{unit.patentamiento ? "Sí" : "No"}</td><td className="px-3 py-2">{unit.flete ? "Sí" : "No"}</td><td className="px-3 py-2">{unit.cantidadServicios}</td><td className="px-3 py-2">{unit.acc ? "Sí" : "No"}</td><td className="px-3 py-2"><span className={`inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-medium ${unitStateClass[unit.estado]}`}>{unitStateLabel(unit)}</span></td></tr>)}
           </tbody>
         </table>
       </div>

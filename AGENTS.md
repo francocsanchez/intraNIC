@@ -6,6 +6,7 @@ En `Licitaciones · Administración`, el interno asignado se presenta como texto
 La grilla de `Licitaciones · Administración` separa los accesos en las columnas Acciones (Editar y Prórroga) y Gestión (Carga de unidades e Informe PDF), con íconos de mayor tamaño y color semántico.
 Gestión incorpora `Ver`: abre una vista de solo lectura del resumen operativo y las unidades, equivalente a la información del PDF pero sin acciones que modifiquen datos.
 En la vista de solo lectura, los estados de conversión se muestran como etiquetas de color: Pendiente en ámbar, En Proveedor en azul y Convertida en verde.
+En esa misma vista, los estados de unidad se muestran con etiquetas de color: Pendiente en ámbar, Asignada en verde y Entregada en azul.
 Al asignar un interno, su unidad pasa automáticamente a estado `Asignada`, mostrado en verde y ubicado a la derecha de Cant. servicios.
 Si el interno de una unidad de licitación tiene `stoauto.sa_estado` 35 o 40, la unidad pasa a `Entregada`; se verifica tanto al asignarla como al consultar sus unidades o generar el PDF.
 Cada licitación permite descargar desde Acciones un resumen PDF A4 vertical de una hoja: incluye ficha de contacto, estado general circular, gráfico de asignadas y pendientes, hitos y todas las unidades; ante muchas filas reduce la tipografía hasta 5 pt para conservar una única página.
