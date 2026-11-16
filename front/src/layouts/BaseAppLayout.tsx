@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import AppFooter from "@/components/AppFooter";
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -8,8 +9,6 @@ import { Navigate, Outlet } from "react-router-dom";
 type BaseAppLayoutProps = {
   centerContent?: ReactNode;
   rightContent?: ReactNode;
-  footerLeft: ReactNode;
-  footerRight: ReactNode;
   mainClassName?: string;
   footerHeightClassName?: string;
 };
@@ -17,8 +16,6 @@ type BaseAppLayoutProps = {
 export default function BaseAppLayout({
   centerContent,
   rightContent,
-  footerLeft,
-  footerRight,
   mainClassName = "px-2 py-3",
   footerHeightClassName = "h-12",
 }: BaseAppLayoutProps) {
@@ -45,14 +42,7 @@ export default function BaseAppLayout({
         </div>
       </main>
 
-      <footer className="border-t border-border bg-card">
-        <div
-          className={`max-w-7xl mx-auto px-3 sm:px-4 ${footerHeightClassName} flex flex-col gap-1 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:py-0 sm:text-sm`}
-        >
-          <span>{footerLeft}</span>
-          <span>{footerRight}</span>
-        </div>
-      </footer>
+      <AppFooter className={footerHeightClassName} />
     </div>
   );
 }

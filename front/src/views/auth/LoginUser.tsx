@@ -1,4 +1,5 @@
 import { authenticateUser, forgotPassword } from "@/api/authAPI";
+import AppFooter from "@/components/AppFooter";
 import { useMutation } from "@tanstack/react-query";
 import { KeyRound, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -154,10 +155,7 @@ export default function LoginUser() {
         </div>
       </main>
 
-      <footer className="flex flex-col gap-1 border-t border-border px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <span>IntraNIC - Uso interno Nippon Car</span>
-        <span>Desarrollado por Franco Sanchez</span>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

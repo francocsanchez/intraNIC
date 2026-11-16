@@ -18,8 +18,6 @@ export default function KintoLayout() {
 
   return (
     <BaseAppLayout
-      footerLeft="IntraNIC - Uso interno Nippon Car"
-      footerRight="Desarrollado por Franco Sanchez"
       centerContent={<>{navItems.map((item) => <Link key={item.to} to={item.to} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${pathname === item.to ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><item.icon size={16} strokeWidth={1.75} />{item.label}</Link>)}</>}
     />
   );

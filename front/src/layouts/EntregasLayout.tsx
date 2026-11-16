@@ -47,8 +47,6 @@ export default function EntregasLayout() {
 
   return (
     <BaseAppLayout
-      footerLeft="IntraNIC - Uso interno Nippon Car"
-      footerRight="Desarrollado por Franco Sanchez"
       centerContent={
         <>
           {visibleNavItems.map((item) => {

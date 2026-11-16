@@ -1,4 +1,5 @@
 import Loading from "@/components/Loading";
+import AppFooter from "@/components/AppFooter";
 import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -209,12 +210,7 @@ export default function AnalisisMercadoLayout() {
           <Outlet />
         </main>
       </div>
-      <footer className="border-t border-border bg-card">
-        <div className="flex min-h-12 flex-col gap-1 px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:py-0">
-          <span>IntraNIC - Uso interno Nippon Car</span>
-          <span>Desarrollado por Franco Sanchez</span>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

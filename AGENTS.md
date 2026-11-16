@@ -231,9 +231,7 @@ git commit -m "{commitSugerido}"
 
 ## Footer
 
-Siempre el Footer de toda la app debe de la siguiente manera
-Lado Izquiero - IntraNIC - Uso interno Nippon Car
-Lado Derecho - Desarrollado por Franco Sanchez
+Siempre el footer de toda la app debe tener fondo negro, texto blanco centrado y comunicar: `IntraNIC — Pensado y desarrollado exclusivamente para Nippon Car S.R.L. y Liess S.A.S.`.
 
 ## Layouts migrados al preset
 

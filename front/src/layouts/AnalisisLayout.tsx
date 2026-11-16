@@ -105,8 +105,6 @@ export default function AnalisisLayout() {
 
   return (
     <BaseAppLayout
-      footerLeft="IntraNIC - Uso interno Nippon Car"
-      footerRight="Desarrollado por Franco Sanchez"
       centerContent={
         <>
           {navItems.map((item) => (

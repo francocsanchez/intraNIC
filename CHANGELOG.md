@@ -2,6 +2,8 @@
 
 ## 2026-11-16
 
+- **Footer:** se unificó el pie de página de toda la aplicación con fondo negro y la leyenda institucional de IntraNIC para Nippon Car S.R.L. y Liess S.A.S.
+
 - **Retiro de módulos:** se eliminaron Ranking Convencional, Central de Deudores y toda la sección Calidad, incluyendo rutas, accesos, permisos, APIs y la tarea programada de Hot Alert. Los registros históricos de Mongo se conservan.
 
 - **Configuración:** los accesos de Parámetros de sistema se agruparon en una tarjeta independiente y se agregó el catálogo Mongo de Conversiones, con Tipo de conversión y Proveedor obligatorios, alta, edición y validación de combinación única.
