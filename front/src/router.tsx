@@ -54,6 +54,8 @@ const StockValorizacionConvencional = lazy(() => import("./views/convencional/St
 const StockValorizacionListaPreciosView = lazy(() => import("./views/convencional/StockValorizacionListaPreciosView"));
 const StockDisponibleLiess = lazy(() => import("./views/liess/StockDisponibleLiess"));
 const LiessReparacionesView = lazy(() => import("./views/liess/LiessReparacionesView"));
+const SaldoOperacionLiessView = lazy(() => import("./views/liess/SaldoOperacionLiessView"));
+const SaldoOperacionLiessAnalysisView = lazy(() => import("./views/liess/SaldoOperacionLiessAnalysisView"));
 const AsignacionesView = lazy(() => import("./views/admin/siac/AsignacionesView"));
 const PrediccionAsignacionesView = lazy(() => import("./views/admin/siac/PrediccionAsignacionesView"));
 const StockDisponibleUsados = lazy(() => import("./views/usados/StockDisponibleUsados"));
@@ -560,6 +562,11 @@ export default function Router() {
           </Route>
 
           <Route element={<LiessLayout />}>
+            <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacionLiess", "liess"]} />}>
+              <Route path={paths.liess.saldoOperacion} element={<SaldoOperacionLiessView />} />
+              <Route path={paths.liess.saldoOperacionCancelaciones} element={<SaldoOperacionLiessAnalysisView canceladas />} />
+              <Route path={paths.liess.saldoOperacionNoCanceladas} element={<SaldoOperacionLiessAnalysisView canceladas={false} />} />
+            </Route>
             <Route element={<ModuleProtectedRoute allowedModules={["liess"]} />}>
                 <Route path={paths.liess.stockDisponibleRoute} element={<StockDisponibleLiess />} />
             </Route>

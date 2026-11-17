@@ -159,6 +159,9 @@ export const paths = {
     stockDisponible: "/stock/belgrano/disponible",
   },
   liess: {
+    saldoOperacion: "/stock/liess/saldo-operacion",
+    saldoOperacionCancelaciones: "/stock/liess/saldo-operacion/cancelaciones",
+    saldoOperacionNoCanceladas: "/stock/liess/saldo-operacion/no-canceladas",
     stockDisponibleRoute: "/stock/liess/:tipo",
     stockDisponible: (tipo: string) => `/stock/liess/${tipo}`,
     reparaciones: "/stock/liess/reparaciones",

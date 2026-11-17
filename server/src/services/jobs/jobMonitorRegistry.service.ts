@@ -18,9 +18,15 @@ import { UnidadesDealersService } from "../unidadesDealers.service";
 import { VinChasisExportService } from "../vinChasisExport.service";
 import { UnidadesDealersSyncJobService } from "./unidadesDealersSyncJob.service";
 import { SaldoOperacionSnapshotJobService } from "./saldoOperacionSnapshotJob.service";
+import { SaldoOperacionLiessSnapshotJobService } from "./saldoOperacionLiessSnapshotJob.service";
 import type { JobMonitorCatalogItem } from "./jobMonitor.types";
 
 const JOB_CATALOG: JobMonitorCatalogItem[] = [
+  {
+    jobKey: SaldoOperacionLiessSnapshotJobService.getJobKey(), title: "Sincronizacion saldo de operacion LIESS",
+    scheduleLabel: SaldoOperacionLiessSnapshotJobService.getScheduleLabel(), jobName: SaldoOperacionLiessSnapshotJobService.getJobName(), sourceType: "database",
+    sourcePath: "LIESS opera + viewpreventa -> Mongo saldo_operacion_liess_snapshots", isRunning: () => SaldoOperacionLiessSnapshotJobService.isJobRunning(), run: (trigger) => SaldoOperacionLiessSnapshotJobService.run(trigger),
+  },
   {
     jobKey: SaldoOperacionSnapshotJobService.getJobKey(),
     title: "Sincronizacion saldo de operacion",

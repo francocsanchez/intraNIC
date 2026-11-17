@@ -23,6 +23,37 @@
 
 - **Footer:** se unificó el pie de página de toda la aplicación con fondo negro y la leyenda institucional de IntraNIC para Nippon Car S.R.L. y Liess S.A.S.
 
+- **Saldo de operación LIESS:** se incorporó el módulo independiente en `/stock/liess/saldo-operacion`, con snapshots propios en Mongo, resumen, exportación Excel y cancelación. La pantalla adopta la misma composición visual compacta del tablero NIC, sin importador de créditos, sucursal ni tipo de cliente.
+- **Saldo de operación LIESS:** se agregó el acceso visible dentro de la sección LIESS de Inicio, condicionado a su permiso propio.
+- **Saldo de operación LIESS:** la acción de cancelación ahora usa un check verde que identifica visualmente el pago total del saldo.
+- **Saldo de operación LIESS:** las tarjetas superiores ahora consolidan el saldo por marca.
+- **Saldo de operación LIESS:** los análisis de canceladas y no canceladas adoptaron la presentación visual del análisis de Saldo de operación y agrupan por vendedor.
+- **Saldo de operación LIESS:** el resumen ahora tolera respuestas anteriores durante un despliegue escalonado, evitando que el tablero desaparezca.
+- **Saldo de operación LIESS:** el acceso se habilita también para usuarios que ya poseen el módulo LIESS, sin requerir una reasignación inmediata del permiso nuevo.
+- **Saldo de operación LIESS:** el saldo incorpora gestoría al total de venta y la grilla muestra Gestoría y Crédito bancario como importes independientes.
+- **Saldo de operación LIESS:** el crédito bancario se conserva únicamente como dato informativo y no descuenta el saldo comercial.
+- **Saldo de operación LIESS:** se quitó la columna Facturada de la grilla.
+- **Saldo de operación LIESS:** se agregó la columna Pago con el desglose de gestoría, anticipo, crédito, usado y saldo comercial por operación.
+- **Saldo de operación LIESS:** el detalle de Pago se abre desde la fila ya cargada para evitar fallas de consulta adicionales.
+- **Saldo de operación LIESS:** la columna OP identifica el tipo de unidad con `N` para nueva y `U` para usada.
+- **Saldo de operación LIESS:** el sincronizador ahora incluye operaciones activas todavía no asignadas; permanecen fuera de los análisis de días hasta recibir fecha de asignación.
+- **Saldo de operación LIESS:** se incorporaron las operaciones usadas activas junto con las nuevas; la columna OP mantiene la identificación `U`.
+- **Saldo de operación LIESS:** los snapshots distinguen la combinación de tipo y número de operación, evitando que una usada reemplace una nueva con el mismo número.
+- **Saldo de operación LIESS:** las bonificaciones de preventa se descuentan del saldo comercial y se muestran en la composición del pago.
+- **Saldo de operación LIESS:** el saldo ahora descuenta únicamente créditos bancarios realmente aplicados en LIESS, detectados desde `salglo` con movimiento 150; el crédito pactado sin movimiento contable continúa pendiente.
+- **Saldo de operación LIESS:** las tarjetas por Marca excluyen saldos negativos; el diálogo de cancelación anticipa sus días y actualiza automáticamente la tabla, los resúmenes y análisis al confirmar.
+- **Saldo de operación LIESS:** la columna OP ahora identifica visualmente las unidades Nuevas en verde y Usadas en amarillo.
+- **Saldo de operación LIESS:** el número de operación y su etiqueta quedaron centrados dentro de la columna OP.
+- **Saldo de operación LIESS:** se agregó el selector de tipo Todas, Nuevas y Usadas para grilla, tarjetas y exportación.
+- **Saldo de operación LIESS:** las operaciones usadas se consolidan en la tarjeta `OP Usados`, separada de las marcas; se renombró el indicador a `Usados NO comprados`.
+- **Saldo de operación LIESS:** el chasis de las operaciones usadas se obtiene desde `anexusa` cuando no existe en `movnped`.
+- **Saldo de operación LIESS:** la grilla informa la última sincronización y permite forzar el job desde un ícono de actualización.
+- **Saldo de operación LIESS:** la hora de última sincronización se refresca automáticamente cada 30 segundos, incluso cuando la pestaña no tiene foco.
+- **Saldo de operación LIESS:** se simplificó la grilla retirando Chasis, Gestoría, Fecha de cancelación y Crédito.
+- **Saldo de operación LIESS:** se depuró el Excel exportado y Tipo de operación ahora informa Nueva o Usada en lugar del código SIAC.
+- **Saldo de operación LIESS:** el Excel ubica Fecha de asignación y Días asignados antes de Total.
+- **Saldo de operación LIESS:** el Excel renombró Señas a Anticipos y se ordena por tipo, vendedor, cliente y saldo.
+- **Saldo de operación LIESS:** el nuevo sincronizador monitorizable consulta exclusivamente la base LIESS mediante `opera`, `viewpreventa`, `stoauto`, `movnped`, `cliente`, `vendedor`, `sucursal`, `auto`, auditoría y cobranzas SIAC; la unión conserva una sola preventa por operación y marca entregadas según estados 35/40.
 
 - **Retiro de módulos:** se eliminaron Ranking Convencional, Central de Deudores y toda la sección Calidad, incluyendo rutas, accesos, permisos, APIs y la tarea programada de Hot Alert. Los registros históricos de Mongo se conservan.
 

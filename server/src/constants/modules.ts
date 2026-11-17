@@ -4,6 +4,7 @@ export const moduleKeys = [
   "usados",
   "belgrano",
   "liess",
+  "saldoOperacionLiess",
   "liessReparaciones",
   "preventas",
   "proformas",

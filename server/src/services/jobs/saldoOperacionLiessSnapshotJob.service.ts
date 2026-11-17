@@ -1,0 +1,13 @@
+import { ImportExecutionLoggerService } from "../imports/importExecutionLogger.service";
+import { SaldoOperacionLiessSnapshotService } from "../saldoOperacionLiessSnapshot.service";
+import type { JobExecutionResult, JobMonitorTrigger } from "./jobMonitor.types";
+const key = "saldo-operacion-liess-snapshot", name = "saldo-operacion-liess-snapshot", schedule = "Cada 2 minutos, de 07:00 a 20:00";
+export class SaldoOperacionLiessSnapshotJobService {
+  private static running = false;
+  static getJobKey() { return key; } static getJobName() { return name; } static getScheduleLabel() { return schedule; } static isJobRunning() { return this.running; }
+  static async run(trigger: JobMonitorTrigger): Promise<JobExecutionResult> {
+    if (this.running) throw new Error("Ya hay una sincronización LIESS en curso"); this.running = true; const startedAt = new Date();
+    const log = await ImportExecutionLoggerService.startExecution({ jobKey: key, jobName: name, sourceType: "database", trigger, scheduleLabel: schedule, sourcePath: "LIESS opera + viewpreventa -> Mongo saldo_operacion_liess_snapshots", message: "Iniciando sincronización de saldo LIESS" });
+    try { const summary = await SaldoOperacionLiessSnapshotService.syncFromLiess(); const finishedAt = new Date(); const message = `Sincronización LIESS finalizada: ${summary.total} leídos`; const metrics = { totalReceived: summary.total, created: summary.createdOrUpdated, updated: 0, discarded: summary.eliminadasSinAsignacion, errors: 0 }; await ImportExecutionLoggerService.finishExecution(String(log._id), { status: "success", message, totalRead: summary.total, inserted: summary.createdOrUpdated, discarded: summary.eliminadasSinAsignacion, metrics, sourceSummary: { title: "Origen", lines: ["LIESS: opera, viewpreventa, stoauto, movnped"] }, resultSummary: { title: "Resultado", lines: [`Snapshots procesados: ${summary.createdOrUpdated}`, `Entregadas: ${summary.entregadas}`] } }); return { status: "success", fileName: null, startedAt: startedAt.toISOString(), finishedAt: finishedAt.toISOString(), durationMs: finishedAt.getTime() - startedAt.getTime(), message, errorSummary: [], metrics, sourceSummary: { title: "Origen", lines: ["LIESS"] }, resultSummary: { title: "Resultado", lines: [message] }, requestSample: [], responseSample: [] }; } catch (error) { const message = error instanceof Error ? error.message : "No se pudo sincronizar LIESS"; await ImportExecutionLoggerService.finishExecution(String(log._id), { status: "failed", message, errored: 1, errorSummary: [message] }); throw error; } finally { this.running = false; }
+  }
+}
