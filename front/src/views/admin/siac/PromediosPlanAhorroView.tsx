@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getPromediosPlanAhorro } from "@/api/dms/dmsAPI";
 import type { PromedioPlanAhorroResponse } from "@/types/index";
@@ -96,7 +97,7 @@ export default function PromediosPlanAhorroView() {
 
           <label className="space-y-1">
             <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Ano</span>
-            <select
+            <AutocompleteSelect
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
               className="h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
@@ -106,7 +107,7 @@ export default function PromediosPlanAhorroView() {
                   {item}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </label>
         </div>
         <div className="grid grid-cols-2 border-t border-border lg:grid-cols-4">

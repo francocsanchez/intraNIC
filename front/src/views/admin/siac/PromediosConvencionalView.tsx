@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getPromedioOperacionesConvencional } from "@/api/dms/dmsAPI";
 import type { PromedioOperacionesConvencionalResponse } from "@/types/index";
@@ -119,7 +120,7 @@ export default function PromediosConvencionalView() {
           <div className="grid grid-cols-2 gap-2">
             <label className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground">Mes</span>
-              <select
+              <AutocompleteSelect
                 value={mes}
                 onChange={(e) => setMes(Number(e.target.value))}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
@@ -129,12 +130,12 @@ export default function PromediosConvencionalView() {
                     {item.label}
                   </option>
                 ))}
-              </select>
+              </AutocompleteSelect>
             </label>
 
             <label className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground">Año</span>
-              <select
+              <AutocompleteSelect
                 value={anio}
                 onChange={(e) => setAnio(Number(e.target.value))}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
@@ -144,7 +145,7 @@ export default function PromediosConvencionalView() {
                     {item}
                   </option>
                 ))}
-              </select>
+              </AutocompleteSelect>
             </label>
           </div>
         </div>

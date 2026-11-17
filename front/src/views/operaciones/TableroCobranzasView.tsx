@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { Dialog, Transition } from "@headlessui/react";
 import Loading from "@/components/Loading";
 import EChart from "@/components/charts/EChart";
@@ -140,9 +141,9 @@ export default function TableroCobranzasView() {
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <CalendarDays className="size-4 text-muted-foreground" />
-          <select aria-label="Mes" value={mes} onChange={(event) => { setMes(Number(event.target.value)); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs">
+          <AutocompleteSelect aria-label="Mes" value={mes} onChange={(event) => { setMes(Number(event.target.value)); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 rounded-md border border-border bg-background px-2 text-xs">
             {MONTHS.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}
-          </select>
+          </AutocompleteSelect>
           <input aria-label="Año" type="number" min="2000" max="2100" value={anio} onChange={(event) => { setAnio(Number(event.target.value) || today.getFullYear()); setSelectedDay(null); setSelectedOperation(null); }} className="h-9 w-24 rounded-md border border-border bg-background px-2 text-xs" />
         </div>
       </section>

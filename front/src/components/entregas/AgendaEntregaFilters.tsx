@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import type { SucursalEntrega } from "@/types/index";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -30,7 +31,7 @@ export default function AgendaEntregaFilters({
           <label htmlFor="agenda-sucursal" className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Sucursal
           </label>
-          <select
+          <AutocompleteSelect
             id="agenda-sucursal"
             value={sucursalId}
             onChange={(event) => onChange({ fecha, sucursalId: event.target.value })}
@@ -42,7 +43,7 @@ export default function AgendaEntregaFilters({
                 {sucursal.nombre}
               </option>
             ))}
-          </select>
+          </AutocompleteSelect>
         </div>
 
         <div className="space-y-2">

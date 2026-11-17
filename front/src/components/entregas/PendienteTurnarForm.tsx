@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   createPendienteTurnar,
   getAgendaEntregaLookup,
@@ -54,6 +55,7 @@ export default function PendienteTurnarForm({
     handleSubmit,
     reset,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<PendienteTurnarFormValues>({
     defaultValues: {
@@ -233,8 +235,9 @@ export default function PendienteTurnarForm({
                         <label htmlFor="pendiente-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Sucursal
                         </label>
-                        <select
+                        <AutocompleteSelect
                           id="pendiente-sucursal"
+                          value={watch("sucursal")}
                           className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
                         >
@@ -244,7 +247,7 @@ export default function PendienteTurnarForm({
                               {sucursal.nombre}{!sucursal.activa ? " (Inactiva)" : ""}
                             </option>
                           ))}
-                        </select>
+                        </AutocompleteSelect>
                         <FieldError message={errors.sucursal?.message} />
                       </div>
 

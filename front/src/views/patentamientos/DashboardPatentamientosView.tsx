@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import PatentamientosGeneralSection from "@/components/patentamientos/PatentamientosGeneralSection";
 import PatentamientosComparisonTable from "@/components/patentamientos/PatentamientosComparisonTable";
@@ -311,7 +312,7 @@ export default function DashboardPatentamientosView() {
                 <label htmlFor="patentamientos-month" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Mes
                 </label>
-                <select
+                <AutocompleteSelect
                   id="patentamientos-month"
                   value={selectedMonth ?? ""}
                   onChange={(event) => setSelectedMonth(event.target.value ? Number(event.target.value) : null)}
@@ -322,7 +323,7 @@ export default function DashboardPatentamientosView() {
                       {month.label}
                     </option>
                   ))}
-                </select>
+                </AutocompleteSelect>
               </>
             ) : null}
 
@@ -331,7 +332,7 @@ export default function DashboardPatentamientosView() {
                 <label htmlFor="patentamientos-plan-filter" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   C/ Plan
                 </label>
-                <select
+                <AutocompleteSelect
                   id="patentamientos-plan-filter"
                   value={planFilter}
                   onChange={(event) => setPlanFilter(event.target.value as PatentamientosPlanFilter)}
@@ -339,7 +340,7 @@ export default function DashboardPatentamientosView() {
                 >
                   <option value="with-plan">Si</option>
                   <option value="without-plan">No</option>
-                </select>
+                </AutocompleteSelect>
               </>
             ) : null}
 
@@ -348,7 +349,7 @@ export default function DashboardPatentamientosView() {
                 <label htmlFor="patentamientos-province" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Provincia
                 </label>
-                <select
+                <AutocompleteSelect
                   id="patentamientos-province"
                   value={selectedProvince}
                   onChange={(event) => {
@@ -363,12 +364,12 @@ export default function DashboardPatentamientosView() {
                       {province}
                     </option>
                   ))}
-                </select>
+                </AutocompleteSelect>
 
                 <label htmlFor="patentamientos-locality" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Localidad
                 </label>
-                <select
+                <AutocompleteSelect
                   id="patentamientos-locality"
                   value={selectedLocality}
                   onChange={(event) => setSelectedLocality(event.target.value)}
@@ -381,14 +382,14 @@ export default function DashboardPatentamientosView() {
                       {locality}
                     </option>
                   ))}
-                </select>
+                </AutocompleteSelect>
               </>
             ) : null}
 
             <label htmlFor="patentamientos-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Ano
             </label>
-            <select
+            <AutocompleteSelect
               id="patentamientos-year"
               value={selectedYear ?? ""}
               onChange={(event) => setUserSelectedYear(Number(event.target.value))}
@@ -399,7 +400,7 @@ export default function DashboardPatentamientosView() {
                   {year}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
         </section>

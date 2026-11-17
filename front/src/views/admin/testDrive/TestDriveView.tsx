@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   createTestDrive,
   changeStatusTestDrive,
@@ -74,6 +75,7 @@ function TestDriveModal({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<TestDriveFormValues>({
     defaultValues,
@@ -243,8 +245,9 @@ function TestDriveModal({
                       >
                         Version
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="versionId"
+                        value={watch("versionId")}
                         className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("versionId", {
                           required: "La version es obligatoria",
@@ -256,7 +259,7 @@ function TestDriveModal({
                             {version.nombre}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.versionId?.message} />
                     </div>
 
@@ -285,8 +288,9 @@ function TestDriveModal({
                       >
                         Color
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="colorId"
+                        value={watch("colorId")}
                         className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("colorId", {
                           required: "El color es obligatorio",
@@ -298,7 +302,7 @@ function TestDriveModal({
                             {color.nombre}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.colorId?.message} />
                     </div>
 
@@ -309,8 +313,9 @@ function TestDriveModal({
                       >
                         Negocio
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="negocio"
+                        value={watch("negocio")}
                         className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("negocio", {
                           required: "El negocio es obligatorio",
@@ -321,7 +326,7 @@ function TestDriveModal({
                             {option.label}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.negocio?.message} />
                     </div>
 

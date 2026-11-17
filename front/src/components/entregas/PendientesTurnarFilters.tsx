@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import type { SucursalEntrega } from "@/types/index";
 
 type PendientesTurnarFiltersProps = {
@@ -18,7 +19,7 @@ export default function PendientesTurnarFilters({
           <label htmlFor="pendientes-sucursal" className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">
             Sucursal
           </label>
-          <select
+          <AutocompleteSelect
             id="pendientes-sucursal"
             value={sucursalId}
             onChange={(event) => onChange({ sucursalId: event.target.value })}
@@ -30,7 +31,7 @@ export default function PendientesTurnarFilters({
                 {sucursal.nombre}
               </option>
             ))}
-          </select>
+          </AutocompleteSelect>
         </div>
 
         <div className="flex items-end">

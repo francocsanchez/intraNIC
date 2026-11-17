@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   getDashboardSalonSettings,
   getDashboardSalonModelImages,
@@ -140,18 +141,18 @@ export default function ConfiguracionDashboardSalonView() {
       <form onSubmit={save} className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
           <label className="text-sm font-semibold text-foreground">Sucursal SIAC
-            <select value={sucursalCodigo} onChange={(event) => updateScope(() => setSucursalCodigo(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground">
+            <AutocompleteSelect value={sucursalCodigo} onChange={(event) => updateScope(() => setSucursalCodigo(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground">
               <option value="">Seleccionar sucursal</option>
               {(sucursalesQuery.data?.data ?? []).map((sucursal) => <option key={sucursal.codigo} value={sucursal.codigo}>{sucursal.nombre}</option>)}
-            </select>
+            </AutocompleteSelect>
           </label>
           <label className="text-sm font-semibold text-foreground">Año
             <input type="number" min="2000" step="1" value={anio} onChange={(event) => updateScope(() => setAnio(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground" />
           </label>
           <label className="text-sm font-semibold text-foreground">Mes
-            <select value={mes} onChange={(event) => updateScope(() => setMes(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground">
+            <AutocompleteSelect value={mes} onChange={(event) => updateScope(() => setMes(event.target.value))} className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground">
               {MONTHS.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}
-            </select>
+            </AutocompleteSelect>
           </label>
           <label className="text-sm font-semibold text-foreground">Objetivo de vendedores
             <input type="number" min="1" step="1" inputMode="numeric" disabled={!isScopeValid || settingsQuery.isLoading} value={objetivoDraft ?? (settingsQuery.data?.data.objetivoVendedores ? String(settingsQuery.data.data.objetivoVendedores) : "")} onChange={(event) => setObjetivoDraft(event.target.value)} placeholder="Ej. 15" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground disabled:cursor-not-allowed disabled:opacity-50" />

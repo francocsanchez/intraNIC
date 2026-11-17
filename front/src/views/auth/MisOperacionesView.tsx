@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import EChart from "@/components/charts/EChart";
 import { textToColor } from "@/helpers/colores";
@@ -232,7 +233,7 @@ export default function MisOperacionesView() {
               Seleccione un ano
             </label>
 
-            <select
+            <AutocompleteSelect
               id="anio"
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
@@ -243,7 +244,7 @@ export default function MisOperacionesView() {
                   {item}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

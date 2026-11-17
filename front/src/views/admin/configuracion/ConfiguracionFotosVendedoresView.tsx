@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { deleteDashboardSalonSellerImage, getDashboardSalonSellerImages, saveDashboardSalonSellerImage } from "@/api/configuracionAPI";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,7 +46,7 @@ export default function ConfiguracionFotosVendedoresView() {
     <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
       {sellersQuery.isLoading || imagesQuery.isLoading ? <p className="text-sm text-muted-foreground">Cargando vendedores y fotos...</p> : sellersQuery.isError || imagesQuery.isError ? <p className="text-sm text-destructive">No se pudo cargar la configuración de fotos. Intentá nuevamente.</p> : <>
         <form onSubmit={submit} className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] lg:items-end">
-          <label className="grid gap-1.5 text-sm font-medium text-foreground">Vendedor<select value={vendedorCodigo} onChange={(event) => setVendedorCodigo(event.target.value)} required className="h-10 rounded-md border border-input bg-background px-3 text-sm"><option value="">Seleccionar vendedor</option>{sellers.map((seller) => <option key={seller.codigo} value={seller.codigo}>{seller.vendedor} · {seller.sucursal}</option>)}</select></label>
+          <label className="grid gap-1.5 text-sm font-medium text-foreground">Vendedor<AutocompleteSelect value={vendedorCodigo} onChange={(event) => setVendedorCodigo(event.target.value)} required className="h-10 rounded-md border border-input bg-background px-3 text-sm"><option value="">Seleccionar vendedor</option>{sellers.map((seller) => <option key={seller.codigo} value={seller.codigo}>{seller.vendedor} · {seller.sucursal}</option>)}</AutocompleteSelect></label>
           <label className="grid gap-1.5 text-sm font-medium text-foreground">URL de la foto<input type="url" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="https://..." required className="h-10 rounded-md border border-input bg-background px-3 text-sm" /></label>
           <div className="flex items-center gap-3"><Avatar className="size-10"><AvatarImage src={imageUrl || undefined} alt={selectedSeller ? `Foto de ${selectedSeller.vendedor}` : "Vista previa de vendedor"} /><AvatarFallback>{sellerInitials(selectedSeller?.vendedor ?? "Vendedor")}</AvatarFallback></Avatar><button type="submit" disabled={saveMutation.isPending} className="h-10 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60">{saveMutation.isPending ? "Guardando..." : "Guardar foto"}</button></div>
         </form>

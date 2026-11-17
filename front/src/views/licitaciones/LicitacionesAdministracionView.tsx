@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   addLicitacionUnidad,
   assignLicitacionUnidadInterno,
@@ -544,7 +545,7 @@ function UnitsDialog({
         <div className="grid gap-3 border-b border-border p-3 md:grid-cols-[minmax(0,1fr)_120px_auto]">
           <label className="space-y-1 text-sm font-medium">
             Versión
-            <select
+            <AutocompleteSelect
               required
               value={versionId}
               onChange={(event) => setVersionId(event.target.value)}
@@ -557,7 +558,7 @@ function UnitsDialog({
                   {version.nombre}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </label>
           <label className="space-y-1 text-sm font-medium">
             Cantidad
@@ -697,7 +698,7 @@ function UnitsDialog({
                     {unit.colorNombre || "-"}
                   </td>
                   <td className="px-3 py-2">
-                    <select
+                    <AutocompleteSelect
                       value={unit.patentamiento ? "si" : "no"}
                       onChange={(event) =>
                         updateDetails(unit, {
@@ -709,10 +710,10 @@ function UnitsDialog({
                     >
                       <option value="no">No</option>
                       <option value="si">Sí</option>
-                    </select>
+                    </AutocompleteSelect>
                   </td>
                   <td className="px-3 py-2">
-                    <select
+                    <AutocompleteSelect
                       value={unit.flete ? "si" : "no"}
                       onChange={(event) =>
                         updateDetails(unit, {
@@ -724,7 +725,7 @@ function UnitsDialog({
                     >
                       <option value="no">No</option>
                       <option value="si">Sí</option>
-                    </select>
+                    </AutocompleteSelect>
                   </td>
                   <td className="px-3 py-2">
                     <input
@@ -753,7 +754,7 @@ function UnitsDialog({
                     />
                   </td>
                   <td className="px-3 py-2">
-                    <select
+                    <AutocompleteSelect
                       value={unit.acc ? "si" : "no"}
                       onChange={(event) =>
                         updateDetails(unit, { acc: event.target.value === "si" })
@@ -763,10 +764,10 @@ function UnitsDialog({
                     >
                       <option value="no">No</option>
                       <option value="si">Sí</option>
-                    </select>
+                    </AutocompleteSelect>
                   </td>
                   <td className="px-3 py-2">
-                    <select
+                    <AutocompleteSelect
                       value={unit.conversionId ?? ""}
                       onChange={(event) => {
                         const conversionId = event.target.value || null;
@@ -784,10 +785,10 @@ function UnitsDialog({
                           {conversion.tipoConversion} · {conversion.proveedor}
                         </option>
                       ))}
-                    </select>
+                    </AutocompleteSelect>
                   </td>
                   <td className="px-3 py-2">
-                    <select
+                    <AutocompleteSelect
                       value={unit.estadoConversion ?? ""}
                       onChange={(event) =>
                         updateDetails(unit, {
@@ -808,7 +809,7 @@ function UnitsDialog({
                       <option value="PENDIENTE">Pendiente</option>
                       <option value="EN_PROVEEDOR">En Proveedor</option>
                       <option value="CONVERTIDA">Convertida</option>
-                    </select>
+                    </AutocompleteSelect>
                   </td>
                   <td className="px-3 py-1.5">
                     <span
@@ -1007,7 +1008,7 @@ export default function LicitacionesAdministracionView() {
     field: "tecnica" | "preAdjudicado",
     enabled: boolean,
   ) => (
-    <select
+    <AutocompleteSelect
       aria-label={`${field} de ${item.entidad}`}
       value={item[field] === null ? "pendiente" : item[field] ? "si" : "no"}
       disabled={!enabled || flowMutation.isPending}
@@ -1026,7 +1027,7 @@ export default function LicitacionesAdministracionView() {
       <option value="pendiente">Pendiente</option>
       <option value="si">Sí</option>
       <option value="no">No</option>
-    </select>
+    </AutocompleteSelect>
   );
   const flowCheck = (
     item: LicitacionAdministracion,

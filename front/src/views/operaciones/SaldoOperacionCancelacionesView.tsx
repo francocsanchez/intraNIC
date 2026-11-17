@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import EChart from "@/components/charts/EChart";
 import { countSaldoOperacionTreeLeaves, createSaldoOperacionTiempoTreeOption } from "@/components/operaciones/SaldoOperacionTiempoTree";
@@ -116,8 +117,8 @@ export function SaldoOperacionTiemposView({ kind }: { kind: SaldoOperacionTiempo
     <section className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
       <div><h1 className="text-base font-semibold">{isNoCanceladas ? "Análisis de no canceladas" : "Análisis de cancelación"}</h1><p className="text-xs text-muted-foreground">{isNoCanceladas ? "Promedio de días desde asignación en operaciones aún no canceladas." : "Promedio de días entre asignación y cancelación."}</p></div>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-xs text-muted-foreground"><CalendarDays className="size-4" /><span>Año asignado</span><select value={year} onChange={(event) => { setYear(event.target.value); setMonth(ALL_MONTHS); }} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_YEARS}>Todos los años</option>{years.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground"><span>Mes asignado</span><select value={month} onChange={(event) => setMonth(event.target.value)} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_MONTHS}>Todos los meses</option>{monthOptions.map((item) => <option key={item.month} value={item.month}>{formatMonth(item.month)}</option>)}</select></label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground"><CalendarDays className="size-4" /><span>Año asignado</span><AutocompleteSelect value={year} onChange={(event) => { setYear(event.target.value); setMonth(ALL_MONTHS); }} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_YEARS}>Todos los años</option>{years.map((item) => <option key={item} value={item}>{item}</option>)}</AutocompleteSelect></label>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground"><span>Mes asignado</span><AutocompleteSelect value={month} onChange={(event) => setMonth(event.target.value)} className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"><option value={ALL_MONTHS}>Todos los meses</option>{monthOptions.map((item) => <option key={item.month} value={item.month}>{formatMonth(item.month)}</option>)}</AutocompleteSelect></label>
         <Button size="sm" variant="outline" onClick={() => navigate(paths.analisis.saldoOperacion)}><ArrowLeft /> Volver a saldo</Button>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import InscripcionUnidadesTable from "@/components/patentamientos/InscripcionUnidadesTable";
 import UnidadesDealersTreemap from "@/components/patentamientos/UnidadesDealersTreemap";
@@ -72,7 +73,7 @@ export default function InscripcionUnidadesView() {
             <label htmlFor="traslado-furlong-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Ano
             </label>
-            <select
+            <AutocompleteSelect
               id="traslado-furlong-year"
               value={selectedYear ?? ""}
               onChange={(event) => setUserSelectedYear(Number(event.target.value))}
@@ -83,7 +84,7 @@ export default function InscripcionUnidadesView() {
                   {year}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

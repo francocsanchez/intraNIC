@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   createTestDriveRegistro,
   deleteTestDriveRegistro,
@@ -246,8 +247,9 @@ function RegistroModal({
                       <label htmlFor="unidadId" className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         Dominio
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="unidadId"
+                        value={selectedUnidadId}
                         className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
                         {...register("unidadId", { required: "La unidad es obligatoria" })}
                       >
@@ -257,7 +259,7 @@ function RegistroModal({
                             {option.dominio} - {option.versionNombre}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.unidadId?.message} />
                     </div>
 

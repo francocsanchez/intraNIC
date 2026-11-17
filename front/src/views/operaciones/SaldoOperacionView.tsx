@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { Button } from "@/components/ui/button";
 import { paths } from "@/routes/paths";
@@ -303,7 +304,7 @@ export default function SaldoOperacionView() {
             Operaciones:{" "}
             <b className="text-foreground">{pagination?.total ?? 0}</b>
           </span>
-          <select
+          <AutocompleteSelect
             aria-label="Sucursal"
             value={sucursal}
             onChange={(event) => {
@@ -318,8 +319,8 @@ export default function SaldoOperacionView() {
                 {item}
               </option>
             ))}
-          </select>
-          <select
+          </AutocompleteSelect>
+          <AutocompleteSelect
             aria-label="Usuario"
             value={usuario}
             onChange={(event) => {
@@ -334,8 +335,8 @@ export default function SaldoOperacionView() {
                 {item}
               </option>
             ))}
-          </select>
-          <select
+          </AutocompleteSelect>
+          <AutocompleteSelect
             aria-label="Vendedor"
             value={vendedor}
             onChange={(event) => {
@@ -350,8 +351,8 @@ export default function SaldoOperacionView() {
                 {item}
               </option>
             ))}
-          </select>
-          <select
+          </AutocompleteSelect>
+          <AutocompleteSelect
             aria-label="Entrega"
             value={entrega}
             onChange={(event) => {
@@ -362,9 +363,9 @@ export default function SaldoOperacionView() {
           >
             <option value="sin-entregar">No entregadas</option>
             <option value="entregadas">Entregadas</option>
-          </select>
+          </AutocompleteSelect>
           {entrega === "sin-entregar" && (
-            <select
+            <AutocompleteSelect
               aria-label="Sección"
               value={section}
               onChange={(event) => {
@@ -375,9 +376,9 @@ export default function SaldoOperacionView() {
             >
               <option value="conSaldo">Con saldo</option>
               <option value="canceladas">Canceladas</option>
-            </select>
+            </AutocompleteSelect>
           )}
-          <select
+          <AutocompleteSelect
             aria-label="Ubicación"
             value={ubicacion}
             onChange={(event) => {
@@ -392,7 +393,7 @@ export default function SaldoOperacionView() {
                 {item}
               </option>
             ))}
-          </select>
+          </AutocompleteSelect>
           <Button
             size="sm"
             variant="outline"
@@ -524,7 +525,7 @@ export default function SaldoOperacionView() {
                 <td className="px-2 py-1.5">{row.codigoOperacion}</td>
                 <td className="px-2 py-1.5">{row.clienteNombre}</td>
                 <td className="px-2 py-1.5">
-                  <select
+                  <AutocompleteSelect
                     aria-label={`Tipo de cliente de la operación ${row.codigoOperacion}`}
                     value={row.tipoCliente ?? ""}
                     disabled={updateTipoCliente.isPending}
@@ -543,7 +544,7 @@ export default function SaldoOperacionView() {
                     <option value="Reventa">Reventa</option>
                     <option value="Empresa">Empresa</option>
                     <option value="Licitación">Licitación</option>
-                  </select>
+                  </AutocompleteSelect>
                 </td>
                 <td className="px-2 py-1.5">{row.sucursal}</td>
                 <td className="px-2 py-1.5">{row.vendedor}</td>

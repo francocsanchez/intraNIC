@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getAnalisisVendedor, getAnalisisVendedorFilters } from "@/services/operacionesService";
 import type { AnalisisOperacionesPreventaItem, AnalisisVendedorFilterOption } from "@/types/index";
@@ -336,7 +337,7 @@ export default function AnalisisVendedorView() {
             <label htmlFor="analisis-vendedor-vendedor" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Vendedor
             </label>
-            <select
+            <AutocompleteSelect
               id="analisis-vendedor-vendedor"
               value={selectedVendedor ?? ""}
               onChange={(event) => setSelectedVendedor(event.target.value ? Number(event.target.value) : null)}
@@ -348,14 +349,14 @@ export default function AnalisisVendedorView() {
                   {option.label}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="analisis-vendedor-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Ano
             </label>
-            <select
+            <AutocompleteSelect
               id="analisis-vendedor-anio"
               value={anio}
               onChange={(event) => setAnio(Number(event.target.value))}
@@ -366,7 +367,7 @@ export default function AnalisisVendedorView() {
                   {option}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

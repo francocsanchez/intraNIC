@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import {
   createPlanNegocio,
@@ -116,7 +117,7 @@ function PlanNegocioModal({ open, onClose, item, selectedYear }: PlanNegocioModa
                 <div className="grid gap-3 p-3 md:grid-cols-2">
                   <label className="block space-y-1.5 md:col-span-2">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modelo</span>
-                    <select
+                    <AutocompleteSelect
                       value={modelo}
                       onChange={(event) => setModelo(event.target.value)}
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
@@ -127,7 +128,7 @@ function PlanNegocioModal({ open, onClose, item, selectedYear }: PlanNegocioModa
                           {item}
                         </option>
                       ))}
-                    </select>
+                    </AutocompleteSelect>
                   </label>
 
                   <label className="block space-y-1.5">
@@ -259,7 +260,7 @@ export default function PlanNegocioCrudView() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <select
+            <AutocompleteSelect
               value={selectedYear}
               onChange={(event) => setSelectedYear(Number(event.target.value))}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
@@ -269,7 +270,7 @@ export default function PlanNegocioCrudView() {
                   {year}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
 
             <button
               type="button"

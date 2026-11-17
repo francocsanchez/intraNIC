@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import {
   createRegistroAsignacion,
@@ -340,7 +341,7 @@ export default function RegistroAsignacionesView() {
 
             <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Tipo
-              <select
+              <AutocompleteSelect
                 value={tipo}
                 onChange={(event) =>
                   setTipo(event.target.value as "Asignado" | "Desasignado" | "")
@@ -350,7 +351,7 @@ export default function RegistroAsignacionesView() {
                 <option value="">Seleccionar</option>
                 <option value="Asignado">Asignado</option>
                 <option value="Desasignado">Desasignado</option>
-              </select>
+              </AutocompleteSelect>
             </label>
           </div>
 

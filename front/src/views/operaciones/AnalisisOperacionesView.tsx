@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { Dialog, Transition } from "@headlessui/react";
 import Loading from "@/components/Loading";
 import {
@@ -732,7 +733,7 @@ export default function AnalisisOperacionesView() {
             <label htmlFor="analisis-operaciones-anio" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Ano
             </label>
-            <select
+            <AutocompleteSelect
               id="analisis-operaciones-anio"
               value={anio}
               onChange={(event) => setAnio(Number(event.target.value))}
@@ -743,14 +744,14 @@ export default function AnalisisOperacionesView() {
                   {option}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="analisis-operaciones-mes" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Mes
             </label>
-            <select
+            <AutocompleteSelect
               id="analisis-operaciones-mes"
               value={mes}
               onChange={(event) => setMes(Number(event.target.value))}
@@ -761,7 +762,7 @@ export default function AnalisisOperacionesView() {
                   {option.label}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

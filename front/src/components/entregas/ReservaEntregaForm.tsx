@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   createReservaEntrega,
   updateReservaEntrega,
@@ -194,8 +195,9 @@ export default function ReservaEntregaForm({
                       <label htmlFor="reserva-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                         Sucursal
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="reserva-sucursal"
+                        value={watch("sucursal")}
                         className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                         {...register("sucursal", { required: "La sucursal es obligatoria" })}
                       >
@@ -205,7 +207,7 @@ export default function ReservaEntregaForm({
                             {sucursal.nombre}{!sucursal.activa ? " (Inactiva)" : ""}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.sucursal?.message} />
                     </div>
 
@@ -226,8 +228,9 @@ export default function ReservaEntregaForm({
                       <label htmlFor="reserva-hora" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                         Hora
                       </label>
-                      <select
+                      <AutocompleteSelect
                         id="reserva-hora"
+                        value={watch("horaAgenda")}
                         className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                         {...register("horaAgenda", { required: "La hora es obligatoria" })}
                       >
@@ -239,7 +242,7 @@ export default function ReservaEntregaForm({
                             {timeSlot}
                           </option>
                         ))}
-                      </select>
+                      </AutocompleteSelect>
                       <FieldError message={errors.horaAgenda?.message} />
                     </div>
 

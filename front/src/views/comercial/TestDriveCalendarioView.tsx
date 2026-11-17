@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { getTestDriveOptions, getTestDriveRegistros, type TestDriveNegocio } from "@/api/testDriveRegistroAPI";
 import type { TestDriveOption, TestDriveRegistro } from "@/types/index";
 import { useQuery } from "@tanstack/react-query";
@@ -536,7 +537,7 @@ export default function TestDriveCalendarioView({
           <div className="flex flex-wrap gap-2">
             <div className="inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3">
               <ListFilter size={15} className="text-muted-foreground" />
-              <select
+              <AutocompleteSelect
                 value={selectedUnidadId}
                 onChange={(event) => setSelectedUnidadId(event.target.value)}
                 className="bg-transparent text-sm font-medium text-foreground outline-none"
@@ -547,7 +548,7 @@ export default function TestDriveCalendarioView({
                     {unit.dominio} - {unit.versionNombre}
                   </option>
                 ))}
-              </select>
+              </AutocompleteSelect>
             </div>
 
             <div className="inline-flex h-9 items-center gap-1 rounded-md border border-border bg-background px-1">

@@ -1,3 +1,12 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
 import {
   Controller,
   type Control,
@@ -5,6 +14,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { getSucursalesSiac, getVendedoresNic } from "@/api/dms/dmsAPI";
 import { getSucursalesEntrega } from "@/api/entregasAPI";
 import { getUnidadesNegocio } from "@/api/unidadNegocioAPI";
@@ -47,6 +57,52 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs font-medium text-destructive">{message}</p>;
 }
 
+function RolesAutocomplete({ value, onChange }: { value: string[]; onChange: (value: string[]) => void }) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visibleRoles = roleOptions.filter((role) => role.label.toLocaleLowerCase().includes(normalizedQuery));
+  const selectedRoles = roleOptions.filter((role) => value.includes(role.value));
+
+  return (
+    <div className="space-y-2">
+      <Combobox value={selectedRoles} onChange={(roles: typeof roleOptions[number][]) => onChange(roles.map((role) => role.value))} multiple immediate>
+        <div className="relative">
+          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground" />
+          <ComboboxInput aria-label="Buscar roles" displayValue={() => query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar o seleccionar roles..." className="h-9 w-full rounded-md border border-input bg-background px-9 pr-9 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring" />
+          <ComboboxButton className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronDown size={16} /></ComboboxButton>
+          <ComboboxOptions transition className="absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg transition duration-150 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0">
+            {visibleRoles.map((role) => <ComboboxOption key={role.value} value={role}>{({ focus, selected }) => <div className={`flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm ${focus ? "bg-muted" : ""}`}><span className={`flex h-4 w-4 items-center justify-center rounded-sm border ${selected ? "border-border bg-primary text-primary-foreground" : "border-input bg-background"}`}>{selected ? <Check size={12} /> : null}</span>{role.label}</div>}</ComboboxOption>)}
+          </ComboboxOptions>
+        </div>
+      </Combobox>
+      <div className="min-h-9 rounded-md border border-dashed border-border bg-muted px-2 py-2">
+        {selectedRoles.length ? <div className="flex flex-wrap gap-1">{selectedRoles.map((role) => <span key={role.value} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground">{role.label}<button type="button" onClick={() => onChange(value.filter((current) => current !== role.value))} className="text-muted-foreground hover:text-foreground" aria-label={`Quitar ${role.label}`}><X size={13} /></button></span>)}</div> : <p className="text-sm text-muted-foreground">Todavía no seleccionaste roles.</p>}
+      </div>
+    </div>
+  );
+}
+
+function VendedorNicAutocomplete({ value, onChange, vendedores }: { value: number; onChange: (value: number) => void; vendedores: Vendedor[] }) {
+  const [query, setQuery] = useState("");
+  const selected = useMemo(() => vendedores.find((vendedor) => vendedor.codigo === value) ?? null, [vendedores, value]);
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visible = normalizedQuery.length >= 3 ? vendedores.filter((vendedor) => vendedor.vendedor.toLocaleLowerCase().includes(normalizedQuery) || String(vendedor.codigo).includes(normalizedQuery)) : [];
+
+  return (
+    <Combobox value={selected} onChange={(vendedor: Vendedor | null) => { onChange(vendedor?.codigo ?? 0); setQuery(""); }} onClose={() => setQuery("")}>
+      <div className="relative">
+        <Search size={15} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground" />
+        <ComboboxInput aria-label="Buscar vendedor NIC" displayValue={() => query || selected?.vendedor || ""} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar vendedor o código..." className="h-9 w-full rounded-md border border-input bg-background px-9 pr-9 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring" />
+        <ComboboxButton className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronDown size={16} /></ComboboxButton>
+        <ComboboxOptions transition className="absolute left-0 right-0 z-20 mt-1 max-h-56 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg transition duration-150 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0">
+          <ComboboxOption value={null} className="cursor-pointer rounded-sm px-2 py-1.5 text-sm text-muted-foreground data-focus:bg-muted">Sin asignar</ComboboxOption>
+          {normalizedQuery.length < 3 ? <p className="px-2 py-2 text-xs text-muted-foreground">Ingresá al menos 3 caracteres para buscar.</p> : visible.length ? visible.map((vendedor) => <ComboboxOption key={vendedor.codigo} value={vendedor} className="cursor-pointer rounded-sm px-2 py-1.5 text-sm data-focus:bg-muted"><span className="font-medium">{vendedor.vendedor}</span><span className="ml-2 text-xs text-muted-foreground">{vendedor.codigo}</span></ComboboxOption>) : <p className="px-2 py-2 text-xs text-muted-foreground">No se encontraron vendedores.</p>}
+        </ComboboxOptions>
+      </div>
+    </Combobox>
+  );
+}
+
 export default function UsuarioForm({
   register,
   control,
@@ -84,9 +140,9 @@ export default function UsuarioForm({
   const sucursalesSiac: SucursalSiac[] = sucursalesSiacResponse?.data ?? [];
 
   return (
-    <div className="space-y-4">
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="space-y-2">
+    <div className="space-y-3">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="space-y-1">
           <label
             htmlFor="name"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -103,21 +159,14 @@ export default function UsuarioForm({
           <FieldError message={errors.name?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label htmlFor="sucursalSiacCodigo" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Sucursal SIAC
           </label>
-          <select
-            id="sucursalSiacCodigo"
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-            {...register("sucursalSiacCodigo")}
-          >
+          <Controller control={control} name="sucursalSiacCodigo" render={({ field }) => <AutocompleteSelect id="sucursalSiacCodigo" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring" value={field.value ?? ""} name={field.name} onBlur={field.onBlur} onChange={field.onChange}>
             <option value="">-- Sin asignar --</option>
-            {sucursalesSiac.map((sucursal) => (
-              <option key={sucursal.codigo} value={sucursal.codigo}>{sucursal.nombre}</option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">Define la sucursal que usará Dashboard Salón.</p>
+            {sucursalesSiac.map((sucursal) => <option key={sucursal.codigo} value={sucursal.codigo}>{sucursal.nombre}</option>)}
+          </AutocompleteSelect>} />
           {isLoadingSucursalesSiac ? <p className="text-xs text-muted-foreground">Cargando sucursales SIAC...</p> : null}
           {isSucursalesSiacError ? (
             <div className="flex items-center gap-2 text-xs text-destructive">
@@ -128,7 +177,7 @@ export default function UsuarioForm({
           <FieldError message={errors.sucursalSiacCodigo?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label
             htmlFor="lastName"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -147,7 +196,7 @@ export default function UsuarioForm({
           <FieldError message={errors.lastName?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label
             htmlFor="email"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -167,30 +216,17 @@ export default function UsuarioForm({
           <FieldError message={errors.email?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label
             htmlFor="unidadNegocio"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Unidad de negocio
           </label>
-          <select
-            id="unidadNegocio"
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-            {...register("unidadNegocio")}
-          >
+          <Controller control={control} name="unidadNegocio" render={({ field }) => <AutocompleteSelect id="unidadNegocio" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring" value={field.value ?? ""} name={field.name} onBlur={field.onBlur} onChange={field.onChange}>
             <option value="">-- Sin asignar --</option>
-            {unidadesNegocio.map((unidad) => (
-              <option key={unidad._id} value={unidad._id}>
-                {unidad.nombre}
-                {unidad.activo ? "" : " (Inactiva)"}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Segmenta la agenda comercial y agrupa usuarios sin reemplazar el
-            campo tecnico `company`.
-          </p>
+            {unidadesNegocio.map((unidad) => <option key={unidad._id} value={unidad._id}>{unidad.nombre}{unidad.activo ? "" : " (Inactiva)"}</option>)}
+          </AutocompleteSelect>} />
           {isLoadingUnidades ? (
             <p className="text-xs text-muted-foreground">
               Cargando unidades de negocio...
@@ -199,30 +235,17 @@ export default function UsuarioForm({
           <FieldError message={errors.unidadNegocio?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label
             htmlFor="sucursalPredeterminada"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Sucursal predeterminada
           </label>
-          <select
-            id="sucursalPredeterminada"
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-            {...register("sucursalPredeterminada")}
-          >
+          <Controller control={control} name="sucursalPredeterminada" render={({ field }) => <AutocompleteSelect id="sucursalPredeterminada" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring" value={field.value ?? ""} name={field.name} onBlur={field.onBlur} onChange={field.onChange}>
             <option value="">-- Sin asignar --</option>
-            {sucursales.map((sucursal) => (
-              <option key={sucursal._id} value={sucursal._id}>
-                {sucursal.nombre}
-                {sucursal.activa ? "" : " (Inactiva)"}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Se usa como sucursal inicial en entregas y pendientes, pero no
-            limita el acceso a otras sucursales.
-          </p>
+            {sucursales.map((sucursal) => <option key={sucursal._id} value={sucursal._id}>{sucursal.nombre}{sucursal.activa ? "" : " (Inactiva)"}</option>)}
+          </AutocompleteSelect>} />
           {isLoadingSucursales ? (
             <p className="text-xs text-muted-foreground">
               Cargando sucursales de entrega...
@@ -231,7 +254,7 @@ export default function UsuarioForm({
           <FieldError message={errors.sucursalPredeterminada?.message} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label
             htmlFor="celular"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -263,14 +286,11 @@ export default function UsuarioForm({
               },
             })}
           />
-          <p className="text-xs text-muted-foreground">
-            Campo opcional. Cargalo sin `0`, sin `15` y sin `+549`.
-          </p>
           <FieldError message={errors.celular?.message} />
         </div>
 
         {showPasswordField ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label
               htmlFor="password"
               className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -290,55 +310,47 @@ export default function UsuarioForm({
                 },
               })}
             />
-            <p className="text-xs text-muted-foreground">
-              Esta sera la contrasena con la que el usuario ingresara por
-              primera vez.
-            </p>
             <FieldError message={errors.password?.message} />
           </div>
         ) : null}
       </section>
 
-      <section className="border-t border-border pt-3">
-        <div className="pb-2">
+      <section className="border-t border-border pt-2">
+        <div className="pb-1.5">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Modulos
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Marca los modulos que queres habilitar para este usuario.
-          </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {moduleSections.map((section) => (
             <div
               key={section.title}
-              className="border-t border-border pt-3 first:border-t-0 first:pt-1"
+              className="border-t border-border pt-2 first:border-t-0 first:pt-0"
             >
-              <div className="mb-2 text-primary font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="mb-1 text-primary font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 {section.title}
               </div>
 
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-5">
                 {section.modules.map((moduleKey) => (
                   <Controller
                     key={moduleKey}
                     control={control}
                     name={`modules.${moduleKey}` as `modules.${ModuleKey}`}
                     render={({ field }) => (
-                      <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2 transition-colors hover:bg-muted">
-                        <span className="text-xs font-medium leading-4 text-foreground">
-                          {moduleLabels[moduleKey as ModuleKey]}
-                        </span>
-
+                      <label className={`flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs font-medium transition-colors hover:bg-muted ${Number(field.value ?? 0) === 1 ? "text-primary" : "text-foreground"}`}>
                         <input
                           type="checkbox"
                           checked={Number(field.value ?? 0) === 1}
                           onChange={(event) =>
                             field.onChange(event.target.checked ? 1 : 0)
                           }
-                          className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+                          className="h-4 w-4 shrink-0 rounded border-input accent-primary focus:ring-ring"
                         />
+                        <span className="leading-4">
+                          {moduleLabels[moduleKey as ModuleKey]}
+                        </span>
                       </label>
                     )}
                   />
@@ -349,60 +361,50 @@ export default function UsuarioForm({
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="space-y-2">
+      <section className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="space-y-1">
           <label
             htmlFor="role"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
           >
             Roles
           </label>
-          <select
-            id="role"
-            multiple
-            className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-            {...register("role", {
-              required: "Debe seleccionar al menos un rol",
-            })}
-          >
-            {roleOptions.map((roleOption) => (
-              <option key={roleOption.value} value={roleOption.value}>
-                {roleOption.label}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="role"
+            rules={{ required: "Debe seleccionar al menos un rol" }}
+            render={({ field }) => (
+              <RolesAutocomplete value={field.value ?? []} onChange={field.onChange} />
+            )}
+          />
           <FieldError message={errors.role?.message as string | undefined} />
-          <p className="text-xs text-muted-foreground">
-            Usa Ctrl/Cmd + click para seleccionar multiples opciones.
-          </p>
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-3 lg:col-span-2 lg:grid lg:grid-cols-2">
+          <div className="space-y-1">
             <label
               htmlFor="numberSaleNic"
               className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
             >
               Vendedor NIC
             </label>
-            <select
-              id="numberSaleNic"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-              {...register("numberSaleNic", { valueAsNumber: true })}
-            >
-              <option value={0}>-- Selecciona un vendedor --</option>
-              {vendedores.map((vendedor) => (
-                <option key={vendedor.codigo} value={vendedor.codigo}>
-                  {vendedor.vendedor}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="numberSaleNic"
+              render={({ field }) => (
+                <VendedorNicAutocomplete
+                  value={Number(field.value ?? 0)}
+                  onChange={field.onChange}
+                  vendedores={vendedores}
+                />
+              )}
+            />
             {isLoading ? (
               <p className="text-xs text-muted-foreground">Cargando vendedores...</p>
             ) : null}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label
               htmlFor="numberSaleLiess"
               className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"

@@ -5,8 +5,14 @@ Las opciones de `/sistema/configuracion` se presentan dentro de una única tarje
 En `/sistema/configuracion/convencional/editar`, `/sistema/configuracion/usados/editar` y `/sistema/configuracion/belgrano/editar`, cada selector de vendedores usa un autocompletado múltiple: busca por nombre o código desde tres caracteres, acumula las selecciones como etiquetas removibles y no renderiza listas de checks.
 Los encabezados de esos tres editores son compactos y no muestran tarjetas redundantes de Sistema o Estado. El control de activación aparece antes de los vendedores, con fondo, texto y switch verde para Activo y rojo para Desactivado.
 En Inicio, la sección Sistema expone un único acceso directo `Administrar sistema`, sin desplegable, hacia el primer módulo de Sistema habilitado; el módulo `Links` se ubica en Herramientas.
+La barra de navegación de Inicio (`/`) usa fondo negro y controles de contraste claro.
 En `/sistema/registros`, las sincronizaciones periódicas de Saldo de operación NIC y LIESS no se muestran cuando terminan correctamente. Si la última ejecución falla, aparece una fila de alerta con su mensaje, sin acción manual.
 La tabla de cronos de `/sistema/registros` muestra `Cuándo se ejecuta` como columna independiente para mantener cada cron en una sola línea.
+`Licitaciones · Administración` abre por defecto en la pestaña `Todas`, que incluye licitaciones pendientes, adjudicadas y perdidas; las demás pestañas conservan sus filtros de estado.
+`/analisis/promedio-convencional` muestra únicamente vendedores con al menos una unidad asignada en el mes seleccionado; quienes no tengan ventas en ese mes no aparecen en la tabla ni sus resúmenes.
+La edición de usuarios en `/sistema/usuarios/:idUsuario/editar` usa un encabezado y formulario compactos: elimina las tarjetas de resumen redundantes, distribuye campos en cuatro columnas en escritorio y reduce el espaciado de módulos y asignaciones.
+Los permisos de módulos en la edición de usuarios se muestran como checks simples, sin bordes ni tarjetas por opción, con checkbox a la izquierda y resaltado sutil al estar habilitados.
+En la edición de usuarios, Roles y Vendedor NIC usan autocompletados: Roles acumula etiquetas removibles y Vendedor NIC busca por nombre o código desde tres caracteres.
 Cada unidad de `Licitaciones · Administración` incluye ACC (Sí/No), con valor inicial No; el resumen PDF incorpora ese indicador.
 En `Licitaciones · Administración`, el interno asignado se presenta como texto fijo y las filas sin interno conservan el buscador; la tabla debe mantenerse compacta, sin quiebres de línea en sus datos.
 La grilla de `Licitaciones · Administración` separa los accesos en las columnas Acciones (Editar y Prórroga) y Gestión (Carga de unidades e Informe PDF), con íconos de mayor tamaño y color semántico.
@@ -299,6 +305,7 @@ Siempre el footer de toda la app debe tener fondo negro, texto blanco centrado y
 - Las solicitudes de cambio de color con chasis asignado no pueden crearse; las existentes se alertan en tabla. Solo `stock`, `gerente` y `superAdmin` pueden rechazarlas, dejando el rechazo como estado final auditado mediante una actualización atómica. Los cambios de estados de `stock` y `superAdmin` usan la misma persistencia atómica.
 - La vista inicial de `Sol. cambio color` muestra solo solicitudes pendientes; los filtros permiten acceder al resto de estados.
 - El Combobox de vendedores en `Sol. cambio color` requiere al menos tres caracteres antes de filtrar, para preservar la fluidez con listados extensos.
+- Todo selector del frontend debe usar el componente reutilizable `AutocompleteSelect`, no el elemento nativo `select`. Las listas breves muestran sus opciones al abrirse y las que superan dieciséis opciones requieren tres caracteres de búsqueda; se preservan valores, validaciones y opciones de limpieza de los formularios existentes. El campo reserva siempre espacio a izquierda y derecha para que texto, búsqueda y flecha no se superpongan.
 - El Registro TestDrive compartido de Comercial y Plan de ahorro ordena por retiro descendente, permite filtrar por patente y separa por defecto los turnos por ocurrir del historial cuya fecha de devolución ya pasó.
 - `Rend. Gastos` vive en `/comercial/rendiciones-gastos`, está disponible para todo usuario autenticado sin depender de módulos ni roles y cada rendición solo puede ser consultada o exportada por su creador, incluido el caso `superAdmin`.
 - Las rendiciones de gastos son inmutables, guardan importes en centavos, resuelven empresas por CUIT canónico de 11 dígitos y exportan un PDF A4 con firma de supervisor.
@@ -308,5 +315,3 @@ Siempre el footer de toda la app debe tener fondo negro, texto blanco centrado y
 - El PDF de `Rend. Gastos` etiqueta al creador como empleado y ordena los gastos por fecha ascendente.
 - El PDF de `Rend. Gastos` reutiliza el membrete institucional de Proformas, incluyendo logo y datos legales de Nippon Car.
 - El membrete de `Rend. Gastos` usa solo un banner gris claro, sin datos legales, para una impresión de bajo consumo.
-La barra de navegación de Inicio (/) usa fondo negro y controles de contraste claro.
-Licitaciones · Administración abre por defecto en la pestaña Todas, que incluye licitaciones pendientes, adjudicadas y perdidas; las demás pestañas conservan sus filtros de estado.

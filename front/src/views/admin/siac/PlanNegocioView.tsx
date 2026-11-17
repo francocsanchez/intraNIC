@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { getPlanNegocioResumen } from "@/api/dms/planNegocioAPI";
 import Loading from "@/components/Loading";
 import { Badge } from "@/components/ui/badge";
@@ -69,9 +70,9 @@ export default function PlanNegocioView() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <label htmlFor="plan-negocio-anio" className="sr-only">Seleccione un año</label>
-              <select id="plan-negocio-anio" value={anio} onChange={(event) => setAnio(Number(event.target.value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:ring-2 focus:ring-ring">
+              <AutocompleteSelect id="plan-negocio-anio" value={anio} onChange={(event) => setAnio(Number(event.target.value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:ring-2 focus:ring-ring">
                 {years.map((year) => <option key={year} value={year}>Año {year}</option>)}
-              </select>
+              </AutocompleteSelect>
               {anio !== currentYear ? <Button type="button" variant="outline" onClick={() => setAnio(currentYear)}>Año actual</Button> : null}
             </div>
           </div>

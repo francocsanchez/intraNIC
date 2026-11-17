@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import type { EChartsCoreOption } from "echarts/core";
 import { useMemo } from "react";
 import EChart from "@/components/charts/EChart";
@@ -119,7 +120,7 @@ export default function OperacionesBarChart({
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Dimension
             </span>
-            <select
+            <AutocompleteSelect
               value={dimension}
               onChange={(event) =>
                 onDimensionChange(event.target.value as OperacionesChartDimension)
@@ -131,14 +132,14 @@ export default function OperacionesBarChart({
               <option value="modelo" disabled={compareBy === "anio"}>Modelo</option>
               <option value="sucursal" disabled={compareBy === "anio"}>Sucursal</option>
               <option value="vendedor" disabled={compareBy === "anio"}>Vendedor</option>
-            </select>
+            </AutocompleteSelect>
           </label>
 
           <label className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Comparar
             </span>
-            <select
+            <AutocompleteSelect
               value={compareBy}
               onChange={(event) =>
                 onCompareByChange(event.target.value as OperacionesChartCompare)
@@ -147,7 +148,7 @@ export default function OperacionesBarChart({
             >
               <option value="none">{COMPARE_LABELS.none}</option>
               <option value="anio">{COMPARE_LABELS.anio}</option>
-            </select>
+            </AutocompleteSelect>
           </label>
 
           <span className="w-fit rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">

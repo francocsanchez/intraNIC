@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getEstadoInternosPedido } from "@/api/dms/pedidoUnidadAPI";
 import { useAuth } from "@/hooks/useAuthe";
@@ -185,7 +186,7 @@ export default function AsignacionesView() {
               Seleccione un año
             </label>
 
-            <select
+            <AutocompleteSelect
               id="anio"
               value={anio}
               onChange={(e) => setAnio(Number(e.target.value))}
@@ -196,7 +197,7 @@ export default function AsignacionesView() {
                   {item}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

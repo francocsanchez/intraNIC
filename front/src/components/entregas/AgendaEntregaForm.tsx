@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   convertReservaEntrega,
   createAgendaEntrega,
@@ -413,8 +414,9 @@ export default function AgendaEntregaForm({
                         <label htmlFor="agenda-sucursal" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Sucursal
                         </label>
-                        <select
+                        <AutocompleteSelect
                           id="agenda-sucursal"
+                          value={watch("sucursal")}
                           disabled={isConvertingReservation}
                           className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
                           {...register("sucursal", { required: "La sucursal es obligatoria" })}
@@ -425,7 +427,7 @@ export default function AgendaEntregaForm({
                               {sucursal.nombre}{!sucursal.activa ? " (Inactiva)" : ""}
                             </option>
                           ))}
-                        </select>
+                        </AutocompleteSelect>
                         <FieldError message={errors.sucursal?.message} />
                       </div>
 
@@ -447,8 +449,9 @@ export default function AgendaEntregaForm({
                         <label htmlFor="agenda-hora-agenda" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Hora
                         </label>
-                        <select
+                        <AutocompleteSelect
                           id="agenda-hora-agenda"
+                          value={watch("horaAgenda")}
                           disabled={isConvertingReservation}
                           className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
                           {...register("horaAgenda", { required: "La hora es obligatoria" })}
@@ -461,7 +464,7 @@ export default function AgendaEntregaForm({
                               {formatTimeSlotLabel(timeSlot)}
                             </option>
                           ))}
-                        </select>
+                        </AutocompleteSelect>
                         <p className="text-xs text-muted-foreground">
                           Turnos cada 30 minutos desde las 08:00 hasta las 18:00 segun configuracion de la sucursal.
                         </p>

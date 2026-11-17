@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getResumenRegistroAsignaciones } from "@/api/dms/registroAsignacionAPI";
 import { paths } from "@/routes/paths";
@@ -119,7 +120,7 @@ export default function RegistroAsignacionesResumenView() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Mes
-              <select
+              <AutocompleteSelect
                 value={mes}
                 onChange={(event) => setMes(Number(event.target.value))}
                 className="rounded-lg border border-input bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
@@ -129,12 +130,12 @@ export default function RegistroAsignacionesResumenView() {
                     {item.label}
                   </option>
                 ))}
-              </select>
+              </AutocompleteSelect>
             </label>
 
             <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground">
               Año
-              <select
+              <AutocompleteSelect
                 value={ano}
                 onChange={(event) => setAno(Number(event.target.value))}
                 className="rounded-lg border border-input bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
@@ -144,7 +145,7 @@ export default function RegistroAsignacionesResumenView() {
                     {item}
                   </option>
                 ))}
-              </select>
+              </AutocompleteSelect>
             </label>
           </div>
 

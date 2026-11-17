@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import TransferenciasGeneralSection from "@/components/transferencias/TransferenciasGeneralSection";
 import {
@@ -101,7 +102,7 @@ export default function DashboardTransferenciasView() {
             <label htmlFor="transferencias-year" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Ano
             </label>
-            <select
+            <AutocompleteSelect
               id="transferencias-year"
               value={selectedYear ?? ""}
               onChange={(event) => setUserSelectedYear(Number(event.target.value))}
@@ -112,7 +113,7 @@ export default function DashboardTransferenciasView() {
                   {year}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </div>
         </div>
       </section>

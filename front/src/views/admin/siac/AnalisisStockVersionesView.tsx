@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import {
   createAnalisisStockVersionDictionary,
   deleteAnalisisStockVersionDictionary,
@@ -137,7 +138,7 @@ function DictionaryModal({
                 <div className="grid gap-4 p-5">
                   <label className="block space-y-2">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modelo</span>
-                    <select
+                    <AutocompleteSelect
                       value={modelo}
                       onChange={(event) => setModelo(event.target.value)}
                       className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-ring"
@@ -148,12 +149,12 @@ function DictionaryModal({
                           {option.modelo}
                         </option>
                       ))}
-                    </select>
+                    </AutocompleteSelect>
                   </label>
 
                   <label className="block space-y-2">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Version cruda</span>
-                    <select
+                    <AutocompleteSelect
                       value={versionRaw}
                       onChange={(event) => setVersionRaw(event.target.value)}
                       disabled={!selectedModelOption}
@@ -165,7 +166,7 @@ function DictionaryModal({
                           {optionVersion}
                         </option>
                       ))}
-                    </select>
+                    </AutocompleteSelect>
                   </label>
 
                   <label className="block space-y-2">

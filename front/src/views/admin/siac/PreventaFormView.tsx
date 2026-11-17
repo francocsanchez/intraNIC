@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import { createPreventa, getColores, getPreventaById, getVersiones, updatePreventa } from "@/api/dms/preventasAPI";
@@ -116,7 +117,7 @@ function PreventaFormContent({
       <div className="max-h-[calc(100vh-12rem)] overflow-y-auto p-3"><div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
           <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-4">
             Vendedor
-            <select
+            <AutocompleteSelect
               value={form.vendedor}
               onChange={(event) => setForm((current) => ({ ...current, vendedor: event.target.value }))}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
@@ -127,7 +128,7 @@ function PreventaFormContent({
                   {vendedor.vendedor}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-4">
@@ -166,7 +167,7 @@ function PreventaFormContent({
 
           <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-3">
             Version
-            <select
+            <AutocompleteSelect
               value={form.version}
               onChange={(event) => setForm((current) => ({ ...current, version: event.target.value }))}
               className="rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-ring"
@@ -177,7 +178,7 @@ function PreventaFormContent({
                   {version.nombre}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-3">

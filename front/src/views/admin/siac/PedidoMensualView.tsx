@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import {
   createPedidoMensual,
@@ -106,7 +107,7 @@ export default function PedidoMensualView() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px_auto]">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
             Version
-            <select
+            <AutocompleteSelect
               value={version}
               onChange={(event) => setVersion(event.target.value)}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
@@ -117,7 +118,7 @@ export default function PedidoMensualView() {
                   {item.nombre}
                 </option>
               ))}
-            </select>
+            </AutocompleteSelect>
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">

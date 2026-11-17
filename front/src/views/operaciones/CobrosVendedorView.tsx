@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { Button } from "@/components/ui/button";
 import { getCobrosVendedor, getCobrosVendedorDetalle, searchCobrosVendedorVendedores } from "@/services/operacionesService";
@@ -120,15 +121,15 @@ export default function CobrosVendedorView() {
           <div className="grid grid-cols-2 gap-2 lg:w-[280px]">
             <label className="space-y-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Mes
-              <select value={mes} onChange={(event) => { setMes(Number(event.target.value)); setPage(1); }} className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm font-normal normal-case tracking-normal text-foreground">
+              <AutocompleteSelect value={mes} onChange={(event) => { setMes(Number(event.target.value)); setPage(1); }} className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm font-normal normal-case tracking-normal text-foreground">
                 {MONTHS.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
-              </select>
+              </AutocompleteSelect>
             </label>
             <label className="space-y-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Año
-              <select value={anio} onChange={(event) => { setAnio(Number(event.target.value)); setPage(1); }} className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm font-normal normal-case tracking-normal text-foreground">
+              <AutocompleteSelect value={anio} onChange={(event) => { setAnio(Number(event.target.value)); setPage(1); }} className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm font-normal normal-case tracking-normal text-foreground">
                 {YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}
-              </select>
+              </AutocompleteSelect>
             </label>
           </div>
         </div>

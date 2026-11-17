@@ -83,61 +83,21 @@ export default function EditUsuarioForm({
   };
 
   return (
-    <div className="font-preset w-full space-y-3 px-2 py-3">
-      <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-3 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Administracion
-          </p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Editar usuario
-          </h1>
+    <div className="font-preset w-full space-y-2 px-2 py-2">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+        <div className="flex min-w-0 items-center gap-2">
+          <h1 className="text-base font-semibold tracking-tight text-foreground">Editar usuario</h1>
+          <span className="truncate rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {data.lastName}, {data.name}
+          </span>
         </div>
 
         <Link
           to={paths.admin.usuarios}
-          className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition hover:opacity-90"
+          className="text-xs font-semibold text-primary hover:underline hover:underline-offset-4"
         >
           Volver
         </Link>
-      </section>
-
-      <section className="grid grid-cols-1 gap-1 border-y border-border bg-card md:grid-cols-4">
-        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Usuario
-          </p>
-          <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-            {data.lastName}, {data.name}
-          </p>
-        </article>
-
-        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Estado
-          </p>
-          <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-            {data.enable ? "Activo" : "Inactivo"}
-          </p>
-        </article>
-
-        <article className="border-b border-border px-3 py-3 md:border-r md:border-b-0">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Email
-          </p>
-          <p className="mt-1 break-all text-sm font-medium text-foreground">
-            {data.email}
-          </p>
-        </article>
-
-        <article className="px-3 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Sucursal predeterminada
-          </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {data.sucursalPredeterminada?.nombre ?? "Sin asignar"}
-          </p>
-        </article>
       </section>
 
       <form
@@ -145,29 +105,20 @@ export default function EditUsuarioForm({
         onSubmit={handleSubmit(handleFormSubmit)}
         noValidate
       >
-        <div className="border-b border-border px-3 py-3">
-          <h2 className="text-base font-semibold tracking-tight text-foreground">
-            Datos del usuario
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Actualiza los datos, la unidad de negocio, la sucursal
-            predeterminada y los modulos habilitados.
-          </p>
+        <div className="border-b border-border px-3 py-2">
+          <h2 className="text-sm font-semibold text-foreground">Datos, permisos y asignaciones</h2>
         </div>
 
         <div className="p-3">
           <UsuarioForm register={register} control={control} errors={errors} />
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-muted-foreground">
-            Revisa los datos antes de guardar la edicion.
-          </div>
+        <div className="flex justify-end border-t border-border bg-muted px-3 py-2">
 
           <input
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex cursor-pointer justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold uppercase text-primary-foreground shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex cursor-pointer justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             value={mutation.isPending ? "Guardando..." : "Guardar cambios"}
           />
         </div>

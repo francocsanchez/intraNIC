@@ -153,6 +153,7 @@ export const buildReportePromedioOperaciones = (rows: PromedioOperacionRow[], me
       ventasMesActual: item.meses[currentMonthKey] ?? 0,
       promedio: Math.round(item.totalSemestre / meses.length),
     }))
+    .filter((item) => item.ventasMesActual > 0)
     .sort((a, b) => {
       const sucursalCompare = a.sucursal.localeCompare(b.sucursal, "es", { sensitivity: "base" });
 

@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import { createProforma } from "@/api/dms/proformasAPI";
 import { getVersiones } from "@/api/dms/preventasAPI";
@@ -195,7 +196,7 @@ export default function ProformaFormView() {
               <div className="grid grid-cols-1 gap-2 xl:grid-cols-12">
                 <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-6">
                   Versión
-                  <select
+                  <AutocompleteSelect
                     value={unidad.version}
                     onChange={(event) =>
                       setUnidades((current) =>
@@ -210,7 +211,7 @@ export default function ProformaFormView() {
                         {version.nombre}
                       </option>
                     ))}
-                  </select>
+                  </AutocompleteSelect>
                 </label>
 
                 <label className="flex flex-col gap-2 text-sm font-medium text-muted-foreground xl:col-span-2">

@@ -1,3 +1,4 @@
+import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import {
   createPedidoUnidad,
@@ -818,7 +819,7 @@ export default function PedidoUnidadesView() {
                         <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
                         <td className="px-4 py-3">
                           {canManagePriority ? (
-                            <select
+                            <AutocompleteSelect
                               value={item.prioridad}
                               onChange={(event) =>
                                 handleChangePrioridad(item.interno, event.target.value as PedidoUnidadPrioridad)
@@ -833,7 +834,7 @@ export default function PedidoUnidadesView() {
                                   {prioridad}
                                 </option>
                               ))}
-                            </select>
+                            </AutocompleteSelect>
                           ) : (
                             <span
                               className={[
