@@ -562,7 +562,7 @@ export default function Router() {
           </Route>
 
           <Route element={<LiessLayout />}>
-            <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacionLiess", "liess"]} />}>
+            <Route element={<ModuleProtectedRoute allowedModules={["saldoOperacionLiess"]} />}>
               <Route path={paths.liess.saldoOperacion} element={<SaldoOperacionLiessView />} />
               <Route path={paths.liess.saldoOperacionCancelaciones} element={<SaldoOperacionLiessAnalysisView canceladas />} />
               <Route path={paths.liess.saldoOperacionNoCanceladas} element={<SaldoOperacionLiessAnalysisView canceladas={false} />} />

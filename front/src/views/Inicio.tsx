@@ -1,7 +1,7 @@
 import Loading from "@/components/Loading";
 import AppBrand from "@/components/AppBrand";
 import AppFooter from "@/components/AppFooter";
-import { hasAnyModuleAccess, hasModulePathAccess } from "@/helpers/access";
+import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
 import {
@@ -81,7 +81,7 @@ export default function Inicio() {
       icon: Motorbike,
       items: [
         { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
-        { label: "Saldo de operación", to: paths.liess.saldoOperacion, enabled: hasAnyModuleAccess(user, ["saldoOperacionLiess", "liess"]), icon: FileSpreadsheet },
+        { label: "Saldo de operación", to: paths.liess.saldoOperacion, enabled: hasModulePathAccess(user, "saldoOperacionLiess", paths.liess.saldoOperacion), icon: FileSpreadsheet },
         { label: "Reparaciones", to: paths.liess.reparaciones, enabled: hasModulePathAccess(user, "liessReparaciones", paths.liess.reparaciones), icon: Wrench },
       ],
     },
