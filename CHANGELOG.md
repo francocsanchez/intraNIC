@@ -19,6 +19,7 @@
 - **Usuarios:** Roles y Vendedor NIC reemplazaron sus selectores por autocompletados compactos.
 - **Frontend:** todos los selectores nativos se reemplazaron por un autocompletado reutilizable; las listas extensas solicitan tres caracteres antes de buscar y las cortas se despliegan de inmediato.
 - **Frontend:** los autocompletados reservan padding fijo para sus íconos de búsqueda y despliegue, evitando que los textos se superpongan.
+- **Inicio:** se retiró el acceso pendiente de Saldo de operación LIESS para mantener el build del frontend hasta publicar ese módulo completo.
 
 - **Footer:** se unificó el pie de página de toda la aplicación con fondo negro y la leyenda institucional de IntraNIC para Nippon Car S.R.L. y Liess S.A.S.
 

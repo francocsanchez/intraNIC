@@ -81,7 +81,6 @@ export default function Inicio() {
       icon: Motorbike,
       items: [
         { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
-        { label: "Saldo de operación", to: paths.liess.saldoOperacion, enabled: hasModulePathAccess(user, "saldoOperacionLiess", paths.liess.saldoOperacion), icon: FileSpreadsheet },
         { label: "Reparaciones", to: paths.liess.reparaciones, enabled: hasModulePathAccess(user, "liessReparaciones", paths.liess.reparaciones), icon: Wrench },
       ],
     },
