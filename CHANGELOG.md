@@ -2,6 +2,16 @@
 
 ## 2026-11-16
 
+- **Configuración:** se unificaron todos los accesos dentro de una única tarjeta de Parámetros de sistema, en una grilla de dos columnas sin explicaciones, subtarjetas ni botones.
+- **Configuración:** se compactaron las tarjetas de asignación de vendedores, con tres columnas en escritorio, accesos de texto y listas de vendedores más densas.
+- **Configuración:** se ocultaron los vendedores asignados; las tarjetas Convencional, Usados y Belgrano ahora muestran solo su estado visual verde o rojo y el acceso a edición.
+- **Configuración convencional:** los selectores de vendedores ahora usan autocompletado múltiple con búsqueda por nombre o código, selección acumulada y etiquetas removibles.
+- **Configuración de Usados y Belgrano:** se incorporó el mismo autocompletado múltiple acumulativo para sus selectores de vendedores.
+- **Configuración de unidades:** se compactaron los encabezados de Convencional, Usados y Belgrano; se eliminaron las tarjetas de estado redundantes y el switch ahora comunica claramente Activo en verde o Desactivado en rojo.
+- **Inicio:** los accesos de Sistema se reemplazaron por un único acceso directo y Links se trasladó a Herramientas.
+- **Control de cronos:** las sincronizaciones periódicas de Saldo de operación NIC y LIESS se ocultan tras una ejecución correcta; el último error permanece visible con su detalle y sin ejecución manual.
+- **Control de cronos:** el horario se trasladó a la columna `Cuándo se ejecuta` para compactar las filas.
+
 - **Footer:** se unificó el pie de página de toda la aplicación con fondo negro y la leyenda institucional de IntraNIC para Nippon Car S.R.L. y Liess S.A.S.
 
 - **Retiro de módulos:** se eliminaron Ranking Convencional, Central de Deudores y toda la sección Calidad, incluyendo rutas, accesos, permisos, APIs y la tarea programada de Hot Alert. Los registros históricos de Mongo se conservan.

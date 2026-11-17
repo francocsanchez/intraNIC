@@ -1,4 +1,14 @@
-import type { UseFormRegister } from "react-hook-form";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
+import { Check, ChevronDown, Search, UserRound, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import type { Control } from "react-hook-form";
+import { useController } from "react-hook-form";
 
 import type { Vendedor } from "@/types/index";
 
@@ -13,59 +23,175 @@ type CheckListVendedoresProps = {
   title: string;
   subtitle: string;
   vendedoresNic: Vendedor[];
-  vendedores: string[];
   name:
     | "vendedoresReservasConvencional"
     | "vendedoresDisponibleConvencional"
     | "vendedoresStockGuardadoConvencional";
-  register: UseFormRegister<ConfigConvChecklistForm>;
+  control: Control<ConfigConvChecklistForm>;
 };
 
 export default function CheckListVendedores({
   title,
   subtitle,
   vendedoresNic,
-  vendedores,
   name,
-  register,
+  control,
 }: CheckListVendedoresProps) {
+  const [query, setQuery] = useState("");
+  const { field } = useController({ control, name });
+  const selectedCodes = (field.value ?? []).map(String);
+  const selectedCodesSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+  const vendedoresByCode = useMemo(
+    () => new Map(vendedoresNic.map((vendedor) => [String(vendedor.codigo), vendedor])),
+    [vendedoresNic],
+  );
+  const selectedVendedores = useMemo(
+    () => vendedoresNic.filter((vendedor) => selectedCodesSet.has(String(vendedor.codigo))),
+    [selectedCodesSet, vendedoresNic],
+  );
+  const inactiveCodes = useMemo(
+    () => selectedCodes.filter((codigo) => !vendedoresByCode.has(codigo)),
+    [selectedCodes, vendedoresByCode],
+  );
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const filteredVendedores = useMemo(
+    () =>
+      normalizedQuery.length >= 3
+        ? vendedoresNic.filter(
+            (vendedor) =>
+              vendedor.vendedor.toLocaleLowerCase().includes(normalizedQuery) ||
+              String(vendedor.codigo).includes(normalizedQuery),
+          )
+        : [],
+    [normalizedQuery, vendedoresNic],
+  );
+
+  const updateSelectedVendedores = (next: Vendedor[]) => {
+    field.onChange([
+      ...inactiveCodes,
+      ...next.map((vendedor) => String(vendedor.codigo)),
+    ]);
+  };
+
+  const removeVendedor = (codigo: string) => {
+    field.onChange(selectedCodes.filter((current) => current !== codigo));
+  };
+
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-5 py-4 border-b border-border">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {title}
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
+    <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="max-h-56 overflow-y-auto p-2">
-        {vendedoresNic.map((v) => {
-          const codigo = String(v.codigo);
-
-          return (
-            <label
-              key={codigo}
-              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-muted"
+      <div className="mt-3 space-y-2">
+        <Combobox
+          value={selectedVendedores}
+          onChange={updateSelectedVendedores}
+          onClose={() => setQuery("")}
+          multiple
+          immediate
+        >
+          <div className="relative">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
+            />
+            <ComboboxInput
+              aria-label={`Buscar ${title}`}
+              displayValue={() => query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar vendedor o código..."
+              className="h-9 w-full rounded-md border border-input bg-background px-9 pr-9 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+            />
+            <ComboboxButton className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <ChevronDown size={16} />
+            </ComboboxButton>
+            <ComboboxOptions
+              transition
+              className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg transition duration-150 ease-out empty:invisible data-[closed]:scale-95 data-[closed]:opacity-0"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <input
-                  type="checkbox"
-                  value={codigo}
-                  defaultChecked={(vendedores ?? []).map(String).includes(codigo)}
-                  {...register(name)}
-                  className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
-                />
-                <span className="text-sm text-foreground truncate">
-                  {v.vendedor}
-                </span>
-              </div>
+              {normalizedQuery.length < 3 ? (
+                <p className="px-2 py-3 text-sm text-muted-foreground">
+                  Ingresá al menos 3 caracteres para buscar.
+                </p>
+              ) : filteredVendedores.length ? (
+                filteredVendedores.map((vendedor) => (
+                  <ComboboxOption key={vendedor.codigo} value={vendedor}>
+                    {({ focus, selected }) => (
+                      <div
+                        className={`flex cursor-pointer items-center gap-3 rounded-sm px-2 py-2 text-sm ${focus ? "bg-muted text-foreground" : "text-foreground"}`}
+                      >
+                        <span
+                          className={`flex h-4 w-4 items-center justify-center rounded-sm border ${selected ? "border-border bg-primary text-primary-foreground" : "border-input bg-background"}`}
+                        >
+                          {selected ? <Check size={12} /> : null}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate font-medium">
+                          {vendedor.vendedor}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {vendedor.codigo}
+                        </span>
+                      </div>
+                    )}
+                  </ComboboxOption>
+                ))
+              ) : (
+                <p className="px-2 py-3 text-sm text-muted-foreground">
+                  No se encontraron vendedores.
+                </p>
+              )}
+            </ComboboxOptions>
+          </div>
+        </Combobox>
 
-              <span className="text-primary font-semibold text-muted-foreground">
-                {v.codigo}
-              </span>
-            </label>
-          );
-        })}
+        <div className="min-h-9 rounded-md border border-dashed border-border bg-muted px-2 py-2">
+          {selectedCodes.length ? (
+            <div className="flex flex-wrap gap-1">
+              {selectedVendedores.map((vendedor) => {
+                const codigo = String(vendedor.codigo);
+                return (
+                  <span
+                    key={codigo}
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground"
+                  >
+                    <UserRound size={13} />
+                    {vendedor.vendedor}
+                    <button
+                      type="button"
+                      onClick={() => removeVendedor(codigo)}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={`Quitar ${vendedor.vendedor}`}
+                    >
+                      <X size={13} />
+                    </button>
+                  </span>
+                );
+              })}
+              {inactiveCodes.map((codigo) => (
+                <span
+                  key={codigo}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                >
+                  Código {codigo}
+                  <button
+                    type="button"
+                    onClick={() => removeVendedor(codigo)}
+                    className="hover:text-foreground"
+                    aria-label={`Quitar código ${codigo}`}
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Todavía no seleccionaste vendedores.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const LOGS_PAGE_SIZE = 30;
+const BACKGROUND_SNAPSHOT_JOB_KEYS = new Set([
+  "saldo-operacion-snapshot",
+  "saldo-operacion-liess-snapshot",
+]);
 const EXPECTED_CONTROL_JOBS: Array<Pick<ControlRow, "jobKey" | "title" | "scheduleLabel" | "canRun">> = [
   {
     jobKey: "patentamientos-import",
@@ -138,6 +142,7 @@ type ControlRow = {
   lastExecutionAt: string | null;
   isRunning: boolean;
   lastStatus: string | null;
+  message: string;
 };
 
 type LogRow = {
@@ -165,6 +170,7 @@ const JobsControlTable = ({
       <thead className="bg-muted text-muted-foreground">
         <tr>
           <th className="border border-border px-2 py-2 text-left font-semibold">Cron</th>
+          <th className="border border-border px-2 py-2 text-left font-semibold">Cuándo se ejecuta</th>
           <th className="border border-border px-2 py-2 text-left font-semibold">Fecha</th>
           <th className="border border-border px-2 py-2 text-left font-semibold">Estado</th>
           <th className="border border-border px-2 py-2 text-left font-semibold">Acciones</th>
@@ -179,8 +185,11 @@ const JobsControlTable = ({
             <tr key={row.jobKey} className={index % 2 === 0 ? "bg-card" : "bg-muted/50"}>
               <td className="border border-border px-2 py-2 align-top text-foreground">
                 <div className="font-semibold">{row.title}</div>
-                <div className="mt-0.5 text-xs text-muted-foreground">{row.scheduleLabel}</div>
+                {row.lastStatus === "failed" ? (
+                  <div className="mt-1 text-xs font-medium text-destructive">{row.message}</div>
+                ) : null}
               </td>
+              <td className="border border-border px-2 py-2 align-top text-muted-foreground">{row.scheduleLabel}</td>
               <td className="border border-border px-2 py-2 align-top text-foreground">{formatDateTime(row.lastExecutionAt)}</td>
               <td className="border border-border px-2 py-2 align-top">
                 <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${status.style}`}>
@@ -351,10 +360,11 @@ export default function PatentamientosRegistrosView() {
         jobKey: detail.jobKey,
         title: detail.title,
         scheduleLabel: detail.scheduleLabel,
-        canRun: detail.canRun ?? true,
         lastExecutionAt: detail.lastExecutionAt,
         isRunning: detail.isRunning,
         lastStatus: detail.lastStatus,
+        message: detail.message,
+        canRun: !BACKGROUND_SNAPSHOT_JOB_KEYS.has(detail.jobKey) && (detail.canRun ?? true),
       }));
 
       const existingKeys = new Set(rowsFromDetails.map((row) => row.jobKey));
@@ -368,9 +378,12 @@ export default function PatentamientosRegistrosView() {
           lastExecutionAt: null,
           isRunning: false,
           lastStatus: null,
+          message: "",
         }));
 
-      return [...rowsFromDetails, ...missingExpectedRows].sort((left, right) => {
+      return [...rowsFromDetails, ...missingExpectedRows]
+        .filter((row) => !BACKGROUND_SNAPSHOT_JOB_KEYS.has(row.jobKey) || row.lastStatus === "failed")
+        .sort((left, right) => {
         const scheduleDelta = getScheduleSortValue(left.scheduleLabel) - getScheduleSortValue(right.scheduleLabel);
 
         if (scheduleDelta !== 0) {
@@ -378,7 +391,7 @@ export default function PatentamientosRegistrosView() {
         }
 
         return left.title.localeCompare(right.title);
-      });
+        });
     },
     [details],
   );
@@ -386,8 +399,11 @@ export default function PatentamientosRegistrosView() {
   const logRows = useMemo<LogRow[]>(
     () =>
       details
+        .filter((detail) => !BACKGROUND_SNAPSHOT_JOB_KEYS.has(detail.jobKey) || detail.lastStatus === "failed")
         .flatMap((detail) =>
-          detail.executionHistory.map((execution) => ({
+          detail.executionHistory
+            .filter((execution) => !BACKGROUND_SNAPSHOT_JOB_KEYS.has(detail.jobKey) || execution.status === "failed")
+            .map((execution) => ({
             id: `${detail.jobKey}-${execution.id}`,
             jobKey: detail.jobKey,
             title: detail.title,
@@ -396,7 +412,7 @@ export default function PatentamientosRegistrosView() {
             alerts: buildAlertText(detail),
             status: execution.status === "running" ? null : execution.status,
             isRunning: execution.status === "running",
-          })),
+            })),
         )
         .sort((a, b) => new Date(b.processedAt).getTime() - new Date(a.processedAt).getTime()),
     [details],

@@ -1,5 +1,6 @@
 import Loading from "@/components/Loading";
 import AppBrand from "@/components/AppBrand";
+import AppFooter from "@/components/AppFooter";
 import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
@@ -80,6 +81,7 @@ export default function Inicio() {
       icon: Motorbike,
       items: [
         { label: "Liess", to: paths.liess.stockDisponible("nuevos"), enabled: hasModulePathAccess(user, "liess", paths.liess.stockDisponible("nuevos")), icon: Motorbike },
+        { label: "Saldo de operación", to: paths.liess.saldoOperacion, enabled: hasModulePathAccess(user, "saldoOperacionLiess", paths.liess.saldoOperacion), icon: FileSpreadsheet },
         { label: "Reparaciones", to: paths.liess.reparaciones, enabled: hasModulePathAccess(user, "liessReparaciones", paths.liess.reparaciones), icon: Wrench },
       ],
     },
@@ -133,6 +135,7 @@ export default function Inicio() {
       items: [
         { label: "Rend. Gastos", to: paths.convencional.rendicionesGastos, enabled: Boolean(user), icon: FileSpreadsheet },
         { label: "Minutas", to: paths.convencional.minutas, enabled: hasModulePathAccess(user, "minutas", paths.convencional.minutas), icon: ClipboardList },
+        { label: "Links", to: paths.admin.links, enabled: hasModulePathAccess(user, "links", paths.admin.links), icon: Link2 },
       ],
     },
     {
@@ -244,7 +247,6 @@ export default function Inicio() {
       items: [
         { label: "Usuarios", to: paths.admin.usuarios, enabled: hasModulePathAccess(user, "usuarios", paths.admin.usuarios), icon: UserCog },
         { label: "Configuracion", to: paths.admin.configuracion, enabled: hasModulePathAccess(user, "configuracion", paths.admin.configuracion), icon: Cog },
-        { label: "Links", to: paths.admin.links, enabled: hasModulePathAccess(user, "links", paths.admin.links), icon: Link2 },
         { label: "TestDrive", to: paths.admin.testDrive, enabled: hasModulePathAccess(user, "testDrive", paths.admin.testDrive), icon: CarFront },
         {
           label: "Act. Registros",
@@ -294,23 +296,27 @@ export default function Inicio() {
                 <span>{section.title}</span>
               </h2>
 
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {section.items.map((item) => (
-                  <Link key={item.label} to={item.to} className={cardClass}>
-                    <item.icon size={15} strokeWidth={2} className="shrink-0 text-muted-foreground" />
-                    <span className="truncate">{item.label}</span>
-                  </Link>
-                ))}
-              </div>
+              {section.title === "Sistema" ? (
+                <Link to={section.items[0].to} className={cardClass}>
+                  <Cog size={15} strokeWidth={2} className="shrink-0 text-muted-foreground" />
+                  <span>Administrar sistema</span>
+                </Link>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {section.items.map((item) => (
+                    <Link key={item.label} to={item.to} className={cardClass}>
+                      <item.icon size={15} strokeWidth={2} className="shrink-0 text-muted-foreground" />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
       </main>
 
-      <footer className="flex flex-col gap-1 border-t border-border px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <span>IntraNIC - Uso interno Nippon Car</span>
-        <span>Desarrollado por Franco Sanchez</span>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

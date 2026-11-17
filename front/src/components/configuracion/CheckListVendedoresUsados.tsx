@@ -1,5 +1,7 @@
-import type { UseFormRegister } from "react-hook-form";
+import type { Control } from "react-hook-form";
+import { useController } from "react-hook-form";
 
+import VendedoresMultiSelect from "@/components/configuracion/VendedoresMultiSelect";
 import type { Vendedor } from "@/types/index";
 
 type ConfigUsadosChecklistForm = {
@@ -15,62 +17,31 @@ type CheckListVendedoresProps = {
   title: string;
   subtitle: string;
   vendedoresNic: Vendedor[];
-  vendedores: string[];
   name:
     | "vendedoresReservasUsados"
     | "vendedoresDisponibleUsados"
     | "vendedoresStockGuardadoUsados"
     | "vendedoresStockNoReparadoUsados"
     | "vendedoresStockPendDocuUsados";
-  register: UseFormRegister<ConfigUsadosChecklistForm>;
+  control: Control<ConfigUsadosChecklistForm>;
 };
 
 export default function CheckListVendedoresUsados({
   title,
   subtitle,
   vendedoresNic,
-  vendedores,
   name,
-  register,
+  control,
 }: CheckListVendedoresProps) {
+  const { field } = useController({ control, name });
+
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="px-5 py-4 border-b border-border">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {title}
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
-      </div>
-
-      <div className="max-h-56 overflow-y-auto p-2">
-        {vendedoresNic.map((v) => {
-          const codigo = String(v.codigo);
-
-          return (
-            <label
-              key={codigo}
-              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-muted"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <input
-                  type="checkbox"
-                  value={codigo}
-                  defaultChecked={(vendedores ?? []).map(String).includes(codigo)}
-                  {...register(name)}
-                  className="h-4 w-4 rounded border-input text-foreground focus:ring-ring"
-                />
-                <span className="text-sm text-foreground truncate">
-                  {v.vendedor}
-                </span>
-              </div>
-
-              <span className="text-primary font-semibold text-muted-foreground">
-                {v.codigo}
-              </span>
-            </label>
-          );
-        })}
-      </div>
-    </div>
+    <VendedoresMultiSelect
+      title={title}
+      subtitle={subtitle}
+      vendedores={vendedoresNic}
+      value={(field.value ?? []).map(String)}
+      onChange={field.onChange}
+    />
   );
 }

@@ -142,52 +142,37 @@ export default function EditConfiguracionUsadoView() {
   }
 
   return (
-    <div className="w-full px-4 py-6 space-y-6">
-      <section className="rounded-lg border border-border bg-card p-6 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Administracion</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Editar configuracion</h1>
-            <span className="rounded-full border border-border bg-muted px-3 py-1 text-primary font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="w-full space-y-3 px-4 py-4">
+      <section className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Configuración</h1>
+          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Usados
-            </span>
-          </div>
+          </span>
         </div>
 
         <Link
           to={paths.admin.configuracion}
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-colors hover:bg-primary/90"
+          className="text-xs font-semibold text-primary hover:underline hover:underline-offset-4"
         >
           Volver
         </Link>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Sistema</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">Usados</p>
-        </article>
-
-        <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Estado actual</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{enabled ? "Activo" : "Inactivo"}</p>
-        </article>
-      </section>
-
       <form className="overflow-hidden rounded-lg border border-border bg-card shadow-sm" noValidate onSubmit={handleSubmit(handleForm)}>
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-base font-semibold tracking-tight text-foreground">Configuracion</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Selecciona vendedores habilitados por modulo.</p>
+        <div className="border-b border-border px-4 py-3">
+          <h2 className="text-sm font-semibold text-foreground">Vendedores habilitados</h2>
         </div>
 
-        <div className="space-y-6 p-6">
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted px-5 py-4">
+        <div className="space-y-4 p-4">
+          <div className={`flex items-center justify-between rounded-md border px-3 py-2.5 ${enabled ? "border-emerald-300 bg-emerald-50" : "border-red-300 bg-red-50"}`}>
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Estado del sistema</div>
-              <div className="mt-1 text-sm text-muted-foreground">Activo habilita el acceso a esta unidad de negocio.</div>
+              <div className="text-sm font-semibold text-foreground">Estado del sistema</div>
+              <div className={`text-xs font-medium ${enabled ? "text-emerald-800" : "text-red-800"}`}>{enabled ? "Activo: acceso habilitado" : "Desactivado: acceso bloqueado"}</div>
             </div>
 
             <label className="inline-flex items-center gap-3">
+              <span className={`text-xs font-bold uppercase tracking-wide ${enabled ? "text-emerald-800" : "text-red-800"}`}>{enabled ? "Activo" : "Desactivado"}</span>
               <Switch
                 checked={enabled}
                 onChange={(val) => {
@@ -197,14 +182,14 @@ export default function EditConfiguracionUsadoView() {
                   });
                 }}
                 className={`${
-                  enabled ? "bg-secondary" : "bg-muted"
-                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring/40`}
+                  enabled ? "bg-emerald-600" : "bg-red-600"
+                } relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring/40`}
               >
                 <span className="sr-only">Cambiar estado del sistema</span>
                 <span
                   className={`${
                     enabled ? "translate-x-6" : "translate-x-1"
-                  } inline-block h-4 w-4 transform rounded-full bg-card transition-transform`}
+                  } inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform`}
                 />
               </Switch>
 
@@ -217,45 +202,40 @@ export default function EditConfiguracionUsadoView() {
               title="Vendedores Reservas"
               subtitle="Habilita crear y gestionar reservas."
               vendedoresNic={vendedoresNic}
-              vendedores={config.vendedoresReservasUsados}
               name="vendedoresReservasUsados"
-              register={register}
+              control={control}
             />
 
             <CheckListVendedoresUsados
               title="Vendedores Disponible"
               subtitle="Habilita visualizacion de stock disponible."
               vendedoresNic={vendedoresNic}
-              vendedores={config.vendedoresDisponibleUsados}
               name="vendedoresDisponibleUsados"
-              register={register}
+              control={control}
             />
 
             <CheckListVendedoresUsados
               title="Vendedores Stock Guardado"
               subtitle="Habilita gestion de stock guardado."
               vendedoresNic={vendedoresNic}
-              vendedores={config.vendedoresStockGuardadoUsados}
               name="vendedoresStockGuardadoUsados"
-              register={register}
+              control={control}
             />
 
             <CheckListVendedoresUsados
               title="Vendedores Stock No Reparado"
               subtitle="Habilita gestion de stock no reparado."
               vendedoresNic={vendedoresNic}
-              vendedores={config.vendedoresStockNoReparadoUsados ?? []}
               name="vendedoresStockNoReparadoUsados"
-              register={register}
+              control={control}
             />
 
             <CheckListVendedoresUsados
               title="Vendedores Stock Pend. Documentacion"
               subtitle="Habilita gestion de stock pendiente de documentacion."
               vendedoresNic={vendedoresNic}
-              vendedores={config.vendedoresStockPendDocuUsados ?? []}
               name="vendedoresStockPendDocuUsados"
-              register={register}
+              control={control}
             />
           </div>
         </div>
