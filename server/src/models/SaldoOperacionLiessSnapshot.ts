@@ -19,6 +19,7 @@ export interface ISaldoOperacionLiessSnapshot extends Document {
   creditoBanco: number | null;
   creditoLiquidadoMonto: number | null;
   creditoLiquidadoEn: Date | null;
+  creditoLiquidadoManual: boolean;
   fechaAsignacion: string | null;
   fechaFactura: string | null;
   diasAsignada: number | null;
@@ -44,6 +45,7 @@ const schema = new Schema<ISaldoOperacionLiessSnapshot>({
   total: nullableNumber, gestoria: nullableNumber, bonificacion: nullableNumber, senas: nullableNumber, usado: nullableNumber,
   creditoBanco: nullableNumber, creditoLiquidadoMonto: nullableNumber,
   creditoLiquidadoEn: { type: Date, default: null },
+  creditoLiquidadoManual: { type: Boolean, default: false, index: true },
   fechaAsignacion: { type: String, default: null }, fechaFactura: { type: String, default: null }, diasAsignada: nullableNumber,
   entregada: { type: Boolean, default: false, index: true }, fechaEntregaDetectada: { type: Date, default: null },
   fechaCancelacion: { type: String, default: null }, diasHastaCancelacion: nullableNumber,

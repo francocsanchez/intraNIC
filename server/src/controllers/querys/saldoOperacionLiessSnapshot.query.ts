@@ -25,4 +25,4 @@ LEFT JOIN dbo.marca ma ON ma.mar_codigo = o.ope_marca
 OUTER APPLY (SELECT TOP 1 aud.aud_fecha AS fecha_asignacion FROM dbo.audittabla aud WHERE aud.aud_codigo = o.ope_codigo AND aud.aud_codigo1 = o.ope_tipo AND aud.aud_tabla = N'opera' AND aud.aud_campo = N'Asignación Unidad' ORDER BY aud.aud_fecha DESC, aud.aud_hora DESC, aud.aud_renglon DESC) auditoria
 OUTER APPLY (SELECT SUM(g.sgl_haber) AS senas FROM dbo.salglo g WHERE g.sgl_opera = o.ope_codigo AND g.sgl_tipmov = 105 AND g.sgl_haber > 0 AND EXISTS (SELECT 1 FROM dbo.movcajh mc WHERE mc.mc_nroope = g.sgl_nroope)) cobros
 OUTER APPLY (SELECT SUM(g.sgl_haber) AS monto_liquidado, MAX(g.sgl_fecmov) AS fecha_liquidacion FROM dbo.salglo g WHERE g.sgl_opera = o.ope_codigo AND g.sgl_tipo = o.ope_tipo AND g.sgl_tipmov = 150 AND g.sgl_haber > 0) creditos
-WHERE o.ope_tipo IN (5, 10) AND o.ope_fecbaj IS NULL;`;
+WHERE o.ope_tipo IN (5, 10) AND o.ope_fecbaj IS NULL AND o.ope_fecha >= CONVERT(date, '20260501', 112);`;

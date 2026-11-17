@@ -11,6 +11,7 @@ import {
   getSaldoLiessSummary,
   syncSaldoLiess,
   updateSaldoLiessCancelacion,
+  updateSaldoLiessCreditoLiquidado,
   type SaldoLiessItem,
 } from "@/services/saldoOperacionLiessService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ import {
   Download,
   GitBranch,
   CheckCircle2,
+  Circle,
   ReceiptText,
   RefreshCw,
   Search,
@@ -40,6 +42,7 @@ const columns = [
   ["D. Asig", "diasAsignada"],
   ["D. Cancelación", "diasHastaCancelacion"],
   ["Saldo", "saldo"],
+  ["Créd. liq.", "creditoLiquidado"],
 ] as const;
 const money = (value: number | null | undefined) =>
   new Intl.NumberFormat("es-AR", {
@@ -62,6 +65,7 @@ export default function SaldoOperacionLiessView() {
       "sin-entregar",
     ),
     [tipoOperacion, setTipoOperacion] = useState<"todas" | "5" | "10">("todas"),
+    [creditoMarcado, setCreditoMarcado] = useState<"todos" | "si" | "no">("todos"),
     [vendedor, setVendedor] = useState(ALL),
     [draft, setDraft] = useState(""),
     [operacion, setOperacion] = useState(""),
@@ -75,6 +79,7 @@ export default function SaldoOperacionLiessView() {
     section,
     entrega,
     tipoOperacion: tipoOperacion === "todas" ? undefined : Number(tipoOperacion) as 5 | 10,
+    creditoMarcado: creditoMarcado === "todos" ? undefined : creditoMarcado,
     vendedor: vendedor === ALL ? undefined : vendedor,
     operacion: operacion || undefined,
     page,
@@ -100,7 +105,7 @@ export default function SaldoOperacionLiessView() {
     refetchIntervalInBackground: true,
   });
   const summary = useQuery({
-    queryKey: ["saldo-liess-summary", entrega, tipoOperacion, vendedor],
+    queryKey: ["saldo-liess-summary", entrega, tipoOperacion, creditoMarcado, vendedor],
     queryFn: () => getSaldoLiessSummary(params),
     staleTime: 30_000,
   });
@@ -130,6 +135,17 @@ export default function SaldoOperacionLiessView() {
         client.invalidateQueries({ queryKey: ["saldo-liess-filters"] }),
       ]);
       toast.success("Saldo LIESS sincronizado");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const creditMutation = useMutation({
+    mutationFn: ({ row, value }: { row: SaldoLiessItem; value: boolean }) => updateSaldoLiessCreditoLiquidado(row.codigoOperacion, row.tipoOperacion, value),
+    onSuccess: async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["saldo-liess"] }),
+        client.invalidateQueries({ queryKey: ["saldo-liess-summary"] }),
+      ]);
+      toast.success("Estado de crédito actualizado");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -188,6 +204,19 @@ export default function SaldoOperacionLiessView() {
             <option value="todas">Todas</option>
             <option value="5">Nuevas</option>
             <option value="10">Usadas</option>
+          </AutocompleteSelect>
+          <AutocompleteSelect
+            aria-label="Crédito marcado"
+            value={creditoMarcado}
+            onChange={(event) => {
+              setCreditoMarcado(event.target.value as "todos" | "si" | "no");
+              setPage(1);
+            }}
+            className="h-9 min-w-36 rounded-md border border-border bg-background px-2 text-xs"
+          >
+            <option value="todos">Todos los créditos</option>
+            <option value="si">Crédito marcado</option>
+            <option value="no">Crédito sin marcar</option>
           </AutocompleteSelect>
           <AutocompleteSelect
             aria-label="Vendedor"
@@ -362,6 +391,9 @@ export default function SaldoOperacionLiessView() {
                   className={`px-2 py-1.5 font-medium ${row.saldo <= 0 ? "text-green-700" : "text-destructive"}`}
                 >
                   {money(row.saldo)}
+                </td>
+                <td className="px-2 py-1.5 text-center">
+                  {(row.creditoBanco ?? 0) > 0 ? <Button size="xs" variant="ghost" title={row.creditoLiquidado ? "Crédito marcado como liquidado" : "Marcar crédito como liquidado"} aria-label="Cambiar estado de crédito" disabled={creditMutation.isPending} onClick={() => creditMutation.mutate({ row, value: !row.creditoLiquidado })}>{row.creditoLiquidado ? <CheckCircle2 className="size-4 text-green-700" /> : <Circle className="size-4 text-muted-foreground" />}</Button> : "-"}
                 </td>
                 <td className="px-2 py-1.5 text-center">
                   <Button size="xs" variant="ghost" title="Ver composición del pago" aria-label="Ver composición del pago" onClick={() => setPaymentDetail(row)}>

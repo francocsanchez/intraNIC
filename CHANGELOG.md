@@ -54,6 +54,8 @@
 - **Saldo de operación LIESS:** el Excel ubica Fecha de asignación y Días asignados antes de Total.
 - **Saldo de operación LIESS:** el Excel renombró Señas a Anticipos y se ordena por tipo, vendedor, cliente y saldo.
 - **Saldo de operación LIESS:** el acceso visual, rutas y APIs ahora requieren exclusivamente el permiso `saldoOperacionLiess`.
+- **Saldo de operación LIESS:** el check de crédito junto a Saldo ahora es manual, persiste por operación y solo se habilita cuando existe crédito; se ajustaron sus filtros.
+- **Saldo de operación LIESS:** el sincronizador ahora conserva únicamente operaciones cargadas desde el 1 de mayo de 2026.
 - **Saldo de operación LIESS:** el nuevo sincronizador monitorizable consulta exclusivamente la base LIESS mediante `opera`, `viewpreventa`, `stoauto`, `movnped`, `cliente`, `vendedor`, `sucursal`, `auto`, auditoría y cobranzas SIAC; la unión conserva una sola preventa por operación y marca entregadas según estados 35/40.
 
 - **Retiro de módulos:** se eliminaron Ranking Convencional, Central de Deudores y toda la sección Calidad, incluyendo rutas, accesos, permisos, APIs y la tarea programada de Hot Alert. Los registros históricos de Mongo se conservan.
