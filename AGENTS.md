@@ -308,3 +308,5 @@ Siempre el footer de toda la app debe tener fondo negro, texto blanco centrado y
 - El PDF de `Rend. Gastos` etiqueta al creador como empleado y ordena los gastos por fecha ascendente.
 - El PDF de `Rend. Gastos` reutiliza el membrete institucional de Proformas, incluyendo logo y datos legales de Nippon Car.
 - El membrete de `Rend. Gastos` usa solo un banner gris claro, sin datos legales, para una impresión de bajo consumo.
+La barra de navegación de Inicio (/) usa fondo negro y controles de contraste claro.
+Licitaciones · Administración abre por defecto en la pestaña Todas, que incluye licitaciones pendientes, adjudicadas y perdidas; las demás pestañas conservan sus filtros de estado.

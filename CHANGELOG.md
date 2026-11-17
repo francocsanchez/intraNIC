@@ -2,6 +2,9 @@
 
 ## 2026-11-16
 
+- **Inicio:** la barra superior adoptó fondo negro, con marca y cierre de sesión de alto contraste.
+- **Licitaciones · Administración:** se agregó la pestaña `Todas` como vista predeterminada para consultar todas las licitaciones sin filtro de estado.
+
 - **Configuración:** se unificaron todos los accesos dentro de una única tarjeta de Parámetros de sistema, en una grilla de dos columnas sin explicaciones, subtarjetas ni botones.
 - **Configuración:** se compactaron las tarjetas de asignación de vendedores, con tres columnas en escritorio, accesos de texto y listas de vendedores más densas.
 - **Configuración:** se ocultaron los vendedores asignados; las tarjetas Convencional, Usados y Belgrano ahora muestran solo su estado visual verde o rojo y el acceso a edición.

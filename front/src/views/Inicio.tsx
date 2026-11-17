@@ -272,14 +272,14 @@ export default function Inicio() {
 
   return (
     <div className="font-preset flex min-h-svh flex-col bg-muted text-foreground">
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-white/15 bg-black">
         <div className="flex h-14 items-center justify-between px-3">
-          <AppBrand />
+          <AppBrand textClassName="text-white" />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
           >
             <LogOut size={16} strokeWidth={2} />
             <span>Cerrar sesion</span>

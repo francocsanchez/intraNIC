@@ -945,8 +945,8 @@ function LicitacionViewDialog({
 
 export default function LicitacionesAdministracionView() {
   const [createOpen, setCreateOpen] = useState(false);
-  const [tab, setTab] = useState<"PENDIENTES" | "ADJUDICADA" | "PERDIDA">(
-    "PENDIENTES",
+  const [tab, setTab] = useState<"TODAS" | "PENDIENTES" | "ADJUDICADA" | "PERDIDA">(
+    "TODAS",
   );
   const [editItem, setEditItem] = useState<LicitacionAdministracion | null>(
     null,
@@ -996,7 +996,9 @@ export default function LicitacionesAdministracionView() {
   });
   const rows = query.data?.data ?? [];
   const visibleRows = rows.filter((item) =>
-    tab === "PENDIENTES"
+    tab === "TODAS"
+      ? true
+      : tab === "PENDIENTES"
       ? item.estado !== "ADJUDICADA" && item.estado !== "PERDIDA"
       : item.estado === tab,
   );
@@ -1071,7 +1073,7 @@ export default function LicitacionesAdministracionView() {
         role="tablist"
         aria-label="Estado de licitaciones"
       >
-        {(["PENDIENTES", "ADJUDICADA", "PERDIDA"] as const).map((option) => (
+        {(["TODAS", "PENDIENTES", "ADJUDICADA", "PERDIDA"] as const).map((option) => (
           <button
             key={option}
             type="button"
@@ -1080,7 +1082,9 @@ export default function LicitacionesAdministracionView() {
             onClick={() => setTab(option)}
             className={`h-9 rounded-md border px-3 text-xs font-medium ${tab === option ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
           >
-            {option === "PENDIENTES"
+            {option === "TODAS"
+              ? "Todas"
+              : option === "PENDIENTES"
               ? "Pendientes"
               : option === "ADJUDICADA"
                 ? "Adjudicadas"
