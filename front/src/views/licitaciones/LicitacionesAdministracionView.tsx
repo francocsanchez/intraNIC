@@ -8,10 +8,11 @@ import {
   getLicitacionCatalogos,
   getLicitacionUnidades,
   getLicitacionesAdministracion,
+  releaseLicitacionUnidadInterno,
   removeLicitacionUnidad,
   updateLicitacionAdministracion,
   updateLicitacionFlow,
-  updateLicitacionUnidadDetalles,
+  updateLicitacionUnidadProgress,
   type LicitacionAdministracionPayload,
 } from "@/api/licitacionesAdministracionAPI";
 import {
@@ -29,7 +30,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarPlus,
   Edit3,
-  Eye,
   FileDown,
   PackagePlus,
   Plus,
@@ -451,63 +451,38 @@ function UnitsDialog({
     },
     onError: (error: Error) => toast.error(error.message),
   });
-  const detailsMutation = useMutation({
-    mutationFn: ({
-      unitId,
-      ...payload
-    }: {
-      unitId: string;
-      patentamiento: boolean;
-      flete: boolean;
-      cantidadServicios: number;
-      acc: boolean;
-      conversionId: string | null;
-      estadoConversion: "PENDIENTE" | "EN_PROVEEDOR" | "CONVERTIDA" | null;
-    }) => updateLicitacionUnidadDetalles(item._id, unitId, payload),
-    onSuccess: (response) => {
-      client.setQueryData(
-        ["licitaciones", "administracion", item._id, "unidades"],
-        { data: response.data },
-      );
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-  const internoMutation = useMutation({
-    mutationFn: ({ unitId, interno }: { unitId: string; interno: number }) =>
-      assignLicitacionUnidadInterno(item._id, unitId, interno),
+  const progressMutation = useMutation({
+    mutationFn: ({ unitId, field, value }: { unitId: string; field: "asignada" | "equipadaTransformada" | "arribada" | "patentada" | "pagada" | "entregada"; value: boolean }) => updateLicitacionUnidadProgress(item._id, unitId, field, value),
     onSuccess: (response, variables) => {
       client.setQueryData(
         ["licitaciones", "administracion", item._id, "unidades"],
         { data: response.data },
       );
+      void variables;
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const detailsMutation = progressMutation;
+  const internoMutation = useMutation({
+    mutationFn: ({ unitId, interno }: { unitId: string; interno: number }) => assignLicitacionUnidadInterno(item._id, unitId, interno),
+    onSuccess: (response, variables) => {
+      client.setQueryData(["licitaciones", "administracion", item._id, "unidades"], { data: response.data });
       setInternos((current) => ({ ...current, [variables.unitId]: "" }));
       toast.success(response.message);
     },
     onError: (error: Error) => toast.error(error.message),
   });
+  const releaseInternoMutation = useMutation({
+    mutationFn: (unitId: string) => releaseLicitacionUnidadInterno(item._id, unitId),
+    onSuccess: (response, unitId) => {
+      client.setQueryData(["licitaciones", "administracion", item._id, "unidades"], { data: response.data });
+      setInternos((current) => ({ ...current, [unitId]: "" }));
+      toast.success(response.message);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const updateDetails = (...values: unknown[]) => { void values; };
   const units = unitsQuery.data?.data ?? [];
-  const updateDetails = (
-    unit: LicitacionUnidad,
-    changes: Partial<
-      Pick<LicitacionUnidad, "patentamiento" | "flete" | "cantidadServicios" | "acc">
-      & Pick<LicitacionUnidad, "conversionId" | "estadoConversion">
-    >,
-  ) =>
-    detailsMutation.mutate({
-      unitId: unit._id,
-      patentamiento: changes.patentamiento ?? unit.patentamiento,
-      flete: changes.flete ?? unit.flete,
-      cantidadServicios: changes.cantidadServicios ?? unit.cantidadServicios,
-      acc: changes.acc ?? unit.acc,
-      conversionId:
-        "conversionId" in changes
-          ? changes.conversionId ?? null
-          : unit.conversionId,
-      estadoConversion:
-        "estadoConversion" in changes
-          ? changes.estadoConversion ?? null
-          : unit.estadoConversion,
-    });
   const unitsByVersion = Array.from(
     units.reduce((summary, unit) => {
       summary.set(
@@ -520,20 +495,14 @@ function UnitsDialog({
   return (
     <Modal
       onClose={close}
-      pending={
-        mutation.isPending ||
-        removeMutation.isPending ||
-        detailsMutation.isPending
-      }
+      pending={mutation.isPending || removeMutation.isPending || progressMutation.isPending}
     >
       <DialogHeader
         title="Unidades del pliego"
         subtitle={item.entidad}
         close={close}
         pending={
-          mutation.isPending ||
-          removeMutation.isPending ||
-          detailsMutation.isPending
+          mutation.isPending || removeMutation.isPending || progressMutation.isPending
         }
       />
       <form
@@ -601,19 +570,25 @@ function UnitsDialog({
         </p>
       ) : null}
       <div className="max-h-[46vh] overflow-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs [&_th:nth-child(n+9)]:hidden [&_td:nth-child(n+9)]:hidden">
           <thead className="sticky top-0 bg-muted text-[10px] uppercase tracking-[.1em] text-muted-foreground">
             <tr>
               <th className="whitespace-nowrap px-3 py-2">Interno</th>
               <th className="whitespace-nowrap px-3 py-2">Versión</th>
-              <th className="whitespace-nowrap px-3 py-2">Color</th>
-              <th className="whitespace-nowrap px-3 py-2">Patentamiento</th>
-              <th className="whitespace-nowrap px-3 py-2">Flete</th>
-              <th className="whitespace-nowrap px-3 py-2">Cant. servicios</th>
-              <th className="whitespace-nowrap px-3 py-2">ACC</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Asignada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">EQ / Transformada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Arribada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Patentada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Pagada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Entregada</th>
               <th className="whitespace-nowrap px-3 py-2">Conversión</th>
               <th className="whitespace-nowrap px-3 py-2">Estado conversión</th>
               <th className="whitespace-nowrap px-3 py-2">Estado</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">EQ / Transformada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Arribada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Patentada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Pagada</th>
+              <th className="whitespace-nowrap px-3 py-2 text-center">Entregada</th>
               <th className="whitespace-nowrap px-3 py-2 text-center">
                 Eliminar
               </th>
@@ -645,9 +620,22 @@ function UnitsDialog({
                 <tr key={unit._id} className="border-t border-border">
                   <td className="px-3 py-1.5">
                     {unit.interno ? (
-                      <span className="font-medium tabular-nums">
-                        {unit.interno}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium tabular-nums">{unit.interno}</span>
+                        <ActionButton
+                          type="button"
+                          size="icon-sm"
+                          variant="outline"
+                          title="Liberar interno"
+                          aria-label={`Liberar interno ${unit.interno}`}
+                          disabled={internoMutation.isPending || releaseInternoMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm(`¿Liberar el interno ${unit.interno} de esta unidad?`)) releaseInternoMutation.mutate(unit._id);
+                          }}
+                        >
+                          <X size={14} />
+                        </ActionButton>
+                      </div>
                     ) : (
                       <div className="flex w-28 gap-1">
                         <input
@@ -694,6 +682,8 @@ function UnitsDialog({
                   <td className="whitespace-nowrap px-3 py-1.5 font-medium">
                     {unit.versionNombre}
                   </td>
+                  <td className="px-3 py-2 text-center">{unit.asignada ? <span className="text-emerald-600">✓</span> : "-"}</td>
+                  {(["equipadaTransformada", "arribada", "patentada", "pagada", "entregada"] as const).map((field) => <td key={field} className="px-3 py-2 text-center"><input type="checkbox" checked={unit[field]} onChange={(event) => progressMutation.mutate({ unitId: unit._id, field, value: event.target.checked })} disabled={progressMutation.isPending} className="h-4 w-4 accent-primary" aria-label={`${field} de ${unit.versionNombre}`} /></td>)}
                   <td className="whitespace-nowrap px-3 py-1.5">
                     {unit.colorNombre || "-"}
                   </td>
@@ -828,7 +818,7 @@ function UnitsDialog({
                         disabled={
                           mutation.isPending ||
                           removeMutation.isPending ||
-                          detailsMutation.isPending
+                          progressMutation.isPending
                         }
                       >
                         <Trash2 />
@@ -857,7 +847,7 @@ function UnitsDialog({
           disabled={
             mutation.isPending ||
             removeMutation.isPending ||
-            detailsMutation.isPending
+            progressMutation.isPending
           }
         >
           Cerrar
@@ -1200,16 +1190,6 @@ export default function LicitacionesAdministracionView() {
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex justify-center gap-2">
-                        <ActionButton
-                          variant="outline"
-                          size="icon-lg"
-                          title="Ver licitación"
-                          aria-label={`Ver ${item.entidad}`}
-                          onClick={() => setViewItem(item)}
-                          className="border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                        >
-                          <Eye size={18} />
-                        </ActionButton>
                         <ActionButton
                           variant="outline"
                           size="icon-lg"

@@ -2,8 +2,25 @@
 
 ## 2026-11-18
 
+- **Licitaciones · Administración:** se corrigió la identificación de la fila al guardar checks de avance, evitando el error `Unidad no encontrada`.
+- **Licitaciones · Administración:** se retiró la acción de vista de Gestión; permanecen la carga de unidades y el informe PDF.
+- **Licitaciones · Administración:** los internos asignados ahora incluyen una X de liberación con confirmación para corregir una asignación errónea y devolver la fila al buscador.
+- **Licitaciones · Resumen:** cada tarjeta muestra, sin desplegar, el avance de Asignadas, EQ / Transformadas, Arribadas, Patentadas, Pagadas y Entregadas como cantidad sobre el total de unidades.
+- **Licitaciones · Resumen:** se incorporó el módulo independiente y de solo lectura en `/licitaciones/resumen`, con tarjetas expandibles por licitación, total de unidades y detalle de versión/asignación.
+- **Licitaciones · Resumen:** la vista ahora utiliza todo el ancho disponible de pantalla.
+- **Licitaciones · Resumen:** las tarjetas incorporan el badge central de estado con la semántica de color de Administración.
+- **Licitaciones · Resumen:** se agregaron las columnas operativas de avance de unidad, pendientes de su futura fuente de información.
+- **Licitaciones · Resumen:** el detalle de unidades ahora se ordena por Versión.
+- **Licitaciones · Administración:** se simplificó la gestión de unidades con checks de avance manual y se retiraron los datos operativos anteriores.
+- **Licitaciones · Administración:** se corrigió la apertura del diálogo de carga de unidades.
+- **Licitaciones · Administración:** se corrigieron referencias heredadas que impedían renderizar el diálogo simplificado.
+- **Licitaciones · Administración:** se restauró la asignación de Interno y el indicador automático de unidad asignada.
+- **Licitaciones · Resumen:** se rediseñaron las tarjetas para mejorar la jerarquía visual y lectura de los avances.
+- **Licitaciones · Resumen:** las tarjetas se compactaron en una única línea horizontal.
+- **Licitaciones · Resumen:** los nombres extensos de entidad ahora se ajustan hasta dos líneas.
 - **Kinto:** se eliminó el Dashboard, su ruta `/kinto/dashboard`, acceso, permiso, API y componentes asociados.
 - **Reventas pendientes:** se rediseñó `/administracion/reventa-pendientes` como tablero compacto, con resumen por modelo y antigüedad, pestañas delineadas para filtrar modelos, actualización manual y orden por columnas. La grilla redujo tipografía y alto de fila para priorizar más operaciones visibles.
+- **Análisis de stock:** se incorporó un informe Excel de control del cálculo P.Vta, con el detalle de las operaciones incluidas y el promedio por Modelo y Versión.
 - **Solicitud de cambio de color:** el interno ahora es opcional. Las solicitudes sin interno se registran como `PREVENTA` y las que lo informan como `CAMBIO COLOR`; la grilla muestra esa clasificación en su primera columna con badges de color.
 - **Solicitud de cambio de color:** se renombró la identificación visual de las solicitudes sin interno a `ADELANTO`.
 

@@ -100,6 +100,7 @@ export default function Inicio() {
       icon: ClipboardList,
       items: [
         { label: "Administración", to: paths.licitaciones.administracion, enabled: hasModulePathAccess(user, "licitacionesAdministracion", paths.licitaciones.administracion), icon: ClipboardList },
+        { label: "Resumen", to: paths.licitaciones.resumen, enabled: hasModulePathAccess(user, "licitacionesResumen", paths.licitaciones.resumen), icon: ClipboardList },
       ],
     },
     {

@@ -3658,20 +3658,19 @@ export const licitacionAdministracionResponseSchema = z.object({
 });
 export const licitacionUnidadSchema = z.object({
   _id: z.string(),
-  interno: z.number().int().positive().nullable().optional().default(null),
   versionId: z.string().nullable(),
   versionNombre: z.string(),
-  colorNombre: z.string().optional().default(""),
   cantidad: z.number().int().positive(),
-  estado: z.enum(["PENDIENTE_ASIGNAR", "ASIGNADA", "ENTREGADA"]),
-  patentamiento: z.boolean(),
-  flete: z.boolean(),
-  cantidadServicios: z.number().int().nonnegative(),
-  acc: z.boolean().optional().default(false),
-  conversionId: z.string().nullable().optional().default(null),
-  conversionTipo: z.string().optional().default(""),
-  conversionProveedor: z.string().optional().default(""),
-  estadoConversion: z.enum(["PENDIENTE", "EN_PROVEEDOR", "CONVERTIDA"]).nullable().optional().default(null),
+  asignada: z.boolean(),
+  equipadaTransformada: z.boolean(),
+  arribada: z.boolean(),
+  patentada: z.boolean(),
+  pagada: z.boolean(),
+  entregada: z.boolean(),
+  interno: z.number().int().positive().nullable().optional().default(null),
+  colorNombre: z.string().optional().default(""),
+  estado: z.enum(["PENDIENTE_ASIGNAR", "ASIGNADA", "ENTREGADA"]).optional().default("PENDIENTE_ASIGNAR"),
+  patentamiento: z.boolean().optional().default(false), flete: z.boolean().optional().default(false), cantidadServicios: z.number().int().nonnegative().optional().default(0), acc: z.boolean().optional().default(false), conversionId: z.string().nullable().optional().default(null), conversionTipo: z.string().optional().default(""), conversionProveedor: z.string().optional().default(""), estadoConversion: z.enum(["PENDIENTE", "EN_PROVEEDOR", "CONVERTIDA"]).nullable().optional().default(null),
 });
 export const licitacionUnidadesResponseSchema = z.object({
   data: z.array(licitacionUnidadSchema),
@@ -3703,6 +3702,45 @@ export type LicitacionCatalogosResponse = z.infer<
 >;
 export type LicitacionUnidadesMutationResponse = z.infer<
   typeof licitacionUnidadesMutationResponseSchema
+>;
+export const licitacionResumenSchema = z.object({
+  _id: z.string(),
+  entidad: z.string(),
+  totalUnidades: z.number().int().nonnegative(),
+  avance: z.object({
+    asignada: z.number().int().nonnegative(),
+    equipadaTransformada: z.number().int().nonnegative(),
+    arribada: z.number().int().nonnegative(),
+    patentada: z.number().int().nonnegative(),
+    pagada: z.number().int().nonnegative(),
+    entregada: z.number().int().nonnegative(),
+  }),
+  estado: licitacionEstadoSchema,
+});
+export const licitacionResumenListResponseSchema = z.object({
+  data: z.array(licitacionResumenSchema),
+});
+export const licitacionResumenUnidadSchema = z.object({
+  versionNombre: z.string(),
+  asignada: z.boolean(),
+  equipadaTransformada: z.boolean(),
+  arribada: z.boolean(),
+  patentada: z.boolean(),
+  pagada: z.boolean(),
+  entregada: z.boolean(),
+});
+export const licitacionResumenUnidadesResponseSchema = z.object({
+  data: z.array(licitacionResumenUnidadSchema),
+});
+export type LicitacionResumen = z.infer<typeof licitacionResumenSchema>;
+export type LicitacionResumenListResponse = z.infer<
+  typeof licitacionResumenListResponseSchema
+>;
+export type LicitacionResumenUnidad = z.infer<
+  typeof licitacionResumenUnidadSchema
+>;
+export type LicitacionResumenUnidadesResponse = z.infer<
+  typeof licitacionResumenUnidadesResponseSchema
 >;
 export const liessTallerSchema = z.object({
   _id: z.string(),

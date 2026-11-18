@@ -141,26 +141,20 @@ export const updateLicitacionUnidad = (
     licitacionUnidadesMutationResponseSchema,
     "No se pudo actualizar la unidad",
   );
-export type LicitacionUnidadDetallesPayload = {
-  patentamiento: boolean;
-  flete: boolean;
-  cantidadServicios: number;
-  acc: boolean;
-  conversionId: string | null;
-  estadoConversion: "PENDIENTE" | "EN_PROVEEDOR" | "CONVERTIDA" | null;
-};
-export const updateLicitacionUnidadDetalles = (
+export type LicitacionUnidadProgressField = "asignada" | "equipadaTransformada" | "arribada" | "patentada" | "pagada" | "entregada";
+export const updateLicitacionUnidadProgress = (
   id: string,
   unitId: string,
-  payload: LicitacionUnidadDetallesPayload,
+  field: LicitacionUnidadProgressField,
+  value: boolean,
 ): Promise<LicitacionUnidadesMutationResponse> =>
   parse(
     api.patch(
-      `/licitaciones/administracion/${id}/unidades/${unitId}/detalles`,
-      payload,
+      `/licitaciones/administracion/${id}/unidades/${unitId}/avance`,
+      { field, value },
     ),
     licitacionUnidadesMutationResponseSchema,
-    "No se pudieron actualizar los datos de la unidad",
+    "No se pudo actualizar el avance de la unidad",
   );
 export const assignLicitacionUnidadInterno = (
   id: string,
@@ -173,6 +167,15 @@ export const assignLicitacionUnidadInterno = (
     }),
     licitacionUnidadesMutationResponseSchema,
     "No se pudo asignar el interno",
+  );
+export const releaseLicitacionUnidadInterno = (
+  id: string,
+  unitId: string,
+): Promise<LicitacionUnidadesMutationResponse> =>
+  parse(
+    api.delete(`/licitaciones/administracion/${id}/unidades/${unitId}/interno`),
+    licitacionUnidadesMutationResponseSchema,
+    "No se pudo liberar el interno",
   );
 export const removeLicitacionUnidad = (
   id: string,

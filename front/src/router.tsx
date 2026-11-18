@@ -122,6 +122,7 @@ const KintoMatafuegosView = lazy(() => import("./views/kinto/KintoMatafuegosView
 const KintoMultasView = lazy(() => import("./views/kinto/KintoMultasView"));
 const KintoNpsShareView = lazy(() => import("./views/kinto/KintoNpsShareView"));
 const LicitacionesAdministracionView = lazy(() => import("./views/licitaciones/LicitacionesAdministracionView"));
+const LicitacionesResumenView = lazy(() => import("./views/licitaciones/LicitacionesResumenView"));
 
 export default function Router() {
   return (
@@ -169,6 +170,9 @@ export default function Router() {
             <Route element={<LicitacionesLayout />}>
               <Route element={<ModuleProtectedRoute allowedModules={["licitacionesAdministracion"]} />}>
                 <Route path={paths.licitaciones.administracion} element={<LicitacionesAdministracionView />} />
+              </Route>
+              <Route element={<ModuleProtectedRoute allowedModules={["licitacionesResumen"]} />}>
+                <Route path={paths.licitaciones.resumen} element={<LicitacionesResumenView />} />
               </Route>
             </Route>
 

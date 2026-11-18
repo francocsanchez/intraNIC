@@ -51,6 +51,7 @@ export const moduleKeys = [
   "kintoMultas",
   "kintoNpsShare",
   "licitacionesAdministracion",
+  "licitacionesResumen",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];

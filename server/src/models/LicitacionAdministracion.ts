@@ -12,7 +12,7 @@ export interface ILicitacionAdministracion extends Document {
   preAdjudicado: boolean | null;
   pagare: boolean;
   oc: boolean;
-  unidades: Array<{ _id: Types.ObjectId; interno?: number | null; versionId?: Types.ObjectId | null; versionNombre: string; colorNombre: string; cantidad: number; estado: "PENDIENTE_ASIGNAR" | "ASIGNADA" | "ENTREGADA"; patentamiento: boolean; flete: boolean; cantidadServicios: number; acc: boolean; conversionId?: Types.ObjectId | null; conversionTipo: string; conversionProveedor: string; estadoConversion?: "PENDIENTE" | "EN_PROVEEDOR" | "CONVERTIDA" | null }>;
+  unidades: Array<{ _id: Types.ObjectId; interno?: number | null; versionId?: Types.ObjectId | null; versionNombre: string; cantidad: number; asignada: boolean; equipadaTransformada: boolean; arribada: boolean; patentada: boolean; pagada: boolean; entregada: boolean }>;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -34,17 +34,13 @@ const licitacionAdministracionSchema = new Schema<ILicitacionAdministracion>({
     versionId: { type: Schema.Types.ObjectId, ref: "versiones", default: null },
     versionNombre: { type: String, required: true, trim: true },
     interno: { type: Number, default: null, min: 1 },
-    colorNombre: { type: String, default: "", trim: true },
     cantidad: { type: Number, required: true, min: 1 },
-    estado: { type: String, enum: ["PENDIENTE_ASIGNAR", "ASIGNADA", "ENTREGADA"], default: "PENDIENTE_ASIGNAR", required: true },
-    patentamiento: { type: Boolean, default: false, required: true },
-    flete: { type: Boolean, default: false, required: true },
-    cantidadServicios: { type: Number, default: 0, min: 0, required: true },
-    acc: { type: Boolean, default: false, required: true },
-    conversionId: { type: Schema.Types.ObjectId, ref: "conversiones", default: null },
-    conversionTipo: { type: String, default: "", trim: true },
-    conversionProveedor: { type: String, default: "", trim: true },
-    estadoConversion: { type: String, enum: ["PENDIENTE", "EN_PROVEEDOR", "CONVERTIDA"], default: null },
+    asignada: { type: Boolean, default: false, required: true },
+    equipadaTransformada: { type: Boolean, default: false, required: true },
+    arribada: { type: Boolean, default: false, required: true },
+    patentada: { type: Boolean, default: false, required: true },
+    pagada: { type: Boolean, default: false, required: true },
+    entregada: { type: Boolean, default: false, required: true },
   }],
   deletedAt: { type: Date, default: null },
 }, { timestamps: true, collection: "licitaciones_administracion" });

@@ -71,11 +71,11 @@ const validateBase = (body: Record<string, unknown>) => {
   return { data: { entidad, cuit, contactoNombre, contactoApellido, contactoTelefono, fechaApertura, diasMantenimientoOferta } };
 };
 
-const pendingAssignmentState = "PENDIENTE_ASIGNAR" as const;
+const progressFields = ["asignada", "equipadaTransformada", "arribada", "patentada", "pagada", "entregada"] as const;
+type ProgressField = (typeof progressFields)[number];
 const deliveredSiacStates = new Set([35, 40]);
-const unitStateFromSiac = (estado: number) => deliveredSiacStates.has(Number(estado)) ? "ENTREGADA" : "ASIGNADA";
-
-const formatUnits = (item: any) => (item.unidades ?? []).map((unit: any) => ({ _id: String(unit._id), interno: unit.interno ?? null, versionId: unit.versionId ? String(unit.versionId) : null, versionNombre: unit.versionNombre, colorNombre: unit.colorNombre ?? "", cantidad: unit.cantidad, estado: unit.estado ?? pendingAssignmentState, patentamiento: unit.patentamiento ?? false, flete: unit.flete ?? false, cantidadServicios: unit.cantidadServicios ?? 0, acc: unit.acc ?? false, conversionId: unit.conversionId ? String(unit.conversionId) : null, conversionTipo: unit.conversionTipo ?? "", conversionProveedor: unit.conversionProveedor ?? "", estadoConversion: unit.conversionId ? unit.estadoConversion ?? "PENDIENTE" : null }));
+const unitStateFromSiac = (estado: number) => Number(estado) === 35 || Number(estado) === 40 ? "ENTREGADA" : "ASIGNADA";
+const formatUnits = (item: any) => (item.unidades ?? []).map((unit: any) => ({ _id: String(unit._id), interno: unit.interno ?? null, versionId: unit.versionId ? String(unit.versionId) : null, versionNombre: unit.versionNombre, cantidad: unit.cantidad, asignada: Boolean(unit.interno), equipadaTransformada: unit.equipadaTransformada ?? false, arribada: unit.arribada ?? false, patentada: unit.patentada ?? false, pagada: unit.pagada ?? false, entregada: unit.entregada ?? false }));
 
 // Las cargas anteriores agrupaban unidades iguales. Al accederlas se desdoblan una sola vez
 // para que cada unidad tenga identidad y estado propios.
@@ -86,22 +86,21 @@ const normalizeUnits = (item: any) => {
     versionId: unit.versionId,
     versionNombre: unit.versionNombre,
     interno: unit.interno ?? null,
-    colorNombre: unit.colorNombre ?? "",
     cantidad: 1,
-    estado: unit.estado ?? pendingAssignmentState,
-    patentamiento: unit.patentamiento ?? false,
-    flete: unit.flete ?? false,
-    cantidadServicios: unit.cantidadServicios ?? 0,
-    acc: unit.acc ?? false,
-    conversionId: unit.conversionId ?? null,
-    conversionTipo: unit.conversionTipo ?? "",
-    conversionProveedor: unit.conversionProveedor ?? "",
-    estadoConversion: unit.conversionId ? unit.estadoConversion ?? "PENDIENTE" : null,
+    asignada: Boolean(unit.interno),
+    equipadaTransformada: unit.equipadaTransformada ?? false,
+    arribada: unit.arribada ?? false,
+    patentada: unit.patentada ?? Boolean(unit.patentamiento),
+    pagada: unit.pagada ?? false,
+    entregada: unit.entregada ?? unit.estado === "ENTREGADA",
   })));
-  const changed = normalized.length !== units.length || units.some((unit) => unit.cantidad !== 1 || !unit.estado || "colorId" in unit || typeof unit.patentamiento !== "boolean" || typeof unit.flete !== "boolean" || !Number.isInteger(unit.cantidadServicios) || unit.cantidadServicios < 0 || typeof unit.acc !== "boolean" || !("conversionId" in unit) || !("conversionTipo" in unit) || !("conversionProveedor" in unit) || (unit.conversionId && !unit.estadoConversion) || (!unit.conversionId && unit.estadoConversion));
+  const changed = normalized.length !== units.length || units.some((unit) => unit.cantidad !== 1 || progressFields.some((field) => typeof unit[field] !== "boolean"));
   if (changed) item.set("unidades", normalized);
   return changed;
 };
+
+const findUnit = (item: any, unitId: string) =>
+  item.unidades.id?.(unitId) ?? (item.unidades as any[]).find((unit) => String(unit._id) === unitId);
 
 const syncDeliveredUnits = async (item: any) => {
   const internos = [...new Set((item.unidades ?? []).map((unit: any) => Number(unit.interno)).filter((interno: number) => Number.isInteger(interno) && interno > 0))];
@@ -130,8 +129,8 @@ const validateUnit = async (body: Record<string, unknown>) => {
 export class LicitacionesAdministracionController {
   static catalogs = async (_req: Request, res: Response) => {
     try {
-      const [versiones, conversiones] = await Promise.all([Version.find({ activo: true }).sort({ nombre: 1 }).lean(), Conversion.find().sort({ tipoConversion: 1, proveedor: 1 }).lean()]);
-      return res.status(200).json({ versiones: versiones.map((item) => ({ _id: String(item._id), nombre: item.nombre })), conversiones: conversiones.map((item) => ({ _id: String(item._id), tipoConversion: item.tipoConversion, proveedor: item.proveedor })) });
+      const versiones = await Version.find({ activo: true }).sort({ nombre: 1 }).lean();
+      return res.status(200).json({ versiones: versiones.map((item) => ({ _id: String(item._id), nombre: item.nombre })) });
     } catch (error) { logError("LicitacionesAdministracionController.catalogs"); console.error(error); return res.status(500).json({ message: "No se pudieron cargar las versiones y conversiones" }); }
   };
 
@@ -216,7 +215,7 @@ export class LicitacionesAdministracionController {
       const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
       normalizeUnits(item);
       const units = item.unidades as any[];
-      units.push(...Array.from({ length: validation.data.cantidad }, () => ({ ...validation.data, cantidad: 1, estado: pendingAssignmentState, patentamiento: false, flete: false, cantidadServicios: 0, acc: false, conversionId: null, conversionTipo: "", conversionProveedor: "", estadoConversion: null })));
+      units.push(...Array.from({ length: validation.data.cantidad }, () => ({ ...validation.data, cantidad: 1, asignada: false, equipadaTransformada: false, arribada: false, patentada: false, pagada: false, entregada: false })));
       await item.save(); return res.status(200).json({ message: "Unidades agregadas correctamente", data: formatUnits(item) });
     } catch (error) { logError("LicitacionesAdministracionController.addUnit"); console.error(error); return res.status(500).json({ message: "No se pudo agregar la unidad" }); }
   };
@@ -235,6 +234,18 @@ export class LicitacionesAdministracionController {
     } catch (error) { logError("LicitacionesAdministracionController.updateUnit"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar la unidad" }); }
   };
 
+  static updateUnitProgress = async (req: Request, res: Response) => {
+    const id = text(req.params.id); const unitId = text(req.params.unitId); const field = text(req.body?.field) as ProgressField; const value = req.body?.value;
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(unitId) || !progressFields.includes(field) || typeof value !== "boolean") return res.status(400).json({ error: "El avance de la unidad no es válido" });
+    try {
+      const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
+      normalizeUnits(item);
+      const unit = findUnit(item, unitId); if (!unit) return res.status(404).json({ error: "Unidad no encontrada" });
+      unit[field] = value;
+      await item.save(); return res.status(200).json({ message: "Avance actualizado correctamente", data: formatUnits(item) });
+    } catch (error) { logError("LicitacionesAdministracionController.updateUnitProgress"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar el avance de la unidad" }); }
+  };
+
   static assignUnitInterno = async (req: Request, res: Response) => {
     const id = text(req.params.id); const unitId = text(req.params.unitId); const interno = Number(req.body?.interno);
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(unitId) || !Number.isInteger(interno) || interno < 1) return res.status(400).json({ error: "El interno no es válido" });
@@ -242,13 +253,25 @@ export class LicitacionesAdministracionController {
       const used = await LicitacionAdministracion.findOne({ deletedAt: null, _id: { $ne: id }, "unidades.interno": interno }).lean();
       const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
       normalizeUnits(item);
-      const unit = (item.unidades as any[]).find((entry) => String(entry._id) === unitId); if (!unit) return res.status(404).json({ error: "Unidad no encontrada" });
+      const unit = findUnit(item, unitId); if (!unit) return res.status(404).json({ error: "Unidad no encontrada" });
       if (used || (item.unidades as any[]).some((entry) => String(entry._id) !== unitId && entry.interno === interno)) return res.status(400).json({ error: "Ese interno ya está asignado a otra unidad; primero quitálo de esa fila" });
       const rows = await sequelizeNIC.query<{ interno: number; version: string; color: string; estado: number }>(unidadCambioColorQuery(), { type: QueryTypes.SELECT, replacements: { interno } });
       const source = rows[0]; if (!source) return res.status(404).json({ error: "No se encontró una unidad nueva para ese interno" });
-      unit.interno = interno; unit.versionId = null; unit.versionNombre = source.version; unit.colorNombre = source.color; unit.estado = unitStateFromSiac(source.estado);
+      unit.interno = interno; unit.versionId = null; unit.versionNombre = source.version; unit.asignada = true;
       await item.save(); return res.status(200).json({ message: "Interno asignado correctamente", data: formatUnits(item) });
     } catch (error) { logError("LicitacionesAdministracionController.assignUnitInterno"); console.error(error); return res.status(500).json({ message: "No se pudo buscar y asignar el interno" }); }
+  };
+
+  static releaseUnitInterno = async (req: Request, res: Response) => {
+    const id = text(req.params.id); const unitId = text(req.params.unitId);
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(unitId)) return res.status(400).json({ error: "La unidad no es válida" });
+    try {
+      const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
+      normalizeUnits(item);
+      const unit = findUnit(item, unitId); if (!unit) return res.status(404).json({ error: "Unidad no encontrada" });
+      unit.interno = null; unit.asignada = false; unit.estado = "PENDIENTE_ASIGNAR";
+      await item.save(); return res.status(200).json({ message: "Interno liberado correctamente", data: formatUnits(item) });
+    } catch (error) { logError("LicitacionesAdministracionController.releaseUnitInterno"); console.error(error); return res.status(500).json({ message: "No se pudo liberar el interno" }); }
   };
 
   static updateUnitDetails = async (req: Request, res: Response) => {

@@ -51,6 +51,7 @@ export const moduleKeys = [
   "kintoMultas",
   "kintoNpsShare",
   "licitacionesAdministracion",
+  "licitacionesResumen",
 ] as const;
 
 export type ModuleKey = (typeof moduleKeys)[number];
@@ -109,6 +110,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   kintoMultas: "Kinto · Multas",
   kintoNpsShare: "Kinto · NPS Share",
   licitacionesAdministracion: "Licitaciones · Administracion",
+  licitacionesResumen: "Licitaciones · Resumen",
 };
 
 export const moduleSections: Array<{
@@ -161,7 +163,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Licitaciones",
-    modules: ["licitacionesAdministracion"],
+    modules: ["licitacionesAdministracion", "licitacionesResumen"],
   },
 ];
 

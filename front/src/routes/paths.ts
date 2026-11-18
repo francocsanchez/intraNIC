@@ -12,6 +12,7 @@ export const paths = {
   },
   licitaciones: {
     administracion: "/licitaciones/administracion",
+    resumen: "/licitaciones/resumen",
   },
   entregas: {
     agenda: "/entregas/agenda",
