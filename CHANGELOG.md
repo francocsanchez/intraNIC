@@ -3,6 +3,7 @@
 ## 2026-11-18
 
 - **Solicitud de cambio de color:** el interno ahora es opcional. Las solicitudes sin interno se registran como `PREVENTA` y las que lo informan como `CAMBIO COLOR`; la grilla muestra esa clasificación en su primera columna con badges de color.
+- **Solicitud de cambio de color:** se renombró la identificación visual de las solicitudes sin interno a `ADELANTO`.
 
 ## 2026-11-16
 
