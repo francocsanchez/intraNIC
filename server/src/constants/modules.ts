@@ -47,7 +47,6 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "kintoFlota",
-  "kintoDashboard",
   "kintoMatafuegos",
   "kintoMultas",
   "kintoNpsShare",

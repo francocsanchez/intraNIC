@@ -41,7 +41,6 @@ import cobranzasRoutes from "./routes/cobranzasRoutes";
 import kintoFlotaRoutes from "./routes/kintoFlotaRoutes";
 import kintoMatafuegosRoutes from "./routes/kintoMatafuegosRoutes";
 import kintoMultasRoutes from "./routes/kintoMultasRoutes";
-import kintoDashboardRoutes from "./routes/kintoDashboardRoutes";
 import kintoNpsShareRoutes from "./routes/kintoNpsShareRoutes";
 import licitacionesAdministracionRoutes from "./routes/licitacionesAdministracionRoutes";
 import linksRoutes from "./routes/linksRoutes";
@@ -94,7 +93,6 @@ app.use("/api/cobranzas", cobranzasRoutes);
 app.use("/api/kinto/flota", kintoFlotaRoutes);
 app.use("/api/kinto/matafuegos", kintoMatafuegosRoutes);
 app.use("/api/kinto/multas", kintoMultasRoutes);
-app.use("/api/kinto/dashboard", kintoDashboardRoutes);
 app.use("/api/kinto/nps-share", kintoNpsShareRoutes);
 app.use("/api/licitaciones/administracion", licitacionesAdministracionRoutes);
 

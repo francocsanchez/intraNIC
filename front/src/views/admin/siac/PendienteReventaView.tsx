@@ -1,277 +1,59 @@
 import Mantenimiento from "@/components/Mantenimiento";
 import { getConfiguracion } from "@/api/configuracionAPI";
 import { getPendienteReventas } from "@/api/dms/dmsAPI";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowUpDown, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
-type PendienteReventaItem = {
-  opera: number;
-  clienteNombre: string;
-  fechaEntrega: string;
-  diasDesdeEntrega: number;
-  version: string;
-  modelo: string;
-  vendedor: string;
-  chasis: string;
-};
-
-type ModeloFiltro = "TODOS" | "HILUX" | "SW4" | "HIACE" | "COROLLA" | "C. CROSS" | "YARIS" | "RAV4" | "YARIS CROSS";
-
-const FILTROS_PRIORITARIOS: ModeloFiltro[] = ["TODOS", "HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
+type PendienteReventaItem = { opera: number; clienteNombre: string; fechaEntrega: string; diasDesdeEntrega: number; version: string; modelo: string; vendedor: string; chasis: string };
+type SortKey = "clienteNombre" | "opera" | "modelo" | "fechaEntrega" | "diasDesdeEntrega" | "vendedor";
+type SortDirection = "asc" | "desc";
+const FILTROS_PRIORITARIOS = ["HILUX", "SW4", "HIACE", "COROLLA", "C. CROSS", "YARIS", "RAV4", "YARIS CROSS"];
 const EMPTY_PENDIENTE_REVENTAS: PendienteReventaItem[] = [];
-
-function formatDate(value?: string) {
-  if (!value) return "-";
-
-  return new Intl.DateTimeFormat("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-function getRowClassByDias(dias: number) {
-  if (dias >= 90) return "bg-destructive/10 hover:bg-destructive/10";
-  if (dias >= 60) return "bg-secondary hover:bg-secondary";
-  return "bg-secondary hover:bg-secondary";
+const formatDate = (value?: string) => {
+  const date = value ? new Date(value) : undefined;
+  return date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date) : "-";
+};
+function getAgeTone(dias: number) {
+  if (dias >= 90) return { row: "bg-destructive/5 hover:bg-destructive/10", badge: "bg-destructive/10 text-destructive ring-destructive/20", label: "Crítica" };
+  if (dias >= 60) return { row: "bg-amber-500/5 hover:bg-amber-500/10", badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-amber-500/20", label: "A revisar" };
+  return { row: "hover:bg-muted/50", badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-emerald-500/20", label: "En plazo" };
 }
 
 export default function PendienteReventaView() {
-  const [modeloActivo, setModeloActivo] = useState<ModeloFiltro>("TODOS");
-
-  const {
-    data: configResponse,
-    isError: configError,
-    isLoading: configLoading,
-  } = useQuery({
-    queryKey: ["configuracion"],
-    queryFn: getConfiguracion,
-    refetchOnWindowFocus: true,
-  });
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["pendiente-reventas", "siac"],
-    queryFn: getPendienteReventas,
-    refetchOnWindowFocus: true,
-  });
-
+  const [modeloActivo, setModeloActivo] = useState("TODOS");
+  const [sort, setSort] = useState<{ key: SortKey; direction: SortDirection }>({ key: "diasDesdeEntrega", direction: "desc" });
+  const { data: configResponse, isError: configError, isLoading: configLoading, error: configQueryError } = useQuery({ queryKey: ["configuracion"], queryFn: getConfiguracion, refetchOnWindowFocus: true });
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({ queryKey: ["pendiente-reventas", "siac"], queryFn: getPendienteReventas, refetchOnWindowFocus: true });
   const items: PendienteReventaItem[] = data?.data ?? EMPTY_PENDIENTE_REVENTAS;
-
-  const resumenDinamico = useMemo(() => {
-    const porModelo = items.reduce<Record<string, number>>((acc, item) => {
-      acc[item.modelo] = (acc[item.modelo] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.entries(porModelo)
-      .map(([modelo, total]) => ({ modelo, total }))
-      .sort((a, b) => b.total - a.total || a.modelo.localeCompare(b.modelo));
-  }, [items]);
-
-  const resumenDias = useMemo(
-    () => ({
-      mayorA90: items.filter((item) => item.diasDesdeEntrega >= 90).length,
-      entre60y89: items.filter((item) => item.diasDesdeEntrega >= 60 && item.diasDesdeEntrega <= 89).length,
-      menorA30: items.filter((item) => item.diasDesdeEntrega < 60).length,
-    }),
-    [items],
-  );
-
-  const filtrosDisponibles = useMemo(() => {
-    const existentes = new Set(items.map((item) => item.modelo));
-    return FILTROS_PRIORITARIOS.filter((filtro) => filtro === "TODOS" || existentes.has(filtro));
-  }, [items]);
-
+  const resumenDinamico = useMemo(() => Object.entries(items.reduce<Record<string, number>>((acc, item) => { const modelo = item.modelo?.trim() || "Sin modelo"; acc[modelo] = (acc[modelo] || 0) + 1; return acc; }, {})).map(([modelo, total]) => ({ modelo, total })).sort((a, b) => b.total - a.total || a.modelo.localeCompare(b.modelo)), [items]);
+  const resumenDias = useMemo(() => ({ mayorA90: items.filter((item) => item.diasDesdeEntrega >= 90).length, entre60y89: items.filter((item) => item.diasDesdeEntrega >= 60 && item.diasDesdeEntrega < 90).length, menorA60: items.filter((item) => item.diasDesdeEntrega < 60).length }), [items]);
+  const filtrosDisponibles = useMemo(() => { const existentes = new Set(resumenDinamico.map(({ modelo }) => modelo)); return ["TODOS", ...FILTROS_PRIORITARIOS.filter((modelo) => existentes.has(modelo)), ...[...existentes].filter((modelo) => !FILTROS_PRIORITARIOS.includes(modelo)).sort((a, b) => a.localeCompare(b))]; }, [resumenDinamico]);
   const itemsFiltrados = useMemo(() => {
-    if (modeloActivo === "TODOS") return items;
-    return items.filter((item) => item.modelo === modeloActivo);
-  }, [items, modeloActivo]);
+    return items.filter((item) => modeloActivo === "TODOS" || item.modelo === modeloActivo).sort((a, b) => {
+      const aValue = a[sort.key] ?? ""; const bValue = b[sort.key] ?? "";
+      const result = typeof aValue === "number" && typeof bValue === "number" ? aValue - bValue : String(aValue).localeCompare(String(bValue), "es", { numeric: true });
+      return sort.direction === "asc" ? result : -result;
+    });
+  }, [items, modeloActivo, sort]);
+  const changeSort = (key: SortKey) => setSort((current) => ({ key, direction: current.key === key && current.direction === "desc" ? "asc" : "desc" }));
+  const sortLabel = (key: SortKey) => sort.key === key ? (sort.direction === "asc" ? "↑" : "↓") : "";
 
-  if (isLoading || configLoading) {
-    return (
-      <div className="font-preset w-full space-y-3 px-2 py-3">
-        <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
-          <div className="h-8 w-80 animate-pulse rounded bg-muted" />
-          <div className="mt-3 h-4 w-72 animate-pulse rounded bg-muted" />
-        </div>
+  if (isLoading || configLoading) return <LoadingState />;
+  if (isError || configError) { const queryError = error ?? configQueryError; return <div className="font-preset w-full px-2 py-3"><div className="rounded-lg border border-destructive/30 bg-card p-4 shadow-sm"><h2 className="text-lg font-semibold text-foreground">No se pudieron cargar las reventas</h2><p className="mt-1 text-sm text-destructive">{queryError instanceof Error ? queryError.message : "Error desconocido"}</p><button type="button" onClick={() => void refetch()} className="mt-3 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">Reintentar</button></div></div>; }
+  if (configResponse?.data.sistemaActivoConvencional === false) return <Mantenimiento />;
+  const resetFilters = () => setModeloActivo("TODOS");
+  const headers: Array<[string, SortKey | null]> = [["Cliente", "clienteNombre"], ["Operación", "opera"], ["Modelo", "modelo"], ["Versión", null], ["Chasis", null], ["Entrega", "fechaEntrega"], ["Antigüedad", "diasDesdeEntrega"], ["Vendedor", "vendedor"]];
 
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[2.6fr_1.1fr]">
-          {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="rounded-lg border border-border bg-card p-3 shadow-sm">
-              <div className="h-5 w-28 animate-pulse rounded bg-muted" />
-              <div className="mt-6 h-24 w-full animate-pulse rounded bg-muted" />
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="h-12 animate-pulse rounded-md bg-muted" />
-          ))}
-        </div>
-
-        <div className="rounded-lg border border-border bg-card shadow-sm">
-          <div className="border-b border-border px-3 py-3">
-            <div className="h-5 w-40 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="space-y-4 p-3">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="h-10 animate-pulse rounded bg-muted" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || configError) {
-    return (
-      <div className="font-preset w-full px-2 py-3">
-        <div className="rounded-lg border border-destructive/30 bg-card p-3 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar las reventas</h2>
-          <p className="mt-2 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (configResponse?.data.sistemaActivoConvencional === false) {
-    return <Mantenimiento />;
-  }
-
-  return (
-    <div className="font-preset w-full space-y-3 px-2 py-3">
-      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <div className="flex items-center justify-between gap-3 px-3 py-3">
-          <div><p className="text-primary font-medium uppercase tracking-[0.16em] text-muted-foreground">Convencional</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Reventas pendientes de facturacion</h1></div>
-          <span className="rounded-full bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground">{items.length} registros</span>
-        </div>
-        <div className="grid border-t border-border xl:grid-cols-[2.6fr_1.1fr]">
-          <article className="px-3 py-3">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Modelos</p>
-              <h2 className="mt-1 text-sm font-semibold tracking-tight text-foreground">Resumen por modelo</h2>
-            </div>
-
-            <div className="text-xs text-muted-foreground">{items.length} registros</div>
-          </div>
-
-          <div className="mt-3 flex overflow-x-auto border-y border-border">
-            {resumenDinamico.map((item) => (
-              <div key={item.modelo} className="min-w-28 flex-1 border-r border-border px-2 py-2 text-center last:border-r-0">
-                <p className="truncate text-primary text-muted-foreground">{item.modelo}</p>
-                <p className="text-sm font-semibold text-foreground">{item.total}</p>
-              </div>
-            ))}
-
-            {resumenDinamico.length === 0 && (
-              <div className="w-full px-2 py-2 text-center">
-                <p className="text-xs text-muted-foreground">Sin modelos</p>
-                <p className="text-sm font-semibold text-foreground">0</p>
-              </div>
-            )}
-          </div>
-        </article>
-
-        <article className="grid grid-cols-3 border-t border-border xl:border-t-0 xl:border-l">
-            <div className="flex min-h-28 flex-col items-center justify-center px-3 py-3 text-center">
-              <p className="text-primary font-medium uppercase tracking-[0.14em] text-destructive">Mayor a 90 dias</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-destructive">{resumenDias.mayorA90}</p>
-            </div>
-            <div className="flex min-h-28 flex-col items-center justify-center border-l border-border px-3 py-3 text-center">
-              <p className="text-primary font-medium uppercase tracking-[0.14em] text-primary">Entre 60 y 90</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-secondary-foreground">{resumenDias.entre60y89}</p>
-            </div>
-            <div className="flex min-h-28 flex-col items-center justify-center border-l border-border px-3 py-3 text-center">
-              <p className="text-primary font-medium uppercase tracking-[0.14em] text-foreground">Menor a 60 dias</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-secondary-foreground">{resumenDias.menorA30}</p>
-            </div>
-        </article>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-8">
-        {filtrosDisponibles.map((filtro) => {
-          const activo = modeloActivo === filtro;
-
-          return (
-            <button
-              key={filtro}
-              type="button"
-              onClick={() => setModeloActivo(filtro)}
-              className={[
-                "h-9 rounded-md border text-xs font-medium transition-colors",
-                activo ? "border-border bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground",
-              ].join(" ")}
-            >
-              {filtro}
-            </button>
-          );
-        })}
-      </section>
-
-      <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border px-3 py-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-base font-semibold tracking-tight text-foreground">Detalle de reventas</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {modeloActivo === "TODOS" ? "Listado completo de reventas pendientes" : `Listado filtrado por modelo: ${modeloActivo}`}
-            </p>
-          </div>
-
-          <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{itemsFiltrados.length} registros</div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="border-b border-border bg-muted">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Cliente</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Opera</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Modelo</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Version</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Chasis</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Fecha entrega</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Dias de entrega</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Vendedor</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {itemsFiltrados.map((item) => (
-                <tr key={`${item.opera}-${item.chasis}`} className={`border-b border-border transition-colors ${getRowClassByDias(item.diasDesdeEntrega)}`}>
-                  <td className="px-4 py-3 font-medium text-foreground">{item.clienteNombre.trim()}</td>
-                  <td className="px-4 py-3 text-foreground">{item.opera}</td>
-                  <td className="px-4 py-3 text-foreground">
-                    <span className="inline-flex rounded-full bg-card/80 px-2.5 py-1 text-xs font-semibold text-foreground ring-1 ring-inset ring-border">
-                      {item.modelo}
-                    </span>
-                  </td>
-                  <td className="min-w-[260px] px-4 py-3 text-foreground">{item.version}</td>
-                  <td className="px-4 py-3 font-mono text-foreground">{item.chasis}</td>
-                  <td className="px-4 py-3 text-foreground">{formatDate(item.fechaEntrega)}</td>
-                  <td className="px-4 py-3 font-semibold text-foreground">{item.diasDesdeEntrega}</td>
-                  <td className="px-4 py-3 text-foreground">{item.vendedor}</td>
-                </tr>
-              ))}
-
-              {itemsFiltrados.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-3 py-10 text-center text-sm text-muted-foreground">
-                    No hay reventas para el filtro seleccionado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="border-t border-border bg-muted px-3 py-3 text-sm text-muted-foreground">
-          Mostrando {itemsFiltrados.length} reventas
-          {modeloActivo !== "TODOS" ? ` de ${modeloActivo}` : ""}.
-        </div>
-      </section>
-    </div>
-  );
+  return <div className="font-preset w-full space-y-3 px-2 py-3">
+    <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Administración · Convencional</p><h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Reventas pendientes de facturación</h1><p className="mt-1 text-sm text-muted-foreground">Unidades entregadas que aún requieren seguimiento de facturación.</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">{items.length} pendientes</span><button type="button" onClick={() => void refetch()} disabled={isFetching} title="Actualizar" className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"><RefreshCw className={isFetching ? "size-4 animate-spin" : "size-4"} /></button></div></div>
+      <div className="grid border-t border-border lg:grid-cols-[minmax(0,1fr)_25rem]"><article className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Distribución</p><h2 className="mt-1 text-sm font-semibold text-foreground">Pendientes por modelo</h2></div><span className="text-xs text-muted-foreground">{resumenDinamico.length} modelos</span></div><div className="mt-3 flex overflow-x-auto rounded-md border border-border">{resumenDinamico.map((item) => <button type="button" key={item.modelo} onClick={() => setModeloActivo(item.modelo)} className={`min-w-28 flex-1 border-r border-border px-3 py-2.5 text-center last:border-r-0 transition-colors hover:bg-muted ${modeloActivo === item.modelo ? "bg-primary/10" : ""}`}><p className="truncate text-xs font-medium text-muted-foreground">{item.modelo}</p><p className="mt-1 text-lg font-semibold text-foreground">{item.total}</p></button>)}{resumenDinamico.length === 0 && <p className="w-full px-3 py-4 text-center text-sm text-muted-foreground">Sin reventas pendientes</p>}</div></article><article className="grid grid-cols-3 border-t border-border lg:border-l lg:border-t-0">{[["Más de 90 días", resumenDias.mayorA90, "text-destructive"], ["60 a 89 días", resumenDias.entre60y89, "text-amber-700 dark:text-amber-400"], ["Menos de 60 días", resumenDias.menorA60, "text-emerald-700 dark:text-emerald-400"]].map(([label, total, tone], index) => <div key={String(label)} className={`flex min-h-28 flex-col items-center justify-center px-2 text-center ${index ? "border-l border-border" : ""}`}><p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</p><p className={`mt-2 text-3xl font-semibold tracking-tight ${tone}`}>{total}</p></div>)}</article></div>
+    </section>
+    <section className="rounded-lg border border-border bg-card p-3 shadow-sm"><div className="flex items-center gap-2"><Tabs value={modeloActivo} onValueChange={(value) => setModeloActivo(String(value))} className="min-w-0 flex-1"><TabsList className="w-full justify-start gap-1 overflow-x-auto rounded-md border border-border bg-background p-1">{filtrosDisponibles.map((filtro) => <TabsTrigger key={filtro} value={filtro} className="shrink-0 data-[active]:border-transparent">{filtro}</TabsTrigger>)}</TabsList></Tabs>{modeloActivo !== "TODOS" && <button type="button" onClick={resetFilters} className="shrink-0 px-2 text-xs font-medium text-primary hover:underline">Limpiar</button>}</div></section>
+    <section className="overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm"><div className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-semibold text-foreground">Detalle de reventas</h2><p className="mt-0.5 text-sm text-muted-foreground">{itemsFiltrados.length} de {items.length} operaciones · ordenadas por antigüedad</p></div><span className="text-xs text-muted-foreground">Actualizá la lista para consultar datos vigentes.</span></div><div className="overflow-x-auto"><table className="min-w-[1050px] w-full text-xs"><thead className="border-b border-border bg-muted/70"><tr>{headers.map(([label, key]) => <th key={label} className="whitespace-nowrap px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{key ? <button type="button" onClick={() => changeSort(key)} className="inline-flex items-center gap-1 hover:text-foreground">{label}<ArrowUpDown className="size-3" /><span className="text-primary">{sortLabel(key)}</span></button> : label}</th>)}</tr></thead><tbody>{itemsFiltrados.map((item) => { const age = getAgeTone(item.diasDesdeEntrega); return <tr key={`${item.opera}-${item.chasis}`} className={`border-b border-border last:border-b-0 ${age.row}`}><td className="max-w-56 px-4 py-2 font-medium text-foreground"><span className="block truncate" title={item.clienteNombre?.trim()}>{item.clienteNombre?.trim() || "-"}</span></td><td className="px-4 py-2 font-mono font-medium text-foreground">{item.opera}</td><td className="px-4 py-2"><span className="inline-flex rounded-full bg-background px-2 py-0.5 text-[11px] font-semibold text-foreground ring-1 ring-inset ring-border">{item.modelo || "Sin modelo"}</span></td><td className="min-w-72 px-4 py-2 text-foreground">{item.version || "-"}</td><td className="px-4 py-2 font-mono text-[11px] text-foreground">{item.chasis || "-"}</td><td className="whitespace-nowrap px-4 py-2 text-foreground">{formatDate(item.fechaEntrega)}</td><td className="whitespace-nowrap px-4 py-2"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${age.badge}`}><span>{item.diasDesdeEntrega} días</span><span className="hidden xl:inline">· {age.label}</span></span></td><td className="px-4 py-2 text-foreground">{item.vendedor || "-"}</td></tr>; })}{itemsFiltrados.length === 0 && <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">No encontramos reventas con esos filtros.</td></tr>}</tbody></table></div></section>
+  </div>;
 }
+
+function LoadingState() { return <div className="font-preset w-full space-y-3 px-2 py-3"><div className="rounded-lg border border-border bg-card p-4 shadow-sm"><div className="h-5 w-32 animate-pulse rounded bg-muted" /><div className="mt-3 h-7 w-80 animate-pulse rounded bg-muted" /></div><div className="grid gap-3 lg:grid-cols-2">{[0, 1].map((index) => <div key={index} className="h-36 animate-pulse rounded-lg border border-border bg-muted" />)}</div><div className="h-96 animate-pulse rounded-lg border border-border bg-muted" /></div>; }

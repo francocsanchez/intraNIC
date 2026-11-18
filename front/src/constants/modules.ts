@@ -47,7 +47,6 @@ export const moduleKeys = [
   "promediosPlanAhorro",
   "minutas",
   "kintoFlota",
-  "kintoDashboard",
   "kintoMatafuegos",
   "kintoMultas",
   "kintoNpsShare",
@@ -106,7 +105,6 @@ export const moduleLabels: Record<ModuleKey, string> = {
   promediosPlanAhorro: "Promedios Plan de ahorro",
   minutas: "Minutas",
   kintoFlota: "Kinto · Flota",
-  kintoDashboard: "Kinto · Dashboard",
   kintoMatafuegos: "Kinto · Matafuegos",
   kintoMultas: "Kinto · Multas",
   kintoNpsShare: "Kinto · NPS Share",
@@ -159,7 +157,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Kinto",
-    modules: ["kintoFlota", "kintoDashboard", "kintoMatafuegos", "kintoMultas", "kintoNpsShare"],
+    modules: ["kintoFlota", "kintoMatafuegos", "kintoMultas", "kintoNpsShare"],
   },
   {
     title: "Licitaciones",

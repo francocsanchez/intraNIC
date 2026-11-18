@@ -2,14 +2,13 @@ import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { hasModulePathAccess } from "@/helpers/access";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { BarChart3, CarFront, Flame, LineChart, ReceiptText } from "lucide-react";
+import { CarFront, Flame, LineChart, ReceiptText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function KintoLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
   const navItems = [
-    { label: "Dashboard", to: paths.kinto.dashboard, icon: BarChart3, module: "kintoDashboard" as const },
     { label: "Flota", to: paths.kinto.flota, icon: CarFront, module: "kintoFlota" as const },
     { label: "Matafuegos", to: paths.kinto.matafuegos, icon: Flame, module: "kintoMatafuegos" as const },
     { label: "Multas", to: paths.kinto.multas, icon: ReceiptText, module: "kintoMultas" as const },

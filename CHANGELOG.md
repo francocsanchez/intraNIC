@@ -2,6 +2,8 @@
 
 ## 2026-11-18
 
+- **Kinto:** se eliminó el Dashboard, su ruta `/kinto/dashboard`, acceso, permiso, API y componentes asociados.
+- **Reventas pendientes:** se rediseñó `/administracion/reventa-pendientes` como tablero compacto, con resumen por modelo y antigüedad, pestañas delineadas para filtrar modelos, actualización manual y orden por columnas. La grilla redujo tipografía y alto de fila para priorizar más operaciones visibles.
 - **Solicitud de cambio de color:** el interno ahora es opcional. Las solicitudes sin interno se registran como `PREVENTA` y las que lo informan como `CAMBIO COLOR`; la grilla muestra esa clasificación en su primera columna con badges de color.
 - **Solicitud de cambio de color:** se renombró la identificación visual de las solicitudes sin interno a `ADELANTO`.
 
