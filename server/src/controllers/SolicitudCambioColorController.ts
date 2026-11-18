@@ -44,7 +44,7 @@ const findUnidadSnapshotsByInternos = async (internos: number[]) => {
 };
 
 const format = (item: any, snapshot: { chasis: string; nrofab: string } = { chasis: "", nrofab: "" }) => ({
-  _id: String(item._id), interno: item.interno, nrofab: item.nrofab ?? snapshot.nrofab ?? "", versionOrigen: (item.nrofab ?? snapshot.nrofab) ? `${item.versionOrigen} · N° fab: ${item.nrofab ?? snapshot.nrofab}` : item.versionOrigen, colorOrigen: item.colorOrigen,
+  _id: String(item._id), interno: item.interno ?? null, nrofab: item.nrofab ?? snapshot.nrofab ?? "", versionOrigen: (item.nrofab ?? snapshot.nrofab) ? `${item.versionOrigen} · N° fab: ${item.nrofab ?? snapshot.nrofab}` : item.versionOrigen, colorOrigen: item.colorOrigen,
   versionDestino: { _id: String(item.versionDestinoId), nombre: item.versionDestinoNombre },
   colorDestino: { _id: String(item.colorDestinoId), nombre: item.colorDestinoNombre },
   colorDestino2: item.colorDestino2Id ? { _id: String(item.colorDestino2Id), nombre: item.colorDestino2Nombre ?? "" } : null,
@@ -97,8 +97,9 @@ export class SolicitudCambioColorController {
       }
       if (estado === "rechazadas") filter.solicitudRechazada = true;
       const data = await SolicitudCambioColor.find(filter).sort({ createdAt: -1 }).lean();
-      const snapshotsByInterno = await findUnidadSnapshotsByInternos([...new Set(data.map((item) => item.interno))]);
-      return res.json({ data: data.map((item) => format(item, snapshotsByInterno.get(item.interno))) });
+      const internos = [...new Set(data.map((item) => item.interno).filter((value): value is number => Number.isInteger(value) && value > 0))];
+      const snapshotsByInterno = await findUnidadSnapshotsByInternos(internos);
+      return res.json({ data: data.map((item) => format(item, item.interno ? snapshotsByInterno.get(item.interno) : undefined)) });
     } catch (error) { logError("SolicitudCambioColorController.list"); console.error(error); return res.status(500).json({ message: "Error al listar las solicitudes" }); }
   };
 
@@ -116,18 +117,19 @@ export class SolicitudCambioColorController {
   static create = async (req: Request, res: Response) => {
     try {
       if (!req.user) return res.status(401).json({ error: "Usuario no autenticado" });
+      const internoText = text(req.body?.interno);
       const interno = positiveInteger(req.body?.interno);
       const solicitadoPorCodigo = positiveInteger(req.body?.solicitadoPorCodigo);
-      if (!interno) return res.status(400).json({ error: "El interno debe ser un numero positivo" });
+      if (internoText && !interno) return res.status(400).json({ error: "El interno debe ser un numero positivo" });
       if (!solicitadoPorCodigo) return res.status(400).json({ error: "Selecciona quien solicita el cambio" });
-      const [unidad, destination, vendedor] = await Promise.all([findUnidad(interno), resolveDestination(req.body ?? {}), findVendedor(solicitadoPorCodigo)]);
-      if (!unidad) return res.status(404).json({ error: "No se encontro una unidad 0 km para el interno indicado" });
-      if (unidad.chasis) return res.status(400).json({ error: "La unidad ya fue pagada y no se puede cambiar porque tiene chasis asignado" });
+      const [unidad, destination, vendedor] = await Promise.all([interno ? findUnidad(interno) : Promise.resolve(null), resolveDestination(req.body ?? {}), findVendedor(solicitadoPorCodigo)]);
+      if (interno && !unidad) return res.status(404).json({ error: "No se encontro una unidad 0 km para el interno indicado" });
+      if (unidad?.chasis) return res.status(400).json({ error: "La unidad ya fue pagada y no se puede cambiar porque tiene chasis asignado" });
       if ("error" in destination) return res.status(400).json({ error: destination.error });
       if (!vendedor) return res.status(400).json({ error: "El vendedor seleccionado no esta activo" });
       const name = actorName(req.user);
-      const after = { interno, nrofab: unidad.nrofab, solicitadoPor: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, versionDestino: destination.data.versionDestinoNombre, colorDestino: destination.data.colorDestinoNombre, colorDestino2: destination.data.colorDestino2Nombre, observaciones: destination.data.observaciones, solicitudPedida: false, solicitudCompletada: false, solicitudRechazada: false };
-      const data = await SolicitudCambioColor.create({ interno, nrofab: unidad.nrofab, solicitadoPorCodigo, solicitadoPorNombre: vendedor.vendedor, versionOrigen: unidad.version, colorOrigen: unidad.color, ...destination.data, createdBy: req.user._id, createdByName: name, audit: [{ action: solicitudCambioColorAuditAction.CREATED, actorId: req.user._id, actorName: name, before: {}, after }] });
+      const after = { interno: interno ?? null, nrofab: unidad?.nrofab ?? "", solicitadoPor: vendedor.vendedor, versionOrigen: unidad?.version ?? "", colorOrigen: unidad?.color ?? "", versionDestino: destination.data.versionDestinoNombre, colorDestino: destination.data.colorDestinoNombre, colorDestino2: destination.data.colorDestino2Nombre, observaciones: destination.data.observaciones, solicitudPedida: false, solicitudCompletada: false, solicitudRechazada: false };
+      const data = await SolicitudCambioColor.create({ interno: interno ?? null, nrofab: unidad?.nrofab ?? "", solicitadoPorCodigo, solicitadoPorNombre: vendedor.vendedor, versionOrigen: unidad?.version ?? "", colorOrigen: unidad?.color ?? "", ...destination.data, createdBy: req.user._id, createdByName: name, audit: [{ action: solicitudCambioColorAuditAction.CREATED, actorId: req.user._id, actorName: name, before: {}, after }] });
       return res.status(201).json({ message: "Solicitud creada correctamente", data: format(data.toObject()) });
     } catch (error) { logError("SolicitudCambioColorController.create"); console.error(error); return res.status(500).json({ message: "Error al crear la solicitud" }); }
   };

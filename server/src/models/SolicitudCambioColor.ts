@@ -21,7 +21,7 @@ export interface ISolicitudCambioColorAudit {
 }
 
 export interface ISolicitudCambioColor extends Document {
-  interno: number;
+  interno?: number | null;
   nrofab: string;
   versionOrigen: string;
   colorOrigen: string;
@@ -58,10 +58,10 @@ const auditSchema = new Schema<ISolicitudCambioColorAudit>(
 
 const solicitudCambioColorSchema = new Schema<ISolicitudCambioColor>(
   {
-    interno: { type: Number, required: true, index: true },
-    nrofab: { type: String, required: true, trim: true },
-    versionOrigen: { type: String, required: true, trim: true },
-    colorOrigen: { type: String, required: true, trim: true },
+    interno: { type: Number, default: null, index: true },
+    nrofab: { type: String, trim: true, default: "" },
+    versionOrigen: { type: String, trim: true, default: "" },
+    colorOrigen: { type: String, trim: true, default: "" },
     versionDestinoId: { type: Schema.Types.ObjectId, ref: "versiones", required: true },
     versionDestinoNombre: { type: String, required: true, trim: true },
     colorDestinoId: { type: Schema.Types.ObjectId, ref: "colores", required: true },

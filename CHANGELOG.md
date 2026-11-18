@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-18
+
+- **Solicitud de cambio de color:** el interno ahora es opcional. Las solicitudes sin interno se registran como `PREVENTA` y las que lo informan como `CAMBIO COLOR`; la grilla muestra esa clasificación en su primera columna con badges de color.
+
 ## 2026-11-16
 
 - **Configuración:** se unificaron todos los accesos dentro de una única tarjeta de Parámetros de sistema, en una grilla de dos columnas sin explicaciones, subtarjetas ni botones.

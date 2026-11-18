@@ -7,7 +7,7 @@ import {
 } from "@/types/index";
 import { isAxiosError } from "axios";
 
-export type SolicitudCambioColorPayload = { interno: number; solicitadoPorCodigo: number; versionDestinoId: string; colorDestinoId: string; colorDestino2Id?: string; observaciones?: string };
+export type SolicitudCambioColorPayload = { interno?: number; solicitadoPorCodigo: number; versionDestinoId: string; colorDestinoId: string; colorDestino2Id?: string; observaciones?: string };
 export type SolicitudCambioColorEstado = "solicitudPedida" | "solicitudCompletada";
 
 const parse = async <T>(request: Promise<{ data: unknown }>, schema: { safeParse: (data: unknown) => { success: true; data: T } | { success: false } }, fallback: string) => {

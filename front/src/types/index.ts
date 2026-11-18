@@ -2881,7 +2881,7 @@ export const solicitudCambioColorAuditSchema = z.object({
 
 export const solicitudCambioColorSchema = z.object({
   _id: z.string(),
-  interno: z.number(),
+  interno: z.number().nullable(),
   nrofab: z.string(),
   versionOrigen: z.string(),
   colorOrigen: z.string(),
