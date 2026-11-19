@@ -1,4 +1,5 @@
 # AGENTS.md
+En la edición y alta de usuarios, el permiso compartido `talleresUsados` se etiqueta `Talleres y presupuestos / Dashboard Reparaciones` para hacer explícito que habilita ambas vistas, sin crear un permiso independiente para el dashboard.
 La tabla Gasto mensual por taller de Dashboard Reparaciones comienza con una fila totalizadora de los importes mensuales de todos los talleres y centra todas sus columnas.
 Las tablas Unidades con presupuesto y Gasto mensual por taller de Dashboard Reparaciones no tienen anchos mínimos ni desplazamiento horizontal: usan tipografía y celdas compactas; el gráfico Unidades en operatoria ocupa un tercio del bloque superior.
 `Dashboard Reparaciones` muestra debajo de los análisis por taller una tabla de gasto mensual por taller: primera columna Taller y columnas mensuales, usando el Costo con IVA de presupuestos Aprobados y el mes de F. Pedido.

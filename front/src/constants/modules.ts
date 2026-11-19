@@ -84,7 +84,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   noReparado: "No reparado",
   pendienteDocumentacion: "Pendiente documentacion",
   ingresos: "Ingresos",
-  talleresUsados: "Talleres y presupuestos",
+  talleresUsados: "Talleres y presupuestos / Dashboard Reparaciones",
   operaciones: "Operaciones",
   dashboardSalon: "Dashboard Salon",
   dashboardAdministracion: "Dashboard Administracion",

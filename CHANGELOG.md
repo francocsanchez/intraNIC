@@ -2,6 +2,7 @@
 
 ## 2026-11-19
 
+- **Permisos de usuarios:** el permiso compartido de Talleres y presupuestos ahora identifica explícitamente que también habilita Dashboard Reparaciones.
 - **Dashboard Reparaciones:** la tabla de gasto mensual ahora inicia con una fila Total que consolida el importe mensual de todos los talleres y centra todas sus columnas.
 - **Dashboard Reparaciones:** se compactaron las tablas de unidades y gasto mensual para evitar desplazamiento horizontal, y el gráfico de operatoria se redujo a un tercio del bloque superior.
 - **Dashboard Reparaciones:** se agregó una tabla de gasto mensual por taller, con Taller como primera columna, meses como columnas e importes con IVA de presupuestos aprobados.
