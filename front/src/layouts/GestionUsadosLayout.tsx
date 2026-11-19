@@ -2,7 +2,7 @@ import { hasModulePathAccess } from "@/helpers/access";
 import BaseAppLayout from "@/layouts/BaseAppLayout";
 import { useAuth } from "@/hooks/useAuthe";
 import { paths } from "@/routes/paths";
-import { FileSearch, Hammer, Inbox } from "lucide-react";
+import { BarChart3, FileSearch, Hammer, Inbox, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function GestionUsadosLayout() {
@@ -30,6 +30,20 @@ export default function GestionUsadosLayout() {
       icon: Inbox,
       visible: hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos),
       active: pathname === paths.usados.stockIngresos,
+    },
+    {
+      label: "Talleres y presupuestos",
+      to: paths.usados.talleres,
+      icon: Wrench,
+      visible: hasModulePathAccess(user, "talleresUsados", paths.usados.talleres),
+      active: pathname === paths.usados.talleres,
+    },
+    {
+      label: "Dashboard Reparaciones",
+      to: paths.usados.dashboardReparaciones,
+      icon: BarChart3,
+      visible: hasModulePathAccess(user, "talleresUsados", paths.usados.dashboardReparaciones),
+      active: pathname === paths.usados.dashboardReparaciones,
     },
   ].filter((item) => item.visible);
 

@@ -44,7 +44,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
 }
-
 /* Solicitudes de cambio de color: estados centrados y acciones alineadas. */
 .font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] th:nth-child(6),
 .font-preset.space-y-3.bg-muted.p-3 > section > .overflow-x-auto > table.min-w-\[1250px\] th:nth-child(7),
@@ -231,4 +230,130 @@
     size: landscape;
     margin: 10mm;
   }
+}
+@media (min-width: 768px) {
+  [role="alert"].md\:col-span-3 {
+    display: none;
+  }
+
+  label:has(input.border-destructive) {
+    position: relative;
+  }
+
+  label:has(input.border-destructive)::after {
+    content: "Supera diferencia";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 0.25rem;
+    background: color-mix(in oklab, var(--destructive) 12%, transparent);
+    color: var(--destructive);
+    padding: 0.05rem 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1rem;
+  }
+}
+
+label:has(input.min-w-0) > .mt-1.flex > button {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+div.rounded-md.border.border-border.bg-muted.p-2.text-sm.md\:col-span-2 {
+  display: flex;
+  height: 2.25rem;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateY(1.35rem);
+}
+
+@media (min-width: 640px) {
+  section.grid.gap-3 > div.grid.grid-cols-2 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  section.grid.gap-3 > div.grid.grid-cols-2 > button {
+    min-height: 4.75rem;
+    border-color: var(--border);
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px oklch(0 0 0 / 0.04);
+  }
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 0;
+  margin-left: auto;
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button {
+  min-height: 2.25rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.3rem 0.55rem;
+  box-shadow: none;
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button p:first-child {
+  display: inline;
+  font-size: 0.75rem;
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button p:last-child {
+  display: inline;
+  margin-left: 0.35rem;
+  font-size: 1rem;
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button.ring-2 {
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="pendiente"] {
+  color: oklch(0.62 0.15 80);
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="aprobado"] {
+  color: oklch(0.52 0.13 155);
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="rechazado"] {
+  color: var(--destructive);
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="revisar"] {
+  color: var(--muted-foreground);
+}
+
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="pendiente"].ring-2 { border-bottom-color: oklch(0.62 0.15 80); }
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="aprobado"].ring-2 { border-bottom-color: oklch(0.52 0.13 155); }
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="rechazado"].ring-2 { border-bottom-color: var(--destructive); }
+section.rounded-lg.border.border-border.bg-card > div.flex.flex-wrap.gap-2.border-b.p-3 > div.grid.grid-cols-2 > button[data-estado="revisar"].ring-2 { border-bottom-color: var(--muted-foreground); }
+
+table.min-w-\[1180px\] th,
+table.min-w-\[1180px\] td {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+table.min-w-\[1180px\] tbody td:nth-child(3) {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-costo-preview="true"] {
+  float: right;
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 500;
 }

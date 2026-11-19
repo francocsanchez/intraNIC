@@ -156,6 +156,6 @@ export default function EChart({ option, className = "", enableHoverEmphasis = t
   }, [enableHoverEmphasis, option, resetOnOptionChange]);
 
   return (
-    <div ref={containerRef} className={`h-full w-full ${className}`.trim()} />
+    <div ref={containerRef} className={className ? `w-full ${className}` : "h-full w-full"} />
   );
 }

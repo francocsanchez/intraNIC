@@ -24,6 +24,7 @@ export const moduleKeys = [
   "noReparado",
   "pendienteDocumentacion",
   "ingresos",
+  "talleresUsados",
   "operaciones",
   "dashboardSalon",
   "dashboardAdministracion",

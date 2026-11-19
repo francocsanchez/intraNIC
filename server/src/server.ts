@@ -45,6 +45,7 @@ import kintoNpsShareRoutes from "./routes/kintoNpsShareRoutes";
 import licitacionesAdministracionRoutes from "./routes/licitacionesAdministracionRoutes";
 import licitacionesResumenRoutes from "./routes/licitacionesResumenRoutes";
 import linksRoutes from "./routes/linksRoutes";
+import talleresUsadosRoutes from "./routes/talleresUsadosRoutes";
 
 import { corsOptions } from "./config/cors";
 
@@ -63,6 +64,7 @@ app.use("/api/links", linksRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/dms/convencional", convencionalRoutes);
 app.use("/api/dms/usados", usadosRoutes);
+app.use("/api/gestion/usados/talleres", talleresUsadosRoutes);
 app.use("/api/dms/belgrano", belgranoRoutes);
 app.use("/api/dms/liess", liessRoutes);
 app.use("/api/dms/liess/reparaciones", liessReparacionesRoutes);

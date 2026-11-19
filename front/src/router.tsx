@@ -66,6 +66,8 @@ const StockNoReparadoUsadosView = lazy(() => import("./views/usados/StockNoRepar
 const StockPendDocuUsadosView = lazy(() => import("./views/usados/StockPendDocuUsadosView"));
 const StockReservasUsados = lazy(() => import("./views/usados/StockReservasUsados"));
 const StockIngresoUsados = lazy(() => import("./views/usados/StockIngresoUsados"));
+const TalleresUsadosView = lazy(() => import("./views/usados/TalleresUsadosView"));
+const DashboardReparacionesView = lazy(() => import("./views/usados/DashboardReparacionesView"));
 const PendienteReventaView = lazy(() => import("./views/admin/siac/PendienteReventaView"));
 const PromediosConvencionalView = lazy(() => import("./views/admin/siac/PromediosConvencionalView"));
 const PedidoUnidadesView = lazy(() => import("./views/admin/siac/PedidoUnidadesView"));
@@ -558,6 +560,12 @@ export default function Router() {
           <Route element={<ModuleProtectedRoute allowedModules={["ingresos"]} />}>
             <Route element={<GestionUsadosLayout />}>
               <Route path={paths.usados.stockIngresos} element={<StockIngresoUsados />} />
+            </Route>
+          </Route>
+          <Route element={<ModuleProtectedRoute allowedModules={["talleresUsados"]} />}>
+            <Route element={<GestionUsadosLayout />}>
+              <Route path={paths.usados.talleres} element={<TalleresUsadosView />} />
+              <Route path={paths.usados.dashboardReparaciones} element={<DashboardReparacionesView />} />
             </Route>
           </Route>
 

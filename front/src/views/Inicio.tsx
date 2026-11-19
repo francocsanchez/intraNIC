@@ -203,6 +203,8 @@ export default function Inicio() {
           icon: FileSearch,
         },
         { label: "Ingresos", to: paths.usados.stockIngresos, enabled: hasModulePathAccess(user, "ingresos", paths.usados.stockIngresos), icon: Inbox },
+        { label: "Talleres y presupuestos", to: paths.usados.talleres, enabled: hasModulePathAccess(user, "talleresUsados", paths.usados.talleres), icon: Wrench },
+        { label: "Dashboard Reparaciones", to: paths.usados.dashboardReparaciones, enabled: hasModulePathAccess(user, "talleresUsados", paths.usados.dashboardReparaciones), icon: BarChart3 },
       ],
     },
     {

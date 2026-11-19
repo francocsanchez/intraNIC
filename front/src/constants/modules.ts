@@ -24,6 +24,7 @@ export const moduleKeys = [
   "noReparado",
   "pendienteDocumentacion",
   "ingresos",
+  "talleresUsados",
   "operaciones",
   "dashboardSalon",
   "dashboardAdministracion",
@@ -83,6 +84,7 @@ export const moduleLabels: Record<ModuleKey, string> = {
   noReparado: "No reparado",
   pendienteDocumentacion: "Pendiente documentacion",
   ingresos: "Ingresos",
+  talleresUsados: "Talleres y presupuestos",
   operaciones: "Operaciones",
   dashboardSalon: "Dashboard Salon",
   dashboardAdministracion: "Dashboard Administracion",
@@ -143,7 +145,7 @@ export const moduleSections: Array<{
   },
   {
     title: "Gestion de stock usados",
-    modules: ["noReparado", "pendienteDocumentacion", "ingresos"],
+    modules: ["noReparado", "pendienteDocumentacion", "ingresos", "talleresUsados"],
   },
   {
     title: "Analisis",

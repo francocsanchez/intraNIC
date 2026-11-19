@@ -152,6 +152,8 @@ export const paths = {
     stockPendienteDocumentacion: "/gestion/usados/stock/pendiente-documentacion",
     stockReservado: "/stock/usados/reservado",
     stockIngresos: "/gestion/usados/stock/ingresos",
+    talleres: "/gestion/usados/talleres",
+    dashboardReparaciones: "/gestion/usados/dashboard-reparaciones",
     misReservas: "/stock/usados/mis-reservas",
     misOperaciones: "/stock/usados/mis-operaciones",
   },

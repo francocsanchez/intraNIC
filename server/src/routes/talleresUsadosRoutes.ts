@@ -1,0 +1,18 @@
+import { Router } from "express";
+import { authenticate } from "../middleware/authenticate";
+import { authorizeModules } from "../middleware/authorizeModules";
+import { TalleresUsadosController } from "../controllers/TalleresUsadosController";
+const router = Router();
+router.use(authenticate, authorizeModules("talleresUsados"));
+router.get("/presupuestos", TalleresUsadosController.listPresupuestos);
+router.post("/presupuestos", TalleresUsadosController.createPresupuesto);
+router.patch("/presupuestos/:id", TalleresUsadosController.updatePresupuesto);
+router.get("/talleres", TalleresUsadosController.listTalleres);
+router.post("/talleres", TalleresUsadosController.saveTaller);
+router.patch("/talleres/:id", TalleresUsadosController.saveTaller);
+router.delete("/talleres/:id", TalleresUsadosController.deleteTaller);
+router.get("/unidad", TalleresUsadosController.unidad);
+router.get("/catalogo", TalleresUsadosController.catalogo);
+router.get("/dashboard", TalleresUsadosController.dashboard);
+router.get("/exportar", TalleresUsadosController.exportPresupuestos);
+export default router;

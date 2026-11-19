@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-11-19
+
+- **Dashboard Reparaciones:** la tabla de gasto mensual ahora inicia con una fila Total que consolida el importe mensual de todos los talleres y centra todas sus columnas.
+- **Dashboard Reparaciones:** se compactaron las tablas de unidades y gasto mensual para evitar desplazamiento horizontal, y el gráfico de operatoria se redujo a un tercio del bloque superior.
+- **Dashboard Reparaciones:** se agregó una tabla de gasto mensual por taller, con Taller como primera columna, meses como columnas e importes con IVA de presupuestos aprobados.
+- **Dashboard Reparaciones:** la tabla y los gráficos ahora incorporan unidades externas, identificadas por dominio, además de los internos; los datos demo vuelven a alimentar toda la operatoria y se informa un error si la carga falla.
+- **Talleres y presupuestos:** se quitaron las tarjetas de estado; los estados quedaron exclusivamente como tabs compactos con conteos globales en la barra de filtros.
+- **Dashboard Reparaciones:** se corrigió el crecimiento vertical continuo al respetar las alturas explícitas de sus gráficos ECharts, sin combinarse con `h-full`.
+- **Dashboard Reparaciones:** se agregó el acceso directo en Inicio, dentro de Gestión de stock usados.
+- **Dashboard Reparaciones:** se incorporó `/gestion/usados/dashboard-reparaciones` dentro de Gestión de stock usados, con el tablero de Intra-Talleres: métricas, etapas mensuales por interno, operatoria, aprobados por taller y distribución por período.
+- **Talleres y presupuestos:** se incrementó nuevamente el alto del gráfico de días de reparación a `h-64` para priorizar su lectura.
+- **Talleres y presupuestos:** el selector de año del gráfico quedó flotante en la esquina superior derecha para no restar altura útil al gráfico.
+- **Talleres y presupuestos:** el gráfico de días de reparación incorpora un selector de año que consulta y muestra el período elegido.
+- **Talleres y presupuestos:** se amplió la altura del gráfico de días de reparación para mejorar la lectura de etiquetas y variaciones mensuales.
+- **Talleres y presupuestos:** el gráfico de días de reparación ahora conserva su alto y ocupa todo el ancho disponible cuando los tabs de estado se integran a la barra de filtros.
+- **Talleres y presupuestos:** se unificó el formulario de alta para que las unidades externas vuelvan a mostrar el check `Es re-ingreso` junto a `Nro. presupuesto`; el valor se envía y persiste como `esReingreso`.
+- **Talleres y presupuestos:** la grilla ahora separa `Tipo / Interno` de Unidad; muestra `Externo` o el número de interno y concentra marca, modelo y dominio en una sola línea truncable para reducir la altura de cada fila.
+- **Talleres y presupuestos:** se agregó el comando `talleres-usados:seed-demo` para recrear 100 presupuestos externos y tres talleres DEMO aislados, útiles para validar grilla, alertas y dashboard.
+- **Talleres y presupuestos:** las cuatro métricas de estado se compactaron en una sola fila de tarjetas, siguiendo el patrón de Card de Shadcn Studio.
+- **Talleres y presupuestos:** los estados se trasladaron a la barra de filtros como tabs, después de Estado, Interno y Dominio.
+- **Talleres y presupuestos:** se compactó la grilla; Tipo pasó a su propia columna y Unidad quedó en una línea para reducir el alto de las filas.
+- **Talleres y presupuestos:** los tabs de estado se alinearon a la derecha y conservan sus conteos globales al filtrar la tabla.
+- **Talleres y presupuestos:** los tabs de estado ahora usan colores semánticos.
+- **Talleres y presupuestos:** se restauró `Es re-ingreso` para altas externas y Ver ahora abre el historial agrupado de presupuestos de una unidad, con tabla de seguimiento y totales.
+- **Talleres y presupuestos:** `Es re-ingreso` se trasladó junto a Nro. presupuesto y se oculta automáticamente para unidades del sistema.
+- **Talleres y presupuestos:** Costo ARS ahora informa en vivo el importe Neto y Con IVA durante la carga.
+- **Talleres y presupuestos:** se corrigió el ciclo de sincronización de tabs que podía bloquear el formulario de nuevo presupuesto.
+- **Talleres y presupuestos:** los tabs de estado se conservan dentro de la barra de filtros mediante una reubicación única y acotada, sin observadores continuos ni solicitudes al abrir el formulario.
+- **Talleres y presupuestos:** los estados de la barra recuperaron el diseño compacto de tabs: etiqueta y contador en una línea, subrayado y color semántico.
+- **Talleres y presupuestos:** los contadores de tabs ahora se resuelven contra el total global, por lo que no pasan a cero al filtrar, y conservan su diseño al seleccionarlos.
+- **Talleres y presupuestos:** el gráfico operativo fue reemplazado por `Promedio anualizado de días de reparación`, una línea ECharts mensual de presupuestos aprobados con ingreso que continúa los casos sin egreso hasta hoy.
+- **Talleres y presupuestos:** el seed DEMO ahora distribuye fechas de egreso, re-ingresos y grupos de dos o tres presupuestos por unidad; la grilla identifica cada re-ingreso con su indicador.
+- **Talleres y presupuestos:** Ver ahora abre el historial agrupado de la unidad en formato tabular, con seguimiento, importes netos/con IVA y totales pendientes, aprobados y generales de la reparación.
+- **Talleres y presupuestos:** los presupuestos Rechazados permanecen visibles en el historial, pero se excluyen de los totales y del conteo económico de la reparación.
+- **Talleres y presupuestos:** el indicador de re-ingreso de la grilla ahora usa una flecha circular compacta junto al tipo de unidad.
+- **Talleres y presupuestos:** el alta ahora muestra KM informado con separador de miles y aplica máscara de pesos argentinos a Costo ARS y Valor info ARS, preservando el valor numérico al guardar.
+- **Talleres y presupuestos:** el alta calcula en vivo Valor ingreso y Diferencia, y destaca en rojo el costo junto con la alerta `Presupuesto supera diferencia` cuando corresponde.
+- **Talleres y presupuestos:** la alerta de presupuesto superior a la diferencia ahora es un badge superpuesto en el encabezado de Costo ARS, sin agregar filas ni desplazar campos del diálogo.
+- **Talleres y presupuestos:** el botón de búsqueda de Interno ahora tiene la misma altura que su campo de texto.
+- **Talleres y presupuestos:** la unidad encontrada se compactó en una línea centrada verticalmente para no ampliar el diálogo.
+- **Talleres y presupuestos:** la ficha compacta de unidad encontrada se alineó visualmente con el campo de Interno.
+- **Talleres y presupuestos:** se integró la funcionalidad de Intra-Talleres en `/gestion/usados/talleres`, con permiso independiente `talleresUsados`, autenticación/usuarios de IntraNIC y API protegida propia.
+- **Talleres y presupuestos:** se incorporaron talleres y presupuestos en colecciones Mongo aisladas, consultas SIAC de unidades usadas y catálogo para externas, gestión de estados/fechas, historial por unidad, paginación de 40 registros, dashboard operativo y exportación Excel.
+- **Migración:** se agregaron `npm run talleres-usados:backup` y `npm run talleres-usados:migrate`: respaldo local previo e importador idempotente y de sólo lectura desde `intra_talleres` usando `TALLERES_MONGO_URI` y referencias históricas `legacySourceId`.
+
 ## 2026-11-18
 
 - **Licitaciones · Administración:** se corrigió la identificación de la fila al guardar checks de avance, evitando el error `Unidad no encontrada`.

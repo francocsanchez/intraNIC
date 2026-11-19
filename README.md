@@ -146,6 +146,15 @@ SMTP_FROM_EMAIL=
 
 Nota: `docker-compose.yml` también referencia `PORT_NIC`, `DBPORT_NIC`, `PORT_LIESS` y `DBPORT_LIESS` para despliegue por contenedores.
 
+Para importar una única vez los datos históricos de la aplicación retirada Intra-Talleres, definir temporalmente `TALLERES_MONGO_URI` apuntando a su MongoDB. Antes del corte, generar un respaldo local (se puede cambiar el destino con `TALLERES_BACKUP_PATH`) y luego ejecutar la migración desde `server`:
+
+```bash
+npm run talleres-usados:backup
+npm run talleres-usados:migrate
+```
+
+El importador sólo lee el origen y es idempotente: conserva el identificador histórico para no duplicar talleres ni presupuestos en ejecuciones posteriores.
+
 ## Desarrollo local
 
 ### 1. Instalar dependencias
