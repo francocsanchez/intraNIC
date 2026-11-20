@@ -1424,6 +1424,7 @@ export type PedidoUnidadInternosEstadoResponse = z.infer<
 export const pedidoUnidadPreviaSchema = z.object({
   _id: z.string(),
   interno: z.number(),
+  anioPatentamiento: z.union([z.literal(2026), z.literal(2027)]).default(2026),
   clienteNombre: z.string(),
   vendedorNombre: z.string(),
   chasis: z.string().nullable(),

@@ -46,6 +46,7 @@ export default function PedidoUnidadesPreviasView() {
   const queryClient = useQueryClient();
   const { user, isLoading: authLoading } = useAuth();
   const [internoInput, setInternoInput] = useState("");
+  const [anioPatentamiento, setAnioPatentamiento] = useState<2026 | 2027>(2026);
 
   const { data = [], isLoading, isError, error } = useQuery({
     queryKey: ["pedido-unidades-previas"],
@@ -58,6 +59,7 @@ export default function PedidoUnidadesPreviasView() {
     onSuccess: (response) => {
       toast.success(response.message);
       setInternoInput("");
+      setAnioPatentamiento(2026);
       queryClient.invalidateQueries({ queryKey: ["pedido-unidades-previas"] });
     },
     onError: (mutationError: Error) => {
@@ -120,7 +122,7 @@ export default function PedidoUnidadesPreviasView() {
       return;
     }
 
-    createMutation.mutate(interno);
+    createMutation.mutate({ interno, anioPatentamiento });
   };
 
   return (
@@ -154,7 +156,7 @@ export default function PedidoUnidadesPreviasView() {
       </section>
 
       {canAddPrevia && (
-        <section className="rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm"><div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_auto]"><label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+        <section className="rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm"><div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_10rem_auto]"><label className="flex flex-col gap-1 text-sm font-medium text-foreground">
               Interno
               <input
                 type="number"
@@ -170,6 +172,18 @@ export default function PedidoUnidadesPreviasView() {
                 placeholder="Ej: 66439"
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
               />
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+              Año pat.
+              <select
+                value={anioPatentamiento}
+                onChange={(event) => setAnioPatentamiento(Number(event.target.value) as 2026 | 2027)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value={2026}>2026</option>
+                <option value={2027}>2027</option>
+              </select>
             </label>
 
             <button
@@ -196,10 +210,11 @@ export default function PedidoUnidadesPreviasView() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[1120px] w-full text-sm">
+          <table className="min-w-[1200px] w-full text-sm">
             <thead className="bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Interno</th>
+                <th className="px-4 py-3 text-left">Año pat.</th>
                 <th className="px-4 py-3 text-left">Cliente</th>
                 <th className="px-4 py-3 text-left">Vendedor</th>
                 <th className="px-4 py-3 text-left">Chasis</th>
@@ -215,6 +230,7 @@ export default function PedidoUnidadesPreviasView() {
               {orderedData.map((item) => (
                 <tr key={item._id} className="hover:bg-muted">
                   <td className="px-4 py-3 font-semibold text-foreground">{item.interno}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.anioPatentamiento}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.clienteNombre}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.vendedorNombre}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
@@ -272,7 +288,7 @@ export default function PedidoUnidadesPreviasView() {
 
               {!data.length ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={11} className="px-6 py-12 text-center text-sm text-muted-foreground">
                     Todavia no hay unidades en la lista previa.
                   </td>
                 </tr>

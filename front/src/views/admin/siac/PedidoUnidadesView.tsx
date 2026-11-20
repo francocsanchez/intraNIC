@@ -722,11 +722,12 @@ export default function PedidoUnidadesView() {
                 </div>
 
                 <div className="mt-4 max-h-64 overflow-auto rounded-lg border border-border bg-card">
-                  <table className="min-w-[1320px] w-full text-sm">
+                  <table className="min-w-[1400px] w-full text-sm">
                     <thead className="sticky top-0 bg-muted text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3 text-center">Sel.</th>
                         <th className="px-4 py-3 text-left">Interno</th>
+                        <th className="px-4 py-3 text-left">Año pat.</th>
                         <th className="px-4 py-3 text-left">Cliente</th>
                         <th className="px-4 py-3 text-left">Vendedor</th>
                         <th className="px-4 py-3 text-left">Version</th>
@@ -754,6 +755,7 @@ export default function PedidoUnidadesView() {
                               />
                             </td>
                             <td className="px-4 py-3 font-semibold">{previa.interno}</td>
+                            <td className="px-4 py-3">{previa.anioPatentamiento}</td>
                             <td className="px-4 py-3">{previa.clienteNombre}</td>
                             <td className="px-4 py-3">{previa.vendedorNombre}</td>
                             <td className="px-4 py-3">{previa.version}</td>
@@ -777,7 +779,7 @@ export default function PedidoUnidadesView() {
 
                       {!previasData.length ? (
                         <tr>
-                          <td colSpan={10} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                          <td colSpan={11} className="px-6 py-8 text-center text-sm text-muted-foreground">
                             Todavia no hay unidades en la lista previa.
                           </td>
                         </tr>

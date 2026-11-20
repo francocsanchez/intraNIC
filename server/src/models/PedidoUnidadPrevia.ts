@@ -2,9 +2,12 @@ import mongoose, { Document, Schema, Types } from "mongoose";
 
 export const PEDIDO_UNIDAD_PRIORIDADES = ["normal", "media", "urgente"] as const;
 export type PedidoUnidadPrioridad = (typeof PEDIDO_UNIDAD_PRIORIDADES)[number];
+export const PEDIDO_UNIDAD_ANIOS_PATENTAMIENTO = [2026, 2027] as const;
+export type PedidoUnidadAnioPatentamiento = (typeof PEDIDO_UNIDAD_ANIOS_PATENTAMIENTO)[number];
 
 export interface IPedidoUnidadPrevia extends Document {
   interno: number;
+  anioPatentamiento: PedidoUnidadAnioPatentamiento;
   prioridad: PedidoUnidadPrioridad;
   usuario_id: Types.ObjectId;
   usuario: string;
@@ -19,6 +22,12 @@ const pedidoUnidadPreviaSchema = new Schema<IPedidoUnidadPrevia>(
       required: true,
       unique: true,
       index: true,
+    },
+    anioPatentamiento: {
+      type: Number,
+      enum: PEDIDO_UNIDAD_ANIOS_PATENTAMIENTO,
+      default: 2026,
+      required: true,
     },
     prioridad: {
       type: String,

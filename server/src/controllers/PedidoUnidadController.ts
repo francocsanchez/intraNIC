@@ -6,7 +6,9 @@ import { infoInternoQuery } from "./querys/convencional.query";
 import PedidoUnidad from "../models/PedidoUnidad";
 import UnidadDealer from "../models/UnidadDealer";
 import PedidoUnidadPrevia, {
+  PEDIDO_UNIDAD_ANIOS_PATENTAMIENTO,
   PEDIDO_UNIDAD_PRIORIDADES,
+  type PedidoUnidadAnioPatentamiento,
   type PedidoUnidadPrioridad,
 } from "../models/PedidoUnidadPrevia";
 import { logError } from "../utils/logError";
@@ -29,6 +31,7 @@ type InternoArriboRow = {
 type PedidoUnidadPreviaResponseItem = {
   _id: mongoose.Types.ObjectId | string;
   interno: number;
+  anioPatentamiento: PedidoUnidadAnioPatentamiento;
   clienteNombre: string;
   vendedorNombre: string;
   chasis: string | null;
@@ -88,6 +91,9 @@ const normalizeVinKey = (value: unknown) => {
 
 const isValidPrioridad = (value: unknown): value is PedidoUnidadPrioridad =>
   typeof value === "string" && PEDIDO_UNIDAD_PRIORIDADES.includes(value as PedidoUnidadPrioridad);
+
+const isValidAnioPatentamiento = (value: unknown): value is PedidoUnidadAnioPatentamiento =>
+  typeof value === "number" && PEDIDO_UNIDAD_ANIOS_PATENTAMIENTO.includes(value as PedidoUnidadAnioPatentamiento);
 
 const canManagePrioridad = (roles: string[] | undefined) =>
   (roles ?? []).some((role) =>
@@ -219,6 +225,7 @@ const hydratePrevia = (
 ): PedidoUnidadPreviaResponseItem => ({
   _id: previa._id,
   interno: previa.interno,
+  anioPatentamiento: isValidAnioPatentamiento(previa?.anioPatentamiento) ? previa.anioPatentamiento : 2026,
   clienteNombre: normalizeText(unidadActual?.cliente),
   vendedorNombre: normalizeText(unidadActual?.vendedor),
   chasis: normalizeNullableText(unidadActual?.chasis),
@@ -376,6 +383,7 @@ export class PedidoUnidadController {
 
   static createPrevia = async (req: Request, res: Response) => {
     const interno = Number(req.body?.interno);
+    const anioPatentamiento = Number(req.body?.anioPatentamiento ?? 2026);
 
     if (!req.user?._id) {
       return res.status(401).json({ error: "Usuario no autenticado" });
@@ -383,6 +391,10 @@ export class PedidoUnidadController {
 
     if (!Number.isInteger(interno) || interno <= 0) {
       return res.status(400).json({ error: "El interno ingresado no es valido" });
+    }
+
+    if (!isValidAnioPatentamiento(anioPatentamiento)) {
+      return res.status(400).json({ error: "El Año pat. debe ser 2026 o 2027" });
     }
 
     try {
@@ -403,6 +415,7 @@ export class PedidoUnidadController {
 
       const previa = await PedidoUnidadPrevia.create({
         interno: unidad.interno,
+        anioPatentamiento,
         prioridad: "normal",
         usuario_id: new mongoose.Types.ObjectId(req.user._id),
         usuario: `${req.user.lastName}, ${req.user.name}`,

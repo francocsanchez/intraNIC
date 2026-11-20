@@ -169,9 +169,15 @@ export async function getPedidoUnidadesPrevias(): Promise<PedidoUnidadPrevia[]> 
   }
 }
 
-export async function createPedidoUnidadPrevia(interno: number) {
+export async function createPedidoUnidadPrevia({
+  interno,
+  anioPatentamiento,
+}: {
+  interno: number;
+  anioPatentamiento: 2026 | 2027;
+}) {
   try {
-    const { data } = await api.post("/dms/pedido-unidades/previas", { interno });
+    const { data } = await api.post("/dms/pedido-unidades/previas", { interno, anioPatentamiento });
     const parsed = pedidoUnidadPreviaResponseSchema.safeParse(data);
 
     if (!parsed.success) {

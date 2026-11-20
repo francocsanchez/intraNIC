@@ -2,6 +2,7 @@
 
 ## 2026-11-20
 
+- **Lista previa de pedido de unidades:** se incorporó `Año pat.` al alta de internos, con selector 2026/2027, 2026 como valor predeterminado y visualización persistente en la lista y su selector de Pedido de Unidades.
 - **Licitaciones · Resumen:** las licitaciones con todas sus unidades entregadas se archivan automáticamente en la pestaña `Finalizadas`; `En gestión` concentra las restantes.
 - **Licitaciones · Administración:** la acción para quitar una fila del pliego ahora es una columna `Eliminar` visible junto a las columnas operativas, para reducir unidades sin desplazamiento horizontal.
 - **Licitaciones · Administración:** quitar una fila del pliego se realiza directamente, sin alerta de confirmación; la eliminación de la licitación completa continúa confirmándose.
