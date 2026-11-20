@@ -3715,6 +3715,7 @@ export const licitacionResumenSchema = z.object({
     pagada: z.number().int().nonnegative(),
     entregada: z.number().int().nonnegative(),
   }),
+  archivada: z.boolean().optional().default(false),
   estado: licitacionEstadoSchema,
 });
 export const licitacionResumenListResponseSchema = z.object({

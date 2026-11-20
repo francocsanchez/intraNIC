@@ -62,6 +62,7 @@ export class LicitacionesResumenController {
             entidad: item.entidad,
             totalUnidades: units.length,
             avance: progressOf(units),
+            archivada: units.length > 0 && units.every((unit) => unit.entregada),
             estado: stateOf(item),
           };
         }),

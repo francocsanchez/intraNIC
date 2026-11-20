@@ -358,6 +358,7 @@ Siempre el footer de toda la app debe tener fondo negro, texto blanco centrado y
 - El PDF de `Rend. Gastos` reutiliza el membrete institucional de Proformas, incluyendo logo y datos legales de Nippon Car.
 - El membrete de `Rend. Gastos` usa solo un banner gris claro, sin datos legales, para una impresión de bajo consumo.
 - `Licitaciones · Resumen` vive en `/licitaciones/resumen`, usa el permiso independiente `licitacionesResumen` y consulta exclusivamente las licitaciones activas de Mongo en modo solo lectura. Muestra una tarjeta expandible por licitación, con nombre y total de unidades; el detalle exhibe solamente Versión y Asignada, usando un check verde cuando la unidad posee interno y `-` en caso contrario.
+- En `/licitaciones/resumen`, una licitación se archiva automáticamente en `Finalizadas` cuando todas sus unidades están entregadas; el tab `En gestión` reúne las que aún tengan alguna unidad pendiente.
 - `Licitaciones · Resumen` aprovecha todo el ancho disponible de la pantalla, conservando únicamente el padding responsivo del layout.
 - Cada tarjeta de `Licitaciones · Resumen` muestra en su centro el estado calculado de la licitación mediante el mismo badge de color de Administración y, sin desplegar, el avance de Asignadas, EQ / Transformadas, Arribadas, Patentadas, Pagadas y Entregadas como cantidad sobre el total objetivo de unidades.
 - El detalle de unidades de `Licitaciones · Resumen` presenta las columnas Asignada, EQ / Transformada, Arribada, Patentada, Pagada y Entregada, con checks verdes para los avances activos.

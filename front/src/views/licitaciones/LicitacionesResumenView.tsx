@@ -121,12 +121,18 @@ function LicitacionCard({ id, entidad, totalUnidades, avance, estado }: {
 }
 
 export default function LicitacionesResumenView() {
+  const [tab, setTab] = useState<"gestion" | "finalizadas">("gestion");
   const listQuery = useQuery({
     queryKey: ["licitaciones", "resumen"],
     queryFn: getLicitacionesResumen,
   });
 
   if (listQuery.isLoading) return <Loading />;
+
+  const licitaciones = listQuery.data?.data ?? [];
+  const enGestion = licitaciones.filter((item) => !item.archivada);
+  const finalizadas = licitaciones.filter((item) => item.archivada);
+  const visibles = tab === "gestion" ? enGestion : finalizadas;
 
   return (
     <main className="w-full space-y-4 p-4 sm:p-6">
@@ -140,9 +146,32 @@ export default function LicitacionesResumenView() {
 
       {listQuery.isError ? (
         <div className="rounded-lg bg-card p-4 text-sm text-destructive ring-1 ring-foreground/10">{listQuery.error.message}</div>
-      ) : listQuery.data?.data.length ? (
-        <section className="space-y-3" aria-label="Licitaciones">
-          {listQuery.data.data.map((item) => (
+      ) : (
+        <>
+          <div className="flex w-fit items-center rounded-lg border bg-card p-1" role="tablist" aria-label="Estado de licitaciones">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "gestion"}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${tab === "gestion" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setTab("gestion")}
+            >
+              En gestión <span className="ml-1 tabular-nums">{enGestion.length}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "finalizadas"}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${tab === "finalizadas" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setTab("finalizadas")}
+            >
+              Finalizadas <span className="ml-1 tabular-nums">{finalizadas.length}</span>
+            </button>
+          </div>
+
+          {visibles.length ? (
+            <section className="space-y-3" aria-label={tab === "gestion" ? "Licitaciones en gestión" : "Licitaciones finalizadas"}>
+              {visibles.map((item) => (
             <LicitacionCard
               key={item._id}
               id={item._id}
@@ -151,10 +180,14 @@ export default function LicitacionesResumenView() {
               avance={item.avance}
               estado={item.estado}
             />
-          ))}
-        </section>
-      ) : (
-        <div className="rounded-lg bg-card p-6 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">No hay licitaciones registradas.</div>
+              ))}
+            </section>
+          ) : (
+            <div className="rounded-lg bg-card p-6 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
+              {tab === "gestion" ? "No hay licitaciones en gestión." : "No hay licitaciones finalizadas."}
+            </div>
+          )}
+        </>
       )}
     </main>
   );

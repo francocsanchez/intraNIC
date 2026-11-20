@@ -2,6 +2,7 @@
 
 ## 2026-11-20
 
+- **Licitaciones · Resumen:** las licitaciones con todas sus unidades entregadas se archivan automáticamente en la pestaña `Finalizadas`; `En gestión` concentra las restantes.
 - **Licitaciones · Administración:** la acción para quitar una fila del pliego ahora es una columna `Eliminar` visible junto a las columnas operativas, para reducir unidades sin desplazamiento horizontal.
 - **Licitaciones · Administración:** quitar una fila del pliego se realiza directamente, sin alerta de confirmación; la eliminación de la licitación completa continúa confirmándose.
 - **Licitaciones · Administración:** al quitar una fila, el servidor ahora admite como respaldo su posición actual en el pliego para eliminar correctamente unidades históricas cuyos IDs internos no coincidan.
