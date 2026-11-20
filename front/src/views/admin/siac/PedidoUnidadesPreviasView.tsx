@@ -1,9 +1,9 @@
-import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import Loading from "@/components/Loading";
 import {
   createPedidoUnidadPrevia,
   deletePedidoUnidadPrevia,
   getPedidoUnidadesPrevias,
+  updatePedidoUnidadPreviaAnioPatentamiento,
   updatePedidoUnidadPreviaPrioridad,
 } from "@/api/dms/pedidoUnidadAPI";
 import { hasModuleAccess } from "@/helpers/access";
@@ -76,6 +76,18 @@ export default function PedidoUnidadesPreviasView() {
     },
     onError: (mutationError: Error) => {
       toast.error(mutationError.message || "No se pudo actualizar la prioridad");
+    },
+  });
+
+  const updateAnioPatentamientoMutation = useMutation({
+    mutationFn: ({ id, anioPatentamiento: nuevoAnio }: { id: string; anioPatentamiento: 2026 | 2027 }) =>
+      updatePedidoUnidadPreviaAnioPatentamiento(id, nuevoAnio),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ["pedido-unidades-previas"] });
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message || "No se pudo actualizar el Año pat.");
     },
   });
 
@@ -230,7 +242,23 @@ export default function PedidoUnidadesPreviasView() {
               {orderedData.map((item) => (
                 <tr key={item._id} className="hover:bg-muted">
                   <td className="px-4 py-3 font-semibold text-foreground">{item.interno}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.anioPatentamiento}</td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={item.anioPatentamiento}
+                      onChange={(event) =>
+                        updateAnioPatentamientoMutation.mutate({
+                          id: item._id,
+                          anioPatentamiento: Number(event.target.value) as 2026 | 2027,
+                        })
+                      }
+                      disabled={updateAnioPatentamientoMutation.isPending}
+                      aria-label={`Año pat. del interno ${item.interno}`}
+                      className="rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <option value={2026}>2026</option>
+                      <option value={2027}>2027</option>
+                    </select>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{item.clienteNombre}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.vendedorNombre}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.chasis ?? "-"}</td>
@@ -238,7 +266,7 @@ export default function PedidoUnidadesPreviasView() {
                   <td className="px-4 py-3 text-muted-foreground">{item.modelo}</td>
                   <td className="px-4 py-3">
                     {canManagePriority ? (
-                      <AutocompleteSelect
+                      <select
                         value={item.prioridad}
                         onChange={(event) =>
                           updatePrioridadMutation.mutate({
@@ -256,7 +284,7 @@ export default function PedidoUnidadesPreviasView() {
                             {prioridad}
                           </option>
                         ))}
-                      </AutocompleteSelect>
+                      </select>
                     ) : (
                       <span
                         className={[

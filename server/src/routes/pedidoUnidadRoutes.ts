@@ -32,6 +32,7 @@ router.post(
 router.get("/previas", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.listPrevias);
 router.post("/previas", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.createPrevia);
 router.patch("/previas/:id/prioridad", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.updatePrioridadPrevia);
+router.patch("/previas/:id/anio-patentamiento", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.updateAnioPatentamientoPrevia);
 router.delete("/previas/:id", authorizeModules("listaPrevia"), authorizeRoleAccess("administracion.listaPrevia"), PedidoUnidadController.deletePrevia);
 
 router.get(

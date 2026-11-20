@@ -1,5 +1,5 @@
 # AGENTS.md
-En `/administracion/pedido-unidades/lista-previa`, el alta de interno incluye `Año pat.` obligatorio como selector 2026/2027, predeterminado en 2026; se persiste en la lista previa y se muestra tanto en sus unidades cargadas como al seleccionarlas desde `/gestion/convencional/pedido-unidades`.
+En `/administracion/pedido-unidades/lista-previa`, el alta de interno incluye `Año pat.` obligatorio como selector 2026/2027, predeterminado en 2026; se persiste en la lista previa, se puede editar desde la tabla de unidades cargadas y se muestra tanto allí como al seleccionarlas desde `/gestion/convencional/pedido-unidades`. La prioridad de esa tabla usa un selector nativo, no un autocompletado.
 En la edición y alta de usuarios, el permiso compartido `talleresUsados` se etiqueta `Talleres y presupuestos / Dashboard Reparaciones` para hacer explícito que habilita ambas vistas, sin crear un permiso independiente para el dashboard.
 La tabla Gasto mensual por taller de Dashboard Reparaciones comienza con una fila totalizadora de los importes mensuales de todos los talleres y centra todas sus columnas.
 Las tablas Unidades con presupuesto y Gasto mensual por taller de Dashboard Reparaciones no tienen anchos mínimos ni desplazamiento horizontal: usan tipografía y celdas compactas; el gráfico Unidades en operatoria ocupa un tercio del bloque superior.

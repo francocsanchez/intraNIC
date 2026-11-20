@@ -207,6 +207,25 @@ export async function updatePedidoUnidadPreviaPrioridad(id: string, prioridad: P
   }
 }
 
+export async function updatePedidoUnidadPreviaAnioPatentamiento(
+  id: string,
+  anioPatentamiento: 2026 | 2027,
+) {
+  try {
+    const { data } = await api.patch(`/dms/pedido-unidades/previas/${id}/anio-patentamiento`, { anioPatentamiento });
+    const parsed = pedidoUnidadPreviaResponseSchema.safeParse(data);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new Error("La respuesta del endpoint no tiene el formato esperado");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Error al actualizar el Año pat."));
+  }
+}
+
 export async function deletePedidoUnidadPrevia(id: string) {
   try {
     const { data } = await api.delete(`/dms/pedido-unidades/previas/${id}`);

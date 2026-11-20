@@ -481,6 +481,48 @@ export class PedidoUnidadController {
     }
   };
 
+  static updateAnioPatentamientoPrevia = async (req: Request, res: Response) => {
+    const anioPatentamiento = Number(req.body?.anioPatentamiento);
+
+    if (!isValidAnioPatentamiento(anioPatentamiento)) {
+      return res.status(400).json({ error: "El Año pat. debe ser 2026 o 2027" });
+    }
+
+    try {
+      const registroPrevio = await PedidoUnidadPrevia.findById(req.params.id).lean();
+
+      if (!registroPrevio) {
+        return res.status(404).json({ error: "Registro previo no encontrado" });
+      }
+
+      const internosYaPedidos = await getInternosYaPedidosSet([registroPrevio.interno]);
+      if (internosYaPedidos.has(registroPrevio.interno)) {
+        return res.status(409).json({ error: "Esta unidad ya fue pedida" });
+      }
+
+      const data = await PedidoUnidadPrevia.findByIdAndUpdate(
+        req.params.id,
+        { anioPatentamiento },
+        { new: true, lean: true },
+      );
+
+      if (!data) {
+        return res.status(404).json({ error: "Registro previo no encontrado" });
+      }
+
+      const unidadActual = (await getInfoInternosMap([data.interno])).get(data.interno);
+
+      return res.status(200).json({
+        message: "Año pat. actualizado correctamente",
+        data: hydratePrevia(data, unidadActual),
+      });
+    } catch (error) {
+      logError("PedidoUnidadController.updateAnioPatentamientoPrevia");
+      console.error(error);
+      return res.status(400).json({ error: "No se pudo actualizar el Año pat." });
+    }
+  };
+
   static deletePrevia = async (req: Request, res: Response) => {
     try {
       const registroPrevio = await PedidoUnidadPrevia.findById(req.params.id).lean();
