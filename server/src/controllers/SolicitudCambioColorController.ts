@@ -96,10 +96,21 @@ export class SolicitudCambioColorController {
         filter.solicitudRechazada = false;
       }
       if (estado === "rechazadas") filter.solicitudRechazada = true;
-      const data = await SolicitudCambioColor.find(filter).sort({ createdAt: -1 }).lean();
+      const [data, counts] = await Promise.all([
+        SolicitudCambioColor.find(filter).sort({ createdAt: -1 }).lean(),
+        Promise.all([
+          SolicitudCambioColor.countDocuments({ solicitudPedida: false, solicitudRechazada: false }),
+          SolicitudCambioColor.countDocuments({ solicitudPedida: true, solicitudCompletada: false, solicitudRechazada: false }),
+          SolicitudCambioColor.countDocuments({ solicitudCompletada: true, solicitudRechazada: false }),
+          SolicitudCambioColor.countDocuments({ solicitudRechazada: true }),
+        ]),
+      ]);
       const internos = [...new Set(data.map((item) => item.interno).filter((value): value is number => Number.isInteger(value) && value > 0))];
       const snapshotsByInterno = await findUnidadSnapshotsByInternos(internos);
-      return res.json({ data: data.map((item) => format(item, item.interno ? snapshotsByInterno.get(item.interno) : undefined)) });
+      return res.json({
+        data: data.map((item) => format(item, item.interno ? snapshotsByInterno.get(item.interno) : undefined)),
+        counts: { pendientes: counts[0], pedidas: counts[1], completadas: counts[2], rechazadas: counts[3] },
+      });
     } catch (error) { logError("SolicitudCambioColorController.list"); console.error(error); return res.status(500).json({ message: "Error al listar las solicitudes" }); }
   };
 

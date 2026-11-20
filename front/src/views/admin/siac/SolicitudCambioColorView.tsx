@@ -1,5 +1,7 @@
 import AutocompleteSelect from "@/components/ui/autocomplete-select";
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from "@headlessui/react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Loading";
 import { ActionButton, EditActionButton } from "@/components/ui/action-button";
 import { getColores, getVersiones } from "@/api/dms/preventasAPI";
@@ -38,7 +40,14 @@ export default function SolicitudCambioColorView() {
   return <div className="font-preset space-y-3 bg-muted p-3">
     <section className="border border-border bg-card p-3">
       <div className="flex justify-between"><div><h1 className="text-xl font-semibold">Solicitudes de cambio de color</h1><p className="text-sm text-muted-foreground">Gestión de unidades 0 km.</p></div><ActionButton onClick={() => setForm(null)}><Plus />Nueva solicitud</ActionButton></div>
-      <div className="mt-3 grid grid-cols-2 gap-1 md:grid-cols-4">{estados.map(([v, l]) => <button key={v} onClick={() => setEstado(v)} className={`h-9 rounded-md border text-xs ${estado === v ? "bg-primary text-primary-foreground" : "bg-card"}`}>{l}</button>)}</div>
+      <Tabs value={estado} onValueChange={(value) => setEstado(value as Exclude<Estado, "">)} className="mt-3">
+        <TabsList aria-label="Estado de las solicitudes" className="grid h-auto w-full grid-cols-2 gap-1 bg-transparent md:grid-cols-4">
+          {estados.map(([value, label]) => <TabsTrigger key={value} value={value} className="h-9 gap-1 rounded-md border border-border bg-card px-2.5 text-xs data-[active]:border-primary data-[active]:bg-primary data-[active]:text-primary-foreground sm:px-3">
+            {label}
+            <Badge variant={estado === value ? "secondary" : "outline"} className="size-4 border-0 px-1 text-[10px] tabular-nums">{list.data?.counts?.[value] ?? 0}</Badge>
+          </TabsTrigger>)}
+        </TabsList>
+      </Tabs>
     </section>
     <section className="overflow-hidden border border-border bg-card">
       <div className="flex justify-end border-b border-border p-3"><input value={interno} onChange={(e) => setInterno(e.target.value)} placeholder="Filtrar por interno" className="h-9 rounded-md border border-input px-3" /></div>

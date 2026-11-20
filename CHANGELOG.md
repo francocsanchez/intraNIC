@@ -2,6 +2,7 @@
 
 ## 2026-11-20
 
+- **Solicitudes de cambio de color:** se reemplazaron los filtros de estado por tabs compactos con badge y conteo global de Pendientes, Pedidas, Completadas y Rechazadas.
 - **Lista previa de pedido de unidades:** `Año pat.` ahora puede corregirse desde la tabla y la prioridad usa un selector directo, sin autocompletado.
 - **Lista previa de pedido de unidades:** se incorporó `Año pat.` al alta de internos, con selector 2026/2027, 2026 como valor predeterminado y visualización persistente en la lista y su selector de Pedido de Unidades.
 - **Licitaciones · Resumen:** las licitaciones con todas sus unidades entregadas se archivan automáticamente en la pestaña `Finalizadas`; `En gestión` concentra las restantes.

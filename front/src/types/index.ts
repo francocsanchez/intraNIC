@@ -2904,6 +2904,12 @@ export const solicitudCambioColorSchema = z.object({
 
 export const solicitudCambioColorListResponseSchema = z.object({
   data: z.array(solicitudCambioColorSchema),
+  counts: z.object({
+    pendientes: z.number(),
+    pedidas: z.number(),
+    completadas: z.number(),
+    rechazadas: z.number(),
+  }).optional(),
 });
 export const solicitudCambioColorResponseSchema = z.object({
   message: z.string(),
