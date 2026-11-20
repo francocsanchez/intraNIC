@@ -9,10 +9,12 @@ import {
   getLicitacionUnidades,
   getLicitacionesAdministracion,
   releaseLicitacionUnidadInterno,
+  removeLicitacionAdministracion,
   removeLicitacionUnidad,
   updateLicitacionAdministracion,
   updateLicitacionFlow,
   updateLicitacionUnidadProgress,
+  updateLicitacionUnidadesProgress,
   type LicitacionAdministracionPayload,
 } from "@/api/licitacionesAdministracionAPI";
 import {
@@ -441,7 +443,8 @@ function UnitsDialog({
     onError: (error: Error) => toast.error(error.message),
   });
   const removeMutation = useMutation({
-    mutationFn: (unitId: string) => removeLicitacionUnidad(item._id, unitId),
+    mutationFn: ({ unitId, rowIndex }: { unitId: string; rowIndex: number }) =>
+      removeLicitacionUnidad(item._id, unitId, rowIndex),
     onSuccess: (response) => {
       toast.success(response.message);
       client.setQueryData(
@@ -459,6 +462,38 @@ function UnitsDialog({
         { data: response.data },
       );
       void variables;
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const bulkProgressMutation = useMutation({
+    mutationFn: async ({
+      field,
+      value,
+      unitIds,
+    }: {
+      field: "equipadaTransformada" | "arribada" | "patentada" | "pagada" | "entregada";
+      value: boolean;
+      unitIds: string[];
+    }) => {
+      try {
+        return await updateLicitacionUnidadesProgress(item._id, field, value);
+      } catch (error) {
+        // Durante un despliegue escalonado el backend anterior interpreta
+        // "avance" como un id de unidad. Conservamos la acción masiva usando
+        // el endpoint individual que ya existe en esa versión.
+        if (!(error instanceof Error) || error.message !== "La unidad no es válida") throw error;
+        if (!unitIds.length) throw new Error("No hay unidades para actualizar");
+        let response = await updateLicitacionUnidadProgress(item._id, unitIds[0], field, value);
+        for (const unitId of unitIds.slice(1)) response = await updateLicitacionUnidadProgress(item._id, unitId, field, value);
+        return { ...response, message: `Columna ${value ? "marcada" : "desmarcada"} correctamente` };
+      }
+    },
+    onSuccess: (response) => {
+      client.setQueryData(
+        ["licitaciones", "administracion", item._id, "unidades"],
+        { data: response.data },
+      );
+      toast.success(response.message);
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -495,14 +530,14 @@ function UnitsDialog({
   return (
     <Modal
       onClose={close}
-      pending={mutation.isPending || removeMutation.isPending || progressMutation.isPending}
+      pending={mutation.isPending || removeMutation.isPending || progressMutation.isPending || bulkProgressMutation.isPending}
     >
       <DialogHeader
         title="Unidades del pliego"
         subtitle={item.entidad}
         close={close}
         pending={
-          mutation.isPending || removeMutation.isPending || progressMutation.isPending
+          mutation.isPending || removeMutation.isPending || progressMutation.isPending || bulkProgressMutation.isPending
         }
       />
       <form
@@ -570,17 +605,25 @@ function UnitsDialog({
         </p>
       ) : null}
       <div className="max-h-[46vh] overflow-auto">
-        <table className="w-full text-left text-xs [&_th:nth-child(n+9)]:hidden [&_td:nth-child(n+9)]:hidden">
+        <table className="w-full text-left text-xs [&_th:nth-child(n+10)]:hidden [&_td:nth-child(n+10)]:hidden">
           <thead className="sticky top-0 bg-muted text-[10px] uppercase tracking-[.1em] text-muted-foreground">
             <tr>
               <th className="whitespace-nowrap px-3 py-2">Interno</th>
               <th className="whitespace-nowrap px-3 py-2">Versión</th>
               <th className="whitespace-nowrap px-3 py-2 text-center">Asignada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">EQ / Transformada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">Arribada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">Patentada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">Pagada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">Entregada</th>
+              {([
+                ["equipadaTransformada", "EQ / Transformada"],
+                ["arribada", "Arribada"],
+                ["patentada", "Patentada"],
+                ["pagada", "Pagada"],
+                ["entregada", "Entregada"],
+              ] as const).map(([field, label]) => {
+                const allMarked = units.length > 0 && units.every((unit) => unit[field]);
+                return <th key={field} className="whitespace-nowrap px-3 py-2 text-center"><label className="flex cursor-pointer flex-col items-center gap-1"><span>{label}</span><input type="checkbox" checked={allMarked} disabled={!units.length || bulkProgressMutation.isPending || progressMutation.isPending} onChange={(event) => bulkProgressMutation.mutate({ field, value: event.target.checked, unitIds: units.map((unit) => unit._id) })} className="h-3.5 w-3.5 accent-primary" aria-label={`Marcar todas las unidades como ${label}`} title={`Marcar o desmarcar toda la columna ${label}`} /></label></th>;
+              })}
+              <th className="whitespace-nowrap px-3 py-2 text-center">
+                Eliminar
+              </th>
               <th className="whitespace-nowrap px-3 py-2">Conversión</th>
               <th className="whitespace-nowrap px-3 py-2">Estado conversión</th>
               <th className="whitespace-nowrap px-3 py-2">Estado</th>
@@ -589,9 +632,6 @@ function UnitsDialog({
               <th className="whitespace-nowrap px-3 py-2 text-center">Patentada</th>
               <th className="whitespace-nowrap px-3 py-2 text-center">Pagada</th>
               <th className="whitespace-nowrap px-3 py-2 text-center">Entregada</th>
-              <th className="whitespace-nowrap px-3 py-2 text-center">
-                Eliminar
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -616,7 +656,7 @@ function UnitsDialog({
                 </td>
               </tr>
             ) : units.length ? (
-              units.map((unit) => (
+              units.map((unit, rowIndex) => (
                 <tr key={unit._id} className="border-t border-border">
                   <td className="px-3 py-1.5">
                     {unit.interno ? (
@@ -684,6 +724,24 @@ function UnitsDialog({
                   </td>
                   <td className="px-3 py-2 text-center">{unit.asignada ? <span className="text-emerald-600">✓</span> : "-"}</td>
                   {(["equipadaTransformada", "arribada", "patentada", "pagada", "entregada"] as const).map((field) => <td key={field} className="px-3 py-2 text-center"><input type="checkbox" checked={unit[field]} onChange={(event) => progressMutation.mutate({ unitId: unit._id, field, value: event.target.checked })} disabled={progressMutation.isPending} className="h-4 w-4 accent-primary" aria-label={`${field} de ${unit.versionNombre}`} /></td>)}
+                  <td className="px-3 py-2">
+                    <div className="flex justify-center">
+                      <DeleteActionButton
+                        size="icon-sm"
+                        title="Quitar unidad"
+                        aria-label={`Quitar ${unit.versionNombre}`}
+                        onClick={() => removeMutation.mutate({ unitId: unit._id, rowIndex })}
+                        disabled={
+                          mutation.isPending ||
+                          removeMutation.isPending ||
+                          progressMutation.isPending ||
+                          bulkProgressMutation.isPending
+                        }
+                      >
+                        <Trash2 />
+                      </DeleteActionButton>
+                    </div>
+                  </td>
                   <td className="whitespace-nowrap px-3 py-1.5">
                     {unit.colorNombre || "-"}
                   </td>
@@ -808,23 +866,6 @@ function UnitsDialog({
                       {unit.estado === "ENTREGADA" ? "Entregada" : unit.estado === "ASIGNADA" ? "Asignada" : "Pend de Asignar"}
                     </span>
                   </td>
-                  <td className="px-3 py-2">
-                    <div className="flex justify-center">
-                      <DeleteActionButton
-                        size="icon-sm"
-                        title="Quitar unidad"
-                        aria-label={`Quitar ${unit.versionNombre}`}
-                        onClick={() => removeMutation.mutate(unit._id)}
-                        disabled={
-                          mutation.isPending ||
-                          removeMutation.isPending ||
-                          progressMutation.isPending
-                        }
-                      >
-                        <Trash2 />
-                      </DeleteActionButton>
-                    </div>
-                  </td>
                 </tr>
               ))
             ) : (
@@ -848,6 +889,7 @@ function UnitsDialog({
             mutation.isPending ||
             removeMutation.isPending ||
             progressMutation.isPending
+            || bulkProgressMutation.isPending
           }
         >
           Cerrar
@@ -982,6 +1024,14 @@ export default function LicitacionesAdministracionView() {
         `licitacion-${item.entidad.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${item.fechaApertura}.pdf`,
       );
       toast.success("PDF generado correctamente");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const removeMutation = useMutation({
+    mutationFn: (item: LicitacionAdministracion) => removeLicitacionAdministracion(item._id),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      client.invalidateQueries({ queryKey: ["licitaciones", "administracion"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -1186,6 +1236,17 @@ export default function LicitacionesAdministracionView() {
                         >
                           <CalendarPlus size={18} />
                         </ActionButton>
+                        <DeleteActionButton
+                          size="icon-lg"
+                          title="Eliminar licitación"
+                          aria-label={`Eliminar ${item.entidad}`}
+                          disabled={removeMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm(`¿Eliminar la licitación ${item.entidad} y todas sus ${item.totalUnidades} unidades? Esta acción no se puede deshacer.`)) removeMutation.mutate(item);
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </DeleteActionButton>
                       </div>
                     </td>
                     <td className="px-3 py-2">

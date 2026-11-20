@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-20
+
+- **Licitaciones · Administración:** la acción para quitar una fila del pliego ahora es una columna `Eliminar` visible junto a las columnas operativas, para reducir unidades sin desplazamiento horizontal.
+- **Licitaciones · Administración:** quitar una fila del pliego se realiza directamente, sin alerta de confirmación; la eliminación de la licitación completa continúa confirmándose.
+- **Licitaciones · Administración:** al quitar una fila, el servidor ahora admite como respaldo su posición actual en el pliego para eliminar correctamente unidades históricas cuyos IDs internos no coincidan.
+- **Licitaciones · Administración:** los checks de encabezado de avance ahora reconocen temporalmente la API anterior y actualizan las filas de forma compatible durante despliegues escalonados, evitando el error `La unidad no es válida`.
+- **Licitaciones · Administración:** se incorporó la eliminación confirmada de una licitación junto con todas sus unidades, la confirmación al quitar una unidad y los checks en los encabezados de avance para marcar o desmarcar cada columna completa en una sola operación.
+
 ## 2026-11-19
 
 - **Permisos de usuarios:** el permiso compartido de Talleres y presupuestos ahora identifica explícitamente que también habilita Dashboard Reparaciones.

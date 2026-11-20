@@ -158,6 +158,17 @@ export class LicitacionesAdministracionController {
     } catch (error) { logError("LicitacionesAdministracionController.update"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar la licitación" }); }
   };
 
+  static remove = async (req: Request, res: Response) => {
+    const id = text(req.params.id); if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "La licitación no es válida" });
+    try {
+      const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null });
+      if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
+      const data = format(item);
+      await item.deleteOne();
+      return res.status(200).json({ message: "Licitación y unidades eliminadas correctamente", data });
+    } catch (error) { logError("LicitacionesAdministracionController.remove"); console.error(error); return res.status(500).json({ message: "No se pudo eliminar la licitación" }); }
+  };
+
   static updateFlow = async (req: Request, res: Response) => {
     const id = text(req.params.id); const field = text(req.body?.field); const value = req.body?.value;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "La licitación no es válida" });
@@ -246,6 +257,17 @@ export class LicitacionesAdministracionController {
     } catch (error) { logError("LicitacionesAdministracionController.updateUnitProgress"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar el avance de la unidad" }); }
   };
 
+  static updateUnitsProgress = async (req: Request, res: Response) => {
+    const id = text(req.params.id); const field = text(req.body?.field) as ProgressField; const value = req.body?.value;
+    if (!mongoose.Types.ObjectId.isValid(id) || !progressFields.includes(field) || field === "asignada" || typeof value !== "boolean") return res.status(400).json({ error: "El avance masivo no es válido" });
+    try {
+      const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
+      normalizeUnits(item);
+      for (const unit of item.unidades as any[]) unit[field] = value;
+      await item.save(); return res.status(200).json({ message: `Columna ${value ? "marcada" : "desmarcada"} correctamente`, data: formatUnits(item) });
+    } catch (error) { logError("LicitacionesAdministracionController.updateUnitsProgress"); console.error(error); return res.status(500).json({ message: "No se pudo actualizar la columna" }); }
+  };
+
   static assignUnitInterno = async (req: Request, res: Response) => {
     const id = text(req.params.id); const unitId = text(req.params.unitId); const interno = Number(req.body?.interno);
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(unitId) || !Number.isInteger(interno) || interno < 1) return res.status(400).json({ error: "El interno no es válido" });
@@ -294,9 +316,16 @@ export class LicitacionesAdministracionController {
   };
 
   static removeUnit = async (req: Request, res: Response) => {
-    const id = text(req.params.id); const unitId = text(req.params.unitId);
+    const id = text(req.params.id); const unitId = text(req.params.unitId); const rowIndex = Number(req.body?.rowIndex);
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(unitId)) return res.status(400).json({ error: "La unidad no es válida" });
-    try { const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" }); normalizeUnits(item); const units = item.unidades as any[]; if (!units.some((unit) => String(unit._id) === unitId)) return res.status(404).json({ error: "Unidad no encontrada" }); (item as any).unidades = units.filter((unit) => String(unit._id) !== unitId); await item.save(); return res.status(200).json({ message: "Unidad quitada correctamente", data: formatUnits(item) }); }
+    try {
+      const item = await LicitacionAdministracion.findOne({ _id: id, deletedAt: null }); if (!item) return res.status(404).json({ error: "Licitación no encontrada" });
+      normalizeUnits(item); const units = item.unidades as any[];
+      const target = units.find((unit) => String(unit._id) === unitId) ?? (Number.isInteger(rowIndex) && rowIndex >= 0 ? units[rowIndex] : undefined);
+      if (!target) return res.status(404).json({ error: "Unidad no encontrada" });
+      (item as any).unidades = units.filter((unit) => String(unit._id) !== String(target._id));
+      await item.save(); return res.status(200).json({ message: "Unidad quitada correctamente", data: formatUnits(item) });
+    }
     catch (error) { logError("LicitacionesAdministracionController.removeUnit"); console.error(error); return res.status(500).json({ message: "No se pudo quitar la unidad" }); }
   };
 

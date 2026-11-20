@@ -72,6 +72,14 @@ export const updateLicitacionAdministracion = (
     licitacionAdministracionResponseSchema,
     "No se pudo actualizar la licitación",
   );
+export const removeLicitacionAdministracion = (
+  id: string,
+): Promise<LicitacionAdministracionResponse> =>
+  parse(
+    api.delete(`/licitaciones/administracion/${id}`),
+    licitacionAdministracionResponseSchema,
+    "No se pudo eliminar la licitación",
+  );
 export const updateLicitacionFlow = (
   id: string,
   field: "tecnica" | "preAdjudicado" | "pagare" | "oc",
@@ -156,6 +164,23 @@ export const updateLicitacionUnidadProgress = (
     licitacionUnidadesMutationResponseSchema,
     "No se pudo actualizar el avance de la unidad",
   );
+export type LicitacionUnidadBulkProgressField = Exclude<
+  LicitacionUnidadProgressField,
+  "asignada"
+>;
+export const updateLicitacionUnidadesProgress = (
+  id: string,
+  field: LicitacionUnidadBulkProgressField,
+  value: boolean,
+): Promise<LicitacionUnidadesMutationResponse> =>
+  parse(
+    api.patch(`/licitaciones/administracion/${id}/unidades/avance`, {
+      field,
+      value,
+    }),
+    licitacionUnidadesMutationResponseSchema,
+    "No se pudo actualizar la columna",
+  );
 export const assignLicitacionUnidadInterno = (
   id: string,
   unitId: string,
@@ -180,9 +205,12 @@ export const releaseLicitacionUnidadInterno = (
 export const removeLicitacionUnidad = (
   id: string,
   unitId: string,
+  rowIndex: number,
 ): Promise<LicitacionUnidadesMutationResponse> =>
   parse(
-    api.delete(`/licitaciones/administracion/${id}/unidades/${unitId}`),
+    api.delete(`/licitaciones/administracion/${id}/unidades/${unitId}`, {
+      data: { rowIndex },
+    }),
     licitacionUnidadesMutationResponseSchema,
     "No se pudo quitar la unidad",
   );
