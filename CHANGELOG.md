@@ -2,7 +2,7 @@
 
 ## 2026-11-24
 
-- **Configuración / Dashboard Salón:** se incorporó la selección persistente de vendedores visibles por sucursal, usando exclusivamente el listado activo de vendedores SIAC.
+- **Configuración / Dashboard Salón:** se incorporó la selección persistente de vendedores visibles por sucursal, usando exclusivamente el listado activo de vendedores SIAC; el tablero ahora oculta los vendedores sin operaciones en el período.
 - **Talleres y presupuestos:** se corrigió la consulta SQL inválida que impedía mostrar modelos de unidades externas y se reemplazó el buscador más selector por un único autocompletado de Modelo.
 - **Entregas pendientes:** el campo Hora del modal para turnar una unidad ahora usa un desplegable común, sin búsqueda.
 - **Agenda de entrega:** el campo Hora de los modales de agenda también usa un desplegable común, sin búsqueda.

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { QueryTypes } from "sequelize";
 import { sequelizeNIC } from "../config/database";
 import Configuration from "../models/Config";
-import { getVendedoresActivosNic, getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
+import { getVendedoresActivosNuevoNic } from "../controllers/querys/dms.query";
 import {
   analisisVendedorCreditoMensualQuery,
   analisisVendedorDescuentoMensualQuery,
@@ -727,7 +727,7 @@ export class OperacionesDashboardService {
   static async getDashboardSalon(
     filters: { anio: number; mes: number; sucursalCodigo: number },
   ): Promise<DashboardSalonResponse> {
-    const [rows, allBranchesRows, config, financiacionRows, vendedoresSiac] = await Promise.all([
+    const [rows, allBranchesRows, config, financiacionRows] = await Promise.all([
       sequelizeNIC.query<OperacionDashboardRow>(
         operacionesDashboardQuery({
           hasAnios: true,
@@ -770,7 +770,6 @@ export class OperacionesDashboardService {
           },
         },
       ),
-      sequelizeNIC.query<{ codigo: number; vendedor: string }>(getVendedoresActivosNic(), { type: QueryTypes.SELECT }),
     ]);
 
     const objetivoConfigurado = Number(
@@ -821,10 +820,6 @@ export class OperacionesDashboardService {
       : null;
     const groupSellers = () => {
       const totals = new Map<number, { codigo: number; nombre: string; total: number }>();
-      if (configuredSellerCodeSet) {
-        const sellerNameByCode = new Map(vendedoresSiac.map((seller) => [Number(seller.codigo), normalizeNullableString(seller.vendedor) ?? `Vendedor ${seller.codigo}`]));
-        configuredSellerCodeSet.forEach((codigo) => totals.set(codigo, { codigo, nombre: sellerNameByCode.get(codigo) ?? `Vendedor ${codigo}`, total: 0 }));
-      }
       rows.forEach((row) => {
         const codigo = normalizeNullableNumber(row.vendedorCodigo) ?? 0;
         if (configuredSellerCodeSet && !configuredSellerCodeSet.has(codigo)) return;
@@ -833,7 +828,9 @@ export class OperacionesDashboardService {
         if (current) current.total += 1;
         else totals.set(codigo, { codigo, nombre, total: 1 });
       });
-      return Array.from(totals.values()).sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
+      return Array.from(totals.values())
+        .filter((item) => item.total > 0)
+        .sort((a, b) => b.total - a.total || a.nombre.localeCompare(b.nombre));
     };
 
     const groupFinanciacionPorVendedor = (
