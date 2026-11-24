@@ -19,9 +19,9 @@ import {
   DeleteActionButton,
   EditActionButton,
 } from "@/components/ui/action-button";
-import { Dialog, Transition } from "@headlessui/react";
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions, Dialog, Transition } from "@headlessui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Eye, Pencil, Plus, RotateCcw, Search, Settings, X } from "lucide-react";
+import { Check, Download, Eye, Pencil, Plus, RotateCcw, Search, Settings, X } from "lucide-react";
 import { Fragment, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 
@@ -149,6 +149,36 @@ function Modal({
   );
 }
 
+type CatalogoModelo = { codigo: string; nombre: string };
+
+function ModeloAutocomplete({
+  value,
+  query,
+  options,
+  loading,
+  disabled,
+  onQueryChange,
+  onChange,
+}: {
+  value: string;
+  query: string;
+  options: CatalogoModelo[];
+  loading: boolean;
+  disabled: boolean;
+  onQueryChange: (value: string) => void;
+  onChange: (value: string) => void;
+}) {
+  const selected = options.find((item) => item.codigo === value) ?? null;
+  return <Combobox value={selected} onChange={(item: CatalogoModelo | null) => { onChange(item?.codigo ?? ""); onQueryChange(item?.nombre ?? ""); }} disabled={disabled} immediate>
+    <div className="relative mt-1">
+      <ComboboxInput aria-label="Buscar modelo" displayValue={() => query} onChange={(event) => { onChange(""); onQueryChange(event.target.value); }} placeholder={disabled ? "Seleccionar marca primero" : "Buscar modelo..."} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" />
+      <ComboboxOptions transition className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg empty:invisible">
+        {query.trim().length < 3 ? <p className="px-2 py-2 text-xs text-muted-foreground">Ingresá al menos 3 caracteres para buscar.</p> : loading ? <p className="px-2 py-2 text-xs text-muted-foreground">Buscando modelos...</p> : options.length ? options.map((item) => <ComboboxOption key={item.codigo} value={item} className="cursor-pointer rounded-sm px-2 py-1.5 text-sm data-focus:bg-muted"><span className="flex items-center gap-2"><span className="flex h-4 w-4 items-center justify-center">{value === item.codigo ? <Check size={14} /> : null}</span>{item.nombre}</span></ComboboxOption>) : <p className="px-2 py-2 text-xs text-muted-foreground">No se encontraron modelos.</p>}
+      </ComboboxOptions>
+    </div>
+  </Combobox>;
+}
+
 function PresupuestoDialog({ close }: { close: () => void }) {
   const client = useQueryClient();
   const [form, setForm] = useState<Form>(blank);
@@ -173,7 +203,7 @@ function PresupuestoDialog({ close }: { close: () => void }) {
         <label className="text-sm font-medium">Origen<select value={form.origen} onChange={(event) => { set("origen", event.target.value); setUnidadRaw(null); set("esReingreso", false); }} className={input}><option value="interno">Unidad del sistema</option><option value="externo">Unidad externa</option></select></label>
         <label className="text-sm font-medium">F. Pedido<input required type="date" value={form.fechaPedido} onChange={(event) => set("fechaPedido", event.target.value)} className={input} /></label>
         <label className="text-sm font-medium">Taller<select required value={form.tallerId} onChange={(event) => set("tallerId", event.target.value)} className={input}><option value="">Seleccionar taller</option>{talleres.data?.data.map((item) => <option key={item._id} value={item._id}>{item.nombre}</option>)}</select></label>
-        {form.origen === "interno" ? <><label className="text-sm font-medium">Interno<div className="mt-1 flex gap-2"><input value={form.interno} onChange={(event) => { set("interno", event.target.value); setUnidadRaw(null); }} className="h-9 min-w-0 flex-1 rounded-md border border-input px-3 text-sm" /><ActionButton type="button" size="icon-sm" variant="outline" disabled={!form.interno || lookup.isPending} onClick={() => lookup.mutate()}><Search size={15} /></ActionButton></div></label>{unidad ? <div className="flex min-w-0 items-center truncate rounded-md border border-border bg-muted px-3 text-sm md:col-span-2"><b className="mr-1">Unidad:</b><span className="truncate">{unidad.marca} · {unidad.modelo} · {unidad.dominio || "sin dominio"}</span></div> : null}</> : <><label className="text-sm font-medium">Dominio<input value={form.dominio} onChange={(event) => set("dominio", event.target.value)} className={input} /></label><label className="text-sm font-medium">Marca<select value={form.marcaCodigo} onChange={(event) => { set("marcaCodigo", event.target.value); set("modeloCodigo", ""); }} className={input}><option value="">Seleccionar marca</option>{marcas.data?.map((item) => <option key={item.codigo} value={item.codigo}>{item.nombre}</option>)}</select></label><label className="text-sm font-medium">Buscar modelo<input value={modelSearch} onChange={(event) => setModelSearch(event.target.value)} placeholder="3 caracteres" className={input} /></label><label className="text-sm font-medium">Modelo<select value={form.modeloCodigo} onChange={(event) => set("modeloCodigo", event.target.value)} className={input}><option value="">Seleccionar modelo</option>{modelos.data?.map((item) => <option key={item.codigo} value={item.codigo}>{item.nombre}</option>)}</select></label></>}
+        {form.origen === "interno" ? <><label className="text-sm font-medium">Interno<div className="mt-1 flex gap-2"><input value={form.interno} onChange={(event) => { set("interno", event.target.value); setUnidadRaw(null); }} className="h-9 min-w-0 flex-1 rounded-md border border-input px-3 text-sm" /><ActionButton type="button" size="icon-sm" variant="outline" disabled={!form.interno || lookup.isPending} onClick={() => lookup.mutate()}><Search size={15} /></ActionButton></div></label>{unidad ? <div className="flex min-w-0 items-center truncate rounded-md border border-border bg-muted px-3 text-sm md:col-span-2"><b className="mr-1">Unidad:</b><span className="truncate">{unidad.marca} · {unidad.modelo} · {unidad.dominio || "sin dominio"}</span></div> : null}</> : <><label className="text-sm font-medium">Dominio<input value={form.dominio} onChange={(event) => set("dominio", event.target.value)} className={input} /></label><label className="text-sm font-medium">Marca<select value={form.marcaCodigo} onChange={(event) => { set("marcaCodigo", event.target.value); set("modeloCodigo", ""); setModelSearch(""); }} className={input}><option value="">Seleccionar marca</option>{marcas.data?.map((item) => <option key={item.codigo} value={item.codigo}>{item.nombre}</option>)}</select></label><label className="text-sm font-medium">Modelo<ModeloAutocomplete value={form.modeloCodigo} query={modelSearch} options={modelos.data ?? []} loading={modelos.isFetching} disabled={!form.marcaCodigo} onChange={(value) => set("modeloCodigo", value)} onQueryChange={setModelSearch} /></label></>}
         <label className="text-sm font-medium">KM informado<input required inputMode="numeric" value={formattedInteger(form.km)} onChange={(event) => set("km", event.target.value.replace(/\D/g, ""))} className={input} /></label>
         <label className="relative text-sm font-medium">Costo ARS{superaDiferencia ? <span className="absolute right-0 top-0 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-semibold text-destructive-foreground">Supera diferencia</span> : null}<input required inputMode="numeric" value={formattedInteger(form.costo, true)} onChange={(event) => set("costo", event.target.value.replace(/\D/g, ""))} className={`${input} ${superaDiferencia ? "border-destructive text-destructive" : ""}`} /></label>
         <label className="text-sm font-medium">Valor info ARS<input required inputMode="numeric" value={formattedInteger(form.valorInfo, true)} onChange={(event) => set("valorInfo", event.target.value.replace(/\D/g, ""))} className={input} /></label>
