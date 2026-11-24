@@ -852,6 +852,8 @@ export class OperacionesDashboardService {
       })
       .map((dia) => ({ dia, total: 0 }));
     rows.forEach((row) => {
+      const vendedorCodigo = normalizeNullableNumber(row.vendedorCodigo) ?? 0;
+      if (configuredSellerCodeSet && !configuredSellerCodeSet.has(vendedorCodigo)) return;
       const dia = getDayFromFechaAsignacion(row.fechaAsignacion);
       const item = operacionesPorDia.find((operacion) => operacion.dia === dia);
       if (item) item.total += 1;
