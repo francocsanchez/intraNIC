@@ -1,4 +1,5 @@
 # AGENTS.md
+En `/entregas/pendientes-turnar` y `/entregas/agenda`, incluidos los modales de turnos y reservas, el selector Hora usa un desplegable nativo, no un autocompletado.
 En `/stock/usados/reservado`, la columna `D. Estadía` cuenta los días desde la recepción y `D. Reserva` los días desde la creación de la reserva; durante despliegues escalonados tolera temporalmente la ausencia de la fecha de reserva.
 En `/gestion/convencional/solicitud-cambio-color`, los estados Pendientes, Pedidas, Completadas y Rechazadas se presentan como tabs shadcn compactos con badge y conteo global; seleccionarlos conserva el filtro correspondiente de la grilla.
 En `/administracion/pedido-unidades/lista-previa`, el alta de interno incluye `Año pat.` obligatorio como selector 2026/2027, predeterminado en 2026; se persiste en la lista previa, se puede editar desde la tabla de unidades cargadas y se muestra tanto allí como al seleccionarlas desde `/gestion/convencional/pedido-unidades`. La prioridad de esa tabla usa un selector nativo, no un autocompletado.

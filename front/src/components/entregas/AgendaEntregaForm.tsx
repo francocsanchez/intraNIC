@@ -449,11 +449,10 @@ export default function AgendaEntregaForm({
                         <label htmlFor="agenda-hora-agenda" className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Hora
                         </label>
-                        <AutocompleteSelect
+                        <select
                           id="agenda-hora-agenda"
-                          value={watch("horaAgenda")}
                           disabled={isConvertingReservation}
-                          className="w-full rounded-lg border border-input px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
+                          className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
                           {...register("horaAgenda", { required: "La hora es obligatoria" })}
                         >
                           <option value="">
@@ -464,7 +463,7 @@ export default function AgendaEntregaForm({
                               {formatTimeSlotLabel(timeSlot)}
                             </option>
                           ))}
-                        </AutocompleteSelect>
+                        </select>
                         <p className="text-xs text-muted-foreground">
                           Turnos cada 30 minutos desde las 08:00 hasta las 18:00 segun configuracion de la sucursal.
                         </p>

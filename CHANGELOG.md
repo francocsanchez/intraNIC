@@ -2,6 +2,9 @@
 
 ## 2026-11-24
 
+- **Entregas pendientes:** el campo Hora del modal para turnar una unidad ahora usa un desplegable común, sin búsqueda.
+- **Agenda de entrega:** el campo Hora de los modales de agenda también usa un desplegable común, sin búsqueda.
+- **Reservas de entrega:** el campo Hora de Nueva reserva ahora usa el mismo desplegable común, sin búsqueda.
 - **Stock usados reservado:** la columna `Días` pasó a llamarse `D. Estadía` y se agregó `D. Reserva`, calculada desde la fecha de creación de la reserva.
 - **Stock usados reservado:** la respuesta de reservas tolera temporalmente registros sin fecha de reserva para evitar que una actualización escalonada deje vacía la vista.
 
