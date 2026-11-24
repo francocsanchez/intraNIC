@@ -232,6 +232,7 @@ export const dashboardSalonSettingsResponseSchema = z.object({
     objetivoVendedores: z.number().int().positive().nullable(),
     objetivoOperacionesTotales: z.number().int().positive().nullable(),
     objetivoOperacionesDiarias: z.number().int().positive().nullable(),
+    vendedores: z.array(z.string()).default([]),
   }),
   message: z.string().optional(),
 });

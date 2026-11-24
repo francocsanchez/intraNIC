@@ -24,6 +24,14 @@ const normalizeDashboardSalonSellerCode = (value: unknown) => {
   return Number.isInteger(sellerCode) && sellerCode > 0 ? sellerCode : null;
 };
 
+const normalizeDashboardSalonSellerCodes = (value: unknown) => {
+  if (!Array.isArray(value)) return null;
+  const codes = value
+    .map(normalizeDashboardSalonSellerCode)
+    .filter((code): code is number => code !== null);
+  return [...new Set(codes)].map(String);
+};
+
 export class ConfigController {
   static getDashboardAdministracionCobranzasSettings = async (req: Request, res: Response) => {
     const anio = Number(req.query.anio);
@@ -280,7 +288,7 @@ export class ConfigController {
       }
       const config = await Configuration.findOne(
         {},
-        { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, objetivosOperacionesDiariasDashboardSalon: 1 },
+        { objetivosVendedoresDashboardSalon: 1, objetivosOperacionesTotalesDashboardSalon: 1, objetivosOperacionesDiariasDashboardSalon: 1, vendedoresDashboardSalonPorSucursal: 1 },
       ).lean();
 
       if (!config) {
@@ -298,6 +306,9 @@ export class ConfigController {
       );
       const objetivoOperacionesDiarias = Number(sucursalCodigo === null ? null : config.objetivosOperacionesDiariasDashboardSalon
         ?.find((item) => item.sucursalCodigo === sucursalCodigo && item.anio === anio && item.mes === mes)?.objetivo);
+      const vendedores = sucursalCodigo === null
+        ? []
+        : config.vendedoresDashboardSalonPorSucursal?.find((item) => item.sucursalCodigo === sucursalCodigo)?.vendedores ?? [];
       return res.status(200).json({
         data: {
           sucursalCodigo,
@@ -313,6 +324,7 @@ export class ConfigController {
             Number.isFinite(objetivoOperacionesDiarias) && objetivoOperacionesDiarias > 0
               ? objetivoOperacionesDiarias
               : null,
+          vendedores: vendedores.map(String),
         },
         message: "Configuración de Dashboard Salón listada",
       });
@@ -335,7 +347,9 @@ export class ConfigController {
       const hasObjetivoVendedores = Number.isInteger(objetivoVendedores) && objetivoVendedores > 0;
       const hasObjetivoOperacionesTotales = Number.isInteger(objetivoOperacionesTotales) && objetivoOperacionesTotales > 0;
       const hasObjetivoOperacionesDiarias = Number.isInteger(objetivoOperacionesDiarias) && objetivoOperacionesDiarias > 0;
-      if ((!hasObjetivoVendedores && !hasObjetivoOperacionesTotales && !hasObjetivoOperacionesDiarias) || ((hasObjetivoVendedores || hasObjetivoOperacionesDiarias) && (sucursalCodigo === null || !Number.isInteger(sucursalCodigo) || sucursalCodigo < 1)) || !Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+      const hasVendedores = req.body?.vendedores !== undefined;
+      const vendedores = hasVendedores ? normalizeDashboardSalonSellerCodes(req.body.vendedores) : null;
+      if ((!hasObjetivoVendedores && !hasObjetivoOperacionesTotales && !hasObjetivoOperacionesDiarias && !hasVendedores) || (hasVendedores && vendedores === null) || ((hasObjetivoVendedores || hasObjetivoOperacionesDiarias || hasVendedores) && (sucursalCodigo === null || !Number.isInteger(sucursalCodigo) || sucursalCodigo < 1)) || !Number.isInteger(anio) || anio < 2000 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
         return res.status(400).json({
           message: "La sucursal, el período y el objetivo deben ser válidos.",
         });
@@ -365,11 +379,17 @@ export class ConfigController {
         );
         config.objetivosOperacionesDiariasDashboardSalon.push({ sucursalCodigo, anio, mes, objetivo: objetivoOperacionesDiarias });
       }
+      if (vendedores !== null && sucursalCodigo !== null) {
+        config.vendedoresDashboardSalonPorSucursal = (config.vendedoresDashboardSalonPorSucursal ?? []).filter(
+          (item) => item.sucursalCodigo !== sucursalCodigo,
+        );
+        config.vendedoresDashboardSalonPorSucursal.push({ sucursalCodigo, vendedores });
+      }
       await config.save();
 
       return res.status(200).json({
-        data: { sucursalCodigo, anio, mes, objetivoVendedores: hasObjetivoVendedores ? objetivoVendedores : null, objetivoOperacionesTotales: hasObjetivoOperacionesTotales ? objetivoOperacionesTotales : null, objetivoOperacionesDiarias: hasObjetivoOperacionesDiarias ? objetivoOperacionesDiarias : null },
-        message: "Objetivo de vendedores actualizado correctamente",
+        data: { sucursalCodigo, anio, mes, objetivoVendedores: hasObjetivoVendedores ? objetivoVendedores : null, objetivoOperacionesTotales: hasObjetivoOperacionesTotales ? objetivoOperacionesTotales : null, objetivoOperacionesDiarias: hasObjetivoOperacionesDiarias ? objetivoOperacionesDiarias : null, vendedores: vendedores ?? [] },
+        message: hasVendedores ? "Vendedores de Dashboard Salón actualizados correctamente" : "Objetivo de vendedores actualizado correctamente",
       });
     } catch (error) {
       logError("ConfigController.updateDashboardSalonSettings");

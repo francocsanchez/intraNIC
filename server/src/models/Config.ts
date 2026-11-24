@@ -46,6 +46,10 @@ export interface IConfiguration extends Document {
     vendedorCodigo: number;
     imagePath: string;
   }>;
+  vendedoresDashboardSalonPorSucursal: Array<{
+    sucursalCodigo: number;
+    vendedores: string[];
+  }>;
   objetivosCobranzasSemanalesDashboardAdministracion: Array<{
     anio: number;
     mes: number;
@@ -115,6 +119,13 @@ const configSchema: Schema = new Schema(
       type: [{
         vendedorCodigo: { type: Number, required: true, min: 1 },
         imagePath: { type: String, required: true, trim: true },
+      }],
+      default: [],
+    },
+    vendedoresDashboardSalonPorSucursal: {
+      type: [{
+        sucursalCodigo: { type: Number, required: true, min: 1 },
+        vendedores: { type: [String], default: [] },
       }],
       default: [],
     },

@@ -1,4 +1,5 @@
 import AutocompleteSelect from "@/components/ui/autocomplete-select";
+import VendedoresMultiSelect from "@/components/configuracion/VendedoresMultiSelect";
 import {
   getDashboardSalonSettings,
   getDashboardSalonModelImages,
@@ -6,7 +7,7 @@ import {
   saveDashboardSalonModelImage,
   deleteDashboardSalonModelImage,
 } from "@/api/configuracionAPI";
-import { getSucursalesSiac } from "@/api/dms/dmsAPI";
+import { getSucursalesSiac, getVendedoresActivosNic } from "@/api/dms/dmsAPI";
 import { ActionButton, DeleteActionButton } from "@/components/ui/action-button";
 import { paths } from "@/routes/paths";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,7 +28,9 @@ export default function ConfiguracionDashboardSalonView() {
   const [objetivoTotalDraft, setObjetivoTotalDraft] = useState<string | null>(null);
   const [modeloImagen, setModeloImagen] = useState("");
   const [enlaceImagen, setEnlaceImagen] = useState("");
+  const [vendedoresDraft, setVendedoresDraft] = useState<string[] | null>(null);
   const sucursalesQuery = useQuery({ queryKey: ["sucursales-siac"], queryFn: getSucursalesSiac });
+  const vendedoresQuery = useQuery({ queryKey: ["vendedores-siac", "activos"], queryFn: getVendedoresActivosNic });
   const period = { anio: Number(anio), mes: Number(mes) };
   const isPeriodValid = Number.isInteger(period.anio) && period.anio >= 2000 && Number.isInteger(period.mes) && period.mes >= 1 && period.mes <= 12;
   const scope = { ...period, sucursalCodigo: Number(sucursalCodigo) };
@@ -81,6 +84,7 @@ export default function ConfiguracionDashboardSalonView() {
     setObjetivoDraft(null);
     setObjetivoDiarioDraft(null);
     setObjetivoTotalDraft(null);
+    setVendedoresDraft(null);
     update();
   };
 
@@ -110,6 +114,15 @@ export default function ConfiguracionDashboardSalonView() {
       return;
     }
     saveMutation.mutate({ ...scope, objetivoOperacionesDiarias });
+  };
+
+  const saveVendedores = () => {
+    if (!isScopeValid) {
+      toast.error("Seleccioná una sucursal para configurar sus vendedores.");
+      return;
+    }
+    const vendedores = vendedoresDraft ?? settingsQuery.data?.data.vendedores ?? [];
+    saveMutation.mutate({ ...scope, vendedores });
   };
 
   const saveModelImage = (event: React.FormEvent<HTMLFormElement>) => {
@@ -169,6 +182,24 @@ export default function ConfiguracionDashboardSalonView() {
         <p className="mt-3 text-sm text-muted-foreground">Vendedores: verde al alcanzar, amarillo desde el 70% y rojo por debajo. El objetivo diario se aplica a todos los días hábiles del período.</p>
         <div className="mt-3 flex flex-wrap gap-2"><ActionButton type="submit" disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveMutation.isPending ? "Guardando..." : "Guardar objetivo vendedores"}</ActionButton><ActionButton type="button" onClick={saveDaily} disabled={!isScopeValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo diario</ActionButton><ActionButton type="button" onClick={saveTotal} disabled={!isPeriodValid || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">Guardar objetivo total</ActionButton></div>
       </form>
+
+      <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
+        <div className="mb-3">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Dashboard Salón</p>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Vendedores mostrados</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Seleccioná una sucursal y definí desde el listado activo de SIAC los vendedores que se mostrarán en su tablero.</p>
+        </div>
+        <VendedoresMultiSelect
+          title="Vendedores SIAC"
+          subtitle="Buscá por nombre o código y elegí los vendedores a mostrar."
+          vendedores={vendedoresQuery.data?.data ?? []}
+          value={vendedoresDraft ?? settingsQuery.data?.data.vendedores ?? []}
+          onChange={setVendedoresDraft}
+        />
+        {vendedoresQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudieron cargar los vendedores activos de SIAC.</p> : null}
+        {settingsQuery.isError ? <p className="mt-3 text-sm text-destructive">No se pudo cargar la selección de vendedores.</p> : null}
+        <div className="mt-3"><ActionButton type="button" onClick={saveVendedores} disabled={!isScopeValid || settingsQuery.isLoading || saveMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">{saveMutation.isPending ? "Guardando..." : "Guardar vendedores de la sucursal"}</ActionButton></div>
+      </section>
 
       <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
         <div>
