@@ -11,6 +11,7 @@ type ReservaUsado = {
   color: string;
   anio: number;
   fechaRecepcion: string;
+  fechaReserva?: string;
   kilometros: number;
 };
 type ReservasUsadosResponse = { data: Record<string, ReservaUsado[]>; resumen: { total: number; sucursales: Record<string, number> } };
@@ -36,7 +37,7 @@ export default function StockReservasUsados() {
     [marcaActiva, reservasPorSucursal],
   );
   const totalFiltrado = useMemo(() => sucursalesFiltradas.reduce((total, [, reservas]) => total + reservas.length, 0), [sucursalesFiltradas]);
-  const diasReserva = (fecha: string) => Math.floor((currentTime - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24));
+  const diasDesde = (fecha?: string) => fecha ? Math.floor((currentTime - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24)) : "-";
 
   if (isLoading) return <div className="font-preset w-full space-y-3 bg-muted px-2 py-3"><div className="h-28 animate-pulse rounded-lg border border-border bg-card" /><div className="h-9 animate-pulse rounded-md bg-muted-foreground/20" /><div className="h-72 animate-pulse rounded-lg border border-border bg-card" /></div>;
   if (isError) return <div className="font-preset w-full bg-muted px-2 py-3"><section className="rounded-lg border border-destructive/30 bg-card p-3 text-card-foreground shadow-sm"><h1 className="text-lg font-semibold tracking-tight text-foreground">Error al cargar reservas</h1><p className="mt-1 text-sm text-destructive">{error instanceof Error ? error.message : "Error desconocido"}</p></section></div>;
@@ -66,9 +67,9 @@ export default function StockReservasUsados() {
           <div className="flex items-center justify-between border-b border-border px-3 py-2"><h2 className="text-base font-semibold tracking-tight text-foreground">{sucursal}</h2><p className="text-sm text-muted-foreground">{reservas.length} registros</p></div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-muted text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"><tr>{['Interno', 'Marca', 'Version', 'Color', 'Ano', 'Km', 'Vendedor', 'Dias'].map((heading) => <th key={heading} className="px-3 py-2 text-left">{heading}</th>)}</tr></thead>
+              <thead className="bg-muted text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"><tr>{['Interno', 'Marca', 'Version', 'Color', 'Ano', 'Km', 'Vendedor', 'D. Estadía', 'D. Reserva'].map((heading) => <th key={heading} className="px-3 py-2 text-left">{heading}</th>)}</tr></thead>
               <tbody className="divide-y divide-border">
-                {reservas.map((item, index) => <tr key={`${item.interno}-${index}-${item.fechaRecepcion}`} className="hover:bg-muted"><td className="px-3 py-1.5 font-medium text-foreground">{item.interno}</td><td className="px-3 py-1.5"><span className="inline-flex rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground">{item.marca}</span></td><td className="min-w-60 px-3 py-1.5 text-foreground">{item.version}</td><td className="px-3 py-1.5"><span className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>{item.color}</span></td><td className="px-3 py-1.5 text-muted-foreground">{item.anio}</td><td className="px-3 py-1.5 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td><td className="px-3 py-1.5 text-muted-foreground">{item.vendedorReserva}</td><td className="px-3 py-1.5 text-muted-foreground">{diasReserva(item.fechaRecepcion)}</td></tr>)}
+                {reservas.map((item, index) => <tr key={`${item.interno}-${index}-${item.fechaRecepcion}`} className="hover:bg-muted"><td className="px-3 py-1.5 font-medium text-foreground">{item.interno}</td><td className="px-3 py-1.5"><span className="inline-flex rounded-md border border-border bg-background px-2 py-0.5 text-xs font-medium text-foreground">{item.marca}</span></td><td className="min-w-60 px-3 py-1.5 text-foreground">{item.version}</td><td className="px-3 py-1.5"><span className={`inline-flex w-40 justify-center rounded-md border border-border px-2 py-0.5 text-xs font-medium ${textToColor(item.color)}`}>{item.color}</span></td><td className="px-3 py-1.5 text-muted-foreground">{item.anio}</td><td className="px-3 py-1.5 text-muted-foreground">{new Intl.NumberFormat("es-AR").format(item.kilometros ?? 0)}</td><td className="px-3 py-1.5 text-muted-foreground">{item.vendedorReserva}</td><td className="px-3 py-1.5 text-muted-foreground">{diasDesde(item.fechaRecepcion)}</td><td className="px-3 py-1.5 text-muted-foreground">{diasDesde(item.fechaReserva)}</td></tr>)}
               </tbody>
             </table>
           </div>

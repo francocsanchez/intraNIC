@@ -44,6 +44,7 @@ SELECT
 	ISNULL(anexusa.aus_anio, 0) AS "anio",
 	ISNULL(anexusa.aus_precio, 0) AS "precioVenta",
 	ISNULL(CONVERT(VARCHAR(30), anexusa.aus_fecrep, 126), '') AS "fechaRecepcion",
+	ISNULL(CONVERT(VARCHAR(30), reserva.res_fecregistro, 126), '') AS "fechaReserva",
 	ISNULL(anexusa.aus_km, 0) AS "kilometros",
 	ISNULL(vendedor.ven_nombre, '') AS "vendedorReserva",
 	ISNULL(sucursal.suc_nombre, 'SIN ASIGNAR') AS "sucursal"

@@ -7,6 +7,7 @@ export type StockRow = {
   ubicacion: string;
   chasis: string;
   fechaRecepcion: string;
+  fechaReserva?: string;
   sucursal?: string
 };
 

@@ -135,7 +135,8 @@ export const ReservaSchema = z.object({
   ubicacion: z.string().nullable(),
   chasis: z.string(),
   sucursal: z.string(),
-  fechaReserva: z.string(),
+  // La API puede no incluir todavía esta fecha mientras se actualiza el backend.
+  fechaReserva: z.string().optional().default(""),
   fechaRecepcion: z.string(),
 });
 
@@ -587,6 +588,7 @@ export const ReservaUsadosSchema = z.object({
   anio: z.number(),
   precioVenta: z.number(),
   fechaRecepcion: z.string(),
+  fechaReserva: z.string(),
   kilometros: z.number(),
   vendedorReserva: z.string(),
   sucursal: z.string(),

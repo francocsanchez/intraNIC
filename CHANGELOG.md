@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-24
+
+- **Stock usados reservado:** la columna `Días` pasó a llamarse `D. Estadía` y se agregó `D. Reserva`, calculada desde la fecha de creación de la reserva.
+- **Stock usados reservado:** la respuesta de reservas tolera temporalmente registros sin fecha de reserva para evitar que una actualización escalonada deje vacía la vista.
+
 ## 2026-11-20
 
 - **Solicitudes de cambio de color:** se reemplazaron los filtros de estado por tabs compactos con badge y conteo global de Pendientes, Pedidas, Completadas y Rechazadas.
