@@ -31,6 +31,7 @@ router.get("/saldo-operacion/:codigoOperacion/detalle-pago", authorizeModules("s
 router.get("/saldo-operacion", authorizeModules("saldoOperacionLiess"), SaldoOperacionLiessSnapshotController.list);
 router.patch("/saldo-operacion/:codigoOperacion/tipo-cliente", authorizeModules("saldoOperacionLiess"), SaldoOperacionLiessSnapshotController.updateTipoCliente);
 router.patch("/saldo-operacion/:codigoOperacion/credito-liquidado", authorizeModules("saldoOperacionLiess"), SaldoOperacionLiessSnapshotController.updateCreditoLiquidado);
+router.patch("/saldo-operacion/:codigoOperacion/observacion", authorizeModules("saldoOperacionLiess"), SaldoOperacionLiessSnapshotController.updateObservacion);
 router.patch("/saldo-operacion/:codigoOperacion/cancelacion", authorizeModules("saldoOperacionLiess"), SaldoOperacionLiessSnapshotController.updateCancelacion);
 
 export default router;

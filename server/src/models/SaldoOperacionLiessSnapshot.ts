@@ -27,6 +27,7 @@ export interface ISaldoOperacionLiessSnapshot extends Document {
   fechaEntregaDetectada: Date | null;
   fechaCancelacion: string | null;
   diasHastaCancelacion: number | null;
+  observacion: string;
   sincronizadoEn: Date;
 }
 
@@ -49,6 +50,7 @@ const schema = new Schema<ISaldoOperacionLiessSnapshot>({
   fechaAsignacion: { type: String, default: null }, fechaFactura: { type: String, default: null }, diasAsignada: nullableNumber,
   entregada: { type: Boolean, default: false, index: true }, fechaEntregaDetectada: { type: Date, default: null },
   fechaCancelacion: { type: String, default: null }, diasHastaCancelacion: nullableNumber,
+  observacion: { type: String, default: "", trim: true, maxlength: 2000 },
   sincronizadoEn: { type: Date, required: true, default: Date.now },
 }, { timestamps: true, collection: "saldo_operacion_liess_snapshots" });
 schema.index({ entregada: 1, fechaCancelacion: 1, sucursal: 1, vendedor: 1 });

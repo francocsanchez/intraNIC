@@ -12,6 +12,7 @@ import {
   syncSaldoLiess,
   updateSaldoLiessCancelacion,
   updateSaldoLiessCreditoLiquidado,
+  updateSaldoLiessObservacion,
   type SaldoLiessItem,
 } from "@/services/saldoOperacionLiessService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import {
   CheckCircle2,
   Circle,
   ReceiptText,
+  MessageSquareText,
   RefreshCw,
   Search,
 } from "lucide-react";
@@ -74,7 +76,9 @@ export default function SaldoOperacionLiessView() {
     [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"),
     [pending, setPending] = useState<SaldoLiessItem | null>(null),
     [paymentDetail, setPaymentDetail] = useState<SaldoLiessItem | null>(null),
-    [fechaCancelacion, setFechaCancelacion] = useState("");
+    [fechaCancelacion, setFechaCancelacion] = useState(""),
+    [commenting, setCommenting] = useState<SaldoLiessItem | null>(null),
+    [observacion, setObservacion] = useState("");
   const params = {
     section,
     entrega,
@@ -146,6 +150,15 @@ export default function SaldoOperacionLiessView() {
         client.invalidateQueries({ queryKey: ["saldo-liess-summary"] }),
       ]);
       toast.success("Estado de crédito actualizado");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const commentMutation = useMutation({
+    mutationFn: (value: string) => commenting ? updateSaldoLiessObservacion(commenting.codigoOperacion, commenting.tipoOperacion, value) : Promise.reject(new Error("No hay operación seleccionada")),
+    onSuccess: async () => {
+      setCommenting(null);
+      await client.invalidateQueries({ queryKey: ["saldo-liess"] });
+      toast.success("Observación guardada");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -369,6 +382,7 @@ export default function SaldoOperacionLiessView() {
                 </th>
               ))}
               <th className="px-2 py-2 text-center">Pago</th>
+              <th className="px-2 py-2 text-center">Comentario</th>
               <th className="px-2 py-2 text-center">Cancelar</th>
             </tr>
           </thead>
@@ -398,6 +412,11 @@ export default function SaldoOperacionLiessView() {
                 <td className="px-2 py-1.5 text-center">
                   <Button size="xs" variant="ghost" title="Ver composición del pago" aria-label="Ver composición del pago" onClick={() => setPaymentDetail(row)}>
                     <ReceiptText className="size-4 text-primary" />
+                  </Button>
+                </td>
+                <td className="px-2 py-1.5 text-center">
+                  <Button size="xs" variant="ghost" title={row.observacion ? "Editar observación" : "Agregar observación"} aria-label={row.observacion ? "Editar observación" : "Agregar observación"} onClick={() => { setCommenting(row); setObservacion(row.observacion ?? ""); }}>
+                    <MessageSquareText className={`size-4 ${row.observacion ? "text-primary" : "text-muted-foreground"}`} />
                   </Button>
                 </td>
                 <td className="px-2 py-1.5 text-center">
@@ -496,6 +515,16 @@ export default function SaldoOperacionLiessView() {
           <div className="w-full max-w-md rounded-md border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-3"><div><h2 className="text-base font-semibold">Composición del pago</h2><p className="text-xs text-muted-foreground">OP {paymentDetail.codigoOperacion} · {paymentDetail.clienteNombre}</p></div><Button size="xs" variant="ghost" aria-label="Cerrar" onClick={() => setPaymentDetail(null)}>×</Button></div>
             <dl className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Precio de venta</dt><dd>{money((paymentDetail.total ?? 0) - (paymentDetail.gestoria ?? 0) + (paymentDetail.bonificacion ?? 0))}</dd></div><div className="flex justify-between"><dt>Gestoría</dt><dd>{money(paymentDetail.gestoria)}</dd></div><div className="flex justify-between"><dt>Bonificación</dt><dd className="text-green-700">- {money(paymentDetail.bonificacion)}</dd></div><div className="flex justify-between"><dt>Anticipos cobrados</dt><dd className="text-green-700">- {money(paymentDetail.senas)}</dd></div><div className="flex justify-between"><dt>Usado</dt><dd className="text-green-700">- {money(paymentDetail.usado)}</dd></div><div className="flex justify-between"><dt>Crédito bancario pactado</dt><dd>{money(paymentDetail.creditoBanco)}</dd></div><div className="flex justify-between"><dt>Crédito aplicado</dt><dd className="text-green-700">- {money(paymentDetail.creditoLiquidadoMonto)}</dd></div><div className="flex justify-between border-t pt-2 text-base font-semibold"><dt>Saldo comercial</dt><dd className={paymentDetail.saldo <= 0 ? "text-green-700" : "text-destructive"}>{money(paymentDetail.saldo)}</dd></div></dl>
+          </div>
+        </div>
+      )}
+      {commenting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4">
+          <div className="w-full max-w-md rounded-md border border-border bg-card p-4">
+            <div className="flex items-start justify-between gap-3"><div><h2 className="text-base font-semibold">Observación</h2><p className="text-xs text-muted-foreground">OP {commenting.codigoOperacion} · {commenting.clienteNombre}</p></div><Button size="xs" variant="ghost" aria-label="Cerrar" onClick={() => setCommenting(null)}>×</Button></div>
+            <label className="mt-4 grid gap-1 text-sm font-medium">Comentario<textarea autoFocus value={observacion} maxLength={2000} onChange={(event) => setObservacion(event.target.value)} rows={5} className="resize-y rounded-md border border-border bg-background px-2 py-1.5 text-sm font-normal" placeholder="Dejá una observación para esta operación" /></label>
+            <p className="mt-1 text-right text-xs text-muted-foreground">{observacion.length}/2000</p>
+            <div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={() => setCommenting(null)}>Cancelar</Button><Button disabled={commentMutation.isPending} onClick={() => commentMutation.mutate(observacion)}>{commentMutation.isPending ? "Guardando..." : "Guardar"}</Button></div>
           </div>
         </div>
       )}

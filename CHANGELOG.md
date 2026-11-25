@@ -2,6 +2,7 @@
 
 ## 2026-11-24
 
+- **Saldo de operación LIESS:** se agregó una acción por fila para dejar o editar una observación en un diálogo; el comentario se conserva en el snapshot aunque se sincronice la operación.
 - **Configuración / Dashboard Salón:** se incorporó la selección persistente de vendedores visibles por sucursal, usando exclusivamente el listado activo de vendedores SIAC; el tablero ahora oculta los vendedores sin operaciones y calcula las asignaciones diarias solo con esa selección.
 - **Talleres y presupuestos:** se corrigió la consulta SQL inválida que impedía mostrar modelos de unidades externas y se reemplazó el buscador más selector por un único autocompletado de Modelo.
 - **Entregas pendientes:** el campo Hora del modal para turnar una unidad ahora usa un desplegable común, sin búsqueda.
